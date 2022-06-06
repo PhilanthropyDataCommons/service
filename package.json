@@ -10,7 +10,7 @@
     "lint": "eslint ./src --ext .ts",
     "migrate": "ts-node -r dotenv/config src/scripts/migrate.ts",
     "test": "jest",
-    "start": "node ."
+    "start": "ts-node src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -36,6 +36,7 @@
     "@types/jest": "^28.1.2",
     "@types/node": "^18.0.0",
     "@types/pg": "^8.6.5",
+    "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
     "eslint": "^8.18.0",
@@ -45,6 +46,7 @@
     "eslint-plugin-sort-exports": "^0.6.0",
     "jest": "^28.1.1",
     "rimraf": "^3.0.2",
+    "supertest": "^6.2.4",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.1",
     "typescript": "^4.7.3"

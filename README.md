@@ -18,6 +18,12 @@ To build the project:
 npm run build
 ```
 
+To run tests:
+
+```bash
+npm run test
+```
+
 ### EditorConfig
 
 We use [EditorConfig](https://editorconfig.org/) to help developers maintain proper whitespace habits in the project.  Most IDEs have [an official EditorConfig plugin](https://editorconfig.org/#download) you can install.

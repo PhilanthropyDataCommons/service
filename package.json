@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -27,7 +27,10 @@
   "homepage": "https://github.com/PhilanthropyDataCommons/pdc#readme",
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
+    "@types/jest": "^28.1.2",
     "@types/node": "^18.0.0",
+    "jest": "^28.1.1",
+    "ts-jest": "^28.0.5",
     "typescript": "^4.7.3"
   }
 }

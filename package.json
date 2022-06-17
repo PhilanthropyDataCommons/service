@@ -4,6 +4,7 @@
   "description": "The service backend for the Philanthropy Data Commons",
   "main": "dist/index.js",
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,5 +24,10 @@
   "bugs": {
     "url": "https://github.com/PhilanthropyDataCommons/pdc/issues"
   },
-  "homepage": "https://github.com/PhilanthropyDataCommons/pdc#readme"
+  "homepage": "https://github.com/PhilanthropyDataCommons/pdc#readme",
+  "devDependencies": {
+    "@tsconfig/node16": "^1.0.3",
+    "@types/node": "^18.0.0",
+    "typescript": "^4.7.3"
+  }
 }

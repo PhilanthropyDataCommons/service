@@ -1,0 +1,27 @@
+{
+  "name": "@pdc/service",
+  "version": "0.0.0",
+  "description": "The service backend for the Philanthropy Data Commons",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PhilanthropyDataCommons/pdc.git"
+  },
+  "keywords": [
+    "Philanthropy",
+    "Common",
+    "Application",
+    "Grant",
+    "Management",
+    "System"
+  ],
+  "author": "Open Tech Strategies",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/PhilanthropyDataCommons/pdc/issues"
+  },
+  "homepage": "https://github.com/PhilanthropyDataCommons/pdc#readme"
+}

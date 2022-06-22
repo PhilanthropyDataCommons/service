@@ -8,6 +8,7 @@
     "build:node": "tsc -p tsconfig.json",
     "cleanup": "rimraf dist",
     "lint": "eslint ./src --ext .ts",
+    "migrate": "ts-node -r dotenv/config src/scripts/migrate.ts",
     "test": "jest",
     "start": "node ."
   },

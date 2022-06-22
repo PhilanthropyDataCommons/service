@@ -1,0 +1,7 @@
+CREATE TABLE applicants (
+  id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  external_id TEXT,
+  opted_in BOOLEAN,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  UNIQUE(external_id)
+)

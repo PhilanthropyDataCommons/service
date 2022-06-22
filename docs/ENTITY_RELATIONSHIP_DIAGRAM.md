@@ -6,89 +6,94 @@ erDiagram
   CanonicalField {
     int id
     string label
-    string type
-    datetime dateCreated
+    string short_code
+    string field_type
+    timestamp created_at
   }
   Applicant {
     int id
-    string externalId 
-    bool hasGivenPermission
+    string external_id
+    bool opted_in
+    timestamp created_at
   }
   ExternalSource {
     int id
-    string name
+    string label
+    string website
+    timestamp created_at
   }
   Application {
     int id
-    int applicantId
-    int opportunityId
-    datetime dateCreated
+    int applicant_id
+    int opportunity_id
+    timestamp created_at
   }
-  Outcome {
+  ApplicationOutcome {
     int id
-    int applicationId
+    int application_id
     string outcome
-    datetime dateCreated
+    timestamp created_at
   }
   Opportunity {
     int id
     string title
-    datetime dateCreated
+    timestamp created_at
   }
-  ApplicationSchema {
+  ApplicationSchema{
     int id
-    int opportunityId
+    int opportunity_id
     int version
-    datetime dateCreated
+    timestamp created_at
   }
-  ApplicationSchemaField {
+  ApplicationSchemaField{
     int id
-    int applicationSchemaId
-    int canonicalFieldId
-    int order
+    int application_schema_id
+    int canonical_field_id
+    int position
     string label
-    datetime dateCreated
+    timestamp created_at
   }
   ExternalFieldValue {
     int id
-    int canonicalFieldId
-    string name
-    string value
-    int sequence
-    datetime dateCreated
+    int external_source_id
+    int canonical_field_id
+    string label
+    string field_value
+    int position
+    timestamp created_at
   }
   ApplicationVersion {
     int id
-    int applicationId
+    int application_id
     int version
-    datetime dateCreated
+    timestamp created_at
   }
   ApplicationFieldValue {
     int id
-    int applicationVersionId
-    int applicationSchemaFieldId
-    int index
-    string value
-    datetime dateCreated
+    int application_version_id
+    int application_schema_field_id
+    int position
+    string field_value
+    timestamp created_at
   }
   ActivityLog {
     int id
-    string actionType
-    string log
-    datetime dateCreated
+    string activity_type
+    string entry
+    timestamp created_at
   }
-  
+
   Applicant ||--o{ Application : submits
   Application }|--|| Opportunity : "responds to"
-  Opportunity ||--|{ ApplicationSchema : establishes
-  Application ||--o{ Outcome : "has"
-  ApplicationSchema ||--|{ ApplicationSchemaField : has
-  ApplicationSchemaField }o--|| CanonicalField : represents
+  Opportunity ||--|{ ApplicationSchema: establishes
+  Application ||--o{ ApplicationOutcome : "has"
+  ApplicationSchema||--|{ ApplicationSchemaField: has
+  ApplicationSchemaField}o--|| canonical_field : represents
   Application ||--|{ ApplicationVersion : has
   ApplicationVersion ||--|{ ApplicationFieldValue : contains
-  ApplicationFieldValue }o--|| ApplicationSchemaField : populates
+  ApplicationFieldValue }o--|| ApplicationSchemaField: populates
   Applicant ||--o{ ExternalFieldValue : "is described by"
-  ExternalFieldValue }o--|| CanonicalField : "contains potential defaults for"
+  ExternalFieldValue }o--|| canonical_field : "contains potential defaults for"
   ExternalSource ||--o{ ExternalFieldValue : "populates"
 ```
 

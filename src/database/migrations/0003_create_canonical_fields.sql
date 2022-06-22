@@ -1,0 +1,7 @@
+CREATE TABLE canonical_fields (
+  id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  label TEXT,
+  short_code TEXT,
+  field_type TEXT,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+)

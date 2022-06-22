@@ -19,6 +19,12 @@ In order to run this software you need to set up a [Postgres 14](https://www.pos
   edit .env
   ```
 
+3. Run migrations
+
+  ```bash
+  npm run migrations
+  ```
+
 ### Common Commands
 
 To build the project:

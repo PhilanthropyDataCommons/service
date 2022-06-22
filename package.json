@@ -8,8 +8,9 @@
     "build:node": "tsc -p tsconfig.json",
     "cleanup": "rimraf dist",
     "lint": "eslint ./src --ext .ts",
-    "test": "jest",
-    "start": "node ."
+    "migrate": "ts-node -r dotenv/config src/scripts/migrate.ts",
+    "start": "node .",
+    "test": "jest"
   },
   "repository": {
     "type": "git",

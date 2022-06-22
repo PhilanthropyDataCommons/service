@@ -2,12 +2,27 @@
 
 ## Development
 
+In order to run this software you need to set up a [Postgres 14](https://www.postgresql.org/) database.
+
 ### Setup
 
 1. Install npm dependencies
 
   ```bash
   npm ci
+  ```
+
+2. Set up environment variables
+
+  ```bash
+  cp .env.example .env
+  edit .env
+  ```
+
+3. Run migrations
+
+  ```bash
+  npm run migrations
   ```
 
 ### Common Commands

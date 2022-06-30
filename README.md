@@ -45,6 +45,11 @@ To use a development docker image from GitHub Container Registry:
 docker pull ghcr.io/philanthropydatacommons/service:latest
 ```
 
+To generate a json schema from the included types:
+```bash
+npm run generate-json-schema
+```
+
 ### EditorConfig
 
 We use [EditorConfig](https://editorconfig.org/) to help developers maintain proper whitespace habits in the project.  Most IDEs have [an official EditorConfig plugin](https://editorconfig.org/#download) you can install.

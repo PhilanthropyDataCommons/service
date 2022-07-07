@@ -1,3 +1,8 @@
+![lint](https://github.com/PhilanthropyDataCommons/service/actions/workflows/lint.yml/badge.svg)
+![test](https://github.com/PhilanthropyDataCommons/service/actions/workflows/test.yml/badge.svg)
+![build](https://github.com/PhilanthropyDataCommons/service/actions/workflows/build.yml/badge.svg)
+[![codecov](https://codecov.io/gh/PhilanthropyDataCommons/service/branch/main/graph/badge.svg?token=PG6K5X5HZD)](https://codecov.io/gh/PhilanthropyDataCommons/service)
+
 # Philanthropy Data Commons Service
 
 ## Development

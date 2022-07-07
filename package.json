@@ -4,11 +4,12 @@
   "description": "The service backend for the Philanthropy Data Commons",
   "main": "dist/index.js",
   "scripts": {
-    "build": "npm run cleanup && npm run build:node",
+    "build": "npm run cleanup && npm run build:node && npm run build:assets",
     "build:node": "tsc -p tsconfig.json",
+    "build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" dist",
     "cleanup": "rimraf dist",
     "lint": "eslint ./src --ext .ts",
-    "migrate": "ts-node -r dotenv/config src/scripts/migrate.ts",
+    "migrate": "npm run build && node -r dotenv/config dist/scripts/migrate.js",
     "test": "jest",
     "start": "npm run build && node ./dist/index.js",
     "start:dev": "ts-node src/index.ts"
@@ -40,6 +41,7 @@
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.18.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",

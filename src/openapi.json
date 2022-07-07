@@ -1,0 +1,177 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Philanthropy Data Commons API",
+    "description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
+    "version": "0.1.0"
+  },
+  "components": {
+    "schemas": {
+      "Opportunity": {
+        "type": "object"
+      },
+      "Application": {
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/opportunities": {
+      "summary": "Funding opportunities such as an available grant.",
+      "get": {
+        "responses": {
+          "200": {
+            "description": "A list of known funding opportunities.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Opportunity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Adds a new opportunity.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Opportunity"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new opportunity that was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Opportunity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opportunities/{opportunityId}": {
+      "summary": "A funding opportunity such as an available grant, RFP, etc.",
+      "get": {
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "description": "The PDC-generated ID of an opportunity, RFC, potential award or grant, etc.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The funding opportunity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Opportunity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications": {
+      "summary": "A list of applications, optionally selected by opportunityId.",
+      "get": {
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "description": "The PDC-generated ID of an opportunity, RFC, potential award or grant, etc.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All applications associated with the given query strings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Application"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Adds a new application for the given opportunityId.",
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "description": "The PDC-generated ID of an opportunity, RFC, potential award or grant, etc.",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The new application that was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "applicationId",
+            "description": "The PDC-generated ID of an application.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An application.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -27,7 +27,7 @@ In order to run this software you need to set up a [Postgres 14](https://www.pos
 3. Run migrations
 
   ```bash
-  npm run migrate
+  npm run migrate:dev
   ```
 
 ### Common Commands
@@ -51,26 +51,39 @@ npm run lint
 ```
 
 To remove dev dependencies for a docker or production build:
+
 ```bash
 npm prune --omit=dev
 ```
 
 To build a docker image:
+
 ```bash
 docker build .
 ```
 
 To use a development docker image from GitHub Container Registry:
+
 ```bash
 docker pull ghcr.io/philanthropydatacommons/service:latest
 ```
 
-To start the server:
+To run migrations:
+
 ```bash
+npm build
+npm migrate
+```
+
+To start the server:
+
+```bash
+npm build
 npm start
 ```
 
 To start the server in a development environment:
+
 ```bash
 npm start:dev
 ```

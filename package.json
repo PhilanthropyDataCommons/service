@@ -9,9 +9,10 @@
     "build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" dist",
     "cleanup": "rimraf dist",
     "lint": "eslint ./src --ext .ts",
-    "migrate": "npm run build && node -r dotenv/config dist/scripts/migrate.js",
+    "migrate": "node -r dotenv/config dist/scripts/migrate.js",
+    "migrate:dev": "ts-node -r dotenv/config src/scripts/migrate.ts",
     "test": "jest",
-    "start": "npm run build && node ./dist/index.js",
+    "start": "node dist/index.js",
     "start:dev": "ts-node src/index.ts"
   },
   "repository": {

@@ -58,15 +58,14 @@ docker build .
 To use a development docker image from GitHub Container Registry:
 ```bash
 docker pull ghcr.io/philanthropydatacommons/service:latest
+```
 
 To start the server:
-
 ```bash
 npm start
 ```
 
 To start the server in a development environment:
-
 ```bash
 npm start:dev
 ```

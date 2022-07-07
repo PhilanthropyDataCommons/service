@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - 'main'
-      - '3-build-docker-image-on-push'
 
 jobs:
   build:
@@ -43,3 +42,13 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,mode=max
+      - name: Notify the top-level 'deploy' project that an image was pushed
+        uses: aurelien-baudet/workflow-dispatch@v2.1.1
+        with:
+          workflow: update-service-image.yml
+          ref: main
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repo: PhilanthropyDataCommons/deploy
+          inputs: "{\"image-tag\":\"${{ env.VERSION }}\"}"
+          wait-for-completion: true
+          wait-for-completion-timeout: 5m

@@ -1,13 +1,15 @@
 import { migrate } from '../database';
 
-console.log('Starting migrations...');
+process.stdout.write('Starting migrations...\n');
 migrate()
   .then(() => {
-    console.log('Migrations complete.');
+    process.stdout.write('Migrations complete.\n');
     process.exit();
   })
-  .catch((reason) => {
-    console.log('Migrations failed!');
-    console.log(reason);
+  .catch((reason: unknown) => {
+    process.stdout.write('Migrations failed!\n');
+    if (reason instanceof Error) {
+      process.stdout.write(`${reason.message}\n`);
+    }
     process.exit(1);
   });

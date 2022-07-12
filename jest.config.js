@@ -4,6 +4,7 @@ module.exports = {
       tsconfig: 'tsconfig.dev.json',
     },
   },
+  collectCoverageFrom: ["src/**/*.ts"],
   preset: 'ts-jest',
   testEnvironment: 'node',
   testPathIgnorePatterns: ["<rootDir>/dist/"],

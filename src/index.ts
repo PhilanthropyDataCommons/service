@@ -10,6 +10,6 @@ app.listen(
   port,
   host,
   () => {
-    console.log(`Server running on ${host}:${port}`);
+    process.stdout.write(`Server running on ${host}:${port}\n`);
   },
 );

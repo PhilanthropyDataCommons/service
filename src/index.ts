@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { app } from './app';
+import { logger } from './logger';
 
 dotenv.config();
 
@@ -10,6 +11,6 @@ app.listen(
   port,
   host,
   () => {
-    process.stdout.write(`Server running on ${host}:${port}\n`);
+    logger.info(`Server running on ${host}:${port}`);
   },
 );

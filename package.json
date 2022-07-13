@@ -11,7 +11,9 @@
     "lint": "eslint ./src --ext .ts",
     "migrate": "node -r dotenv/config dist/scripts/migrate.js",
     "migrate:dev": "ts-node -r dotenv/config src/scripts/migrate.ts | pino-pretty",
-    "test": "jest",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "jest --config=jest.config.unit.js",
+    "test:integration": "jest --config=jest.config.int.js --runInBand",
     "start": "node dist/index.js",
     "start:dev": "ts-node src/index.ts | pino-pretty"
   },

@@ -1,15 +1,18 @@
+import { logger as root_logger } from '../logger';
 import { migrate } from '../database';
 
-process.stdout.write('Starting migrations...\n');
+const logger = root_logger.child({ source: 'migrate' });
+
+logger.info('Starting migrations...');
 migrate()
   .then(() => {
-    process.stdout.write('Migrations complete.\n');
+    logger.info('Migrations complete.');
     process.exit();
   })
   .catch((reason: unknown) => {
-    process.stdout.write('Migrations failed!\n');
+    logger.error('Migrations failed!');
     if (reason instanceof Error) {
-      process.stdout.write(`${reason.message}\n`);
+      logger.error(`${reason.message}`);
     }
     process.exit(1);
   });

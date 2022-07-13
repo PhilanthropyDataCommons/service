@@ -8,4 +8,5 @@ export const migrate = async (): Promise<void> => {
     { client },
     path.resolve(__dirname, 'migrations'),
   );
+  client.release();
 };

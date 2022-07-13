@@ -7,7 +7,6 @@ logger.info('Starting migrations...');
 migrate()
   .then(() => {
     logger.info('Migrations complete.');
-    process.exit();
   })
   .catch((reason: unknown) => {
     logger.error('Migrations failed!');

@@ -24,7 +24,14 @@ In order to run this software you need to set up a [Postgres 14](https://www.pos
   edit .env
   ```
 
-3. Run migrations
+3. Set up test environment variables
+
+  ```bash
+  cp .env.example .env.test
+  edit .env.test
+  ```
+
+4. Run migrations
 
   ```bash
   npm run migrate:dev

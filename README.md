@@ -5,6 +5,8 @@
 
 # Philanthropy Data Commons Service
 
+This project is related to [Philanthropy Data Commons](https://philanthropydatacommons.org) (PDC). Please visit https://philanthropydatacommons.org for an overview of PDC.
+
 ## Development
 
 In order to run this software you need to set up a [Postgres 14](https://www.postgresql.org/) database.

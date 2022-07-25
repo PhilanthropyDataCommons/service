@@ -10,5 +10,6 @@ WORKDIR /opt/philanthropy-data-commons/server
 COPY --chown=web:web package.json .
 COPY --chown=web:web node_modules ./node_modules
 COPY --chown=web:web dist ./dist
+COPY docker-entrypoint.sh .
 
-CMD ["npm", "start"]
+CMD ["./docker-entrypoint.sh"]

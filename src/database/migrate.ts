@@ -4,9 +4,12 @@ import { db } from './db';
 
 export const migrate = async (): Promise<void> => {
   const client = await db.getClient();
-  await pgMigrate(
-    { client },
-    path.resolve(__dirname, 'migrations'),
-  );
-  client.release();
+  try {
+    await pgMigrate(
+      { client },
+      path.resolve(__dirname, 'migrations'),
+    );
+  } finally {
+    client.release();
+  }
 };

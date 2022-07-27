@@ -1,4 +1,4 @@
-import { logger } from '../logger';
+import { getLogger } from '../logger';
 import { db } from '../database';
 import { isCanonicalFieldArray } from '../types';
 import { ValidationError } from '../errors';
@@ -6,6 +6,8 @@ import type {
   Request,
   Response,
 } from 'express';
+
+const logger = getLogger(__filename);
 
 const getCanonicalFields = (req: Request, res: Response): void => {
   db.sql('canonicalFields.fetchAll')

@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import { app } from './app';
-import { logger } from './logger';
+import { getLogger } from './logger';
 
+const logger = getLogger(__filename);
 dotenv.config();
 
 const port = Number(process.env.PORT ?? 3000);

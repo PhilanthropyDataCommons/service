@@ -97,6 +97,16 @@ To start the server in a development environment:
 npm start:dev
 ```
 
+### Logging
+
+To override the default log level in any environment, set the environment variable `LOG_LEVEL` with any of the above `npm` commands:
+
+```bash
+LOG_LEVEL=trace npm run test
+```
+
+Alternatively, one may set `LOG_LEVEL` in the `.env` file.
+
 ### Understanding the Project
 
 #### Project Structure

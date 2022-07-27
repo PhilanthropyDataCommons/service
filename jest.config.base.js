@@ -6,7 +6,7 @@ module.exports = {
   },
   collectCoverageFrom: ["src/**/*.ts"],
   preset: 'ts-jest',
-  setupFiles: ['<rootDir>/src/test/setupEnv.ts'],
+  globalSetup: "<rootDir>/src/test/globalSetup.ts",
   testEnvironment: 'node',
   testPathIgnorePatterns: ["<rootDir>/dist/"],
   silent: true,

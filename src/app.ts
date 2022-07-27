@@ -1,8 +1,9 @@
 import express from 'express';
 import pinoHttp from 'pino-http';
 import { rootRouter } from './routers';
-import { logger } from './logger';
+import { getLogger } from './logger';
 
+const logger = getLogger(__filename);
 const app = express();
 app.use(pinoHttp({
   logger,

@@ -18,4 +18,5 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await cleanupDatabaseForCurrentWorker();
+  jest.restoreAllMocks();
 });

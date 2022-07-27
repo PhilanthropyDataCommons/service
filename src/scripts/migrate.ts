@@ -1,7 +1,7 @@
-import { logger as root_logger } from '../logger';
+import { getLogger } from '../logger';
 import { migrate } from '../database';
 
-const logger = root_logger.child({ source: 'migrate' });
+const logger = getLogger(__filename);
 
 logger.info('Starting migrations...');
 migrate()

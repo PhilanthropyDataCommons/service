@@ -10,6 +10,7 @@ export interface CanonicalField {
 }
 
 export const canonicalFieldSchema: JSONSchemaType<CanonicalField> = {
+  $id: 'philanthropydatacommons/jsonschema/canonicalField',
   type: 'object',
   properties: {
     id: {
@@ -42,6 +43,7 @@ export const canonicalFieldSchema: JSONSchemaType<CanonicalField> = {
 export const isCanonicalField = ajv.compile(canonicalFieldSchema);
 
 const canonicalFieldArraySchema: JSONSchemaType<CanonicalField[]> = {
+  $id: 'philanthropydatacommons/jsonschema/canonicalFieldArray',
   type: 'array',
   items: canonicalFieldSchema,
 };

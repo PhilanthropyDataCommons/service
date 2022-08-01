@@ -113,27 +113,32 @@ describe('/opportunities', () => {
               applicationSchema: {
                 id: 2,
                 createdAt: '2525-01-01T00:00:08.000Z',
+                version: 11,
                 fields: [
                   {
                     id: 2,
-                    createdAt: '2525-01-01T00:00:12Z',
+                    createdAt: '2525-01-01T00:00:12.000Z',
                     label: 'Surname',
+                    position: 1,
                     canonicalField: {
                       id: lastNameFieldId,
                       createdAt: '2525-01-01T00:00:02.000Z',
                       shortCode: 'lastName',
                       label: 'Last Name',
+                      dataType: 'string',
                     },
                   },
                   {
                     id: 3,
                     createdAt: '2525-01-01T00:00:13.000Z',
                     label: 'Preferred Name',
+                    position: 2,
                     canonicalField: {
                       id: firstNameFieldId,
                       createdAt: '2525-01-01T00:00:01.000Z',
                       shortCode: 'firstName',
                       label: 'First Name',
+                      dataType: 'string',
                     },
                   },
                 ],
@@ -146,27 +151,32 @@ describe('/opportunities', () => {
               applicationSchema: {
                 id: 4,
                 createdAt: '2525-01-01T00:00:10.000Z',
+                version: 19,
                 fields: [
                   {
                     id: 5,
-                    createdAt: '2525-01-01T00:00:16Z',
-                    label: 'Proposal Abstract',
-                    canonicalField: {
-                      id: proposalSummaryFieldId,
-                      createdAt: '2525-01-01T00:00:03.000Z',
-                      shortCode: 'proposalSummary',
-                      label: 'Proposal Summary',
-                    },
-                  },
-                  {
-                    id: 6,
-                    createdAt: '2525-01-01T00:00:15.00Z',
+                    createdAt: '2525-01-01T00:00:15.000Z',
                     label: 'Budget',
+                    position: 2,
                     canonicalField: {
                       id: proposalBudgetFieldId,
                       createdAt: '2525-01-01T00:00:04.000Z',
                       shortCode: 'proposalBudget',
                       label: 'Proposal Budget',
+                      dataType: 'number',
+                    },
+                  },
+                  {
+                    id: 6,
+                    createdAt: '2525-01-01T00:00:16.000Z',
+                    label: 'Proposal Abstract',
+                    position: 1,
+                    canonicalField: {
+                      id: proposalSummaryFieldId,
+                      createdAt: '2525-01-01T00:00:03.000Z',
+                      shortCode: 'proposalSummary',
+                      label: 'Proposal Summary',
+                      dataType: 'string',
                     },
                   },
                 ],

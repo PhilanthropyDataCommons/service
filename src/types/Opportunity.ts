@@ -36,3 +36,11 @@ export const opportunitySchema: JSONSchemaType<Opportunity> = {
 };
 
 export const isOpportunity = ajv.compile(opportunitySchema);
+
+const opportunityArraySchema: JSONSchemaType<Opportunity[]> = {
+  $id: 'PhilanthropyDataCommons/JSONSchema/opportunityArray',
+  type: 'array',
+  items: opportunitySchema,
+};
+
+export const isOpportunityArraySchema = ajv.compile(opportunityArraySchema);

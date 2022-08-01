@@ -1,11 +1,17 @@
 import { getLogger } from '../logger';
 import { db } from '../database';
-import { Opportunity, isOpportunity, CanonicalField } from '../types';
+import { isOpportunity, isOpportunityArraySchema } from '../types';
 import { ValidationError } from '../errors';
 import type {
   Request,
   Response,
 } from 'express';
+import type {
+  Opportunity,
+  CanonicalField,
+  ApplicationSchema,
+} from '../types';
+import type { ApplicationSchemaField } from '../types/ApplicationSchemaField';
 
 const logger = getLogger(__filename);
 
@@ -13,30 +19,35 @@ const getOpportunities = (req: Request, res: Response): void => {
   db.sql('opportunities.fetchAll')
     .then((opportunitiesRaw) => {
       logger.debug(opportunitiesRaw, 'opportunities.fetchAll');
-      let opportunitiesSomething: Omit<Opportunity,'applicationSchema'>[] = [];
-      /*
-      const buildOpportunities = (a: any, b: any) => {
-        if ( a.opportunityId == b.opportunityId ) {
-          logger.debug('Found a.id %s == b. %s',
-            a.opportunityId, b.opportunityId );
-        }
-        else {
-          a.id = b.opportunityId;
-          a.canonicalFieldShortCode = b.canonicalFieldShortCode
-        }
+      type ShortOpportunity = Omit<Opportunity, 'applicationSchema'>;
+      type ShortApplicationSchema = Omit<ApplicationSchema, 'fields'>;
+      type ShortApplicationSchemaField = Omit<ApplicationSchemaField, 'canonicalField'>;
+
+      // Here is how each raw, de-normalized row fetched from the DB looks:
+      interface RowPerField {
+        opportunity: ShortOpportunity;
+        applicationSchema: ShortApplicationSchema;
+        applicationSchemaField: ShortApplicationSchemaField;
+        canonicalField: CanonicalField;
       };
-      */
-      type ShortOpportunity = Omit<Opportunity,'applicationSchema'>;
-      interface Blah {
-        opp: ShortOpportunity;
-        can: CanonicalField;
-      }
+
       const { rows } = opportunitiesRaw;
-      const buildOpportunities2 = (it: any): Blah => {
+      const formalizeRow = (it: any): RowPerField => {
         const opportunity: ShortOpportunity = {
           id: it.opportunityId,
           title: it.opportunityTitle,
           createdAt: it.opportunityCreatedAt,
+        };
+        const applicationSchema: ShortApplicationSchema = {
+          id: it.applicationSchemaId,
+          version: it.applicationSchemaVersion,
+          createdAt: it.applicationSchemaCreatedAt,
+        };
+        const applicationSchemaField: ShortApplicationSchemaField = {
+          id: it.applicationSchemaFieldId,
+          label: it.applicationSchemaFieldLabel,
+          position: it.applicationSchemaFieldPosition,
+          createdAt: it.applicationSchemaFieldCreatedAt,
         };
         const canonicalField: CanonicalField = {
           id: it.canonicalFieldId,
@@ -45,26 +56,68 @@ const getOpportunities = (req: Request, res: Response): void => {
           dataType: it.canonicalFieldDataType,
           createdAt: it.canonicalFieldCreatedAt,
         };
-        return { opp: opportunity, can: canonicalField };
+        return {
+          opportunity: opportunity,
+          applicationSchema: applicationSchema,
+          applicationSchemaField: applicationSchemaField,
+          canonicalField: canonicalField,
+        };
       }
-      const mapped = rows.map(buildOpportunities2);
-      logger.debug(mapped);
+      const formalized = rows.map(formalizeRow);
+      logger.debug(formalized);
 
+      const schematize = (it: RowPerField[]): Opportunity[] => {
+        const merged: Opportunity[] = [];
+        let lastOpportunity: Opportunity;
+        let lastApplicationSchema: ApplicationSchema;
 
-      /*
-      rows.map( (it) => { logger.debug(it); });
-      logger.debug(rows);
-      const reduced = rows.reduce(buildOpportunities, { id: -1, opportunityId: -1 });
-      logger.debug(reduced);
-      */
-      if (isOpportunity(rows)) {
+        it.forEach((row: RowPerField) => {
+          const field: ApplicationSchemaField = {
+            ...row.applicationSchemaField,
+            canonicalField: row.canonicalField
+          };
+
+          let applicationSchema: ApplicationSchema = {
+            ...row.applicationSchema,
+            fields: [field]
+          };
+
+          if (lastApplicationSchema !== null && lastApplicationSchema !== undefined
+              && row.applicationSchema.id === lastApplicationSchema.id) {
+            applicationSchema = lastApplicationSchema;
+            applicationSchema.fields.push(field);
+          }
+
+          let opportunity: Opportunity = {
+            ...row.opportunity,
+            applicationSchema: applicationSchema
+          };
+
+          if (lastOpportunity !== null && lastOpportunity !== undefined
+              && row.opportunity.id === lastOpportunity.id ) {
+          }
+          else{
+            merged.push(opportunity);
+          }
+
+          lastOpportunity = opportunity;
+          lastApplicationSchema = applicationSchema;
+        });
+
+        return merged;
+      };
+
+      const schematized = schematize(formalized);
+      logger.debug(schematized);
+
+      if (isOpportunityArraySchema(schematized)) {
         res.status(200)
           .contentType('application/json')
-          .send(rows);
+          .send(schematized);
       } else {
         throw new ValidationError(
-          'The database responded with an unexpected format.',
-          isOpportunity.errors ?? [],
+          'Unable to build the expected format.',
+          isOpportunityArraySchema.errors ?? [],
         );
       }
     })

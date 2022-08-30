@@ -22,14 +22,14 @@ import type { CanonicalField } from '../types';
 const logger = getLogger(__filename);
 
 const getCanonicalFields = (req: Request, res: Response): void => {
-  db.sql('canonicalFields.fetchAll')
-    .then((canonicalFields) => {
-      logger.debug(canonicalFields, 'canonicalFields.fetchAll');
-      const { rows } = canonicalFields;
-      if (isCanonicalFieldArray(rows)) {
+  db.sql('canonicalFields.selectAll')
+    .then((canonicalFieldsQueryResult: Result<CanonicalField>) => {
+      logger.debug(canonicalFieldsQueryResult);
+      const { rows: canonicalFields } = canonicalFieldsQueryResult;
+      if (isCanonicalFieldArray(canonicalFields)) {
         res.status(200)
           .contentType('application/json')
-          .send(rows);
+          .send(canonicalFields);
       } else {
         throw new ValidationError(
           'The database responded with an unexpected format.',
@@ -80,9 +80,9 @@ const postCanonicalField = (
   }
 
   db.sql('canonicalFields.insertOne', req.body)
-    .then((insertOneQueryResult: Result<CanonicalField>) => {
-      logger.debug(insertOneQueryResult);
-      const canonicalField = insertOneQueryResult.rows[0];
+    .then((canonicalFieldsQueryResult: Result<CanonicalField>) => {
+      logger.debug(canonicalFieldsQueryResult);
+      const canonicalField = canonicalFieldsQueryResult.rows[0];
       if (isCanonicalField(canonicalField)) {
         res.status(201)
           .contentType('application/json')

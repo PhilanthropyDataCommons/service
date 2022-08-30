@@ -17,14 +17,14 @@ import type { Opportunity } from '../types';
 const logger = getLogger(__filename);
 
 const getOpportunities = (req: Request, res: Response): void => {
-  db.sql('opportunities.fetchAll')
-    .then((opportunities) => {
-      const { rows } = opportunities;
-      logger.debug(opportunities);
-      if (isOpportunityArraySchema(rows)) {
+  db.sql('opportunities.selectAll')
+    .then((opportunitiesQueryResult: Result<Opportunity>) => {
+      logger.debug(opportunitiesQueryResult);
+      const { rows: opportunities } = opportunitiesQueryResult;
+      if (isOpportunityArraySchema(opportunities)) {
         res.status(200)
           .contentType('application/json')
-          .send(rows);
+          .send(opportunities);
       } else {
         throw new ValidationError(
           'The database responded with an unexpected format.',
@@ -66,24 +66,21 @@ const getOpportunity = (req: Request<GetOpportunityParams>, res: Response): void
       });
     return;
   }
-
-  logger.debug(req);
-  db.sql('opportunities.fetchById', { id: req.params.id })
-    .then((opportunity: Result<Opportunity>) => {
-      logger.debug(opportunity);
-      if (opportunity.row_count === 0) {
+  db.sql('opportunities.selectById', { id: req.params.id })
+    .then((opportunitiesQueryResult: Result<Opportunity>) => {
+      logger.debug(opportunitiesQueryResult);
+      if (opportunitiesQueryResult.row_count === 0) {
         res.status(404)
           .contentType('application/json')
           .send({ message: 'Not found. Find existing opportunities by calling with no parameters.' });
         return;
       }
 
-      const { rows } = opportunity;
-
-      if (isOpportunity(rows[0])) {
+      const opportunity = opportunitiesQueryResult.rows[0];
+      if (isOpportunity(opportunity)) {
         res.status(200)
           .contentType('application/json')
-          .send(rows[0]);
+          .send(opportunity);
       } else {
         throw new ValidationError(
           'The database responded with an unexpected format.',

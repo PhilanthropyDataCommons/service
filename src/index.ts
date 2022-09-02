@@ -13,6 +13,6 @@ app.listen(
   port,
   host,
   () => {
-    logger.info(`Server running on ${host}:${port}`);
+    logger.info(`Server running on http://${host}:${port}`);
   },
 );

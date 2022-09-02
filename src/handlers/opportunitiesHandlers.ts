@@ -1,3 +1,4 @@
+import { ajv } from '../ajv';
 import { getLogger } from '../logger';
 import { db } from '../database';
 import {
@@ -38,14 +39,29 @@ const getOpportunities = (req: Request, res: Response): void => {
     });
 };
 
-const getOpportunity = (req: Request, res: Response): void => {
-  const isInteger = (it: string): boolean => !Number.isNaN(parseInt(it, 10))
-    && parseInt(it, 10) % 1 === 0;
-
-  if (!isInteger(req.params.id)) {
+interface GetOpportunityParams {
+  id: number;
+}
+const isGetOpportunityParams = ajv.compile<GetOpportunityParams>({
+  type: 'object',
+  properties: {
+    id: {
+      type: 'integer',
+      minimum: 1,
+    },
+  },
+  required: [
+    'id',
+  ],
+});
+const getOpportunity = (req: Request<GetOpportunityParams>, res: Response): void => {
+  if (!isGetOpportunityParams(req.params)) {
     res.status(400)
       .contentType('application/json')
-      .send({ message: 'Bad request. Send an integer id or call with no parameters.' });
+      .send({
+        message: 'Invalid request parameters.',
+        errors: isGetOpportunityParams.errors,
+      });
     return;
   }
 

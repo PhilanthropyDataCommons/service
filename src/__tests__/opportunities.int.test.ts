@@ -118,5 +118,19 @@ describe('/opportunities', () => {
         .get('/opportunities/9001')
         .expect(404);
     });
+
+    it('returns a 500 ValidationError if the database returns an unexpected data structure', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => ({
+          rows: [{ foo: 'not a valid result' }],
+        }) as Result<object>);
+      const result = await agent
+        .get('/opportunities/1')
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'ValidationError',
+        errors: expect.any(Array) as unknown[],
+      });
+    });
   });
 });

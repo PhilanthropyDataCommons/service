@@ -1,12 +1,15 @@
 import request from 'supertest';
 import { app } from '../app';
 import { db } from '../database';
+import { getLogger } from '../logger';
+import { isoTimestampPattern } from '../test/utils';
 import type { Result } from 'tinypg';
 
+const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 describe('/canonicalFields', () => {
-  describe('/', () => {
+  describe('GET /', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/canonicalFields')
@@ -55,6 +58,113 @@ describe('/canonicalFields', () => {
         }) as Result<object>);
       const result = await agent
         .get('/canonicalFields')
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'ValidationError',
+        errors: expect.any(Array) as unknown[],
+      });
+    });
+  });
+
+  describe('POST /', () => {
+    it('creates exactly one canonical field', async () => {
+      const before: Result<{ count: number; maxId: number; now: Date }> = await db.query(`
+        SELECT COUNT(id) AS "count",
+          MAX(id) AS "maxId",
+          NOW() as "now"
+        FROM canonical_fields;
+      `);
+      logger.debug('before: %o', before);
+      const result = await agent
+        .post('/canonicalFields')
+        .type('application/json')
+        .send({
+          label: '🏷️',
+          shortCode: '🩳',
+          dataType: '📊',
+        })
+        .expect(201);
+      const after: Result<{ count: number; maxId: number; now: Date }> = await db.query(`
+        SELECT COUNT(id) AS "count",
+          MAX(id) AS "maxId",
+          NOW() as "now"
+        FROM canonical_fields;
+      `);
+      logger.debug('after: %o', after);
+      expect(before.rows[0].count).toEqual('0');
+      expect(result.body).toMatchObject({
+        id: expect.any(Number) as number,
+        label: '🏷️',
+        shortCode: '🩳',
+        dataType: '📊',
+        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+      });
+      expect(after.rows[0].count).toEqual('1');
+    });
+    it('returns 400 bad request when no label is sent', async () => {
+      await agent
+        .post('/canonicalFields')
+        .type('application/json')
+        .send({
+          shortCode: '🩳',
+          dataType: '📊',
+        })
+        .expect(400);
+    });
+    it('returns 400 bad request when no shortCode is sent', async () => {
+      await agent
+        .post('/canonicalFields')
+        .type('application/json')
+        .send({
+          label: '🏷️',
+          dataType: '📊',
+        })
+        .expect(400);
+    });
+    it('returns 400 bad request when no dataType is sent', async () => {
+      await agent
+        .post('/canonicalFields')
+        .type('application/json')
+        .send({
+          label: '🏷️',
+          shortCode: '🩳',
+        })
+        .expect(400);
+    });
+    it('returns 409 conflict when a duplicate short name is submitted', async () => {
+      await db.query(`
+        INSERT INTO canonical_fields (
+          label,
+          short_code,
+          data_type,
+          created_at
+        )
+        VALUES
+          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' );
+      `);
+      await agent
+        .post('/canonicalFields')
+        .type('application/json')
+        .send({
+          label: '🏷️',
+          shortCode: 'firstName',
+          dataType: '📊',
+        })
+        .expect(409);
+    });
+    it('returns 500 if the database returns an unexpected data structure', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => ({
+          rows: [{ foo: 'not a valid result' }],
+        }) as Result<object>);
+      const result = await agent
+        .post('/canonicalFields')
+        .type('application/json')
+        .send({
+          label: '🏷️',
+          shortCode: '🩳',
+          dataType: '📊',
+        })
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'ValidationError',

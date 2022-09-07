@@ -1,8 +1,14 @@
 import request from 'supertest';
 import { app } from '../app';
 import { db } from '../database';
+import { getLogger } from '../logger';
+import {
+  getTableMetrics,
+  isoTimestampPattern,
+} from '../test/utils';
 import type { Result } from 'tinypg';
 
+const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 describe('/applicants', () => {
@@ -52,6 +58,67 @@ describe('/applicants', () => {
         }) as Result<object>);
       const result = await agent
         .get('/applicants')
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'ValidationError',
+        errors: expect.any(Array) as unknown[],
+      });
+    });
+  });
+
+  describe('POST /', () => {
+    it('creates exactly one applicant', async () => {
+      const before = await getTableMetrics('applicants');
+      logger.debug('before: %o', before);
+      const result = await agent
+        .post('/applicants')
+        .type('application/json')
+        .send({
+          externalId: '🆔',
+        })
+        .expect(201);
+      const after = await getTableMetrics('applicants');
+      logger.debug('after: %o', after);
+      expect(before.count).toEqual('0');
+      expect(result.body).toMatchObject({
+        id: expect.any(Number) as number,
+        externalId: '🆔',
+        optedIn: false,
+        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+      });
+      expect(after.count).toEqual('1');
+    });
+    it('returns 400 bad request when no external id is provided', async () => {
+      await agent
+        .post('/applicants')
+        .type('application/json')
+        .send({})
+        .expect(400);
+    });
+    it('returns 409 conflict when a duplicate external id is submitted', async () => {
+      await db.query(`
+        INSERT INTO applicants (external_id)
+        VALUES ( '12345' );
+      `);
+      await agent
+        .post('/applicants')
+        .type('application/json')
+        .send({
+          externalId: '12345',
+        })
+        .expect(409);
+    });
+    it('returns 500 if the database returns an unexpected data structure', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => ({
+          rows: [{ foo: 'not a valid result' }],
+        }) as Result<object>);
+      const result = await agent
+        .post('/applicants')
+        .type('application/json')
+        .send({
+          externalId: '12345',
+        })
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'ValidationError',

@@ -3,6 +3,7 @@ import { canonicalFieldsHandlers } from '../handlers/canonicalFieldsHandlers';
 
 const canonicalFieldsRouter = express.Router();
 
-canonicalFieldsRouter.use('/', canonicalFieldsHandlers.getCanonicalFields);
+canonicalFieldsRouter.get('/', canonicalFieldsHandlers.getCanonicalFields);
+canonicalFieldsRouter.post('/', canonicalFieldsHandlers.postCanonicalField);
 
 export { canonicalFieldsRouter };

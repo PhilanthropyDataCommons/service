@@ -11,6 +11,7 @@ import type {
   Response,
 } from 'express';
 import type { Result } from 'tinypg';
+import type { JSONSchemaType } from 'ajv';
 import type { Opportunity } from '../types';
 
 const logger = getLogger(__filename);
@@ -42,7 +43,7 @@ const getOpportunities = (req: Request, res: Response): void => {
 interface GetOpportunityParams {
   id: number;
 }
-const isGetOpportunityParams = ajv.compile<GetOpportunityParams>({
+const getOpportunityParamsSchema: JSONSchemaType<GetOpportunityParams> = {
   type: 'object',
   properties: {
     id: {
@@ -53,7 +54,8 @@ const isGetOpportunityParams = ajv.compile<GetOpportunityParams>({
   required: [
     'id',
   ],
-});
+};
+const isGetOpportunityParams = ajv.compile(getOpportunityParamsSchema);
 const getOpportunity = (req: Request<GetOpportunityParams>, res: Response): void => {
   if (!isGetOpportunityParams(req.params)) {
     res.status(400)

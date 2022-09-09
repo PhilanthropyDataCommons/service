@@ -12,10 +12,10 @@ import type { Applicant } from '../types';
 const logger = getLogger(__filename);
 
 const getApplicants = (req: Request, res: Response): void => {
-  db.sql('applicants.fetchAll')
-    .then((fetchAllQueryResult: Result<Applicant>) => {
-      logger.debug(fetchAllQueryResult);
-      const { rows: applicants } = fetchAllQueryResult;
+  db.sql('applicants.selectAll')
+    .then((applicantsQueryResult: Result<Applicant>) => {
+      logger.debug(applicantsQueryResult);
+      const { rows: applicants } = applicantsQueryResult;
       if (isApplicantArray(applicants)) {
         res.status(200)
           .contentType('application/json')

@@ -1,5 +1,10 @@
+import { ajv } from '../ajv';
 import type { JsonObject } from 'swagger-ui-express';
+import type { JSONSchemaType } from 'ajv';
 
-export const isJsonObject = (obj: unknown): obj is JsonObject => (
-  typeof obj === 'object'
-);
+const jsonObjectSchema: JSONSchemaType<JsonObject> = {
+  type: 'object',
+  properties: {},
+  required: [],
+};
+export const isJsonObject = ajv.compile(jsonObjectSchema);

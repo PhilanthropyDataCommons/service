@@ -4,7 +4,10 @@ module.exports = {
       tsconfig: 'tsconfig.dev.json',
     },
   },
-  collectCoverageFrom: ["src/**/*.ts"],
+  collectCoverageFrom: [
+    "src/**/*.ts",
+    "!src/**/*.test.*",
+  ],
   preset: 'ts-jest',
   globalSetup: "<rootDir>/src/test/globalSetup.ts",
   testEnvironment: 'node',

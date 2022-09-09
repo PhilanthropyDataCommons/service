@@ -2,7 +2,10 @@ import request from 'supertest';
 import { app } from '../app';
 import { db } from '../database';
 import { getLogger } from '../logger';
-import { isoTimestampPattern } from '../test/utils';
+import {
+  isoTimestampPattern,
+  getTableMetrics,
+} from '../test/utils';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
@@ -68,12 +71,7 @@ describe('/canonicalFields', () => {
 
   describe('POST /', () => {
     it('creates exactly one canonical field', async () => {
-      const before: Result<{ count: number; maxId: number; now: Date }> = await db.query(`
-        SELECT COUNT(id) AS "count",
-          MAX(id) AS "maxId",
-          NOW() as "now"
-        FROM canonical_fields;
-      `);
+      const before = await getTableMetrics('canonical_fields');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/canonicalFields')
@@ -84,14 +82,9 @@ describe('/canonicalFields', () => {
           dataType: '📊',
         })
         .expect(201);
-      const after: Result<{ count: number; maxId: number; now: Date }> = await db.query(`
-        SELECT COUNT(id) AS "count",
-          MAX(id) AS "maxId",
-          NOW() as "now"
-        FROM canonical_fields;
-      `);
+      const after = await getTableMetrics('canonical_fields');
       logger.debug('after: %o', after);
-      expect(before.rows[0].count).toEqual('0');
+      expect(before.count).toEqual('0');
       expect(result.body).toMatchObject({
         id: expect.any(Number) as number,
         label: '🏷️',
@@ -99,7 +92,7 @@ describe('/canonicalFields', () => {
         dataType: '📊',
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
-      expect(after.rows[0].count).toEqual('1');
+      expect(after.count).toEqual('1');
     });
     it('returns 400 bad request when no label is sent', async () => {
       await agent

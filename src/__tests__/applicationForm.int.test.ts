@@ -130,7 +130,7 @@ describe('/applicationForms', () => {
         .send({
           opportunityId: '1',
           fields: [{
-            canonicalFieldId: 1,
+            canonicalFieldShortCode: 'firstName',
             position: 1,
             label: 'Your First Name',
           }],
@@ -145,7 +145,7 @@ describe('/applicationForms', () => {
         version: 1,
         fields: [{
           applicationFormId: 1,
-          canonicalFieldId: 1,
+          canonicalFieldShortCode: 'firstName',
           createdAt: expect.stringMatching(isoTimestampPattern) as string,
           id: 1,
           label: 'Your First Name',

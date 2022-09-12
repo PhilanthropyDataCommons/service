@@ -4,7 +4,7 @@ import type { JSONSchemaType } from 'ajv';
 export interface ApplicationFormField {
   readonly id: number;
   applicationFormId: number;
-  canonicalFieldId: number;
+  canonicalFieldShortCode: string;
   position: number;
   label: string;
   readonly createdAt: Date;
@@ -21,8 +21,8 @@ export const applicationFormFieldSchema: JSONSchemaType<ApplicationFormField> = 
     applicationFormId: {
       type: 'integer',
     },
-    canonicalFieldId: {
-      type: 'integer',
+    canonicalFieldShortCode: {
+      type: 'string',
     },
     position: {
       type: 'integer',
@@ -39,7 +39,7 @@ export const applicationFormFieldSchema: JSONSchemaType<ApplicationFormField> = 
   required: [
     'id',
     'applicationFormId',
-    'canonicalFieldId',
+    'canonicalFieldShortCode',
     'position',
     'label',
     'createdAt',
@@ -51,8 +51,8 @@ export const isApplicationFormField = ajv.compile(applicationFormFieldSchema);
 export const applicationFormFieldWriteSchema: JSONSchemaType<ApplicationFormFieldWrite> = {
   type: 'object',
   properties: {
-    canonicalFieldId: {
-      type: 'integer',
+    canonicalFieldShortCode: {
+      type: 'string',
     },
     position: {
       type: 'integer',
@@ -62,7 +62,7 @@ export const applicationFormFieldWriteSchema: JSONSchemaType<ApplicationFormFiel
     },
   },
   required: [
-    'canonicalFieldId',
+    'canonicalFieldShortCode',
     'position',
     'label',
   ],

@@ -1,23 +1,23 @@
-import { TinyPgError } from 'tinypg';
-import { ajv } from '../ajv';
 import { getLogger } from '../logger';
-import {
-  db,
-  PostgressErrorCode,
-} from '../database';
+import { db } from '../database';
 import {
   isApplicationForm,
+  isApplicationFormWrite,
   isApplicationFormArray,
-  isQueryContextWithError,
+  isApplicationFormFieldArray,
 } from '../types';
 import { ValidationError } from '../errors';
+import { handleDbPromiseFailure } from '../tools/utils';
 import type {
   Request,
   Response,
 } from 'express';
 import type { Result } from 'tinypg';
-import type { JSONSchemaType } from 'ajv';
-import type { ApplicationForm } from '../types';
+import type {
+  ApplicationForm,
+  ApplicationFormWrite,
+  ApplicationFormField,
+} from '../types';
 
 const logger = getLogger(__filename);
 
@@ -45,28 +45,16 @@ const getApplicationForms = (req: Request, res: Response): void => {
     });
 };
 
-const postApplicantionFormsBodySchema: JSONSchemaType<Omit<ApplicationForm, 'createdAt' | 'id' | 'version'>> = {
-  type: 'object',
-  properties: {
-    opportunityId: {
-      type: 'number',
-    },
-  },
-  required: [
-    'opportunityId',
-  ],
-};
-const isPostApplicantionFormsBody = ajv.compile(postApplicantionFormsBodySchema);
 const postApplicationForms = (
-  req: Request<unknown, unknown, Omit<ApplicationForm, 'createdAt' | 'id' | 'version'>>,
+  req: Request<unknown, unknown, ApplicationFormWrite>,
   res: Response,
 ): void => {
-  if (!isPostApplicantionFormsBody(req.body)) {
+  if (!isApplicationFormWrite(req.body)) {
     res.status(400)
       .contentType('application/json')
       .send({
         message: 'Invalid request body.',
-        errors: isPostApplicantionFormsBody.errors,
+        errors: isApplicationFormWrite.errors,
       });
     return;
   }
@@ -79,9 +67,34 @@ const postApplicationForms = (
       logger.debug(applicationFormsQueryResult);
       const applicationForm = applicationFormsQueryResult.rows[0];
       if (isApplicationForm(applicationForm)) {
-        res.status(201)
-          .contentType('application/json')
-          .send(applicationForm);
+        const queries = req.body.fields.map(async (field) => (
+          db.sql('applicationFormFields.insertOne', {
+            ...field,
+            applicationFormId: applicationForm.id,
+          })
+        ));
+        Promise.all<Result<ApplicationFormField>>(
+          queries,
+        ).then((applicationFormFieldsQueryResults) => {
+          const applicationFormFields = applicationFormFieldsQueryResults.map(
+            (applicationFormFieldsQueryResult) => applicationFormFieldsQueryResult.rows[0],
+          );
+          if (isApplicationFormFieldArray(applicationFormFields)) {
+            res.status(201)
+              .contentType('application/json')
+              .send({
+                ...applicationForm,
+                fields: applicationFormFields,
+              });
+          } else {
+            throw new ValidationError(
+              'The database responded with an unexpected format.',
+              isApplicationFormFieldArray.errors ?? [],
+            );
+          }
+        }).catch((error: unknown) => {
+          handleDbPromiseFailure(error, res, logger);
+        });
       } else {
         throw new ValidationError(
           'The database responded with an unexpected format.',
@@ -90,32 +103,7 @@ const postApplicationForms = (
       }
     })
     .catch((error: unknown) => {
-      if (error instanceof TinyPgError
-      && isQueryContextWithError(error.queryContext)) {
-        switch (error.queryContext.error.code) {
-          case PostgressErrorCode.FOREIGN_KEY_VIOLATION:
-            res.status(409)
-              .contentType('application/json')
-              .send({
-                message: 'Unique key constraint violation.',
-                errors: [error.queryContext.error],
-              });
-            return;
-          case PostgressErrorCode.UNIQUE_VIOLATION:
-            res.status(409)
-              .contentType('application/json')
-              .send({
-                message: 'Unique key constraint violation.',
-                errors: [error.queryContext.error],
-              });
-            return;
-          default:
-        }
-      }
-      logger.warn(error);
-      res.status(500)
-        .contentType('application/json')
-        .send(error);
+      handleDbPromiseFailure(error, res, logger);
     });
 };
 

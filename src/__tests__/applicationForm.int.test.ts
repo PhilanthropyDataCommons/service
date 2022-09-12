@@ -24,13 +24,10 @@ describe('/applicationForms', () => {
 
     it('returns all application forms present in the database', async () => {
       await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
+        INSERT INTO opportunities (title)
         VALUES
-          ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' ),
-          ( 'Good opportunity', '2525-02-01T00:00:05Z' );
+          ( 'Tremendous opportunity 👌' ),
+          ( 'Good opportunity' );
       `);
       await db.query(`
         INSERT INTO application_forms (
@@ -88,12 +85,8 @@ describe('/applicationForms', () => {
   describe('POST /', () => {
     it('creates exactly one application form', async () => {
       await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
+        INSERT INTO opportunities ( title )
+        VALUES ( 'Tremendous opportunity 👌' );
       `);
       const before = await getTableMetrics('application_forms');
       const result = await agent
@@ -101,6 +94,7 @@ describe('/applicationForms', () => {
         .type('application/json')
         .send({
           opportunityId: '1',
+          fields: [],
         })
         .expect(201);
       const after = await getTableMetrics('application_forms');
@@ -110,6 +104,53 @@ describe('/applicationForms', () => {
         id: 1,
         opportunityId: 1,
         version: 1,
+        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+      });
+      expect(after.count).toEqual('1');
+    });
+
+    it('creates exactly the number of provided fields', async () => {
+      await db.query(`
+        INSERT INTO opportunities ( title )
+        VALUES ( 'Tremendous opportunity 👌' );
+      `);
+      await db.query(`
+        INSERT INTO canonical_fields (
+          label,
+          short_code,
+          data_type
+        )
+        VALUES
+          ( 'First Name', 'firstName', 'string' );
+      `);
+      const before = await getTableMetrics('application_form_fields');
+      const result = await agent
+        .post('/applicationForms')
+        .type('application/json')
+        .send({
+          opportunityId: '1',
+          fields: [{
+            canonicalFieldId: 1,
+            position: 1,
+            label: 'Your First Name',
+          }],
+        })
+        .expect(201);
+      const after = await getTableMetrics('application_form_fields');
+      logger.debug('after: %o', after);
+      expect(before.count).toEqual('0');
+      expect(result.body).toMatchObject({
+        id: 1,
+        opportunityId: 1,
+        version: 1,
+        fields: [{
+          applicationFormId: 1,
+          canonicalFieldId: 1,
+          createdAt: expect.stringMatching(isoTimestampPattern) as string,
+          id: 1,
+          label: 'Your First Name',
+          position: 1,
+        }],
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
       expect(after.count).toEqual('1');
@@ -139,6 +180,7 @@ describe('/applicationForms', () => {
         .type('application/json')
         .send({
           opportunityId: '1',
+          fields: [],
         })
         .expect(201);
       expect(result.body).toMatchObject({
@@ -153,7 +195,32 @@ describe('/applicationForms', () => {
       await agent
         .post('/applicationForms')
         .type('application/json')
-        .send({})
+        .send({
+          fields: [],
+        })
+        .expect(400);
+    });
+
+    it('returns 400 bad request when no fields are provided', async () => {
+      await agent
+        .post('/applicationForms')
+        .type('application/json')
+        .send({
+          opportunityId: 1,
+        })
+        .expect(400);
+    });
+
+    it('returns 400 bad request when an invalid field is provided', async () => {
+      await agent
+        .post('/applicationForms')
+        .type('application/json')
+        .send({
+          opportunityId: 1,
+          fields: [{
+            foo: 'not a field',
+          }],
+        })
         .expect(400);
     });
 
@@ -163,6 +230,7 @@ describe('/applicationForms', () => {
         .type('application/json')
         .send({
           opportunityId: 1,
+          fields: [],
         })
         .expect(409);
       expect(result.body).toMatchObject({
@@ -190,6 +258,34 @@ describe('/applicationForms', () => {
         .type('application/json')
         .send({
           opportunityId: 1,
+          fields: [],
+        })
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'ValidationError',
+        errors: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 500 if the database returns an unexpected data structure when collecting fields', async () => {
+      await db.query(`
+        INSERT INTO opportunities (
+          title,
+          created_at
+        )
+        VALUES
+          ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
+      `);
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => ({
+          rows: [{ foo: 'not a valid result' }],
+        }) as Result<object>);
+      const result = await agent
+        .post('/applicationForms')
+        .type('application/json')
+        .send({
+          opportunityId: 1,
+          fields: [],
         })
         .expect(500);
       expect(result.body).toMatchObject({

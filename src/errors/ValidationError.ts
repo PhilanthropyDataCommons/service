@@ -3,7 +3,7 @@
 import type { ErrorObject } from 'ajv';
 
 export class ValidationError extends Error {
-  public errors?: ErrorObject[] | null;
+  public errors: ErrorObject[];
 
   public constructor(
     message: string,

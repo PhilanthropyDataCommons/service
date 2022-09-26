@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { TinyPgError } from 'tinypg';
 import { app } from '../app';
 import { db } from '../database';
 import { getLogger } from '../logger';
@@ -6,6 +7,7 @@ import {
   getTableMetrics,
   isoTimestampPattern,
 } from '../test/utils';
+import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
@@ -58,8 +60,46 @@ describe('/opportunities', () => {
         .get('/opportunities')
         .expect(500);
       expect(result.body).toMatchObject({
-        name: 'ValidationError',
+        name: 'InternalValidationError',
         errors: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new Error('This is unexpected');
+        });
+      const result = await agent
+        .get('/opportunities')
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'UnknownError',
+        errors: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new TinyPgError(
+            'Something went wrong',
+            undefined,
+            {
+              error: {
+                code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+              },
+            },
+          );
+        });
+      const result = await agent
+        .get('/opportunities')
+        .expect(503);
+      expect(result.body).toMatchObject({
+        name: 'DatabaseError',
+        errors: [{
+          code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+        }],
       });
     });
   });
@@ -103,9 +143,13 @@ describe('/opportunities', () => {
           ( 'This should not be returned', '2525-01-02T00:00:04Z' ),
           ( 'This also should not be returned', '2525-01-02T00:00:05Z' );
       `);
-      await agent
+      const result = await agent
         .get('/opportunities/a')
         .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        errors: expect.any(Array) as unknown[],
+      });
     });
 
     it('returns 404 when id is not found', async () => {
@@ -123,7 +167,7 @@ describe('/opportunities', () => {
         .expect(404);
     });
 
-    it('returns a 500 ValidationError if the database returns an unexpected data structure', async () => {
+    it('returns a 500 InternalValidationError if the database returns an unexpected data structure', async () => {
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => ({
           rows: [{ foo: 'not a valid result' }],
@@ -132,8 +176,46 @@ describe('/opportunities', () => {
         .get('/opportunities/1')
         .expect(500);
       expect(result.body).toMatchObject({
-        name: 'ValidationError',
+        name: 'InternalValidationError',
         errors: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new Error('This is unexpected');
+        });
+      const result = await agent
+        .get('/opportunities/1')
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'UnknownError',
+        errors: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new TinyPgError(
+            'Something went wrong',
+            undefined,
+            {
+              error: {
+                code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+              },
+            },
+          );
+        });
+      const result = await agent
+        .get('/opportunities/1')
+        .expect(503);
+      expect(result.body).toMatchObject({
+        name: 'DatabaseError',
+        errors: [{
+          code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+        }],
       });
     });
   });
@@ -159,11 +241,15 @@ describe('/opportunities', () => {
     });
 
     it('returns 400 bad request when no title sent', async () => {
-      await agent
+      const result = await agent
         .post('/opportunities')
         .type('application/json')
         .send({ noTitleHere: '👎' })
         .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        errors: expect.any(Array) as unknown[],
+      });
     });
 
     it('returns 500 if the database returns an unexpected data structure', async () => {
@@ -179,8 +265,54 @@ describe('/opportunities', () => {
         })
         .expect(500);
       expect(result.body).toMatchObject({
-        name: 'ValidationError',
+        name: 'InternalValidationError',
         errors: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 500 UnknownError if a generic Error is thrown when inserting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new Error('This is unexpected');
+        });
+      const result = await agent
+        .post('/opportunities')
+        .type('application/json')
+        .send({
+          title: '🤷',
+        })
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'UnknownError',
+        errors: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 503 DatabaseError if an insufficient resources database error is thrown when inserting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new TinyPgError(
+            'Something went wrong',
+            undefined,
+            {
+              error: {
+                code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+              },
+            },
+          );
+        });
+      const result = await agent
+        .post('/opportunities')
+        .type('application/json')
+        .send({
+          title: '🤷',
+        })
+        .expect(503);
+      expect(result.body).toMatchObject({
+        name: 'DatabaseError',
+        errors: [{
+          code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+        }],
       });
     });
   });

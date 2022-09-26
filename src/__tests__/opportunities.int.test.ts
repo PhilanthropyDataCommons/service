@@ -2,13 +2,17 @@ import request from 'supertest';
 import { app } from '../app';
 import { db } from '../database';
 import { getLogger } from '../logger';
+import {
+  getTableMetrics,
+  isoTimestampPattern,
+} from '../test/utils';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 describe('/opportunities', () => {
-  describe('/', () => {
+  describe('GET /', () => {
     logger.debug('Now running an opportunities test');
     it('returns an empty array when no data is present', async () => {
       await agent
@@ -60,7 +64,7 @@ describe('/opportunities', () => {
     });
   });
 
-  describe('/id', () => {
+  describe('GET /id', () => {
     it('returns exactly one opportunity selected by id', async () => {
       const opportunityIds: Result<{ id: number; title: string }> = await db.query(`
         INSERT INTO opportunities (
@@ -126,6 +130,53 @@ describe('/opportunities', () => {
         }) as Result<object>);
       const result = await agent
         .get('/opportunities/1')
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'ValidationError',
+        errors: expect.any(Array) as unknown[],
+      });
+    });
+  });
+
+  describe('POST /', () => {
+    it('creates exactly one opportunity', async () => {
+      const before = await getTableMetrics('opportunities');
+      logger.debug('before: %o', before);
+      const result = await agent
+        .post('/opportunities')
+        .type('application/json')
+        .send({ title: '🎆' })
+        .expect(201);
+      const after = await getTableMetrics('opportunities');
+      logger.debug('after: %o', after);
+      expect(before.count).toEqual('0');
+      expect(result.body).toMatchObject({
+        id: 1,
+        title: '🎆',
+        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+      });
+      expect(after.count).toEqual('1');
+    });
+
+    it('returns 400 bad request when no title sent', async () => {
+      await agent
+        .post('/opportunities')
+        .type('application/json')
+        .send({ noTitleHere: '👎' })
+        .expect(400);
+    });
+
+    it('returns 500 if the database returns an unexpected data structure', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => ({
+          rows: [{ foo: 'not a valid result' }],
+        }) as Result<object>);
+      const result = await agent
+        .post('/opportunities')
+        .type('application/json')
+        .send({
+          title: '🤷',
+        })
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'ValidationError',

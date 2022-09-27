@@ -81,7 +81,7 @@ To run migrations:
 
 ```bash
 npm build
-npm migrate
+npm run migrate
 ```
 
 To start the server:
@@ -94,7 +94,7 @@ npm start
 To start the server in a development environment:
 
 ```bash
-npm start:dev
+npm run start:dev
 ```
 
 ### Logging
@@ -112,7 +112,7 @@ Alternatively, one may set `LOG_LEVEL` in the `.env` file.
 #### Project Structure
 
 - `/src/databases` contains database `migrations`, `queries`, and the core `db` access object.
-- `/src/controllers` contains all business logic related to the invocation of a given PDC api call.
+- `/src/handlers` contains all business logic related to the invocation of a given PDC api call.
 - `/src/routers` contains the piping that maps a given API route to a controller.
 
 #### Database

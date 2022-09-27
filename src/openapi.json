@@ -203,7 +203,7 @@
             "readOnly": true,
             "example": 1
           },
-          "canonicalFieldCode": {
+          "canonicalFieldShortCode": {
             "type": "string",
             "example": "firstName"
           },

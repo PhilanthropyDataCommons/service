@@ -3,7 +3,8 @@ import { opportunitiesHandlers } from '../handlers/opportunitiesHandlers';
 
 const opportunitiesRouter = express.Router();
 
-opportunitiesRouter.use('/:id', opportunitiesHandlers.getOpportunity);
-opportunitiesRouter.use('/', opportunitiesHandlers.getOpportunities);
+opportunitiesRouter.post('/', opportunitiesHandlers.postOpportunity);
+opportunitiesRouter.get('/:id', opportunitiesHandlers.getOpportunity);
+opportunitiesRouter.get('/', opportunitiesHandlers.getOpportunities);
 
 export { opportunitiesRouter };

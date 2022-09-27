@@ -96,7 +96,56 @@ const getOpportunity = (req: Request<GetOpportunityParams>, res: Response): void
     });
 };
 
+const postOpportunitiesBodySchema: JSONSchemaType<Omit<Opportunity, 'createdAt' | 'id'>> = {
+  type: 'object',
+  properties: {
+    title: {
+      type: 'string',
+    },
+  },
+  required: [
+    'title',
+  ],
+};
+const isPostOpportunitiesBodySchema = ajv.compile(postOpportunitiesBodySchema);
+const postOpportunity = (
+  req: Request<unknown, unknown, Omit<Opportunity, 'createdAt' | 'id'>>,
+  res: Response,
+): void => {
+  logger.debug(req);
+
+  if (!isPostOpportunitiesBodySchema(req.body)) {
+    res.status(400)
+      .contentType('application/json')
+      .send(isPostOpportunitiesBodySchema.errors ?? { message: 'Expected JSON body having title.' });
+    return;
+  }
+
+  db.sql('opportunities.insertOne', req.body)
+    .then((opportunitiesQueryResult: Result<Opportunity>) => {
+      logger.debug(opportunitiesQueryResult);
+      const opportunity = opportunitiesQueryResult.rows[0];
+      if (isOpportunity(opportunity)) {
+        res.status(201)
+          .contentType('application/json')
+          .send(opportunity);
+      } else {
+        throw new ValidationError(
+          'The database responded with an unexpected format.',
+          isOpportunity.errors ?? [],
+        );
+      }
+    })
+    .catch((error: unknown) => {
+      logger.error(error);
+      res.status(500)
+        .contentType('application/json')
+        .send(error);
+    });
+};
+
 export const opportunitiesHandlers = {
   getOpportunities,
   getOpportunity,
+  postOpportunity,
 };

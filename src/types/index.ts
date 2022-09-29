@@ -3,4 +3,5 @@ export * from './ApplicationForm';
 export * from './CanonicalField';
 export * from './JsonObject';
 export * from './Opportunity';
-export * from './QueryContextWithError';
+export * from './PostgresErrorCode';
+export * from './TinyPgErrorWithQueryContext';

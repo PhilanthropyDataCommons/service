@@ -1,19 +1,20 @@
-import { TinyPgError } from 'tinypg';
 import { ajv } from '../ajv';
 import { getLogger } from '../logger';
-import {
-  db,
-  detectUniqueConstraintViolation,
-} from '../database';
+import { db } from '../database';
 import {
   isApplicant,
   isApplicantArray,
-  isQueryContextWithError,
+  isTinyPgErrorWithQueryContext,
 } from '../types';
-import { ValidationError } from '../errors';
+import {
+  DatabaseError,
+  InputValidationError,
+  InternalValidationError,
+} from '../errors';
 import type {
   Request,
   Response,
+  NextFunction,
 } from 'express';
 import type { Result } from 'tinypg';
 import type { JSONSchemaType } from 'ajv';
@@ -21,7 +22,11 @@ import type { Applicant } from '../types';
 
 const logger = getLogger(__filename);
 
-const getApplicants = (req: Request, res: Response): void => {
+const getApplicants = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   db.sql('applicants.selectAll')
     .then((applicantsQueryResult: Result<Applicant>) => {
       logger.debug(applicantsQueryResult);
@@ -31,17 +36,21 @@ const getApplicants = (req: Request, res: Response): void => {
           .contentType('application/json')
           .send(applicants);
       } else {
-        throw new ValidationError(
+        next(new InternalValidationError(
           'The database responded with an unexpected format.',
           isApplicantArray.errors ?? [],
-        );
+        ));
       }
     })
     .catch((error: unknown) => {
-      logger.error(error);
-      res.status(500)
-        .contentType('application/json')
-        .send(error);
+      if (isTinyPgErrorWithQueryContext(error)) {
+        next(new DatabaseError(
+          'Error retrieving applicants.',
+          error,
+        ));
+        return;
+      }
+      next(error);
     });
 };
 
@@ -60,15 +69,13 @@ const isPostApplicantsBody = ajv.compile(postApplicantsBodySchema);
 const postApplicants = (
   req: Request<unknown, unknown, Omit<Applicant, 'createdAt' | 'id' | 'optedIn'>>,
   res: Response,
+  next: NextFunction,
 ): void => {
   if (!isPostApplicantsBody(req.body)) {
-    res.status(400)
-      .contentType('application/json')
-      .send({
-        message: 'Invalid request body.',
-        errors: isPostApplicantsBody.errors,
-      });
-    return;
+    next(new InputValidationError(
+      'Invalid request body.',
+      isPostApplicantsBody.errors ?? [],
+    ));
   }
 
   db.sql('applicants.insertOne', {
@@ -83,28 +90,21 @@ const postApplicants = (
           .contentType('application/json')
           .send(canonicalField);
       } else {
-        throw new ValidationError(
+        next(new InternalValidationError(
           'The database responded with an unexpected format.',
           isApplicant.errors ?? [],
-        );
+        ));
       }
     })
     .catch((error: unknown) => {
-      if (error instanceof TinyPgError
-      && isQueryContextWithError(error.queryContext)
-      && detectUniqueConstraintViolation(error)) {
-        res.status(409)
-          .contentType('application/json')
-          .send({
-            message: 'Unique key constraint violation.',
-            errors: [error.queryContext.error],
-          });
-      } else {
-        logger.warn(error);
-        res.status(500)
-          .contentType('application/json')
-          .send(error);
+      if (isTinyPgErrorWithQueryContext(error)) {
+        next(new DatabaseError(
+          'Error creating applicant.',
+          error,
+        ));
+        return;
       }
+      next(error);
     });
 };
 

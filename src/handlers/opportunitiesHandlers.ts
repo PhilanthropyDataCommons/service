@@ -4,11 +4,17 @@ import { db } from '../database';
 import {
   isOpportunityArraySchema,
   isOpportunity,
+  isTinyPgErrorWithQueryContext,
 } from '../types';
-import { ValidationError } from '../errors';
+import {
+  DatabaseError,
+  InputValidationError,
+  InternalValidationError,
+} from '../errors';
 import type {
   Request,
   Response,
+  NextFunction,
 } from 'express';
 import type { Result } from 'tinypg';
 import type { JSONSchemaType } from 'ajv';
@@ -16,7 +22,11 @@ import type { Opportunity } from '../types';
 
 const logger = getLogger(__filename);
 
-const getOpportunities = (req: Request, res: Response): void => {
+const getOpportunities = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   db.sql('opportunities.selectAll')
     .then((opportunitiesQueryResult: Result<Opportunity>) => {
       logger.debug(opportunitiesQueryResult);
@@ -26,17 +36,21 @@ const getOpportunities = (req: Request, res: Response): void => {
           .contentType('application/json')
           .send(opportunities);
       } else {
-        throw new ValidationError(
+        next(new InternalValidationError(
           'The database responded with an unexpected format.',
           isOpportunityArraySchema.errors ?? [],
-        );
+        ));
       }
     })
     .catch((error: unknown) => {
-      logger.error(error);
-      res.status(500)
-        .contentType('application/json')
-        .send(error);
+      if (isTinyPgErrorWithQueryContext(error)) {
+        next(new DatabaseError(
+          'Error retrieving opportunity.',
+          error,
+        ));
+        return;
+      }
+      next(error);
     });
 };
 
@@ -56,14 +70,16 @@ const getOpportunityParamsSchema: JSONSchemaType<GetOpportunityParams> = {
   ],
 };
 const isGetOpportunityParams = ajv.compile(getOpportunityParamsSchema);
-const getOpportunity = (req: Request<GetOpportunityParams>, res: Response): void => {
+const getOpportunity = (
+  req: Request<GetOpportunityParams>,
+  res: Response,
+  next: NextFunction,
+): void => {
   if (!isGetOpportunityParams(req.params)) {
-    res.status(400)
-      .contentType('application/json')
-      .send({
-        message: 'Invalid request parameters.',
-        errors: isGetOpportunityParams.errors,
-      });
+    next(new InputValidationError(
+      'Invalid request parameters.',
+      isGetOpportunityParams.errors ?? [],
+    ));
     return;
   }
   db.sql('opportunities.selectById', { id: req.params.id })
@@ -82,17 +98,21 @@ const getOpportunity = (req: Request<GetOpportunityParams>, res: Response): void
           .contentType('application/json')
           .send(opportunity);
       } else {
-        throw new ValidationError(
+        next(new InternalValidationError(
           'The database responded with an unexpected format.',
           isOpportunity.errors ?? [],
-        );
+        ));
       }
     })
     .catch((error: unknown) => {
-      logger.error(error);
-      res.status(500)
-        .contentType('application/json')
-        .send(error);
+      if (isTinyPgErrorWithQueryContext(error)) {
+        next(new DatabaseError(
+          'Error retrieving opportunity.',
+          error,
+        ));
+        return;
+      }
+      next(error);
     });
 };
 
@@ -111,13 +131,15 @@ const isPostOpportunitiesBodySchema = ajv.compile(postOpportunitiesBodySchema);
 const postOpportunity = (
   req: Request<unknown, unknown, Omit<Opportunity, 'createdAt' | 'id'>>,
   res: Response,
+  next: NextFunction,
 ): void => {
   logger.debug(req);
 
   if (!isPostOpportunitiesBodySchema(req.body)) {
-    res.status(400)
-      .contentType('application/json')
-      .send(isPostOpportunitiesBodySchema.errors ?? { message: 'Expected JSON body having title.' });
+    next(new InputValidationError(
+      'Invalid request parameters.',
+      isPostOpportunitiesBodySchema.errors ?? [],
+    ));
     return;
   }
 
@@ -130,17 +152,21 @@ const postOpportunity = (
           .contentType('application/json')
           .send(opportunity);
       } else {
-        throw new ValidationError(
+        next(new InternalValidationError(
           'The database responded with an unexpected format.',
           isOpportunity.errors ?? [],
-        );
+        ));
       }
     })
     .catch((error: unknown) => {
-      logger.error(error);
-      res.status(500)
-        .contentType('application/json')
-        .send(error);
+      if (isTinyPgErrorWithQueryContext(error)) {
+        next(new DatabaseError(
+          'Error creating opportunity.',
+          error,
+        ));
+        return;
+      }
+      next(error);
     });
 };
 

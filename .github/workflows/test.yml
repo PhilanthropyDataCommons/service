@@ -39,6 +39,9 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit -- --coverage
 
+      - name: Upload unit test coverage
+        uses: codecov/codecov-action@v2
+
       - name: Run integration tests
         run: npm run test:integration -- --coverage
         env:
@@ -47,5 +50,5 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: postgres
 
-      - name: Upload coverage
+      - name: Upload integration test coverage
         uses: codecov/codecov-action@v2

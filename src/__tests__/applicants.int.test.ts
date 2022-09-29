@@ -1,7 +1,9 @@
 import request from 'supertest';
+import { TinyPgError } from 'tinypg';
 import { app } from '../app';
 import { db } from '../database';
 import { getLogger } from '../logger';
+import { PostgresErrorCode } from '../types';
 import {
   getTableMetrics,
   isoTimestampPattern,
@@ -60,8 +62,46 @@ describe('/applicants', () => {
         .get('/applicants')
         .expect(500);
       expect(result.body).toMatchObject({
-        name: 'ValidationError',
+        name: 'InternalValidationError',
         errors: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new Error('This is unexpected');
+        });
+      const result = await agent
+        .get('/applicants')
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'UnknownError',
+        errors: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new TinyPgError(
+            'Something went wrong',
+            undefined,
+            {
+              error: {
+                code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+              },
+            },
+          );
+        });
+      const result = await agent
+        .get('/applicants')
+        .expect(503);
+      expect(result.body).toMatchObject({
+        name: 'DatabaseError',
+        errors: [{
+          code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+        }],
       });
     });
   });
@@ -89,24 +129,34 @@ describe('/applicants', () => {
       expect(after.count).toEqual('1');
     });
     it('returns 400 bad request when no external id is provided', async () => {
-      await agent
+      const result = await agent
         .post('/applicants')
         .type('application/json')
         .send({})
         .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        errors: expect.any(Array) as unknown[],
+      });
     });
     it('returns 409 conflict when a duplicate external id is submitted', async () => {
       await db.query(`
         INSERT INTO applicants (external_id)
         VALUES ( '12345' );
       `);
-      await agent
+      const result = await agent
         .post('/applicants')
         .type('application/json')
         .send({
           externalId: '12345',
         })
         .expect(409);
+      expect(result.body).toMatchObject({
+        name: 'DatabaseError',
+        errors: [{
+          code: PostgresErrorCode.UNIQUE_VIOLATION,
+        }],
+      });
     });
     it('returns 500 if the database returns an unexpected data structure', async () => {
       jest.spyOn(db, 'sql')
@@ -121,7 +171,7 @@ describe('/applicants', () => {
         })
         .expect(500);
       expect(result.body).toMatchObject({
-        name: 'ValidationError',
+        name: 'InternalValidationError',
         errors: expect.any(Array) as unknown[],
       });
     });

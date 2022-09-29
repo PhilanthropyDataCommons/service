@@ -1,27 +1,32 @@
-import { TinyPgError } from 'tinypg';
 import { ajv } from '../ajv';
 import { getLogger } from '../logger';
-import {
-  db,
-  detectUniqueConstraintViolation,
-} from '../database';
+import { db } from '../database';
 import {
   isCanonicalFieldArray,
   isCanonicalField,
-  isQueryContextWithError,
+  isTinyPgErrorWithQueryContext,
 } from '../types';
-import { ValidationError } from '../errors';
+import {
+  DatabaseError,
+  InputValidationError,
+  InternalValidationError,
+} from '../errors';
 import type { JSONSchemaType } from 'ajv';
 import type {
   Request,
   Response,
+  NextFunction,
 } from 'express';
 import type { Result } from 'tinypg';
 import type { CanonicalField } from '../types';
 
 const logger = getLogger(__filename);
 
-const getCanonicalFields = (req: Request, res: Response): void => {
+const getCanonicalFields = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   db.sql('canonicalFields.selectAll')
     .then((canonicalFieldsQueryResult: Result<CanonicalField>) => {
       logger.debug(canonicalFieldsQueryResult);
@@ -31,17 +36,21 @@ const getCanonicalFields = (req: Request, res: Response): void => {
           .contentType('application/json')
           .send(canonicalFields);
       } else {
-        throw new ValidationError(
+        next(new InternalValidationError(
           'The database responded with an unexpected format.',
           isCanonicalFieldArray.errors ?? [],
-        );
+        ));
       }
     })
     .catch((error: unknown) => {
-      logger.error(error);
-      res.status(500)
-        .contentType('application/json')
-        .send(error);
+      if (isTinyPgErrorWithQueryContext(error)) {
+        next(new DatabaseError(
+          'Error retrieving canonical fields.',
+          error,
+        ));
+        return;
+      }
+      next(error);
     });
 };
 
@@ -68,14 +77,13 @@ const isPostCanonicalFieldBody = ajv.compile(postCanonicalFieldBodySchema);
 const postCanonicalField = (
   req: Request<unknown, unknown, Omit<CanonicalField, 'createdAt' | 'id'>>,
   res: Response,
+  next: NextFunction,
 ): void => {
   if (!isPostCanonicalFieldBody(req.body)) {
-    res.status(400)
-      .contentType('application/json')
-      .send({
-        message: 'Invalid request body.',
-        errors: isPostCanonicalFieldBody.errors,
-      });
+    next(new InputValidationError(
+      'Invalid request body.',
+      isPostCanonicalFieldBody.errors ?? [],
+    ));
     return;
   }
 
@@ -88,28 +96,21 @@ const postCanonicalField = (
           .contentType('application/json')
           .send(canonicalField);
       } else {
-        throw new ValidationError(
+        next(new InternalValidationError(
           'The database responded with an unexpected format.',
           isCanonicalField.errors ?? [],
-        );
+        ));
       }
     })
     .catch((error: unknown) => {
-      if (error instanceof TinyPgError
-      && isQueryContextWithError(error.queryContext)
-      && detectUniqueConstraintViolation(error)) {
-        res.status(409)
-          .contentType('application/json')
-          .send({
-            message: 'Unique key constraint violation.',
-            errors: [error.queryContext.error],
-          });
-      } else {
-        logger.warn(error);
-        res.status(500)
-          .contentType('application/json')
-          .send(error);
+      if (isTinyPgErrorWithQueryContext(error)) {
+        next(new DatabaseError(
+          'Error creating canonical field.',
+          error,
+        ));
+        return;
       }
+      next(error);
     });
 };
 

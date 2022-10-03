@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - 'main'
+      - '23-avoid-use-of-pat-in-ci-cd'
 
 jobs:
   build:
@@ -48,7 +49,7 @@ jobs:
         with:
           workflow: update-service-image.yml
           ref: main
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repo: PhilanthropyDataCommons/deploy
           inputs: "{\"image-tag\":\"${{ env.VERSION }}\"}"
           wait-for-completion: true

@@ -7,18 +7,588 @@
   },
   "components": {
     "schemas": {
-      "Opportunity": {
-        "type": "object"
+      "Applicant": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "externalId": {
+            "type": "string",
+            "example": "111-11-1111"
+          },
+          "optedIn": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "externalId",
+          "optedIn",
+          "createdAt"
+        ]
       },
       "Application": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "applicantId": {
+            "type": "integer",
+            "example": 1
+          },
+          "opportunityId": {
+            "type": "integer",
+            "example": 1
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicationVersion"
+            },
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "applicantId",
+          "opportunityId",
+          "createdAt"
+        ]
+      },
+      "ApplicationVersion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "applicationId": {
+            "type": "integer",
+            "example": 1
+          },
+          "version": {
+            "type": "integer",
+            "example": 1
+          },
+          "fieldValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicationFieldValue"
+            },
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "applicationId",
+          "version",
+          "createdAt"
+        ]
+      },
+      "ApplicationFieldValue": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "applicationVersionId": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "applicationFormFieldId": {
+            "type": "integer",
+            "example": 1
+          },
+          "position": {
+            "type": "integer",
+            "example": 1
+          },
+          "value": {
+            "type": "string",
+            "example": "Some arbitrary value"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "applicationVersionId",
+          "applicationFormFieldId",
+          "position",
+          "value",
+          "createdAt"
+        ]
+      },
+      "ApplicationForm": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "opportunityId": {
+            "type": "integer",
+            "example": 1
+          },
+          "version": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicationFormField"
+            },
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "opportunityId",
+          "version",
+          "createdAt"
+        ]
+      },
+      "ApplicationFormField": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "applicationFormId": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "canonicalFieldShortCode": {
+            "type": "string",
+            "example": "firstName"
+          },
+          "position": {
+            "type": "integer",
+            "example": 1
+          },
+          "label": {
+            "type": "string",
+            "example": "Your First Name"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "applicationFormId",
+          "canonicalFieldId",
+          "position",
+          "label",
+          "createdAt"
+        ]
+      },
+      "CanonicalField": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "label": {
+            "type": "string",
+            "example": "First Name"
+          },
+          "shortCode": {
+            "type": "string",
+            "example": "firstName"
+          },
+          "dataType": {
+            "type": "string",
+            "example": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "shortCode",
+          "dataType",
+          "createdAt"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": []
+      },
+      "Opportunity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "The Open Source Foundation 2022 Challenge"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "createdAt"
+        ]
       }
     }
   },
   "paths": {
-    "/opportunities": {
-      "summary": "Funding opportunities such as an available grant.",
+    "/applicants": {
       "get": {
+        "summary": "Get a list of applicants.",
+        "tags": [
+          "Applicants"
+        ],
+        "responses": {
+          "200": {
+            "description": "All applicants currently registered in the PDC.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Applicant"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new applicant.",
+        "tags": [
+          "Applicants"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Applicant"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new applicant that was created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Applicant"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "There was a unique key or foreign key key conflict.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applicants/{externalId}": {
+      "get": {
+        "summary": "Get a specific applicant, including all known field values associated with the applicant. (In Development)",
+        "tags": [
+          "Applicants"
+        ],
+        "parameters": [
+          {
+            "name": "externalId",
+            "description": "The external identifier of an applicant.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The populated applicant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Applicant"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applicationForms": {
+      "get": {
+        "summary": "Get a list of application forms.",
+        "tags": [
+          "Application Forms"
+        ],
+        "responses": {
+          "200": {
+            "description": "All application forms currently registered in the PDC.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationForm"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "opportunityId": 1,
+                    "version": 1,
+                    "createdAt": "2022-09-13T14:45:06.139Z"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new application form.",
+        "tags": [
+          "Application Forms"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new application form that was created, with populated fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationForm"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "There was a unique key or foreign key conflict.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications": {
+      "get": {
+        "summary": "Get a list of applications. (In Development)",
+        "tags": [
+          "Applications"
+        ],
+        "responses": {
+          "200": {
+            "description": "All applications currently registered in the PDC.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Application"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new application. (In Development)",
+        "tags": [
+          "Applications"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Application"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new application that was created, with populated field values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "There was a unique key or foreign key conflict.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/canonicalFields": {
+      "get": {
+        "summary": "Get a list of canonical fields.",
+        "tags": [
+          "Canonical Fields"
+        ],
+        "responses": {
+          "200": {
+            "description": "All canonical fields currently registered in the PDC.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CanonicalField"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new canonical field.",
+        "tags": [
+          "Canonical Fields"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CanonicalField"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new canonical field that was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanonicalField"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "There was a unique key conflict.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opportunities": {
+      "get": {
+        "summary": "Get a list of opportunities.",
+        "tags": [
+          "Opportunities"
+        ],
         "responses": {
           "200": {
             "description": "A list of known funding opportunities.",
@@ -36,7 +606,10 @@
         }
       },
       "post": {
-        "description": "Adds a new opportunity.",
+        "summary": "Add a new opportunity. (In Development)",
+        "tags": [
+          "Opportunities"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -62,8 +635,11 @@
       }
     },
     "/opportunities/{opportunityId}": {
-      "summary": "A funding opportunity such as an available grant, RFP, etc.",
       "get": {
+        "summary": "Get a specific opportunity.",
+        "tags": [
+          "Opportunities"
+        ],
         "parameters": [
           {
             "name": "opportunityId",
@@ -82,90 +658,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Opportunity"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/applications": {
-      "summary": "A list of applications, optionally selected by opportunityId.",
-      "get": {
-        "parameters": [
-          {
-            "name": "opportunityId",
-            "description": "The PDC-generated ID of an opportunity, RFC, potential award or grant, etc.",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "All applications associated with the given query strings.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Application"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Adds a new application for the given opportunityId.",
-        "parameters": [
-          {
-            "name": "opportunityId",
-            "description": "The PDC-generated ID of an opportunity, RFC, potential award or grant, etc.",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "The new application that was created.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Application"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/applications/{applicationId}": {
-      "get": {
-        "parameters": [
-          {
-            "name": "applicationId",
-            "description": "The PDC-generated ID of an application.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "An application.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Application"
                 }
               }
             }

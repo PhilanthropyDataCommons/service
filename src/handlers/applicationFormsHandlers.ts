@@ -1,8 +1,9 @@
-import { ajv } from '../ajv';
 import { getLogger } from '../logger';
 import { db } from '../database';
 import {
   isApplicationForm,
+  isApplicationFormWrite,
+  isApplicationFormFieldArray,
   isApplicationFormArray,
   isTinyPgErrorWithQueryContext,
 } from '../types';
@@ -17,8 +18,11 @@ import type {
   NextFunction,
 } from 'express';
 import type { Result } from 'tinypg';
-import type { JSONSchemaType } from 'ajv';
-import type { ApplicationForm } from '../types';
+import type {
+  ApplicationForm,
+  ApplicationFormWrite,
+  ApplicationFormField,
+} from '../types';
 
 const logger = getLogger(__filename);
 
@@ -54,27 +58,15 @@ const getApplicationForms = (
     });
 };
 
-const postApplicationFormsBodySchema: JSONSchemaType<Omit<ApplicationForm, 'createdAt' | 'id' | 'version'>> = {
-  type: 'object',
-  properties: {
-    opportunityId: {
-      type: 'number',
-    },
-  },
-  required: [
-    'opportunityId',
-  ],
-};
-const isPostApplicationFormsBody = ajv.compile(postApplicationFormsBodySchema);
 const postApplicationForms = (
-  req: Request<unknown, unknown, Omit<ApplicationForm, 'createdAt' | 'id' | 'version'>>,
+  req: Request<unknown, unknown, ApplicationFormWrite>,
   res: Response,
   next: NextFunction,
 ): void => {
-  if (!isPostApplicationFormsBody(req.body)) {
+  if (!isApplicationFormWrite(req.body)) {
     next(new InputValidationError(
       'Invalid request body.',
-      isPostApplicationFormsBody.errors ?? [],
+      isApplicationFormWrite.errors ?? [],
     ));
     return;
   }
@@ -87,12 +79,44 @@ const postApplicationForms = (
       logger.debug(applicationFormsQueryResult);
       const applicationForm = applicationFormsQueryResult.rows[0];
       if (isApplicationForm(applicationForm)) {
-        res.status(201)
-          .contentType('application/json')
-          .send(applicationForm);
+        const queries = req.body.fields.map(async (field) => (
+          db.sql('applicationFormFields.insertOne', {
+            ...field,
+            applicationFormId: applicationForm.id,
+          })
+        ));
+        Promise.all<Result<ApplicationFormField>>(
+          queries,
+        ).then((applicationFormFieldsQueryResults) => {
+          const applicationFormFields = applicationFormFieldsQueryResults.map(
+            (applicationFormFieldsQueryResult) => applicationFormFieldsQueryResult.rows[0],
+          );
+          if (isApplicationFormFieldArray(applicationFormFields)) {
+            res.status(201)
+              .contentType('application/json')
+              .send({
+                ...applicationForm,
+                fields: applicationFormFields,
+              });
+          } else {
+            next(new InternalValidationError(
+              'The database responded with an unexpected format when creating a field.',
+              isApplicationFormFieldArray.errors ?? [],
+            ));
+          }
+        }).catch((error: unknown) => {
+          if (isTinyPgErrorWithQueryContext(error)) {
+            next(new DatabaseError(
+              'Error creating application form.',
+              error,
+            ));
+            return;
+          }
+          next(error);
+        });
       } else {
         next(new InternalValidationError(
-          'The database responded with an unexpected format.',
+          'The database responded with an unexpected format when creating the form.',
           isApplicationForm.errors ?? [],
         ));
       }

@@ -1,12 +1,27 @@
 import { ajv } from '../ajv';
+import {
+  applicationFormFieldSchema,
+  applicationFormFieldWriteSchema,
+} from './ApplicationFormField';
 import type { JSONSchemaType } from 'ajv';
+import type {
+  ApplicationFormField,
+  ApplicationFormFieldWrite,
+} from './ApplicationFormField';
 
 export interface ApplicationForm {
-  id: number;
+  readonly id: number;
   opportunityId: number;
   version: number;
-  createdAt: Date;
+  fields?: ApplicationFormField[];
+  readonly createdAt: Date;
 }
+
+// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
+/* eslint-disable @typescript-eslint/indent */
+export type ApplicationFormWrite = Omit<ApplicationForm, 'createdAt' | 'fields' | 'id' | 'version'>
+  & { fields: ApplicationFormFieldWrite[] };
+/* eslint-enable @typescript-eslint/indent */
 
 export const applicationFormSchema: JSONSchemaType<ApplicationForm> = {
   type: 'object',
@@ -19,6 +34,11 @@ export const applicationFormSchema: JSONSchemaType<ApplicationForm> = {
     },
     version: {
       type: 'integer',
+    },
+    fields: {
+      type: 'array',
+      items: applicationFormFieldSchema,
+      nullable: true,
     },
     createdAt: {
       type: 'object',
@@ -35,6 +55,25 @@ export const applicationFormSchema: JSONSchemaType<ApplicationForm> = {
 };
 
 export const isApplicationForm = ajv.compile(applicationFormSchema);
+
+export const applicationFormWriteSchema: JSONSchemaType<ApplicationFormWrite> = {
+  type: 'object',
+  properties: {
+    opportunityId: {
+      type: 'number',
+    },
+    fields: {
+      type: 'array',
+      items: applicationFormFieldWriteSchema,
+    },
+  },
+  required: [
+    'opportunityId',
+    'fields',
+  ],
+};
+
+export const isApplicationFormWrite = ajv.compile(applicationFormWriteSchema);
 
 const applicationFormArraySchema: JSONSchemaType<ApplicationForm[]> = {
   type: 'array',

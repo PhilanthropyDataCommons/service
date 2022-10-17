@@ -1,0 +1,822 @@
+[
+  {
+    "label": "Org Name",
+    "shortCode": "Org Name",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Mission Statement",
+    "shortCode": "Org Mission Statement",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Website",
+    "shortCode": "Org Website",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Entity Type",
+    "shortCode": "Org Entity Type",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Registration Number: EIN / TIN",
+    "shortCode": "Org Registration Number: EIN / TIN",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Address",
+    "shortCode": "Org Address",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Phone",
+    "shortCode": "Org Phone",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Email",
+    "shortCode": "Org Email",
+    "dataType": "string"
+  },
+  {
+    "label": "Org DBA Name",
+    "shortCode": "Org DBA Name",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Banking Information",
+    "shortCode": "Org Banking Information",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Legal Docs",
+    "shortCode": "Org Legal Docs",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Board Members",
+    "shortCode": "Org Board Members",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Administrative Lead",
+    "shortCode": "Org Administrative Lead",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Annual Operating Budget",
+    "shortCode": "Org Annual Operating Budget",
+    "dataType": "number"
+  },
+  {
+    "label": "Org Lobbying Activities",
+    "shortCode": "Org Lobbying Activities",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Start Date",
+    "shortCode": "Org Start Date",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Geographic Areas",
+    "shortCode": "Org Geographic Areas",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Audited Financial Statements",
+    "shortCode": "Org Audited Financial Statements",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Grant Agreement Signatory",
+    "shortCode": "Org Grant Agreement Signatory",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Fiscal Year End Date",
+    "shortCode": "Org Fiscal Year End Date",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Name(s)",
+    "shortCode": "Proposal Name(s)",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Primary Contact Name",
+    "shortCode": "Proposal Primary Contact Name",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Primary Email",
+    "shortCode": "Proposal Primary Email",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Primary Phone Number",
+    "shortCode": "Proposal Primary Phone Number",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Summary",
+    "shortCode": "Proposal Summary",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Budget",
+    "shortCode": "Proposal Budget",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Investment Start Date/Duration",
+    "shortCode": "Proposal Investment Start Date/Duration",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Investment End Date",
+    "shortCode": "Proposal Investment End Date",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Project Total Budget",
+    "shortCode": "Proposal Project Total Budget",
+    "dataType": "number"
+  },
+  {
+    "label": "Proposal Type",
+    "shortCode": "Proposal Type",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Fiscal Sponsorship Org Name",
+    "shortCode": "Proposal Fiscal Sponsorship Org Name",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Location of Work (free-form string)",
+    "shortCode": "Proposal Location of Work (free-form string)",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Involves Lobbying or Electioneering?",
+    "shortCode": "Proposal Involves Lobbying or Electioneering?",
+    "dataType": "string"
+  },
+  {
+    "label": "IRB review needed?",
+    "shortCode": "IRB review needed?",
+    "dataType": "boolean"
+  },
+  {
+    "label": "IRB approval obtained?",
+    "shortCode": "IRB approval obtained?",
+    "dataType": "string"
+  },
+  {
+    "label": "Are sub-grants being given?",
+    "shortCode": "Are sub-grants being given?",
+    "dataType": "string"
+  },
+  {
+    "label": "Sub-grantees",
+    "shortCode": "Sub-grantees",
+    "dataType": "string"
+  },
+  {
+    "label": "Accounting Period End Month",
+    "shortCode": "fiscal_month",
+    "dataType": "string"
+  },
+  {
+    "label": "Location",
+    "shortCode": "Location",
+    "dataType": "string"
+  },
+  {
+    "label": "Grant Agreement Signatory",
+    "shortCode": "related_user1.last_name_first",
+    "dataType": "string"
+  },
+  {
+    "label": "Organization Financial Officer",
+    "shortCode": "related_user2.last_name_first",
+    "dataType": "string"
+  },
+  {
+    "label": "Organization Grants Officer",
+    "shortCode": "related_user3.last_name_first",
+    "dataType": "string"
+  },
+  {
+    "label": "Authorized Banking Contact 1",
+    "shortCode": "authorized_banking_contact_1",
+    "dataType": "string"
+  },
+  {
+    "label": "Authorized Banking Contact 2",
+    "shortCode": "authorized_banking_contact_2",
+    "dataType": "string"
+  },
+  {
+    "label": "Type of Governing Body",
+    "shortCode": "type_of_governing_body",
+    "dataType": "string"
+  },
+  {
+    "label": "Term Duration",
+    "shortCode": "term_duration",
+    "dataType": "string"
+  },
+  {
+    "label": "Number of Terms Permitted",
+    "shortCode": "number_of_terms_permitted",
+    "dataType": "string"
+  },
+  {
+    "label": "Are members of the governing body compensated?",
+    "shortCode": "governing_body_compensation",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Financial Oversight by Governing Body",
+    "shortCode": "gov_body_oversee_finances",
+    "dataType": "string"
+  },
+  {
+    "label": "CEO Review Method",
+    "shortCode": "ceo_review_method",
+    "dataType": "string"
+  },
+  {
+    "label": "Does your organization have a conflict of interest policy?",
+    "shortCode": "does_your_organization_have_a_conflict_of_interest_policy",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Workplace Issues?",
+    "shortCode": "workplace_issues_yes_no",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Please provide detail below or let us know if you would instead prefer to discuss your response with your Program Officer.",
+    "shortCode": "workplace_issues_details",
+    "dataType": "string"
+  },
+  {
+    "label": "Does your organization have a whistleblower policy?",
+    "shortCode": "does_your_organization_have_a_whistleblower_policy",
+    "dataType": "boolean"
+  },
+  {
+    "label": "EIN / Foreign Entities",
+    "shortCode": "irs_name_foreign",
+    "dataType": "string"
+  },
+  {
+    "label": "Will you be using a Fiscal Agent to administer your grant?",
+    "shortCode": "fiscal_agent_administers_grant",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Fiscal Org Location",
+    "shortCode": "Location",
+    "dataType": "string"
+  },
+  {
+    "label": "Fiscal Org Primary Contact",
+    "shortCode": "fiscal_org_owner_id",
+    "dataType": "string"
+  },
+  {
+    "label": "Fiscal Signatory",
+    "shortCode": "fiscal_signatory_id",
+    "dataType": "string"
+  },
+  {
+    "label": "Are names of your organization contacts missing from the drop-down fields above?",
+    "shortCode": "leadership_names_missing",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Organization Leadership Contact Details",
+    "shortCode": "organization_leadership_contact_details",
+    "dataType": "string"
+  },
+  {
+    "label": "Authorized Banking Contacts",
+    "shortCode": "authorized_banking_contacts",
+    "dataType": "string"
+  },
+  {
+    "label": "Is your organization information correct and current?",
+    "shortCode": "org_contact_info_is_correct_and_current",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Please provide your organization's contact information below, including address, phone numbers and email addresses, and we will add them to our database.",
+    "shortCode": "organization_information",
+    "dataType": "string"
+  },
+  {
+    "label": "Is your contact information correct and current?",
+    "shortCode": "user_contact_info_is_correct_and_current",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Updated Contact Information",
+    "shortCode": "updated_contact_information",
+    "dataType": "string"
+  },
+  {
+    "label": "Grant Title",
+    "shortCode": "grant_title_1",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposed Start Date",
+    "shortCode": "proposed_start_date",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposed End Date",
+    "shortCode": "proposed_end_date",
+    "dataType": "string"
+  },
+  {
+    "label": "Amount Requested from MacArthur (USD $ only)",
+    "shortCode": "amount_requested",
+    "dataType": "number"
+  },
+  {
+    "label": "Significant Other Funders",
+    "shortCode": "significant_other_funders_grantee",
+    "dataType": "string"
+  },
+  {
+    "label": "Organization Overview",
+    "shortCode": "organization_overview",
+    "dataType": "string"
+  },
+  {
+    "label": "Context",
+    "shortCode": "context_opportunity_project_description",
+    "dataType": "string"
+  },
+  {
+    "label": "Description of Funded Activities",
+    "shortCode": "goals_description_funded_activities",
+    "dataType": "string"
+  },
+  {
+    "label": "Results",
+    "shortCode": "results_project_description",
+    "dataType": "string"
+  },
+  {
+    "label": "Leadership",
+    "shortCode": "leadership_project_description",
+    "dataType": "string"
+  },
+  {
+    "label": "Learning & Evaluation",
+    "shortCode": "learning_project_description",
+    "dataType": "string"
+  },
+  {
+    "label": "Sustainability / Next Stages",
+    "shortCode": "sustainability_next_stages_project_description",
+    "dataType": "string"
+  },
+  {
+    "label": "Past Performance",
+    "shortCode": "past_performance_project_description",
+    "dataType": "string"
+  },
+  {
+    "label": "What steps do you take or processes do you have in place to ensure that the individuals or organizations that you may pay with MacArthur grant funds (other than your own staff) are not on terrorist watch lists, are paid in compliance with applicable anti money laundering statutes, and the funds will not be used for criminal or illegal activity?",
+    "shortCode": "steps_or_processes_to_ensure_payee_not_on_watchlists",
+    "dataType": "string"
+  },
+  {
+    "label": "Will MacArthur funds support scholarships or awards?",
+    "shortCode": "fund_scholarships_awards",
+    "dataType": "string"
+  },
+  {
+    "label": "Scholarship / Award Explanation",
+    "shortCode": "scholarship_award_explanation",
+    "dataType": "string"
+  },
+  {
+    "label": "Will MacArthur funds be used to make payments to or on the behalf of meeting participants/attendees who are not employed by you and who are not providing a specific service to you?",
+    "shortCode": "funds_reimburse_travel_personal_benefit",
+    "dataType": "string"
+  },
+  {
+    "label": "Personal Travel Reimbursement Explanation",
+    "shortCode": "personal_travel_reimbursement_explanation",
+    "dataType": "string"
+  },
+  {
+    "label": "Geographic Focus",
+    "shortCode": "geo_place_relationships",
+    "dataType": "string"
+  },
+  {
+    "label": "Locations under US sanction",
+    "shortCode": "funds_in_locations_under_us_sanction",
+    "dataType": "string"
+  },
+  {
+    "label": "Locations Under Sanction Explanation",
+    "shortCode": "locations_under_sanction_explanation",
+    "dataType": "string"
+  },
+  {
+    "label": "Will this project support research?",
+    "shortCode": "will_this_project_support_research",
+    "dataType": "string"
+  },
+  {
+    "label": "Involves desk research?",
+    "shortCode": "desk_research",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Collects new data from individuals?",
+    "shortCode": "collect_new_data_from_individuals",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Collects personal data?",
+    "shortCode": "collects_personal_data",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Describe the research activities for collecting personal data",
+    "shortCode": "new_and_personal_data_describe_the_research_activities",
+    "dataType": "string"
+  },
+  {
+    "label": "Will the research be published?",
+    "shortCode": "will_the_research_be_published",
+    "dataType": "boolean"
+  },
+  {
+    "label": "HSR Policy",
+    "shortCode": "hsr_policy",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Research involves minors",
+    "shortCode": "research_involve_minors",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Does your organization have a child protection policy?",
+    "shortCode": "child_protection_policy",
+    "dataType": "boolean"
+  },
+  {
+    "label": "Funds for fiscal agent duties, research or conferences",
+    "shortCode": "non_us_orgs_fiscal_agent_or_research_or_conference",
+    "dataType": "string"
+  },
+  {
+    "label": "Fiscal Agent Duties / Research / Conference Explanation",
+    "shortCode": "fiscal_agent_duties_research_conference_explanation",
+    "dataType": "string"
+  },
+  {
+    "label": "Additional Information from Applicant",
+    "shortCode": "additional_information_requested",
+    "dataType": "string"
+  },
+  {
+    "label": "Latitude",
+    "shortCode": "bing_latitude",
+    "dataType": "number"
+  },
+  {
+    "label": "Longitude",
+    "shortCode": "bing_longitude",
+    "dataType": "number"
+  },
+  {
+    "label": "Neighborhood",
+    "shortCode": "bing_neighborhood",
+    "dataType": "string"
+  },
+  {
+    "label": "Abstract",
+    "shortCode": "abstract_discussion_and_justification",
+    "dataType": "string"
+  },
+  {
+    "label": "Amount recommended",
+    "shortCode": "amount_recommended",
+    "dataType": "number"
+  },
+  {
+    "label": "Purpose Statement",
+    "shortCode": "purpose_statement",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Name",
+    "shortCode": "Org Name",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Mission Statement",
+    "shortCode": "Org Mission Statement",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Website",
+    "shortCode": "Org Website",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Entity Type",
+    "shortCode": "Org Entity Type",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Registration Number: EIN / TIN",
+    "shortCode": "Org Registration Number: EIN / TIN",
+    "dataType": "number"
+  },
+  {
+    "label": "Org Address",
+    "shortCode": "Org Address",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Phone",
+    "shortCode": "Org Phone",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Email",
+    "shortCode": "Org Email",
+    "dataType": "string"
+  },
+  {
+    "label": "Org DBA Name",
+    "shortCode": "Org DBA Name",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Banking Information",
+    "shortCode": "Org Banking Information",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Legal Docs",
+    "shortCode": "Org Legal Docs",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Board Members",
+    "shortCode": "Org Board Members",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Administrative Lead",
+    "shortCode": "Org Administrative Lead",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Annual Operating Budget",
+    "shortCode": "Org Annual Operating Budget",
+    "dataType": "number"
+  },
+  {
+    "label": "Org Lobbying Activities",
+    "shortCode": "Org Lobbying Activities",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Start Date",
+    "shortCode": "Org Start Date",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Geographic Areas",
+    "shortCode": "Org Geographic Areas",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Audited Financial Statements",
+    "shortCode": "Org Audited Financial Statements",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Grant Agreement Signatory",
+    "shortCode": "Org Grant Agreement Signatory",
+    "dataType": "string"
+  },
+  {
+    "label": "Org Fiscal Year End Date",
+    "shortCode": "Org Fiscal Year End Date",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Name(s)",
+    "shortCode": "Proposal Name(s)",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Primary Contact Name",
+    "shortCode": "Proposal Primary Contact Name",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Primary Email",
+    "shortCode": "Proposal Primary Email",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Primary Phone Number",
+    "shortCode": "Proposal Primary Phone Number",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Summary",
+    "shortCode": "Proposal Summary",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Budget",
+    "shortCode": "Proposal Budget",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Investment Start Date/Duration",
+    "shortCode": "Proposal Investment Start Date/Duration",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Investment End Date",
+    "shortCode": "Proposal Investment End Date",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Project Total Budget",
+    "shortCode": "Proposal Project Total Budget",
+    "dataType": "number"
+  },
+  {
+    "label": "Proposal Type",
+    "shortCode": "Proposal Type",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Fiscal Sponsorship Org Name",
+    "shortCode": "Proposal Fiscal Sponsorship Org Name",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Location of Work (free-form string)",
+    "shortCode": "Proposal Location of Work (free-form string)",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Involves Lobbying or Electioneering?",
+    "shortCode": "Proposal Involves Lobbying or Electioneering?",
+    "dataType": "string"
+  },
+  {
+    "label": "IRB review needed?",
+    "shortCode": "IRB review needed?",
+    "dataType": "string"
+  },
+  {
+    "label": "IRB approval obtained?",
+    "shortCode": "IRB approval obtained?",
+    "dataType": "string"
+  },
+  {
+    "label": "Are sub-grants being given?",
+    "shortCode": "Are sub-grants being given?",
+    "dataType": "string"
+  },
+  {
+    "label": "Sub-grantees",
+    "shortCode": "Sub-grantees",
+    "dataType": "string"
+  },
+  {
+    "label": "Number of Paid Staff",
+    "shortCode": "a3603d12-8635-483c-8476-69d0ea8429a9",
+    "dataType": "number"
+  },
+  {
+    "label": "Contact Title",
+    "shortCode": "24631004-5979-496e-9bc4-4b32aa24e472",
+    "dataType": "string"
+  },
+  {
+    "label": "Fiscal Sponsor EIN Number",
+    "shortCode": "fcecf43a-c38a-4ec1-9aa1-7d5ae6acc5b9",
+    "dataType": "number"
+  },
+  {
+    "label": "Fiscal Sponsor Contact",
+    "shortCode": "ada1af5f-fca9-4012-a9f6-ee3deef719fe",
+    "dataType": "string"
+  },
+  {
+    "label": "Fiscal Sponsor Contact Email",
+    "shortCode": "b3d4820b-60ba-4709-b7a4-a29193b656e9",
+    "dataType": "string"
+  },
+  {
+    "label": "Requested Grant Amount",
+    "shortCode": "efdce251-a272-449c-b6d5-fc94e90723aa",
+    "dataType": "number"
+  },
+  {
+    "label": "Funding Category",
+    "shortCode": "202e1a63-f2bf-435b-9de7-98405c8bd0ac",
+    "dataType": "string"
+  },
+  {
+    "label": "3. Statement of Need: Describe the local community need or opportunity you plan to address.*",
+    "shortCode": "2688de33-9607-4740-bdd5-bc0a609c6e90",
+    "dataType": "string"
+  },
+  {
+    "label": "4. Implementation: What is your work plan? Describe the program activities and timeline.",
+    "shortCode": "9006fba1-4f8e-49c1-ad6d-e1be27ba4054",
+    "dataType": "string"
+  },
+  {
+    "label": "5. Outreach & Engagement: Who will you serve? Describe the target population(s), neighborhoods, and main outreach strategies to engage them in the proposed work.",
+    "shortCode": "d4c7d9d5-4a52-4478-b76e-ea4e365ccbd4",
+    "dataType": "string"
+  },
+  {
+    "label": "6. Assessment: What are the main expected outcomes for your proposed work and how will you measure the impact?",
+    "shortCode": "48d444db-89d8-459e-b2c8-fac8ce778e08",
+    "dataType": "string"
+  },
+  {
+    "label": "7. Qualifications & Partnerships: Describe how your organization is well-positioned to implement the proposed work, including relevant partnerships, existing work, and/or staff expertise.",
+    "shortCode": "2ae19bd7-9dd8-467f-b8b0-408a00dff929",
+    "dataType": "string"
+  },
+  {
+    "label": "8. Advancing Equity: How is your organization’s work advancing equity of people and communities that have been historically marginalized?",
+    "shortCode": "baac6dd6-6f43-4da5-a308-95c7e95ff1a0",
+    "dataType": "string"
+  },
+  {
+    "label": "9. Financial Narrative:  Describe your financial plan to achieve the proposed work, as shown in your attached budget. How will the funds support your organization and your identified goals?",
+    "shortCode": "f8f04356-dbec-42b4-95f0-4d3f2a18cf5a",
+    "dataType": "string"
+  },
+  {
+    "label": "Executive Leader - Race and Ethnicity",
+    "shortCode": "c922c1e7-9886-46f7-af0e-373aba1358da",
+    "dataType": "string"
+  },
+  {
+    "label": "Executive Leader - Gender Identity",
+    "shortCode": "c40de37a-ecab-4869-bb23-0ed8e1dfd49b",
+    "dataType": "string"
+  },
+  {
+    "label": "Executive Leader - Sexual Orientation",
+    "shortCode": "0fa693a5-354c-468a-86b2-008e41ee18d4",
+    "dataType": "string"
+  },
+  {
+    "label": "Executive Leader - Disability Status",
+    "shortCode": "be9b9006-7382-4afe-b224-4bf9805c7d06",
+    "dataType": "string"
+  },
+  {
+    "label": "Senior Leadership and Board Leadership",
+    "shortCode": "4503196f-a3e1-4d94-a829-4f236e4f8079",
+    "dataType": "string"
+  },
+  {
+    "label": "Proposal Budget Form",
+    "shortCode": "9119fbc9-73a5-4b3a-af7d-41c711dd56db",
+    "dataType": "string"
+  },
+  {
+    "label": "Supplemental Information (Optional)",
+    "shortCode": "35ab529b-d9e0-4101-a5d9-82a1771972cf",
+    "dataType": "string"
+  },
+  {
+    "label": "Please select your desired involvement for the PDC Pilot.",
+    "shortCode": "6eeb968c-44d1-4337-aad8-919754795761",
+    "dataType": "string"
+  }
+]

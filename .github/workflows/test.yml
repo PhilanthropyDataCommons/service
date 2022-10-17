@@ -36,19 +36,13 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Run unit tests
-        run: npm run test:unit -- --coverage
-
-      - name: Upload unit test coverage
-        uses: codecov/codecov-action@v2
-
-      - name: Run integration tests
-        run: npm run test:integration -- --coverage
+      - name: Run all tests
+        run: npm run test:ci
         env:
           PGHOST: localhost
           PGPORT: 5432
           PGUSER: postgres
           PGPASSWORD: postgres
 
-      - name: Upload integration test coverage
+      - name: Upload test coverage
         uses: codecov/codecov-action@v2

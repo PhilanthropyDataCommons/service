@@ -36,4 +36,4 @@ const opportunityArraySchema: JSONSchemaType<Opportunity[]> = {
   items: opportunitySchema,
 };
 
-export const isOpportunityArraySchema = ajv.compile(opportunityArraySchema);
+export const isOpportunityArray = ajv.compile(opportunityArraySchema);

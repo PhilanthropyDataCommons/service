@@ -35,13 +35,17 @@
           "createdAt"
         ]
       },
-      "Application": {
+      "Proposal": {
         "type": "object",
         "properties": {
           "id": {
             "type": "integer",
             "readOnly": true,
             "example": 1
+          },
+          "externalId": {
+            "type": "string",
+            "example": "AnIdGeneratedByAGms"
           },
           "applicantId": {
             "type": "integer",
@@ -54,7 +58,7 @@
           "versions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ApplicationVersion"
+              "$ref": "#/components/schemas/ProposalVersion"
             },
             "nullable": true
           },
@@ -71,7 +75,7 @@
           "createdAt"
         ]
       },
-      "ApplicationVersion": {
+      "ProposalVersion": {
         "type": "object",
         "properties": {
           "id": {
@@ -79,7 +83,7 @@
             "readOnly": true,
             "example": 1
           },
-          "applicationId": {
+          "proposalId": {
             "type": "integer",
             "example": 1
           },
@@ -90,7 +94,7 @@
           "fieldValues": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ApplicationFieldValue"
+              "$ref": "#/components/schemas/ProposalFieldValue"
             },
             "nullable": true
           },
@@ -102,12 +106,12 @@
         },
         "required": [
           "id",
-          "applicationId",
+          "proposalId",
           "version",
           "createdAt"
         ]
       },
-      "ApplicationFieldValue": {
+      "ProposalFieldValue": {
         "type": "object",
         "properties": {
           "id": {
@@ -115,7 +119,7 @@
             "readOnly": true,
             "example": 1
           },
-          "applicationVersionId": {
+          "proposalVersionId": {
             "type": "integer",
             "readOnly": true,
             "example": 1
@@ -140,7 +144,7 @@
         },
         "required": [
           "id",
-          "applicationVersionId",
+          "proposalVersionId",
           "applicationFormFieldId",
           "position",
           "value",
@@ -461,21 +465,21 @@
         }
       }
     },
-    "/applications": {
+    "/proposals": {
       "get": {
-        "summary": "Get a list of applications. (In Development)",
+        "summary": "Get a list of proposals.",
         "tags": [
-          "Applications"
+          "Proposals"
         ],
         "responses": {
           "200": {
-            "description": "All applications currently registered in the PDC.",
+            "description": "All proposals currently registered in the PDC.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Application"
+                    "$ref": "#/components/schemas/Proposal"
                   }
                 }
               }
@@ -484,27 +488,27 @@
         }
       },
       "post": {
-        "summary": "Add a new application. (In Development)",
+        "summary": "Add a new proposal. (In Development)",
         "tags": [
-          "Applications"
+          "Proposals"
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Application"
+                "$ref": "#/components/schemas/Proposal"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "The new application that was created, with populated field values",
+            "description": "The new proposal that was created, with populated field values",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Application"
+                  "$ref": "#/components/schemas/Proposal"
                 }
               }
             }

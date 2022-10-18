@@ -18,8 +18,9 @@ erDiagram
     int id
     string name
   }
-  Application {
+  Proposal {
     int id
+    string externalId
     int applicantId
     int opportunityId
     datetime dateCreated
@@ -57,15 +58,15 @@ erDiagram
     int sequence
     datetime dateCreated
   }
-  ApplicationVersion {
+  ProposalVersion {
     int id
-    int applicationId
+    int proposalId
     int version
     datetime dateCreated
   }
-  ApplicationFieldValue {
+  ProposalFieldValue {
     int id
-    int applicationVersionId
+    int proposalVersionId
     int applicationFormFieldId
     int index
     string value
@@ -78,15 +79,15 @@ erDiagram
     datetime dateCreated
   }
 
-  Applicant ||--o{ Application : submits
-  Application }|--|| Opportunity : "responds to"
+  Applicant ||--o{ Proposal : submits
+  Proposal }|--|| Opportunity : "responds to"
   Opportunity ||--|{ ApplicationForm : establishes
-  Application ||--o{ Outcome : "has"
+  Proposal ||--o{ Outcome : "has"
   ApplicationForm ||--|{ ApplicationFormField : has
   ApplicationFormField }o--|| CanonicalField : represents
-  Application ||--|{ ApplicationVersion : has
-  ApplicationVersion ||--|{ ApplicationFieldValue : contains
-  ApplicationFieldValue }o--|| ApplicationFormField : populates
+  Proposal ||--|{ ProposalVersion : has
+  ProposalVersion ||--|{ ProposalFieldValue : contains
+  ProposalFieldValue }o--|| ApplicationFormField : populates
   Applicant ||--o{ ExternalFieldValue : "is described by"
   ExternalFieldValue }o--|| CanonicalField : "contains potential defaults for"
   ExternalSource ||--o{ ExternalFieldValue : "populates"
@@ -94,26 +95,26 @@ erDiagram
 
 ## Narrative
 
-1. An `Applicant` submits an `Application`
-2. An `Application` is a response to an `Opportunity`.  An `Opportunity` represents a given challenge, RFP, etc.
+1. An `Applicant` submits a `Proposal`
+2. A `Proposal` is a response to an `Opportunity`.  An `Opportunity` represents a given challenge, RFP, etc.
 3. An `Opportunity` establishes an `Application Form`. An application form is the set of fields that make up an application.  An `Opportunity` might update its `Application Form` over time, which is why an `Opportunity` can have many `Application Forms`.
 4. An `Application Form` will define many `Application Form Fields`.
 5. An `Application Form Field` represents a `Canonical Field`.
 
 Meanwhile...
 
-6. An `Application` can have more than one `Application Version`.  This occurs as an application is updated or revised.
-7. An `Application Version` contains a set of `Application Field Values`.  These are the responses that were provided by the `Applicant`.
-8. An `Application Field Value` contains a response to a given `Application Form Field`.  Some fields might allow multiple responses, which is why we provide an `index`.
+6. A `Proposal` can have more than one `Proposal Version`.  This occurs as a proposal is updated or revised.
+7. A `Proposal Version` contains a set of `Proposal Field Values`.  These are the responses that were provided by the `Applicant`.
+8. A `Proposal Field Value` contains a response to a given `Application Form Field`.  Some fields might allow multiple responses, which is why we provide an `index`.
 
-The thinking is that when a new application is being written, a Grant Management System could ask the PDC "is there any pre-populated data we should use for this organization?"
+The thinking is that when a new proposal is being written, a Grant Management System could ask the PDC "is there any pre-populated data we should use for this organization?"
 
 PDC would then:
 
-* Collect the most recent ApplicationFieldValues for each CanonicalField for that Applicant.
+* Collect the most recent ProposalFieldValues for each CanonicalField for that Applicant.
 * Collect the most recent ExternalFieldValues for each CanonicalField for that Applicant.
 
-It would use the ApplicationFieldValue set as the primary source, and the ExternalFieldValue set as a secondary source.
+It would use the ProposalFieldValue set as the primary source, and the ExternalFieldValue set as a secondary source.
 
 ## Examples
 ### Registering an Application Form
@@ -171,30 +172,30 @@ sequenceDiagram
   API ->>- GMS :  Here they are
 ```
 
-When an applicant begins to fills out an application, the Grant Management System would request all field values known for that `Applicant`.  Which values are returned could be based on business logic; it could be the complete set; it could be restricted to just the fields associated with a given application form -- these would be implementation details but the form would support any of them.
+When an applicant begins to fills out a proposal, the Grant Management System would request all field values known for that `Applicant`.  Which values are returned could be based on business logic; it could be the complete set; it could be restricted to just the fields associated with a given application form -- these would be implementation details but the form would support any of them.
 
 The API would use the Database to collect values associated with past applications (`Application Field Values`); these have been directly entered by an applicant representative.
 The API would use the Database to also collect values associated with external / independent sources (`External Field Values`).
 
-Which values are ultimately selected for prepopulation is an implementation detail.  It could be that we decide that ALL distinct values should be returned, and the GMS should determine whether to render a "dropdown" the user could select from.  It could be we decide that only the most recently updated values should be returned.  It could be we decide that values associated with past applications should override externally sourced values.  Again, these would be implementation decisions but the form would support any of them.
+Which values are ultimately selected for prepopulation is an implementation detail.  It could be that we decide that ALL distinct values should be returned, and the GMS should determine whether to render a "dropdown" the user could select from.  It could be we decide that only the most recently updated values should be returned.  It could be we decide that values associated with past proposals should override externally sourced values.  Again, these would be implementation decisions but the form would support any of them.
 
-### Submitting an Application
+### Submitting a Proposal
 
 ```mermaid
 sequenceDiagram
   participant GMS
   participant API
   participant Database
-  GMS ->>+ API : Save this completed Application
-  API ->>+ Database : Create a new Application
+  GMS ->>+ API : Save this completed Proposal
+  API ->>+ Database : Create a new Proposal
   Database ->>- API : OK
-  API ->>+ Database : Save the Application Field Values
+  API ->>+ Database : Save the Proposal Field Values
   Database ->>- API : OK
   API ->>- GMS : OK
 ```
 
-The above flow is based on an assumption that we know this is the first time the applicant had submitted an application / it is not an update to an existing application.
+The above flow is based on an assumption that we know this is the first time the applicant had submitted a proposal / it is not an update to an existing proposal.
 
-The API would create a new Application, a new Application Version, and then it would store one `Application Field Value` per `Canonical Field`.  Those field values would then be incorporated in future lookups according to the "Pre-filling an Application" logic.
+The API would create a new Proposal, a new Proposal Version, and then it would store one `Proposal Field Value` per `Canonical Field`.  Those field values would then be incorporated in future lookups according to the "Pre-filling an Proposal" logic.
 
 The API might then send alerts to other GMSs depending on business logic, but that is an implementation detail and outside of the scope of this particular example.

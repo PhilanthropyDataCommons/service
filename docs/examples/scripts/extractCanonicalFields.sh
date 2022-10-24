@@ -4,10 +4,10 @@
 #
 # Example output given a PSV file with two "core" and two "custom" fields:
 #
-#     { "label": "Org Name", "shortCode": "Org Name", "dataType": "string" },
-#     { "label": "Org Mission Statement", "shortCode": "Org Mission Statement", "dataType": "string" },
-#     { "label": "Number of Paid Staff", "shortCode": "a3603d12-8635-483c-8476-69d0ea8429a9", "dataType": "number" },
-#     { "label": "Contact Title", "shortCode": "24631004-5979-496e-9bc4-4b32aa24e472", "dataType": "string" },
+#     { "label": "Org Name", "shortCode": "orgName", "dataType": "string" },
+#     { "label": "Org Mission Statement", "shortCode": "orgMissionStatement", "dataType": "string" },
+#     { "label": "Number of Paid Staff", "shortCode": "numberOfPaidStaff", "dataType": "number" },
+#     { "label": "Contact Title", "shortCode": "contactTitle", "dataType": "string" },
 #
 # Requires gnu coreutils and a pipe-delimited file path as argument 1.
 # The pipe-delimited file is assumed to have these columns in this order:
@@ -38,20 +38,24 @@
 tail -n +2 $1 \
     | grep '^\(Organization\|Proposal\)|[a-zA-Z0-9].*|' \
     | cut -d'|' -f 2,5 \
-    | grep -v '||' \
     | grep -v 'NA\||N\/A\||N \/ A' \
     | grep '|' \
-    | sed -E 's/([^[:space:]].+[^[:space:]])[[:space:]]*\|[[:space:]]*([^[:space:]]*).*/{ "label": "\1", "shortCode": "\1", "dataType": "\2" },/g' \
-    | sed -E 's/"dataType": "([dD]ouble|[iI]nteger|Number)"/"dataType": "number"/g' \
-    | sed -E '/"dataType": "(number|boolean|object|array)"/! s/"dataType": ".*"/"dataType": "string"/g' \
+    | sed -E 's/([[:space:]])?Org([[:space:]])/\1Organization\2/g' \
+    | sed -E 's/(Proposal[[:space:]]*)?([^[:space:]].+[^[:space:]])[[:space:]]*\|[[:space:]]*([^[:space:]]*).*/{ "label": "\2", "shortCode": "\2", "dataType": "\3" },/g' \
+    | sed -E 's/"dataType": "([dD]ouble|Number)"/"dataType": "number"/g' \
+    | sed -E 's/"dataType": "(Integer)"/"dataType": "integer"/g' \
+    | sed -E '/"dataType": "(number|integer|boolean|object|array)"/! s/"dataType": ".*"/"dataType": "string"/g' \
+    | sed -E 's/"shortCode": "[0-9[:space:]\._-]*?([[:alpha:]]+)[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[^\"]*"/"shortCode": "\L\1\u\2\u\3\u\4\u\5\u\6\u\7\u\8\u\9"/g'
 
-# Strip header, get custom field columns and perhaps their data types, JSON-ize.
 tail -n +2 $1 \
     | grep -v '^\(Organization\|Proposal\)|[a-zA-Z0-9].*|' \
-    | cut -d'|' -f 3,4,5 \
+    | cut -d'|' -f 3,5 \
     | grep -v '||' \
     | grep -v 'NA\|N\/A\|N \/ A' \
     | grep '|' \
-    | sed -E 's/([^[:space:]].+[^[:space:]])[[:space:]]*\|(.+[^[:space:]])[[:space:]]*\|[[:space:]]*([^[:space:]]*).*/{ "label": "\1", "shortCode": "\2", "dataType": "\3" },/g' \
-    | sed -E 's/"dataType": "([dD]ouble|[iI]nteger|Number)"/"dataType": "number"/g' \
-    | sed -E '/"dataType": "(number|boolean|object|array)"/! s/"dataType": ".*"/"dataType": "string"/g' \
+    | sed -E 's/([[:space:]])?Org([[:space:]])/\1Organization\2/g' \
+    | sed -E 's/(Proposal[[:space:]]*)?([^[:space:]].+[^[:space:]])[[:space:]]*\|[[:space:]]*([^[:space:]]*).*/{ "label": "\2", "shortCode": "\2", "dataType": "\3" },/g' \
+    | sed -E 's/"dataType": "([dD]ouble|Number)"/"dataType": "number"/g' \
+    | sed -E 's/"dataType": "(Integer)"/"dataType": "integer"/g' \
+    | sed -E '/"dataType": "(number|integer|boolean|object|array)"/! s/"dataType": ".*"/"dataType": "string"/g' \
+    | sed -E 's/"shortCode": "[0-9[:space:]\._-]*?([[:alpha:]]+)[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[^\"]*"/"shortCode": "\L\1\u\2\u\3\u\4\u\5\u\6\u\7\u\8\u\9"/g'

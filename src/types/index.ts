@@ -5,4 +5,5 @@ export * from './CanonicalField';
 export * from './JsonObject';
 export * from './Opportunity';
 export * from './PostgresErrorCode';
+export * from './Proposal';
 export * from './TinyPgErrorWithQueryContext';

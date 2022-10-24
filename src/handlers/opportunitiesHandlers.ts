@@ -2,7 +2,7 @@ import { ajv } from '../ajv';
 import { getLogger } from '../logger';
 import { db } from '../database';
 import {
-  isOpportunityArraySchema,
+  isOpportunityArray,
   isOpportunity,
   isTinyPgErrorWithQueryContext,
 } from '../types';
@@ -31,14 +31,14 @@ const getOpportunities = (
     .then((opportunitiesQueryResult: Result<Opportunity>) => {
       logger.debug(opportunitiesQueryResult);
       const { rows: opportunities } = opportunitiesQueryResult;
-      if (isOpportunityArraySchema(opportunities)) {
+      if (isOpportunityArray(opportunities)) {
         res.status(200)
           .contentType('application/json')
           .send(opportunities);
       } else {
         next(new InternalValidationError(
           'The database responded with an unexpected format.',
-          isOpportunityArraySchema.errors ?? [],
+          isOpportunityArray.errors ?? [],
         ));
       }
     })

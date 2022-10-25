@@ -60,6 +60,7 @@
             "items": {
               "$ref": "#/components/schemas/ProposalVersion"
             },
+            "readOnly": true,
             "nullable": true
           },
           "createdAt": {
@@ -488,7 +489,7 @@
         }
       },
       "post": {
-        "summary": "Add a new proposal. (In Development)",
+        "summary": "Add a new proposal.",
         "tags": [
           "Proposals"
         ],

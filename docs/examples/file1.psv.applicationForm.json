@@ -1,0 +1,992 @@
+[
+  {
+    "position": 0,
+    "label": "Organization-Legal Name",
+    "canonicalField": {
+      "label": "Organization Name",
+      "shortCode": "organizationName",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 1,
+    "label": "Organization Mission Statement",
+    "canonicalField": {
+      "label": "Organization Mission Statement",
+      "shortCode": "organizationMissionStatement",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 2,
+    "label": "Url",
+    "canonicalField": {
+      "label": "Organization Website",
+      "shortCode": "organizationWebsite",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 3,
+    "label": "Tax Code/Name",
+    "canonicalField": {
+      "label": "Organization Entity Type",
+      "shortCode": "organizationEntityType",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 4,
+    "label": "Tax ID",
+    "canonicalField": {
+      "label": "Organization Registration Number: EIN / TIN",
+      "shortCode": "organizationRegistrationNumber",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 5,
+    "label": "Geocode response full address",
+    "canonicalField": {
+      "label": "Organization Address",
+      "shortCode": "organizationAddress",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 6,
+    "label": "Phone",
+    "canonicalField": {
+      "label": "Organization Phone",
+      "shortCode": "organizationPhone",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 7,
+    "label": "Email",
+    "canonicalField": {
+      "label": "Organization Email",
+      "shortCode": "organizationEmail",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 8,
+    "label": "Organization Name - Common",
+    "canonicalField": {
+      "label": "Organization DBA Name",
+      "shortCode": "organizationDbaName",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 9,
+    "label": "Articles of incorporation",
+    "canonicalField": {
+      "label": "Organization Legal Docs",
+      "shortCode": "organizationLegalDocs",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 10,
+    "label": "Organization board members and their organizational affiliations",
+    "canonicalField": {
+      "label": "Organization Board Members",
+      "shortCode": "organizationBoardMembers",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 11,
+    "label": "Organizational Budget - Current Fiscal Yr (USD)",
+    "canonicalField": {
+      "label": "Organization Annual Operating Budget",
+      "shortCode": "organizationAnnualOperatingBudget",
+      "dataType": "number"
+    }
+  },
+  {
+    "position": 12,
+    "label": "Date organization commenced operations.",
+    "canonicalField": {
+      "label": "Organization Start Date",
+      "shortCode": "organizationStartDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 13,
+    "label": "Audited financial statements for the last two years",
+    "canonicalField": {
+      "label": "Organization Audited Financial Statements",
+      "shortCode": "organizationAuditedFinancialStatements",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 14,
+    "label": "Additional Contact",
+    "canonicalField": {
+      "label": "Organization Grant Agreement Signatory",
+      "shortCode": "organizationGrantAgreementSignatory",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 15,
+    "label": "Accounting Period End Day",
+    "canonicalField": {
+      "label": "Organization Fiscal Year End Date",
+      "shortCode": "organizationFiscalYearEndDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 16,
+    "label": "Title for Proposed Work",
+    "canonicalField": {
+      "label": "Name(s)",
+      "shortCode": "name",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 17,
+    "label": "Primary Contact",
+    "canonicalField": {
+      "label": "Primary Contact Name",
+      "shortCode": "primaryContactName",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 18,
+    "label": "Email (Primary Contact)",
+    "canonicalField": {
+      "label": "Primary Email",
+      "shortCode": "primaryEmail",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 19,
+    "label": "Work Phone",
+    "canonicalField": {
+      "label": "Primary Phone Number",
+      "shortCode": "primaryPhoneNumber",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 20,
+    "label": "Summary of Project",
+    "canonicalField": {
+      "label": "Summary",
+      "shortCode": "summary",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 21,
+    "label": "Project budget",
+    "canonicalField": {
+      "label": "Budget",
+      "shortCode": "budget",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 22,
+    "label": "Funded Activity Start Date",
+    "canonicalField": {
+      "label": "Investment Start Date/Duration",
+      "shortCode": "investmentStartDateDuration",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 23,
+    "label": "Funded Activity End Date",
+    "canonicalField": {
+      "label": "Investment End Date",
+      "shortCode": "investmentEndDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 24,
+    "label": "Overall Project Budget",
+    "canonicalField": {
+      "label": "Project Total Budget",
+      "shortCode": "projectTotalBudget",
+      "dataType": "number"
+    }
+  },
+  {
+    "position": 25,
+    "label": "Support Code",
+    "canonicalField": {
+      "label": "Type",
+      "shortCode": "type",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 26,
+    "label": "Fiscal Organization",
+    "canonicalField": {
+      "label": "Fiscal Sponsorship Organization Name",
+      "shortCode": "fiscalSponsorshipOrganizationName",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 27,
+    "label": "Geographic Focus of Work",
+    "canonicalField": {
+      "label": "Location of Work (free-form string)",
+      "shortCode": "locationOfWork",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 28,
+    "label": "Does your organization have an institutional review board (IRB)?",
+    "canonicalField": {
+      "label": "IRB review needed?",
+      "shortCode": "irbReviewNeeded",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 29,
+    "label": "IRB Approval Status",
+    "canonicalField": {
+      "label": "IRB approval obtained?",
+      "shortCode": "irbApprovalObtained",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 30,
+    "label": "Funds support unsupervised entities",
+    "canonicalField": {
+      "label": "Are sub-grants being given?",
+      "shortCode": "areSubGrantsBeingGiven",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 31,
+    "label": "Re-Grants Explanation",
+    "canonicalField": {
+      "label": "Sub-grantees",
+      "shortCode": "subGrantees",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 32,
+    "label": "Accounting Period End Month",
+    "canonicalField": {
+      "label": "Accounting Period End Month",
+      "shortCode": "accountingPeriodEndMonth",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 33,
+    "label": "Location",
+    "canonicalField": {
+      "label": "Location",
+      "shortCode": "location",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 34,
+    "label": "Grant Agreement Signatory",
+    "canonicalField": {
+      "label": "Grant Agreement Signatory",
+      "shortCode": "grantAgreementSignatory",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 35,
+    "label": "Organization Financial Officer",
+    "canonicalField": {
+      "label": "Organization Financial Officer",
+      "shortCode": "organizationFinancialOfficer",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 36,
+    "label": "Organization Grants Officer",
+    "canonicalField": {
+      "label": "Organization Grants Officer",
+      "shortCode": "organizationGrantsOfficer",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 37,
+    "label": "Authorized Banking Contact 1",
+    "canonicalField": {
+      "label": "Authorized Banking Contact 1",
+      "shortCode": "authorizedBankingContact1",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 38,
+    "label": "Authorized Banking Contact 2",
+    "canonicalField": {
+      "label": "Authorized Banking Contact 2",
+      "shortCode": "authorizedBankingContact2",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 39,
+    "label": "Type of Governing Body",
+    "canonicalField": {
+      "label": "Type of Governing Body",
+      "shortCode": "typeOfGoverningBody",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 40,
+    "label": "Term Duration",
+    "canonicalField": {
+      "label": "Term Duration",
+      "shortCode": "termDuration",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 41,
+    "label": "Number of Terms Permitted",
+    "canonicalField": {
+      "label": "Number of Terms Permitted",
+      "shortCode": "numberOfTermsPermitted",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 42,
+    "label": "Are members of the governing body compensated?",
+    "canonicalField": {
+      "label": "Are members of the governing body compensated?",
+      "shortCode": "areMembersOfTheGoverningBodyCompensated",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 43,
+    "label": "Financial Oversight by Governing Body",
+    "canonicalField": {
+      "label": "Financial Oversight by Governing Body",
+      "shortCode": "financialOversightByGoverningBody",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 44,
+    "label": "CEO Review Method",
+    "canonicalField": {
+      "label": "CEO Review Method",
+      "shortCode": "ceoReviewMethod",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 45,
+    "label": "Does your organization have a conflict of interest policy?",
+    "canonicalField": {
+      "label": "Does your organization have a conflict of interest policy?",
+      "shortCode": "doesYourOrganizationHaveAConflictOfInterestPolicy",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 46,
+    "label": "Workplace Issues?",
+    "canonicalField": {
+      "label": "Workplace Issues?",
+      "shortCode": "workplaceIssues",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 47,
+    "label": "Please provide detail below or let us know if you would instead prefer to discuss your response with your Program Officer.",
+    "canonicalField": {
+      "label": "Please provide detail below or let us know if you would instead prefer to discuss your response with your Program Officer.",
+      "shortCode": "pleaseProvideDetailBelowOrLetUsKnowIf",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 48,
+    "label": "Does your organization have a whistleblower policy?",
+    "canonicalField": {
+      "label": "Does your organization have a whistleblower policy?",
+      "shortCode": "doesYourOrganizationHaveAWhistleblowerPolicy",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 49,
+    "label": "EIN / Foreign Entities",
+    "canonicalField": {
+      "label": "EIN / Foreign Entities",
+      "shortCode": "einForeignEntities",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 50,
+    "label": "Will you be using a Fiscal Agent to administer your grant?",
+    "canonicalField": {
+      "label": "Will you be using a Fiscal Agent to administer your grant?",
+      "shortCode": "willYouBeUsingAFiscalAgentToAdminister",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 51,
+    "label": "Fiscal Organization Location",
+    "canonicalField": {
+      "label": "Fiscal Organization Location",
+      "shortCode": "fiscalOrganizationLocation",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 52,
+    "label": "Fiscal Organization Primary Contact",
+    "canonicalField": {
+      "label": "Fiscal Organization Primary Contact",
+      "shortCode": "fiscalOrganizationPrimaryContact",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 53,
+    "label": "Fiscal Signatory",
+    "canonicalField": {
+      "label": "Fiscal Signatory",
+      "shortCode": "fiscalSignatory",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 54,
+    "label": "Are names of your organization contacts missing from the drop-down fields above?",
+    "canonicalField": {
+      "label": "Are names of your organization contacts missing from the drop-down fields above?",
+      "shortCode": "areNamesOfYourOrganizationContactsMissingFromThe",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 55,
+    "label": "Organization Leadership Contact Details",
+    "canonicalField": {
+      "label": "Organization Leadership Contact Details",
+      "shortCode": "organizationLeadershipContactDetails",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 56,
+    "label": "Authorized Banking Contacts",
+    "canonicalField": {
+      "label": "Authorized Banking Contacts",
+      "shortCode": "authorizedBankingContacts",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 57,
+    "label": "Is your organization information correct and current?",
+    "canonicalField": {
+      "label": "Is your organization information correct and current?",
+      "shortCode": "isYourOrganizationInformationCorrectAndCurrent",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 58,
+    "label": "Please provide your organization's contact information below, including address, phone numbers and email addresses, and we will add them to our database.",
+    "canonicalField": {
+      "label": "Please provide your organization's contact information below, including address, phone numbers and email addresses, and we will add them to our database.",
+      "shortCode": "pleaseProvideYourOrganization",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 59,
+    "label": "Is your contact information correct and current?",
+    "canonicalField": {
+      "label": "Is your contact information correct and current?",
+      "shortCode": "isYourContactInformationCorrectAndCurrent",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 60,
+    "label": "Updated Contact Information",
+    "canonicalField": {
+      "label": "Updated Contact Information",
+      "shortCode": "updatedContactInformation",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 61,
+    "label": "Grant Title",
+    "canonicalField": {
+      "label": "Grant Title",
+      "shortCode": "grantTitle",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 62,
+    "label": "Proposed Start Date",
+    "canonicalField": {
+      "label": "Proposed Start Date",
+      "shortCode": "proposedStartDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 63,
+    "label": "Proposed End Date",
+    "canonicalField": {
+      "label": "Proposed End Date",
+      "shortCode": "proposedEndDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 64,
+    "label": "Amount Requested from MacArthur (USD $ only)",
+    "canonicalField": {
+      "label": "Amount Requested from MacArthur (USD $ only)",
+      "shortCode": "amountRequestedFromMacarthur",
+      "dataType": "number"
+    }
+  },
+  {
+    "position": 65,
+    "label": "Significant Other Funders",
+    "canonicalField": {
+      "label": "Significant Other Funders",
+      "shortCode": "significantOtherFunders",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 66,
+    "label": "Organization Overview",
+    "canonicalField": {
+      "label": "Organization Overview",
+      "shortCode": "organizationOverview",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 67,
+    "label": "Context",
+    "canonicalField": {
+      "label": "Context",
+      "shortCode": "context",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 68,
+    "label": "Description of Funded Activities",
+    "canonicalField": {
+      "label": "Description of Funded Activities",
+      "shortCode": "descriptionOfFundedActivities",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 69,
+    "label": "Results",
+    "canonicalField": {
+      "label": "Results",
+      "shortCode": "results",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 70,
+    "label": "Leadership",
+    "canonicalField": {
+      "label": "Leadership",
+      "shortCode": "leadership",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 71,
+    "label": "Learning & Evaluation",
+    "canonicalField": {
+      "label": "Learning & Evaluation",
+      "shortCode": "learning",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 72,
+    "label": "Sustainability / Next Stages",
+    "canonicalField": {
+      "label": "Sustainability / Next Stages",
+      "shortCode": "sustainabilityNextStages",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 73,
+    "label": "Past Performance",
+    "canonicalField": {
+      "label": "Past Performance",
+      "shortCode": "pastPerformance",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 74,
+    "label": "What steps do you take or processes do you have in place to ensure that the individuals or organizations that you may pay with MacArthur grant funds (other than your own staff) are not on terrorist watch lists, are paid in compliance with applicable anti money laundering statutes, and the funds will not be used for criminal or illegal activity?",
+    "canonicalField": {
+      "label": "What steps do you take or processes do you have in place to ensure that the individuals or organizations that you may pay with MacArthur grant funds (other than your own staff) are not on terrorist watch lists, are paid in compliance with applicable anti money laundering statutes, and the funds will not be used for criminal or illegal activity?",
+      "shortCode": "whatStepsDoYouTakeOrProcessesDoYou",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 75,
+    "label": "Will MacArthur funds support scholarships or awards?",
+    "canonicalField": {
+      "label": "Will MacArthur funds support scholarships or awards?",
+      "shortCode": "willMacarthurFundsSupportScholarshipsOrAwards",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 76,
+    "label": "Scholarship / Award Explanation",
+    "canonicalField": {
+      "label": "Scholarship / Award Explanation",
+      "shortCode": "scholarshipAwardExplanation",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 77,
+    "label": "Will MacArthur funds be used to make payments to or on the behalf of meeting participants/attendees who are not employed by you and who are not providing a specific service to you?",
+    "canonicalField": {
+      "label": "Will MacArthur funds be used to make payments to or on the behalf of meeting participants/attendees who are not employed by you and who are not providing a specific service to you?",
+      "shortCode": "willMacarthurFundsBeUsedToMakePaymentsTo",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 78,
+    "label": "Personal Travel Reimbursement Explanation",
+    "canonicalField": {
+      "label": "Personal Travel Reimbursement Explanation",
+      "shortCode": "personalTravelReimbursementExplanation",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 79,
+    "label": "Geographic Focus",
+    "canonicalField": {
+      "label": "Geographic Focus",
+      "shortCode": "geographicFocus",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 80,
+    "label": "Locations under US sanction",
+    "canonicalField": {
+      "label": "Locations under US sanction",
+      "shortCode": "locationsUnderUsSanction",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 81,
+    "label": "Locations Under Sanction Explanation",
+    "canonicalField": {
+      "label": "Locations Under Sanction Explanation",
+      "shortCode": "locationsUnderSanctionExplanation",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 82,
+    "label": "Will this project support research?",
+    "canonicalField": {
+      "label": "Will this project support research?",
+      "shortCode": "willThisProjectSupportResearch",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 83,
+    "label": "Involves desk research?",
+    "canonicalField": {
+      "label": "Involves desk research?",
+      "shortCode": "involvesDeskResearch",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 84,
+    "label": "Collects new data from individuals?",
+    "canonicalField": {
+      "label": "Collects new data from individuals?",
+      "shortCode": "collectsNewDataFromIndividuals",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 85,
+    "label": "Collects personal data?",
+    "canonicalField": {
+      "label": "Collects personal data?",
+      "shortCode": "collectsPersonalData",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 86,
+    "label": "Describe the research activities for collecting personal data",
+    "canonicalField": {
+      "label": "Describe the research activities for collecting personal data",
+      "shortCode": "describeTheResearchActivitiesForCollectingPersonalData",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 87,
+    "label": "Will the research be published?",
+    "canonicalField": {
+      "label": "Will the research be published?",
+      "shortCode": "willTheResearchBePublished",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 88,
+    "label": "HSR Policy",
+    "canonicalField": {
+      "label": "HSR Policy",
+      "shortCode": "hsrPolicy",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 89,
+    "label": "Research involves minors",
+    "canonicalField": {
+      "label": "Research involves minors",
+      "shortCode": "researchInvolvesMinors",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 90,
+    "label": "Does your organization have a child protection policy?",
+    "canonicalField": {
+      "label": "Does your organization have a child protection policy?",
+      "shortCode": "doesYourOrganizationHaveAChildProtectionPolicy",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "position": 91,
+    "label": "Funds for fiscal agent duties, research or conferences",
+    "canonicalField": {
+      "label": "Funds for fiscal agent duties, research or conferences",
+      "shortCode": "fundsForFiscalAgentDutiesResearchOrConferences",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 92,
+    "label": "Fiscal Agent Duties / Research / Conference Explanation",
+    "canonicalField": {
+      "label": "Fiscal Agent Duties / Research / Conference Explanation",
+      "shortCode": "fiscalAgentDutiesResearchConferenceExplanation",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 93,
+    "label": "Additional Information from Applicant",
+    "canonicalField": {
+      "label": "Additional Information from Applicant",
+      "shortCode": "additionalInformationFromApplicant",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 94,
+    "label": "Child protection policy",
+    "canonicalField": {
+      "label": "Child protection policy",
+      "shortCode": "childProtectionPolicy",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 95,
+    "label": "Conflict of interest policy",
+    "canonicalField": {
+      "label": "Conflict of interest policy",
+      "shortCode": "conflictOfInterestPolicy",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 96,
+    "label": "Human subjects research policy",
+    "canonicalField": {
+      "label": "Human subjects research policy",
+      "shortCode": "humanSubjectsResearchPolicy",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 97,
+    "label": "IRS tax letter",
+    "canonicalField": {
+      "label": "IRS tax letter",
+      "shortCode": "irsTaxLetter",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 98,
+    "label": "Latest unaudited financial statement",
+    "canonicalField": {
+      "label": "Latest unaudited financial statement",
+      "shortCode": "latestUnauditedFinancialStatement",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 99,
+    "label": "Organization charter",
+    "canonicalField": {
+      "label": "Organization charter",
+      "shortCode": "organizationCharter",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 100,
+    "label": "Policy regarding data gathering from children",
+    "canonicalField": {
+      "label": "Policy regarding data gathering from children",
+      "shortCode": "policyRegardingDataGatheringFromChildren",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 101,
+    "label": "Whistleblower policy",
+    "canonicalField": {
+      "label": "Whistleblower policy",
+      "shortCode": "whistleblowerPolicy",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 102,
+    "label": "Latitude",
+    "canonicalField": {
+      "label": "Latitude",
+      "shortCode": "latitude",
+      "dataType": "number"
+    }
+  },
+  {
+    "position": 103,
+    "label": "Longitude",
+    "canonicalField": {
+      "label": "Longitude",
+      "shortCode": "longitude",
+      "dataType": "number"
+    }
+  },
+  {
+    "position": 104,
+    "label": "Neighborhood",
+    "canonicalField": {
+      "label": "Neighborhood",
+      "shortCode": "neighborhood",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 105,
+    "label": "Abstract",
+    "canonicalField": {
+      "label": "Abstract",
+      "shortCode": "abstract",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 106,
+    "label": "Amount recommended",
+    "canonicalField": {
+      "label": "Amount recommended",
+      "shortCode": "amountRecommended",
+      "dataType": "number"
+    }
+  },
+  {
+    "position": 107,
+    "label": "Purpose Statement",
+    "canonicalField": {
+      "label": "Purpose Statement",
+      "shortCode": "purposeStatement",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 108,
+    "label": "Agreement with fiscal agent",
+    "canonicalField": {
+      "label": "Agreement with fiscal agent",
+      "shortCode": "agreementWithFiscalAgent",
+      "dataType": "string"
+    }
+  },
+  {
+    "position": 109,
+    "label": "Project budget narrative",
+    "canonicalField": {
+      "label": "Project budget narrative",
+      "shortCode": "projectBudgetNarrative",
+      "dataType": "string"
+    }
+  }
+]

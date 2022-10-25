@@ -1,0 +1,1037 @@
+[
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organization-Legal Name",
+    "canonicalField": {
+      "label": "Organization Name",
+      "shortCode": "organizationName",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organization Mission Statement",
+    "canonicalField": {
+      "label": "Organization Mission Statement",
+      "shortCode": "organizationMissionStatement",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Url",
+    "canonicalField": {
+      "label": "Organization Website",
+      "shortCode": "organizationWebsite",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Tax Code/Name",
+    "canonicalField": {
+      "label": "Organization Entity Type",
+      "shortCode": "organizationEntityType",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Tax ID",
+    "canonicalField": {
+      "label": "Organization Registration Number: EIN / TIN",
+      "shortCode": "organizationRegistrationNumber",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Geocode response full address",
+    "canonicalField": {
+      "label": "Organization Address",
+      "shortCode": "organizationAddress",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Phone",
+    "canonicalField": {
+      "label": "Organization Phone",
+      "shortCode": "organizationPhone",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Email",
+    "canonicalField": {
+      "label": "Organization Email",
+      "shortCode": "organizationEmail",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organization Name - Common",
+    "canonicalField": {
+      "label": "Organization DBA Name",
+      "shortCode": "organizationDbaName",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "",
+    "canonicalField": {
+      "label": "Organization Banking Information",
+      "shortCode": "organizationBankingInformation",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Articles of incorporation",
+    "canonicalField": {
+      "label": "Organization Legal Docs",
+      "shortCode": "organizationLegalDocs",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organization board members and their organizational affiliations",
+    "canonicalField": {
+      "label": "Organization Board Members",
+      "shortCode": "organizationBoardMembers",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "",
+    "canonicalField": {
+      "label": "Organization Administrative Lead",
+      "shortCode": "organizationAdministrativeLead",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organizational Budget - Current Fiscal Yr (USD)",
+    "canonicalField": {
+      "label": "Organization Annual Operating Budget",
+      "shortCode": "organizationAnnualOperatingBudget",
+      "dataType": "number"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "",
+    "canonicalField": {
+      "label": "Organization Lobbying Activities",
+      "shortCode": "organizationLobbyingActivities",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Date organization commenced operations.",
+    "canonicalField": {
+      "label": "Organization Start Date",
+      "shortCode": "organizationStartDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "",
+    "canonicalField": {
+      "label": "Organization Geographic Areas",
+      "shortCode": "organizationGeographicAreas",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Audited financial statements for the last two years",
+    "canonicalField": {
+      "label": "Organization Audited Financial Statements",
+      "shortCode": "organizationAuditedFinancialStatements",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Additional Contact",
+    "canonicalField": {
+      "label": "Organization Grant Agreement Signatory",
+      "shortCode": "organizationGrantAgreementSignatory",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Accounting Period End Day",
+    "canonicalField": {
+      "label": "Organization Fiscal Year End Date",
+      "shortCode": "organizationFiscalYearEndDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Title for Proposed Work",
+    "canonicalField": {
+      "label": "Name(s)",
+      "shortCode": "name",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Primary Contact",
+    "canonicalField": {
+      "label": "Primary Contact Name",
+      "shortCode": "primaryContactName",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Email (Primary Contact)",
+    "canonicalField": {
+      "label": "Primary Email",
+      "shortCode": "primaryEmail",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Work Phone",
+    "canonicalField": {
+      "label": "Primary Phone Number",
+      "shortCode": "primaryPhoneNumber",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Summary of Project",
+    "canonicalField": {
+      "label": "Summary",
+      "shortCode": "summary",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Project budget",
+    "canonicalField": {
+      "label": "Budget",
+      "shortCode": "budget",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Funded Activity Start Date",
+    "canonicalField": {
+      "label": "Investment Start Date/Duration",
+      "shortCode": "investmentStartDateDuration",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Funded Activity End Date",
+    "canonicalField": {
+      "label": "Investment End Date",
+      "shortCode": "investmentEndDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Overall Project Budget",
+    "canonicalField": {
+      "label": "Project Total Budget",
+      "shortCode": "projectTotalBudget",
+      "dataType": "number"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Support Code",
+    "canonicalField": {
+      "label": "Type",
+      "shortCode": "type",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Fiscal Organization",
+    "canonicalField": {
+      "label": "Fiscal Sponsorship Organization Name",
+      "shortCode": "fiscalSponsorshipOrganizationName",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Geographic Focus of Work",
+    "canonicalField": {
+      "label": "Location of Work (free-form string)",
+      "shortCode": "locationOfWork",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "",
+    "canonicalField": {
+      "label": "Involves Lobbying or Electioneering?",
+      "shortCode": "involvesLobbyingOrElectioneering",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Does your organization have an institutional review board (IRB)?",
+    "canonicalField": {
+      "label": "IRB review needed?",
+      "shortCode": "irbReviewNeeded",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "IRB Approval Status",
+    "canonicalField": {
+      "label": "IRB approval obtained?",
+      "shortCode": "irbApprovalObtained",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Funds support unsupervised entities",
+    "canonicalField": {
+      "label": "Are sub-grants being given?",
+      "shortCode": "areSubGrantsBeingGiven",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Re-Grants Explanation",
+    "canonicalField": {
+      "label": "Sub-grantees",
+      "shortCode": "subGrantees",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Accounting Period End Month",
+    "canonicalField": {
+      "label": "Accounting Period End Month",
+      "shortCode": "accountingPeriodEndMonth",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Location",
+    "canonicalField": {
+      "label": "Location",
+      "shortCode": "location",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Grant Agreement Signatory",
+    "canonicalField": {
+      "label": "Grant Agreement Signatory",
+      "shortCode": "grantAgreementSignatory",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organization Financial Officer",
+    "canonicalField": {
+      "label": "Organization Financial Officer",
+      "shortCode": "organizationFinancialOfficer",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organization Grants Officer",
+    "canonicalField": {
+      "label": "Organization Grants Officer",
+      "shortCode": "organizationGrantsOfficer",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Authorized Banking Contact 1",
+    "canonicalField": {
+      "label": "Authorized Banking Contact 1",
+      "shortCode": "authorizedBankingContact1",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Authorized Banking Contact 2",
+    "canonicalField": {
+      "label": "Authorized Banking Contact 2",
+      "shortCode": "authorizedBankingContact2",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Type of Governing Body",
+    "canonicalField": {
+      "label": "Type of Governing Body",
+      "shortCode": "typeOfGoverningBody",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Term Duration",
+    "canonicalField": {
+      "label": "Term Duration",
+      "shortCode": "termDuration",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Number of Terms Permitted",
+    "canonicalField": {
+      "label": "Number of Terms Permitted",
+      "shortCode": "numberOfTermsPermitted",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Are members of the governing body compensated?",
+    "canonicalField": {
+      "label": "Are members of the governing body compensated?",
+      "shortCode": "areMembersOfTheGoverningBodyCompensated",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Financial Oversight by Governing Body",
+    "canonicalField": {
+      "label": "Financial Oversight by Governing Body",
+      "shortCode": "financialOversightByGoverningBody",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "CEO Review Method",
+    "canonicalField": {
+      "label": "CEO Review Method",
+      "shortCode": "ceoReviewMethod",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Does your organization have a conflict of interest policy?",
+    "canonicalField": {
+      "label": "Does your organization have a conflict of interest policy?",
+      "shortCode": "doesYourOrganizationHaveAConflictOfInterestPolicy",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Workplace Issues?",
+    "canonicalField": {
+      "label": "Workplace Issues?",
+      "shortCode": "workplaceIssues",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Please provide detail below or let us know if you would instead prefer to discuss your response with your Program Officer.",
+    "canonicalField": {
+      "label": "Please provide detail below or let us know if you would instead prefer to discuss your response with your Program Officer.",
+      "shortCode": "pleaseProvideDetailBelowOrLetUsKnowIf",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Does your organization have a whistleblower policy?",
+    "canonicalField": {
+      "label": "Does your organization have a whistleblower policy?",
+      "shortCode": "doesYourOrganizationHaveAWhistleblowerPolicy",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "EIN / Foreign Entities",
+    "canonicalField": {
+      "label": "EIN / Foreign Entities",
+      "shortCode": "einForeignEntities",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Will you be using a Fiscal Agent to administer your grant?",
+    "canonicalField": {
+      "label": "Will you be using a Fiscal Agent to administer your grant?",
+      "shortCode": "willYouBeUsingAFiscalAgentToAdminister",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Fiscal Organization Location",
+    "canonicalField": {
+      "label": "Fiscal Organization Location",
+      "shortCode": "fiscalOrganizationLocation",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Fiscal Organization Primary Contact",
+    "canonicalField": {
+      "label": "Fiscal Organization Primary Contact",
+      "shortCode": "fiscalOrganizationPrimaryContact",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Fiscal Signatory",
+    "canonicalField": {
+      "label": "Fiscal Signatory",
+      "shortCode": "fiscalSignatory",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Are names of your organization contacts missing from the drop-down fields above?",
+    "canonicalField": {
+      "label": "Are names of your organization contacts missing from the drop-down fields above?",
+      "shortCode": "areNamesOfYourOrganizationContactsMissingFromThe",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organization Leadership Contact Details",
+    "canonicalField": {
+      "label": "Organization Leadership Contact Details",
+      "shortCode": "organizationLeadershipContactDetails",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Authorized Banking Contacts",
+    "canonicalField": {
+      "label": "Authorized Banking Contacts",
+      "shortCode": "authorizedBankingContacts",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Is your organization information correct and current?",
+    "canonicalField": {
+      "label": "Is your organization information correct and current?",
+      "shortCode": "isYourOrganizationInformationCorrectAndCurrent",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Please provide your organization's contact information below, including address, phone numbers and email addresses, and we will add them to our database.",
+    "canonicalField": {
+      "label": "Please provide your organization's contact information below, including address, phone numbers and email addresses, and we will add them to our database.",
+      "shortCode": "pleaseProvideYourOrganization",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Is your contact information correct and current?",
+    "canonicalField": {
+      "label": "Is your contact information correct and current?",
+      "shortCode": "isYourContactInformationCorrectAndCurrent",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Updated Contact Information",
+    "canonicalField": {
+      "label": "Updated Contact Information",
+      "shortCode": "updatedContactInformation",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Grant Title",
+    "canonicalField": {
+      "label": "Grant Title",
+      "shortCode": "grantTitle",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Proposed Start Date",
+    "canonicalField": {
+      "label": "Proposed Start Date",
+      "shortCode": "proposedStartDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Proposed End Date",
+    "canonicalField": {
+      "label": "Proposed End Date",
+      "shortCode": "proposedEndDate",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Amount Requested from MacArthur (USD $ only)",
+    "canonicalField": {
+      "label": "Amount Requested from MacArthur (USD $ only)",
+      "shortCode": "amountRequestedFromMacarthur",
+      "dataType": "number"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Significant Other Funders",
+    "canonicalField": {
+      "label": "Significant Other Funders",
+      "shortCode": "significantOtherFunders",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organization Overview",
+    "canonicalField": {
+      "label": "Organization Overview",
+      "shortCode": "organizationOverview",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Context",
+    "canonicalField": {
+      "label": "Context",
+      "shortCode": "context",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Description of Funded Activities",
+    "canonicalField": {
+      "label": "Description of Funded Activities",
+      "shortCode": "descriptionOfFundedActivities",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Results",
+    "canonicalField": {
+      "label": "Results",
+      "shortCode": "results",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Leadership",
+    "canonicalField": {
+      "label": "Leadership",
+      "shortCode": "leadership",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Learning & Evaluation",
+    "canonicalField": {
+      "label": "Learning & Evaluation",
+      "shortCode": "learning",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Sustainability / Next Stages",
+    "canonicalField": {
+      "label": "Sustainability / Next Stages",
+      "shortCode": "sustainabilityNextStages",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Past Performance",
+    "canonicalField": {
+      "label": "Past Performance",
+      "shortCode": "pastPerformance",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "What steps do you take or processes do you have in place to ensure that the individuals or organizations that you may pay with MacArthur grant funds (other than your own staff) are not on terrorist watch lists, are paid in compliance with applicable anti money laundering statutes, and the funds will not be used for criminal or illegal activity?",
+    "canonicalField": {
+      "label": "What steps do you take or processes do you have in place to ensure that the individuals or organizations that you may pay with MacArthur grant funds (other than your own staff) are not on terrorist watch lists, are paid in compliance with applicable anti money laundering statutes, and the funds will not be used for criminal or illegal activity?",
+      "shortCode": "whatStepsDoYouTakeOrProcessesDoYou",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Will MacArthur funds support scholarships or awards?",
+    "canonicalField": {
+      "label": "Will MacArthur funds support scholarships or awards?",
+      "shortCode": "willMacarthurFundsSupportScholarshipsOrAwards",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Scholarship / Award Explanation",
+    "canonicalField": {
+      "label": "Scholarship / Award Explanation",
+      "shortCode": "scholarshipAwardExplanation",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Will MacArthur funds be used to make payments to or on the behalf of meeting participants/attendees who are not employed by you and who are not providing a specific service to you?",
+    "canonicalField": {
+      "label": "Will MacArthur funds be used to make payments to or on the behalf of meeting participants/attendees who are not employed by you and who are not providing a specific service to you?",
+      "shortCode": "willMacarthurFundsBeUsedToMakePaymentsTo",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Personal Travel Reimbursement Explanation",
+    "canonicalField": {
+      "label": "Personal Travel Reimbursement Explanation",
+      "shortCode": "personalTravelReimbursementExplanation",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Geographic Focus",
+    "canonicalField": {
+      "label": "Geographic Focus",
+      "shortCode": "geographicFocus",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Locations under US sanction",
+    "canonicalField": {
+      "label": "Locations under US sanction",
+      "shortCode": "locationsUnderUsSanction",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Locations Under Sanction Explanation",
+    "canonicalField": {
+      "label": "Locations Under Sanction Explanation",
+      "shortCode": "locationsUnderSanctionExplanation",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Will this project support research?",
+    "canonicalField": {
+      "label": "Will this project support research?",
+      "shortCode": "willThisProjectSupportResearch",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Involves desk research?",
+    "canonicalField": {
+      "label": "Involves desk research?",
+      "shortCode": "involvesDeskResearch",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Collects new data from individuals?",
+    "canonicalField": {
+      "label": "Collects new data from individuals?",
+      "shortCode": "collectsNewDataFromIndividuals",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Collects personal data?",
+    "canonicalField": {
+      "label": "Collects personal data?",
+      "shortCode": "collectsPersonalData",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Describe the research activities for collecting personal data",
+    "canonicalField": {
+      "label": "Describe the research activities for collecting personal data",
+      "shortCode": "describeTheResearchActivitiesForCollectingPersonalData",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Will the research be published?",
+    "canonicalField": {
+      "label": "Will the research be published?",
+      "shortCode": "willTheResearchBePublished",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "HSR Policy",
+    "canonicalField": {
+      "label": "HSR Policy",
+      "shortCode": "hsrPolicy",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Research involves minors",
+    "canonicalField": {
+      "label": "Research involves minors",
+      "shortCode": "researchInvolvesMinors",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Does your organization have a child protection policy?",
+    "canonicalField": {
+      "label": "Does your organization have a child protection policy?",
+      "shortCode": "doesYourOrganizationHaveAChildProtectionPolicy",
+      "dataType": "boolean"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Funds for fiscal agent duties, research or conferences",
+    "canonicalField": {
+      "label": "Funds for fiscal agent duties, research or conferences",
+      "shortCode": "fundsForFiscalAgentDutiesResearchOrConferences",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Fiscal Agent Duties / Research / Conference Explanation",
+    "canonicalField": {
+      "label": "Fiscal Agent Duties / Research / Conference Explanation",
+      "shortCode": "fiscalAgentDutiesResearchConferenceExplanation",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Additional Information from Applicant",
+    "canonicalField": {
+      "label": "Additional Information from Applicant",
+      "shortCode": "additionalInformationFromApplicant",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Child protection policy",
+    "canonicalField": {
+      "label": "Child protection policy",
+      "shortCode": "childProtectionPolicy",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Conflict of interest policy",
+    "canonicalField": {
+      "label": "Conflict of interest policy",
+      "shortCode": "conflictOfInterestPolicy",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Human subjects research policy",
+    "canonicalField": {
+      "label": "Human subjects research policy",
+      "shortCode": "humanSubjectsResearchPolicy",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "IRS tax letter",
+    "canonicalField": {
+      "label": "IRS tax letter",
+      "shortCode": "irsTaxLetter",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Latest unaudited financial statement",
+    "canonicalField": {
+      "label": "Latest unaudited financial statement",
+      "shortCode": "latestUnauditedFinancialStatement",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Organization charter",
+    "canonicalField": {
+      "label": "Organization charter",
+      "shortCode": "organizationCharter",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Policy regarding data gathering from children",
+    "canonicalField": {
+      "label": "Policy regarding data gathering from children",
+      "shortCode": "policyRegardingDataGatheringFromChildren",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Whistleblower policy",
+    "canonicalField": {
+      "label": "Whistleblower policy",
+      "shortCode": "whistleblowerPolicy",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Latitude",
+    "canonicalField": {
+      "label": "Latitude",
+      "shortCode": "latitude",
+      "dataType": "number"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Longitude",
+    "canonicalField": {
+      "label": "Longitude",
+      "shortCode": "longitude",
+      "dataType": "number"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Neighborhood",
+    "canonicalField": {
+      "label": "Neighborhood",
+      "shortCode": "neighborhood",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Abstract",
+    "canonicalField": {
+      "label": "Abstract",
+      "shortCode": "abstract",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Amount recommended",
+    "canonicalField": {
+      "label": "Amount recommended",
+      "shortCode": "amountRecommended",
+      "dataType": "number"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Purpose Statement",
+    "canonicalField": {
+      "label": "Purpose Statement",
+      "shortCode": "purposeStatement",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Agreement with fiscal agent",
+    "canonicalField": {
+      "label": "Agreement with fiscal agent",
+      "shortCode": "agreementWithFiscalAgent",
+      "dataType": "string"
+    }
+  },
+  {
+    "funderFile": "file1.psv",
+    "funderFieldName": "Project budget narrative",
+    "canonicalField": {
+      "label": "Project budget narrative",
+      "shortCode": "projectBudgetNarrative",
+      "dataType": "string"
+    }
+  }
+]

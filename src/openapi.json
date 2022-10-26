@@ -269,7 +269,10 @@
           "message": {
             "type": "string"
           },
-          "errors": {
+          "name": {
+            "type": "string"
+          },
+          "details": {
             "type": "array",
             "items": {
               "type": "object"

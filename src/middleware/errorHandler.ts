@@ -69,7 +69,7 @@ const getMessageForError = (error: unknown): string => {
   return 'Unknown error.';
 };
 
-const getErrorsForError = (error: unknown): unknown[] => {
+const getDetailsForError = (error: unknown): unknown[] => {
   if (error instanceof DatabaseError) {
     return [error.tinyPgError.queryContext.error];
   }
@@ -97,6 +97,6 @@ export const errorHandler = (
     .send({
       name: getNameForError(err),
       message: getMessageForError(err),
-      errors: getErrorsForError(err),
+      details: getDetailsForError(err),
     });
 };

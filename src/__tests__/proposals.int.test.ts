@@ -85,7 +85,7 @@ describe('/proposals', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -99,7 +99,7 @@ describe('/proposals', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -121,7 +121,7 @@ describe('/proposals', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });
@@ -183,7 +183,7 @@ describe('/proposals', () => {
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -198,7 +198,7 @@ describe('/proposals', () => {
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -213,7 +213,7 @@ describe('/proposals', () => {
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -237,7 +237,7 @@ describe('/proposals', () => {
         .expect(409);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.FOREIGN_KEY_VIOLATION,
           constraint: 'fk_applicant',
         }],
@@ -266,7 +266,7 @@ describe('/proposals', () => {
         .expect(409);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.FOREIGN_KEY_VIOLATION,
           constraint: 'fk_opportunity',
         }],
@@ -307,7 +307,7 @@ describe('/proposals', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -345,7 +345,7 @@ describe('/proposals', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -391,7 +391,7 @@ describe('/proposals', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });

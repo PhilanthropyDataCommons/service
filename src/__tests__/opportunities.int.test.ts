@@ -61,7 +61,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -75,7 +75,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -97,7 +97,7 @@ describe('/opportunities', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });
@@ -151,7 +151,7 @@ describe('/opportunities', () => {
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -180,7 +180,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -194,7 +194,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -216,7 +216,7 @@ describe('/opportunities', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });
@@ -251,7 +251,7 @@ describe('/opportunities', () => {
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -269,7 +269,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -287,7 +287,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -313,7 +313,7 @@ describe('/opportunities', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });

@@ -76,7 +76,7 @@ describe('/applicationForms', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -90,7 +90,7 @@ describe('/applicationForms', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -112,7 +112,7 @@ describe('/applicationForms', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });
@@ -261,7 +261,7 @@ describe('/applicationForms', () => {
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -276,7 +276,7 @@ describe('/applicationForms', () => {
         .expect(409);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.FOREIGN_KEY_VIOLATION,
         }],
       });
@@ -305,7 +305,7 @@ describe('/applicationForms', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -333,7 +333,7 @@ describe('/applicationForms', () => {
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
         message: 'The database responded with an unexpected format when creating the form.',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -386,7 +386,7 @@ describe('/applicationForms', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -440,7 +440,7 @@ describe('/applicationForms', () => {
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
         message: 'The database responded with an unexpected format when creating a field.',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
   });

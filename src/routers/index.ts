@@ -4,6 +4,7 @@ import { applicationFormsRouter } from './applicationFormsRouter';
 import { canonicalFieldsRouter } from './canonicalFieldsRouter';
 import { opportunitiesRouter } from './opportunitiesRouter';
 import { proposalsRouter } from './proposalsRouter';
+import { proposalVersionsRouter } from './proposalVersionsRouter';
 import { documentationRouter } from './documentationRouter';
 
 const rootRouter = express.Router();
@@ -13,6 +14,7 @@ rootRouter.use('/applicationForms', applicationFormsRouter);
 rootRouter.use('/canonicalFields', canonicalFieldsRouter);
 rootRouter.use('/opportunities', opportunitiesRouter);
 rootRouter.use('/proposals', proposalsRouter);
+rootRouter.use('/proposalVersions', proposalVersionsRouter);
 rootRouter.use('/', documentationRouter);
 
 export { rootRouter };

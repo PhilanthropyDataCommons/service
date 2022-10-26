@@ -68,7 +68,7 @@ erDiagram
     int id
     int proposalVersionId
     int applicationFormFieldId
-    int index
+    int sequence
     string value
     datetime dateCreated
   }
@@ -105,7 +105,7 @@ Meanwhile...
 
 6. A `Proposal` can have more than one `Proposal Version`.  This occurs as a proposal is updated or revised.
 7. A `Proposal Version` contains a set of `Proposal Field Values`.  These are the responses that were provided by the `Applicant`.
-8. A `Proposal Field Value` contains a response to a given `Application Form Field`.  Some fields might allow multiple responses, which is why we provide an `index`.
+8. A `Proposal Field Value` contains a response to a given `Application Form Field`.  Some fields might allow multiple responses, which is why we provide an `sequence`.
 
 The thinking is that when a new proposal is being written, a Grant Management System could ask the PDC "is there any pre-populated data we should use for this organization?"
 

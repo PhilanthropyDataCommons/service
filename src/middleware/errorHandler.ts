@@ -2,6 +2,7 @@ import {
   DatabaseError,
   InternalValidationError,
   InputValidationError,
+  InputConflictError,
 } from '../errors';
 import { PostgresErrorCode } from '../types';
 import type {
@@ -55,6 +56,9 @@ const getHttpStatusCodeForError = (error: unknown): number => {
   if (error instanceof InputValidationError) {
     return 400;
   }
+  if (error instanceof InputConflictError) {
+    return 409;
+  }
   return 500;
 };
 
@@ -78,6 +82,9 @@ const getDetailsForError = (error: unknown): unknown[] => {
   }
   if (error instanceof InputValidationError) {
     return error.errors;
+  }
+  if (error instanceof InputConflictError) {
+    return [error.details];
   }
   return [error];
 };

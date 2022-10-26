@@ -6,4 +6,6 @@ export * from './JsonObject';
 export * from './Opportunity';
 export * from './PostgresErrorCode';
 export * from './Proposal';
+export * from './ProposalFieldValue';
+export * from './ProposalVersion';
 export * from './TinyPgErrorWithQueryContext';

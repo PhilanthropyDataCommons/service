@@ -59,10 +59,10 @@
 #         | jq -s > $(basename $f).applicationForm.json
 #     done
 
-filename=$(basename $1)
+filename=$(basename "${1}")
 
 # Strip header, get core fields and perhaps their data types, JSON-ize.
-tail -n +2 $1 \
+tail -n +2 "${1}" \
     | grep '^\(Organization\|Proposal\)|[a-zA-Z0-9].*|' \
     | cut -d'|' -f 2,3,5 \
     | grep -v 'NA\||N\/A\||N \/ A' \
@@ -75,7 +75,7 @@ tail -n +2 $1 \
     | sed -E '/"dataType": "(number|integer|boolean|object|array)"/! s/"dataType": ".*"/"dataType": "string"/g' \
     | sed -E 's/"shortCode": "[0-9[:space:]\._-]*?([[:alpha:]]+)[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[[:space:]\.,\/_-]*?([[:alnum:]]+)?[^\"]*"/"shortCode": "\L\1\u\2\u\3\u\4\u\5\u\6\u\7\u\8\u\9"/g'
 
-tail -n +2 $1 \
+tail -n +2 "${1}" \
     | grep -v '^\(Organization\|Proposal\)|[a-zA-Z0-9].*|' \
     | cut -d'|' -f 3,5 \
     | grep -v '||' \

@@ -1,3 +1,4 @@
+#!/bin/bash
 # Posts canonical fields from JSON file (arg1) to URL (arg2)
 #
 # Expected format of the JSON file is an array with map elements each with a key
@@ -30,4 +31,7 @@
 # Argument 2 is the full URL to the canonicalFields endpoint,
 # for example http://localhost:3000/canonicalFields.
 
-cat $1 | jq -c '.[].canonicalField' | while read data; do curl -H "Content-Type: application/json" --data-binary "${data}" $2; done
+jq -c '.[].canonicalField' "${1}" \
+    | while read -r data
+          do curl -H "Content-Type: application/json" --data-binary "${data}" "${2}"
+      done

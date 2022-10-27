@@ -3,7 +3,8 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noUncheckedIndexedAccess": true,
   },
   "include": [
     "src"

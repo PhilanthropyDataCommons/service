@@ -1,3 +1,4 @@
+export * from './ApiKeyError';
 export * from './DatabaseError';
 export * from './InputConflictError';
 export * from './InputValidationError';

@@ -63,7 +63,7 @@ describe('/applicants', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -77,7 +77,7 @@ describe('/applicants', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -99,7 +99,7 @@ describe('/applicants', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });
@@ -136,7 +136,7 @@ describe('/applicants', () => {
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
     it('returns 409 conflict when a duplicate external id is submitted', async () => {
@@ -153,7 +153,7 @@ describe('/applicants', () => {
         .expect(409);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.UNIQUE_VIOLATION,
         }],
       });
@@ -172,7 +172,7 @@ describe('/applicants', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
   });

@@ -19,8 +19,17 @@ const createSchema = async (schemaName: string): Promise<void> => {
   await db.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName};`);
 };
 
-const setSchema = async (schemaName: string): Promise<void> => {
+const setSchemaForCurrentPoolConnection = async (schemaName: string): Promise<void> => {
   await db.query(`SET search_path TO ${schemaName};`);
+};
+
+const setSchemaForFuturePoolConnections = (schemaName: string): void => {
+  process.env.PGOPTIONS = `-c search_path=${schemaName}`;
+};
+
+const setSchema = async (schemaName: string): Promise<void> => {
+  await setSchemaForCurrentPoolConnection(schemaName);
+  setSchemaForFuturePoolConnections(schemaName);
 };
 
 const dropSchema = async (schemaName: string): Promise<void> => {

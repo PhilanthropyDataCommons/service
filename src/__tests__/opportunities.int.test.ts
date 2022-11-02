@@ -61,7 +61,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -75,7 +75,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -97,7 +97,7 @@ describe('/opportunities', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });
@@ -118,15 +118,18 @@ describe('/opportunities', () => {
         RETURNING id, title;
       `);
       logger.debug('opportunityIds: %o', opportunityIds);
-      const sparkleOpportunityId = opportunityIds.rows
-        .filter((it) => it.title === '✨')[0].id;
-      logger.debug('sparkleOpportunityId: %d', sparkleOpportunityId);
+      const sparkleOpportunity = opportunityIds.rows
+        .filter((it) => it.title === '✨')[0];
+      if (sparkleOpportunity === undefined) {
+        throw new Error('The sparkle opportunity could not be created so the test must fail.');
+      }
+      logger.debug('sparkleOpportunityId: %d', sparkleOpportunity.id);
       await agent
-        .get(`/opportunities/${sparkleOpportunityId}`)
+        .get(`/opportunities/${sparkleOpportunity.id}`)
         .expect(
           200,
           {
-            id: sparkleOpportunityId,
+            id: sparkleOpportunity.id,
             createdAt: '2525-01-02T00:00:02.000Z',
             title: '✨',
           },
@@ -148,7 +151,7 @@ describe('/opportunities', () => {
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -177,7 +180,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -191,7 +194,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -213,7 +216,7 @@ describe('/opportunities', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });
@@ -248,7 +251,7 @@ describe('/opportunities', () => {
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -266,7 +269,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -284,7 +287,7 @@ describe('/opportunities', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        errors: expect.any(Array) as unknown[],
+        details: expect.any(Array) as unknown[],
       });
     });
 
@@ -310,7 +313,7 @@ describe('/opportunities', () => {
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
-        errors: [{
+        details: [{
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });

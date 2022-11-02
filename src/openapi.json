@@ -60,6 +60,7 @@
             "items": {
               "$ref": "#/components/schemas/ProposalVersion"
             },
+            "readOnly": true,
             "nullable": true
           },
           "createdAt": {
@@ -84,6 +85,10 @@
             "example": 1
           },
           "proposalId": {
+            "type": "integer",
+            "example": 1
+          },
+          "applicationFormId": {
             "type": "integer",
             "example": 1
           },
@@ -268,7 +273,10 @@
           "message": {
             "type": "string"
           },
-          "errors": {
+          "name": {
+            "type": "string"
+          },
+          "details": {
             "type": "array",
             "items": {
               "type": "object"
@@ -488,7 +496,7 @@
         }
       },
       "post": {
-        "summary": "Add a new proposal. (In Development)",
+        "summary": "Add a new proposal.",
         "tags": [
           "Proposals"
         ],
@@ -504,7 +512,7 @@
         },
         "responses": {
           "201": {
-            "description": "The new proposal that was created, with populated field values",
+            "description": "The new proposal that was created",
             "content": {
               "application/json": {
                 "schema": {
@@ -515,6 +523,46 @@
           },
           "409": {
             "description": "There was a unique key or foreign key conflict.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proposalVersions": {
+      "post": {
+        "summary": "Add a new proposal version.",
+        "tags": [
+          "Proposals"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalVersion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new proposal version that was created, with populated field values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalVersion"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "There was a foreign key conflict.",
             "content": {
               "application/json": {
                 "schema": {

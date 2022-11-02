@@ -2,6 +2,7 @@ import {
   DatabaseError,
   InternalValidationError,
   InputValidationError,
+  InputConflictError,
 } from '../errors';
 import { PostgresErrorCode } from '../types';
 import type {
@@ -55,6 +56,9 @@ const getHttpStatusCodeForError = (error: unknown): number => {
   if (error instanceof InputValidationError) {
     return 400;
   }
+  if (error instanceof InputConflictError) {
+    return 409;
+  }
   return 500;
 };
 
@@ -69,7 +73,7 @@ const getMessageForError = (error: unknown): string => {
   return 'Unknown error.';
 };
 
-const getErrorsForError = (error: unknown): unknown[] => {
+const getDetailsForError = (error: unknown): unknown[] => {
   if (error instanceof DatabaseError) {
     return [error.tinyPgError.queryContext.error];
   }
@@ -78,6 +82,9 @@ const getErrorsForError = (error: unknown): unknown[] => {
   }
   if (error instanceof InputValidationError) {
     return error.errors;
+  }
+  if (error instanceof InputConflictError) {
+    return [error.details];
   }
   return [error];
 };
@@ -97,6 +104,6 @@ export const errorHandler = (
     .send({
       name: getNameForError(err),
       message: getMessageForError(err),
-      errors: getErrorsForError(err),
+      details: getDetailsForError(err),
     });
 };

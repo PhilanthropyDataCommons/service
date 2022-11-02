@@ -14,5 +14,10 @@ export const getTableMetrics = async (tableWithId: string): Promise<TableMetrics
       NOW() as "now"
     FROM ${tableWithId};
   `);
-  return metricsQueryResult.rows[0];
+
+  const metrics = metricsQueryResult.rows[0];
+  if (metrics === undefined) {
+    throw new Error(`Something went wrong collecting table metrics for ${tableWithId}`);
+  }
+  return metrics;
 };

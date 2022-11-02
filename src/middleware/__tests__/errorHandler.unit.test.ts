@@ -23,7 +23,7 @@ describe('errorHandler', () => {
     expect(sendMock).toBeCalledWith(expect.objectContaining({
       name: 'UnknownError',
       message: 'Unknown error.',
-      errors: [err],
+      details: [err],
     }));
   });
 
@@ -54,7 +54,7 @@ describe('errorHandler', () => {
     expect(sendMock).toBeCalledWith(expect.objectContaining({
       name: 'DatabaseError',
       message: 'Unexpected database error.',
-      errors: [{
+      details: [{
         code: 'some unexpected code',
       }],
     }));

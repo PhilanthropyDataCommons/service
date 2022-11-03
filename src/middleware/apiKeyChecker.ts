@@ -8,8 +8,7 @@ import type {
   Response,
 } from 'express';
 
-export const checkApiKey = async (req: Request, res: Response, next: NextFunction):
-Promise<void> => {
+export const checkApiKey = (req: Request, res: Response, next: NextFunction): void => {
   const apiKey = req.headers['x-api-key'] ?? '';
   const authServer = process.env.AUTH_SERVER_URL ?? '';
   const realmName = process.env.AUTH_REALM_NAME ?? '';
@@ -24,7 +23,7 @@ Promise<void> => {
   } else {
     const url = new URL(`${authServer}/realms/${realmName}/check`);
     url.searchParams.append('apiKey', apiKey.toString());
-    await axios.get(url.toString())
+    axios.get(url.toString())
       .then(() => {
         next();
       })

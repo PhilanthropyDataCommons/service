@@ -206,9 +206,9 @@
             "readOnly": true,
             "example": 1
           },
-          "canonicalFieldShortCode": {
-            "type": "string",
-            "example": "firstName"
+          "canonicalFieldId": {
+            "type": "integer",
+            "example": 1
           },
           "position": {
             "type": "integer",

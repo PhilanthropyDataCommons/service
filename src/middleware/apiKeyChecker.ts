@@ -12,7 +12,7 @@ export const checkApiKey = async (req: Request, res: Response, next: NextFunctio
 Promise<void> => {
   const apiKey = req.headers['x-api-key'] ?? '';
   const authServer = process.env.AUTH_SERVER_URL ?? '';
-  const realmName = process.env.REALM_NAME ?? '';
+  const realmName = process.env.AUTH_REALM_NAME ?? '';
   if (apiKey === '') {
     next(new AuthenticationError(
       'API key not provided in the header',
@@ -22,7 +22,7 @@ Promise<void> => {
       'Environment variables not set.',
     ));
   } else {
-    const url = new URL(`http://${authServer}/realms/${realmName}/check`);
+    const url = new URL(`${authServer}/realms/${realmName}/check`);
     url.searchParams.append('apiKey', apiKey.toString());
     await axios.get(url.toString())
       .then(() => {

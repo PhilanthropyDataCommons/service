@@ -13,7 +13,7 @@ describe('Authorization middleware', () => {
   });
 
   it('without x-api-key header', async () => {
-    const expectedResponse = new AuthenticationError('API key not provided in the header');
+    const expectedResponse = new AuthenticationError('API key not provided in the header "x-api-key"');
     mockRequest = {
       headers: {
         'x-api-key': '',
@@ -35,7 +35,7 @@ describe('Authorization middleware', () => {
   });
 
   it('with correct api header', async () => {
-    const data = fs.readFileSync('keys.txt', 'utf8').split('\n');
+    const data = fs.readFileSync('test_keys.txt', 'utf8').split('\n');
     mockRequest = {
       headers: {
         'x-api-key': data[0],

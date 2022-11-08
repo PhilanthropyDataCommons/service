@@ -10,11 +10,11 @@ export const checkApiKey = (req: Request, res: Response, next: NextFunction): vo
   const apiKey = req.headers['x-api-key'] ?? '';
   if (apiKey === '') {
     next(new AuthenticationError(
-      'API key not provided in the header',
+      'API key not provided in the header "x-api-key"',
     ));
   } else {
     try {
-      const data = fs.readFileSync('keys.txt', 'utf8').split('\n');
+      const data = fs.readFileSync('test_keys.txt', 'utf8').split('\n');
       if (data.includes(apiKey.toString())) {
         next();
       } else {

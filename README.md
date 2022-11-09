@@ -125,6 +125,16 @@ LOG_LEVEL=trace npm run test
 
 Alternatively, one may set `LOG_LEVEL` in the `.env` file.
 
+### API Keys
+
+As a temporary measure, API keys from a file are used for authentication. To generate five keys, for example:
+
+    touch secret_api_keys.txt
+    chmod 600 secret_api_keys.txt
+    for i in {1..5}; do tr -dc a-zA-Z0-9 </dev/random | head -c 80; echo ''; done > secret_api_keys.txt
+
+Set `API_KEYS_FILE` in `.env` to `secret_api_keys.txt` (or whatever was specified above) but remember also to set `API_KEYS_FILE=test_keys.txt` (verbatim) in .env.test such that the .env value will not take precedence over the non-existent test value. In other words, `.env` and `.env.test` get merged in tests, and if you set API_KEYS_FILE in `.env`, the tests will unintentially pick up the wrong keys if you do not also set the variable correctly in `.env.test`. By default, if neither `.env` nor `.env.test` specifies `API_KEYS_FILE` the tests will use `test_keys.txt` which are not intended for production use.
+
 ### Understanding the Project
 
 #### Project Structure

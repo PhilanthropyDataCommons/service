@@ -6,9 +6,17 @@ import type { NextFunction, Request, Response } from 'express';
 describe('Authorization middleware', () => {
   const mockResponse: Partial<Response> = {};
   const nextFunction: NextFunction = jest.fn();
+  const environment = process.env;
+  const fileWithApiTestKeys = 'test_keys.txt';
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+    process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
+  });
+
+  afterEach(() => {
+    process.env = environment;
   });
 
   it('without x-api-key header', async () => {
@@ -40,7 +48,7 @@ describe('Authorization middleware', () => {
   });
 
   it('with correct api header', async () => {
-    const data = fs.readFileSync('test_keys.txt', 'utf8').split('\n');
+    const data = fs.readFileSync(fileWithApiTestKeys, 'utf8').split('\n');
     const mockRequest: Partial<Request> = {
       headers: {
         'x-api-key': data[0],

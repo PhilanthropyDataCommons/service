@@ -6,13 +6,15 @@ erDiagram
   CanonicalField {
     int id
     string label
-    string type
-    datetime dateCreated
+    string shortCode
+    string dataType
+    datetime createdAt
   }
   Applicant {
     int id
     string externalId
-    bool hasGivenPermission
+    bool optedIn
+    datetime createdAt
   }
   ExternalSource {
     int id
@@ -20,63 +22,63 @@ erDiagram
   }
   Proposal {
     int id
-    string externalId
     int applicantId
     int opportunityId
-    datetime dateCreated
+    string externalId
+    datetime createdAt
   }
   Outcome {
     int id
     int applicationId
     string outcome
-    datetime dateCreated
+    datetime createdAt
   }
   Opportunity {
     int id
     string title
-    datetime dateCreated
+    datetime createdAt
   }
   ApplicationForm {
     int id
     int opportunityId
     int version
-    datetime dateCreated
+    datetime createdAt
   }
   ApplicationFormField {
     int id
     int applicationFormId
     int canonicalFieldId
-    int order
+    int position
     string label
-    datetime dateCreated
+    datetime createdAt
   }
   ExternalFieldValue {
     int id
     int canonicalFieldId
     string name
     string value
-    int sequence
-    datetime dateCreated
+    int position
+    datetime createdAt
   }
   ProposalVersion {
     int id
     int proposalId
     int version
-    datetime dateCreated
+    datetime createdAt
   }
   ProposalFieldValue {
     int id
     int proposalVersionId
     int applicationFormFieldId
-    int sequence
+    int position
     string value
-    datetime dateCreated
+    datetime createdAt
   }
   ActivityLog {
     int id
     string actionType
     string log
-    datetime dateCreated
+    datetime createdAt
   }
 
   Applicant ||--o{ Proposal : submits
@@ -105,7 +107,7 @@ Meanwhile...
 
 6. A `Proposal` can have more than one `Proposal Version`.  This occurs as a proposal is updated or revised.
 7. A `Proposal Version` contains a set of `Proposal Field Values`.  These are the responses that were provided by the `Applicant`.
-8. A `Proposal Field Value` contains a response to a given `Application Form Field`.  Some fields might allow multiple responses, which is why we provide an `sequence`.
+8. A `Proposal Field Value` contains a response to a given `Application Form Field`.  Some fields might allow multiple responses, which is why we provide a `position`.
 
 The thinking is that when a new proposal is being written, a Grant Management System could ask the PDC "is there any pre-populated data we should use for this organization?"
 
@@ -132,7 +134,7 @@ sequenceDiagram
   API ->>- Admin :  OK!
 ```
 
-New `Application Forms` will have to be externally defined; some day maybe we will make a user interface that generates an `Application Form` definition, but for the short term this will be manually written JSON (or YAML, or something else highly structured).  The form will define the full set of `Application Form Fields` along with the name of the `Canonical Field` to which the `Application Form Fields` map.
+New `Application Forms` will have to be externally defined; some day maybe we will make a user interface that generates an `Application Form` definition, but for the short term this will be manually written JSON (or YAML, or something else highly structured).  The form will define the full set of `Application Form Fields` along with the id of the `Canonical Field` to which the `Application Form Fields` map.
 
 This might look something like this:
 
@@ -142,12 +144,12 @@ This might look something like this:
     {
       "name": "Applicant Name",
       "type": "string",
-      "canonicalField": "applicantName",
+      "canonicalFieldId": 42,
     },
     {
       "name": "Have you ever seen the Mona Lisa?",
       "type": "boolean",
-      "canonicalField": "haveSeenMonaLisa",
+      "canonicalFieldId": 43,
     }
   ]
 }

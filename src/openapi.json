@@ -43,10 +43,6 @@
             "readOnly": true,
             "example": 1
           },
-          "externalId": {
-            "type": "string",
-            "example": "AnIdGeneratedByAGms"
-          },
           "applicantId": {
             "type": "integer",
             "example": 1
@@ -54,6 +50,10 @@
           "opportunityId": {
             "type": "integer",
             "example": 1
+          },
+          "externalId": {
+            "type": "string",
+            "example": "AnIdGeneratedByAGms"
           },
           "versions": {
             "type": "array",
@@ -73,6 +73,7 @@
           "id",
           "applicantId",
           "opportunityId",
+          "externalId",
           "createdAt"
         ]
       },

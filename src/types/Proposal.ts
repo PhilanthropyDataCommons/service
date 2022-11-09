@@ -5,9 +5,9 @@ import type { ProposalVersion } from './ProposalVersion';
 
 export interface Proposal {
   id: number;
-  externalId: string;
   applicantId: number;
   opportunityId: number;
+  externalId: string;
   versions?: ProposalVersion[];
   createdAt: Date;
 }
@@ -23,15 +23,15 @@ export const proposalSchema: JSONSchemaType<Proposal> = {
     id: {
       type: 'integer',
     },
-    externalId: {
-      type: 'string',
-      pattern: '.+',
-    },
     applicantId: {
       type: 'integer',
     },
     opportunityId: {
       type: 'integer',
+    },
+    externalId: {
+      type: 'string',
+      pattern: '.+',
     },
     versions: {
       type: 'array',
@@ -46,9 +46,9 @@ export const proposalSchema: JSONSchemaType<Proposal> = {
   },
   required: [
     'id',
-    'externalId',
     'applicantId',
     'opportunityId',
+    'externalId',
     'createdAt',
   ],
 };
@@ -56,21 +56,21 @@ export const proposalSchema: JSONSchemaType<Proposal> = {
 export const proposalWriteSchema: JSONSchemaType<ProposalWrite> = {
   type: 'object',
   properties: {
-    externalId: {
-      type: 'string',
-      pattern: '.+',
-    },
     applicantId: {
       type: 'integer',
     },
     opportunityId: {
       type: 'integer',
     },
+    externalId: {
+      type: 'string',
+      pattern: '.+',
+    },
   },
   required: [
-    'externalId',
     'applicantId',
     'opportunityId',
+    'externalId',
   ],
 };
 

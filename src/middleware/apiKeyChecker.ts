@@ -1,10 +1,13 @@
 import fs from 'fs';
 import { AuthenticationError } from '../errors';
+import { getLogger } from '../logger';
 import type {
   NextFunction,
   Request,
   Response,
 } from 'express';
+
+const logger = getLogger(__filename);
 
 export const checkApiKey = (req: Request, res: Response, next: NextFunction): void => {
   const apiKey = req.headers['x-api-key'] ?? '';
@@ -14,8 +17,9 @@ export const checkApiKey = (req: Request, res: Response, next: NextFunction): vo
     ));
   } else {
     try {
-      const data = fs.readFileSync('test_keys.txt', 'utf8').split('\n');
-      if (data.includes(apiKey.toString())) {
+      const validApiKeysFile = process.env.API_KEYS_FILE ?? 'keys.txt';
+      const validApiKeys = fs.readFileSync(validApiKeysFile, 'utf8').split('\n');
+      if (validApiKeys.includes(apiKey.toString())) {
         next();
       } else {
         next(new AuthenticationError(
@@ -23,7 +27,8 @@ export const checkApiKey = (req: Request, res: Response, next: NextFunction): vo
         ));
       }
     } catch (err) {
-      next('Internal server error');
+      logger.error(err);
+      next('Internal Server Error');
     }
   }
 };

@@ -26,7 +26,7 @@ describe('Authentication middleware', () => {
     checkApiKey(mockRequest as Request, mockResponse as Response, nextFunction);
     expect(nextFunction).toBeCalledWith(
       new AuthenticationError(
-        'API key not provided in the header "x-api-key"',
+        'API key not provided in the header \'x-api-key\'',
       ),
     );
   });
@@ -40,7 +40,7 @@ describe('Authentication middleware', () => {
     checkApiKey(mockRequest as Request, mockResponse as Response, nextFunction);
     expect(nextFunction).toBeCalledWith(
       new AuthenticationError(
-        'API key not provided in the header "x-api-key"',
+        'API key not provided in the header \'x-api-key\'',
       ),
     );
   });
@@ -54,7 +54,7 @@ describe('Authentication middleware', () => {
     checkApiKey(mockRequest as Request, mockResponse as Response, nextFunction);
     expect(nextFunction).toBeCalledWith(
       new AuthenticationError(
-        'Invalid api key provided',
+        'Invalid API key provided',
       ),
     );
   });

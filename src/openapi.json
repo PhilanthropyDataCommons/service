@@ -345,6 +345,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
@@ -379,8 +389,8 @@
               }
             }
           },
-          "409": {
-            "description": "There was a unique key or foreign key key conflict.",
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
             "content": {
               "application/json": {
                 "schema": {
@@ -421,6 +431,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Applicant"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -489,6 +509,16 @@
               }
             }
           },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "409": {
             "description": "There was a unique key or foreign key conflict.",
             "content": {
@@ -526,6 +556,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
@@ -556,6 +596,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Proposal"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -601,6 +651,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProposalVersion"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -671,6 +731,16 @@
               }
             }
           },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "409": {
             "description": "There was a unique key conflict.",
             "content": {
@@ -733,6 +803,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Opportunity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

@@ -13,7 +13,7 @@ export const checkApiKey = (req: Request, res: Response, next: NextFunction): vo
   const apiKey = req.headers['x-api-key'] ?? '';
   if (apiKey === '') {
     next(new AuthenticationError(
-      'API key not provided in the header "x-api-key"',
+      'API key not provided in the header \'x-api-key\'',
     ));
   } else {
     try {
@@ -23,7 +23,7 @@ export const checkApiKey = (req: Request, res: Response, next: NextFunction): vo
         next();
       } else {
         next(new AuthenticationError(
-          'Invalid api key provided',
+          'Invalid API key provided',
         ));
       }
     } catch (err) {

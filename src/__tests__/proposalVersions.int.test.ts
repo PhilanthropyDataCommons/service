@@ -7,13 +7,26 @@ import {
   getTableMetrics,
   isoTimestampPattern,
 } from '../test/utils';
+import { dummyApiKey } from '../test/dummyApiKey';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
+const fileWithApiTestKeys = 'test_keys.txt';
+const environment = process.env;
 
 describe('/proposalVersions', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+    process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
+  });
+
+  afterEach(() => {
+    process.env = environment;
+  });
+
   describe('POST /', () => {
     it('creates exactly one proposal version', async () => {
       await db.query(`
@@ -57,6 +70,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -139,6 +153,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -186,6 +201,7 @@ describe('/proposalVersions', () => {
       await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           applicationFormId: 1,
           fieldValues: [],
@@ -197,6 +213,7 @@ describe('/proposalVersions', () => {
       await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           fieldValues: [],
@@ -208,6 +225,7 @@ describe('/proposalVersions', () => {
       await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -255,6 +273,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 2,
           applicationFormId: 1,
@@ -313,6 +332,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 2,
@@ -376,6 +396,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 2,
@@ -439,6 +460,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -530,6 +552,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 2,
@@ -601,6 +624,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -664,6 +688,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -728,6 +753,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -815,6 +841,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -913,6 +940,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -984,6 +1012,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -1071,6 +1100,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -1151,6 +1181,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,
@@ -1244,6 +1275,7 @@ describe('/proposalVersions', () => {
       const result = await agent
         .post('/proposalVersions')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           proposalId: 1,
           applicationFormId: 1,

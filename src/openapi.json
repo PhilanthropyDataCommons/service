@@ -6,6 +6,14 @@
     "version": "0.1.0"
   },
   "components": {
+    "securitySchemes": {
+      "preSharedApiKey": {
+        "type": "apiKey",
+        "description": "A pre-shared key required to create or access protected resources via the API.",
+        "name": "x-api-key",
+        "in": "header"
+      }
+    },
     "schemas": {
       "Applicant": {
         "type": "object",
@@ -319,6 +327,11 @@
         "tags": [
           "Applicants"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "All applicants currently registered in the PDC.",
@@ -339,6 +352,11 @@
         "summary": "Add a new applicant.",
         "tags": [
           "Applicants"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -379,6 +397,11 @@
         "summary": "Get a specific applicant, including all known field values associated with the applicant. (In Development)",
         "tags": [
           "Applicants"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
         ],
         "parameters": [
           {
@@ -440,6 +463,11 @@
         "tags": [
           "Application Forms"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -480,6 +508,11 @@
         "tags": [
           "Proposals"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "All proposals currently registered in the PDC.",
@@ -500,6 +533,11 @@
         "summary": "Add a new proposal.",
         "tags": [
           "Proposals"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -540,6 +578,11 @@
         "summary": "Add a new proposal version.",
         "tags": [
           "Proposals"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -602,6 +645,11 @@
         "tags": [
           "Canonical Fields"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -662,6 +710,11 @@
         "summary": "Add a new opportunity. (In Development)",
         "tags": [
           "Opportunities"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
         ],
         "requestBody": {
           "required": true,

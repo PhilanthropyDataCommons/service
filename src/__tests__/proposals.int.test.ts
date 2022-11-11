@@ -7,18 +7,32 @@ import {
   getTableMetrics,
   isoTimestampPattern,
 } from '../test/utils';
+import { dummyApiKey } from '../test/dummyApiKey';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
+const fileWithApiTestKeys = 'test_keys.txt';
+const environment = process.env;
 
 describe('/proposals', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+    process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
+  });
+
+  afterEach(() => {
+    process.env = environment;
+  });
+
   describe('GET /', () => {
     logger.debug('Now running an proposals test');
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/proposals')
+        .set(dummyApiKey)
         .expect(200, []);
     });
 
@@ -54,6 +68,7 @@ describe('/proposals', () => {
       `);
       await agent
         .get('/proposals')
+        .set(dummyApiKey)
         .expect(
           200,
           [
@@ -82,6 +97,7 @@ describe('/proposals', () => {
         }) as Result<object>);
       const result = await agent
         .get('/proposals')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -96,6 +112,7 @@ describe('/proposals', () => {
         });
       const result = await agent
         .get('/proposals')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -118,6 +135,7 @@ describe('/proposals', () => {
         });
       const result = await agent
         .get('/proposals')
+        .set(dummyApiKey)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -153,6 +171,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -176,6 +195,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           externalId: 'proposal123',
           opportunityId: 1,
@@ -191,6 +211,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           applicantId: 1,
           opportunityId: 1,
@@ -206,6 +227,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -229,6 +251,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -258,6 +281,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -299,6 +323,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -337,6 +362,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -383,6 +409,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           applicantId: 1,
           externalId: 'proposal123',

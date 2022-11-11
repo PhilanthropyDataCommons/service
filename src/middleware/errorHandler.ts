@@ -1,4 +1,5 @@
 import {
+  AuthenticationError,
   DatabaseError,
   InternalValidationError,
   InputValidationError,
@@ -58,6 +59,9 @@ const getHttpStatusCodeForError = (error: unknown): number => {
   }
   if (error instanceof InputConflictError) {
     return 409;
+  }
+  if (error instanceof AuthenticationError) {
+    return 401;
   }
   return 500;
 };

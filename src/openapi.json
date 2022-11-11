@@ -6,6 +6,14 @@
     "version": "0.1.0"
   },
   "components": {
+    "securitySchemes": {
+      "preSharedApiKey": {
+        "type": "apiKey",
+        "description": "A pre-shared key required to create or access protected resources via the API.",
+        "name": "x-api-key",
+        "in": "header"
+      }
+    },
     "schemas": {
       "Applicant": {
         "type": "object",
@@ -319,6 +327,11 @@
         "tags": [
           "Applicants"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "All applicants currently registered in the PDC.",
@@ -332,6 +345,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
@@ -339,6 +362,11 @@
         "summary": "Add a new applicant.",
         "tags": [
           "Applicants"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -361,8 +389,8 @@
               }
             }
           },
-          "409": {
-            "description": "There was a unique key or foreign key key conflict.",
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
             "content": {
               "application/json": {
                 "schema": {
@@ -379,6 +407,11 @@
         "summary": "Get a specific applicant, including all known field values associated with the applicant. (In Development)",
         "tags": [
           "Applicants"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
         ],
         "parameters": [
           {
@@ -398,6 +431,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Applicant"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -440,6 +483,11 @@
         "tags": [
           "Application Forms"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -457,6 +505,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApplicationForm"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -480,6 +538,11 @@
         "tags": [
           "Proposals"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "All proposals currently registered in the PDC.",
@@ -493,6 +556,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
@@ -500,6 +573,11 @@
         "summary": "Add a new proposal.",
         "tags": [
           "Proposals"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -518,6 +596,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Proposal"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -541,6 +629,11 @@
         "tags": [
           "Proposals"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -558,6 +651,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProposalVersion"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -602,6 +705,11 @@
         "tags": [
           "Canonical Fields"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -619,6 +727,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CanonicalField"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -663,6 +781,11 @@
         "tags": [
           "Opportunities"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -680,6 +803,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Opportunity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

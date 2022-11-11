@@ -8,16 +8,30 @@ import {
   getTableMetrics,
   isoTimestampPattern,
 } from '../test/utils';
+import { dummyApiKey } from '../test/dummyApiKey';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
+const fileWithApiTestKeys = 'test_keys.txt';
+const environment = process.env;
 
 describe('/applicants', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+    process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
+  });
+
+  afterEach(() => {
+    process.env = environment;
+  });
+
   describe('GET /', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/applicants')
+        .set(dummyApiKey)
         .expect(200, []);
     });
 
@@ -34,6 +48,7 @@ describe('/applicants', () => {
       `);
       await agent
         .get('/applicants')
+        .set(dummyApiKey)
         .expect(
           200,
           [
@@ -60,6 +75,7 @@ describe('/applicants', () => {
         }) as Result<object>);
       const result = await agent
         .get('/applicants')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -74,6 +90,7 @@ describe('/applicants', () => {
         });
       const result = await agent
         .get('/applicants')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -96,6 +113,7 @@ describe('/applicants', () => {
         });
       const result = await agent
         .get('/applicants')
+        .set(dummyApiKey)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -113,6 +131,7 @@ describe('/applicants', () => {
       const result = await agent
         .post('/applicants')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           externalId: '🆔',
         })
@@ -132,6 +151,7 @@ describe('/applicants', () => {
       const result = await agent
         .post('/applicants')
         .type('application/json')
+        .set(dummyApiKey)
         .send({})
         .expect(400);
       expect(result.body).toMatchObject({
@@ -147,6 +167,7 @@ describe('/applicants', () => {
       const result = await agent
         .post('/applicants')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           externalId: '12345',
         })
@@ -166,6 +187,7 @@ describe('/applicants', () => {
       const result = await agent
         .post('/applicants')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           externalId: '12345',
         })

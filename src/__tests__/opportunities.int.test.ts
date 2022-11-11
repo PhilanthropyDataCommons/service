@@ -7,13 +7,26 @@ import {
   getTableMetrics,
   isoTimestampPattern,
 } from '../test/utils';
+import { dummyApiKey } from '../test/dummyApiKey';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
+const fileWithApiTestKeys = 'test_keys.txt';
+const environment = process.env;
 
 describe('/opportunities', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+    process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
+  });
+
+  afterEach(() => {
+    process.env = environment;
+  });
+
   describe('GET /', () => {
     logger.debug('Now running an opportunities test');
     it('returns an empty array when no data is present', async () => {
@@ -230,6 +243,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
+        .set(dummyApiKey)
         .send({ title: '🎆' })
         .expect(201);
       const after = await getTableMetrics('opportunities');
@@ -247,6 +261,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
+        .set(dummyApiKey)
         .send({ noTitleHere: '👎' })
         .expect(400);
       expect(result.body).toMatchObject({
@@ -263,6 +278,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           title: '🤷',
         })
@@ -281,6 +297,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           title: '🤷',
         })
@@ -307,6 +324,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
+        .set(dummyApiKey)
         .send({
           title: '🤷',
         })

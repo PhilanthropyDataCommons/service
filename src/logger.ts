@@ -13,6 +13,7 @@ dotenv.config();
 
 const logger = pino({
   level: process.env.LOG_LEVEL ?? 'info',
+  redact: ['req.headers["x-api-key"]'],
 });
 
 export const getLogger = (source: string): Logger => logger.child({ source });

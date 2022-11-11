@@ -103,7 +103,8 @@
           },
           "version": {
             "type": "integer",
-            "example": 1
+            "example": 1,
+            "readOnly": true
           },
           "fieldValues": {
             "type": "array",

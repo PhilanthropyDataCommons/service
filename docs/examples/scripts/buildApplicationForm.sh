@@ -13,6 +13,8 @@
 #
 # Argument 1 is a path to an xlsx file.
 # Argument 2 is a URL for a PDC service instance.
+# Argument 3 is a path to a file containing an API key header, example contents:
+# x-api-key: example_key
 #
 # The xlsx file is expected to have exactly one sheet and particular columns.
 # Here are the expected columns in the given xlsx file, in this order:
@@ -45,9 +47,9 @@ echo "create canonicalFields."
 xlsx2csv -d '|' "${1}" "${psvFile}"
 ./extractCanonicalFields.sh "${psvFile}" | jq -s '.' > "${allFieldsFile}"
 jq '. | map(select(.funderFieldName != "")) | to_entries | .[] | { position: .key, label: .value.funderFieldName, canonicalField: .value.canonicalField }' "${allFieldsFile}" | jq -s '.' > "${formFieldsFile}"
-./postCanonicalFields.sh "${allFieldsFile}" "${canonicalFieldsUrl}"
+./postCanonicalFields.sh "${allFieldsFile}" "${canonicalFieldsUrl}" "${3}"
 
-allCanonicalFields=$(curl "${canonicalFieldsUrl}")
+allCanonicalFields=$(curl -H "@${3}" "${canonicalFieldsUrl}")
 allCanonicalFieldsForMergeFile="allCanonicalFieldsForMerge.json"
 
 # Use the shortCode from each application form field to look up the id of the
@@ -69,11 +71,11 @@ jq -c -s 'flatten | group_by(.canonicalField.shortCode) | map(reduce .[] as $x (
     > "${joinedFormFieldsFile}"
 
 # Create an opportunity in the PDC instance.
-opportunity=$(curl -H "Content-Type: application/json" --data-binary "{ \"title\": \"Opportunity from ${psvFile}\" }" "${2}/opportunities")
+opportunity=$(curl -H "@${3}" -H "Content-Type: application/json" --data-binary "{ \"title\": \"Opportunity from ${psvFile}\" }" "${2}/opportunities")
 opportunityId=$(echo "$opportunity" | jq '.id')
 
 # Use the opportunityId and joined fields to post a new application form.
 applicationFormData="{ \"opportunityId\": ${opportunityId}, \"fields\": $(cat "${joinedFormFieldsFile}") }"
-applicationForm=$(curl -H "Content-Type: application/json" --data-binary "${applicationFormData}" "${2}/applicationForms")
+applicationForm=$(curl -H "@${3}" -H "Content-Type: application/json" --data-binary "${applicationFormData}" "${2}/applicationForms")
 applicationFormId=$(echo "$applicationForm" | jq '.id')
 echo "Successfully created applicationForm with id=${applicationFormId}"

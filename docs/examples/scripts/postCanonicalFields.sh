@@ -30,8 +30,10 @@
 # Argument 1 is the path to such a file as shown above.
 # Argument 2 is the full URL to the canonicalFields endpoint,
 # for example http://localhost:3000/canonicalFields.
+# Argument 3 is a path to a file containing an API key header, content example:
+# x-api-key: example_key
 
 jq -c '.[].canonicalField' "${1}" \
     | while read -r data
-          do curl -H "Content-Type: application/json" --data-binary "${data}" "${2}"
+          do curl -H "@${3}" -H "Content-Type: application/json" --data-binary "${data}" "${2}"
       done

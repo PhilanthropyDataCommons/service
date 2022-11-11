@@ -145,12 +145,12 @@ describe('/proposalVersions', () => {
           fieldValues: [
             {
               applicationFormFieldId: 1,
-              sequence: 1,
+              position: 1,
               value: 'Gronald',
             },
             {
               applicationFormFieldId: 2,
-              sequence: 1,
+              position: 1,
               value: 'Plorp',
             },
           ],
@@ -166,14 +166,14 @@ describe('/proposalVersions', () => {
           {
             id: 1,
             applicationFormFieldId: 1,
-            sequence: 1,
+            position: 1,
             value: 'Gronald',
             createdAt: expect.stringMatching(isoTimestampPattern) as string,
           },
           {
             id: 2,
             applicationFormFieldId: 2,
-            sequence: 1,
+            position: 1,
             value: 'Plorp',
             createdAt: expect.stringMatching(isoTimestampPattern) as string,
           },
@@ -445,7 +445,7 @@ describe('/proposalVersions', () => {
           fieldValues: [
             {
               applicationFormFieldId: 1,
-              sequence: 1,
+              position: 1,
               value: 'Gronald',
             },
           ],
@@ -536,7 +536,7 @@ describe('/proposalVersions', () => {
           fieldValues: [
             {
               applicationFormFieldId: 1,
-              sequence: 1,
+              position: 1,
               value: 'Gronald',
             },
           ],
@@ -821,7 +821,7 @@ describe('/proposalVersions', () => {
           fieldValues: [
             {
               applicationFormFieldId: 1,
-              sequence: 1,
+              position: 1,
               value: 'Gronald',
             },
           ],
@@ -919,7 +919,7 @@ describe('/proposalVersions', () => {
           fieldValues: [
             {
               applicationFormFieldId: 1,
-              sequence: 1,
+              position: 1,
               value: 'Gronald',
             },
           ],
@@ -1077,12 +1077,12 @@ describe('/proposalVersions', () => {
           fieldValues: [
             {
               applicationFormFieldId: 1,
-              sequence: 1,
+              position: 1,
               value: 'Gronald',
             },
             {
               applicationFormFieldId: 2,
-              sequence: 1,
+              position: 1,
               value: 'Plorp',
             },
           ],
@@ -1250,12 +1250,12 @@ describe('/proposalVersions', () => {
           fieldValues: [
             {
               applicationFormFieldId: 1,
-              sequence: 1,
+              position: 1,
               value: 'Gronald',
             },
             {
               applicationFormFieldId: 2,
-              sequence: 1,
+              position: 1,
               value: 'Plorp',
             },
           ],

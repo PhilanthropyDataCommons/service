@@ -5,7 +5,7 @@ export interface ProposalFieldValue {
   id: number;
   proposalVersionId: number;
   applicationFormFieldId: number;
-  sequence: number;
+  position: number;
   value: string;
   createdAt: Date;
 }
@@ -27,7 +27,7 @@ export const proposalFieldValueSchema: JSONSchemaType<ProposalFieldValue> = {
     applicationFormFieldId: {
       type: 'integer',
     },
-    sequence: {
+    position: {
       type: 'integer',
     },
     value: {
@@ -43,7 +43,7 @@ export const proposalFieldValueSchema: JSONSchemaType<ProposalFieldValue> = {
     'id',
     'proposalVersionId',
     'applicationFormFieldId',
-    'sequence',
+    'position',
     'value',
     'createdAt',
   ],
@@ -55,7 +55,7 @@ export const proposalFieldValueWriteSchema: JSONSchemaType<ProposalFieldValueWri
     applicationFormFieldId: {
       type: 'integer',
     },
-    sequence: {
+    position: {
       type: 'integer',
     },
     value: {
@@ -64,7 +64,7 @@ export const proposalFieldValueWriteSchema: JSONSchemaType<ProposalFieldValueWri
   },
   required: [
     'applicationFormFieldId',
-    'sequence',
+    'position',
     'value',
   ],
 };

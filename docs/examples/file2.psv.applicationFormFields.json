@@ -238,7 +238,7 @@
     "label": "3. Statement of Need: Describe the local community need or opportunity you plan to address.*",
     "canonicalField": {
       "label": "3. Statement of Need: Describe the local community need or opportunity you plan to address.*",
-      "shortCode": "statementOfNeed",
+      "shortCode": "statementOfNeedDescribeTheLocalCommunityNeedOr",
       "dataType": "string"
     }
   },
@@ -247,7 +247,7 @@
     "label": "4. Implementation: What is your work plan? Describe the program activities and timeline.",
     "canonicalField": {
       "label": "4. Implementation: What is your work plan? Describe the program activities and timeline.",
-      "shortCode": "implementation",
+      "shortCode": "implementationWhatIsYourWorkPlanDescribeTheProgram",
       "dataType": "string"
     }
   },
@@ -256,7 +256,7 @@
     "label": "5. Outreach & Engagement: Who will you serve? Describe the target population(s), neighborhoods, and main outreach strategies to engage them in the proposed work.",
     "canonicalField": {
       "label": "5. Outreach & Engagement: Who will you serve? Describe the target population(s), neighborhoods, and main outreach strategies to engage them in the proposed work.",
-      "shortCode": "outreach",
+      "shortCode": "outreachEngagementWhoWillYouServeDescribeTheTarget",
       "dataType": "string"
     }
   },
@@ -265,7 +265,7 @@
     "label": "6. Assessment: What are the main expected outcomes for your proposed work and how will you measure the impact?",
     "canonicalField": {
       "label": "6. Assessment: What are the main expected outcomes for your proposed work and how will you measure the impact?",
-      "shortCode": "assessment",
+      "shortCode": "assessmentWhatAreTheMainExpectedOutcomesForYour",
       "dataType": "string"
     }
   },
@@ -274,7 +274,7 @@
     "label": "7. Qualifications & Partnerships: Describe how your organization is well-positioned to implement the proposed work, including relevant partnerships, existing work, and/or staff expertise.",
     "canonicalField": {
       "label": "7. Qualifications & Partnerships: Describe how your organization is well-positioned to implement the proposed work, including relevant partnerships, existing work, and/or staff expertise.",
-      "shortCode": "qualifications",
+      "shortCode": "qualificationsPartnershipsDescribeHowYourOrganizationIsWellPositioned",
       "dataType": "string"
     }
   },
@@ -283,7 +283,7 @@
     "label": "8. Advancing Equity: How is your organization’s work advancing equity of people and communities that have been historically marginalized?",
     "canonicalField": {
       "label": "8. Advancing Equity: How is your organization’s work advancing equity of people and communities that have been historically marginalized?",
-      "shortCode": "advancingEquity",
+      "shortCode": "advancingEquityHowIsYourOrganizationSWorkAdvancing",
       "dataType": "string"
     }
   },
@@ -292,7 +292,7 @@
     "label": "9. Financial Narrative:  Describe your financial plan to achieve the proposed work, as shown in your attached budget. How will the funds support your organization and your identified goals?",
     "canonicalField": {
       "label": "9. Financial Narrative:  Describe your financial plan to achieve the proposed work, as shown in your attached budget. How will the funds support your organization and your identified goals?",
-      "shortCode": "financialNarrative",
+      "shortCode": "financialNarrativeDescribeYourFinancialPlanToAchieveThe",
       "dataType": "string"
     }
   },
@@ -355,7 +355,7 @@
     "label": "Supplemental Information (Optional)",
     "canonicalField": {
       "label": "Supplemental Information (Optional)",
-      "shortCode": "supplementalInformation",
+      "shortCode": "supplementalInformationOptional",
       "dataType": "string"
     }
   },

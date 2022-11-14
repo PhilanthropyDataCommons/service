@@ -625,7 +625,7 @@
     "funderFieldName": "Amount Requested from MacArthur (USD $ only)",
     "canonicalField": {
       "label": "Amount Requested from MacArthur (USD $ only)",
-      "shortCode": "amountRequestedFromMacarthur",
+      "shortCode": "amountRequestedFromMacarthurUsdOnly",
       "dataType": "number"
     }
   },
@@ -688,7 +688,7 @@
     "funderFieldName": "Learning & Evaluation",
     "canonicalField": {
       "label": "Learning & Evaluation",
-      "shortCode": "learning",
+      "shortCode": "learningEvaluation",
       "dataType": "string"
     }
   },

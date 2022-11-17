@@ -1,4 +1,5 @@
 import fs from 'fs';
+import os from 'os';
 import { AuthenticationError } from '../errors';
 import { getLogger } from '../logger';
 import type {
@@ -18,7 +19,7 @@ export const checkApiKey = (req: Request, res: Response, next: NextFunction): vo
   } else {
     try {
       const validApiKeysFile = process.env.API_KEYS_FILE ?? 'keys.txt';
-      const validApiKeys = fs.readFileSync(validApiKeysFile, 'utf8').split('\n');
+      const validApiKeys = fs.readFileSync(validApiKeysFile, 'utf8').split(os.EOL);
       if (validApiKeys.includes(apiKey.toString())) {
         next();
       } else {

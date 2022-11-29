@@ -49,6 +49,7 @@ In order to run this software you need to set up a [Postgres 14](https://www.pos
   ```bash
   cp .env.example .env.test
   edit .env.test
+  # Along with the other variables, be sure to set `API_KEYS_FILE=test_keys.txt`
   ```
 
 4. Run migrations

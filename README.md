@@ -136,6 +136,10 @@ As a temporary measure, API keys from a file are used for authentication. To gen
 
 Set `API_KEYS_FILE` in `.env` to `secret_api_keys.txt` (or whatever was specified above) but remember also to set `API_KEYS_FILE=test_keys.txt` (verbatim) in .env.test such that the .env value will not take precedence over the non-existent test value. In other words, `.env` and `.env.test` get merged in tests, and if you set API_KEYS_FILE in `.env`, the tests will unintentially pick up the wrong keys if you do not also set the variable correctly in `.env.test`. By default, if neither `.env` nor `.env.test` specifies `API_KEYS_FILE` the tests will use `test_keys.txt` which are not intended for production use.
 
+### Example scripts to add data to the PDC
+
+The script `/docs/examples/scripts/buildApplicationForm.sh` takes an xlsx spreadsheet with certain columns and creates canonicalFields, an opportunity, and an associated applicationForm from it. It works with the original files provided at https://github.com/PhilanthropyDataCommons/service/issues/94 and https://github.com/PhilanthropyDataCommons/service/issues/95. These are not exactly the canonical fields or data that we expect will be in PDC long-term, but the script and some of its steps demonstrate the use of the API in roughly the order expected. Suppose all expected canonical fields are already present, one would skip to the "GET /canonicalFields" rather than starting with creating and posting canonical fields. See the comment header of the script for the assumptions and dependencies.
+
 ### Understanding the Project
 
 #### Project Structure

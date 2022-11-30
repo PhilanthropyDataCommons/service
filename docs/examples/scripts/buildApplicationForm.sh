@@ -2,7 +2,7 @@
 
 # Takes xlsx, transforms the data to JSON, and posts an applicationForm to PDC.
 #
-# Example usage: ./buildApplicationForm.sh file1.xlsx http://localhost:3000/
+# Example usage: ./buildApplicationForm.sh file1.xlsx http://localhost:3000/ api_token.txt
 #
 # Requires the following:
 # GNU coreutils, xlsx2csv, curl, jq, extractCanonicalFields.sh, and

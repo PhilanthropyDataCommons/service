@@ -32,6 +32,7 @@ describe('/opportunities', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/opportunities')
+        .set(dummyApiKey)
         .expect(200, []);
     });
 
@@ -47,6 +48,7 @@ describe('/opportunities', () => {
       `);
       await agent
         .get('/opportunities')
+        .set(dummyApiKey)
         .expect(
           200,
           [
@@ -71,6 +73,7 @@ describe('/opportunities', () => {
         }) as Result<object>);
       const result = await agent
         .get('/opportunities')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -85,6 +88,7 @@ describe('/opportunities', () => {
         });
       const result = await agent
         .get('/opportunities')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -107,6 +111,7 @@ describe('/opportunities', () => {
         });
       const result = await agent
         .get('/opportunities')
+        .set(dummyApiKey)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -139,6 +144,7 @@ describe('/opportunities', () => {
       logger.debug('sparkleOpportunityId: %d', sparkleOpportunity.id);
       await agent
         .get(`/opportunities/${sparkleOpportunity.id}`)
+        .set(dummyApiKey)
         .expect(
           200,
           {
@@ -161,6 +167,7 @@ describe('/opportunities', () => {
       `);
       const result = await agent
         .get('/opportunities/a')
+        .set(dummyApiKey)
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
@@ -180,6 +187,7 @@ describe('/opportunities', () => {
       `);
       await agent
         .get('/opportunities/9001')
+        .set(dummyApiKey)
         .expect(404);
     });
 
@@ -190,6 +198,7 @@ describe('/opportunities', () => {
         }) as Result<object>);
       const result = await agent
         .get('/opportunities/1')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -204,6 +213,7 @@ describe('/opportunities', () => {
         });
       const result = await agent
         .get('/opportunities/1')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -226,6 +236,7 @@ describe('/opportunities', () => {
         });
       const result = await agent
         .get('/opportunities/1')
+        .set(dummyApiKey)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',

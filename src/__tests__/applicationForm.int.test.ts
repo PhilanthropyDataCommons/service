@@ -31,6 +31,7 @@ describe('/applicationForms', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/applicationForms')
+        .set(dummyApiKey)
         .expect(200, []);
     });
 
@@ -54,6 +55,7 @@ describe('/applicationForms', () => {
       `);
       await agent
         .get('/applicationForms')
+        .set(dummyApiKey)
         .expect(
           200,
           [
@@ -86,6 +88,7 @@ describe('/applicationForms', () => {
         }) as Result<object>);
       const result = await agent
         .get('/applicationForms')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -100,6 +103,7 @@ describe('/applicationForms', () => {
         });
       const result = await agent
         .get('/applicationForms')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -122,6 +126,7 @@ describe('/applicationForms', () => {
         });
       const result = await agent
         .get('/applicationForms')
+        .set(dummyApiKey)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',

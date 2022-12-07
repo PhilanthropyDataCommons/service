@@ -455,6 +455,11 @@
         "tags": [
           "Application Forms"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "All application forms currently registered in the PDC.",
@@ -685,6 +690,11 @@
         "tags": [
           "Canonical Fields"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "All canonical fields currently registered in the PDC.",
@@ -761,6 +771,11 @@
         "tags": [
           "Opportunities"
         ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "A list of known funding opportunities.",
@@ -826,6 +841,11 @@
         "summary": "Get a specific opportunity.",
         "tags": [
           "Opportunities"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
         ],
         "parameters": [
           {

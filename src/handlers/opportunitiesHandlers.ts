@@ -71,7 +71,7 @@ const getOpportunityParamsSchema: JSONSchemaType<GetOpportunityParams> = {
 };
 const isGetOpportunityParams = ajv.compile(getOpportunityParamsSchema);
 const getOpportunity = (
-  req: Request<GetOpportunityParams>,
+  req: Request<unknown, unknown, GetOpportunityParams>,
   res: Response,
   next: NextFunction,
 ): void => {

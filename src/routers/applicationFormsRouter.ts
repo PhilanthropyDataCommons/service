@@ -4,7 +4,7 @@ import { checkApiKey } from '../middleware/apiKeyChecker';
 
 const applicationFormsRouter = express.Router();
 
-applicationFormsRouter.get('/', applicationFormsHandlers.getApplicationForms);
+applicationFormsRouter.get('/', checkApiKey, applicationFormsHandlers.getApplicationForms);
 applicationFormsRouter.post('/', checkApiKey, applicationFormsHandlers.postApplicationForms);
 
 export { applicationFormsRouter };

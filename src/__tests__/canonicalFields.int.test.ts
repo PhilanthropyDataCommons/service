@@ -31,6 +31,7 @@ describe('/canonicalFields', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/canonicalFields')
+        .set(dummyApiKey)
         .expect(200, []);
     });
 
@@ -48,6 +49,7 @@ describe('/canonicalFields', () => {
       `);
       await agent
         .get('/canonicalFields')
+        .set(dummyApiKey)
         .expect(
           200,
           [
@@ -76,6 +78,7 @@ describe('/canonicalFields', () => {
         }) as Result<object>);
       const result = await agent
         .get('/canonicalFields')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -90,6 +93,7 @@ describe('/canonicalFields', () => {
         });
       const result = await agent
         .get('/canonicalFields')
+        .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -112,6 +116,7 @@ describe('/canonicalFields', () => {
         });
       const result = await agent
         .get('/canonicalFields')
+        .set(dummyApiKey)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',

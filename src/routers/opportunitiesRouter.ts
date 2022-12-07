@@ -5,7 +5,7 @@ import { checkApiKey } from '../middleware/apiKeyChecker';
 const opportunitiesRouter = express.Router();
 
 opportunitiesRouter.post('/', checkApiKey, opportunitiesHandlers.postOpportunity);
-opportunitiesRouter.get('/:id', opportunitiesHandlers.getOpportunity);
-opportunitiesRouter.get('/', opportunitiesHandlers.getOpportunities);
+opportunitiesRouter.get('/:id', checkApiKey, opportunitiesHandlers.getOpportunity);
+opportunitiesRouter.get('/', checkApiKey, opportunitiesHandlers.getOpportunities);
 
 export { opportunitiesRouter };

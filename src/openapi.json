@@ -21,7 +21,7 @@
           "id": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3407
           },
           "externalId": {
             "type": "string",
@@ -49,15 +49,15 @@
           "id": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3709
           },
           "applicantId": {
             "type": "integer",
-            "example": 1
+            "example": 3407
           },
           "opportunityId": {
             "type": "integer",
-            "example": 1
+            "example": 3203
           },
           "externalId": {
             "type": "string",
@@ -91,19 +91,19 @@
           "id": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3821
           },
           "proposalId": {
             "type": "integer",
-            "example": 1
+            "example": 3709
           },
           "applicationFormId": {
             "type": "integer",
-            "example": 1
+            "example": 3529
           },
           "version": {
             "type": "integer",
-            "example": 1,
+            "example": 17,
             "readOnly": true
           },
           "fieldValues": {
@@ -132,20 +132,20 @@
           "id": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3943
           },
           "proposalVersionId": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3709
           },
           "applicationFormFieldId": {
             "type": "integer",
-            "example": 1
+            "example": 3613
           },
           "position": {
             "type": "integer",
-            "example": 1
+            "example": 23
           },
           "value": {
             "type": "string",
@@ -172,16 +172,16 @@
           "id": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3529
           },
           "opportunityId": {
             "type": "integer",
-            "example": 1
+            "example": 3203
           },
           "version": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 13
           },
           "fields": {
             "type": "array",
@@ -209,20 +209,20 @@
           "id": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3613
           },
           "applicationFormId": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3529
           },
           "canonicalFieldId": {
             "type": "integer",
-            "example": 1
+            "example": 3011
           },
           "position": {
             "type": "integer",
-            "example": 1
+            "example": 19
           },
           "label": {
             "type": "string",
@@ -249,7 +249,7 @@
           "id": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3011
           },
           "label": {
             "type": "string",
@@ -301,7 +301,7 @@
           "id": {
             "type": "integer",
             "readOnly": true,
-            "example": 1
+            "example": 3203
           },
           "title": {
             "type": "string",
@@ -473,9 +473,9 @@
                 },
                 "example": [
                   {
-                    "id": 1,
-                    "opportunityId": 1,
-                    "version": 1,
+                    "id": 3529,
+                    "opportunityId": 3203,
+                    "version": 13,
                     "createdAt": "2022-09-13T14:45:06.139Z"
                   }
                 ]

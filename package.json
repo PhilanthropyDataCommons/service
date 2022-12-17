@@ -38,7 +38,7 @@
   "homepage": "https://github.com/PhilanthropyDataCommons/pdc#readme",
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
-    "@types/express": "^4.17.14",
+    "@types/express": "^4.17.15",
     "@types/jest": "^28.1.2",
     "@types/node": "^16.18.9",
     "@types/pg": "^8.6.5",

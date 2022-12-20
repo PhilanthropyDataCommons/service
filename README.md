@@ -152,6 +152,11 @@ Migrations should be named according to the following pattern: `####-{action}-{t
 
 For example: `0001-create-users` or `0001-modify-users`
 
+#### Node version
+
+We aim to use the "Active LTS" version of node, currently 18. An exact version of node is specified in automated workflows and Dockerfile while a major version is specified in the .node-version. You should be able to use any minor version within the Active LTS version and might be able to use other major versions.
+
 ### EditorConfig
 
 We use [EditorConfig](https://editorconfig.org/) to help developers maintain proper whitespace habits in the project.  Most IDEs have [an official EditorConfig plugin](https://editorconfig.org/#download) you can install.
+

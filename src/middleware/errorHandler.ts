@@ -6,11 +6,14 @@ import {
   InputConflictError,
 } from '../errors';
 import { PostgresErrorCode } from '../types';
+import { getLogger } from '../logger';
 import type {
   NextFunction,
   Request,
   Response,
 } from 'express';
+
+const logger = getLogger(__filename);
 
 const getHttpStatusCodeForDatabaseErrorCode = (errorCode: string): number => {
   switch (errorCode) {
@@ -102,6 +105,8 @@ export const errorHandler = (
   res: Response,
   next: NextFunction, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): void => {
+  logger.debug(err);
+  logger.trace(req.body);
   const statusCode = getHttpStatusCodeForError(err);
   res.status(statusCode)
     .contentType('application/json')

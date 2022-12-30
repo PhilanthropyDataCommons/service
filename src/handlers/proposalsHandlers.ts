@@ -56,6 +56,44 @@ const getProposals = (
     });
 };
 
+const getProposal = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
+  db.sql('proposals.selectById', { id: req.params.id })
+    .then((proposalsQueryResult: Result<Proposal>) => {
+      logger.debug(proposalsQueryResult);
+      if (proposalsQueryResult.row_count === 0) {
+        res.status(404)
+          .contentType('application/json')
+          .send({ message: 'Not found. Find existing proposals by calling with no parameters.' });
+        return;
+      }
+      const proposal = proposalsQueryResult.rows[0];
+      if (isProposal(proposal)) {
+        res.status(200)
+          .contentType('application/json')
+          .send(proposal);
+      } else {
+        next(new InternalValidationError(
+          'The database responded with an unexpected format.',
+          isProposal.errors ?? [],
+        ));
+      }
+    })
+    .catch((error: unknown) => {
+      if (isTinyPgErrorWithQueryContext(error)) {
+        next(new DatabaseError(
+          'Error retrieving proposals.',
+          error,
+        ));
+        return;
+      }
+      next(error);
+    });
+};
+
 const postProposal = (
   req: Request<unknown, unknown, ProposalWrite>,
   res: Response,
@@ -98,5 +136,6 @@ const postProposal = (
 
 export const proposalsHandlers = {
   getProposals,
+  getProposal,
   postProposal,
 };

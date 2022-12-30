@@ -629,6 +629,49 @@
         }
       }
     },
+    "/proposals/{proposalId}": {
+      "get": {
+        "summary": "Get a specific proposal.",
+        "tags": [
+          "Proposals"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "proposalId",
+            "description": "The PDC-generated ID of a proposal.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The proposal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proposal"
+                },
+                "example": {
+                  "id": 3709,
+                  "applicantId": 3407,
+                  "externalId": "AnIdGeneratedByAGms",
+                  "opportunityId": 3203,
+                  "createdAt": "2022-12-30T15:50:58.839Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/proposalVersions": {
       "post": {
         "summary": "Add a new proposal version.",

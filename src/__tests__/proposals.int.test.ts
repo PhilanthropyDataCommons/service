@@ -146,6 +146,115 @@ describe('/proposals', () => {
     });
   });
 
+  describe('GET /:id', () => {
+    it('returns 404 when given id is not present', async () => {
+      await agent
+        .get('/proposals/9001')
+        .set(dummyApiKey)
+        .expect(404, { message: 'Not found. Find existing proposals by calling with no parameters.' });
+    });
+
+    it('returns the one proposal asked for', async () => {
+      await db.query(`
+        INSERT INTO opportunities (
+          title,
+          created_at
+        )
+        VALUES
+          ( '⛰️', '2525-01-03T00:00:01Z' )
+      `);
+      await db.query(`
+        INSERT INTO applicants (
+          external_id,
+          opted_in,
+          created_at
+        )
+        VALUES
+          ( '🐕', 'true', '2525-01-03T00:00:02Z' ),
+          ( '🐈', 'false', '2525-01-03T00:00:03Z' );
+      `);
+      await db.query(`
+        INSERT INTO proposals (
+          applicant_id,
+          external_id,
+          opportunity_id,
+          created_at
+        )
+        VALUES
+          ( 1, 'proposal-1', 1, '2525-01-03T00:00:04Z' ),
+          ( 1, 'proposal-2', 1, '2525-01-03T00:00:05Z' );
+      `);
+      await agent
+        .get('/proposals/2')
+        .set(dummyApiKey)
+        .expect(
+          200,
+          {
+            id: 2,
+            externalId: 'proposal-2',
+            applicantId: 1,
+            opportunityId: 1,
+            createdAt: '2525-01-03T00:00:05.000Z',
+          },
+        );
+    });
+
+    it('should error if the database returns an unexpected data structure', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => ({
+          rows: [{ foo: 'not a valid result' }],
+        }) as Result<object>);
+      const result = await agent
+        .get('/proposals/2')
+        .set(dummyApiKey)
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'InternalValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new Error('This is unexpected');
+        });
+      const result = await agent
+        .get('/proposals/2')
+        .set(dummyApiKey)
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'UnknownError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new TinyPgError(
+            'Something went wrong',
+            undefined,
+            {
+              error: {
+                code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+              },
+            },
+          );
+        });
+      const result = await agent
+        .get('/proposals/2')
+        .set(dummyApiKey)
+        .expect(503);
+      expect(result.body).toMatchObject({
+        name: 'DatabaseError',
+        details: [{
+          code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+        }],
+      });
+    });
+  });
+
   describe('POST /', () => {
     it('creates exactly one proposal', async () => {
       await db.query(`

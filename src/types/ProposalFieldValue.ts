@@ -1,5 +1,7 @@
 import { ajv } from '../ajv';
+import { applicationFormFieldSchema } from './ApplicationFormField';
 import type { JSONSchemaType } from 'ajv';
+import type { ApplicationFormField } from './ApplicationFormField';
 
 export interface ProposalFieldValue {
   id: number;
@@ -8,11 +10,12 @@ export interface ProposalFieldValue {
   position: number;
   value: string;
   createdAt: Date;
+  applicationFormField?: ApplicationFormField;
 }
 
 // See https://github.com/typescript-eslint/typescript-eslint/issues/1824
 /* eslint-disable @typescript-eslint/indent */
-export type ProposalFieldValueWrite = Omit<ProposalFieldValue, 'createdAt' | 'id' | 'proposalVersionId'>;
+export type ProposalFieldValueWrite = Omit<ProposalFieldValue, 'applicationFormField' | 'createdAt' | 'id' | 'proposalVersionId'>;
 /* eslint-enable @typescript-eslint/indent */
 
 export const proposalFieldValueSchema: JSONSchemaType<ProposalFieldValue> = {
@@ -37,6 +40,10 @@ export const proposalFieldValueSchema: JSONSchemaType<ProposalFieldValue> = {
       type: 'object',
       required: [],
       instanceof: 'Date',
+    },
+    applicationFormField: {
+      ...applicationFormFieldSchema,
+      nullable: true,
     },
   },
   required: [

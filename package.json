@@ -53,7 +53,7 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-sort-exports": "^0.8.0",
     "jest": "^28.1.1",
-    "pino-pretty": "^9.1.1",
+    "pino-pretty": "^9.2.0",
     "rimraf": "^4.1.2",
     "supertest": "^6.3.3",
     "ts-jest": "^28.0.5",

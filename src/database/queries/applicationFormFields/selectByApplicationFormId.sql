@@ -7,3 +7,4 @@ SELECT
   aff.created_at as "createdAt"
 FROM application_form_fields aff
 WHERE aff.application_form_id = :applicationFormId
+ORDER BY aff.position;

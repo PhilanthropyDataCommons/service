@@ -81,13 +81,133 @@ describe('/applicationForms', () => {
         );
     });
 
+    it('returns an application form without its fields', async () => {
+      await db.query(`
+        INSERT INTO opportunities (title)
+        VALUES
+          ( 'Summer opportunity 🩴' ),
+          ( 'Spring opportunity 🌺' );
+      `);
+      await db.query(`
+        INSERT INTO application_forms (
+          opportunity_id,
+          version,
+          created_at
+        )
+        VALUES
+          ( 1, 1, '2510-02-02 00:00:01+0000' ),
+          ( 1, 2, '2510-02-02 00:00:02+0000' ),
+          ( 2, 1, '2510-02-02 00:00:03+0000' )
+      `);
+      await db.query(`
+      INSERT INTO canonical_fields (
+        label,
+        short_code,
+        data_type,
+        created_at
+      )
+      VALUES
+        ( 'Organization Name', 'organizationName', '{ type: "string" }', '2510-02-02 00:00:04+0000' ),
+        ( 'Years of work', 'yearsOfWork', '{ type: "integer" }', '2510-02-02 00:00:05+0000' );
+      `);
+      await agent
+        .get('/applicationForms/2')
+        .set(dummyApiKey)
+        .expect(
+          200,
+          {
+            id: 2,
+            opportunityId: 1,
+            version: 2,
+            createdAt: '2510-02-02T00:00:02.000Z',
+          },
+        );
+    });
+
+    it('returns an application form with its fields', async () => {
+      await db.query(`
+        INSERT INTO opportunities (title)
+        VALUES
+          ( 'Holiday opportunity 🎄' ),
+          ( 'Another holiday opportunity 🕎' );
+      `);
+      await db.query(`
+        INSERT INTO application_forms (
+          opportunity_id,
+          version,
+          created_at
+        )
+        VALUES
+          ( 1, 1, '2510-02-01 00:00:01+0000' ),
+          ( 1, 2, '2510-02-01 00:00:02+0000' ),
+          ( 2, 1, '2510-02-01 00:00:03+0000' )
+      `);
+      await db.query(`
+      INSERT INTO canonical_fields (
+        label,
+        short_code,
+        data_type,
+        created_at
+      )
+      VALUES
+        ( 'Organization Name', 'organizationName', '{ type: "string" }', '2510-02-01 00:00:04+0000' ),
+        ( 'Years of work', 'yearsOfWork', '{ type: "integer" }', '2510-02-01 00:00:05+0000' );
+      `);
+      await db.query(`
+        INSERT INTO application_form_fields (
+          application_form_id,
+          canonical_field_id,
+          position,
+          label,
+          created_at
+        )
+        VALUES
+          ( 3, 2, 1, 'Anni Worki', '2510-02-01 00:00:06+0000' ),
+          ( 3, 1, 2, 'Org Nomen', '2510-02-01 00:00:07+0000' ),
+          ( 2, 1, 2, 'Name of Organization', '2510-02-01 00:00:08+0000' ),
+          ( 2, 2, 1, 'Duration of work in years', '2510-02-01 00:00:09+0000' )
+      `);
+      await agent
+        .get('/applicationForms/2')
+        .query({ includeFields: 'true' })
+        .set(dummyApiKey)
+        .expect(
+          200,
+          {
+            id: 2,
+            opportunityId: 1,
+            version: 2,
+            fields: [
+              {
+                id: 4,
+                applicationFormId: 2,
+                canonicalFieldId: 2,
+                position: 1,
+                label: 'Duration of work in years',
+                createdAt: '2510-02-01T00:00:09.000Z',
+              },
+              {
+                id: 3,
+                applicationFormId: 2,
+                canonicalFieldId: 1,
+                position: 2,
+                label: 'Name of Organization',
+                createdAt: '2510-02-01T00:00:08.000Z',
+              },
+            ],
+            createdAt: '2510-02-01T00:00:02.000Z',
+          },
+        );
+    });
+
     it('should error if the database returns an unexpected data structure', async () => {
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => ({
           rows: [{ foo: 'not a valid result' }],
         }) as Result<object>);
       const result = await agent
-        .get('/applicationForms')
+        .get('/applicationForms/2')
+        .query({ includeFields: 'true' })
         .set(dummyApiKey)
         .expect(500);
       expect(result.body).toMatchObject({
@@ -134,6 +254,160 @@ describe('/applicationForms', () => {
           code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
         }],
       });
+    });
+
+    it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting one', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new TinyPgError(
+            'Something went wrong',
+            undefined,
+            {
+              error: {
+                code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+              },
+            },
+          );
+        });
+      const result = await agent
+        .get('/applicationForms/3')
+        .set(dummyApiKey)
+        .expect(503);
+      expect(result.body).toMatchObject({
+        name: 'DatabaseError',
+        details: [{
+          code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+        }],
+      });
+    });
+
+    it('should error if the database returns an unexpected data structure', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => ({
+          rows: [{ foo: 'not a valid applicationForm' }],
+        }) as Result<object>);
+      const result = await agent
+        .get('/applicationForms/5')
+        .set(dummyApiKey)
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'InternalValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('should return 404 when the applicationForm is not found (shallow)', async () => {
+      const result = await agent
+        .get('/applicationForms/6')
+        .set(dummyApiKey)
+        .expect(404);
+      expect(result.body).toMatchObject({
+        name: 'NotFoundError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+    it('should return 404 when the applicationForm is not found (with fields)', async () => {
+      const result = await agent
+        .get('/applicationForms/7')
+        .query({ includeFields: 'true' })
+        .set(dummyApiKey)
+        .expect(404);
+      expect(result.body).toMatchObject({
+        name: 'NotFoundError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('should return 500 when the application form fields returned are invalid', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => ({
+          command: '',
+          row_count: 1,
+          rows: [
+            {
+              id: 1,
+              opportunityId: 1,
+              version: 1,
+              createdAt: new Date(),
+            },
+          ],
+        }))
+        .mockImplementationOnce(async () => ({
+          rows: [{ foo: 'not a valid application form fields result' }],
+        }) as Result<object>);
+      const result = await agent
+        .get('/applicationForms/8')
+        .query({ includeFields: 'true' })
+        .set(dummyApiKey)
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'InternalValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+  });
+
+  it('should return 503 when the db has insufficient resources on application form fields select', async () => {
+    jest.spyOn(db, 'sql')
+      .mockImplementationOnce(async () => ({
+        command: '',
+        row_count: 1,
+        rows: [
+          {
+            id: 1,
+            opportunityId: 1,
+            version: 1,
+            createdAt: new Date(),
+          },
+        ],
+      }))
+      .mockImplementationOnce(async () => {
+        throw new TinyPgError(
+          'Something went wrong',
+          undefined,
+          {
+            error: {
+              code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+            },
+          },
+        );
+      });
+    const result = await agent
+      .get('/applicationForms/9')
+      .query({ includeFields: 'true' })
+      .set(dummyApiKey)
+      .expect(503);
+    expect(result.body).toMatchObject({
+      name: 'DatabaseError',
+      details: [{
+        code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+      }],
+    });
+  });
+
+  it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting one', async () => {
+    jest.spyOn(db, 'sql')
+      .mockImplementationOnce(async () => {
+        throw new TinyPgError(
+          'Something went wrong',
+          undefined,
+          {
+            error: {
+              code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+            },
+          },
+        );
+      });
+    const result = await agent
+      .get('/applicationForms/4')
+      .set(dummyApiKey)
+      .query({ includeFields: 'true' })
+      .expect(503);
+    expect(result.body).toMatchObject({
+      name: 'DatabaseError',
+      details: [{
+        code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+      }],
     });
   });
 
@@ -391,7 +665,6 @@ describe('/applicationForms', () => {
               id: 1,
               opportunityId: 1,
               version: 1,
-              fields: [],
               createdAt: new Date(),
             },
           ],
@@ -471,6 +744,39 @@ describe('/applicationForms', () => {
         message: 'The database responded with an unexpected format when creating a field.',
         details: expect.any(Array) as unknown[],
       });
+    });
+  });
+
+  it('returns 503 when the db has insufficient resources on insert', async () => {
+    jest.spyOn(db, 'sql')
+      .mockImplementationOnce(async () => {
+        throw new TinyPgError(
+          'Something went wrong',
+          undefined,
+          {
+            error: {
+              code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+            },
+          },
+        );
+      });
+    const result = await agent
+      .post('/applicationForms')
+      .set(dummyApiKey)
+      .send({
+        opportunityId: 9001,
+        fields: [{
+          canonicalFieldId: 9002,
+          position: 9003,
+          label: 'A label of some kind',
+        }],
+      })
+      .expect(503);
+    expect(result.body).toMatchObject({
+      name: 'DatabaseError',
+      details: [{
+        code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+      }],
     });
   });
 });

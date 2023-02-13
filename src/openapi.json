@@ -471,14 +471,19 @@
                     "$ref": "#/components/schemas/ApplicationForm"
                   }
                 },
-                "example": [
-                  {
-                    "id": 3529,
-                    "opportunityId": 3203,
-                    "version": 13,
-                    "createdAt": "2022-09-13T14:45:06.139Z"
+                "examples": {
+                  "default": {
+                    "summary": "The default is a shallow response. To get deep objects, request by applicationFormId.",
+                    "value": [
+                      {
+                        "id": 3529,
+                        "opportunityId": 3203,
+                        "version": 13,
+                        "createdAt": "2022-09-13T14:45:06.139Z"
+                      }
+                    ]
                   }
-                ]
+                }
               }
             }
           }
@@ -531,6 +536,84 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applicationForms/{applicationFormId}": {
+      "get": {
+        "summary": "Get a specific application form.",
+        "tags": [
+          "Application Forms"
+        ],
+        "security": [
+          {
+            "preSharedApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "applicationFormId",
+            "description": "The PDC-generated ID of an application form.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "includeFields",
+            "in": "query",
+            "description": "Include the fields associated with the application form when 'true', otherwise not.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All application forms currently registered in the PDC.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationForm"
+                  }
+                },
+                "examples": {
+                  "default": {
+                    "summary": "The default, shallow response with no parameters or where includeFields=false",
+                    "value": {
+                      "id": 3529,
+                      "opportunityId": 3203,
+                      "version": 13,
+                      "createdAt": "2022-09-13T14:45:06.139Z"
+                    }
+                  },
+                  "includeFields": {
+                    "summary": "The response when includeFields is set to true",
+                    "value": {
+                      "id": 3529,
+                      "opportunityId": 3203,
+                      "version": 13,
+                      "createdAt": "2022-09-13T14:45:06.139Z",
+                      "fields": [
+                        {
+                          "id": 3613,
+                          "applicationFormId": 3529,
+                          "canonicalFieldId": 3011,
+                          "position": 29,
+                          "label": "Your First Name",
+                          "createdAt": "2022-12-12T17:54:24.988Z"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }

@@ -171,7 +171,14 @@ const getProposalWithFieldsAndValues = (
           .contentType('application/json')
           .send(proposal);
       }).catch((error: unknown) => {
-        throw error;
+        if (isTinyPgErrorWithQueryContext(error)) {
+          next(new DatabaseError(
+            'Error retrieving proposal.',
+            error,
+          ));
+          return;
+        }
+        next(error);
       });
     }).catch((error: unknown) => {
       if (isTinyPgErrorWithQueryContext(error)) {

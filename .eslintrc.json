@@ -9,7 +9,9 @@
     "sort-exports"
   ],
   "extends": [
-    "plugin:@typescript-eslint/all",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:@typescript-eslint/strict",
     "airbnb-base",
     "airbnb-typescript/base"
   ],

@@ -17,10 +17,13 @@ const fileWithApiTestKeys = 'test_keys.txt';
 const environment = process.env;
 
 describe('/proposalVersions', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();
     process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
+    // These tests assume no stock canonical_fields, so remove the stock fields.
+    await db.query('DELETE FROM canonical_fields;');
+    await db.query('ALTER SEQUENCE canonical_fields_id_seq RESTART 1;');
   });
 
   afterEach(() => {

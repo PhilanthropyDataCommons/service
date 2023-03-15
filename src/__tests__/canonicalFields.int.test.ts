@@ -8,7 +8,7 @@ import {
   isoTimestampPattern,
   getTableMetrics,
 } from '../test/utils';
-import { dummyApiKey } from '../test/dummyApiKey';
+import { dummyApiKey as authHeader } from '../test/dummyApiKey';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
@@ -31,7 +31,7 @@ describe('/canonicalFields', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/canonicalFields')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(200, []);
     });
 
@@ -49,7 +49,7 @@ describe('/canonicalFields', () => {
       `);
       await agent
         .get('/canonicalFields')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           [
@@ -78,7 +78,7 @@ describe('/canonicalFields', () => {
         }) as Result<object>);
       const result = await agent
         .get('/canonicalFields')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -93,7 +93,7 @@ describe('/canonicalFields', () => {
         });
       const result = await agent
         .get('/canonicalFields')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -116,7 +116,7 @@ describe('/canonicalFields', () => {
         });
       const result = await agent
         .get('/canonicalFields')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -134,7 +134,7 @@ describe('/canonicalFields', () => {
       const result = await agent
         .post('/canonicalFields')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           label: '🏷️',
           shortCode: '🩳',
@@ -157,7 +157,7 @@ describe('/canonicalFields', () => {
       const result = await agent
         .post('/canonicalFields')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           shortCode: '🩳',
           dataType: '📊',
@@ -172,7 +172,7 @@ describe('/canonicalFields', () => {
       const result = await agent
         .post('/canonicalFields')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           label: '🏷️',
           dataType: '📊',
@@ -187,7 +187,7 @@ describe('/canonicalFields', () => {
       const result = await agent
         .post('/canonicalFields')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           label: '🏷️',
           shortCode: '🩳',
@@ -212,7 +212,7 @@ describe('/canonicalFields', () => {
       const result = await agent
         .post('/canonicalFields')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           label: '🏷️',
           shortCode: 'firstName',
@@ -235,7 +235,7 @@ describe('/canonicalFields', () => {
       const result = await agent
         .post('/canonicalFields')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           label: '🏷️',
           shortCode: 'firstName',
@@ -256,7 +256,7 @@ describe('/canonicalFields', () => {
       const result = await agent
         .post('/canonicalFields')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           label: '🏷️',
           shortCode: '🩳',

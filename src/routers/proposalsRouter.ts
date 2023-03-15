@@ -1,11 +1,11 @@
 import express from 'express';
 import { proposalsHandlers } from '../handlers/proposalsHandlers';
-import { checkApiKey } from '../middleware/apiKeyChecker';
+import { checkApiKey as verifyAuth } from '../middleware/apiKeyChecker';
 
 const proposalsRouter = express.Router();
 
-proposalsRouter.get('/:id', checkApiKey, proposalsHandlers.getProposal);
-proposalsRouter.get('/', checkApiKey, proposalsHandlers.getProposals);
-proposalsRouter.post('/', checkApiKey, proposalsHandlers.postProposal);
+proposalsRouter.get('/:id', verifyAuth, proposalsHandlers.getProposal);
+proposalsRouter.get('/', verifyAuth, proposalsHandlers.getProposals);
+proposalsRouter.post('/', verifyAuth, proposalsHandlers.postProposal);
 
 export { proposalsRouter };

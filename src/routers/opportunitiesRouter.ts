@@ -1,11 +1,11 @@
 import express from 'express';
 import { opportunitiesHandlers } from '../handlers/opportunitiesHandlers';
-import { checkApiKey } from '../middleware/apiKeyChecker';
+import { checkApiKey as verifyAuth } from '../middleware/apiKeyChecker';
 
 const opportunitiesRouter = express.Router();
 
-opportunitiesRouter.post('/', checkApiKey, opportunitiesHandlers.postOpportunity);
-opportunitiesRouter.get('/:id', checkApiKey, opportunitiesHandlers.getOpportunity);
-opportunitiesRouter.get('/', checkApiKey, opportunitiesHandlers.getOpportunities);
+opportunitiesRouter.post('/', verifyAuth, opportunitiesHandlers.postOpportunity);
+opportunitiesRouter.get('/:id', verifyAuth, opportunitiesHandlers.getOpportunity);
+opportunitiesRouter.get('/', verifyAuth, opportunitiesHandlers.getOpportunities);
 
 export { opportunitiesRouter };

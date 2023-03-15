@@ -7,7 +7,7 @@ import {
   getTableMetrics,
   isoTimestampPattern,
 } from '../test/utils';
-import { dummyApiKey } from '../test/dummyApiKey';
+import { dummyApiKey as authHeader } from '../test/dummyApiKey';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
 
@@ -32,7 +32,7 @@ describe('/proposals', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/proposals')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(200, []);
     });
 
@@ -68,7 +68,7 @@ describe('/proposals', () => {
       `);
       await agent
         .get('/proposals')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           [
@@ -97,7 +97,7 @@ describe('/proposals', () => {
         }) as Result<object>);
       const result = await agent
         .get('/proposals')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -112,7 +112,7 @@ describe('/proposals', () => {
         });
       const result = await agent
         .get('/proposals')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -135,7 +135,7 @@ describe('/proposals', () => {
         });
       const result = await agent
         .get('/proposals')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -150,7 +150,7 @@ describe('/proposals', () => {
     it('returns 404 when given id is not present', async () => {
       await agent
         .get('/proposals/9001')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(404, {
           name: 'NotFoundError',
           message: 'Not found. Find existing proposals by calling with no parameters.',
@@ -194,7 +194,7 @@ describe('/proposals', () => {
       `);
       await agent
         .get('/proposals/2')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           {
@@ -303,7 +303,7 @@ describe('/proposals', () => {
       `);
       await agent
         .get('/proposals/1/?includeFieldsAndValues=true')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           {
@@ -407,7 +407,7 @@ describe('/proposals', () => {
         }) as Result<object>);
       const result = await agent
         .get('/proposals/2')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -422,7 +422,7 @@ describe('/proposals', () => {
         });
       const result = await agent
         .get('/proposals/2')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -445,7 +445,7 @@ describe('/proposals', () => {
         });
       const result = await agent
         .get('/proposals/2')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -458,7 +458,7 @@ describe('/proposals', () => {
     it('returns 404 when given id is not present and includeFieldsAndValues=true', async () => {
       await agent
         .get('/proposals/9002?includeFieldsAndValues=true')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(404, {
           name: 'NotFoundError',
           message: 'Not found. Find existing proposals by calling with no parameters.',
@@ -477,7 +477,7 @@ describe('/proposals', () => {
         }) as Result<object>);
       const result = await agent
         .get('/proposals/9003?includeFieldsAndValues=true')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -492,7 +492,7 @@ describe('/proposals', () => {
         });
       const result = await agent
         .get('/proposals/9004?includeFieldsAndValues=true')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -543,7 +543,7 @@ describe('/proposals', () => {
       const result = await agent
         .get('/proposals/1?includeFieldsAndValues=true')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -582,7 +582,7 @@ describe('/proposals', () => {
       const result = await agent
         .get('/proposals/9005')
         .query({ includeFieldsAndValues: 'true' })
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -618,7 +618,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -642,7 +642,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           externalId: 'proposal123',
           opportunityId: 1,
@@ -658,7 +658,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           applicantId: 1,
           opportunityId: 1,
@@ -674,7 +674,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -698,7 +698,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -728,7 +728,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -770,7 +770,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -809,7 +809,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           applicantId: 1,
           externalId: 'proposal123',
@@ -856,7 +856,7 @@ describe('/proposals', () => {
       const result = await agent
         .post('/proposals')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           applicantId: 1,
           externalId: 'proposal123',

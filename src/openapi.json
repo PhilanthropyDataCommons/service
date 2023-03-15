@@ -7,7 +7,7 @@
   },
   "components": {
     "securitySchemes": {
-      "preSharedApiKey": {
+      "auth": {
         "type": "apiKey",
         "description": "A pre-shared key required to create or access protected resources via the API.",
         "name": "x-api-key",
@@ -330,7 +330,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -366,7 +366,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -411,7 +411,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "parameters": [
@@ -457,7 +457,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -496,7 +496,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -551,7 +551,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "parameters": [
@@ -629,7 +629,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -665,7 +665,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -720,7 +720,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "parameters": [
@@ -814,7 +814,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -869,7 +869,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -895,7 +895,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -950,7 +950,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -976,7 +976,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -1021,7 +1021,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "parameters": [

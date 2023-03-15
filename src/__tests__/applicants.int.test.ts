@@ -8,7 +8,7 @@ import {
   getTableMetrics,
   isoTimestampPattern,
 } from '../test/utils';
-import { dummyApiKey } from '../test/dummyApiKey';
+import { dummyApiKey as authHeader } from '../test/dummyApiKey';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
@@ -31,7 +31,7 @@ describe('/applicants', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/applicants')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(200, []);
     });
 
@@ -48,7 +48,7 @@ describe('/applicants', () => {
       `);
       await agent
         .get('/applicants')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           [
@@ -75,7 +75,7 @@ describe('/applicants', () => {
         }) as Result<object>);
       const result = await agent
         .get('/applicants')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -90,7 +90,7 @@ describe('/applicants', () => {
         });
       const result = await agent
         .get('/applicants')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -113,7 +113,7 @@ describe('/applicants', () => {
         });
       const result = await agent
         .get('/applicants')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -131,7 +131,7 @@ describe('/applicants', () => {
       const result = await agent
         .post('/applicants')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           externalId: '🆔',
         })
@@ -151,7 +151,7 @@ describe('/applicants', () => {
       const result = await agent
         .post('/applicants')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({})
         .expect(400);
       expect(result.body).toMatchObject({
@@ -167,7 +167,7 @@ describe('/applicants', () => {
       const result = await agent
         .post('/applicants')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           externalId: '12345',
         })
@@ -187,7 +187,7 @@ describe('/applicants', () => {
       const result = await agent
         .post('/applicants')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           externalId: '12345',
         })

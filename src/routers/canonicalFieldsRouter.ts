@@ -1,10 +1,10 @@
 import express from 'express';
 import { canonicalFieldsHandlers } from '../handlers/canonicalFieldsHandlers';
-import { checkApiKey } from '../middleware/apiKeyChecker';
+import { checkApiKey as verifyAuth } from '../middleware/apiKeyChecker';
 
 const canonicalFieldsRouter = express.Router();
 
-canonicalFieldsRouter.get('/', checkApiKey, canonicalFieldsHandlers.getCanonicalFields);
-canonicalFieldsRouter.post('/', checkApiKey, canonicalFieldsHandlers.postCanonicalField);
+canonicalFieldsRouter.get('/', verifyAuth, canonicalFieldsHandlers.getCanonicalFields);
+canonicalFieldsRouter.post('/', verifyAuth, canonicalFieldsHandlers.postCanonicalField);
 
 export { canonicalFieldsRouter };

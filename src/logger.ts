@@ -11,7 +11,7 @@ import type {
 // here in the logger code.
 dotenv.config();
 
-export const redactAllButFirstAndLastThreeDigits = (secret: string): string => {
+export const redactToPreventAuthReplay = (secret: string): string => {
   // We want to redact much more than we log. These are usually >=80 characters.
   if (secret.length >= 24) {
     return `${secret.slice(0, 3)}...[redacted]...${secret.slice(-3)}`;
@@ -24,7 +24,7 @@ const logger = pino({
   level: process.env.LOG_LEVEL ?? 'info',
   redact: {
     paths: ['req.headers["x-api-key"]'],
-    censor: redactAllButFirstAndLastThreeDigits,
+    censor: redactToPreventAuthReplay,
   },
 });
 

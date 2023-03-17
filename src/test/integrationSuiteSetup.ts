@@ -7,8 +7,14 @@ import {
   prepareDatabaseForCurrentWorker,
   cleanupDatabaseForCurrentWorker,
 } from './harnessFunctions';
+import { mockJwks } from './mockJwt';
+
+beforeAll(async () => {
+  mockJwks.start();
+});
 
 afterAll(async () => {
+  mockJwks.stop();
   await db.close();
 });
 

@@ -8,25 +8,13 @@ import {
   isoTimestampPattern,
   getTableMetrics,
 } from '../test/utils';
-import { dummyApiKey as authHeader } from '../test/dummyApiKey';
+import { mockJwt as authHeader } from '../test/mockJwt';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
-const fileWithApiTestKeys = 'test_keys.txt';
-const environment = process.env;
 
 describe('/applicationForms', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-    process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
-  });
-
-  afterEach(() => {
-    process.env = environment;
-  });
-
   describe('GET /', () => {
     it('returns an empty array when no data is present', async () => {
       await agent

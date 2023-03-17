@@ -27,6 +27,26 @@ describe('errorHandler', () => {
     }));
   });
 
+  it('should send 503 on JWKS rate limit error', () => {
+    const err = 'Requested tokens 1 exceeds maximum tokens per interval 0';
+    const req = {} as Request;
+    const res = {} as unknown as Response;
+    const statusMock = jest.fn().mockReturnValue(res);
+    const contentTypeMock = jest.fn().mockReturnValue(res);
+    const sendMock = jest.fn().mockReturnValue(res);
+    res.status = statusMock;
+    res.contentType = contentTypeMock;
+    res.send = sendMock;
+    const next = jest.fn();
+    errorHandler(err, req, res, next);
+    expect(statusMock).toBeCalledWith(503);
+    expect(sendMock).toBeCalledWith(expect.objectContaining({
+      name: 'UnknownError',
+      message: 'Unknown error.',
+      details: [err],
+    }));
+  });
+
   it('should process Database Errors with unknown status codes', () => {
     const err = new DatabaseError(
       'A database error',

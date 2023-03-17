@@ -1,15 +1,15 @@
 import { redactToPreventAuthReplay } from '../../logger';
 
 describe('logger redaction function', () => {
-  it('should redact all but six chars when given 50 digit secret', () => {
-    const longishSecret = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX';
+  it('should redact the signature of the JWT', () => {
+    const longishSecret = 'Bearer asdf.gh.jkl';
     const redacted = redactToPreventAuthReplay(longishSecret);
-    expect(redacted).toBe('abc...[redacted]...VWX');
+    expect(redacted).toBe('Bearer asdf.gh.[redacted]');
   });
 
-  it('should redact all chars when given eight digit secret', () => {
-    const shortishSecret = 'abcdefgh';
+  it('should redact nothing when no second dot is present', () => {
+    const shortishSecret = 'Bearer abcdefgh';
     const redacted = redactToPreventAuthReplay(shortishSecret);
-    expect(redacted).toBe('[redacted a secret that was too short]');
+    expect(redacted).toBe('Bearer abcdefgh');
   });
 });

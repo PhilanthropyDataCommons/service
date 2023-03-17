@@ -1,6 +1,6 @@
 import express from 'express';
 import { opportunitiesHandlers } from '../handlers/opportunitiesHandlers';
-import { checkApiKey as verifyAuth } from '../middleware/apiKeyChecker';
+import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
 
 const opportunitiesRouter = express.Router();
 

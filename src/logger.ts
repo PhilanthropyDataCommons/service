@@ -11,19 +11,16 @@ import type {
 // here in the logger code.
 dotenv.config();
 
-export const redactToPreventAuthReplay = (secret: string): string => {
-  // We want to redact much more than we log. These are usually >=80 characters.
-  if (secret.length >= 24) {
-    return `${secret.slice(0, 3)}...[redacted]...${secret.slice(-3)}`;
-  }
-
-  return '[redacted a secret that was too short]';
-};
+// To prevent replays with JWT, we can redact the signature. This invalidates the JWT.
+export const redactToPreventAuthReplay = (secret: string): string => secret.replace(
+  /^(Bearer [A-Za-z0-9]*\.[A-Za-z0-9]*\.).*/,
+  '$1[redacted]',
+);
 
 const logger = pino({
   level: process.env.LOG_LEVEL ?? 'info',
   redact: {
-    paths: ['req.headers["x-api-key"]'],
+    paths: ['req.headers["authorization"]'],
     censor: redactToPreventAuthReplay,
   },
 });

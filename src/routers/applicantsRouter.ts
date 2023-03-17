@@ -1,6 +1,6 @@
 import express from 'express';
 import { applicantsHandlers } from '../handlers/applicantsHandlers';
-import { checkApiKey as verifyAuth } from '../middleware/apiKeyChecker';
+import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
 
 const applicantsRouter = express.Router();
 

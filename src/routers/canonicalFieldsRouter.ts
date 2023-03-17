@@ -1,6 +1,6 @@
 import express from 'express';
 import { canonicalFieldsHandlers } from '../handlers/canonicalFieldsHandlers';
-import { checkApiKey as verifyAuth } from '../middleware/apiKeyChecker';
+import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
 
 const canonicalFieldsRouter = express.Router();
 

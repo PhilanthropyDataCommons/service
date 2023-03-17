@@ -8,31 +8,29 @@ import {
   getTableMetrics,
   isoTimestampPattern,
 } from '../test/utils';
-import { dummyApiKey as authHeader } from '../test/dummyApiKey';
+import { mockJwt as authHeader } from '../test/mockJwt';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
-const fileWithApiTestKeys = 'test_keys.txt';
-const environment = process.env;
 
 describe('/applicants', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-    process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
-  });
-
-  afterEach(() => {
-    process.env = environment;
-  });
-
   describe('GET /', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/applicants')
         .set(authHeader)
         .expect(200, []);
+    });
+
+    it('sends UnauthorizedError when no JWT is sent', async () => {
+      const result = await agent
+        .get('/applicants')
+        .expect(401);
+      expect(result.body).toMatchObject({
+        name: 'UnauthorizedError',
+        details: expect.any(Array) as unknown[],
+      });
     });
 
     it('returns all applicants present in the database', async () => {

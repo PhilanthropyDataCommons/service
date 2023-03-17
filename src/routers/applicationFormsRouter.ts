@@ -1,6 +1,6 @@
 import express from 'express';
 import { applicationFormsHandlers } from '../handlers/applicationFormsHandlers';
-import { checkApiKey as verifyAuth } from '../middleware/apiKeyChecker';
+import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
 
 const applicationFormsRouter = express.Router();
 

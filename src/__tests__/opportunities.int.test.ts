@@ -7,32 +7,20 @@ import {
   getTableMetrics,
   isoTimestampPattern,
 } from '../test/utils';
-import { dummyApiKey } from '../test/dummyApiKey';
+import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
-const fileWithApiTestKeys = 'test_keys.txt';
-const environment = process.env;
 
 describe('/opportunities', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-    process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
-  });
-
-  afterEach(() => {
-    process.env = environment;
-  });
-
   describe('GET /', () => {
     logger.debug('Now running an opportunities test');
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/opportunities')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(200, []);
     });
 
@@ -48,7 +36,7 @@ describe('/opportunities', () => {
       `);
       await agent
         .get('/opportunities')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           [
@@ -73,7 +61,7 @@ describe('/opportunities', () => {
         }) as Result<object>);
       const result = await agent
         .get('/opportunities')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -88,7 +76,7 @@ describe('/opportunities', () => {
         });
       const result = await agent
         .get('/opportunities')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -111,7 +99,7 @@ describe('/opportunities', () => {
         });
       const result = await agent
         .get('/opportunities')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -144,7 +132,7 @@ describe('/opportunities', () => {
       logger.debug('sparkleOpportunityId: %d', sparkleOpportunity.id);
       await agent
         .get(`/opportunities/${sparkleOpportunity.id}`)
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           {
@@ -167,7 +155,7 @@ describe('/opportunities', () => {
       `);
       const result = await agent
         .get('/opportunities/a')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(400);
       expect(result.body).toMatchObject({
         name: 'InputValidationError',
@@ -187,7 +175,7 @@ describe('/opportunities', () => {
       `);
       await agent
         .get('/opportunities/9001')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(404);
     });
 
@@ -198,7 +186,7 @@ describe('/opportunities', () => {
         }) as Result<object>);
       const result = await agent
         .get('/opportunities/1')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -213,7 +201,7 @@ describe('/opportunities', () => {
         });
       const result = await agent
         .get('/opportunities/1')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -236,7 +224,7 @@ describe('/opportunities', () => {
         });
       const result = await agent
         .get('/opportunities/1')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -254,7 +242,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({ title: '🎆' })
         .expect(201);
       const after = await getTableMetrics('opportunities');
@@ -272,7 +260,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({ noTitleHere: '👎' })
         .expect(400);
       expect(result.body).toMatchObject({
@@ -289,7 +277,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           title: '🤷',
         })
@@ -308,7 +296,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           title: '🤷',
         })
@@ -335,7 +323,7 @@ describe('/opportunities', () => {
       const result = await agent
         .post('/opportunities')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           title: '🤷',
         })

@@ -1,11 +1,11 @@
 import express from 'express';
 import { applicationFormsHandlers } from '../handlers/applicationFormsHandlers';
-import { checkApiKey } from '../middleware/apiKeyChecker';
+import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
 
 const applicationFormsRouter = express.Router();
 
-applicationFormsRouter.get('/:id', checkApiKey, applicationFormsHandlers.getApplicationForm);
-applicationFormsRouter.get('/', checkApiKey, applicationFormsHandlers.getApplicationForms);
-applicationFormsRouter.post('/', checkApiKey, applicationFormsHandlers.postApplicationForms);
+applicationFormsRouter.get('/:id', verifyAuth, applicationFormsHandlers.getApplicationForm);
+applicationFormsRouter.get('/', verifyAuth, applicationFormsHandlers.getApplicationForms);
+applicationFormsRouter.post('/', verifyAuth, applicationFormsHandlers.postApplicationForms);
 
 export { applicationFormsRouter };

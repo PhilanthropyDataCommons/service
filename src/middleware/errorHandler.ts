@@ -1,5 +1,5 @@
+import { UnauthorizedError } from 'express-jwt';
 import {
-  AuthenticationError,
   DatabaseError,
   InternalValidationError,
   InputValidationError,
@@ -64,11 +64,15 @@ const getHttpStatusCodeForError = (error: unknown): number => {
   if (error instanceof InputConflictError) {
     return 409;
   }
-  if (error instanceof AuthenticationError) {
-    return 401;
+  if (error instanceof UnauthorizedError) {
+    return error.status;
   }
   if (error instanceof NotFoundError) {
     return 404;
+  }
+  // In the `jwks-rsa` library, when a rate limit is exceeded a string error gets thrown.
+  if (typeof error === 'string' && error.includes('exceeds maximum tokens per interval')) {
+    return 503;
   }
   return 500;
 };

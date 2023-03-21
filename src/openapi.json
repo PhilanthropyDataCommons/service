@@ -7,11 +7,21 @@
   },
   "components": {
     "securitySchemes": {
-      "preSharedApiKey": {
-        "type": "apiKey",
-        "description": "A pre-shared key required to create or access protected resources via the API.",
-        "name": "x-api-key",
-        "in": "header"
+      "auth": {
+        "type": "oauth2",
+        "description":  "The OAuth 2.0 (and OpenID Connect) Authorization Code flow.",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "${AUTH_SERVER_ISSUER}/protocol/openid-connect/auth",
+            "tokenUrl": "${AUTH_SERVER_ISSUER}/protocol/openid-connect/token",
+            "refreshUrl": "${AUTH_SERVER_ISSUER}/protocol/openid-connect/token",
+            "scopes": {
+              "openid": "Use OpenID Connect (recommended).",
+              "roles": "Read your roles (recommended).",
+              "profile": "Read your profile (recommended)."
+            }
+          }
+        }
       }
     },
     "schemas": {
@@ -330,7 +340,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -366,7 +376,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -411,7 +421,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "parameters": [
@@ -457,7 +467,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -496,7 +506,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -551,7 +561,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "parameters": [
@@ -629,7 +639,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -665,7 +675,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -720,7 +730,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "parameters": [
@@ -814,7 +824,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -869,7 +879,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -895,7 +905,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -950,7 +960,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "responses": {
@@ -976,7 +986,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "requestBody": {
@@ -1021,7 +1031,7 @@
         ],
         "security": [
           {
-            "preSharedApiKey": []
+            "auth": []
           }
         ],
         "parameters": [

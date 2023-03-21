@@ -1,9 +1,9 @@
 import express from 'express';
 import { proposalVersionsHandlers } from '../handlers/proposalVersionsHandlers';
-import { checkApiKey } from '../middleware/apiKeyChecker';
+import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
 
 const proposalVersionsRouter = express.Router();
 
-proposalVersionsRouter.post('/', checkApiKey, proposalVersionsHandlers.postProposalVersion);
+proposalVersionsRouter.post('/', verifyAuth, proposalVersionsHandlers.postProposalVersion);
 
 export { proposalVersionsRouter };

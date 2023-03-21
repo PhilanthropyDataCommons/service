@@ -8,30 +8,18 @@ import {
   isoTimestampPattern,
   getTableMetrics,
 } from '../test/utils';
-import { dummyApiKey } from '../test/dummyApiKey';
+import { mockJwt as authHeader } from '../test/mockJwt';
 import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
-const fileWithApiTestKeys = 'test_keys.txt';
-const environment = process.env;
 
 describe('/applicationForms', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-    process.env = { ...environment, API_KEYS_FILE: fileWithApiTestKeys };
-  });
-
-  afterEach(() => {
-    process.env = environment;
-  });
-
   describe('GET /', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/applicationForms')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(200, []);
     });
 
@@ -55,7 +43,7 @@ describe('/applicationForms', () => {
       `);
       await agent
         .get('/applicationForms')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           [
@@ -112,7 +100,7 @@ describe('/applicationForms', () => {
       `);
       await agent
         .get('/applicationForms/2')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           {
@@ -170,7 +158,7 @@ describe('/applicationForms', () => {
       await agent
         .get('/applicationForms/2')
         .query({ includeFields: 'true' })
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(
           200,
           {
@@ -208,7 +196,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .get('/applicationForms/2')
         .query({ includeFields: 'true' })
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -223,7 +211,7 @@ describe('/applicationForms', () => {
         });
       const result = await agent
         .get('/applicationForms')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -246,7 +234,7 @@ describe('/applicationForms', () => {
         });
       const result = await agent
         .get('/applicationForms')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -271,7 +259,7 @@ describe('/applicationForms', () => {
         });
       const result = await agent
         .get('/applicationForms/3')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',
@@ -288,7 +276,7 @@ describe('/applicationForms', () => {
         }) as Result<object>);
       const result = await agent
         .get('/applicationForms/5')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -299,7 +287,7 @@ describe('/applicationForms', () => {
     it('should return 404 when the applicationForm is not found (shallow)', async () => {
       const result = await agent
         .get('/applicationForms/6')
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(404);
       expect(result.body).toMatchObject({
         name: 'NotFoundError',
@@ -310,7 +298,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .get('/applicationForms/7')
         .query({ includeFields: 'true' })
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(404);
       expect(result.body).toMatchObject({
         name: 'NotFoundError',
@@ -338,7 +326,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .get('/applicationForms/8')
         .query({ includeFields: 'true' })
-        .set(dummyApiKey)
+        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'InternalValidationError',
@@ -375,7 +363,7 @@ describe('/applicationForms', () => {
     const result = await agent
       .get('/applicationForms/9')
       .query({ includeFields: 'true' })
-      .set(dummyApiKey)
+      .set(authHeader)
       .expect(503);
     expect(result.body).toMatchObject({
       name: 'DatabaseError',
@@ -400,7 +388,7 @@ describe('/applicationForms', () => {
       });
     const result = await agent
       .get('/applicationForms/4')
-      .set(dummyApiKey)
+      .set(authHeader)
       .query({ includeFields: 'true' })
       .expect(503);
     expect(result.body).toMatchObject({
@@ -421,7 +409,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: '1',
           fields: [],
@@ -457,7 +445,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: '1',
           fields: [{
@@ -509,7 +497,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: '1',
           fields: [],
@@ -527,7 +515,7 @@ describe('/applicationForms', () => {
       await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           fields: [],
         })
@@ -538,7 +526,7 @@ describe('/applicationForms', () => {
       await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: 1,
         })
@@ -549,7 +537,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: 1,
           fields: [{
@@ -567,7 +555,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: 1,
           fields: [],
@@ -597,7 +585,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: 1,
           fields: [],
@@ -625,7 +613,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: 1,
           fields: [],
@@ -675,7 +663,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: '1',
           fields: [{
@@ -729,7 +717,7 @@ describe('/applicationForms', () => {
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
-        .set(dummyApiKey)
+        .set(authHeader)
         .send({
           opportunityId: '1',
           fields: [{
@@ -762,7 +750,7 @@ describe('/applicationForms', () => {
       });
     const result = await agent
       .post('/applicationForms')
-      .set(dummyApiKey)
+      .set(authHeader)
       .send({
         opportunityId: 9001,
         fields: [{

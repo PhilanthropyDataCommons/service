@@ -1,10 +1,10 @@
 import express from 'express';
 import { applicantsHandlers } from '../handlers/applicantsHandlers';
-import { checkApiKey } from '../middleware/apiKeyChecker';
+import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
 
 const applicantsRouter = express.Router();
 
-applicantsRouter.get('/', checkApiKey, applicantsHandlers.getApplicants);
-applicantsRouter.post('/', checkApiKey, applicantsHandlers.postApplicants);
+applicantsRouter.get('/', verifyAuth, applicantsHandlers.getApplicants);
+applicantsRouter.post('/', verifyAuth, applicantsHandlers.postApplicants);
 
 export { applicantsRouter };

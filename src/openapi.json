@@ -5,6 +5,26 @@
     "description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
     "version": "0.1.0"
   },
+  "parameters": {
+    "pageParam": {
+      "in": "query",
+      "name": "_page",
+      "required": false,
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "The page number being retrieved."
+    },
+    "countParam": {
+      "in": "query",
+      "name": "_count",
+      "required": false,
+      "type": "integer",
+      "minimum": 1,
+      "default": 100,
+      "description": "The maximum number of items that should appear per page or request."
+    }
+  },
   "components": {
     "securitySchemes": {
       "auth": {
@@ -641,6 +661,10 @@
           {
             "auth": []
           }
+        ],
+        "parameters": [
+          { "$ref": "#/parameters/pageParam" },
+          { "$ref": "#/parameters/countParam" }
         ],
         "responses": {
           "200": {

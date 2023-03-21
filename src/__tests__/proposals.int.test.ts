@@ -24,7 +24,7 @@ describe('/proposals', () => {
         .expect(200, []);
     });
 
-    it('returns all proposals present in the database', async () => {
+    it('returns proposals present in the database', async () => {
       await db.query(`
         INSERT INTO opportunities (
           title,
@@ -61,20 +61,87 @@ describe('/proposals', () => {
           200,
           [
             {
-              id: 1,
-              externalId: 'proposal-1',
-              applicantId: 1,
-              opportunityId: 1,
-              createdAt: '2525-01-01T00:00:05.000Z',
-            },
-            {
               id: 2,
               externalId: 'proposal-2',
               applicantId: 1,
               opportunityId: 1,
               createdAt: '2525-01-01T00:00:06.000Z',
             },
+            {
+              id: 1,
+              externalId: 'proposal-1',
+              applicantId: 1,
+              opportunityId: 1,
+              createdAt: '2525-01-01T00:00:05.000Z',
+            },
           ],
+        );
+    });
+
+    it('returns according to pagination parameters', async () => {
+      await db.sql('opportunities.insertOne', {
+        title: '🔥',
+      });
+      await db.sql('applicants.insertOne', {
+        externalId: '12345',
+        optedIn: 'true',
+      });
+      await Array.from(Array(20)).reduce(async (p, _, i) => {
+        await p;
+        await db.sql('proposals.insertOne', {
+          applicantId: 1,
+          externalId: `proposal-${i + 1}`,
+          opportunityId: 1,
+        });
+      }, Promise.resolve());
+      await agent
+        .get('/proposals')
+        .query({
+          _page: 2,
+          _count: 5,
+        })
+        .set(authHeader)
+        .expect(200)
+        .expect(
+          (res) => expect(res.body).toEqual(
+            [
+              {
+                id: 15,
+                externalId: 'proposal-15',
+                applicantId: 1,
+                opportunityId: 1,
+                createdAt: expect.stringMatching(isoTimestampPattern) as string,
+              },
+              {
+                id: 14,
+                externalId: 'proposal-14',
+                applicantId: 1,
+                opportunityId: 1,
+                createdAt: expect.stringMatching(isoTimestampPattern) as string,
+              },
+              {
+                id: 13,
+                externalId: 'proposal-13',
+                applicantId: 1,
+                opportunityId: 1,
+                createdAt: expect.stringMatching(isoTimestampPattern) as string,
+              },
+              {
+                id: 12,
+                externalId: 'proposal-12',
+                applicantId: 1,
+                opportunityId: 1,
+                createdAt: expect.stringMatching(isoTimestampPattern) as string,
+              },
+              {
+                id: 11,
+                externalId: 'proposal-11',
+                applicantId: 1,
+                opportunityId: 1,
+                createdAt: expect.stringMatching(isoTimestampPattern) as string,
+              },
+            ],
+          ),
         );
     });
 

@@ -1,5 +1,8 @@
 import { getLogger } from '../logger';
-import { db } from '../database';
+import {
+  db,
+  getLimitValues,
+} from '../database';
 import {
   isProposalArray,
   isProposalWrite,
@@ -15,6 +18,9 @@ import {
   InputValidationError,
   NotFoundError,
 } from '../errors';
+import {
+  extractPaginationParameters,
+} from '../queryParameters';
 import type {
   Request,
   Response,
@@ -36,7 +42,13 @@ const getProposals = (
   res: Response,
   next: NextFunction,
 ): void => {
-  db.sql('proposals.selectAll')
+  const paginationParameters = extractPaginationParameters(req);
+  db.sql(
+    'proposals.selectWithPagination',
+    {
+      ...getLimitValues(paginationParameters),
+    },
+  )
     .then((proposalsQueryResult: Result<Proposal>) => {
       logger.debug(proposalsQueryResult);
       const { rows: proposals } = proposalsQueryResult;

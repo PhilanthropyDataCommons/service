@@ -1,6 +1,7 @@
 INSERT INTO application_forms (
   opportunity_id,
-  version
+  version,
+  external_id
 ) VALUES (
   :opportunityId,
   COALESCE(
@@ -10,10 +11,12 @@ INSERT INTO application_forms (
       WHERE af.opportunity_id = :opportunityId
     ),
     1
-  )
+  ),
+  :externalId
 )
 RETURNING
   id as "id",
   opportunity_id as "opportunityId",
   version as "version",
+  external_id as "externalId",
   created_at as "createdAt"

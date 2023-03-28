@@ -3,6 +3,7 @@ import {
   applicationFormFieldSchema,
   applicationFormFieldWriteSchema,
 } from './ApplicationFormField';
+import { nullable } from './nullable';
 import type { JSONSchemaType } from 'ajv';
 import type {
   ApplicationFormField,
@@ -13,6 +14,7 @@ export interface ApplicationForm {
   readonly id: number;
   opportunityId: number;
   version: number;
+  externalId: string | null;
   fields?: ApplicationFormField[];
   readonly createdAt: Date;
 }
@@ -35,6 +37,9 @@ export const applicationFormSchema: JSONSchemaType<ApplicationForm> = {
     version: {
       type: 'integer',
     },
+    externalId: nullable({
+      type: 'string',
+    }),
     fields: {
       type: 'array',
       items: applicationFormFieldSchema,
@@ -50,6 +55,7 @@ export const applicationFormSchema: JSONSchemaType<ApplicationForm> = {
     'id',
     'opportunityId',
     'version',
+    'externalId',
     'createdAt',
   ],
 };
@@ -62,6 +68,9 @@ export const applicationFormWriteSchema: JSONSchemaType<ApplicationFormWrite> = 
     opportunityId: {
       type: 'number',
     },
+    externalId: nullable({
+      type: 'string',
+    }),
     fields: {
       type: 'array',
       items: applicationFormFieldWriteSchema,
@@ -69,6 +78,7 @@ export const applicationFormWriteSchema: JSONSchemaType<ApplicationFormWrite> = 
   },
   required: [
     'opportunityId',
+    'externalId',
     'fields',
   ],
 };

@@ -213,6 +213,11 @@
             "readOnly": true,
             "example": 13
           },
+          "externalId": {
+            "type": "string",
+            "example": "ID from the original system",
+            "nullable": true
+          },
           "fields": {
             "type": "array",
             "items": {
@@ -230,6 +235,7 @@
           "id",
           "opportunityId",
           "version",
+          "externalId",
           "createdAt"
         ]
       },
@@ -509,6 +515,7 @@
                         "id": 3529,
                         "opportunityId": 3203,
                         "version": 13,
+                        "externalId": "ID from the original system",
                         "createdAt": "2022-09-13T14:45:06.139Z"
                       }
                     ]
@@ -622,6 +629,7 @@
                       "id": 3529,
                       "opportunityId": 3203,
                       "version": 13,
+                      "externalId":"ID from the original system",
                       "createdAt": "2022-09-13T14:45:06.139Z"
                     }
                   },
@@ -631,6 +639,7 @@
                       "id": 3529,
                       "opportunityId": 3203,
                       "version": 13,
+                      "externalId":"ID from the original system",
                       "createdAt": "2022-09-13T14:45:06.139Z",
                       "fields": [
                         {

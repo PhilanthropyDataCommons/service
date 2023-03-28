@@ -52,18 +52,21 @@ describe('/applicationForms', () => {
               id: 1,
               opportunityId: 1,
               version: 1,
+              externalId: null,
             },
             {
               createdAt: '2022-08-20T12:00:00.000Z',
               id: 2,
               opportunityId: 1,
               version: 2,
+              externalId: null,
             },
             {
               createdAt: '2022-09-20T12:00:00.000Z',
               id: 3,
               opportunityId: 2,
               version: 1,
+              externalId: null,
             },
           ],
         );
@@ -107,6 +110,7 @@ describe('/applicationForms', () => {
             id: 2,
             opportunityId: 1,
             version: 2,
+            externalId: null,
             createdAt: '2510-02-02T00:00:02.000Z',
           },
         );
@@ -165,6 +169,7 @@ describe('/applicationForms', () => {
             id: 2,
             opportunityId: 1,
             version: 2,
+            externalId: null,
             fields: [
               {
                 id: 4,
@@ -345,6 +350,7 @@ describe('/applicationForms', () => {
             id: 1,
             opportunityId: 1,
             version: 1,
+            externalId: null,
             createdAt: new Date(),
           },
         ],
@@ -412,6 +418,7 @@ describe('/applicationForms', () => {
         .set(authHeader)
         .send({
           opportunityId: '1',
+          externalId: 'originalSystemId',
           fields: [],
         })
         .expect(201);
@@ -422,6 +429,7 @@ describe('/applicationForms', () => {
         id: 1,
         opportunityId: 1,
         version: 1,
+        externalId: 'originalSystemId',
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
       expect(after.count).toEqual('1');
@@ -448,6 +456,7 @@ describe('/applicationForms', () => {
         .set(authHeader)
         .send({
           opportunityId: '1',
+          externalId: 'myFormId',
           fields: [{
             canonicalFieldId: '1',
             position: 1,
@@ -462,6 +471,7 @@ describe('/applicationForms', () => {
         id: 1,
         opportunityId: 1,
         version: 1,
+        externalId: 'myFormId',
         fields: [{
           applicationFormId: 1,
           canonicalFieldId: 1,
@@ -500,6 +510,7 @@ describe('/applicationForms', () => {
         .set(authHeader)
         .send({
           opportunityId: '1',
+          externalId: 'aFormId',
           fields: [],
         })
         .expect(201);
@@ -507,6 +518,7 @@ describe('/applicationForms', () => {
         id: 3,
         opportunityId: 1,
         version: 3,
+        externalId: 'aFormId',
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
     });
@@ -540,6 +552,7 @@ describe('/applicationForms', () => {
         .set(authHeader)
         .send({
           opportunityId: 1,
+          externalId: null,
           fields: [{
             foo: 'not a field',
           }],
@@ -558,6 +571,7 @@ describe('/applicationForms', () => {
         .set(authHeader)
         .send({
           opportunityId: 1,
+          externalId: null,
           fields: [],
         })
         .expect(409);
@@ -588,6 +602,7 @@ describe('/applicationForms', () => {
         .set(authHeader)
         .send({
           opportunityId: 1,
+          externalId: null,
           fields: [],
         })
         .expect(500);
@@ -616,6 +631,7 @@ describe('/applicationForms', () => {
         .set(authHeader)
         .send({
           opportunityId: 1,
+          externalId: null,
           fields: [],
         })
         .expect(500);
@@ -653,6 +669,7 @@ describe('/applicationForms', () => {
               id: 1,
               opportunityId: 1,
               version: 1,
+              externalId: null,
               createdAt: new Date(),
             },
           ],
@@ -666,6 +683,7 @@ describe('/applicationForms', () => {
         .set(authHeader)
         .send({
           opportunityId: '1',
+          externalId: null,
           fields: [{
             canonicalFieldId: '1',
             position: 1,
@@ -706,6 +724,7 @@ describe('/applicationForms', () => {
               id: 1,
               opportunityId: 1,
               version: 1,
+              externalId: null,
               fields: [],
               createdAt: new Date(),
             },
@@ -720,6 +739,7 @@ describe('/applicationForms', () => {
         .set(authHeader)
         .send({
           opportunityId: '1',
+          externalId: null,
           fields: [{
             canonicalFieldId: '1',
             position: 1,
@@ -753,6 +773,7 @@ describe('/applicationForms', () => {
       .set(authHeader)
       .send({
         opportunityId: 9001,
+        externalId: null,
         fields: [{
           canonicalFieldId: 9002,
           position: 9003,

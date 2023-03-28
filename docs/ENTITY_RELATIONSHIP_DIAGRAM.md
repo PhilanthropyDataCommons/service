@@ -42,6 +42,7 @@ erDiagram
     int id
     int opportunityId
     int version
+    string externalId
     datetime createdAt
   }
   ApplicationFormField {

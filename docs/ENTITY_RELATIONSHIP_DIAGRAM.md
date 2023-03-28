@@ -51,6 +51,7 @@ erDiagram
     int canonicalFieldId
     int position
     string label
+    string externalId
     datetime createdAt
   }
   ExternalFieldValue {

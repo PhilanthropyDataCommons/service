@@ -128,6 +128,7 @@ describe('mergeApplicationFormFields', () => {
         canonicalFieldId: 3359,
         position: 3361,
         label: 'Three thousand three hundred sixty one',
+        externalId: 'Thirty three million and one',
         createdAt: new Date('2023-01-23T13:42:00-0600'),
       },
       {
@@ -136,6 +137,7 @@ describe('mergeApplicationFormFields', () => {
         canonicalFieldId: 3389,
         position: 3391,
         label: 'Three thousand four hundred seven',
+        externalId: 'Thirty three million and twenty nine',
         createdAt: new Date('2023-01-23T13:43:00-0600'),
       },
     ];
@@ -153,6 +155,7 @@ describe('mergeApplicationFormFields', () => {
           applicationFormId: 3347,
           canonicalFieldId: 3359,
           position: 3361,
+          externalId: 'Thirty three million and one',
           label: 'Three thousand three hundred sixty one',
           createdAt: new Date('2023-01-23T13:42:00-0600'),
         },
@@ -170,6 +173,7 @@ describe('mergeApplicationFormFields', () => {
           canonicalFieldId: 3389,
           position: 3391,
           label: 'Three thousand four hundred seven',
+          externalId: 'Thirty three million and twenty nine',
           createdAt: new Date('2023-01-23T13:43:00-0600'),
         },
       },
@@ -194,6 +198,7 @@ describe('mergeApplicationFormFields', () => {
         canonicalFieldId: 3677,
         position: 3691,
         label: 'Three thousand six hundred ninety seven',
+        externalId: 'Thirty six million and forty three',
         createdAt: new Date('2023-01-23T14:15:00-0600'),
       },
       {
@@ -202,6 +207,7 @@ describe('mergeApplicationFormFields', () => {
         canonicalFieldId: 3709,
         position: 3719,
         label: 'Three thousand seven hundred twenty seven',
+        externalId: 'Thirty seven million and one',
         createdAt: new Date('2023-01-23T14:16:00-0600'),
       },
     ];
@@ -247,6 +253,7 @@ describe('mergeApplicationFormFields', () => {
         canonicalFieldId: 3877,
         position: 3881,
         label: 'Three thousand eight hundred eighty nine',
+        externalId: 'Thirty seven million and sixty one',
         createdAt: new Date('2023-01-23T14:33:00-0600'),
       },
     ];
@@ -258,6 +265,7 @@ describe('mergeApplicationFormFields', () => {
       canonicalFieldId: 3911,
       position: 3917,
       label: 'Three thousand nine hundred nineteen',
+      externalId: 'Thirty seven million and ninety three',
       createdAt: new Date('2023-01-23T14:36:00-0600'),
     };
     fields[3] = {
@@ -267,6 +275,7 @@ describe('mergeApplicationFormFields', () => {
       canonicalFieldId: 3929,
       position: 3931,
       label: 'Three thousand nine forty three',
+      externalId: 'Thirty eight million and thirty three',
       createdAt: new Date('2023-01-23T14:39:00-0600'),
     };
     // We now have values and fields of equal length, defined either by max index or by element
@@ -296,6 +305,7 @@ describe('mergeApplicationFormFields', () => {
         canonicalFieldId: 4019,
         position: 4021,
         label: 'Four thousand twenty seven',
+        externalId: null,
         createdAt: new Date('2023-01-24T08:50:00-0600'),
       },
     ];

@@ -177,6 +177,7 @@ describe('/applicationForms', () => {
                 canonicalFieldId: 2,
                 position: 1,
                 label: 'Duration of work in years',
+                externalId: null,
                 createdAt: '2510-02-01T00:00:09.000Z',
               },
               {
@@ -185,6 +186,7 @@ describe('/applicationForms', () => {
                 canonicalFieldId: 1,
                 position: 2,
                 label: 'Name of Organization',
+                externalId: null,
                 createdAt: '2510-02-01T00:00:08.000Z',
               },
             ],
@@ -461,6 +463,7 @@ describe('/applicationForms', () => {
             canonicalFieldId: '1',
             position: 1,
             label: 'Your First Name',
+            externalId: 'myFieldId',
           }],
         })
         .expect(201);
@@ -479,6 +482,7 @@ describe('/applicationForms', () => {
           id: 1,
           label: 'Your First Name',
           position: 1,
+          externalId: 'myFieldId',
         }],
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
@@ -688,6 +692,7 @@ describe('/applicationForms', () => {
             canonicalFieldId: '1',
             position: 1,
             label: 'Your First Name',
+            externalId: null,
           }],
         })
         .expect(500);
@@ -744,6 +749,7 @@ describe('/applicationForms', () => {
             canonicalFieldId: '1',
             position: 1,
             label: 'Your First Name',
+            externalId: null,
           }],
         })
         .expect(500);
@@ -778,6 +784,7 @@ describe('/applicationForms', () => {
           canonicalFieldId: 9002,
           position: 9003,
           label: 'A label of some kind',
+          externalId: null,
         }],
       })
       .expect(503);

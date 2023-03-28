@@ -264,6 +264,11 @@
             "type": "string",
             "example": "Your First Name"
           },
+          "externalId": {
+            "type": "string",
+            "example": "The field ID from the original system",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -276,6 +281,7 @@
           "canonicalFieldId",
           "position",
           "label",
+          "externalId",
           "createdAt"
         ]
       },
@@ -648,6 +654,7 @@
                           "canonicalFieldId": 3011,
                           "position": 29,
                           "label": "Your First Name",
+                          "externalId": "The field ID from the original system",
                           "createdAt": "2022-12-12T17:54:24.988Z"
                         }
                       ]
@@ -834,6 +841,7 @@
                                 "canonicalFieldId": 3011,
                                 "position": 19,
                                 "label": "Your First Name",
+                                "externalId": "The field ID from the original system",
                                 "createdAt": "2023-02-14T09:58:00.000Z"
                               }
                             }

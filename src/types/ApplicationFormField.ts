@@ -1,4 +1,5 @@
 import { ajv } from '../ajv';
+import { nullable } from './nullable';
 import type { JSONSchemaType } from 'ajv';
 
 export interface ApplicationFormField {
@@ -7,6 +8,7 @@ export interface ApplicationFormField {
   canonicalFieldId: number;
   position: number;
   label: string;
+  externalId: string | null;
   readonly createdAt: Date;
 }
 
@@ -30,6 +32,9 @@ export const applicationFormFieldSchema: JSONSchemaType<ApplicationFormField> = 
     label: {
       type: 'string',
     },
+    externalId: nullable({
+      type: 'string',
+    }),
     createdAt: {
       type: 'object',
       required: [],
@@ -42,6 +47,7 @@ export const applicationFormFieldSchema: JSONSchemaType<ApplicationFormField> = 
     'canonicalFieldId',
     'position',
     'label',
+    'externalId',
     'createdAt',
   ],
 };
@@ -60,11 +66,15 @@ export const applicationFormFieldWriteSchema: JSONSchemaType<ApplicationFormFiel
     label: {
       type: 'string',
     },
+    externalId: nullable({
+      type: 'string',
+    }),
   },
   required: [
     'canonicalFieldId',
     'position',
     'label',
+    'externalId',
   ],
 };
 

@@ -99,14 +99,14 @@ docker pull ghcr.io/philanthropydatacommons/service:latest
 To run migrations:
 
 ```bash
-npm build
+npm run build
 npm run migrate
 ```
 
 To start the server:
 
 ```bash
-npm build
+npm run build
 npm start
 ```
 

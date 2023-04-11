@@ -25,35 +25,23 @@ describe('/proposals', () => {
     });
 
     it('returns proposals present in the database', async () => {
-      await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
-      await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' ),
-          ( '67890', 'false', '2022-07-20 12:00:00+0000' );
-      `);
-      await db.query(`
-        INSERT INTO proposals (
-          applicant_id,
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' ),
-          ( 1, 'proposal-2', 1, '2525-01-01T00:00:06Z' );
-      `);
+      await db.sql('opportunities.insertOne', {
+        title: '🔥',
+      });
+      await db.sql('applicants.insertOne', {
+        externalId: '12345',
+        optedIn: true,
+      });
+      await db.sql('proposals.insertOne', {
+        applicantId: 1,
+        externalId: 'proposal-1',
+        opportunityId: 1,
+      });
+      await db.sql('proposals.insertOne', {
+        applicantId: 1,
+        externalId: 'proposal-2',
+        opportunityId: 1,
+      });
       await agent
         .get('/proposals')
         .set(authHeader)

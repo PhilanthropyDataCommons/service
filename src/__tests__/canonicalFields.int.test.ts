@@ -1,13 +1,13 @@
 import request from 'supertest';
 import { TinyPgError } from 'tinypg';
 import { app } from '../app';
-import { db } from '../database';
+import {
+  db,
+  loadTableMetrics,
+} from '../database';
 import { getLogger } from '../logger';
 import { PostgresErrorCode } from '../types';
-import {
-  isoTimestampPattern,
-  getTableMetrics,
-} from '../test/utils';
+import { isoTimestampPattern } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import type { Result } from 'tinypg';
 
@@ -117,7 +117,7 @@ describe('/canonicalFields', () => {
 
   describe('POST /', () => {
     it('creates exactly one canonical field', async () => {
-      const before = await getTableMetrics('canonical_fields');
+      const before = await loadTableMetrics('canonical_fields');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/canonicalFields')
@@ -129,9 +129,9 @@ describe('/canonicalFields', () => {
           dataType: '📊',
         })
         .expect(201);
-      const after = await getTableMetrics('canonical_fields');
+      const after = await loadTableMetrics('canonical_fields');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         id: expect.any(Number) as number,
         label: '🏷️',
@@ -139,7 +139,7 @@ describe('/canonicalFields', () => {
         dataType: '📊',
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
-      expect(after.count).toEqual('1');
+      expect(after.count).toEqual(1);
     });
     it('returns 400 bad request when no label is sent', async () => {
       const result = await agent

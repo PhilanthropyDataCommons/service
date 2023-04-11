@@ -1,12 +1,12 @@
 import request from 'supertest';
 import { TinyPgError } from 'tinypg';
 import { app } from '../app';
-import { db } from '../database';
-import { getLogger } from '../logger';
 import {
-  getTableMetrics,
-  isoTimestampPattern,
-} from '../test/utils';
+  db,
+  loadTableMetrics,
+} from '../database';
+import { getLogger } from '../logger';
+import { isoTimestampPattern } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
@@ -53,7 +53,7 @@ describe('/proposalVersions', () => {
         VALUES
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
-      const before = await getTableMetrics('proposal_versions');
+      const before = await loadTableMetrics('proposal_versions');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/proposalVersions')
@@ -65,15 +65,15 @@ describe('/proposalVersions', () => {
           fieldValues: [],
         })
         .expect(201);
-      const after = await getTableMetrics('proposal_versions');
+      const after = await loadTableMetrics('proposal_versions');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         id: 1,
         proposalId: 1,
         fieldValues: [],
       });
-      expect(after.count).toEqual('1');
+      expect(after.count).toEqual(1);
     });
 
     it('creates exactly the number of provided field values', async () => {
@@ -136,7 +136,7 @@ describe('/proposalVersions', () => {
           ( 1, 1, 1, 'First Name', '2022-07-20 12:00:00+0000' ),
           ( 1, 2, 2, 'Last Name', '2022-07-20 12:00:00+0000' );
       `);
-      const before = await getTableMetrics('proposal_field_values');
+      const before = await loadTableMetrics('proposal_field_values');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/proposalVersions')
@@ -159,9 +159,9 @@ describe('/proposalVersions', () => {
           ],
         })
         .expect(201);
-      const after = await getTableMetrics('proposal_field_values');
+      const after = await loadTableMetrics('proposal_field_values');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         id: 1,
         proposalId: 1,
@@ -182,7 +182,7 @@ describe('/proposalVersions', () => {
           },
         ],
       });
-      expect(after.count).toEqual('2');
+      expect(after.count).toEqual(2);
     });
 
     it('returns 400 bad request when no proposal id is provided', async () => {
@@ -315,7 +315,7 @@ describe('/proposalVersions', () => {
         VALUES
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
-      const before = await getTableMetrics('proposal_field_values');
+      const before = await loadTableMetrics('proposal_field_values');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/proposalVersions')
@@ -327,9 +327,9 @@ describe('/proposalVersions', () => {
           fieldValues: [],
         })
         .expect(409);
-      const after = await getTableMetrics('proposal_field_values');
+      const after = await loadTableMetrics('proposal_field_values');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         name: 'InputConflictError',
         details: [{
@@ -337,7 +337,7 @@ describe('/proposalVersions', () => {
           entityId: 2,
         }],
       });
-      expect(after.count).toEqual('0');
+      expect(after.count).toEqual(0);
     });
 
     it('Returns 409 Conflict if the provided application form ID is not associated with the proposal opportunity', async () => {
@@ -379,7 +379,7 @@ describe('/proposalVersions', () => {
           ( 1, 1, '2022-07-20 12:00:00+0000' ),
           ( 2, 1, '2022-07-20 12:00:00+0000' );
       `);
-      const before = await getTableMetrics('proposal_field_values');
+      const before = await loadTableMetrics('proposal_field_values');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/proposalVersions')
@@ -391,9 +391,9 @@ describe('/proposalVersions', () => {
           fieldValues: [],
         })
         .expect(409);
-      const after = await getTableMetrics('proposal_field_values');
+      const after = await loadTableMetrics('proposal_field_values');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         name: 'InputConflictError',
         details: [{
@@ -403,7 +403,7 @@ describe('/proposalVersions', () => {
           contextEntityId: 1,
         }],
       });
-      expect(after.count).toEqual('0');
+      expect(after.count).toEqual(0);
     });
 
     it('Returns 409 Conflict if a provided application form field ID does not exist', async () => {
@@ -443,7 +443,7 @@ describe('/proposalVersions', () => {
         VALUES
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
-      const before = await getTableMetrics('proposal_field_values');
+      const before = await loadTableMetrics('proposal_field_values');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/proposalVersions')
@@ -461,9 +461,9 @@ describe('/proposalVersions', () => {
           ],
         })
         .expect(409);
-      const after = await getTableMetrics('proposal_field_values');
+      const after = await loadTableMetrics('proposal_field_values');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         name: 'InputConflictError',
         details: [{
@@ -471,7 +471,7 @@ describe('/proposalVersions', () => {
           entityId: 1,
         }],
       });
-      expect(after.count).toEqual('0');
+      expect(after.count).toEqual(0);
     });
 
     it('Returns 409 Conflict if a provided application form field ID is not associated with the supplied application form ID', async () => {
@@ -535,7 +535,7 @@ describe('/proposalVersions', () => {
           ( 1, 1, 1, 'First Name', '2022-07-20 12:00:00+0000' ),
           ( 1, 2, 2, 'Last Name', '2022-07-20 12:00:00+0000' );
       `);
-      const before = await getTableMetrics('proposal_field_values');
+      const before = await loadTableMetrics('proposal_field_values');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/proposalVersions')
@@ -553,9 +553,9 @@ describe('/proposalVersions', () => {
           ],
         })
         .expect(409);
-      const after = await getTableMetrics('proposal_field_values');
+      const after = await loadTableMetrics('proposal_field_values');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         name: 'InputConflictError',
         details: [{
@@ -565,7 +565,7 @@ describe('/proposalVersions', () => {
           contextEntityId: 1,
         }],
       });
-      expect(after.count).toEqual('0');
+      expect(after.count).toEqual(0);
     });
 
     it('returns 500 UnknownError if a generic Error is thrown when inserting the proposal version', async () => {

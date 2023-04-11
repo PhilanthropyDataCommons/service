@@ -1,12 +1,12 @@
 import request from 'supertest';
 import { TinyPgError } from 'tinypg';
 import { app } from '../app';
-import { db } from '../database';
-import { getLogger } from '../logger';
 import {
-  getTableMetrics,
-  isoTimestampPattern,
-} from '../test/utils';
+  db,
+  loadTableMetrics,
+} from '../database';
+import { getLogger } from '../logger';
+import { isoTimestampPattern } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
@@ -668,7 +668,7 @@ describe('/proposals', () => {
           ( '12345', 'true', '2022-07-20 12:00:00+0000' ),
           ( '67890', 'false', '2022-07-20 12:00:00+0000' );
       `);
-      const before = await getTableMetrics('proposals');
+      const before = await loadTableMetrics('proposals');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/proposals')
@@ -680,9 +680,9 @@ describe('/proposals', () => {
           opportunityId: 1,
         })
         .expect(201);
-      const after = await getTableMetrics('proposals');
+      const after = await loadTableMetrics('proposals');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         id: 1,
         applicantId: 1,
@@ -690,7 +690,7 @@ describe('/proposals', () => {
         opportunityId: 1,
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
-      expect(after.count).toEqual('1');
+      expect(after.count).toEqual(1);
     });
 
     it('returns 400 bad request when no applicant ID is sent', async () => {

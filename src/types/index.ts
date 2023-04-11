@@ -10,4 +10,5 @@ export * from './PostgresErrorCode';
 export * from './Proposal';
 export * from './ProposalFieldValue';
 export * from './ProposalVersion';
+export * from './TableMetrics';
 export * from './TinyPgErrorWithQueryContext';

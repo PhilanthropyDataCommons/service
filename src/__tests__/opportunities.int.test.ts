@@ -1,12 +1,12 @@
 import request from 'supertest';
 import { TinyPgError } from 'tinypg';
 import { app } from '../app';
-import { db } from '../database';
-import { getLogger } from '../logger';
 import {
-  getTableMetrics,
-  isoTimestampPattern,
-} from '../test/utils';
+  db,
+  loadTableMetrics,
+} from '../database';
+import { getLogger } from '../logger';
+import { isoTimestampPattern } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
@@ -237,7 +237,7 @@ describe('/opportunities', () => {
 
   describe('POST /', () => {
     it('creates exactly one opportunity', async () => {
-      const before = await getTableMetrics('opportunities');
+      const before = await loadTableMetrics('opportunities');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/opportunities')
@@ -245,15 +245,15 @@ describe('/opportunities', () => {
         .set(authHeader)
         .send({ title: '🎆' })
         .expect(201);
-      const after = await getTableMetrics('opportunities');
+      const after = await loadTableMetrics('opportunities');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         id: 1,
         title: '🎆',
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
-      expect(after.count).toEqual('1');
+      expect(after.count).toEqual(1);
     });
 
     it('returns 400 bad request when no title sent', async () => {

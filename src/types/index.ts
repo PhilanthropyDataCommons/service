@@ -1,6 +1,7 @@
 export * from './Applicant';
 export * from './ApplicationForm';
 export * from './ApplicationFormField';
+export * from './Bundle';
 export * from './CanonicalField';
 export * from './JsonObject';
 export * from './Opportunity';
@@ -10,4 +11,5 @@ export * from './PostgresErrorCode';
 export * from './Proposal';
 export * from './ProposalFieldValue';
 export * from './ProposalVersion';
+export * from './TableMetrics';
 export * from './TinyPgErrorWithQueryContext';

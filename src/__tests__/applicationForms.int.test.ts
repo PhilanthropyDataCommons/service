@@ -1,13 +1,13 @@
 import request from 'supertest';
 import { TinyPgError } from 'tinypg';
 import { app } from '../app';
-import { db } from '../database';
+import {
+  db,
+  loadTableMetrics,
+} from '../database';
 import { getLogger } from '../logger';
 import { PostgresErrorCode } from '../types';
-import {
-  isoTimestampPattern,
-  getTableMetrics,
-} from '../test/utils';
+import { isoTimestampPattern } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import type { Result } from 'tinypg';
 
@@ -405,7 +405,7 @@ describe('/applicationForms', () => {
         INSERT INTO opportunities ( title )
         VALUES ( 'Tremendous opportunity 👌' );
       `);
-      const before = await getTableMetrics('application_forms');
+      const before = await loadTableMetrics('application_forms');
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
@@ -415,16 +415,16 @@ describe('/applicationForms', () => {
           fields: [],
         })
         .expect(201);
-      const after = await getTableMetrics('application_forms');
+      const after = await loadTableMetrics('application_forms');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         id: 1,
         opportunityId: 1,
         version: 1,
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
-      expect(after.count).toEqual('1');
+      expect(after.count).toEqual(1);
     });
 
     it('creates exactly the number of provided fields', async () => {
@@ -441,7 +441,7 @@ describe('/applicationForms', () => {
         VALUES
           ( 'First Name', 'firstName', 'string' );
       `);
-      const before = await getTableMetrics('application_form_fields');
+      const before = await loadTableMetrics('application_form_fields');
       const result = await agent
         .post('/applicationForms')
         .type('application/json')
@@ -455,9 +455,9 @@ describe('/applicationForms', () => {
           }],
         })
         .expect(201);
-      const after = await getTableMetrics('application_form_fields');
+      const after = await loadTableMetrics('application_form_fields');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         id: 1,
         opportunityId: 1,
@@ -472,7 +472,7 @@ describe('/applicationForms', () => {
         }],
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
-      expect(after.count).toEqual('1');
+      expect(after.count).toEqual(1);
     });
 
     it('increments version when creating a second form for an opportunity', async () => {

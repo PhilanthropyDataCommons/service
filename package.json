@@ -1,6 +1,6 @@
 {
   "name": "@pdc/service",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "description": "The service backend for the Philanthropy Data Commons",
   "main": "dist/index.js",
   "scripts": {

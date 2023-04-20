@@ -1,13 +1,13 @@
 import request from 'supertest';
 import { TinyPgError } from 'tinypg';
 import { app } from '../app';
-import { db } from '../database';
+import {
+  db,
+  loadTableMetrics,
+} from '../database';
 import { getLogger } from '../logger';
 import { PostgresErrorCode } from '../types';
-import {
-  getTableMetrics,
-  isoTimestampPattern,
-} from '../test/utils';
+import { isoTimestampPattern } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import type { Result } from 'tinypg';
 
@@ -124,7 +124,7 @@ describe('/applicants', () => {
 
   describe('POST /', () => {
     it('creates exactly one applicant', async () => {
-      const before = await getTableMetrics('applicants');
+      const before = await loadTableMetrics('applicants');
       logger.debug('before: %o', before);
       const result = await agent
         .post('/applicants')
@@ -134,16 +134,16 @@ describe('/applicants', () => {
           externalId: '🆔',
         })
         .expect(201);
-      const after = await getTableMetrics('applicants');
+      const after = await loadTableMetrics('applicants');
       logger.debug('after: %o', after);
-      expect(before.count).toEqual('0');
+      expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
         id: expect.any(Number) as number,
         externalId: '🆔',
         optedIn: false,
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
-      expect(after.count).toEqual('1');
+      expect(after.count).toEqual(1);
     });
     it('returns 400 bad request when no external id is provided', async () => {
       const result = await agent

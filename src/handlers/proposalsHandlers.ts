@@ -2,9 +2,9 @@ import { getLogger } from '../logger';
 import {
   db,
   getLimitValues,
+  loadProposalBundle,
 } from '../database';
 import {
-  isProposalArray,
   isProposalWrite,
   isProposal,
   isProposalVersionArray,
@@ -43,26 +43,14 @@ const getProposals = (
   next: NextFunction,
 ): void => {
   const paginationParameters = extractPaginationParameters(req);
-  db.sql(
-    'proposals.selectWithPagination',
-    {
+  (async () => {
+    const proposalBundle = await loadProposalBundle({
       ...getLimitValues(paginationParameters),
-    },
-  )
-    .then((proposalsQueryResult: Result<Proposal>) => {
-      logger.debug(proposalsQueryResult);
-      const { rows: proposals } = proposalsQueryResult;
-      if (isProposalArray(proposals)) {
-        res.status(200)
-          .contentType('application/json')
-          .send(proposals);
-      } else {
-        next(new InternalValidationError(
-          'The database responded with an unexpected format.',
-          isProposalArray.errors ?? [],
-        ));
-      }
-    })
+    });
+    res.status(200)
+      .contentType('application/json')
+      .send(proposalBundle);
+  })()
     .catch((error: unknown) => {
       if (isTinyPgErrorWithQueryContext(error)) {
         next(new DatabaseError(

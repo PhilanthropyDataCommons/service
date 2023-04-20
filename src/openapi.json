@@ -3,7 +3,7 @@
   "info": {
     "title": "Philanthropy Data Commons API",
     "description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "parameters": {
     "pageParam": {
@@ -348,6 +348,46 @@
           "title",
           "createdAt"
         ]
+      },
+      "Bundle": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "description": "The collection of requested resources.",
+            "example": []
+          },
+          "total": {
+            "type": "integer",
+            "description": "The total number of requested resources that exist in the database, across all pages.",
+            "example": 20
+          }
+        },
+        "required": [
+          "entries",
+          "total"
+        ]
+      },
+      "ProposalBundle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Bundle"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Proposal"
+                }
+              }
+            },
+            "required": [
+              "entries"
+            ]
+          }
+        ]
       }
     }
   },
@@ -672,10 +712,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Proposal"
-                  }
+                  "$ref": "#/components/schemas/ProposalBundle"
                 }
               }
             }

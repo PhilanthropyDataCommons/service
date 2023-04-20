@@ -74,13 +74,6 @@ export const proposalWriteSchema: JSONSchemaType<ProposalWrite> = {
   ],
 };
 
-const proposalArraySchema: JSONSchemaType<Proposal[]> = {
-  type: 'array',
-  items: proposalSchema,
-};
-
 export const isProposal = ajv.compile(proposalSchema);
 
 export const isProposalWrite = ajv.compile(proposalWriteSchema);
-
-export const isProposalArray = ajv.compile(proposalArraySchema);

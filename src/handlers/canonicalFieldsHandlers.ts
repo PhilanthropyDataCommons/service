@@ -11,6 +11,7 @@ import {
   InputValidationError,
   InternalValidationError,
 } from '../errors';
+import { jsonSchemaObject } from '../types/JsonSchemaObject';
 import type { JSONSchemaType } from 'ajv';
 import type {
   Request,
@@ -63,9 +64,7 @@ const postCanonicalFieldBodySchema: JSONSchemaType<Omit<CanonicalField, 'created
     shortCode: {
       type: 'string',
     },
-    dataType: {
-      type: 'string',
-    },
+    dataType: jsonSchemaObject,
   },
   required: [
     'label',

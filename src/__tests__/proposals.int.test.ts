@@ -278,8 +278,8 @@ describe('/proposals', () => {
           created_at
         )
         VALUES
-          ( 'Summary', 'summary', '{ type: "string" }', '2023-01-06T16:22:00+0000' ),
-          ( 'Title', 'title', '{ type: "string" }', '2023-01-06T16:24:00+0000' );
+          ( 'Summary', 'summary', '{ "type": "string" }', '2023-01-06T16:22:00+0000' ),
+          ( 'Title', 'title', '{ "type": "string" }', '2023-01-06T16:24:00+0000' );
       `);
       await db.query(`
         INSERT INTO opportunities (

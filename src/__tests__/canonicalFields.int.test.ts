@@ -32,8 +32,8 @@ describe('/canonicalFields', () => {
           created_at
         )
         VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
+          ( 'First Name', 'firstName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' ),
+          ( 'Last Name', 'lastName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' );
       `);
       await agent
         .get('/canonicalFields')
@@ -43,14 +43,14 @@ describe('/canonicalFields', () => {
           [
             {
               createdAt: '2022-07-20T12:00:00.000Z',
-              dataType: 'string',
+              dataType: { type: 'string' },
               id: 1,
               label: 'First Name',
               shortCode: 'firstName',
             },
             {
               createdAt: '2022-07-20T12:00:00.000Z',
-              dataType: 'string',
+              dataType: { type: 'string' },
               id: 2,
               label: 'Last Name',
               shortCode: 'lastName',
@@ -126,7 +126,7 @@ describe('/canonicalFields', () => {
         .send({
           label: '🏷️',
           shortCode: '🩳',
-          dataType: '📊',
+          dataType: { type: 'string' },
         })
         .expect(201);
       const after = await loadTableMetrics('canonical_fields');
@@ -136,7 +136,7 @@ describe('/canonicalFields', () => {
         id: expect.any(Number) as number,
         label: '🏷️',
         shortCode: '🩳',
-        dataType: '📊',
+        dataType: { type: 'string' },
         createdAt: expect.stringMatching(isoTimestampPattern) as string,
       });
       expect(after.count).toEqual(1);
@@ -148,7 +148,7 @@ describe('/canonicalFields', () => {
         .set(authHeader)
         .send({
           shortCode: '🩳',
-          dataType: '📊',
+          dataType: { type: 'string' },
         })
         .expect(400);
       expect(result.body).toMatchObject({
@@ -163,7 +163,7 @@ describe('/canonicalFields', () => {
         .set(authHeader)
         .send({
           label: '🏷️',
-          dataType: '📊',
+          dataType: { type: 'string' },
         })
         .expect(400);
       expect(result.body).toMatchObject({
@@ -186,6 +186,22 @@ describe('/canonicalFields', () => {
         details: expect.any(Array) as unknown[],
       });
     });
+    it('returns 400 bad request when non-JSON dataType is sent', async () => {
+      const result = await agent
+        .post('/canonicalFields')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          label: '🏷️',
+          shortCode: '🩳',
+          dataType: '{ this: "is", not: \'json\' }',
+        })
+        .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
     it('returns 409 conflict when a duplicate short name is submitted', async () => {
       await db.query(`
         INSERT INTO canonical_fields (
@@ -195,7 +211,7 @@ describe('/canonicalFields', () => {
           created_at
         )
         VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' );
+          ( 'First Name', 'firstName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' );
       `);
       const result = await agent
         .post('/canonicalFields')
@@ -204,7 +220,7 @@ describe('/canonicalFields', () => {
         .send({
           label: '🏷️',
           shortCode: 'firstName',
-          dataType: '📊',
+          dataType: { type: 'string' },
         })
         .expect(409);
       expect(result.body).toMatchObject({
@@ -227,7 +243,7 @@ describe('/canonicalFields', () => {
         .send({
           label: '🏷️',
           shortCode: 'firstName',
-          dataType: '📊',
+          dataType: { type: 'string' },
         })
         .expect(500);
       expect(result.body).toMatchObject({
@@ -248,7 +264,7 @@ describe('/canonicalFields', () => {
         .send({
           label: '🏷️',
           shortCode: '🩳',
-          dataType: '📊',
+          dataType: { type: 'string' },
         })
         .expect(500);
       expect(result.body).toMatchObject({

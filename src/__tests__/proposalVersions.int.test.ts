@@ -121,8 +121,8 @@ describe('/proposalVersions', () => {
           created_at
         )
         VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
+          ( 'First Name', 'firstName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' ),
+          ( 'Last Name', 'lastName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
         INSERT INTO application_form_fields (
@@ -520,8 +520,8 @@ describe('/proposalVersions', () => {
           created_at
         )
         VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
+          ( 'First Name', 'firstName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' ),
+          ( 'Last Name', 'lastName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
         INSERT INTO application_form_fields (
@@ -800,8 +800,8 @@ describe('/proposalVersions', () => {
           created_at
         )
         VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
+          ( 'First Name', 'firstName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' ),
+          ( 'Last Name', 'lastName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
         INSERT INTO application_form_fields (
@@ -894,8 +894,8 @@ describe('/proposalVersions', () => {
           created_at
         )
         VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
+          ( 'First Name', 'firstName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' ),
+          ( 'Last Name', 'lastName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
         INSERT INTO application_form_fields (
@@ -1059,8 +1059,8 @@ describe('/proposalVersions', () => {
           created_at
         )
         VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
+          ( 'First Name', 'firstName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' ),
+          ( 'Last Name', 'lastName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
         INSERT INTO application_form_fields (
@@ -1229,8 +1229,8 @@ describe('/proposalVersions', () => {
           created_at
         )
         VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
+          ( 'First Name', 'firstName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' ),
+          ( 'Last Name', 'lastName', '{ "type": "string" }', '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
         INSERT INTO application_form_fields (

@@ -95,8 +95,8 @@ describe('/applicationForms', () => {
         created_at
       )
       VALUES
-        ( 'Organization Name', 'organizationName', '{ type: "string" }', '2510-02-02 00:00:04+0000' ),
-        ( 'Years of work', 'yearsOfWork', '{ type: "integer" }', '2510-02-02 00:00:05+0000' );
+        ( 'Organization Name', 'organizationName', '{ "type": "string" }', '2510-02-02 00:00:04+0000' ),
+        ( 'Years of work', 'yearsOfWork', '{ "type": "integer" }', '2510-02-02 00:00:05+0000' );
       `);
       await agent
         .get('/applicationForms/2')
@@ -138,8 +138,8 @@ describe('/applicationForms', () => {
         created_at
       )
       VALUES
-        ( 'Organization Name', 'organizationName', '{ type: "string" }', '2510-02-01 00:00:04+0000' ),
-        ( 'Years of work', 'yearsOfWork', '{ type: "integer" }', '2510-02-01 00:00:05+0000' );
+        ( 'Organization Name', 'organizationName', '{ "type": "string" }', '2510-02-01 00:00:04+0000' ),
+        ( 'Years of work', 'yearsOfWork', '{ "type": "integer" }', '2510-02-01 00:00:05+0000' );
       `);
       await db.query(`
         INSERT INTO application_form_fields (
@@ -439,7 +439,7 @@ describe('/applicationForms', () => {
           data_type
         )
         VALUES
-          ( 'First Name', 'firstName', 'string' );
+          ( 'First Name', 'firstName', '{ "type": "string" }' );
       `);
       const before = await loadTableMetrics('application_form_fields');
       const result = await agent
@@ -642,7 +642,7 @@ describe('/applicationForms', () => {
           data_type
         )
         VALUES
-          ( 'First Name', 'firstName', 'string' );
+          ( 'First Name', 'firstName', '{ "type": "string" }' );
       `);
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => ({
@@ -695,7 +695,7 @@ describe('/applicationForms', () => {
           data_type
         )
         VALUES
-          ( 'First Name', 'firstName', 'string' );
+          ( 'First Name', 'firstName', '{ "type": "string" }' );
       `);
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => ({

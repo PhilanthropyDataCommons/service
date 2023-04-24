@@ -1,11 +1,13 @@
 import { ajv } from '../ajv';
+import { jsonSchemaObject } from './JsonSchemaObject';
+import type { JsonSchemaObject } from './JsonSchemaObject';
 import type { JSONSchemaType } from 'ajv';
 
 export interface CanonicalField {
   id: number;
   label: string;
   shortCode: string;
-  dataType: string;
+  dataType: JsonSchemaObject;
   createdAt: Date;
 }
 
@@ -21,9 +23,7 @@ export const canonicalFieldSchema: JSONSchemaType<CanonicalField> = {
     shortCode: {
       type: 'string',
     },
-    dataType: {
-      type: 'string',
-    },
+    dataType: jsonSchemaObject,
     createdAt: {
       type: 'object',
       required: [],

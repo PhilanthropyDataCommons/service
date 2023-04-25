@@ -3,6 +3,7 @@ import {
   db,
   getLimitValues,
   loadProposalBundle,
+  enrichProposals,
 } from '../database';
 import {
   isProposalWrite,
@@ -47,9 +48,14 @@ const getProposals = (
     const proposalBundle = await loadProposalBundle({
       ...getLimitValues(paginationParameters),
     });
+    const enrichedProposalBundle = {
+      ...proposalBundle,
+      entries: await enrichProposals(proposalBundle.entries),
+    };
+
     res.status(200)
       .contentType('application/json')
-      .send(proposalBundle);
+      .send(enrichedProposalBundle);
   })()
     .catch((error: unknown) => {
       if (isTinyPgErrorWithQueryContext(error)) {

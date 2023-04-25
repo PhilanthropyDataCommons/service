@@ -39,7 +39,10 @@
     {
       "files": [ "**/index.ts" ],
       "rules": {
-        "sort-exports/sort-exports": ["error", { "sortDir": "asc" }]
+        "sort-exports/sort-exports": ["error", {
+          "sortDir": "asc",
+          "ignoreCase": true
+        }]
       }
     }
   ],

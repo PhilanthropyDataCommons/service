@@ -1,5 +1,4 @@
 import { loadBundle } from '..';
-import { isApplicant } from '../../../types';
 import { db } from '../..';
 
 describe('loadBundle', () => {
@@ -12,7 +11,6 @@ describe('loadBundle', () => {
       'applicants.selectAll',
       {},
       'applicants',
-      isApplicant,
     );
     expect(objects).toMatchObject({
       total: 1,

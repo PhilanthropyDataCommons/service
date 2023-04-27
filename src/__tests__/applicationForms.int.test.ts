@@ -7,7 +7,7 @@ import {
 } from '../database';
 import { getLogger } from '../logger';
 import { PostgresErrorCode } from '../types';
-import { isoTimestampPattern } from '../test/utils';
+import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import type { Result } from 'tinypg';
 
@@ -422,7 +422,7 @@ describe('/applicationForms', () => {
         id: 1,
         opportunityId: 1,
         version: 1,
-        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+        createdAt: expectTimestamp,
       });
       expect(after.count).toEqual(1);
     });
@@ -465,12 +465,12 @@ describe('/applicationForms', () => {
         fields: [{
           applicationFormId: 1,
           canonicalFieldId: 1,
-          createdAt: expect.stringMatching(isoTimestampPattern) as string,
+          createdAt: expectTimestamp,
           id: 1,
           label: 'Your First Name',
           position: 1,
         }],
-        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+        createdAt: expectTimestamp,
       });
       expect(after.count).toEqual(1);
     });
@@ -507,7 +507,7 @@ describe('/applicationForms', () => {
         id: 3,
         opportunityId: 1,
         version: 3,
-        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+        createdAt: expectTimestamp,
       });
     });
 

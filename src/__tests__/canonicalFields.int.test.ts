@@ -7,7 +7,7 @@ import {
 } from '../database';
 import { getLogger } from '../logger';
 import { PostgresErrorCode } from '../types';
-import { isoTimestampPattern } from '../test/utils';
+import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import type { Result } from 'tinypg';
 
@@ -137,7 +137,7 @@ describe('/canonicalFields', () => {
         label: '🏷️',
         shortCode: '🩳',
         dataType: '📊',
-        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+        createdAt: expectTimestamp,
       });
       expect(after.count).toEqual(1);
     });

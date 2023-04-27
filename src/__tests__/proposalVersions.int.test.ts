@@ -6,7 +6,7 @@ import {
   loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { isoTimestampPattern } from '../test/utils';
+import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
@@ -171,14 +171,14 @@ describe('/proposalVersions', () => {
             applicationFormFieldId: 1,
             position: 1,
             value: 'Gronald',
-            createdAt: expect.stringMatching(isoTimestampPattern) as string,
+            createdAt: expectTimestamp,
           },
           {
             id: 2,
             applicationFormFieldId: 2,
             position: 1,
             value: 'Plorp',
-            createdAt: expect.stringMatching(isoTimestampPattern) as string,
+            createdAt: expectTimestamp,
           },
         ],
       });

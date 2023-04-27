@@ -6,7 +6,7 @@ import {
   loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { isoTimestampPattern } from '../test/utils';
+import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
@@ -84,7 +84,7 @@ describe('/proposals', () => {
                   externalId: 'proposal-2',
                   applicantId: 1,
                   opportunityId: 1,
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  createdAt: expectTimestamp,
                   versions: [],
                 },
                 {
@@ -92,27 +92,27 @@ describe('/proposals', () => {
                   externalId: 'proposal-1',
                   applicantId: 1,
                   opportunityId: 1,
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  createdAt: expectTimestamp,
                   versions: [{
                     id: 1,
                     proposalId: 1,
                     version: 1,
                     applicationFormId: 1,
-                    createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                    createdAt: expectTimestamp,
                     fieldValues: [{
                       id: 1,
                       applicationFormFieldId: 1,
                       proposalVersionId: 1,
                       position: 1,
                       value: 'This is a summary',
-                      createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                      createdAt: expectTimestamp,
                       applicationFormField: {
                         id: 1,
                         applicationFormId: 1,
                         canonicalFieldId: 1,
                         label: 'Short summary',
                         position: 1,
-                        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                        createdAt: expectTimestamp,
                       },
                     }],
                   }],
@@ -158,7 +158,7 @@ describe('/proposals', () => {
                   applicantId: 1,
                   opportunityId: 1,
                   versions: [],
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  createdAt: expectTimestamp,
                 },
                 {
                   id: 14,
@@ -166,7 +166,7 @@ describe('/proposals', () => {
                   applicantId: 1,
                   opportunityId: 1,
                   versions: [],
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  createdAt: expectTimestamp,
                 },
                 {
                   id: 13,
@@ -174,7 +174,7 @@ describe('/proposals', () => {
                   applicantId: 1,
                   opportunityId: 1,
                   versions: [],
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  createdAt: expectTimestamp,
                 },
                 {
                   id: 12,
@@ -182,7 +182,7 @@ describe('/proposals', () => {
                   applicantId: 1,
                   opportunityId: 1,
                   versions: [],
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  createdAt: expectTimestamp,
                 },
                 {
                   id: 11,
@@ -190,7 +190,7 @@ describe('/proposals', () => {
                   applicantId: 1,
                   opportunityId: 1,
                   versions: [],
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  createdAt: expectTimestamp,
                 },
               ],
             },
@@ -741,7 +741,7 @@ describe('/proposals', () => {
         applicantId: 1,
         externalId: 'proposal123',
         opportunityId: 1,
-        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+        createdAt: expectTimestamp,
       });
       expect(after.count).toEqual(1);
     });

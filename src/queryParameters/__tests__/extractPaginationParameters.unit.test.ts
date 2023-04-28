@@ -12,8 +12,8 @@ describe('extractPaginationParameters', () => {
       query: {},
     });
     expect(paginationParameters).toEqual({
-      page: apiSpecification.parameters.pageParam.default,
-      count: apiSpecification.parameters.countParam.default,
+      page: apiSpecification.components.parameters.pageParam.schema.default,
+      count: apiSpecification.components.parameters.countParam.schema.default,
     });
   });
 

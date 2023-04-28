@@ -5,36 +5,40 @@
     "description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
     "version": "0.2.0"
   },
-  "parameters": {
-    "pageParam": {
-      "in": "query",
-      "name": "_page",
-      "required": false,
-      "type": "integer",
-      "minimum": 1,
-      "default": 1,
-      "description": "The page number being retrieved."
-    },
-    "countParam": {
-      "in": "query",
-      "name": "_count",
-      "required": false,
-      "type": "integer",
-      "minimum": 1,
-      "default": 100,
-      "description": "The maximum number of items that should appear per page or request."
-    }
-  },
   "components": {
+    "parameters": {
+      "pageParam": {
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "in": "query",
+        "name": "_page",
+        "required": false,
+        "description": "The page number being retrieved."
+      },
+      "countParam": {
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 100
+        },
+        "in": "query",
+        "name": "_count",
+        "required": false,
+        "description": "The maximum number of items that should appear per page or request."
+      }
+    },
     "securitySchemes": {
       "auth": {
         "type": "oauth2",
         "description":  "The OAuth 2.0 (and OpenID Connect) Authorization Code flow.",
         "flows": {
           "authorizationCode": {
-            "authorizationUrl": "${AUTH_SERVER_ISSUER}/protocol/openid-connect/auth",
-            "tokenUrl": "${AUTH_SERVER_ISSUER}/protocol/openid-connect/token",
-            "refreshUrl": "${AUTH_SERVER_ISSUER}/protocol/openid-connect/token",
+            "authorizationUrl": "https://example.com/protocol/openid-connect/auth",
+            "tokenUrl": "https://example.com/protocol/openid-connect/token",
+            "refreshUrl": "https://example.com/protocol/openid-connect/token",
             "scopes": {
               "openid": "Use OpenID Connect (recommended).",
               "roles": "Read your roles (recommended).",
@@ -321,12 +325,9 @@
           },
           "details": {
             "type": "array",
-            "items": {
-              "type": "object"
-            }
+            "items": {}
           }
-        },
-        "required": []
+        }
       },
       "Opportunity": {
         "type": "object",
@@ -706,8 +707,8 @@
           }
         ],
         "parameters": [
-          { "$ref": "#/parameters/pageParam" },
-          { "$ref": "#/parameters/countParam" }
+          { "$ref": "#/components/parameters/pageParam" },
+          { "$ref": "#/components/parameters/countParam" }
         ],
         "responses": {
           "200": {

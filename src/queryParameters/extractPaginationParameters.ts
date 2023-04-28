@@ -23,8 +23,8 @@ export const extractPaginationParameters = (
   }
   /* eslint-disable no-underscore-dangle */
   return {
-    page: query._page ?? apiSpecification.parameters.pageParam.default,
-    count: query._count ?? apiSpecification.parameters.countParam.default,
+    page: query._page ?? apiSpecification.components.parameters.pageParam.schema.default,
+    count: query._count ?? apiSpecification.components.parameters.countParam.schema.default,
   };
   /* eslint-enable no-underscore-dangle */
 };

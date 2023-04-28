@@ -325,12 +325,9 @@
           },
           "details": {
             "type": "array",
-            "items": {
-              "type": "object"
-            }
+            "items": {}
           }
-        },
-        "required": []
+        }
       },
       "Opportunity": {
         "type": "object",

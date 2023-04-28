@@ -357,8 +357,8 @@
         "properties": {
           "entries": {
             "type": "array",
-            "description": "The collection of requested resources.",
-            "example": []
+            "items": {},
+            "description": "The collection of requested resources."
           },
           "total": {
             "type": "integer",

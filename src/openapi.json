@@ -173,6 +173,9 @@
             "type": "integer",
             "example": 3613
           },
+          "applicationFormField": {
+            "$ref": "#/components/schemas/ApplicationFormField"
+          },
           "position": {
             "type": "integer",
             "example": 23
@@ -354,8 +357,8 @@
         "properties": {
           "entries": {
             "type": "array",
-            "description": "The collection of requested resources.",
-            "example": []
+            "items": {},
+            "description": "The collection of requested resources."
           },
           "total": {
             "type": "integer",

@@ -6,7 +6,7 @@ import {
   loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { isoTimestampPattern } from '../test/utils';
+import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
@@ -251,7 +251,7 @@ describe('/opportunities', () => {
       expect(result.body).toMatchObject({
         id: 1,
         title: '🎆',
-        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+        createdAt: expectTimestamp,
       });
       expect(after.count).toEqual(1);
     });

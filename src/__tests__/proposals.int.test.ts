@@ -6,7 +6,7 @@ import {
   loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { isoTimestampPattern } from '../test/utils';
+import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import type { Result } from 'tinypg';
@@ -35,6 +35,11 @@ describe('/proposals', () => {
         externalId: '12345',
         optedIn: true,
       });
+      await db.sql('canonicalFields.insertOne', {
+        label: 'Summary',
+        shortCode: 'summary',
+        dataType: 'string',
+      });
       await db.sql('proposals.insertOne', {
         applicantId: 1,
         externalId: 'proposal-1',
@@ -45,6 +50,26 @@ describe('/proposals', () => {
         externalId: 'proposal-2',
         opportunityId: 1,
       });
+      await db.sql('applicationForms.insertOne', {
+        opportunityId: 1,
+      });
+      await db.sql('proposalVersions.insertOne', {
+        proposalId: 1,
+        applicationFormId: 1,
+      });
+      await db.sql('applicationFormFields.insertOne', {
+        applicationFormId: 1,
+        canonicalFieldId: 1,
+        position: 1,
+        label: 'Short summary',
+      });
+      await db.sql('proposalFieldValues.insertOne', {
+        proposalVersionId: 1,
+        applicationFormFieldId: 1,
+        position: 1,
+        value: 'This is a summary',
+      });
+
       await agent
         .get('/proposals')
         .set(authHeader)
@@ -59,14 +84,38 @@ describe('/proposals', () => {
                   externalId: 'proposal-2',
                   applicantId: 1,
                   opportunityId: 1,
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  createdAt: expectTimestamp,
+                  versions: [],
                 },
                 {
                   id: 1,
                   externalId: 'proposal-1',
                   applicantId: 1,
                   opportunityId: 1,
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  createdAt: expectTimestamp,
+                  versions: [{
+                    id: 1,
+                    proposalId: 1,
+                    version: 1,
+                    applicationFormId: 1,
+                    createdAt: expectTimestamp,
+                    fieldValues: [{
+                      id: 1,
+                      applicationFormFieldId: 1,
+                      proposalVersionId: 1,
+                      position: 1,
+                      value: 'This is a summary',
+                      createdAt: expectTimestamp,
+                      applicationFormField: {
+                        id: 1,
+                        applicationFormId: 1,
+                        canonicalFieldId: 1,
+                        label: 'Short summary',
+                        position: 1,
+                        createdAt: expectTimestamp,
+                      },
+                    }],
+                  }],
                 },
               ],
             },
@@ -108,35 +157,40 @@ describe('/proposals', () => {
                   externalId: 'proposal-15',
                   applicantId: 1,
                   opportunityId: 1,
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  versions: [],
+                  createdAt: expectTimestamp,
                 },
                 {
                   id: 14,
                   externalId: 'proposal-14',
                   applicantId: 1,
                   opportunityId: 1,
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  versions: [],
+                  createdAt: expectTimestamp,
                 },
                 {
                   id: 13,
                   externalId: 'proposal-13',
                   applicantId: 1,
                   opportunityId: 1,
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  versions: [],
+                  createdAt: expectTimestamp,
                 },
                 {
                   id: 12,
                   externalId: 'proposal-12',
                   applicantId: 1,
                   opportunityId: 1,
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  versions: [],
+                  createdAt: expectTimestamp,
                 },
                 {
                   id: 11,
                   externalId: 'proposal-11',
                   applicantId: 1,
                   opportunityId: 1,
-                  createdAt: expect.stringMatching(isoTimestampPattern) as string,
+                  versions: [],
+                  createdAt: expectTimestamp,
                 },
               ],
             },
@@ -687,7 +741,7 @@ describe('/proposals', () => {
         applicantId: 1,
         externalId: 'proposal123',
         opportunityId: 1,
-        createdAt: expect.stringMatching(isoTimestampPattern) as string,
+        createdAt: expectTimestamp,
       });
       expect(after.count).toEqual(1);
     });

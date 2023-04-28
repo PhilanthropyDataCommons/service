@@ -123,6 +123,104 @@ describe('/proposals', () => {
         );
     });
 
+    it('returns a subset of proposals present in the database when search is provided', async () => {
+      await db.sql('opportunities.insertOne', {
+        title: '🔥',
+      });
+      await db.sql('applicants.insertOne', {
+        externalId: '12345',
+        optedIn: true,
+      });
+      await db.sql('canonicalFields.insertOne', {
+        label: 'Summary',
+        shortCode: 'summary',
+        dataType: 'string',
+      });
+      await db.sql('proposals.insertOne', {
+        applicantId: 1,
+        externalId: 'proposal-1',
+        opportunityId: 1,
+      });
+      await db.sql('proposals.insertOne', {
+        applicantId: 1,
+        externalId: 'proposal-2',
+        opportunityId: 1,
+      });
+      await db.sql('applicationForms.insertOne', {
+        opportunityId: 1,
+      });
+      await db.sql('proposalVersions.insertOne', {
+        proposalId: 1,
+        applicationFormId: 1,
+      });
+      await db.sql('proposalVersions.insertOne', {
+        proposalId: 2,
+        applicationFormId: 1,
+      });
+      await db.sql('applicationFormFields.insertOne', {
+        applicationFormId: 1,
+        canonicalFieldId: 1,
+        position: 1,
+        label: 'Short summary',
+      });
+      await db.sql('proposalFieldValues.insertOne', {
+        proposalVersionId: 1,
+        applicationFormFieldId: 1,
+        position: 1,
+        value: 'This is a summary',
+      });
+      await db.sql('proposalFieldValues.insertOne', {
+        proposalVersionId: 2,
+        applicationFormFieldId: 1,
+        position: 1,
+        value: 'This is a pair of pants',
+      });
+
+      await agent
+        .get('/proposals?_content=summary')
+        .set(authHeader)
+        .expect(200)
+        .expect(
+          (res) => expect(res.body).toEqual(
+            {
+              total: 2,
+              entries: [
+                {
+                  id: 1,
+                  externalId: 'proposal-1',
+                  applicantId: 1,
+                  opportunityId: 1,
+                  createdAt: expectTimestamp,
+                  versions: [{
+                    id: 1,
+                    proposalId: 1,
+                    version: 1,
+                    applicationFormId: 1,
+                    createdAt: expectTimestamp,
+                    fieldValues: [{
+                      id: 1,
+                      applicationFormFieldId: 1,
+                      proposalVersionId: 1,
+                      position: 1,
+                      value: 'This is a summary',
+                      createdAt: expectTimestamp,
+                      applicationFormField: {
+                        id: 1,
+                        applicationFormId: 1,
+                        canonicalFieldId: 1,
+                        label: 'Short summary',
+                        position: 1,
+                        createdAt: expectTimestamp,
+                      },
+                    }],
+                  }],
+                },
+              ],
+            },
+          ),
+        );
+    });
+
     it('returns according to pagination parameters', async () => {
       await db.sql('opportunities.insertOne', {
         title: '🔥',

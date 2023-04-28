@@ -28,6 +28,16 @@
         "name": "_count",
         "required": false,
         "description": "The maximum number of items that should appear per page or request."
+      },
+      "searchParam": {
+        "schema": {
+          "type": "string",
+          "default": ""
+        },
+        "in": "query",
+        "name": "_content",
+        "required": false,
+        "description": "A web-search formatted string to select specific entities returned."
       }
     },
     "securitySchemes": {
@@ -708,7 +718,8 @@
         ],
         "parameters": [
           { "$ref": "#/components/parameters/pageParam" },
-          { "$ref": "#/components/parameters/countParam" }
+          { "$ref": "#/components/parameters/countParam" },
+          { "$ref": "#/components/parameters/searchParam" }
         ],
         "responses": {
           "200": {

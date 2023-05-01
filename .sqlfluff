@@ -1,0 +1,16 @@
+[sqlfluff]
+dialect = postgres
+templater = placeholder
+
+[sqlfluff:indentation]
+indent_unit = space
+tab_space_size = 2
+
+[sqlfluff:templater:placeholder]
+param_style = colon
+
+# placeholder values
+externalId = '12-3456789'
+limit = 20
+offset = 0
+search = ''

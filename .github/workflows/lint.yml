@@ -24,6 +24,17 @@ jobs:
           node-version: 20.17.0
       - run: npm ci
       - run: npm run lint:prettier
+  sqlfluff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install SQLFluff
+        run: 'pip install -r requirements.txt'
+      - name: Lint SQL
+        run: sqlfluff lint --format github-annotation-native src/database/
   swagger:
     runs-on: ubuntu-latest
     steps:

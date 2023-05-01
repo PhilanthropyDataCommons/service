@@ -1,0 +1,30 @@
+[sqlfluff]
+dialect = postgres
+templater = placeholder
+exclude_rules =
+  aliasing.table,
+  capitalisation.functions,
+  capitalisation.identifiers,
+  capitalisation.keywords,
+  capitalisation.literals,
+  capitalisation.types,
+  convention.terminator,
+  layout.end_of_file,
+  layout.functions,
+  layout.indent,
+  layout.long_lines,
+  layout.spacing,
+  references.consistent,
+  references.quoting,
+  structure.join_condition_order,
+
+[sqlfluff:indentation]
+indent_unit = space
+tab_space_size = 2
+
+[sqlfluff:templater:placeholder]
+param_style = colon
+
+# placeholder values
+limit = 20
+offset = 0

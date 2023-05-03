@@ -21,6 +21,7 @@ import {
 } from '../errors';
 import {
   extractPaginationParameters,
+  extractSearchParameters,
 } from '../queryParameters';
 import type {
   Request,
@@ -44,9 +45,11 @@ const getProposals = (
   next: NextFunction,
 ): void => {
   const paginationParameters = extractPaginationParameters(req);
+  const searchParameters = extractSearchParameters(req);
   (async () => {
     const proposalBundle = await loadProposalBundle({
       ...getLimitValues(paginationParameters),
+      ...searchParameters,
     });
     const enrichedProposalBundle = {
       ...proposalBundle,

@@ -3,7 +3,7 @@
 
 ```mermaid
 erDiagram
-  CanonicalField {
+  BaseField {
     int id
     string label
     string shortCode
@@ -47,14 +47,14 @@ erDiagram
   ApplicationFormField {
     int id
     int applicationFormId
-    int canonicalFieldId
+    int baseFieldId
     int position
     string label
     datetime createdAt
   }
   ExternalFieldValue {
     int id
-    int canonicalFieldId
+    int baseFieldId
     string name
     string value
     int position
@@ -86,12 +86,12 @@ erDiagram
   Opportunity ||--|{ ApplicationForm : establishes
   Proposal ||--o{ Outcome : "has"
   ApplicationForm ||--|{ ApplicationFormField : has
-  ApplicationFormField }o--|| CanonicalField : represents
+  ApplicationFormField }o--|| BaseField : represents
   Proposal ||--|{ ProposalVersion : has
   ProposalVersion ||--|{ ProposalFieldValue : contains
   ProposalFieldValue }o--|| ApplicationFormField : populates
   Applicant ||--o{ ExternalFieldValue : "is described by"
-  ExternalFieldValue }o--|| CanonicalField : "contains potential defaults for"
+  ExternalFieldValue }o--|| BaseField : "contains potential defaults for"
   ExternalSource ||--o{ ExternalFieldValue : "populates"
 ```
 
@@ -101,7 +101,7 @@ erDiagram
 2. A `Proposal` is a response to an `Opportunity`.  An `Opportunity` represents a given challenge, RFP, etc.
 3. An `Opportunity` establishes an `Application Form`. An application form is the set of fields that make up an application.  An `Opportunity` might update its `Application Form` over time, which is why an `Opportunity` can have many `Application Forms`.
 4. An `Application Form` will define many `Application Form Fields`.
-5. An `Application Form Field` represents a `Canonical Field`.
+5. An `Application Form Field` represents a `Base Field`.
 
 Meanwhile...
 
@@ -113,8 +113,8 @@ The thinking is that when a new proposal is being written, a Grant Management Sy
 
 PDC would then:
 
-* Collect the most recent ProposalFieldValues for each CanonicalField for that Applicant.
-* Collect the most recent ExternalFieldValues for each CanonicalField for that Applicant.
+* Collect the most recent ProposalFieldValues for each BaseField for that Applicant.
+* Collect the most recent ExternalFieldValues for each BaseField for that Applicant.
 
 It would use the ProposalFieldValue set as the primary source, and the ExternalFieldValue set as a secondary source.
 
@@ -127,14 +127,14 @@ sequenceDiagram
   participant API
   participant Database
   Admin ->>+ API : Here is a new application form
-  API ->>+ Database : Register any new canonical fields
+  API ->>+ Database : Register any new base fields
   Database ->>- API : OK!
   API ->>+ Database : Register the new application form
   Database ->>- API : OK!
   API ->>- Admin :  OK!
 ```
 
-New `Application Forms` will have to be externally defined; some day maybe we will make a user interface that generates an `Application Form` definition, but for the short term this will be manually written JSON (or YAML, or something else highly structured).  The form will define the full set of `Application Form Fields` along with the id of the `Canonical Field` to which the `Application Form Fields` map.
+New `Application Forms` will have to be externally defined; some day maybe we will make a user interface that generates an `Application Form` definition, but for the short term this will be manually written JSON (or YAML, or something else highly structured).  The form will define the full set of `Application Form Fields` along with the id of the `Base Field` to which the `Application Form Fields` map.
 
 This might look something like this:
 
@@ -144,20 +144,20 @@ This might look something like this:
     {
       "name": "Applicant Name",
       "type": "string",
-      "canonicalFieldId": 42,
+      "baseFieldId": 42,
     },
     {
       "name": "Have you ever seen the Mona Lisa?",
       "type": "boolean",
-      "canonicalFieldId": 43,
+      "baseFieldId": 43,
     }
   ]
 }
 ```
 
-The PDC API would then ingest that new form document.  It would first register any `Canonical Fields` that did not already exist.  It would then register the `Application Form` and `Application Form Fields`, with field-level associations to the `Canonical Fields`.
+The PDC API would then ingest that new form document.  It would first register any `Base Fields` that did not already exist.  It would then register the `Application Form` and `Application Form Fields`, with field-level associations to the `Base Fields`.
 
-The database does not differentiate between "core" and "custom" fields.  Rather, there will be a set of `Canonical Fields` that are used by varying numbers of `Application Forms`.  We will likely see that some `Canonical Fields` are used more often than others, and some are only used by a single `Application Form`.  We might choose a subset of the `Canonical Fields` to highlight in our documentation and might call those "core" fields; that decision is not directly relevant to the form.
+The database does not differentiate between "core" and "custom" fields.  Rather, there will be a set of `Base Fields` that are used by varying numbers of `Application Forms`.  We will likely see that some `Base Fields` are used more often than others, and some are only used by a single `Application Form`.  We might choose a subset of the `Base Fields` to highlight in our documentation and might call those "core" fields; that decision is not directly relevant to the form.
 
 ### Pre-filling an Application
 
@@ -198,6 +198,6 @@ sequenceDiagram
 
 The above flow is based on an assumption that we know this is the first time the applicant had submitted a proposal / it is not an update to an existing proposal.
 
-The API would create a new Proposal, a new Proposal Version, and then it would store one `Proposal Field Value` per `Canonical Field`.  Those field values would then be incorporated in future lookups according to the "Pre-filling an Proposal" logic.
+The API would create a new Proposal, a new Proposal Version, and then it would store one `Proposal Field Value` per `Base Field`.  Those field values would then be incorporated in future lookups according to the "Pre-filling an Proposal" logic.
 
 The API might then send alerts to other GMSs depending on business logic, but that is an implementation detail and outside of the scope of this particular example.

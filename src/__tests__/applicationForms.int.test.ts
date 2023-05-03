@@ -88,7 +88,7 @@ describe('/applicationForms', () => {
           ( 2, 1, '2510-02-02 00:00:03+0000' )
       `);
       await db.query(`
-      INSERT INTO canonical_fields (
+      INSERT INTO base_fields (
         label,
         short_code,
         data_type,
@@ -131,7 +131,7 @@ describe('/applicationForms', () => {
           ( 2, 1, '2510-02-01 00:00:03+0000' )
       `);
       await db.query(`
-      INSERT INTO canonical_fields (
+      INSERT INTO base_fields (
         label,
         short_code,
         data_type,
@@ -144,7 +144,7 @@ describe('/applicationForms', () => {
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
-          canonical_field_id,
+          base_field_id,
           position,
           label,
           created_at
@@ -169,7 +169,7 @@ describe('/applicationForms', () => {
               {
                 id: 4,
                 applicationFormId: 2,
-                canonicalFieldId: 2,
+                baseFieldId: 2,
                 position: 1,
                 label: 'Duration of work in years',
                 createdAt: '2510-02-01T00:00:09.000Z',
@@ -177,7 +177,7 @@ describe('/applicationForms', () => {
               {
                 id: 3,
                 applicationFormId: 2,
-                canonicalFieldId: 1,
+                baseFieldId: 1,
                 position: 2,
                 label: 'Name of Organization',
                 createdAt: '2510-02-01T00:00:08.000Z',
@@ -433,7 +433,7 @@ describe('/applicationForms', () => {
         VALUES ( 'Tremendous opportunity 👌' );
       `);
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type
@@ -449,7 +449,7 @@ describe('/applicationForms', () => {
         .send({
           opportunityId: '1',
           fields: [{
-            canonicalFieldId: '1',
+            baseFieldId: '1',
             position: 1,
             label: 'Your First Name',
           }],
@@ -464,7 +464,7 @@ describe('/applicationForms', () => {
         version: 1,
         fields: [{
           applicationFormId: 1,
-          canonicalFieldId: 1,
+          baseFieldId: 1,
           createdAt: expectTimestamp,
           id: 1,
           label: 'Your First Name',
@@ -636,7 +636,7 @@ describe('/applicationForms', () => {
           ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
       `);
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type
@@ -667,7 +667,7 @@ describe('/applicationForms', () => {
         .send({
           opportunityId: '1',
           fields: [{
-            canonicalFieldId: '1',
+            baseFieldId: '1',
             position: 1,
             label: 'Your First Name',
           }],
@@ -689,7 +689,7 @@ describe('/applicationForms', () => {
           ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
       `);
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type
@@ -721,7 +721,7 @@ describe('/applicationForms', () => {
         .send({
           opportunityId: '1',
           fields: [{
-            canonicalFieldId: '1',
+            baseFieldId: '1',
             position: 1,
             label: 'Your First Name',
           }],
@@ -754,7 +754,7 @@ describe('/applicationForms', () => {
       .send({
         opportunityId: 9001,
         fields: [{
-          canonicalFieldId: 9002,
+          baseFieldId: 9002,
           position: 9003,
           label: 'A label of some kind',
         }],

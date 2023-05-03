@@ -3,7 +3,7 @@
   "info": {
     "title": "Philanthropy Data Commons API",
     "description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "components": {
     "parameters": {
@@ -263,7 +263,7 @@
             "readOnly": true,
             "example": 3529
           },
-          "canonicalFieldId": {
+          "baseFieldId": {
             "type": "integer",
             "example": 3011
           },
@@ -284,13 +284,13 @@
         "required": [
           "id",
           "applicationFormId",
-          "canonicalFieldId",
+          "baseFieldId",
           "position",
           "label",
           "createdAt"
         ]
       },
-      "CanonicalField": {
+      "BaseField": {
         "type": "object",
         "properties": {
           "id": {
@@ -690,7 +690,7 @@
                         {
                           "id": 3613,
                           "applicationFormId": 3529,
-                          "canonicalFieldId": 3011,
+                          "baseFieldId": 3011,
                           "position": 29,
                           "label": "Your First Name",
                           "createdAt": "2022-12-12T17:54:24.988Z"
@@ -874,7 +874,7 @@
                               "applicationFormField": {
                                 "id": 3613,
                                 "applicationFormId": 3529,
-                                "canonicalFieldId": 3011,
+                                "baseFieldId": 3011,
                                 "position": 19,
                                 "label": "Your First Name",
                                 "createdAt": "2023-02-14T09:58:00.000Z"
@@ -947,11 +947,11 @@
         }
       }
     },
-    "/canonicalFields": {
+    "/baseFields": {
       "get": {
-        "summary": "Get a list of canonical fields.",
+        "summary": "Get a list of base fields.",
         "tags": [
-          "Canonical Fields"
+          "Base Fields"
         ],
         "security": [
           {
@@ -960,13 +960,13 @@
         ],
         "responses": {
           "200": {
-            "description": "All canonical fields currently registered in the PDC.",
+            "description": "All base fields currently registered in the PDC.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CanonicalField"
+                    "$ref": "#/components/schemas/BaseField"
                   }
                 }
               }
@@ -975,9 +975,9 @@
         }
       },
       "post": {
-        "summary": "Add a new canonical field.",
+        "summary": "Add a new base field.",
         "tags": [
-          "Canonical Fields"
+          "Base Fields"
         ],
         "security": [
           {
@@ -989,18 +989,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CanonicalField"
+                "$ref": "#/components/schemas/BaseField"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "The new canonical field that was created.",
+            "description": "The new base field that was created.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CanonicalField"
+                  "$ref": "#/components/schemas/BaseField"
                 }
               }
             }

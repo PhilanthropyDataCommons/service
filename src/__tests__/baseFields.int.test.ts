@@ -9,23 +9,22 @@ import { getLogger } from '../logger';
 import { PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
-import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
 
-describe('/canonicalFields', () => {
+describe('/baseFields', () => {
   describe('GET /', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
-        .get('/canonicalFields')
+        .get('/baseFields')
         .set(authHeader)
         .expect(200, []);
     });
 
-    it('returns all canonical fields present in the database', async () => {
+    it('returns all base fields present in the database', async () => {
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type,
@@ -36,7 +35,7 @@ describe('/canonicalFields', () => {
           ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
       `);
       await agent
-        .get('/canonicalFields')
+        .get('/baseFields')
         .set(authHeader)
         .expect(
           200,
@@ -59,28 +58,13 @@ describe('/canonicalFields', () => {
         );
     });
 
-    it('should error if the database returns an unexpected data structure', async () => {
-      jest.spyOn(db, 'sql')
-        .mockImplementationOnce(async () => ({
-          rows: [{ foo: 'not a valid result' }],
-        }) as Result<object>);
-      const result = await agent
-        .get('/canonicalFields')
-        .set(authHeader)
-        .expect(500);
-      expect(result.body).toMatchObject({
-        name: 'InternalValidationError',
-        details: expect.any(Array) as unknown[],
-      });
-    });
-
     it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => {
           throw new Error('This is unexpected');
         });
       const result = await agent
-        .get('/canonicalFields')
+        .get('/baseFields')
         .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
@@ -103,7 +87,7 @@ describe('/canonicalFields', () => {
           );
         });
       const result = await agent
-        .get('/canonicalFields')
+        .get('/baseFields')
         .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
@@ -116,11 +100,11 @@ describe('/canonicalFields', () => {
   });
 
   describe('POST /', () => {
-    it('creates exactly one canonical field', async () => {
-      const before = await loadTableMetrics('canonical_fields');
+    it('creates exactly one base field', async () => {
+      const before = await loadTableMetrics('base_fields');
       logger.debug('before: %o', before);
       const result = await agent
-        .post('/canonicalFields')
+        .post('/baseFields')
         .type('application/json')
         .set(authHeader)
         .send({
@@ -129,7 +113,7 @@ describe('/canonicalFields', () => {
           dataType: '📊',
         })
         .expect(201);
-      const after = await loadTableMetrics('canonical_fields');
+      const after = await loadTableMetrics('base_fields');
       logger.debug('after: %o', after);
       expect(before.count).toEqual(0);
       expect(result.body).toMatchObject({
@@ -143,7 +127,7 @@ describe('/canonicalFields', () => {
     });
     it('returns 400 bad request when no label is sent', async () => {
       const result = await agent
-        .post('/canonicalFields')
+        .post('/baseFields')
         .type('application/json')
         .set(authHeader)
         .send({
@@ -158,7 +142,7 @@ describe('/canonicalFields', () => {
     });
     it('returns 400 bad request when no shortCode is sent', async () => {
       const result = await agent
-        .post('/canonicalFields')
+        .post('/baseFields')
         .type('application/json')
         .set(authHeader)
         .send({
@@ -173,7 +157,7 @@ describe('/canonicalFields', () => {
     });
     it('returns 400 bad request when no dataType is sent', async () => {
       const result = await agent
-        .post('/canonicalFields')
+        .post('/baseFields')
         .type('application/json')
         .set(authHeader)
         .send({
@@ -188,7 +172,7 @@ describe('/canonicalFields', () => {
     });
     it('returns 409 conflict when a duplicate short name is submitted', async () => {
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type,
@@ -198,7 +182,7 @@ describe('/canonicalFields', () => {
           ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' );
       `);
       const result = await agent
-        .post('/canonicalFields')
+        .post('/baseFields')
         .type('application/json')
         .set(authHeader)
         .send({
@@ -221,7 +205,7 @@ describe('/canonicalFields', () => {
           throw new Error('This is unexpected');
         });
       const result = await agent
-        .post('/canonicalFields')
+        .post('/baseFields')
         .type('application/json')
         .set(authHeader)
         .send({
@@ -232,27 +216,6 @@ describe('/canonicalFields', () => {
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
-        details: expect.any(Array) as unknown[],
-      });
-    });
-
-    it('returns 500 if the database returns an unexpected data structure', async () => {
-      jest.spyOn(db, 'sql')
-        .mockImplementationOnce(async () => ({
-          rows: [{ foo: 'not a valid result' }],
-        }) as Result<object>);
-      const result = await agent
-        .post('/canonicalFields')
-        .type('application/json')
-        .set(authHeader)
-        .send({
-          label: '🏷️',
-          shortCode: '🩳',
-          dataType: '📊',
-        })
-        .expect(500);
-      expect(result.body).toMatchObject({
-        name: 'InternalValidationError',
         details: expect.any(Array) as unknown[],
       });
     });

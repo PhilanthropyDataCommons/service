@@ -1,6 +1,6 @@
 SELECT aff.id AS "id",
   aff.application_form_id AS "applicationFormId",
-  aff.canonical_field_id AS "canonicalFieldId",
+  aff.base_field_id AS "baseFieldId",
   aff.position AS "position",
   aff.label AS "label",
   aff.created_at AS "createdAt"

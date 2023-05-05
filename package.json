@@ -77,7 +77,7 @@
     "pino-http": "^8.3.3",
     "postgres-migrations": "^5.3.0",
     "require-env-variable": "^4.0.1",
-    "swagger-ui-express": "^4.6.2",
+    "swagger-ui-express": "^4.6.3",
     "tinypg": "^7.0.0"
   }
 }

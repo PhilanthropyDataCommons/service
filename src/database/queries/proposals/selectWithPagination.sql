@@ -9,7 +9,7 @@ FROM proposals p
 WHERE
   CASE
     WHEN :search::text != '' THEN
-      pfv.value_search @@ websearch_to_tsquery(:search::text)
+      pfv.value_search @@ websearch_to_tsquery('english', :search::text)
     ELSE
       true
     END

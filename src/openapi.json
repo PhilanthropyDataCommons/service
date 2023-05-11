@@ -38,6 +38,16 @@
         "name": "_content",
         "required": false,
         "description": "A web-search formatted string to select specific entities returned."
+      },
+      "opportunityIdParam": {
+        "schema": {
+          "type": "integer",
+          "default": 0
+        },
+        "in": "query",
+        "name": "opportunityId",
+        "required": false,
+        "description": "The PDC-generated ID of an opportunity by which to filter results."
       }
     },
     "securitySchemes": {
@@ -719,11 +729,12 @@
         "parameters": [
           { "$ref": "#/components/parameters/pageParam" },
           { "$ref": "#/components/parameters/countParam" },
-          { "$ref": "#/components/parameters/searchParam" }
+          { "$ref": "#/components/parameters/searchParam" },
+          { "$ref": "#/components/parameters/opportunityIdParam" }
         ],
         "responses": {
           "200": {
-            "description": "All proposals currently registered in the PDC.",
+            "description": "Proposals currently registered in the PDC matching the given criteria.",
             "content": {
               "application/json": {
                 "schema": {

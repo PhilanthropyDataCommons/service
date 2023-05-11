@@ -13,6 +13,12 @@ WHERE
     ELSE
       true
     END
+  AND CASE
+    WHEN :opportunityId != 0 THEN
+      p.opportunity_id = :opportunityId
+    ELSE
+      true
+    END
 GROUP BY p.id
 ORDER BY p.id DESC
 OFFSET :offset FETCH NEXT :limit ROWS ONLY

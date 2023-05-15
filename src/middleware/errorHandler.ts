@@ -113,9 +113,13 @@ export const errorHandler = (
   res: Response,
   next: NextFunction, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): void => {
-  logger.debug(err);
   logger.trace(req.body);
   const statusCode = getHttpStatusCodeForError(err);
+  if (statusCode >= 500) {
+    logger.error({ err, statusCode });
+  } else {
+    logger.debug({ err, statusCode });
+  }
   res.status(statusCode)
     .contentType('application/json')
     .send({

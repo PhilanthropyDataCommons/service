@@ -38,8 +38,8 @@
     "url": "https://github.com/PhilanthropyDataCommons/pdc/issues"
   },
   "homepage": "https://github.com/PhilanthropyDataCommons/pdc#readme",
-  "engines" : {
-    "node" : "18"
+  "engines": {
+    "node": "18"
   },
   "devDependencies": {
     "@tsconfig/node18": "^2.0.1",

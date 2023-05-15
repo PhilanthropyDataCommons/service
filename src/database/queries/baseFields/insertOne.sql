@@ -1,4 +1,4 @@
-INSERT INTO canonical_fields (
+INSERT INTO base_fields (
   label,
   short_code,
   data_type

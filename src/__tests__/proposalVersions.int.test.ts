@@ -114,7 +114,7 @@ describe('/proposalVersions', () => {
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type,
@@ -127,7 +127,7 @@ describe('/proposalVersions', () => {
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
-          canonical_field_id,
+          base_field_id,
           position,
           label,
           created_at
@@ -513,7 +513,7 @@ describe('/proposalVersions', () => {
           ( 1, 2, '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type,
@@ -526,7 +526,7 @@ describe('/proposalVersions', () => {
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
-          canonical_field_id,
+          base_field_id,
           position,
           label,
           created_at
@@ -793,7 +793,7 @@ describe('/proposalVersions', () => {
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type,
@@ -806,7 +806,7 @@ describe('/proposalVersions', () => {
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
-          canonical_field_id,
+          base_field_id,
           position,
           label,
           created_at
@@ -887,7 +887,7 @@ describe('/proposalVersions', () => {
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type,
@@ -900,7 +900,7 @@ describe('/proposalVersions', () => {
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
-          canonical_field_id,
+          base_field_id,
           position,
           label,
           created_at
@@ -1052,7 +1052,7 @@ describe('/proposalVersions', () => {
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type,
@@ -1065,7 +1065,7 @@ describe('/proposalVersions', () => {
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
-          canonical_field_id,
+          base_field_id,
           position,
           label,
           created_at
@@ -1222,7 +1222,7 @@ describe('/proposalVersions', () => {
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type,
@@ -1235,7 +1235,7 @@ describe('/proposalVersions', () => {
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
-          canonical_field_id,
+          base_field_id,
           position,
           label,
           created_at

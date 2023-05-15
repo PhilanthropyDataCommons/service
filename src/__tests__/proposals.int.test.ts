@@ -35,7 +35,7 @@ describe('/proposals', () => {
         externalId: '12345',
         optedIn: true,
       });
-      await db.sql('canonicalFields.insertOne', {
+      await db.sql('baseFields.insertOne', {
         label: 'Summary',
         shortCode: 'summary',
         dataType: 'string',
@@ -59,7 +59,7 @@ describe('/proposals', () => {
       });
       await db.sql('applicationFormFields.insertOne', {
         applicationFormId: 1,
-        canonicalFieldId: 1,
+        baseFieldId: 1,
         position: 1,
         label: 'Short summary',
       });
@@ -109,7 +109,7 @@ describe('/proposals', () => {
                       applicationFormField: {
                         id: 1,
                         applicationFormId: 1,
-                        canonicalFieldId: 1,
+                        baseFieldId: 1,
                         label: 'Short summary',
                         position: 1,
                         createdAt: expectTimestamp,
@@ -131,7 +131,7 @@ describe('/proposals', () => {
         externalId: '12345',
         optedIn: true,
       });
-      await db.sql('canonicalFields.insertOne', {
+      await db.sql('baseFields.insertOne', {
         label: 'Summary',
         shortCode: 'summary',
         dataType: 'string',
@@ -159,7 +159,7 @@ describe('/proposals', () => {
       });
       await db.sql('applicationFormFields.insertOne', {
         applicationFormId: 1,
-        canonicalFieldId: 1,
+        baseFieldId: 1,
         position: 1,
         label: 'Short summary',
       });
@@ -206,7 +206,7 @@ describe('/proposals', () => {
                       applicationFormField: {
                         id: 1,
                         applicationFormId: 1,
-                        canonicalFieldId: 1,
+                        baseFieldId: 1,
                         label: 'Short summary',
                         position: 1,
                         createdAt: expectTimestamp,
@@ -231,7 +231,7 @@ describe('/proposals', () => {
         externalId: '4993',
         optedIn: true,
       });
-      await db.sql('canonicalFields.insertOne', {
+      await db.sql('baseFields.insertOne', {
         label: 'Summary',
         shortCode: 'summary',
         dataType: 'string',
@@ -259,7 +259,7 @@ describe('/proposals', () => {
       });
       await db.sql('applicationFormFields.insertOne', {
         applicationFormId: 1,
-        canonicalFieldId: 1,
+        baseFieldId: 1,
         position: 1,
         label: 'Concise summary',
       });
@@ -306,7 +306,7 @@ describe('/proposals', () => {
                       applicationFormField: {
                         id: 1,
                         applicationFormId: 1,
-                        canonicalFieldId: 1,
+                        baseFieldId: 1,
                         label: 'Concise summary',
                         position: 1,
                         createdAt: expectTimestamp,
@@ -513,7 +513,7 @@ describe('/proposals', () => {
     });
 
     it('returns one proposal with deep fields when includeFieldsAndValues=true', async () => {
-      // Needs canonical fields,
+      // Needs base fields,
       // opportunity,
       // an applicant,
       // application form,
@@ -522,7 +522,7 @@ describe('/proposals', () => {
       // proposal versions, and
       // proposal field values.
       await db.query(`
-        INSERT INTO canonical_fields (
+        INSERT INTO base_fields (
           label,
           short_code,
           data_type,
@@ -562,7 +562,7 @@ describe('/proposals', () => {
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
-          canonical_field_id,
+          base_field_id,
           position,
           label,
           created_at
@@ -635,7 +635,7 @@ describe('/proposals', () => {
                     applicationFormField: {
                       id: 1,
                       applicationFormId: 1,
-                      canonicalFieldId: 2,
+                      baseFieldId: 2,
                       position: 1,
                       label: 'Short summary or title',
                       createdAt: '2525-01-04T00:00:05.000Z',
@@ -651,7 +651,7 @@ describe('/proposals', () => {
                     applicationFormField: {
                       id: 2,
                       applicationFormId: 1,
-                      canonicalFieldId: 1,
+                      baseFieldId: 1,
                       position: 2,
                       label: 'Long summary or abstract',
                       createdAt: '2525-01-04T00:00:06.000Z',
@@ -676,7 +676,7 @@ describe('/proposals', () => {
                     applicationFormField: {
                       id: 1,
                       applicationFormId: 1,
-                      canonicalFieldId: 2,
+                      baseFieldId: 2,
                       position: 1,
                       label: 'Short summary or title',
                       createdAt: '2525-01-04T00:00:05.000Z',
@@ -692,7 +692,7 @@ describe('/proposals', () => {
                     applicationFormField: {
                       id: 2,
                       applicationFormId: 1,
-                      canonicalFieldId: 1,
+                      baseFieldId: 1,
                       position: 2,
                       label: 'Long summary or abstract',
                       createdAt: '2525-01-04T00:00:06.000Z',

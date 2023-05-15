@@ -125,7 +125,7 @@ describe('mergeApplicationFormFields', () => {
       {
         id: 3301,
         applicationFormId: 3347,
-        canonicalFieldId: 3359,
+        baseFieldId: 3359,
         position: 3361,
         label: 'Three thousand three hundred sixty one',
         createdAt: new Date('2023-01-23T13:42:00-0600'),
@@ -133,7 +133,7 @@ describe('mergeApplicationFormFields', () => {
       {
         id: 3329,
         applicationFormId: 3371,
-        canonicalFieldId: 3389,
+        baseFieldId: 3389,
         position: 3391,
         label: 'Three thousand four hundred seven',
         createdAt: new Date('2023-01-23T13:43:00-0600'),
@@ -151,7 +151,7 @@ describe('mergeApplicationFormFields', () => {
         applicationFormField: {
           id: 3301,
           applicationFormId: 3347,
-          canonicalFieldId: 3359,
+          baseFieldId: 3359,
           position: 3361,
           label: 'Three thousand three hundred sixty one',
           createdAt: new Date('2023-01-23T13:42:00-0600'),
@@ -167,7 +167,7 @@ describe('mergeApplicationFormFields', () => {
         applicationFormField: {
           id: 3329,
           applicationFormId: 3371,
-          canonicalFieldId: 3389,
+          baseFieldId: 3389,
           position: 3391,
           label: 'Three thousand four hundred seven',
           createdAt: new Date('2023-01-23T13:43:00-0600'),
@@ -191,7 +191,7 @@ describe('mergeApplicationFormFields', () => {
       {
         id: 3643,
         applicationFormId: 3673,
-        canonicalFieldId: 3677,
+        baseFieldId: 3677,
         position: 3691,
         label: 'Three thousand six hundred ninety seven',
         createdAt: new Date('2023-01-23T14:15:00-0600'),
@@ -199,7 +199,7 @@ describe('mergeApplicationFormFields', () => {
       {
         id: 3701,
         applicationFormId: 3673,
-        canonicalFieldId: 3709,
+        baseFieldId: 3709,
         position: 3719,
         label: 'Three thousand seven hundred twenty seven',
         createdAt: new Date('2023-01-23T14:16:00-0600'),
@@ -244,7 +244,7 @@ describe('mergeApplicationFormFields', () => {
         // Matches the first value.
         id: 3761,
         applicationFormId: 3863,
-        canonicalFieldId: 3877,
+        baseFieldId: 3877,
         position: 3881,
         label: 'Three thousand eight hundred eighty nine',
         createdAt: new Date('2023-01-23T14:33:00-0600'),
@@ -255,7 +255,7 @@ describe('mergeApplicationFormFields', () => {
       // Matches the second value, but in the wrong position here.
       id: 3793,
       applicationFormId: 3907,
-      canonicalFieldId: 3911,
+      baseFieldId: 3911,
       position: 3917,
       label: 'Three thousand nine hundred nineteen',
       createdAt: new Date('2023-01-23T14:36:00-0600'),
@@ -264,7 +264,7 @@ describe('mergeApplicationFormFields', () => {
       // Matches the third value, but in the wrong position here.
       id: 3833,
       applicationFormId: 3923,
-      canonicalFieldId: 3929,
+      baseFieldId: 3929,
       position: 3931,
       label: 'Three thousand nine forty three',
       createdAt: new Date('2023-01-23T14:39:00-0600'),
@@ -293,7 +293,7 @@ describe('mergeApplicationFormFields', () => {
         /// This application form field id 4007 does not match the above 3989
         id: 4007,
         applicationFormId: 4013,
-        canonicalFieldId: 4019,
+        baseFieldId: 4019,
         position: 4021,
         label: 'Four thousand twenty seven',
         createdAt: new Date('2023-01-24T08:50:00-0600'),

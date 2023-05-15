@@ -84,11 +84,11 @@ const postApplicants = (
   })
     .then((applicantsQueryResult: Result<Applicant>) => {
       logger.debug(applicantsQueryResult);
-      const canonicalField = applicantsQueryResult.rows[0];
-      if (isApplicant(canonicalField)) {
+      const baseField = applicantsQueryResult.rows[0];
+      if (isApplicant(baseField)) {
         res.status(201)
           .contentType('application/json')
-          .send(canonicalField);
+          .send(baseField);
       } else {
         next(new InternalValidationError(
           'The database responded with an unexpected format.',

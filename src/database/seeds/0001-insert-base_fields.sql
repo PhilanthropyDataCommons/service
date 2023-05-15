@@ -1,23 +1,23 @@
--- Use the included INSERT statement to seed canonical fields data.
+-- Use the included INSERT statement to seed base fields data.
 
--- This script helps get a development database started with some canonical fields.
+-- This script helps get a development database started with some base fields.
 
--- Usage example 1: `psql -d pdc -U pdc -p 5432 -f 0001-insert-canonical_fields.sql`
--- Usage example 2: `cat 0001-insert-canonical_fields.sql` then copy/paste into a `psql` session.
+-- Usage example 1: `psql -d pdc -U pdc -p 5432 -f 0001-insert-base_fields.sql`
+-- Usage example 2: `cat 0001-insert-base_fields.sql` then copy/paste into a `psql` session.
 
 -- If you get a `violates unique constraint` error, you might already have run the script once.
 -- If you get the `violates unique constraint` error and didn't run it, you have a conflicting row
--- in your database instance in the canonical_fields table. The error `DETAIL` should help you find
--- the problem row. Try `DELETE FROM canonical_fields WHERE short_code='the_short_code'` to remove
+-- in your database instance in the base_fields table. The error `DETAIL` should help you find
+-- the problem row. Try `DELETE FROM base_fields WHERE short_code='the_short_code'` to remove
 -- the existing row. If such a `DELETE` fails due to a foreign key reference, that means the
--- canonical field is already used in an application form and should probably not be removed unless
+-- base field is already used in an application form and should probably not be removed unless
 -- you are OK with first removing the application form and its dependent data in proposals,
 -- proposal versions, and proposal field values.
 
 -- The SQL in this file was generated from a spreadsheet as input to a script here:
 -- https://github.com/PhilanthropyDataCommons/data-scripts/commit/2af7a7109017f7d43ff7593660dbdce44732d126
 
-INSERT INTO canonical_fields (label, short_code, data_type) VALUES
+INSERT INTO base_fields (label, short_code, data_type) VALUES
 ('Organization Name', 'organization_name', '{ "type": "string" }' ),
 ('Organization Legal Name' , 'organization_legal_name', '{ "type": "string" }' ),
 ('Organization DBA Name' , 'organization_dba_name', '{ "type": "string" }' ),

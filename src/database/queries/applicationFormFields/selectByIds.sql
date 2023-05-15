@@ -1,7 +1,7 @@
 SELECT
   id,
   application_form_id as "applicationFormId",
-  canonical_field_id as "canonicalFieldId",
+  base_field_id as "baseFieldId",
   position,
   label,
   created_at as "createdAt"

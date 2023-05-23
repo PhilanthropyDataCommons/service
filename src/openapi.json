@@ -363,6 +363,33 @@
           "createdAt"
         ]
       },
+      "PlatformProviderResponse": {
+        "type": "object",
+        "properties": {
+          "externalId": {
+            "type": "string",
+            "example": "000000000"
+          },
+          "platformProvider": {
+            "type": "string",
+            "example": "DataPlatformProviderX"
+          },
+          "data": {
+            "type": "object"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "externalId",
+          "platformProvider",
+          "data",
+          "createdAt"
+        ]
+      },
       "Bundle": {
         "type": "object",
         "properties": {
@@ -1128,6 +1155,87 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Opportunity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/platformProviderResponses": {
+      "get": {
+        "summary": "Get a list of platform provider responses.",
+        "tags": [
+          "Internal Use Only"
+        ],
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of cached platform provider responses.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformProviderResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new platform provider response.",
+        "tags": [
+          "Internal Use Only"
+        ],
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformProviderResponse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new platform provider response that was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformProviderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Required fields were not provided or were incorrectly formatted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

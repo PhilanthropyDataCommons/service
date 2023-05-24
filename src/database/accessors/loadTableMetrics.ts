@@ -5,8 +5,7 @@ import type { TableMetrics } from '../../types';
 
 export const loadTableMetrics = async (tableName: string): Promise<TableMetrics> => {
   const metricsQueryResult = await db.query<TableMetrics>(`
-    SELECT COUNT(id) AS "count",
-      MAX(id) AS "maxId",
+    SELECT COUNT(*) AS "count",
       NOW() as "now"
     FROM ${tableName};
   `);

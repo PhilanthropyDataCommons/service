@@ -3,7 +3,6 @@ import type { JSONSchemaType } from 'ajv';
 
 export interface TableMetrics {
   count: number;
-  maxId: number;
   now: Date;
 }
 
@@ -11,9 +10,6 @@ export const tableMetricsSchema: JSONSchemaType<TableMetrics> = {
   type: 'object',
   properties: {
     count: {
-      type: 'integer',
-    },
-    maxId: {
       type: 'integer',
     },
     now: {
@@ -24,7 +20,6 @@ export const tableMetricsSchema: JSONSchemaType<TableMetrics> = {
   },
   required: [
     'count',
-    'maxId',
     'now',
   ],
 };

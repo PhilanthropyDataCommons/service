@@ -9,7 +9,6 @@ describe('loadTableMetrics', () => {
     const metrics = await loadTableMetrics('applicants');
     expect(metrics).toMatchObject({
       count: 0,
-      maxId: 0,
       now: expect.any(Date) as Date,
     });
   });

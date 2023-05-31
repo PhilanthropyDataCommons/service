@@ -8,4 +8,4 @@ FROM proposal_field_values pfv
 INNER JOIN proposal_versions pv
   ON pv.id = pfv.proposal_version_id
 WHERE pv.proposal_id = :proposalId
-ORDER BY pv.version DESC, pfv.position;
+ORDER BY pv.version DESC, pfv.position, pfv.id;

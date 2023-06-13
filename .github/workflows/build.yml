@@ -22,7 +22,7 @@ jobs:
       - name: Build with node
         uses: actions/setup-node@v3
         with:
-          node-version: 18.12.1
+          node-version: 18.16.0
       - run: npm ci
       - run: npm run build
       - run: npm prune --omit=dev

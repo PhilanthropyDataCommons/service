@@ -59,7 +59,7 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-sort-exports": "^0.8.0",
     "jest": "^28.1.1",
-    "mock-jwks": "^1.0.10",
+    "mock-jwks": "^3.1.0",
     "pino-pretty": "^10.2.0",
     "rimraf": "^5.0.1",
     "supertest": "^6.3.3",

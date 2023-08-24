@@ -1173,6 +1173,17 @@
             "auth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "externalId",
+            "description": "The external ID that has been associated with the response.  This ID is arbitrarily formatted, and cannot be predicted without knowledge of specific PDC data.",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "A list of cached platform provider responses.",

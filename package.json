@@ -41,6 +41,7 @@
   "engines": {
     "node": "18"
   },
+  "type": "commonjs",
   "devDependencies": {
     "@tsconfig/node18": "^18.2.1",
     "@types/cors": "^2.8.13",

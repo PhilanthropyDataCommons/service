@@ -36,7 +36,17 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Run all tests
+      - name: Run all tests (without coverage)
+        run: npm run test:ci -- --coverage=false
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          AUTH_SERVER_ISSUER: https://totally-fake-server-name/realms/pdc
+          OPENAPI_DOCS_AUTH_CLIENT_ID: pdc-fake-client-id
+
+      - name: Run all tests (with coverage)
         run: npm run test:ci
         env:
           PGHOST: localhost

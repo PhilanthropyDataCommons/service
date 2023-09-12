@@ -488,9 +488,20 @@
             "auth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "externalId",
+            "description": "The external identifier of an applicant, usually an EIN.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "All applicants currently registered in the PDC.",
+            "description": "Applicants currently registered in the PDC meeting the given criteria.",
             "content": {
               "application/json": {
                 "schema": {
@@ -537,52 +548,6 @@
         "responses": {
           "201": {
             "description": "The new applicant that was created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Applicant"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/applicants/{externalId}": {
-      "get": {
-        "summary": "Get a specific applicant, including all known field values associated with the applicant. (In Development)",
-        "tags": [
-          "Applicants"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "externalId",
-            "description": "The external identifier of an applicant.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The populated applicant.",
             "content": {
               "application/json": {
                 "schema": {

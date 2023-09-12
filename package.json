@@ -44,7 +44,7 @@
   "type": "commonjs",
   "devDependencies": {
     "@tsconfig/node18": "^18.2.1",
-    "@types/cors": "^2.8.13",
+    "@types/cors": "^2.8.14",
     "@types/express": "^4.17.17",
     "@types/jest": "^28.1.2",
     "@types/node": "^18.17.15",

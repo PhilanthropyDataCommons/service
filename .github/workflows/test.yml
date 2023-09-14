@@ -57,4 +57,4 @@ jobs:
           OPENAPI_DOCS_AUTH_CLIENT_ID: pdc-fake-client-id
 
       - name: Upload test coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4

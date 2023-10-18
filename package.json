@@ -52,7 +52,7 @@
     "@types/supertest": "^2.0.14",
     "@types/swagger-ui-express": "^4.1.4",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.7.5",
+    "@typescript-eslint/parser": "^6.8.0",
     "copyfiles": "^2.4.1",
     "eslint": "^8.51.0",
     "eslint-config-airbnb-base": "^15.0.0",

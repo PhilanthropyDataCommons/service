@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run cleanup && npm run build:node && npm run build:assets",
     "build:node": "tsc -p tsconfig.json",
-    "build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" dist",
+    "build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" \"src/public/**\" dist",
     "cleanup": "rimraf dist",
     "lint": "npm run lint:ts && npm run lint:swagger",
     "lint:ts": "eslint ./src --ext .ts",

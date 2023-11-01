@@ -9,6 +9,7 @@ export * from './PaginationParameters';
 export * from './PaginationParametersQuery';
 export * from './PlatformProviderResponse';
 export * from './PostgresErrorCode';
+export * from './PresignedPostRequest';
 export * from './Proposal';
 export * from './ProposalFieldValue';
 export * from './ProposalVersion';

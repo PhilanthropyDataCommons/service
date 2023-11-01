@@ -87,6 +87,50 @@
           "createdAt"
         ]
       },
+      "PresignedPostRequest": {
+        "type": "object",
+        "properties": {
+          "fileType": {
+            "type": "string",
+            "example": "application/octet-stream"
+          },
+          "fileSize": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 512
+          },
+          "presignedPost": {
+            "type": "object",
+            "readOnly": true,
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "fields": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "example": "96ddab90-1931-478d-8c02-a1dc80ae01e5"
+                  }
+                },
+                "required": [
+                  "key"
+                ]
+              }
+            },
+            "required": [
+              "url",
+              "fields"
+            ]
+          }
+        },
+        "required": [
+          "fileType",
+          "fileSize",
+          "presignedPost"
+        ]
+      },
       "Proposal": {
         "type": "object",
         "properties": {
@@ -725,6 +769,51 @@
                       ]
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/presignedPostRequests": {
+      "post": {
+        "summary": "Request a presigned post URL.",
+        "tags": [
+          "Presigned Posts"
+        ],
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresignedPostRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The presigned post request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresignedPostRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

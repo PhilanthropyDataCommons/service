@@ -395,6 +395,81 @@ describe('/proposals', () => {
         );
     });
 
+    it('returns a subset of proposals for a given opportunityId', async () => {
+      await db.sql('opportunities.insertOne', {
+        title: 'First opportunity',
+      });
+      await db.sql('opportunities.insertOne', {
+        title: 'Second opportunity',
+      });
+      await db.sql('opportunities.insertOne', {
+        title: 'Third opportunity',
+      });
+      await db.sql('applicants.insertOne', {
+        externalId: '5009',
+        optedIn: true,
+      });
+      await db.sql('proposals.insertOne', {
+        applicantId: 1,
+        externalId: 'proposal-5011',
+        opportunityId: 3,
+      });
+      await db.sql('proposals.insertOne', {
+        applicantId: 1,
+        externalId: 'proposal-5021',
+        opportunityId: 1,
+      });
+      await db.sql('proposals.insertOne', {
+        applicantId: 1,
+        externalId: 'proposal-5023',
+        opportunityId: 2,
+      });
+      await db.sql('proposals.insertOne', {
+        applicantId: 1,
+        externalId: 'proposal-5039',
+        opportunityId: 2,
+      });
+      await agent
+        .get('/proposals?opportunityId=2')
+        .set(authHeader)
+        .expect(200)
+        .expect(
+          (res) => expect(res.body).toEqual(
+            {
+              total: 4,
+              entries: [
+                {
+                  id: 4,
+                  externalId: 'proposal-5039',
+                  applicantId: 1,
+                  opportunityId: 2,
+                  createdAt: expectTimestamp,
+                  versions: [],
+                },
+                {
+                  id: 3,
+                  externalId: 'proposal-5023',
+                  applicantId: 1,
+                  opportunityId: 2,
+                  createdAt: expectTimestamp,
+                  versions: [],
+                },
+              ],
+            },
+          ),
+        );
+    });
+
+    it('should throw an input validation error when given a non-integer opportunityId', async () => {
+      const result = await agent
+        .get('/proposals?opportunityId=thisIsNotAnIntegerYall')
+        .set(authHeader)
+        .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'SimpleInputValidationError',
+      });
+    });
+
     it('should error if the database returns an unexpected data structure', async () => {
       jest.spyOn(db, 'query')
         .mockImplementationOnce(async () => ({

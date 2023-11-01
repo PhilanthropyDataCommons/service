@@ -20,6 +20,7 @@ import {
   NotFoundError,
 } from '../errors';
 import {
+  extractOpportunityIdParameter,
   extractPaginationParameters,
   extractSearchParameters,
 } from '../queryParameters';
@@ -46,10 +47,12 @@ const getProposals = (
 ): void => {
   const paginationParameters = extractPaginationParameters(req);
   const searchParameters = extractSearchParameters(req);
+  const opportunityIdParameter = extractOpportunityIdParameter(req);
   (async () => {
     const proposalBundle = await loadProposalBundle({
       ...getLimitValues(paginationParameters),
       ...searchParameters,
+      ...opportunityIdParameter,
     });
     const enrichedProposalBundle = {
       ...proposalBundle,

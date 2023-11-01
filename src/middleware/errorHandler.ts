@@ -5,6 +5,7 @@ import {
   InputValidationError,
   InputConflictError,
   NotFoundError,
+  SimpleInputValidationError,
 } from '../errors';
 import { PostgresErrorCode } from '../types';
 import { getLogger } from '../logger';
@@ -58,7 +59,7 @@ const getHttpStatusCodeForError = (error: unknown): number => {
   if (error instanceof InternalValidationError) {
     return 500;
   }
-  if (error instanceof InputValidationError) {
+  if (error instanceof InputValidationError || error instanceof SimpleInputValidationError) {
     return 400;
   }
   if (error instanceof InputConflictError) {

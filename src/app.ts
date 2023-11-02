@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import pinoHttp from 'pino-http';
 import cors from 'cors';
@@ -13,6 +14,7 @@ app.use(pinoHttp({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use('/', rootRouter);
 app.use(errorHandler);
 

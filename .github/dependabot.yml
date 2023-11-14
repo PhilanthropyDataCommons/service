@@ -10,6 +10,10 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+    groups:
+      aws-sdk:
+        patterns:
+        - "@aws-sdk/*"
 
   - package-ecosystem: "docker"
     directory: "/"

@@ -18,11 +18,11 @@ const logger = getLogger(__filename);
 
 const getHttpStatusCodeForDatabaseErrorCode = (errorCode: string): number => {
   switch (errorCode) {
-    case PostgresErrorCode.FOREIGN_KEY_VIOLATION:
+    case PostgresErrorCode.FOREIGN_KEY_VIOLATION.valueOf():
       return 409;
-    case PostgresErrorCode.UNIQUE_VIOLATION:
+    case PostgresErrorCode.UNIQUE_VIOLATION.valueOf():
       return 409;
-    case PostgresErrorCode.INSUFFICIENT_RESOURCES:
+    case PostgresErrorCode.INSUFFICIENT_RESOURCES.valueOf():
       return 503;
     default:
       return 500;
@@ -31,11 +31,11 @@ const getHttpStatusCodeForDatabaseErrorCode = (errorCode: string): number => {
 
 const getMessageForDatabaseErrorCode = (errorCode: string): string => {
   switch (errorCode) {
-    case PostgresErrorCode.FOREIGN_KEY_VIOLATION:
+    case PostgresErrorCode.FOREIGN_KEY_VIOLATION.valueOf():
       return 'Foreign key constraint violation.';
-    case PostgresErrorCode.UNIQUE_VIOLATION:
+    case PostgresErrorCode.UNIQUE_VIOLATION.valueOf():
       return 'Unique key constraint violation.';
-    case PostgresErrorCode.INSUFFICIENT_RESOURCES:
+    case PostgresErrorCode.INSUFFICIENT_RESOURCES.valueOf():
       return 'Insufficient resources.';
     default:
       return 'Unexpected database error.';

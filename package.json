@@ -82,7 +82,7 @@
     "jwks-rsa": "^3.1.0",
     "pino": "^8.16.2",
     "pino-http": "^8.5.1",
-    "postgres-migrations": "^5.3.0",
+    "postgres-schema-migrations": "^6.1.0",
     "require-env-variable": "^4.0.2",
     "swagger-ui-express": "^5.0.0",
     "tinypg": "^7.0.0",

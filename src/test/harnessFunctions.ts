@@ -40,7 +40,7 @@ export const prepareDatabaseForCurrentWorker = async (): Promise<void> => {
   const schemaName = getSchemaNameForCurrentTestWorker();
   await createSchema(schemaName);
   await setSchema(schemaName);
-  await migrate();
+  await migrate(schemaName);
 };
 
 export const cleanupDatabaseForCurrentWorker = async (): Promise<void> => {

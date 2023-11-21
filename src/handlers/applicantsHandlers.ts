@@ -27,7 +27,14 @@ const getApplicants = (
   res: Response,
   next: NextFunction,
 ): void => {
-  db.sql('applicants.selectAll')
+  let dbQuery = 'applicants.selectAll';
+  let dbParams = {};
+  if (req.query.externalId !== undefined) {
+    dbQuery = 'applicants.selectByExternalId';
+    dbParams = { externalId: req.query.externalId };
+  }
+
+  db.sql(dbQuery, dbParams)
     .then((applicantsQueryResult: Result<Applicant>) => {
       logger.debug(applicantsQueryResult);
       const { rows: applicants } = applicantsQueryResult;

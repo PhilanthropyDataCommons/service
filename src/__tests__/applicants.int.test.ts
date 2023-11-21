@@ -66,6 +66,49 @@ describe('/applicants', () => {
         );
     });
 
+    it('returns the expected applicant by externalId', async () => {
+      await db.sql('applicants.insertOne', {
+        externalId: '54280485',
+        optedIn: false,
+      });
+      await db.sql('applicants.insertOne', {
+        externalId: '167336',
+        optedIn: true,
+      });
+      await agent
+        .get('/applicants?externalId=167336')
+        .set(authHeader)
+        .expect(200)
+        .expect((res) => expect(res.body).toEqual(
+          [
+            {
+              createdAt: expectTimestamp,
+              externalId: '167336',
+              id: 2,
+              optedIn: true,
+            },
+          ],
+        ));
+    });
+
+    it('returns empty list when no applicants found by externalId', async () => {
+      await db.sql('applicants.insertOne', {
+        externalId: '3581',
+        optedIn: false,
+      });
+      await db.sql('applicants.insertOne', {
+        externalId: '3583',
+        optedIn: true,
+      });
+      await agent
+        .get('/applicants?externalId=3593')
+        .set(authHeader)
+        .expect(200)
+        .expect((res) => expect(res.body).toEqual(
+          [],
+        ));
+    });
+
     it('should error if the database returns an unexpected data structure', async () => {
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => ({
@@ -73,6 +116,21 @@ describe('/applicants', () => {
         }) as Result<object>);
       const result = await agent
         .get('/applicants')
+        .set(authHeader)
+        .expect(500);
+      expect(result.body).toMatchObject({
+        name: 'InternalValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('should error if the database returns an unexpected data structure by externalId', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => ({
+          rows: [{ foo: 'not a valid result' }],
+        }) as Result<object>);
+      const result = await agent
+        .get('/applicants?externalId=77400639310803291')
         .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
@@ -111,6 +169,31 @@ describe('/applicants', () => {
         });
       const result = await agent
         .get('/applicants')
+        .set(authHeader)
+        .expect(503);
+      expect(result.body).toMatchObject({
+        name: 'DatabaseError',
+        details: [{
+          code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+        }],
+      });
+    });
+
+    it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting by externalId', async () => {
+      jest.spyOn(db, 'sql')
+        .mockImplementationOnce(async () => {
+          throw new TinyPgError(
+            'Something went wrong',
+            undefined,
+            {
+              error: {
+                code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+              },
+            },
+          );
+        });
+      const result = await agent
+        .get('/applicants?externalId=3356908728606')
         .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({

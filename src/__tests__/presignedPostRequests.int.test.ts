@@ -3,8 +3,15 @@
 // See https://stackoverflow.com/a/67595592/159522
 const mockedCreatePresignedPost = jest.fn();
 import request from 'supertest';
+import { requireEnv } from 'require-env-variable';
 import { app } from '../app';
 import { mockJwt as authHeader } from '../test/mockJwt';
+
+const {
+  S3_BUCKET,
+} = requireEnv(
+  'S3_BUCKET',
+);
 
 jest.mock('@aws-sdk/client-s3');
 jest.mock(
@@ -41,7 +48,7 @@ describe('/presignedPostRequests', () => {
       expect(mockedCreatePresignedPost).toHaveBeenCalledWith(
         expect.anything(),
         {
-          Bucket: process.env.S3_UNPROCESSED_BUCKET,
+          Bucket: S3_BUCKET,
           Key: expect.stringMatching(/.*/) as string,
           Expires: 3600,
           Conditions: [

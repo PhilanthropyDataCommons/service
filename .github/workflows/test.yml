@@ -47,6 +47,7 @@ jobs:
           OPENAPI_DOCS_AUTH_CLIENT_ID: pdc-fake-client-id
           S3_ACCESS_KEY_ID: fake-access-key-id
           S3_ACCESS_SECRET: fake-access-key-secret
+          S3_BUCKET: fake-s3-bucket
           S3_ENDPOINT: https://fake-s3-endpoint
 
       - name: Run all tests (with coverage)
@@ -60,6 +61,7 @@ jobs:
           OPENAPI_DOCS_AUTH_CLIENT_ID: pdc-fake-client-id
           S3_ACCESS_KEY_ID: fake-access-key-id
           S3_ACCESS_SECRET: fake-access-key-secret
+          S3_BUCKET: fake-s3-bucket
           S3_ENDPOINT: https://fake-s3-endpoint
 
       - name: Upload test coverage

@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
+import { requireEnv } from 'require-env-variable';
 import { s3Client } from '../s3Client';
 import { isPresignedPostRequestWrite } from '../types';
 import { InputValidationError } from '../errors';
@@ -10,13 +11,19 @@ import type {
   NextFunction,
 } from 'express';
 
+const {
+  S3_BUCKET,
+} = requireEnv(
+  'S3_BUCKET',
+);
+
 const generatePresignedPost = async (
   fileType: string,
   fileSize: number,
 ): Promise<PresignedPost> => {
   const key = `${uuidv4()}`;
   return createPresignedPost(s3Client, {
-    Bucket: process.env.S3_UNPROCESSED_BUCKET as string,
+    Bucket: S3_BUCKET,
     Key: key,
     Expires: 3600, // 1 hour
     Conditions: [

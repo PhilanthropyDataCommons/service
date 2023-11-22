@@ -1,0 +1,67 @@
+features:
+  - buildpack-stack=ubuntu-22
+jobs:
+  - environment_slug: node-js
+    envs:
+      - scope: RUN_AND_BUILD_TIME
+        type: GENERAL
+        key: PGHOST
+      - scope: RUN_AND_BUILD_TIME
+        type: GENERAL
+        key: PGPORT
+      - scope: RUN_AND_BUILD_TIME
+        type: GENERAL
+        key: PGDATABASE
+      - scope: RUN_AND_BUILD_TIME
+        type: GENERAL
+        key: PGUSER
+      - scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        key: PGPASSWORD
+    github:
+      branch: digitalocean-app
+      deploy_on_push: true
+      repo: PhilanthropyDataCommons/service
+    name: migrate
+    run_command: node dist/scripts/migrate.js
+name: pdc-service
+services:
+  - environment_slug: node-js
+    github:
+      branch: digitalocean-app
+      deploy_on_push: true
+      repo: PhilanthropyDataCommons/service
+    envs:
+      - scope: RUN_TIME
+        type: GENERAL
+        key: AUTH_SERVER_ISSUER
+      - scope: RUN_TIME
+        type: GENERAL
+        key: OPENAPI_DOCS_AUTH_CLIENT_ID
+      - scope: RUN_TIME
+        type: GENERAL
+        key: PGHOST
+      - scope: RUN_TIME
+        type: GENERAL
+        key: PGPORT
+      - scope: RUN_TIME
+        type: GENERAL
+        key: PGDATABASE
+      - scope: RUN_TIME
+        type: GENERAL
+        key: PGUSER
+      - scope: RUN_TIME
+        type: SECRET
+        key: PGPASSWORD
+      - scope: RUN_TIME
+        type: GENERAL
+        key: S3_ENDPOINT
+      - scope: RUN_TIME
+        type: GENERAL
+        key: S3_BUCKET
+      - scope: RUN_TIME
+        type: GENERAL
+        key: S3_ACCESS_KEY_ID
+      - scope: RUN_TIME
+        type: SECRET
+        key: S3_ACCESS_SECRET

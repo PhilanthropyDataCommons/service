@@ -7,6 +7,7 @@
     "build": "npm run cleanup && npm run build:node && npm run build:assets",
     "build:node": "tsc -p tsconfig.json",
     "build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" \"src/public/**\" dist",
+    "build:digitalocean": "npm install --include=dev && npm run build && npm ci --omit=dev && echo \"${DATABASE_CA_CERT}\" > \"${DATABASE_CA_CERT_FILE}\"",
     "cleanup": "rimraf dist",
     "lint": "npm run lint:ts && npm run lint:swagger",
     "lint:ts": "eslint ./src --ext .ts",

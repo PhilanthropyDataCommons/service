@@ -2,6 +2,7 @@ export * from './Applicant';
 export * from './ApplicationForm';
 export * from './ApplicationFormField';
 export * from './BaseField';
+export * from './BulkUpload';
 export * from './Bundle';
 export * from './JsonObject';
 export * from './Opportunity';

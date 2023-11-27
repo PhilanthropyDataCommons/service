@@ -87,6 +87,48 @@
           "createdAt"
         ]
       },
+      "BulkUpload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "example": 3407
+          },
+          "fileName": {
+            "type": "string",
+            "example": "upload.csv",
+            "pattern": "^.+\\.csv$"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "example": "https://example.com/upload.csv",
+            "pattern": "https?:\\/\\/.+"
+          },
+          "status": {
+            "type": "string",
+            "readOnly": true,
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "failed",
+              "canceled"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "id",
+          "fileName",
+          "sourceUrl",
+          "createdAt"
+        ]
+      },
       "PresignedPostRequest": {
         "type": "object",
         "properties": {
@@ -769,6 +811,51 @@
                       ]
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bulkUploads": {
+      "post": {
+        "summary": "Register a bulk upload.",
+        "tags": [
+          "Bulk Uploads"
+        ],
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The bulk upload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkUpload"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

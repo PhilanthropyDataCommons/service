@@ -11,10 +11,12 @@ import {
 import {
   DatabaseError,
   InputValidationError,
+  NotFoundError,
 } from '../errors';
 import {
   extractPaginationParameters,
 } from '../queryParameters';
+import { addProcessBulkUploadJob } from '../jobQueue';
 import type {
   Request,
   Response,
@@ -46,6 +48,12 @@ const createBulkUpload = (
       status: BulkUploadStatus.PENDING,
     });
     const bulkUpload = bulkUploadsQueryResult.rows[0];
+    if (!bulkUpload) {
+      throw new NotFoundError('The database did not return an entity after bulk upload creation.');
+    }
+    await addProcessBulkUploadJob({
+      bulkUploadId: bulkUpload.id,
+    });
     res.status(201)
       .contentType('application/json')
       .send(bulkUpload);

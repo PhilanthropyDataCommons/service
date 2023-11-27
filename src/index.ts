@@ -1,4 +1,5 @@
 import { app } from './app';
+import { startJobQueue } from './jobQueue';
 import { getLogger } from './logger';
 
 const logger = getLogger(__filename);
@@ -16,3 +17,7 @@ app.listen(
     logger.info(`Server running on http://${host}:${port}`);
   },
 );
+
+startJobQueue().catch((err) => {
+  logger.error(err, 'Job queue failed to start');
+});

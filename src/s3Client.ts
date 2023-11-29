@@ -1,11 +1,26 @@
 import { S3 } from '@aws-sdk/client-s3';
+import { requireEnv } from 'require-env-variable';
+
+const {
+  S3_ACCESS_KEY_ID,
+  S3_ACCESS_SECRET,
+  S3_ENDPOINT,
+  S3_PATH_STYLE,
+  S3_REGION,
+} = requireEnv(
+  'S3_ACCESS_KEY_ID',
+  'S3_ACCESS_SECRET',
+  'S3_ENDPOINT',
+  'S3_PATH_STYLE',
+  'S3_REGION',
+);
 
 export const s3Client = new S3({
-  forcePathStyle: false,
-  endpoint: process.env.S3_ENDPOINT as string,
-  region: 'us-east-1', // This is required but not actually used by the S3 sdk
+  forcePathStyle: S3_PATH_STYLE === 'true',
+  endpoint: S3_ENDPOINT,
+  region: S3_REGION,
   credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY_ID as string,
-    secretAccessKey: process.env.S3_ACCESS_SECRET as string,
+    accessKeyId: S3_ACCESS_KEY_ID,
+    secretAccessKey: S3_ACCESS_SECRET,
   },
 });

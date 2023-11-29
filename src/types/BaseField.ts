@@ -4,6 +4,7 @@ import type { JSONSchemaType } from 'ajv';
 export interface BaseField {
   id: number;
   label: string;
+  description: string;
   shortCode: string;
   dataType: string;
   createdAt: Date;
@@ -20,6 +21,9 @@ export const baseFieldCreateSchema: JSONSchemaType<BaseFieldCreate> = {
     label: {
       type: 'string',
     },
+    description: {
+      type: 'string',
+    },
     shortCode: {
       type: 'string',
     },
@@ -29,6 +33,7 @@ export const baseFieldCreateSchema: JSONSchemaType<BaseFieldCreate> = {
   },
   required: [
     'label',
+    'description',
     'shortCode',
     'dataType',
   ],

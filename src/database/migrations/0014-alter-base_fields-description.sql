@@ -1,0 +1,4 @@
+ALTER TABLE base_fields
+  ADD COLUMN description VARCHAR NOT NULL DEFAULT '';
+
+ALTER TABLE base_fields ALTER COLUMN description DROP DEFAULT;

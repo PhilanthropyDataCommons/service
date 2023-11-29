@@ -14,6 +14,21 @@ import type { Result } from 'tinypg';
 const logger = getLogger(__filename);
 const agent = request.agent(app);
 
+const createTestBaseFields = async () => {
+  await db.sql('baseFields.insertOne', {
+    label: 'Summary',
+    description: 'A summary of the proposal',
+    shortCode: 'summary',
+    dataType: 'string',
+  });
+  await db.sql('baseFields.insertOne', {
+    label: 'Title',
+    description: 'The title of the proposal',
+    shortCode: 'title',
+    dataType: 'string',
+  });
+};
+
 describe('/proposals', () => {
   describe('GET /', () => {
     logger.debug('Now running an proposals test');
@@ -35,11 +50,7 @@ describe('/proposals', () => {
         externalId: '12345',
         optedIn: true,
       });
-      await db.sql('baseFields.insertOne', {
-        label: 'Summary',
-        shortCode: 'summary',
-        dataType: 'string',
-      });
+      await createTestBaseFields();
       await db.sql('proposals.insertOne', {
         applicantId: 1,
         externalId: 'proposal-1',
@@ -131,11 +142,7 @@ describe('/proposals', () => {
         externalId: '12345',
         optedIn: true,
       });
-      await db.sql('baseFields.insertOne', {
-        label: 'Summary',
-        shortCode: 'summary',
-        dataType: 'string',
-      });
+      await createTestBaseFields();
       await db.sql('proposals.insertOne', {
         applicantId: 1,
         externalId: 'proposal-1',
@@ -231,11 +238,7 @@ describe('/proposals', () => {
         externalId: '4993',
         optedIn: true,
       });
-      await db.sql('baseFields.insertOne', {
-        label: 'Summary',
-        shortCode: 'summary',
-        dataType: 'string',
-      });
+      await createTestBaseFields();
       await db.sql('proposals.insertOne', {
         applicantId: 1,
         externalId: 'proposal-4999',
@@ -513,16 +516,7 @@ describe('/proposals', () => {
     });
 
     it('returns one proposal with deep fields when includeFieldsAndValues=true', async () => {
-      await db.sql('baseFields.insertOne', {
-        label: 'Summary',
-        shortCode: 'summary',
-        dataType: 'string',
-      });
-      await db.sql('baseFields.insertOne', {
-        label: 'Title',
-        shortCode: 'title',
-        dataType: 'string',
-      });
+      await createTestBaseFields();
       await db.query(`
         INSERT INTO opportunities (
           title,

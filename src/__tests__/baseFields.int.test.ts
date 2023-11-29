@@ -25,11 +25,13 @@ describe('/baseFields', () => {
     it('returns all base fields present in the database', async () => {
       await db.sql('baseFields.insertOne', {
         label: 'First Name',
+        description: 'The first name of the applicant',
         shortCode: 'firstName',
         dataType: 'string',
       });
       await db.sql('baseFields.insertOne', {
         label: 'Last Name',
+        description: 'The last name of the applicant',
         shortCode: 'lastName',
         dataType: 'string',
       });
@@ -41,6 +43,7 @@ describe('/baseFields', () => {
         {
           id: 1,
           label: 'First Name',
+          description: 'The first name of the applicant',
           shortCode: 'firstName',
           dataType: 'string',
           createdAt: expectTimestamp,
@@ -48,6 +51,7 @@ describe('/baseFields', () => {
         {
           id: 2,
           label: 'Last Name',
+          description: 'The last name of the applicant',
           shortCode: 'lastName',
           dataType: 'string',
           createdAt: expectTimestamp,
@@ -106,6 +110,7 @@ describe('/baseFields', () => {
         .set(authHeader)
         .send({
           label: '🏷️',
+          description: '😍',
           shortCode: '🩳',
           dataType: '📊',
         })
@@ -116,6 +121,7 @@ describe('/baseFields', () => {
       expect(result.body).toMatchObject({
         id: expect.any(Number) as number,
         label: '🏷️',
+        description: '😍',
         shortCode: '🩳',
         dataType: '📊',
         createdAt: expectTimestamp,
@@ -128,6 +134,23 @@ describe('/baseFields', () => {
         .type('application/json')
         .set(authHeader)
         .send({
+          shortCode: '🩳',
+          description: '😍',
+          dataType: '📊',
+        })
+        .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+    it('returns 400 bad request when no description is sent', async () => {
+      const result = await agent
+        .post('/baseFields')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          label: '🏷️',
           shortCode: '🩳',
           dataType: '📊',
         })
@@ -144,6 +167,7 @@ describe('/baseFields', () => {
         .set(authHeader)
         .send({
           label: '🏷️',
+          description: '😍',
           dataType: '📊',
         })
         .expect(400);
@@ -159,6 +183,7 @@ describe('/baseFields', () => {
         .set(authHeader)
         .send({
           label: '🏷️',
+          description: '😍',
           shortCode: '🩳',
         })
         .expect(400);
@@ -170,6 +195,7 @@ describe('/baseFields', () => {
     it('returns 409 conflict when a duplicate short name is submitted', async () => {
       await db.sql('baseFields.insertOne', {
         label: 'First Name',
+        description: 'The first name of the applicant',
         shortCode: 'firstName',
         dataType: 'string',
       });
@@ -179,6 +205,7 @@ describe('/baseFields', () => {
         .set(authHeader)
         .send({
           label: '🏷️',
+          description: '😍',
           shortCode: 'firstName',
           dataType: '📊',
         })
@@ -202,6 +229,7 @@ describe('/baseFields', () => {
         .set(authHeader)
         .send({
           label: '🏷️',
+          description: '😍',
           shortCode: 'firstName',
           dataType: '📊',
         })

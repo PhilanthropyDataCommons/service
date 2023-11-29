@@ -23,39 +23,36 @@ describe('/baseFields', () => {
     });
 
     it('returns all base fields present in the database', async () => {
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type,
-          created_at
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
-      `);
-      await agent
+      await db.sql('baseFields.insertOne', {
+        label: 'First Name',
+        shortCode: 'firstName',
+        dataType: 'string',
+      });
+      await db.sql('baseFields.insertOne', {
+        label: 'Last Name',
+        shortCode: 'lastName',
+        dataType: 'string',
+      });
+      const result = await agent
         .get('/baseFields')
         .set(authHeader)
-        .expect(
-          200,
-          [
-            {
-              createdAt: '2022-07-20T12:00:00.000Z',
-              dataType: 'string',
-              id: 1,
-              label: 'First Name',
-              shortCode: 'firstName',
-            },
-            {
-              createdAt: '2022-07-20T12:00:00.000Z',
-              dataType: 'string',
-              id: 2,
-              label: 'Last Name',
-              shortCode: 'lastName',
-            },
-          ],
-        );
+        .expect(200);
+      expect(result.body).toMatchObject([
+        {
+          id: 1,
+          label: 'First Name',
+          shortCode: 'firstName',
+          dataType: 'string',
+          createdAt: expectTimestamp,
+        },
+        {
+          id: 2,
+          label: 'Last Name',
+          shortCode: 'lastName',
+          dataType: 'string',
+          createdAt: expectTimestamp,
+        },
+      ]);
     });
 
     it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
@@ -171,16 +168,11 @@ describe('/baseFields', () => {
       });
     });
     it('returns 409 conflict when a duplicate short name is submitted', async () => {
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type,
-          created_at
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' );
-      `);
+      await db.sql('baseFields.insertOne', {
+        label: 'First Name',
+        shortCode: 'firstName',
+        dataType: 'string',
+      });
       const result = await agent
         .post('/baseFields')
         .type('application/json')

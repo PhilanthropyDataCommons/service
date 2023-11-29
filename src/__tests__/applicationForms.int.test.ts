@@ -87,17 +87,16 @@ describe('/applicationForms', () => {
           ( 1, 2, '2510-02-02 00:00:02+0000' ),
           ( 2, 1, '2510-02-02 00:00:03+0000' )
       `);
-      await db.query(`
-      INSERT INTO base_fields (
-        label,
-        short_code,
-        data_type,
-        created_at
-      )
-      VALUES
-        ( 'Organization Name', 'organizationName', '{ type: "string" }', '2510-02-02 00:00:04+0000' ),
-        ( 'Years of work', 'yearsOfWork', '{ type: "integer" }', '2510-02-02 00:00:05+0000' );
-      `);
+      await db.sql('baseFields.insertOne', {
+        label: 'Organization Name',
+        shortCode: 'organizationName',
+        dataType: '{ type: "string" }',
+      });
+      await db.sql('baseFields.insertOne', {
+        label: 'Years of work',
+        shortCode: 'yearsOfWork',
+        dataType: '{ type: "integer" }',
+      });
       await agent
         .get('/applicationForms/2')
         .set(authHeader)
@@ -130,17 +129,16 @@ describe('/applicationForms', () => {
           ( 1, 2, '2510-02-01 00:00:02+0000' ),
           ( 2, 1, '2510-02-01 00:00:03+0000' )
       `);
-      await db.query(`
-      INSERT INTO base_fields (
-        label,
-        short_code,
-        data_type,
-        created_at
-      )
-      VALUES
-        ( 'Organization Name', 'organizationName', '{ type: "string" }', '2510-02-01 00:00:04+0000' ),
-        ( 'Years of work', 'yearsOfWork', '{ type: "integer" }', '2510-02-01 00:00:05+0000' );
-      `);
+      await db.sql('baseFields.insertOne', {
+        label: 'Organization Name',
+        shortCode: 'organizationName',
+        dataType: '{ type: "string" }',
+      });
+      await db.sql('baseFields.insertOne', {
+        label: 'Years of work',
+        shortCode: 'yearsOfWork',
+        dataType: '{ type: "integer" }',
+      });
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
@@ -432,15 +430,16 @@ describe('/applicationForms', () => {
         INSERT INTO opportunities ( title )
         VALUES ( 'Tremendous opportunity 👌' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string' );
-      `);
+      await db.sql('baseFields.insertOne', {
+        label: 'Organization Name',
+        shortCode: 'organizationName',
+        dataType: '{ type: "string" }',
+      });
+      await db.sql('baseFields.insertOne', {
+        label: 'Years of work',
+        shortCode: 'yearsOfWork',
+        dataType: '{ type: "integer" }',
+      });
       const before = await loadTableMetrics('application_form_fields');
       const result = await agent
         .post('/applicationForms')
@@ -635,15 +634,11 @@ describe('/applicationForms', () => {
         VALUES
           ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string' );
-      `);
+      await db.sql('baseFields.insertOne', {
+        label: 'First Name',
+        shortCode: 'firstName',
+        dataType: 'string',
+      });
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => ({
           command: '',
@@ -688,15 +683,11 @@ describe('/applicationForms', () => {
         VALUES
           ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string' );
-      `);
+      await db.sql('baseFields.insertOne', {
+        label: 'First Name',
+        shortCode: 'firstName',
+        dataType: 'string',
+      });
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => ({
           command: '',

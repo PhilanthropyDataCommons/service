@@ -513,25 +513,16 @@ describe('/proposals', () => {
     });
 
     it('returns one proposal with deep fields when includeFieldsAndValues=true', async () => {
-      // Needs base fields,
-      // opportunity,
-      // an applicant,
-      // application form,
-      // application form fields,
-      // proposal,
-      // proposal versions, and
-      // proposal field values.
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type,
-          created_at
-        )
-        VALUES
-          ( 'Summary', 'summary', '{ type: "string" }', '2023-01-06T16:22:00+0000' ),
-          ( 'Title', 'title', '{ type: "string" }', '2023-01-06T16:24:00+0000' );
-      `);
+      await db.sql('baseFields.insertOne', {
+        label: 'Summary',
+        shortCode: 'summary',
+        dataType: 'string',
+      });
+      await db.sql('baseFields.insertOne', {
+        label: 'Title',
+        shortCode: 'title',
+        dataType: 'string',
+      });
       await db.query(`
         INSERT INTO opportunities (
           title,

@@ -1,4 +1,8 @@
-import { db } from '../database';
+import {
+  db,
+  getLimitValues,
+  loadBulkUploadBundle,
+} from '../database';
 import {
   isTinyPgErrorWithQueryContext,
   isBulkUploadCreate,
@@ -8,6 +12,9 @@ import {
   DatabaseError,
   InputValidationError,
 } from '../errors';
+import {
+  extractPaginationParameters,
+} from '../queryParameters';
 import type {
   Request,
   Response,
@@ -54,6 +61,33 @@ const createBulkUpload = (
   });
 };
 
+const readBulkUploads = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
+  const paginationParameters = extractPaginationParameters(req);
+  (async () => {
+    const bulkUploadBundle = await loadBulkUploadBundle({
+      ...getLimitValues(paginationParameters),
+    });
+
+    res.status(200)
+      .contentType('application/json')
+      .send(bulkUploadBundle);
+  })().catch((error: unknown) => {
+    if (isTinyPgErrorWithQueryContext(error)) {
+      next(new DatabaseError(
+        'Error retrieving bulk uploads.',
+        error,
+      ));
+      return;
+    }
+    next(error);
+  });
+};
+
 export const bulkUploadsHandlers = {
   createBulkUpload,
+  readBulkUploads,
 };

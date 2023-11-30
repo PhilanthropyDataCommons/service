@@ -14,6 +14,21 @@ import type { Result } from 'tinypg';
 const logger = getLogger(__filename);
 const agent = request.agent(app);
 
+const createTestBaseFields = async () => {
+  await db.sql('baseFields.insertOne', {
+    label: 'First Name',
+    description: 'The first name of the applicant',
+    shortCode: 'firstName',
+    dataType: 'string',
+  });
+  await db.sql('baseFields.insertOne', {
+    label: 'Last Name',
+    description: 'The last name of the applicant',
+    shortCode: 'lastName',
+    dataType: 'string',
+  });
+};
+
 describe('/proposalVersions', () => {
   describe('POST /', () => {
     it('creates exactly one proposal version', async () => {
@@ -113,17 +128,7 @@ describe('/proposalVersions', () => {
         VALUES
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type,
-          created_at
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
-      `);
+      await createTestBaseFields();
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
@@ -512,17 +517,7 @@ describe('/proposalVersions', () => {
           ( 1, 1, '2022-07-20 12:00:00+0000' ),
           ( 1, 2, '2022-07-20 12:00:00+0000' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type,
-          created_at
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
-      `);
+      await createTestBaseFields();
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
@@ -792,17 +787,7 @@ describe('/proposalVersions', () => {
         VALUES
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type,
-          created_at
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
-      `);
+      await createTestBaseFields();
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
@@ -886,17 +871,7 @@ describe('/proposalVersions', () => {
         VALUES
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type,
-          created_at
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
-      `);
+      await createTestBaseFields();
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
@@ -1051,17 +1026,7 @@ describe('/proposalVersions', () => {
         VALUES
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type,
-          created_at
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
-      `);
+      await createTestBaseFields();
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
@@ -1221,17 +1186,7 @@ describe('/proposalVersions', () => {
         VALUES
           ( 1, 1, '2022-07-20 12:00:00+0000' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type,
-          created_at
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string', '2022-07-20 12:00:00+0000' ),
-          ( 'Last Name', 'lastName', 'string', '2022-07-20 12:00:00+0000' );
-      `);
+      await createTestBaseFields();
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,

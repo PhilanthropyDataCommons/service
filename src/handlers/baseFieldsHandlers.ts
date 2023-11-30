@@ -1,19 +1,23 @@
-import { ajv } from '../ajv';
 import { getLogger } from '../logger';
 import { db } from '../database';
-import { isTinyPgErrorWithQueryContext } from '../types';
+import {
+  isTinyPgErrorWithQueryContext,
+  isBaseFieldCreate,
+} from '../types';
 import {
   DatabaseError,
   InputValidationError,
 } from '../errors';
-import type { JSONSchemaType } from 'ajv';
 import type {
   Request,
   Response,
   NextFunction,
 } from 'express';
 import type { Result } from 'tinypg';
-import type { BaseField } from '../types';
+import type {
+  BaseField,
+  BaseFieldCreate,
+} from '../types';
 
 const logger = getLogger(__filename);
 
@@ -42,35 +46,15 @@ const getBaseFields = (
     });
 };
 
-const postBaseFieldBodySchema: JSONSchemaType<Omit<BaseField, 'createdAt' | 'id'>> = {
-  type: 'object',
-  properties: {
-    label: {
-      type: 'string',
-    },
-    shortCode: {
-      type: 'string',
-    },
-    dataType: {
-      type: 'string',
-    },
-  },
-  required: [
-    'label',
-    'shortCode',
-    'dataType',
-  ],
-};
-const isPostBaseFieldBody = ajv.compile(postBaseFieldBodySchema);
 const postBaseField = (
-  req: Request<unknown, unknown, Omit<BaseField, 'createdAt' | 'id'>>,
+  req: Request<unknown, unknown, BaseFieldCreate>,
   res: Response,
   next: NextFunction,
 ): void => {
-  if (!isPostBaseFieldBody(req.body)) {
+  if (!isBaseFieldCreate(req.body)) {
     next(new InputValidationError(
       'Invalid request body.',
-      isPostBaseFieldBody.errors ?? [],
+      isBaseFieldCreate.errors ?? [],
     ));
     return;
   }

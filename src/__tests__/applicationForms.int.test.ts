@@ -14,6 +14,21 @@ import type { Result } from 'tinypg';
 const logger = getLogger(__filename);
 const agent = request.agent(app);
 
+const createTestBaseFields = async () => {
+  await db.sql('baseFields.insertOne', {
+    label: 'Organization Name',
+    description: 'The organizational name of the applicant',
+    shortCode: 'organizationName',
+    dataType: '{ type: "string" }',
+  });
+  await db.sql('baseFields.insertOne', {
+    label: 'Years of work',
+    description: 'The number of years the project will take to complete',
+    shortCode: 'yearsOfWork',
+    dataType: '{ type: "integer" }',
+  });
+};
+
 describe('/applicationForms', () => {
   describe('GET /', () => {
     it('returns an empty array when no data is present', async () => {
@@ -87,17 +102,7 @@ describe('/applicationForms', () => {
           ( 1, 2, '2510-02-02 00:00:02+0000' ),
           ( 2, 1, '2510-02-02 00:00:03+0000' )
       `);
-      await db.query(`
-      INSERT INTO base_fields (
-        label,
-        short_code,
-        data_type,
-        created_at
-      )
-      VALUES
-        ( 'Organization Name', 'organizationName', '{ type: "string" }', '2510-02-02 00:00:04+0000' ),
-        ( 'Years of work', 'yearsOfWork', '{ type: "integer" }', '2510-02-02 00:00:05+0000' );
-      `);
+      await createTestBaseFields();
       await agent
         .get('/applicationForms/2')
         .set(authHeader)
@@ -130,17 +135,7 @@ describe('/applicationForms', () => {
           ( 1, 2, '2510-02-01 00:00:02+0000' ),
           ( 2, 1, '2510-02-01 00:00:03+0000' )
       `);
-      await db.query(`
-      INSERT INTO base_fields (
-        label,
-        short_code,
-        data_type,
-        created_at
-      )
-      VALUES
-        ( 'Organization Name', 'organizationName', '{ type: "string" }', '2510-02-01 00:00:04+0000' ),
-        ( 'Years of work', 'yearsOfWork', '{ type: "integer" }', '2510-02-01 00:00:05+0000' );
-      `);
+      await createTestBaseFields();
       await db.query(`
         INSERT INTO application_form_fields (
           application_form_id,
@@ -432,15 +427,7 @@ describe('/applicationForms', () => {
         INSERT INTO opportunities ( title )
         VALUES ( 'Tremendous opportunity 👌' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string' );
-      `);
+      await createTestBaseFields();
       const before = await loadTableMetrics('application_form_fields');
       const result = await agent
         .post('/applicationForms')
@@ -635,15 +622,7 @@ describe('/applicationForms', () => {
         VALUES
           ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string' );
-      `);
+      await createTestBaseFields();
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => ({
           command: '',
@@ -688,15 +667,7 @@ describe('/applicationForms', () => {
         VALUES
           ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
       `);
-      await db.query(`
-        INSERT INTO base_fields (
-          label,
-          short_code,
-          data_type
-        )
-        VALUES
-          ( 'First Name', 'firstName', 'string' );
-      `);
+      await createTestBaseFields();
       jest.spyOn(db, 'sql')
         .mockImplementationOnce(async () => ({
           command: '',

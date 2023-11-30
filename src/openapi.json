@@ -388,6 +388,10 @@
             "type": "string",
             "example": "First Name"
           },
+          "description": {
+            "type": "string",
+            "example": "The first name of the applicant"
+          },
           "shortCode": {
             "type": "string",
             "example": "firstName"

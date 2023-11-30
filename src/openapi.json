@@ -819,6 +819,43 @@
       }
     },
     "/bulkUploads": {
+      "get": {
+        "summary": "Get a list of bulk uploads.",
+        "tags": [
+          "Bulk Uploads"
+        ],
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "parameters": [
+          { "$ref": "#/components/parameters/pageParam" },
+          { "$ref": "#/components/parameters/countParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "All bulk uploads currently registered in the PDC.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkUpload"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Register a bulk upload.",
         "tags": [

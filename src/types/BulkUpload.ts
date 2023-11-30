@@ -17,6 +17,37 @@ export interface BulkUpload {
   readonly createdAt: Date;
 }
 
+export const bulkUploadSchema: JSONSchemaType<BulkUpload> = {
+  type: 'object',
+  properties: {
+    id: {
+      type: 'integer',
+    },
+    fileName: {
+      type: 'string',
+    },
+    sourceUrl: {
+      type: 'string',
+    },
+    status: {
+      type: 'string',
+    },
+    createdAt: {
+      type: 'object',
+      required: [],
+      instanceof: 'Date',
+    },
+  },
+  required: [
+    'id',
+    'fileName',
+    'sourceUrl',
+    'createdAt',
+  ],
+};
+
+export const isBulkUpload = ajv.compile(bulkUploadSchema);
+
 // See https://github.com/typescript-eslint/typescript-eslint/issues/1824
 /* eslint-disable @typescript-eslint/indent */
 export type BulkUploadCreate = Omit<BulkUpload, 'createdAt' | 'status' | 'id'>;

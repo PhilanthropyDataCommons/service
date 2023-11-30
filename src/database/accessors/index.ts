@@ -1,3 +1,4 @@
+export * from './loadBulkUploadBundle';
 export * from './loadBundle';
 export * from './loadObjects';
 export * from './loadProposalBundle';

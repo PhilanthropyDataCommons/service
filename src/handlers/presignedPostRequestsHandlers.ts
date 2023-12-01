@@ -24,7 +24,7 @@ const generatePresignedPost = async (
   s3Client,
   {
     Bucket: S3_BUCKET,
-    Key: `${uuidv4()}`,
+    Key: `unprocessed/${uuidv4()}`,
     Expires: 3600, // 1 hour
     Conditions: [
       ['eq', '$Content-Type', fileType],

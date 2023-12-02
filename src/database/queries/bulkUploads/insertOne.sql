@@ -1,16 +1,16 @@
 INSERT INTO bulk_uploads (
   file_name,
-  source_url,
+  source_key,
   status
 )
 VALUES (
   :fileName,
-  :sourceUrl,
+  :sourceKey,
   :status
 )
 RETURNING
   id as "id",
   file_name as "fileName",
-  source_url as "sourceUrl",
+  source_key as "sourceKey",
   status as "status",
   created_at AS "createdAt"

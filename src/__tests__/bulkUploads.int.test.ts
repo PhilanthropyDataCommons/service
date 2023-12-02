@@ -21,15 +21,15 @@ describe('/bulkUploads', () => {
       });
   });
 
-  it('returns proposals present in the database', async () => {
+  it('returns bulk uploads present in the database', async () => {
     await db.sql('bulkUploads.insertOne', {
       fileName: 'foo.csv',
-      sourceUrl: 'https://example.com/foo.csv',
+      sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
       status: BulkUploadStatus.PENDING,
     });
     await db.sql('bulkUploads.insertOne', {
       fileName: 'bar.csv',
-      sourceUrl: 'https://example.com/bar.csv',
+      sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
       status: BulkUploadStatus.COMPLETED,
     });
 
@@ -45,14 +45,14 @@ describe('/bulkUploads', () => {
               {
                 id: 2,
                 fileName: 'bar.csv',
-                sourceUrl: 'https://example.com/bar.csv',
+                sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
                 status: BulkUploadStatus.COMPLETED,
                 createdAt: expectTimestamp,
               },
               {
                 id: 1,
                 fileName: 'foo.csv',
-                sourceUrl: 'https://example.com/foo.csv',
+                sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
                 status: BulkUploadStatus.PENDING,
                 createdAt: expectTimestamp,
               },
@@ -67,7 +67,7 @@ describe('/bulkUploads', () => {
       await p;
       await db.sql('bulkUploads.insertOne', {
         fileName: `bar-${i + 1}.csv`,
-        sourceUrl: 'https://example.com/bar.csv',
+        sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
         status: BulkUploadStatus.COMPLETED,
       });
     }, Promise.resolve());
@@ -87,35 +87,35 @@ describe('/bulkUploads', () => {
             {
               id: 15,
               fileName: 'bar-15.csv',
-              sourceUrl: 'https://example.com/bar.csv',
+              sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
               status: BulkUploadStatus.COMPLETED,
               createdAt: expectTimestamp,
             },
             {
               id: 14,
               fileName: 'bar-14.csv',
-              sourceUrl: 'https://example.com/bar.csv',
+              sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
               status: BulkUploadStatus.COMPLETED,
               createdAt: expectTimestamp,
             },
             {
               id: 13,
               fileName: 'bar-13.csv',
-              sourceUrl: 'https://example.com/bar.csv',
+              sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
               status: BulkUploadStatus.COMPLETED,
               createdAt: expectTimestamp,
             },
             {
               id: 12,
               fileName: 'bar-12.csv',
-              sourceUrl: 'https://example.com/bar.csv',
+              sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
               status: BulkUploadStatus.COMPLETED,
               createdAt: expectTimestamp,
             },
             {
               id: 11,
               fileName: 'bar-11.csv',
-              sourceUrl: 'https://example.com/bar.csv',
+              sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
               status: BulkUploadStatus.COMPLETED,
               createdAt: expectTimestamp,
             },
@@ -133,7 +133,7 @@ describe('/bulkUploads', () => {
         .set(authHeader)
         .send({
           fileName: 'foo.csv',
-          sourceUrl: 'https://example.com/blah.csv',
+          sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
         })
         .expect(201);
       const after = await loadTableMetrics('bulk_uploads');
@@ -141,7 +141,7 @@ describe('/bulkUploads', () => {
       expect(result.body).toMatchObject({
         id: expect.any(Number) as number,
         fileName: 'foo.csv',
-        sourceUrl: 'https://example.com/blah.csv',
+        sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
         status: 'pending',
         createdAt: expectTimestamp,
       });
@@ -154,7 +154,7 @@ describe('/bulkUploads', () => {
         .type('application/json')
         .set(authHeader)
         .send({
-          sourceUrl: 'https://example.com/blah.csv',
+          sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
         })
         .expect(400);
       expect(result.body).toMatchObject({
@@ -170,7 +170,7 @@ describe('/bulkUploads', () => {
         .set(authHeader)
         .send({
           fileName: 'foo.png',
-          sourceUrl: 'https://example.com/blah.csv',
+          sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
         })
         .expect(400);
       expect(result.body).toMatchObject({
@@ -179,14 +179,14 @@ describe('/bulkUploads', () => {
       });
     });
 
-    it('returns 400 bad request when an invalid url is provided', async () => {
+    it('returns 400 bad request when an invalid source key is provided', async () => {
       const result = await agent
         .post('/bulkUploads')
         .type('application/json')
         .set(authHeader)
         .send({
           fileName: 'foo.csv',
-          sourceUrl: 'example.com/blah.csv',
+          sourceKey: '',
         })
         .expect(400);
       expect(result.body).toMatchObject({
@@ -195,7 +195,7 @@ describe('/bulkUploads', () => {
       });
     });
 
-    it('returns 400 bad request when no source URL is provided', async () => {
+    it('returns 400 bad request when no source key is provided', async () => {
       const result = await agent
         .post('/bulkUploads')
         .type('application/json')

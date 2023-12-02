@@ -44,7 +44,7 @@ const createBulkUpload = (
   (async () => {
     const bulkUploadsQueryResult = await db.sql<BulkUpload>('bulkUploads.insertOne', {
       fileName: body.fileName,
-      sourceUrl: body.sourceUrl,
+      sourceKey: body.sourceKey,
       status: BulkUploadStatus.PENDING,
     });
     const bulkUpload = bulkUploadsQueryResult.rows[0];

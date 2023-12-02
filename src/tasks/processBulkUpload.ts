@@ -77,11 +77,8 @@ export const processBulkUpload = async (
   helpers: JobHelpers,
 ): Promise<void> => {
   if (!isProcessBulkUploadJobPayload(payload)) {
-    helpers.logger.debug('Malformed bulk upload job payload', { errors: isProcessBulkUploadJobPayload.errors ?? [] });
-    throw new InternalValidationError(
-      'The bulk upload job payload is not properly formed',
-      isProcessBulkUploadJobPayload.errors ?? [],
-    );
+    helpers.logger.error('Malformed bulk upload job payload', { errors: isProcessBulkUploadJobPayload.errors ?? [] });
+    return;
   }
   helpers.logger.debug(`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`);
   const bulkUpload = await loadBulkUpload(payload.bulkUploadId);
@@ -94,6 +91,13 @@ export const processBulkUpload = async (
     await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.FAILED);
     return;
   }
-  await bulkUploadFile.cleanup();
+  try {
+    await bulkUploadFile.cleanup();
+  } catch (error) {
+    helpers.logger.warn(
+      `Cleanup of a temporary file failed (${bulkUploadFile.path})`,
+      { error },
+    );
+  }
   await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.COMPLETED);
 };

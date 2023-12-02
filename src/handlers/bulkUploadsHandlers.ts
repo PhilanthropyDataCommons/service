@@ -41,6 +41,14 @@ const createBulkUpload = (
     return;
   }
 
+  if (!body.sourceKey.startsWith('unprocessed/')) {
+    next(new InputValidationError(
+      'sourceKey must be unprocessed, and begin with `unprocessed/`.',
+      [],
+    ));
+    return;
+  }
+
   (async () => {
     const bulkUploadsQueryResult = await db.sql<BulkUpload>('bulkUploads.insertOne', {
       fileName: body.fileName,

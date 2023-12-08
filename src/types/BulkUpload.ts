@@ -12,7 +12,7 @@ export enum BulkUploadStatus {
 export interface BulkUpload {
   readonly id: number;
   fileName: string
-  sourceUrl: string;
+  sourceKey: string;
   status: BulkUploadStatus;
   readonly createdAt: Date;
 }
@@ -26,7 +26,7 @@ export const bulkUploadSchema: JSONSchemaType<BulkUpload> = {
     fileName: {
       type: 'string',
     },
-    sourceUrl: {
+    sourceKey: {
       type: 'string',
     },
     status: {
@@ -41,7 +41,7 @@ export const bulkUploadSchema: JSONSchemaType<BulkUpload> = {
   required: [
     'id',
     'fileName',
-    'sourceUrl',
+    'sourceKey',
     'createdAt',
   ],
 };
@@ -60,14 +60,14 @@ export const bulkUploadCreateSchema: JSONSchemaType<BulkUploadCreate> = {
       type: 'string',
       pattern: '^.+\\.csv$',
     },
-    sourceUrl: {
+    sourceKey: {
       type: 'string',
-      pattern: 'https?:\\/\\/.+',
+      minLength: 1,
     },
   },
   required: [
     'fileName',
-    'sourceUrl',
+    'sourceKey',
   ],
 };
 

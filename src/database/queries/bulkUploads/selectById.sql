@@ -5,5 +5,4 @@ SELECT
   status as "status",
   created_at AS "createdAt"
 FROM bulk_uploads
-ORDER BY id DESC
-OFFSET :offset FETCH NEXT :limit ROWS ONLY
+WHERE id = :id;

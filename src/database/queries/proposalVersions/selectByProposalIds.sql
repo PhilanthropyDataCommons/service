@@ -5,4 +5,4 @@ SELECT id,
   created_at AS "createdAt"
 FROM proposal_versions
 WHERE proposal_id = ANY(:proposalIds)
-ORDER BY version DESC;
+ORDER BY version, id DESC;

@@ -58,6 +58,21 @@ const createTestBulkUpload = async (overrideValues?: Partial<BulkUpload>): Promi
   return bulkUpload;
 };
 
+const createTestBaseFields = async (): Promise<void> => {
+  await db.sql<BulkUpload>('baseFields.insertOne', {
+    label: 'Proposal Submitter Email',
+    description: 'The email address of the person who submitted the proposal.',
+    shortCode: 'proposal_submitter_email',
+    dataType: 'string',
+  });
+  await db.sql<BulkUpload>('baseFields.insertOne', {
+    label: 'Organization Name',
+    description: 'The name of the applying organization.',
+    shortCode: 'organization_name',
+    dataType: 'string',
+  });
+};
+
 describe('processBulkUpload', () => {
   it('should attempt to access the contents of the sourceKey associated with the specified bulk upload', async () => {
     const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
@@ -98,7 +113,77 @@ describe('processBulkUpload', () => {
     expect(sourceRequest.isDone()).toEqual(true);
   });
 
-  it('should set the status of the upload to COMPLETED if the sourceKey is accessible', async () => {
+  it('should set the status of the upload to FAILED if the csv does not have a proposal_submitter_email field', async () => {
+    await createTestBaseFields();
+    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const bulkUpload = await createTestBulkUpload({ sourceKey });
+    const sourceRequest = nock(await getS3Endpoint())
+      .get(getS3KeyPath(sourceKey))
+      .query({ 'x-id': 'GetObject' })
+      .replyWithFile(
+        200,
+        `${__dirname}/fixtures/processBulkUpload/missingEmail.csv`,
+      );
+
+    await processBulkUpload(
+      {
+        bulkUploadId: bulkUpload.id,
+      },
+      getMockJobHelpers(),
+    );
+    const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
+    expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.FAILED);
+    expect(sourceRequest.isDone()).toEqual(true);
+  });
+
+  it('should set the status of the upload to FAILED if the csv contains an invalid short code', async () => {
+    await createTestBaseFields();
+    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const bulkUpload = await createTestBulkUpload({ sourceKey });
+    const sourceRequest = nock(await getS3Endpoint())
+      .get(getS3KeyPath(sourceKey))
+      .query({ 'x-id': 'GetObject' })
+      .replyWithFile(
+        200,
+        `${__dirname}/fixtures/processBulkUpload/invalidShortCode.csv`,
+      );
+
+    await processBulkUpload(
+      {
+        bulkUploadId: bulkUpload.id,
+      },
+      getMockJobHelpers(),
+    );
+    const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
+    expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.FAILED);
+    expect(sourceRequest.isDone()).toEqual(true);
+  });
+
+  it('should set the status of the upload to FAILED if the csv is empty', async () => {
+    await createTestBaseFields();
+    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const bulkUpload = await createTestBulkUpload({ sourceKey });
+    const sourceRequest = nock(await getS3Endpoint())
+      .get(getS3KeyPath(sourceKey))
+      .query({ 'x-id': 'GetObject' })
+      .replyWithFile(
+        200,
+        `${__dirname}/fixtures/processBulkUpload/empty.csv`,
+      );
+
+    await processBulkUpload(
+      {
+        bulkUploadId: bulkUpload.id,
+      },
+      getMockJobHelpers(),
+    );
+    const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
+    expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.FAILED);
+    expect(sourceRequest.isDone()).toEqual(true);
+  });
+
+  it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
+    await createTestBaseFields();
     const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const sourceRequest = nock(await getS3Endpoint())

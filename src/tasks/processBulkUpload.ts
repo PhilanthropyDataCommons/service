@@ -366,17 +366,17 @@ export const processBulkUpload = async (
         },
       ));
     });
-  } catch (error) {
-    helpers.logger.info('Bulk upload is being marked as failed', { error });
+  } catch (err) {
+    helpers.logger.info('Bulk upload is being marked as failed', { err });
     await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.FAILED);
     return;
   }
   try {
     await bulkUploadFile.cleanup();
-  } catch (error) {
+  } catch (err) {
     helpers.logger.warn(
       `Cleanup of a temporary file failed (${bulkUploadFile.path})`,
-      { error },
+      { err },
     );
   }
   await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.COMPLETED);

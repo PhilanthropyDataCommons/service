@@ -19,19 +19,19 @@ export const jobQueueLogger = new Logger((scope) => (
   (level, message, meta) => {
     switch (level.valueOf()) {
       case 'error':
-        logger.error({ meta, scope }, message);
+        logger.error({ ...meta, scope }, message);
         break;
       case 'warn':
-        logger.warn({ meta, scope }, message);
+        logger.warn({ ...meta, scope }, message);
         break;
       case 'info':
-        logger.info({ meta, scope }, message);
+        logger.info({ ...meta, scope }, message);
         break;
       case 'debug':
-        logger.debug({ meta, scope }, message);
+        logger.debug({ ...meta, scope }, message);
         break;
       default:
-        logger.info({ meta, scope }, message);
+        logger.info({ ...meta, scope }, message);
     }
   }
 ));

@@ -1,5 +1,5 @@
-import { db } from '../db';
-import { InternalValidationError } from '../../errors';
+import { db } from '../../db';
+import { InternalValidationError } from '../../../errors';
 import type { TinyPgParams } from 'tinypg';
 import type { ValidateFunction } from 'ajv';
 

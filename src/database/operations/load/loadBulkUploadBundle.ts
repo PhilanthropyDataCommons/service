@@ -1,10 +1,10 @@
-import { isBulkUpload } from '../../types';
+import { isBulkUpload } from '../../../types';
 import { loadBundle } from './loadBundle';
 import type { TinyPgParams } from 'tinypg';
 import type {
   Bundle,
   BulkUpload,
-} from '../../types';
+} from '../../../types';
 
 export const loadBulkUploadBundle = async (
   queryParameters: TinyPgParams,

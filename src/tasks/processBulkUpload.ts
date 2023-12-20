@@ -8,7 +8,7 @@ import { db } from '../database/db';
 import {
   loadBaseFields,
   loadBulkUpload,
-} from '../database/accessors';
+} from '../database/operations/load';
 import {
   BulkUploadStatus,
   isProcessBulkUploadJobPayload,

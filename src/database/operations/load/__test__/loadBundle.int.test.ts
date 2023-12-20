@@ -1,6 +1,6 @@
 import { loadBundle } from '..';
-import { isApplicant } from '../../../types';
-import { db } from '../..';
+import { isApplicant } from '../../../../types';
+import { db } from '../../..';
 
 describe('loadBundle', () => {
   it('Should return a bundle for the query', async () => {

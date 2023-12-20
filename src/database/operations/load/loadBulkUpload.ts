@@ -1,6 +1,6 @@
-import { db } from '../db';
-import { NotFoundError } from '../../errors';
-import type { BulkUpload } from '../../types';
+import { db } from '../../db';
+import { NotFoundError } from '../../../errors';
+import type { BulkUpload } from '../../../types';
 
 export const loadBulkUpload = async (id: number): Promise<BulkUpload> => {
   const bulkUploadsQueryResult = await db.sql<BulkUpload>('bulkUploads.selectById', {

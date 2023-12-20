@@ -1,4 +1,4 @@
-import { loadObjects } from '../accessors/loadObjects';
+import { loadObjects } from '../operations/load/loadObjects';
 import { isProposalFieldValue } from '../../types';
 import { enrichProposalFieldValues } from './enrichProposalFieldValues';
 import type { ProposalVersion } from '../../types';

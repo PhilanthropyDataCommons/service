@@ -1,4 +1,4 @@
-import { loadObjects } from '../accessors/loadObjects';
+import { loadObjects } from '../operations/load/loadObjects';
 import { isApplicationFormField } from '../../types';
 import type { ProposalFieldValue } from '../../types';
 

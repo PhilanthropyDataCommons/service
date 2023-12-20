@@ -2,7 +2,7 @@ import { getLogger } from '../logger';
 import { db } from '../database';
 import {
   isTinyPgErrorWithQueryContext,
-  isBaseFieldCreate,
+  isBaseFieldWrite,
 } from '../types';
 import {
   DatabaseError,
@@ -16,7 +16,6 @@ import type {
 import type { Result } from 'tinypg';
 import type {
   BaseField,
-  BaseFieldCreate,
 } from '../types';
 
 const logger = getLogger(__filename);
@@ -47,14 +46,14 @@ const getBaseFields = (
 };
 
 const postBaseField = (
-  req: Request<unknown, unknown, BaseFieldCreate>,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): void => {
-  if (!isBaseFieldCreate(req.body)) {
+  if (!isBaseFieldWrite(req.body)) {
     next(new InputValidationError(
       'Invalid request body.',
-      isBaseFieldCreate.errors ?? [],
+      isBaseFieldWrite.errors ?? [],
     ));
     return;
   }

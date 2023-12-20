@@ -12,10 +12,10 @@ export interface BaseField {
 
 // See https://github.com/typescript-eslint/typescript-eslint/issues/1824
 /* eslint-disable @typescript-eslint/indent */
-export type BaseFieldCreate = Omit<BaseField, 'createdAt' | 'id'>;
+export type BaseFieldWrite = Omit<BaseField, 'createdAt' | 'id'>;
 /* eslint-enable @typescript-eslint/indent */
 
-export const baseFieldCreateSchema: JSONSchemaType<BaseFieldCreate> = {
+export const baseFieldWriteSchema: JSONSchemaType<BaseFieldWrite> = {
   type: 'object',
   properties: {
     label: {
@@ -39,4 +39,4 @@ export const baseFieldCreateSchema: JSONSchemaType<BaseFieldCreate> = {
   ],
 };
 
-export const isBaseFieldCreate = ajv.compile(baseFieldCreateSchema);
+export const isBaseFieldWrite = ajv.compile(baseFieldWriteSchema);

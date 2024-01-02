@@ -24,3 +24,5 @@ export const s3Client = new S3({
     secretAccessKey: S3_ACCESS_SECRET,
   },
 });
+
+export const S3_UNPROCESSED_KEY_PREFIX = 'unprocessed';

@@ -13,7 +13,8 @@
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:@typescript-eslint/strict",
     "airbnb-base",
-    "airbnb-typescript/base"
+    "airbnb-typescript/base",
+		"prettier"
   ],
   "rules": {
     "import/prefer-default-export": "off",

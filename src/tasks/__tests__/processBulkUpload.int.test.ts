@@ -1,3 +1,4 @@
+import path from 'path';
 import nock from 'nock';
 import { requireEnv } from 'require-env-variable';
 import {
@@ -88,6 +89,19 @@ const mockS3GetObjectReplyWithFile = async (
     filePath,
   );
 
+const mockS3CopyObjectReply = async (sourceKey: string) => nock(await getS3Endpoint())
+  .put(getS3KeyPath(`${sourceKey}`))
+  .query({ 'x-id': 'CopyObject' })
+  .reply(
+    200,
+    '<?xml version="1.0" encoding="UTF-8"?><CopyObjectResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><LastModified>2024-01-02T19:24:50.814Z</LastModified><ETag>745905cba4f8bfd2394f34e61d035a36</ETag></CopyObjectResult>',
+  );
+
+const mockS3DeleteObjectReply = async (sourceKey: string) => nock(await getS3Endpoint())
+  .delete(getS3KeyPath(`${sourceKey}`))
+  .query({ 'x-id': 'DeleteObject' })
+  .reply(204);
+
 const mockS3ResponsesForBulkUploadProcessing = async (
   sourceKey: string,
   bulkUploadFilePath: string,
@@ -97,8 +111,14 @@ const mockS3ResponsesForBulkUploadProcessing = async (
     sourceKey,
     bulkUploadFilePath,
   );
+  const copyRequest = await mockS3CopyObjectReply(
+    `bulk-uploads/${keyBasename}`,
+  );
+  const deleteRequest = await mockS3DeleteObjectReply(sourceKey);
   return {
     getRequest,
+    copyRequest,
+    deleteRequest,
   };
 };
 
@@ -210,6 +230,25 @@ describe('processBulkUpload', () => {
     expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.FAILED);
   });
 
+  it('should move the csv file to processed location if the csv does not have a proposal_submitter_email field', async () => {
+    await createTestBaseFields();
+    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const bulkUpload = await createTestBulkUpload({ sourceKey });
+    const requests = await mockS3ResponsesForBulkUploadProcessing(
+      sourceKey,
+      `${__dirname}/fixtures/processBulkUpload/missingEmail.csv`,
+    );
+
+    await processBulkUpload(
+      {
+        bulkUploadId: bulkUpload.id,
+      },
+      getMockJobHelpers(),
+    );
+    expect(requests.copyRequest.isDone()).toEqual(true);
+    expect(requests.deleteRequest.isDone()).toEqual(true);
+  });
+
   it('should set the status of the upload to FAILED if the csv contains an invalid short code', async () => {
     await createTestBaseFields();
     const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
@@ -226,6 +265,24 @@ describe('processBulkUpload', () => {
     );
     const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
     expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.FAILED);
+  });
+
+  it('should move the csv file to processed location if the csv contains an invalid short code', async () => {
+    await createTestBaseFields();
+    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const bulkUpload = await createTestBulkUpload({ sourceKey });
+    const requests = await mockS3ResponsesForBulkUploadProcessing(
+      sourceKey,
+      `${__dirname}/fixtures/processBulkUpload/invalidShortCode.csv`,
+    );
+    await processBulkUpload(
+      {
+        bulkUploadId: bulkUpload.id,
+      },
+      getMockJobHelpers(),
+    );
+    expect(requests.copyRequest.isDone()).toEqual(true);
+    expect(requests.deleteRequest.isDone()).toEqual(true);
   });
 
   it('should set the status of the upload to FAILED if the csv is empty', async () => {
@@ -357,5 +414,7 @@ describe('processBulkUpload', () => {
     ]);
     expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.COMPLETED);
     expect(requests.getRequest.isDone()).toEqual(true);
+    expect(requests.copyRequest.isDone()).toEqual(true);
+    expect(requests.deleteRequest.isDone()).toEqual(true);
   });
 });

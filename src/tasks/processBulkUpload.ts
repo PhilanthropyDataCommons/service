@@ -1,9 +1,13 @@
+import path from 'path';
 import fs from 'fs';
 import { finished } from 'stream/promises';
 import { parse } from 'csv-parse';
 import { requireEnv } from 'require-env-variable';
 import tmp from 'tmp-promise';
-import { s3Client } from '../s3Client';
+import {
+  s3Client,
+  S3_BULK_UPLOADS_KEY_PREFIX,
+} from '../s3Client';
 import { db } from '../database/db';
 import {
   loadBaseFields,
@@ -51,6 +55,19 @@ const updateBulkUploadStatus = async (
     status,
   });
   if (bulkUploadsQueryResult.row_count !== 1) {
+    throw new NotFoundError(`The bulk upload was not found (id: ${id})`);
+  }
+};
+
+const updateBulkUploadSourceKey = async (
+  id: number,
+  sourceKey: string,
+) => {
+  const result = await db.sql<BulkUpload>('bulkUploads.updateSourceKeyById', {
+    id,
+    sourceKey,
+  });
+  if (result.row_count !== 1) {
     throw new NotFoundError(`The bulk upload was not found (id: ${id})`);
   }
 };
@@ -301,6 +318,11 @@ const createProposalFieldValueForBulkUploadCsvRecord = async (
   return proposalFieldValue;
 };
 
+const getProcessedKey = (unprocessedKey: string): string => (
+  `${S3_BULK_UPLOADS_KEY_PREFIX}/${path.basename(unprocessedKey)}`
+
+);
+
 export const processBulkUpload = async (
   payload: unknown,
   helpers: JobHelpers,
@@ -312,6 +334,7 @@ export const processBulkUpload = async (
   helpers.logger.debug(`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`);
   const bulkUpload = await loadBulkUpload(payload.bulkUploadId);
   let bulkUploadFile: FileResult;
+  let bulkUploadHasFailed = false;
   try {
     await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.IN_PROGRESS);
     bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
@@ -374,10 +397,10 @@ export const processBulkUpload = async (
       ));
     });
   } catch (err) {
-    helpers.logger.info('Bulk upload is being marked as failed', { err });
-    await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.FAILED);
-    return;
+    helpers.logger.info('Bulk upload has failed', { err });
+    bulkUploadHasFailed = true;
   }
+
   try {
     await bulkUploadFile.cleanup();
   } catch (err) {
@@ -386,5 +409,30 @@ export const processBulkUpload = async (
       { err },
     );
   }
-  await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.COMPLETED);
+
+  try {
+    const copySource = `${S3_BUCKET}/${bulkUpload.sourceKey}`;
+    const copyDestination = getProcessedKey(bulkUpload.sourceKey);
+    await s3Client.copyObject({
+      Bucket: S3_BUCKET,
+      CopySource: copySource,
+      Key: copyDestination,
+    });
+    await s3Client.deleteObject({
+      Bucket: S3_BUCKET,
+      Key: bulkUpload.sourceKey,
+    });
+    await updateBulkUploadSourceKey(bulkUpload.id, copyDestination);
+  } catch (err) {
+    helpers.logger.warn(
+      `Moving the bulk upload file to final processed destination failed (${bulkUploadFile.path})`,
+      { err },
+    );
+  }
+
+  if (bulkUploadHasFailed) {
+    await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.FAILED);
+  } else {
+    await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.COMPLETED);
+  }
 };

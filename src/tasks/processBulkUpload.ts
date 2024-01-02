@@ -79,10 +79,10 @@ const downloadS3ObjectToTemporaryStorage = async (
     if (s3Response.Body === undefined) {
       throw new Error('S3 did not return a body');
     }
-  } catch (error) {
+  } catch (err) {
     logger.error(
       'Failed to load an object from S3',
-      { error, key },
+      { err, key },
     );
     await temporaryFile.cleanup();
     throw new Error('Unable to load the s3 object');
@@ -318,6 +318,13 @@ export const processBulkUpload = async (
       bulkUpload.sourceKey,
       helpers.logger,
     );
+  } catch (err) {
+    helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
+    await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.FAILED);
+    return;
+  }
+
+  try {
     await assertBulkUploadCsvIsValid(bulkUploadFile.path);
     const opportunity = await createOpportunityForBulkUpload(bulkUpload);
     const applicationForm = await createApplicationFormForBulkUpload(opportunity.id);

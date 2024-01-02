@@ -124,20 +124,53 @@ const getProposalsByExternalIds = async (externalIds: string[]): Promise<Proposa
 
 describe('processBulkUpload', () => {
   it('should attempt to access the contents of the sourceKey associated with the specified bulk upload', async () => {
-    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = 'unprocessed/550e8400-e29b-41d4-a716-446655440000';
     const bulkUpload = await createTestBulkUpload({ sourceKey });
-    const sourceRequest = await mockS3ReplyWithFile(
+    const requests = await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,
       `${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
     );
-
     await processBulkUpload(
       {
         bulkUploadId: bulkUpload.id,
       },
       getMockJobHelpers(),
     );
-    expect(sourceRequest.isDone()).toEqual(true);
+    expect(requests.getRequest.isDone()).toEqual(true);
+  });
+
+  it('should attempt to copy the contents of the sourceKey associated with the specified bulk upload to a processed location', async () => {
+    await createTestBaseFields();
+    const sourceKey = 'unprocessed/550e8400-e29b-41d4-a716-446655440000';
+    const bulkUpload = await createTestBulkUpload({ sourceKey });
+    const requests = await mockS3ResponsesForBulkUploadProcessing(
+      sourceKey,
+      `${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+    );
+    await processBulkUpload(
+      {
+        bulkUploadId: bulkUpload.id,
+      },
+      getMockJobHelpers(),
+    );
+    expect(requests.copyRequest.isDone()).toEqual(true);
+  });
+
+  it('should attempt to delete the unprocessed file of the sourceKey associated with the specified bulk upload', async () => {
+    await createTestBaseFields();
+    const sourceKey = 'unprocessed/550e8400-e29b-41d4-a716-446655440000';
+    const bulkUpload = await createTestBulkUpload({ sourceKey });
+    const requests = await mockS3ResponsesForBulkUploadProcessing(
+      sourceKey,
+      `${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+    );
+    await processBulkUpload(
+      {
+        bulkUploadId: bulkUpload.id,
+      },
+      getMockJobHelpers(),
+    );
+    expect(requests.deleteRequest.isDone()).toEqual(true);
   });
 
   it('should set the status of the upload to FAILED if the sourceKey is not accessible', async () => {
@@ -149,11 +182,10 @@ describe('processBulkUpload', () => {
       .reply(404);
 
     await processBulkUpload(
-      {
-        bulkUploadId: bulkUpload.id,
-      },
+      { bulkUploadId: bulkUpload.id },
       getMockJobHelpers(),
     );
+
     const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
     expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.FAILED);
     expect(sourceRequest.isDone()).toEqual(true);

@@ -6,6 +6,7 @@ import tmp from 'tmp-promise';
 import {
   s3Client,
   S3_BULK_UPLOADS_KEY_PREFIX,
+  S3_UNPROCESSED_KEY_PREFIX,
 } from '../s3Client';
 import { db } from '../database/db';
 import {
@@ -333,6 +334,16 @@ export const processBulkUpload = async (
   }
   helpers.logger.debug(`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`);
   const bulkUpload = await loadBulkUpload(payload.bulkUploadId);
+  if (bulkUpload.status !== BulkUploadStatus.PENDING) {
+    helpers.logger.warn('Bulk upload cannot be processed because it is not in a PENDING state', { bulkUpload });
+    return;
+  }
+  if (!bulkUpload.sourceKey.startsWith(S3_UNPROCESSED_KEY_PREFIX)) {
+    helpers.logger.info(`Bulk upload cannot be processed because the associated sourceKey does not begin with ${S3_UNPROCESSED_KEY_PREFIX}`, { bulkUpload });
+    await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.FAILED);
+    return;
+  }
+
   let bulkUploadFile: FileResult;
   let bulkUploadHasFailed = false;
   try {

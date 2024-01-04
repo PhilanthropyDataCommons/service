@@ -23,6 +23,7 @@ const {
 );
 
 const TEST_UNPROCESSED_SOURCE_KEY = 'unprocessed/550e8400-e29b-41d4-a716-446655440000';
+const TEST_BULK_UPLOAD_SOURCE_KEY = 'bulk-upload/1';
 
 const getS3Endpoint = async () => {
   if (s3Client.config.endpoint === undefined) {
@@ -209,6 +210,45 @@ describe('processBulkUpload', () => {
     const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
     expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.FAILED);
     expect(sourceRequest.isDone()).toEqual(true);
+  });
+
+  it('should not process, and set the status of the upload to FAILED, if the sourceKey is not in the unprocessed namespace', async () => {
+    const sourceKey = TEST_BULK_UPLOAD_SOURCE_KEY;
+    const bulkUpload = await createTestBulkUpload({ sourceKey });
+    const requests = await mockS3ResponsesForBulkUploadProcessing(
+      bulkUpload,
+      `${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+    );
+
+    await processBulkUpload(
+      { bulkUploadId: bulkUpload.id },
+      getMockJobHelpers(),
+    );
+
+    const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
+    expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.FAILED);
+    expect(requests.getRequest.isDone()).toEqual(false);
+  });
+
+  it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+    const bulkUpload = await createTestBulkUpload({
+      sourceKey,
+      status: BulkUploadStatus.IN_PROGRESS,
+    });
+    const requests = await mockS3ResponsesForBulkUploadProcessing(
+      bulkUpload,
+      `${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+    );
+
+    await processBulkUpload(
+      { bulkUploadId: bulkUpload.id },
+      getMockJobHelpers(),
+    );
+
+    const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
+    expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.IN_PROGRESS);
+    expect(requests.getRequest.isDone()).toEqual(false);
   });
 
   it('should set the status of the upload to FAILED if the csv does not have a proposal_submitter_email field', async () => {

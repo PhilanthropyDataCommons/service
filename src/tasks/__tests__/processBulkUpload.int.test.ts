@@ -23,6 +23,8 @@ const {
   'S3_PATH_STYLE',
 );
 
+const TEST_UNPROCESSED_SOURCE_KEY = 'unprocessed/550e8400-e29b-41d4-a716-446655440000';
+
 const getS3Endpoint = async () => {
   if (s3Client.config.endpoint === undefined) {
     throw new Error('The S3 client is not configured with an endpoint');
@@ -49,7 +51,7 @@ const getS3KeyPath = (key: string) => (
 const createTestBulkUpload = async (overrideValues?: Partial<BulkUpload>): Promise<BulkUpload> => {
   const defaultValues = {
     fileName: 'bar.csv',
-    sourceKey: '550e8400-e29b-41d4-a716-446655440000',
+    sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
     status: BulkUploadStatus.PENDING,
   };
   const bulkUploadsQueryResult = await db.sql<BulkUpload>('bulkUploads.insertOne', {
@@ -144,7 +146,7 @@ const getProposalsByExternalIds = async (externalIds: string[]): Promise<Proposa
 
 describe('processBulkUpload', () => {
   it('should attempt to access the contents of the sourceKey associated with the specified bulk upload', async () => {
-    const sourceKey = 'unprocessed/550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,
@@ -161,7 +163,7 @@ describe('processBulkUpload', () => {
 
   it('should attempt to copy the contents of the sourceKey associated with the specified bulk upload to a processed location', async () => {
     await createTestBaseFields();
-    const sourceKey = 'unprocessed/550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,
@@ -178,7 +180,7 @@ describe('processBulkUpload', () => {
 
   it('should attempt to delete the unprocessed file of the sourceKey associated with the specified bulk upload', async () => {
     await createTestBaseFields();
-    const sourceKey = 'unprocessed/550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,
@@ -194,7 +196,7 @@ describe('processBulkUpload', () => {
   });
 
   it('should set the status of the upload to FAILED if the sourceKey is not accessible', async () => {
-    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const sourceRequest = nock(await getS3Endpoint())
       .get(getS3KeyPath(sourceKey))
@@ -213,7 +215,7 @@ describe('processBulkUpload', () => {
 
   it('should set the status of the upload to FAILED if the csv does not have a proposal_submitter_email field', async () => {
     await createTestBaseFields();
-    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,
@@ -232,7 +234,7 @@ describe('processBulkUpload', () => {
 
   it('should move the csv file to processed location if the csv does not have a proposal_submitter_email field', async () => {
     await createTestBaseFields();
-    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,
@@ -251,7 +253,7 @@ describe('processBulkUpload', () => {
 
   it('should set the status of the upload to FAILED if the csv contains an invalid short code', async () => {
     await createTestBaseFields();
-    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,
@@ -269,7 +271,7 @@ describe('processBulkUpload', () => {
 
   it('should move the csv file to processed location if the csv contains an invalid short code', async () => {
     await createTestBaseFields();
-    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,
@@ -287,7 +289,7 @@ describe('processBulkUpload', () => {
 
   it('should set the status of the upload to FAILED if the csv is empty', async () => {
     await createTestBaseFields();
-    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,
@@ -306,7 +308,7 @@ describe('processBulkUpload', () => {
 
   it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
     await createTestBaseFields();
-    const sourceKey = '550e8400-e29b-41d4-a716-446655440000';
+    const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
       sourceKey,

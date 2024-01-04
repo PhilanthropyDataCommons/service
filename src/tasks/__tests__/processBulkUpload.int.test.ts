@@ -1,4 +1,3 @@
-import path from 'path';
 import nock from 'nock';
 import { requireEnv } from 'require-env-variable';
 import {
@@ -105,18 +104,17 @@ const mockS3DeleteObjectReply = async (sourceKey: string) => nock(await getS3End
   .reply(204);
 
 const mockS3ResponsesForBulkUploadProcessing = async (
-  sourceKey: string,
+  bulkUpload: BulkUpload,
   bulkUploadFilePath: string,
 ) => {
-  const keyBasename = path.basename(sourceKey);
   const getRequest = await mockS3GetObjectReplyWithFile(
-    sourceKey,
+    bulkUpload.sourceKey,
     bulkUploadFilePath,
   );
   const copyRequest = await mockS3CopyObjectReply(
-    `bulk-uploads/${keyBasename}`,
+    `bulk-uploads/${bulkUpload.id}`,
   );
-  const deleteRequest = await mockS3DeleteObjectReply(sourceKey);
+  const deleteRequest = await mockS3DeleteObjectReply(bulkUpload.sourceKey);
   return {
     getRequest,
     copyRequest,
@@ -149,7 +147,7 @@ describe('processBulkUpload', () => {
     const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
-      sourceKey,
+      bulkUpload,
       `${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
     );
     await processBulkUpload(
@@ -166,7 +164,7 @@ describe('processBulkUpload', () => {
     const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
-      sourceKey,
+      bulkUpload,
       `${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
     );
     await processBulkUpload(
@@ -183,7 +181,7 @@ describe('processBulkUpload', () => {
     const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
-      sourceKey,
+      bulkUpload,
       `${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
     );
     await processBulkUpload(
@@ -218,7 +216,7 @@ describe('processBulkUpload', () => {
     const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     await mockS3ResponsesForBulkUploadProcessing(
-      sourceKey,
+      bulkUpload,
       `${__dirname}/fixtures/processBulkUpload/missingEmail.csv`,
     );
 
@@ -237,7 +235,7 @@ describe('processBulkUpload', () => {
     const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
-      sourceKey,
+      bulkUpload,
       `${__dirname}/fixtures/processBulkUpload/missingEmail.csv`,
     );
 
@@ -256,7 +254,7 @@ describe('processBulkUpload', () => {
     const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     await mockS3ResponsesForBulkUploadProcessing(
-      sourceKey,
+      bulkUpload,
       `${__dirname}/fixtures/processBulkUpload/invalidShortCode.csv`,
     );
     await processBulkUpload(
@@ -274,7 +272,7 @@ describe('processBulkUpload', () => {
     const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
-      sourceKey,
+      bulkUpload,
       `${__dirname}/fixtures/processBulkUpload/invalidShortCode.csv`,
     );
     await processBulkUpload(
@@ -292,7 +290,7 @@ describe('processBulkUpload', () => {
     const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     await mockS3ResponsesForBulkUploadProcessing(
-      sourceKey,
+      bulkUpload,
       `${__dirname}/fixtures/processBulkUpload/empty.csv`,
     );
 
@@ -311,7 +309,7 @@ describe('processBulkUpload', () => {
     const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
     const bulkUpload = await createTestBulkUpload({ sourceKey });
     const requests = await mockS3ResponsesForBulkUploadProcessing(
-      sourceKey,
+      bulkUpload,
       `${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
     );
 

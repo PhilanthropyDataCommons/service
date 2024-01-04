@@ -1,4 +1,3 @@
-import path from 'path';
 import fs from 'fs';
 import { finished } from 'stream/promises';
 import { parse } from 'csv-parse';
@@ -318,9 +317,10 @@ const createProposalFieldValueForBulkUploadCsvRecord = async (
   return proposalFieldValue;
 };
 
-const getProcessedKey = (unprocessedKey: string): string => (
-  `${S3_BULK_UPLOADS_KEY_PREFIX}/${path.basename(unprocessedKey)}`
-
+const getProcessedKey = (
+  bulkUpload: BulkUpload,
+): string => (
+  `${S3_BULK_UPLOADS_KEY_PREFIX}/${bulkUpload.id}`
 );
 
 export const processBulkUpload = async (
@@ -412,7 +412,7 @@ export const processBulkUpload = async (
 
   try {
     const copySource = `${S3_BUCKET}/${bulkUpload.sourceKey}`;
-    const copyDestination = getProcessedKey(bulkUpload.sourceKey);
+    const copyDestination = getProcessedKey(bulkUpload);
     await s3Client.copyObject({
       Bucket: S3_BUCKET,
       CopySource: copySource,

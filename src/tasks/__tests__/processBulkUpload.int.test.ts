@@ -429,7 +429,6 @@ describe('processBulkUpload', () => {
       },
       {
         applicationFormFieldId: 2,
-        id: 2,
         position: 1,
         proposalVersionId: firstProposalVersion.id,
         value: 'Foo LLC.',

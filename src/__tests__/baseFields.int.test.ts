@@ -26,7 +26,6 @@ describe('/baseFields', () => {
     it('returns an empty array when no data is present', async () => {
       await agent
         .get('/baseFields')
-        .set(authHeader)
         .expect(200, []);
     });
 
@@ -45,7 +44,6 @@ describe('/baseFields', () => {
       });
       const result = await agent
         .get('/baseFields')
-        .set(authHeader)
         .expect(200);
       expect(result.body).toMatchObject([
         {
@@ -74,7 +72,6 @@ describe('/baseFields', () => {
         });
       const result = await agent
         .get('/baseFields')
-        .set(authHeader)
         .expect(500);
       expect(result.body).toMatchObject({
         name: 'UnknownError',
@@ -97,7 +94,6 @@ describe('/baseFields', () => {
         });
       const result = await agent
         .get('/baseFields')
-        .set(authHeader)
         .expect(503);
       expect(result.body).toMatchObject({
         name: 'DatabaseError',

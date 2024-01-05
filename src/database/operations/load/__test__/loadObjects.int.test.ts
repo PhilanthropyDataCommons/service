@@ -2,9 +2,9 @@ import { loadObjects } from '..';
 import {
   isApplicant,
   isProposal,
-} from '../../../types';
-import { InternalValidationError } from '../../../errors';
-import { db } from '../..';
+} from '../../../../types';
+import { InternalValidationError } from '../../../../errors';
+import { db } from '../../..';
 
 describe('loadObjects', () => {
   it('Should return objects provided by the database', async () => {

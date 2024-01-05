@@ -1,7 +1,7 @@
 import {
   loadTableMetrics,
 } from '..';
-import { db } from '../..';
+import { db } from '../../..';
 import type { Result } from 'tinypg';
 
 describe('loadTableMetrics', () => {

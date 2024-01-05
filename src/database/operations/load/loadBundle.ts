@@ -4,7 +4,7 @@ import type { TinyPgParams } from 'tinypg';
 import type { ValidateFunction } from 'ajv';
 import type {
   Bundle,
-} from '../../types';
+} from '../../../types';
 
 export const loadBundle = async <T extends object>(
   tinyPgQueryName: string,

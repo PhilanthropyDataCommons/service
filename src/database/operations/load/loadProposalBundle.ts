@@ -1,10 +1,10 @@
-import { isProposal } from '../../types';
+import { isProposal } from '../../../types';
 import { loadBundle } from './loadBundle';
 import type { TinyPgParams } from 'tinypg';
 import type {
   Bundle,
   Proposal,
-} from '../../types';
+} from '../../../types';
 
 export const loadProposalBundle = async (
   queryParameters: TinyPgParams,

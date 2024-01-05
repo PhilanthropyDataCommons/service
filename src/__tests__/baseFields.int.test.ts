@@ -3,6 +3,7 @@ import { TinyPgError } from 'tinypg';
 import { app } from '../app';
 import {
   db,
+  loadBaseFields,
   loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
@@ -12,6 +13,13 @@ import { mockJwt as authHeader } from '../test/mockJwt';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
+
+const createTestBaseField = async () => db.sql('baseFields.insertOne', {
+  label: 'Summary',
+  description: 'A summary of the proposal',
+  shortCode: 'summary',
+  dataType: 'string',
+});
 
 describe('/baseFields', () => {
   describe('GET /', () => {
@@ -238,6 +246,168 @@ describe('/baseFields', () => {
         name: 'UnknownError',
         details: expect.any(Array) as unknown[],
       });
+    });
+  });
+
+  describe('PUT /', () => {
+    it('updates the specified base field', async () => {
+      // Not using the helper here because observing a change in values is explicitly
+      // the point of the test, so having full explicit control of the original value
+      // seems important.  Some day when we add better test tooling we can have it all.
+      await db.sql('baseFields.insertOne', {
+        label: 'Summary',
+        description: 'A summary of the proposal',
+        shortCode: 'summary',
+        dataType: 'string',
+      });
+      await agent
+        .put('/baseFields/1')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          label: '🏷️',
+          description: '😍',
+          shortCode: '🩳',
+          dataType: '📊',
+        })
+        .expect(200);
+      const baseFields = await loadBaseFields();
+      expect(baseFields[0]).toMatchObject({
+        id: 1,
+        label: '🏷️',
+        description: '😍',
+        shortCode: '🩳',
+        dataType: '📊',
+        createdAt: expect.any(Date) as Date,
+      });
+    });
+
+    it('returns the updated base field', async () => {
+      await createTestBaseField();
+      const result = await agent
+        .put('/baseFields/1')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          label: '🏷️',
+          description: '😍',
+          shortCode: '🩳',
+          dataType: '📊',
+        })
+        .expect(200);
+      expect(result.body).toMatchObject({
+        id: 1,
+        label: '🏷️',
+        description: '😍',
+        shortCode: '🩳',
+        dataType: '📊',
+        createdAt: expectTimestamp,
+      });
+    });
+
+    it('returns 400 bad request when no label is sent', async () => {
+      await createTestBaseField();
+
+      const result = await agent
+        .put('/baseFields/1')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          shortCode: '🩳',
+          description: '😍',
+          dataType: '📊',
+        })
+        .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 400 bad request when no description is sent', async () => {
+      await createTestBaseField();
+      const result = await agent
+        .put('/baseFields/1')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          label: '🏷️',
+          shortCode: '🩳',
+          dataType: '📊',
+        })
+        .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 400 bad request when no shortCode is sent', async () => {
+      await createTestBaseField();
+      const result = await agent
+        .put('/baseFields/1')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          label: '🏷️',
+          description: '😍',
+          dataType: '📊',
+        })
+        .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 400 bad request when no dataType is sent', async () => {
+      await createTestBaseField();
+      const result = await agent
+        .put('/baseFields/1')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          label: '🏷️',
+          description: '😍',
+          shortCode: '🩳',
+        })
+        .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 400 when a non-numeric ID is sent', async () => {
+      const result = await agent
+        .put('/baseFields/notanumber')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          label: '🏷️',
+          description: '😍',
+          shortCode: 'firstName',
+          dataType: '📊',
+        })
+        .expect(400);
+      expect(result.body).toMatchObject({
+        name: 'InputValidationError',
+        details: expect.any(Array) as unknown[],
+      });
+    });
+
+    it('returns 404 when attempting to update a non-existent record', async () => {
+      await agent
+        .put('/baseFields/1')
+        .type('application/json')
+        .set(authHeader)
+        .send({
+          label: '🏷️',
+          description: '😍',
+          shortCode: '🩳',
+          dataType: '📊',
+        })
+        .expect(404);
     });
   });
 });

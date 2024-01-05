@@ -6,5 +6,6 @@ const baseFieldsRouter = express.Router();
 
 baseFieldsRouter.get('/', verifyAuth, baseFieldsHandlers.getBaseFields);
 baseFieldsRouter.post('/', verifyAuth, baseFieldsHandlers.postBaseField);
+baseFieldsRouter.put('/:id', verifyAuth, baseFieldsHandlers.putBaseField);
 
 export { baseFieldsRouter };

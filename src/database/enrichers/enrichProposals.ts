@@ -1,4 +1,4 @@
-import { loadObjects } from '../accessors/loadObjects';
+import { loadObjects } from '../operations/load/loadObjects';
 import { isProposalVersion } from '../../types';
 import { enrichProposalVersions } from './enrichProposalVersions';
 import type { Proposal } from '../../types';

@@ -1272,6 +1272,65 @@
         }
       }
     },
+    "/baseFields/{baseFieldId}": {
+      "put": {
+        "summary": "Update a base field.",
+        "tags": [
+          "Base Fields"
+        ],
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "baseFieldId",
+            "description": "The PDC-generated ID of a base field.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BaseField"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated base field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseField"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication was not provided or was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The base field could not be found."
+          }
+        }
+      }
+    },
     "/opportunities": {
       "get": {
         "summary": "Get a list of opportunities.",

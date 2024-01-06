@@ -156,3 +156,13 @@ We aim to use the "Active LTS" version of node, currently 18. An exact version o
 ### EditorConfig
 
 We use [EditorConfig](https://editorconfig.org/) to help developers maintain proper whitespace habits in the project. Most IDEs have [an official EditorConfig plugin](https://editorconfig.org/#download) you can install.
+
+### Ignored revisions
+
+We have set up a file to track commits that are focused on formatting changes. It is possible to [ignore these commits when running git blame](https://akrabat.com/ignoring-revisions-with-git-blame/).
+
+You can configure your local git to always ignore these commits by invoking:
+
+```
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```

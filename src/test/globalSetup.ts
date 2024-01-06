@@ -15,8 +15,10 @@ dotenv.config({ path: '.env.test' });
 dotenv.config();
 
 export default (globalConfig: Config, projectConfig: Config): void => {
-  if ((process.env.LOG_LEVEL === undefined || process.env.LOG_LEVEL === '')
-      && (globalConfig.silent === true || projectConfig.silent === true)) {
-    process.env.LOG_LEVEL = 'silent';
-  }
+	if (
+		(process.env.LOG_LEVEL === undefined || process.env.LOG_LEVEL === '') &&
+		(globalConfig.silent === true || projectConfig.silent === true)
+	) {
+		process.env.LOG_LEVEL = 'silent';
+	}
 };

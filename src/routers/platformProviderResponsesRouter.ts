@@ -5,14 +5,14 @@ import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
 const platformProviderResponsesRouter = express.Router();
 
 platformProviderResponsesRouter.get(
-  '/',
-  verifyAuth,
-  platformProviderResponsesHandlers.getPlatformProviderResponsesByExternalId,
+	'/',
+	verifyAuth,
+	platformProviderResponsesHandlers.getPlatformProviderResponsesByExternalId,
 );
 platformProviderResponsesRouter.post(
-  '/',
-  verifyAuth,
-  platformProviderResponsesHandlers.postPlatformProviderResponse,
+	'/',
+	verifyAuth,
+	platformProviderResponsesHandlers.postPlatformProviderResponse,
 );
 
 export { platformProviderResponsesRouter };

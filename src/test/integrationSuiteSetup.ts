@@ -5,8 +5,8 @@ import nock from 'nock';
  */
 import { db } from '../database';
 import {
-  prepareDatabaseForCurrentWorker,
-  cleanupDatabaseForCurrentWorker,
+	prepareDatabaseForCurrentWorker,
+	cleanupDatabaseForCurrentWorker,
 } from './harnessFunctions';
 import { mockJwks } from './mockJwt';
 
@@ -22,17 +22,17 @@ import { mockJwks } from './mockJwt';
 jest.mock('graphile-worker');
 
 afterAll(async () => {
-  await db.close();
+	await db.close();
 });
 
 beforeEach(async () => {
-  mockJwks.start();
-  await prepareDatabaseForCurrentWorker();
+	mockJwks.start();
+	await prepareDatabaseForCurrentWorker();
 });
 
 afterEach(async () => {
-  await cleanupDatabaseForCurrentWorker();
-  jest.restoreAllMocks();
-  mockJwks.stop();
-  nock.cleanAll();
+	await cleanupDatabaseForCurrentWorker();
+	jest.restoreAllMocks();
+	mockJwks.stop();
+	nock.cleanAll();
 });

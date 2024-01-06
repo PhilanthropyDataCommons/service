@@ -1,28 +1,26 @@
 import { isPaginationParameters } from '../../types';
 import { InternalValidationError } from '../../errors';
-import type {
-  PaginationParameters,
-} from '../../types';
+import type { PaginationParameters } from '../../types';
 
 interface LimitValues {
-  limit: number;
-  offset: number;
+	limit: number;
+	offset: number;
 }
 
 export const getLimitValues = (
-  paginationParameters: PaginationParameters,
+	paginationParameters: PaginationParameters,
 ): LimitValues => {
-  if (!isPaginationParameters(paginationParameters)) {
-    throw new InternalValidationError(
-      'Invalid pagination parameters',
-      isPaginationParameters.errors ?? [],
-    );
-  }
-  const zeroIndexedPage = paginationParameters.page - 1;
-  const limit = paginationParameters.count;
-  const offset = paginationParameters.count * zeroIndexedPage;
-  return {
-    limit,
-    offset,
-  };
+	if (!isPaginationParameters(paginationParameters)) {
+		throw new InternalValidationError(
+			'Invalid pagination parameters',
+			isPaginationParameters.errors ?? [],
+		);
+	}
+	const zeroIndexedPage = paginationParameters.page - 1;
+	const limit = paginationParameters.count;
+	const offset = paginationParameters.count * zeroIndexedPage;
+	return {
+		limit,
+		offset,
+	};
 };

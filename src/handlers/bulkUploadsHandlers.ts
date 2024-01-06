@@ -1,4 +1,7 @@
 import {
+  S3_UNPROCESSED_KEY_PREFIX,
+} from '../s3Client';
+import {
   db,
   getLimitValues,
   loadBulkUploadBundle,
@@ -41,9 +44,9 @@ const createBulkUpload = (
     return;
   }
 
-  if (!body.sourceKey.startsWith('unprocessed/')) {
+  if (!body.sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
     next(new InputValidationError(
-      'sourceKey must be unprocessed, and begin with `unprocessed/`.',
+      `sourceKey must be unprocessed, and begin with '${S3_UNPROCESSED_KEY_PREFIX}/'.`,
       [],
     ));
     return;

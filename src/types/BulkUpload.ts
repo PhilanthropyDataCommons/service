@@ -43,10 +43,7 @@ export const bulkUploadSchema: JSONSchemaType<BulkUpload> = {
 
 export const isBulkUpload = ajv.compile(bulkUploadSchema);
 
-// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
-/* eslint-disable @typescript-eslint/indent */
 export type BulkUploadCreate = Omit<BulkUpload, 'createdAt' | 'status' | 'id'>;
-/* eslint-enable @typescript-eslint/indent */
 
 export const bulkUploadCreateSchema: JSONSchemaType<BulkUploadCreate> = {
 	type: 'object',

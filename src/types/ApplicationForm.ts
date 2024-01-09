@@ -17,13 +17,10 @@ export interface ApplicationForm {
 	readonly createdAt: Date;
 }
 
-// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
-/* eslint-disable @typescript-eslint/indent */
 export type ApplicationFormWrite = Omit<
 	ApplicationForm,
 	'createdAt' | 'fields' | 'id' | 'version'
 > & { fields: ApplicationFormFieldWrite[] };
-/* eslint-enable @typescript-eslint/indent */
 
 export const applicationFormSchema: JSONSchemaType<ApplicationForm> = {
 	type: 'object',

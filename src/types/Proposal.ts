@@ -12,10 +12,7 @@ export interface Proposal {
 	createdAt: Date;
 }
 
-// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
-/* eslint-disable @typescript-eslint/indent */
 export type ProposalWrite = Omit<Proposal, 'createdAt' | 'id' | 'versions'>;
-/* eslint-enable @typescript-eslint/indent */
 
 export const proposalSchema: JSONSchemaType<Proposal> = {
 	type: 'object',

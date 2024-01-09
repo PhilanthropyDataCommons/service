@@ -18,13 +18,10 @@ export interface ProposalVersion {
 	createdAt: Date;
 }
 
-// See https://github.com/typescript-eslint/typescript-eslint/issues/1824
-/* eslint-disable @typescript-eslint/indent */
 export type ProposalVersionWrite = Omit<
 	ProposalVersion,
 	'createdAt' | 'fieldValues' | 'id' | 'version'
 > & { fieldValues: ProposalFieldValueWrite[] };
-/* eslint-enable @typescript-eslint/indent */
 
 export const proposalVersionSchema: JSONSchemaType<ProposalVersion> = {
 	type: 'object',

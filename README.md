@@ -7,21 +7,21 @@
 
 This is the data-handling service layer for the [Philanthropy Data Commons](https://philanthropydatacommons.org) (PDC).
 
-The PDC is an access-controlled environment in which changemakers and funders can share funding proposals, both for improved efficiency (e.g., offering a "common grant application" in specific domains) and for opening up new possibilities in partnering and alliance-building.  The PDC is designed to enable cross-organizational data sharing while allowing organizations to maintain their own systems, practices, and data standards.
+The PDC is an access-controlled environment in which changemakers and funders can share funding proposals, both for improved efficiency (e.g., offering a "common grant application" in specific domains) and for opening up new possibilities in partnering and alliance-building. The PDC is designed to enable cross-organizational data sharing while allowing organizations to maintain their own systems, practices, and data standards.
 
-To do this, the PDC maintains a **mapping** between various organizations' data fields and the PDC's internal data representation.  For example, if one organization uses `Proposal Name` and another uses `Title of Proposal`, both of those might map to the PDC field `ProposalTitle`.  The PDC remembers this mapping, translating back and forth as needed so that data flow in and out seamlessly, a unified search interface can be offered, etc.
+To do this, the PDC maintains a **mapping** between various organizations' data fields and the PDC's internal data representation. For example, if one organization uses `Proposal Name` and another uses `Title of Proposal`, both of those might map to the PDC field `ProposalTitle`. The PDC remembers this mapping, translating back and forth as needed so that data flow in and out seamlessly, a unified search interface can be offered, etc.
 
 With the above overview in mind, we can now summarize what this service layer does:
 
-* Store **opportunities** (analogous to RFPs / CFPs) and the **fields** (which hold applicants' responses) associated with those opportunities.
-* Store **proposals** -- the actual responses to opportunities, with long-term consistency provided via the above-described mapping.
-* **Authenticate** users and provide **access control**, so that a given organization's data is only shared with whom that organization has authorized.
-* Provide a **programmatic interface** (an [API](https://en.wikipedia.org/wiki/API)) by which authorized users (both changemakers and funders) can **browse**,  **search**, and, where appropriate, **update** opportunities and proposals, subject to the access controls defined by data owners.
-* Track the **provenance** and **update history** of all information, noticing and handling discrepancies.  For example, if two different [GMS](https://en.wikipedia.org/wiki/Grant_management_software) tools connect to the PDC and provide conflicting information about an application or an applicant, the PDC may be able to pick the right answer automatically (based on a up-to-date date or on some other precedence rule), or it may flag the conflict and require a human to resolve it.
+- Store **opportunities** (analogous to RFPs / CFPs) and the **fields** (which hold applicants' responses) associated with those opportunities.
+- Store **proposals** -- the actual responses to opportunities, with long-term consistency provided via the above-described mapping.
+- **Authenticate** users and provide **access control**, so that a given organization's data is only shared with whom that organization has authorized.
+- Provide a **programmatic interface** (an [API](https://en.wikipedia.org/wiki/API)) by which authorized users (both changemakers and funders) can **browse**, **search**, and, where appropriate, **update** opportunities and proposals, subject to the access controls defined by data owners.
+- Track the **provenance** and **update history** of all information, noticing and handling discrepancies. For example, if two different [GMS](https://en.wikipedia.org/wiki/Grant_management_software) tools connect to the PDC and provide conflicting information about an application or an applicant, the PDC may be able to pick the right answer automatically (based on a up-to-date date or on some other precedence rule), or it may flag the conflict and require a human to resolve it.
 
-Of all these features, the API is probably the most important, because it is the heart of the PDC's interoperability.  It enables GMSs and other systems to connect to the PDC to give and receive information about opportunities and proposals.  For example, it can enable a second funder to discover a proposal that a changemaker had proposed to some other potential funder originally; it even provides ways for the originally considered funder to deliberately share (assuming the changemaker authorizes) a good proposal with a specific funder that might be more appropriate for it.
+Of all these features, the API is probably the most important, because it is the heart of the PDC's interoperability. It enables GMSs and other systems to connect to the PDC to give and receive information about opportunities and proposals. For example, it can enable a second funder to discover a proposal that a changemaker had proposed to some other potential funder originally; it even provides ways for the originally considered funder to deliberately share (assuming the changemaker authorizes) a good proposal with a specific funder that might be more appropriate for it.
 
-While the PDC service layer will have its own web-browser-based searching and browsing interface, the API (and its associated [data schema](docs/ENTITY_RELATIONSHIP_DIAGRAM.md)) are where interoperability lives, and our top priority is documenting that API and helping people to use it.  Through the API, other systems, including but not limited to GMS tools, can connect to the PDC and use PDC data to supplement what they provide.
+While the PDC service layer will have its own web-browser-based searching and browsing interface, the API (and its associated [data schema](docs/ENTITY_RELATIONSHIP_DIAGRAM.md)) are where interoperability lives, and our top priority is documenting that API and helping people to use it. Through the API, other systems, including but not limited to GMS tools, can connect to the PDC and use PDC data to supplement what they provide.
 
 See also the [technical architecture diagram](docs/ARCHITECTURE.md).
 
@@ -33,29 +33,29 @@ In order to run this software you need to set up a [Postgres 14](https://www.pos
 
 1. Install npm dependencies
 
-  ```bash
-  npm ci
-  ```
+```bash
+npm ci
+```
 
 2. Set up environment variables
 
-  ```bash
-  cp .env.example .env
-  edit .env
-  ```
+```bash
+cp .env.example .env
+edit .env
+```
 
 3. Set up test environment variables
 
-  ```bash
-  cp .env.example .env.test
-  edit .env.test
-  ```
+```bash
+cp .env.example .env.test
+edit .env.test
+```
 
 4. Run migrations
 
-  ```bash
-  npm run migrate:dev
-  ```
+```bash
+npm run migrate:dev
+```
 
 ### Common Commands
 
@@ -155,5 +155,14 @@ We aim to use the "Active LTS" version of node, currently 18. An exact version o
 
 ### EditorConfig
 
-We use [EditorConfig](https://editorconfig.org/) to help developers maintain proper whitespace habits in the project.  Most IDEs have [an official EditorConfig plugin](https://editorconfig.org/#download) you can install.
+We use [EditorConfig](https://editorconfig.org/) to help developers maintain proper whitespace habits in the project. Most IDEs have [an official EditorConfig plugin](https://editorconfig.org/#download) you can install.
 
+### Ignored revisions
+
+We have set up a file to track commits that are focused on formatting changes. It is possible to [ignore these commits when running git blame](https://akrabat.com/ignoring-revisions-with-git-blame/).
+
+You can configure your local git to always ignore these commits by invoking:
+
+```
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```

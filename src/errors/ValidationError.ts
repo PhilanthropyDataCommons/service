@@ -3,14 +3,11 @@
 import type { ErrorObject } from 'ajv';
 
 export class ValidationError extends Error {
-  public errors: ErrorObject[];
+	public errors: ErrorObject[];
 
-  public constructor(
-    message: string,
-    errors: ErrorObject[],
-  ) {
-    super(message);
-    this.name = this.constructor.name;
-    this.errors = errors;
-  }
+	public constructor(message: string, errors: ErrorObject[]) {
+		super(message);
+		this.name = this.constructor.name;
+		this.errors = errors;
+	}
 }

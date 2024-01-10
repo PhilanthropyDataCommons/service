@@ -50,5 +50,5 @@ jobs:
           ref: main
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repo: PhilanthropyDataCommons/deploy
-          inputs: "{\"image-tag\":\"${{ env.VERSION }}\"}"
+          inputs: '{"image-tag":"${{ env.VERSION }}"}'
           wait: true

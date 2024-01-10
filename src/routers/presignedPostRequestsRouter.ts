@@ -4,6 +4,10 @@ import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
 
 const presignedPostRequestsRouter = express.Router();
 
-presignedPostRequestsRouter.post('/', verifyAuth, presignedPostRequestsHandlers.createPresignedPostRequest);
+presignedPostRequestsRouter.post(
+	'/',
+	verifyAuth,
+	presignedPostRequestsHandlers.createPresignedPostRequest,
+);
 
 export { presignedPostRequestsRouter };

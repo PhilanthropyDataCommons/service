@@ -10,14 +10,10 @@ const logger = getLogger(__filename);
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? 'localhost';
 
-app.listen(
-  port,
-  host,
-  () => {
-    logger.info(`Server running on http://${host}:${port}`);
-  },
-);
+app.listen(port, host, () => {
+	logger.info(`Server running on http://${host}:${port}`);
+});
 
 startJobQueue().catch((err) => {
-  logger.error(err, 'Job queue failed to start');
+	logger.error(err, 'Job queue failed to start');
 });

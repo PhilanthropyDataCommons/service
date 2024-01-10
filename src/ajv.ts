@@ -2,6 +2,6 @@ import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 
 export const ajv = new Ajv({
-  coerceTypes: true,
+	coerceTypes: true,
 });
 ajvKeywords(ajv, 'instanceof');

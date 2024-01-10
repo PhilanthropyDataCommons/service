@@ -1,12 +1,9 @@
-
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
-  "compilerOptions": {
-    "noEmit": true,
-    "resolveJsonModule": true,
-    "noUncheckedIndexedAccess": true,
-  },
-  "include": [
-    "src"
-  ]
+	"extends": "@tsconfig/node18/tsconfig.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"resolveJsonModule": true,
+		"noUncheckedIndexedAccess": true
+	},
+	"include": ["src"]
 }

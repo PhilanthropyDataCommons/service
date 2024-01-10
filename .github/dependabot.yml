@@ -1,30 +1,30 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "daily"
+      interval: 'daily'
     open-pull-requests-limit: 10
     ignore:
-      - dependency-name: "mock-jwks"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "@types/node"
-        update-types: ["version-update:semver-major"]
+      - dependency-name: 'mock-jwks'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       aws-sdk:
         patterns:
-        - "@aws-sdk/*"
+          - '@aws-sdk/*'
       eslint:
         patterns:
-        - "*eslint*"
+          - '*eslint*'
 
-  - package-ecosystem: "docker"
-    directory: "/"
+  - package-ecosystem: 'docker'
+    directory: '/'
     schedule:
-      interval: "daily"
+      interval: 'daily'
     open-pull-requests-limit: 2
 
-  - package-ecosystem: "github-actions"
-    directory: ".github/workflows"
+  - package-ecosystem: 'github-actions'
+    directory: '.github/workflows'
     schedule:
-      interval: "daily"
+      interval: 'daily'

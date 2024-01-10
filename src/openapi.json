@@ -1,1534 +1,1443 @@
 {
-  "openapi": "3.0.3",
-  "info": {
-    "title": "Philanthropy Data Commons API",
-    "description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-    "version": "0.3.0"
-  },
-  "components": {
-    "parameters": {
-      "pageParam": {
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "default": 1
-        },
-        "in": "query",
-        "name": "_page",
-        "required": false,
-        "description": "The page number being retrieved."
-      },
-      "countParam": {
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "default": 100
-        },
-        "in": "query",
-        "name": "_count",
-        "required": false,
-        "description": "The maximum number of items that should appear per page or request."
-      },
-      "searchParam": {
-        "schema": {
-          "type": "string",
-          "default": ""
-        },
-        "in": "query",
-        "name": "_content",
-        "required": false,
-        "description": "A web-search formatted string to select specific entities returned."
-      }
-    },
-    "securitySchemes": {
-      "auth": {
-        "type": "oauth2",
-        "description":  "The OAuth 2.0 (and OpenID Connect) Authorization Code flow.",
-        "flows": {
-          "authorizationCode": {
-            "authorizationUrl": "https://example.com/protocol/openid-connect/auth",
-            "tokenUrl": "https://example.com/protocol/openid-connect/token",
-            "refreshUrl": "https://example.com/protocol/openid-connect/token",
-            "scopes": {
-              "openid": "Use OpenID Connect (recommended).",
-              "roles": "Read your roles (recommended).",
-              "profile": "Read your profile (recommended)."
-            }
-          }
-        }
-      }
-    },
-    "schemas": {
-      "Applicant": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3407
-          },
-          "externalId": {
-            "type": "string",
-            "example": "111-11-1111"
-          },
-          "optedIn": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "id",
-          "externalId",
-          "optedIn",
-          "createdAt"
-        ]
-      },
-      "BulkUpload": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3407
-          },
-          "fileName": {
-            "type": "string",
-            "example": "upload.csv",
-            "pattern": "^.+\\.csv$"
-          },
-          "sourceKey": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000",
-            "minLength": 1
-          },
-          "status": {
-            "type": "string",
-            "readOnly": true,
-            "enum": [
-              "pending",
-              "in_progress",
-              "completed",
-              "failed",
-              "canceled"
-            ]
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "id",
-          "fileName",
-          "sourceKey",
-          "createdAt"
-        ]
-      },
-      "PresignedPostRequest": {
-        "type": "object",
-        "properties": {
-          "fileType": {
-            "type": "string",
-            "example": "application/octet-stream"
-          },
-          "fileSize": {
-            "type": "integer",
-            "minimum": 0,
-            "example": 512
-          },
-          "presignedPost": {
-            "type": "object",
-            "readOnly": true,
-            "properties": {
-              "url": {
-                "type": "string"
-              },
-              "fields": {
-                "type": "object",
-                "properties": {
-                  "key": {
-                    "type": "string",
-                    "example": "96ddab90-1931-478d-8c02-a1dc80ae01e5"
-                  }
-                },
-                "required": [
-                  "key"
-                ]
-              }
-            },
-            "required": [
-              "url",
-              "fields"
-            ]
-          }
-        },
-        "required": [
-          "fileType",
-          "fileSize",
-          "presignedPost"
-        ]
-      },
-      "Proposal": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3709
-          },
-          "applicantId": {
-            "type": "integer",
-            "example": 3407
-          },
-          "opportunityId": {
-            "type": "integer",
-            "example": 3203
-          },
-          "externalId": {
-            "type": "string",
-            "example": "AnIdGeneratedByAGms"
-          },
-          "versions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProposalVersion"
-            },
-            "readOnly": true,
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "id",
-          "applicantId",
-          "opportunityId",
-          "externalId",
-          "createdAt"
-        ]
-      },
-      "ProposalVersion": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3821
-          },
-          "proposalId": {
-            "type": "integer",
-            "example": 3709
-          },
-          "applicationFormId": {
-            "type": "integer",
-            "example": 3529
-          },
-          "version": {
-            "type": "integer",
-            "example": 17,
-            "readOnly": true
-          },
-          "fieldValues": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProposalFieldValue"
-            },
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "id",
-          "proposalId",
-          "version",
-          "createdAt"
-        ]
-      },
-      "ProposalFieldValue": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3943
-          },
-          "proposalVersionId": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3709
-          },
-          "applicationFormFieldId": {
-            "type": "integer",
-            "example": 3613
-          },
-          "applicationFormField": {
-            "$ref": "#/components/schemas/ApplicationFormField"
-          },
-          "position": {
-            "type": "integer",
-            "example": 23
-          },
-          "value": {
-            "type": "string",
-            "example": "Some arbitrary value"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "id",
-          "proposalVersionId",
-          "applicationFormFieldId",
-          "position",
-          "value",
-          "createdAt"
-        ]
-      },
-      "ApplicationForm": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3529
-          },
-          "opportunityId": {
-            "type": "integer",
-            "example": 3203
-          },
-          "version": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 13
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ApplicationFormField"
-            },
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "id",
-          "opportunityId",
-          "version",
-          "createdAt"
-        ]
-      },
-      "ApplicationFormField": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3613
-          },
-          "applicationFormId": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3529
-          },
-          "baseFieldId": {
-            "type": "integer",
-            "example": 3011
-          },
-          "position": {
-            "type": "integer",
-            "example": 19
-          },
-          "label": {
-            "type": "string",
-            "example": "Your First Name"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "id",
-          "applicationFormId",
-          "baseFieldId",
-          "position",
-          "label",
-          "createdAt"
-        ]
-      },
-      "BaseField": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3011
-          },
-          "label": {
-            "type": "string",
-            "example": "First Name"
-          },
-          "description": {
-            "type": "string",
-            "example": "The first name of the applicant"
-          },
-          "shortCode": {
-            "type": "string",
-            "example": "firstName"
-          },
-          "dataType": {
-            "type": "string",
-            "example": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "id",
-          "label",
-          "shortCode",
-          "dataType",
-          "createdAt"
-        ]
-      },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "details": {
-            "type": "array",
-            "items": {}
-          }
-        }
-      },
-      "Opportunity": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "example": 3203
-          },
-          "title": {
-            "type": "string",
-            "example": "The Open Source Foundation 2022 Challenge"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "createdAt"
-        ]
-      },
-      "PlatformProviderResponse": {
-        "type": "object",
-        "properties": {
-          "externalId": {
-            "type": "string",
-            "example": "000000000"
-          },
-          "platformProvider": {
-            "type": "string",
-            "example": "DataPlatformProviderX"
-          },
-          "data": {
-            "type": "object"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "externalId",
-          "platformProvider",
-          "data",
-          "createdAt"
-        ]
-      },
-      "Bundle": {
-        "type": "object",
-        "properties": {
-          "entries": {
-            "type": "array",
-            "items": {},
-            "description": "The collection of requested resources."
-          },
-          "total": {
-            "type": "integer",
-            "description": "The total number of requested resources that exist in the database, across all pages.",
-            "example": 20
-          }
-        },
-        "required": [
-          "entries",
-          "total"
-        ]
-      },
-      "ProposalBundle": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Bundle"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "entries": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Proposal"
-                }
-              }
-            },
-            "required": [
-              "entries"
-            ]
-          }
-        ]
-      }
-    }
-  },
-  "paths": {
-    "/applicants": {
-      "get": {
-        "summary": "Get a list of applicants.",
-        "tags": [
-          "Applicants"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "All applicants currently registered in the PDC.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Applicant"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Add a new applicant.",
-        "tags": [
-          "Applicants"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Applicant"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The new applicant that was created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Applicant"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/applicants/{externalId}": {
-      "get": {
-        "summary": "Get a specific applicant, including all known field values associated with the applicant. (In Development)",
-        "tags": [
-          "Applicants"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "externalId",
-            "description": "The external identifier of an applicant.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The populated applicant.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Applicant"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/applicationForms": {
-      "get": {
-        "summary": "Get a list of application forms.",
-        "tags": [
-          "Application Forms"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "All application forms currently registered in the PDC.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ApplicationForm"
-                  }
-                },
-                "examples": {
-                  "default": {
-                    "summary": "The default is a shallow response. To get deep objects, request by applicationFormId.",
-                    "value": [
-                      {
-                        "id": 3529,
-                        "opportunityId": 3203,
-                        "version": 13,
-                        "createdAt": "2022-09-13T14:45:06.139Z"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Add a new application form.",
-        "tags": [
-          "Application Forms"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApplicationForm"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The new application form that was created, with populated fields",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApplicationForm"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "There was a unique key or foreign key conflict.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/applicationForms/{applicationFormId}": {
-      "get": {
-        "summary": "Get a specific application form.",
-        "tags": [
-          "Application Forms"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "applicationFormId",
-            "description": "The PDC-generated ID of an application form.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "includeFields",
-            "in": "query",
-            "description": "Include the fields associated with the application form when `true`, otherwise do not include them.",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "All application forms currently registered in the PDC.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ApplicationForm"
-                  }
-                },
-                "examples": {
-                  "default": {
-                    "summary": "The default, shallow response with no parameters or where `includeFields=false`.",
-                    "value": {
-                      "id": 3529,
-                      "opportunityId": 3203,
-                      "version": 13,
-                      "createdAt": "2022-09-13T14:45:06.139Z"
-                    }
-                  },
-                  "includeFields": {
-                    "summary": "The response when `includeFields` is set to `true`.",
-                    "value": {
-                      "id": 3529,
-                      "opportunityId": 3203,
-                      "version": 13,
-                      "createdAt": "2022-09-13T14:45:06.139Z",
-                      "fields": [
-                        {
-                          "id": 3613,
-                          "applicationFormId": 3529,
-                          "baseFieldId": 3011,
-                          "position": 29,
-                          "label": "Your First Name",
-                          "createdAt": "2022-12-12T17:54:24.988Z"
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/bulkUploads": {
-      "get": {
-        "summary": "Get a list of bulk uploads.",
-        "tags": [
-          "Bulk Uploads"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "parameters": [
-          { "$ref": "#/components/parameters/pageParam" },
-          { "$ref": "#/components/parameters/countParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "All bulk uploads currently registered in the PDC.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BulkUpload"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Register a bulk upload.",
-        "tags": [
-          "Bulk Uploads"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkUpload"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The bulk upload",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BulkUpload"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/presignedPostRequests": {
-      "post": {
-        "summary": "Request a presigned post URL.",
-        "tags": [
-          "Presigned Posts"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PresignedPostRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The presigned post request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PresignedPostRequest"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proposals": {
-      "get": {
-        "summary": "Get a list of proposals.",
-        "tags": [
-          "Proposals"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "parameters": [
-          { "$ref": "#/components/parameters/pageParam" },
-          { "$ref": "#/components/parameters/countParam" },
-          { "$ref": "#/components/parameters/searchParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "All proposals currently registered in the PDC.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProposalBundle"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Add a new proposal.",
-        "tags": [
-          "Proposals"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Proposal"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The new proposal that was created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Proposal"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "There was a unique key or foreign key conflict.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proposals/{proposalId}": {
-      "get": {
-        "summary": "Get a specific proposal.",
-        "tags": [
-          "Proposals"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "proposalId",
-            "description": "The PDC-generated ID of a proposal.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "includeFieldsAndValues",
-            "in": "query",
-            "description": "Include the application form fields and the associated proposal values when `true`. This necessarily includes all proposal versions because form fields are related to a particular proposal version.",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The proposal.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Proposal"
-                },
-                "examples": {
-                  "default": {
-                    "summary": "The default, shallow response with no parameters or where `includeFieldsAndValues=false`",
-                    "value": {
-                      "id": 3709,
-                      "applicantId": 3407,
-                      "externalId": "AnIdGeneratedByAGms",
-                      "opportunityId": 3203,
-                      "createdAt": "2022-12-30T15:50:58.839Z"
-                    }
-                  },
-                  "includeFieldsAndValues": {
-                    "summary": "The response when `includeFieldsAndValues` is set to `true`.",
-                    "value": {
-                      "id": 3709,
-                      "applicantId": 3407,
-                      "externalId": "AnIdGeneratedByAGms",
-                      "opportunityId": 3203,
-                      "createdAt": "2022-12-30T15:50:58.839Z",
-                      "versions": [
-                        {
-                          "id": 3821,
-                          "proposalId": 3709,
-                          "applicationFormId": 3529,
-                          "version": 17,
-                          "createdAt": "2023-02-14T09:52:00.000",
-                          "fieldValues": [
-                            {
-                              "id": 3943,
-                              "proposalVersionId": 3821,
-                              "applicationFormFieldId": 3613,
-                              "value": "John",
-                              "position": 23,
-                              "createdAt": "2023-02-14T09:57:00.000Z",
-                              "applicationFormField": {
-                                "id": 3613,
-                                "applicationFormId": 3529,
-                                "baseFieldId": 3011,
-                                "position": 19,
-                                "label": "Your First Name",
-                                "createdAt": "2023-02-14T09:58:00.000Z"
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proposalVersions": {
-      "post": {
-        "summary": "Add a new proposal version.",
-        "tags": [
-          "Proposals"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProposalVersion"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The new proposal version that was created, with populated field values",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProposalVersion"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "There was a foreign key conflict.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/baseFields": {
-      "get": {
-        "summary": "Get a list of base fields.",
-        "tags": [
-          "Base Fields"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "All base fields currently registered in the PDC.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BaseField"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Add a new base field.",
-        "tags": [
-          "Base Fields"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BaseField"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The new base field that was created.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseField"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "There was a unique key conflict.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/baseFields/{baseFieldId}": {
-      "put": {
-        "summary": "Update a base field.",
-        "tags": [
-          "Base Fields"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "baseFieldId",
-            "description": "The PDC-generated ID of a base field.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BaseField"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The updated base field.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseField"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "The base field could not be found."
-          }
-        }
-      }
-    },
-    "/opportunities": {
-      "get": {
-        "summary": "Get a list of opportunities.",
-        "tags": [
-          "Opportunities"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of known funding opportunities.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Opportunity"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Add a new opportunity. (In Development)",
-        "tags": [
-          "Opportunities"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Opportunity"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The new opportunity that was created.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Opportunity"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/opportunities/{opportunityId}": {
-      "get": {
-        "summary": "Get a specific opportunity.",
-        "tags": [
-          "Opportunities"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "opportunityId",
-            "description": "The PDC-generated ID of an opportunity, RFC, potential award or grant, etc.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The funding opportunity.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Opportunity"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/platformProviderResponses": {
-      "get": {
-        "summary": "Get a list of platform provider responses.",
-        "tags": [
-          "Internal Use Only"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "externalId",
-            "description": "The external ID that has been associated with the response.  This ID is arbitrarily formatted, and cannot be predicted without knowledge of specific PDC data.",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of cached platform provider responses.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PlatformProviderResponse"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Add a new platform provider response.",
-        "tags": [
-          "Internal Use Only"
-        ],
-        "security": [
-          {
-            "auth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PlatformProviderResponse"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The new platform provider response that was created.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlatformProviderResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Required fields were not provided or were incorrectly formatted.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication was not provided or was invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+	"openapi": "3.0.3",
+	"info": {
+		"title": "Philanthropy Data Commons API",
+		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
+		"version": "0.3.0"
+	},
+	"components": {
+		"parameters": {
+			"pageParam": {
+				"schema": {
+					"type": "integer",
+					"minimum": 1,
+					"default": 1
+				},
+				"in": "query",
+				"name": "_page",
+				"required": false,
+				"description": "The page number being retrieved."
+			},
+			"countParam": {
+				"schema": {
+					"type": "integer",
+					"minimum": 1,
+					"default": 100
+				},
+				"in": "query",
+				"name": "_count",
+				"required": false,
+				"description": "The maximum number of items that should appear per page or request."
+			},
+			"searchParam": {
+				"schema": {
+					"type": "string",
+					"default": ""
+				},
+				"in": "query",
+				"name": "_content",
+				"required": false,
+				"description": "A web-search formatted string to select specific entities returned."
+			}
+		},
+		"securitySchemes": {
+			"auth": {
+				"type": "oauth2",
+				"description": "The OAuth 2.0 (and OpenID Connect) Authorization Code flow.",
+				"flows": {
+					"authorizationCode": {
+						"authorizationUrl": "https://example.com/protocol/openid-connect/auth",
+						"tokenUrl": "https://example.com/protocol/openid-connect/token",
+						"refreshUrl": "https://example.com/protocol/openid-connect/token",
+						"scopes": {
+							"openid": "Use OpenID Connect (recommended).",
+							"roles": "Read your roles (recommended).",
+							"profile": "Read your profile (recommended)."
+						}
+					}
+				}
+			}
+		},
+		"schemas": {
+			"Applicant": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3407
+					},
+					"externalId": {
+						"type": "string",
+						"example": "111-11-1111"
+					},
+					"optedIn": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "externalId", "optedIn", "createdAt"]
+			},
+			"BulkUpload": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3407
+					},
+					"fileName": {
+						"type": "string",
+						"example": "upload.csv",
+						"pattern": "^.+\\.csv$"
+					},
+					"sourceKey": {
+						"type": "string",
+						"example": "550e8400-e29b-41d4-a716-446655440000",
+						"minLength": 1
+					},
+					"status": {
+						"type": "string",
+						"readOnly": true,
+						"enum": [
+							"pending",
+							"in_progress",
+							"completed",
+							"failed",
+							"canceled"
+						]
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "fileName", "sourceKey", "createdAt"]
+			},
+			"PresignedPostRequest": {
+				"type": "object",
+				"properties": {
+					"fileType": {
+						"type": "string",
+						"example": "application/octet-stream"
+					},
+					"fileSize": {
+						"type": "integer",
+						"minimum": 0,
+						"example": 512
+					},
+					"presignedPost": {
+						"type": "object",
+						"readOnly": true,
+						"properties": {
+							"url": {
+								"type": "string"
+							},
+							"fields": {
+								"type": "object",
+								"properties": {
+									"key": {
+										"type": "string",
+										"example": "96ddab90-1931-478d-8c02-a1dc80ae01e5"
+									}
+								},
+								"required": ["key"]
+							}
+						},
+						"required": ["url", "fields"]
+					}
+				},
+				"required": ["fileType", "fileSize", "presignedPost"]
+			},
+			"Proposal": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3709
+					},
+					"applicantId": {
+						"type": "integer",
+						"example": 3407
+					},
+					"opportunityId": {
+						"type": "integer",
+						"example": 3203
+					},
+					"externalId": {
+						"type": "string",
+						"example": "AnIdGeneratedByAGms"
+					},
+					"versions": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ProposalVersion"
+						},
+						"readOnly": true,
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": [
+					"id",
+					"applicantId",
+					"opportunityId",
+					"externalId",
+					"createdAt"
+				]
+			},
+			"ProposalVersion": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3821
+					},
+					"proposalId": {
+						"type": "integer",
+						"example": 3709
+					},
+					"applicationFormId": {
+						"type": "integer",
+						"example": 3529
+					},
+					"version": {
+						"type": "integer",
+						"example": 17,
+						"readOnly": true
+					},
+					"fieldValues": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ProposalFieldValue"
+						},
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "proposalId", "version", "createdAt"]
+			},
+			"ProposalFieldValue": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3943
+					},
+					"proposalVersionId": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3709
+					},
+					"applicationFormFieldId": {
+						"type": "integer",
+						"example": 3613
+					},
+					"applicationFormField": {
+						"$ref": "#/components/schemas/ApplicationFormField"
+					},
+					"position": {
+						"type": "integer",
+						"example": 23
+					},
+					"value": {
+						"type": "string",
+						"example": "Some arbitrary value"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": [
+					"id",
+					"proposalVersionId",
+					"applicationFormFieldId",
+					"position",
+					"value",
+					"createdAt"
+				]
+			},
+			"ApplicationForm": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3529
+					},
+					"opportunityId": {
+						"type": "integer",
+						"example": 3203
+					},
+					"version": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 13
+					},
+					"fields": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ApplicationFormField"
+						},
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "opportunityId", "version", "createdAt"]
+			},
+			"ApplicationFormField": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3613
+					},
+					"applicationFormId": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3529
+					},
+					"baseFieldId": {
+						"type": "integer",
+						"example": 3011
+					},
+					"position": {
+						"type": "integer",
+						"example": 19
+					},
+					"label": {
+						"type": "string",
+						"example": "Your First Name"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": [
+					"id",
+					"applicationFormId",
+					"baseFieldId",
+					"position",
+					"label",
+					"createdAt"
+				]
+			},
+			"BaseField": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3011
+					},
+					"label": {
+						"type": "string",
+						"example": "First Name"
+					},
+					"description": {
+						"type": "string",
+						"example": "The first name of the applicant"
+					},
+					"shortCode": {
+						"type": "string",
+						"example": "firstName"
+					},
+					"dataType": {
+						"type": "string",
+						"example": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "label", "shortCode", "dataType", "createdAt"]
+			},
+			"Error": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"details": {
+						"type": "array",
+						"items": {}
+					}
+				}
+			},
+			"Opportunity": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3203
+					},
+					"title": {
+						"type": "string",
+						"example": "The Open Source Foundation 2022 Challenge"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "title", "createdAt"]
+			},
+			"PlatformProviderResponse": {
+				"type": "object",
+				"properties": {
+					"externalId": {
+						"type": "string",
+						"example": "000000000"
+					},
+					"platformProvider": {
+						"type": "string",
+						"example": "DataPlatformProviderX"
+					},
+					"data": {
+						"type": "object"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["externalId", "platformProvider", "data", "createdAt"]
+			},
+			"Bundle": {
+				"type": "object",
+				"properties": {
+					"entries": {
+						"type": "array",
+						"items": {},
+						"description": "The collection of requested resources."
+					},
+					"total": {
+						"type": "integer",
+						"description": "The total number of requested resources that exist in the database, across all pages.",
+						"example": 20
+					}
+				},
+				"required": ["entries", "total"]
+			},
+			"ProposalBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/Proposal"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			}
+		}
+	},
+	"paths": {
+		"/applicants": {
+			"get": {
+				"summary": "Get a list of applicants.",
+				"tags": ["Applicants"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "All applicants currently registered in the PDC.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Applicant"
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Add a new applicant.",
+				"tags": ["Applicants"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Applicant"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new applicant that was created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Applicant"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/applicants/{externalId}": {
+			"get": {
+				"summary": "Get a specific applicant, including all known field values associated with the applicant. (In Development)",
+				"tags": ["Applicants"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "externalId",
+						"description": "The external identifier of an applicant.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The populated applicant.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Applicant"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/applicationForms": {
+			"get": {
+				"summary": "Get a list of application forms.",
+				"tags": ["Application Forms"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "All application forms currently registered in the PDC.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ApplicationForm"
+									}
+								},
+								"examples": {
+									"default": {
+										"summary": "The default is a shallow response. To get deep objects, request by applicationFormId.",
+										"value": [
+											{
+												"id": 3529,
+												"opportunityId": 3203,
+												"version": 13,
+												"createdAt": "2022-09-13T14:45:06.139Z"
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Add a new application form.",
+				"tags": ["Application Forms"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ApplicationForm"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new application form that was created, with populated fields",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApplicationForm"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "There was a unique key or foreign key conflict.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/applicationForms/{applicationFormId}": {
+			"get": {
+				"summary": "Get a specific application form.",
+				"tags": ["Application Forms"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "applicationFormId",
+						"description": "The PDC-generated ID of an application form.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "includeFields",
+						"in": "query",
+						"description": "Include the fields associated with the application form when `true`, otherwise do not include them.",
+						"required": false,
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "All application forms currently registered in the PDC.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ApplicationForm"
+									}
+								},
+								"examples": {
+									"default": {
+										"summary": "The default, shallow response with no parameters or where `includeFields=false`.",
+										"value": {
+											"id": 3529,
+											"opportunityId": 3203,
+											"version": 13,
+											"createdAt": "2022-09-13T14:45:06.139Z"
+										}
+									},
+									"includeFields": {
+										"summary": "The response when `includeFields` is set to `true`.",
+										"value": {
+											"id": 3529,
+											"opportunityId": 3203,
+											"version": 13,
+											"createdAt": "2022-09-13T14:45:06.139Z",
+											"fields": [
+												{
+													"id": 3613,
+													"applicationFormId": 3529,
+													"baseFieldId": 3011,
+													"position": 29,
+													"label": "Your First Name",
+													"createdAt": "2022-12-12T17:54:24.988Z"
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/bulkUploads": {
+			"get": {
+				"summary": "Get a list of bulk uploads.",
+				"tags": ["Bulk Uploads"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" }
+				],
+				"responses": {
+					"200": {
+						"description": "All bulk uploads currently registered in the PDC.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BulkUpload"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Register a bulk upload.",
+				"tags": ["Bulk Uploads"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BulkUpload"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The bulk upload",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BulkUpload"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/presignedPostRequests": {
+			"post": {
+				"summary": "Request a presigned post URL.",
+				"tags": ["Presigned Posts"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PresignedPostRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The presigned post request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PresignedPostRequest"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/proposals": {
+			"get": {
+				"summary": "Get a list of proposals.",
+				"tags": ["Proposals"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" },
+					{ "$ref": "#/components/parameters/searchParam" }
+				],
+				"responses": {
+					"200": {
+						"description": "All proposals currently registered in the PDC.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProposalBundle"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Add a new proposal.",
+				"tags": ["Proposals"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Proposal"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new proposal that was created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Proposal"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "There was a unique key or foreign key conflict.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/proposals/{proposalId}": {
+			"get": {
+				"summary": "Get a specific proposal.",
+				"tags": ["Proposals"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "proposalId",
+						"description": "The PDC-generated ID of a proposal.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "includeFieldsAndValues",
+						"in": "query",
+						"description": "Include the application form fields and the associated proposal values when `true`. This necessarily includes all proposal versions because form fields are related to a particular proposal version.",
+						"required": false,
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The proposal.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Proposal"
+								},
+								"examples": {
+									"default": {
+										"summary": "The default, shallow response with no parameters or where `includeFieldsAndValues=false`",
+										"value": {
+											"id": 3709,
+											"applicantId": 3407,
+											"externalId": "AnIdGeneratedByAGms",
+											"opportunityId": 3203,
+											"createdAt": "2022-12-30T15:50:58.839Z"
+										}
+									},
+									"includeFieldsAndValues": {
+										"summary": "The response when `includeFieldsAndValues` is set to `true`.",
+										"value": {
+											"id": 3709,
+											"applicantId": 3407,
+											"externalId": "AnIdGeneratedByAGms",
+											"opportunityId": 3203,
+											"createdAt": "2022-12-30T15:50:58.839Z",
+											"versions": [
+												{
+													"id": 3821,
+													"proposalId": 3709,
+													"applicationFormId": 3529,
+													"version": 17,
+													"createdAt": "2023-02-14T09:52:00.000",
+													"fieldValues": [
+														{
+															"id": 3943,
+															"proposalVersionId": 3821,
+															"applicationFormFieldId": 3613,
+															"value": "John",
+															"position": 23,
+															"createdAt": "2023-02-14T09:57:00.000Z",
+															"applicationFormField": {
+																"id": 3613,
+																"applicationFormId": 3529,
+																"baseFieldId": 3011,
+																"position": 19,
+																"label": "Your First Name",
+																"createdAt": "2023-02-14T09:58:00.000Z"
+															}
+														}
+													]
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/proposalVersions": {
+			"post": {
+				"summary": "Add a new proposal version.",
+				"tags": ["Proposals"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ProposalVersion"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new proposal version that was created, with populated field values",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProposalVersion"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "There was a foreign key conflict.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/baseFields": {
+			"get": {
+				"summary": "Get a list of base fields.",
+				"tags": ["Base Fields"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "All base fields currently registered in the PDC.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/BaseField"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Add a new base field.",
+				"tags": ["Base Fields"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BaseField"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new base field that was created.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BaseField"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "There was a unique key conflict.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/baseFields/{baseFieldId}": {
+			"put": {
+				"summary": "Update a base field.",
+				"tags": ["Base Fields"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "baseFieldId",
+						"description": "The PDC-generated ID of a base field.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BaseField"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "The updated base field.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BaseField"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "The base field could not be found."
+					}
+				}
+			}
+		},
+		"/opportunities": {
+			"get": {
+				"summary": "Get a list of opportunities.",
+				"tags": ["Opportunities"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "A list of known funding opportunities.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Opportunity"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Add a new opportunity. (In Development)",
+				"tags": ["Opportunities"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Opportunity"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new opportunity that was created.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Opportunity"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/opportunities/{opportunityId}": {
+			"get": {
+				"summary": "Get a specific opportunity.",
+				"tags": ["Opportunities"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "opportunityId",
+						"description": "The PDC-generated ID of an opportunity, RFC, potential award or grant, etc.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The funding opportunity.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Opportunity"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/platformProviderResponses": {
+			"get": {
+				"summary": "Get a list of platform provider responses.",
+				"tags": ["Internal Use Only"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "externalId",
+						"description": "The external ID that has been associated with the response.  This ID is arbitrarily formatted, and cannot be predicted without knowledge of specific PDC data.",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "A list of cached platform provider responses.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/PlatformProviderResponse"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Add a new platform provider response.",
+				"tags": ["Internal Use Only"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PlatformProviderResponse"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new platform provider response that was created.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PlatformProviderResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Required fields were not provided or were incorrectly formatted.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

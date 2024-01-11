@@ -6,10 +6,12 @@ import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUpload } from '../processBulkUpload';
 import { BulkUploadStatus, Proposal } from '../../types';
 import type {
+	Applicant,
 	ApplicationForm,
 	ApplicationFormField,
 	BaseField,
 	BulkUpload,
+	Opportunity,
 	ProposalFieldValue,
 	ProposalVersion,
 } from '../../types';
@@ -389,16 +391,30 @@ describe('processBulkUpload', () => {
 		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
 
 		const {
+			rows: [opportunity],
+		} = await db.sql<Opportunity>('opportunities.selectAll');
+		if (opportunity === undefined) {
+			fail('The opportunity was not created');
+		}
+
+		const {
 			rows: [applicationForm],
 		} = await db.sql<ApplicationForm>('applicationForms.selectAll');
 		if (applicationForm === undefined) {
 			fail('The application form was not created');
 		}
 		expect(applicationForm).toMatchObject({
-			opportunityId: 1,
+			opportunityId: opportunity.id,
 			version: 1,
 			createdAt: expect.any(Date) as Date,
 		});
+
+		const {
+			rows: [applicant],
+		} = await db.sql<Applicant>('applicants.selectAll');
+		if (applicant === undefined) {
+			fail('The applicant was not created');
+		}
 
 		const [firstProposal, secondProposal] = await getProposalsByExternalIds([
 			'1',
@@ -411,21 +427,21 @@ describe('processBulkUpload', () => {
 			fail('The second proposal was not created');
 		}
 		expect(firstProposal).toMatchObject({
-			applicantId: 1,
+			applicantId: applicant.id,
 			externalId: '1',
-			opportunityId: 1,
+			opportunityId: opportunity.id,
 			createdAt: expect.any(Date) as Date,
 		});
 		expect(secondProposal).toMatchObject({
-			applicantId: 1,
+			applicantId: applicant.id,
 			externalId: '2',
-			opportunityId: 1,
+			opportunityId: opportunity.id,
 			createdAt: expect.any(Date) as Date,
 		});
 
 		const { rows: proposalVersions } = await db.sql<ProposalVersion>(
 			'proposalVersions.selectByProposalIds',
-			{ proposalIds: [1, 2] },
+			{ proposalIds: [firstProposal.id, secondProposal.id] },
 		);
 		const firstProposalVersion = proposalVersions.find(
 			(proposalVersion) => proposalVersion.proposalId === firstProposal.id,
@@ -440,13 +456,13 @@ describe('processBulkUpload', () => {
 			fail('The second proposal version was not created');
 		}
 		expect(firstProposalVersion).toMatchObject({
-			applicationFormId: 1,
+			applicationFormId: applicationForm.id,
 			proposalId: firstProposal.id,
 			version: 1,
 			createdAt: expect.any(Date) as Date,
 		});
 		expect(secondProposalVersion).toMatchObject({
-			applicationFormId: 1,
+			applicationFormId: applicationForm.id,
 			proposalId: secondProposal.id,
 			version: 1,
 			createdAt: expect.any(Date) as Date,

@@ -6,7 +6,12 @@ import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUpload } from '../processBulkUpload';
 import { BulkUploadStatus, Proposal } from '../../types';
 import type {
+	Applicant,
+	ApplicationForm,
+	ApplicationFormField,
+	BaseField,
 	BulkUpload,
+	Opportunity,
 	ProposalFieldValue,
 	ProposalVersion,
 } from '../../types';
@@ -53,19 +58,30 @@ const createTestBulkUpload = async (
 	return bulkUpload;
 };
 
-const createTestBaseFields = async (): Promise<void> => {
-	await db.sql<BulkUpload>('baseFields.insertOne', {
+const createTestBaseFields = async (): Promise<[BaseField, BaseField]> => {
+	const {
+		rows: [proposalSubmitterEmailBaseField],
+	} = await db.sql<BaseField>('baseFields.insertOne', {
 		label: 'Proposal Submitter Email',
 		description: 'The email address of the person who submitted the proposal.',
 		shortCode: 'proposal_submitter_email',
 		dataType: 'string',
 	});
-	await db.sql<BulkUpload>('baseFields.insertOne', {
+	const {
+		rows: [organizationNameBaseField],
+	} = await db.sql<BaseField>('baseFields.insertOne', {
 		label: 'Organization Name',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_name',
 		dataType: 'string',
 	});
+	if (proposalSubmitterEmailBaseField === undefined) {
+		throw new Error("Couldn't create the proposal submitter email base field");
+	}
+	if (organizationNameBaseField === undefined) {
+		throw new Error("Couldn't create the organization name base field");
+	}
+	return [proposalSubmitterEmailBaseField, organizationNameBaseField];
 };
 
 const mockS3GetObjectReplyWithFile = async (
@@ -130,6 +146,28 @@ const getProposalsByExternalIds = async (
 			throw new Error(`There is no proposal with externalId "${externalId}"`);
 		}
 		return proposal;
+	});
+};
+
+const getApplicationFormFieldsByBaseFieldIds = async (
+	applicationFormId: number,
+	baseFieldIds: number[],
+): Promise<ApplicationFormField[]> => {
+	const { rows: applicationFormFields } = await db.sql<ApplicationFormField>(
+		'applicationFormFields.selectByApplicationFormId',
+		{ applicationFormId },
+	);
+	return baseFieldIds.map((baseFieldId) => {
+		const applicationFormField = applicationFormFields.find(
+			(applicationFormFieldCandidate) =>
+				applicationFormFieldCandidate.baseFieldId === baseFieldId,
+		);
+		if (applicationFormField === undefined) {
+			throw new Error(
+				`There is no application form field with baseFieldId "${baseFieldId}"`,
+			);
+		}
+		return applicationFormField;
 	});
 };
 
@@ -335,7 +373,8 @@ describe('processBulkUpload', () => {
 	});
 
 	it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
-		await createTestBaseFields();
+		const [proposalSubmitterEmailBaseField, organizationNameBaseField] =
+			await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUpload = await createTestBulkUpload({ sourceKey });
 		const requests = await mockS3ResponsesForBulkUploadProcessing(
@@ -350,6 +389,33 @@ describe('processBulkUpload', () => {
 			getMockJobHelpers(),
 		);
 		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
+
+		const {
+			rows: [opportunity],
+		} = await db.sql<Opportunity>('opportunities.selectAll');
+		if (opportunity === undefined) {
+			fail('The opportunity was not created');
+		}
+
+		const {
+			rows: [applicationForm],
+		} = await db.sql<ApplicationForm>('applicationForms.selectAll');
+		if (applicationForm === undefined) {
+			fail('The application form was not created');
+		}
+		expect(applicationForm).toMatchObject({
+			opportunityId: opportunity.id,
+			version: 1,
+			createdAt: expect.any(Date) as Date,
+		});
+
+		const {
+			rows: [applicant],
+		} = await db.sql<Applicant>('applicants.selectAll');
+		if (applicant === undefined) {
+			fail('The applicant was not created');
+		}
+
 		const [firstProposal, secondProposal] = await getProposalsByExternalIds([
 			'1',
 			'2',
@@ -361,21 +427,21 @@ describe('processBulkUpload', () => {
 			fail('The second proposal was not created');
 		}
 		expect(firstProposal).toMatchObject({
-			applicantId: 1,
+			applicantId: applicant.id,
 			externalId: '1',
-			opportunityId: 1,
+			opportunityId: opportunity.id,
 			createdAt: expect.any(Date) as Date,
 		});
 		expect(secondProposal).toMatchObject({
-			applicantId: 1,
+			applicantId: applicant.id,
 			externalId: '2',
-			opportunityId: 1,
+			opportunityId: opportunity.id,
 			createdAt: expect.any(Date) as Date,
 		});
 
 		const { rows: proposalVersions } = await db.sql<ProposalVersion>(
 			'proposalVersions.selectByProposalIds',
-			{ proposalIds: [1, 2] },
+			{ proposalIds: [firstProposal.id, secondProposal.id] },
 		);
 		const firstProposalVersion = proposalVersions.find(
 			(proposalVersion) => proposalVersion.proposalId === firstProposal.id,
@@ -390,17 +456,29 @@ describe('processBulkUpload', () => {
 			fail('The second proposal version was not created');
 		}
 		expect(firstProposalVersion).toMatchObject({
-			applicationFormId: 1,
+			applicationFormId: applicationForm.id,
 			proposalId: firstProposal.id,
 			version: 1,
 			createdAt: expect.any(Date) as Date,
 		});
 		expect(secondProposalVersion).toMatchObject({
-			applicationFormId: 1,
+			applicationFormId: applicationForm.id,
 			proposalId: secondProposal.id,
 			version: 1,
 			createdAt: expect.any(Date) as Date,
 		});
+
+		const [proposalSubmitterEmailFormField, organizationNameFormField] =
+			await getApplicationFormFieldsByBaseFieldIds(applicationForm.id, [
+				proposalSubmitterEmailBaseField.id,
+				organizationNameBaseField.id,
+			]);
+		if (proposalSubmitterEmailFormField === undefined) {
+			fail('The proposal submitter email form field was not created');
+		}
+		if (organizationNameFormField === undefined) {
+			fail('The organization name form field was not created');
+		}
 
 		const { rows: firstProposalFieldValues } = await db.sql<ProposalFieldValue>(
 			'proposalFieldValues.selectByProposalId',
@@ -413,14 +491,14 @@ describe('processBulkUpload', () => {
 			);
 		expect(firstProposalFieldValues).toMatchObject([
 			{
-				applicationFormFieldId: 1,
+				applicationFormFieldId: proposalSubmitterEmailFormField.id,
 				position: 0,
 				proposalVersionId: firstProposalVersion.id,
 				value: 'foo@example.com',
 				createdAt: expect.any(Date) as Date,
 			},
 			{
-				applicationFormFieldId: 2,
+				applicationFormFieldId: organizationNameFormField.id,
 				position: 1,
 				proposalVersionId: firstProposalVersion.id,
 				value: 'Foo LLC.',
@@ -429,14 +507,14 @@ describe('processBulkUpload', () => {
 		]);
 		expect(secondProposalFieldValues).toMatchObject([
 			{
-				applicationFormFieldId: 1,
+				applicationFormFieldId: proposalSubmitterEmailFormField.id,
 				position: 0,
 				proposalVersionId: secondProposalVersion.id,
 				value: 'foo@example.com',
 				createdAt: expect.any(Date) as Date,
 			},
 			{
-				applicationFormFieldId: 2,
+				applicationFormFieldId: organizationNameFormField.id,
 				position: 1,
 				proposalVersionId: secondProposalVersion.id,
 				value: 'Bar Inc.',

@@ -9,7 +9,6 @@ export const loadObjects = async <T extends object>(
 	objectValidator: ValidateFunction<T>,
 ): Promise<T[]> => {
 	const { rows } = await db.sql<T>(tinyPgQueryName, tinyPgQueryParameters);
-
 	rows.forEach((row) => {
 		if (!objectValidator(row)) {
 			throw new InternalValidationError(

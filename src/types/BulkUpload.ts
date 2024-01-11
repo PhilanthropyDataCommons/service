@@ -14,6 +14,7 @@ export interface BulkUpload {
 	fileName: string;
 	sourceKey: string;
 	status: BulkUploadStatus;
+	fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
 	readonly createdAt: Date;
 }
 
@@ -32,6 +33,10 @@ export const bulkUploadSchema: JSONSchemaType<BulkUpload> = {
 		status: {
 			type: 'string',
 		},
+		fileSize: {
+			type: 'integer',
+			nullable: true,
+		},
 		createdAt: {
 			type: 'object',
 			required: [],
@@ -43,7 +48,10 @@ export const bulkUploadSchema: JSONSchemaType<BulkUpload> = {
 
 export const isBulkUpload = ajv.compile(bulkUploadSchema);
 
-export type BulkUploadCreate = Omit<BulkUpload, 'createdAt' | 'status' | 'id'>;
+export type BulkUploadCreate = Omit<
+	BulkUpload,
+	'createdAt' | 'status' | 'id' | 'fileSize'
+>;
 
 export const bulkUploadCreateSchema: JSONSchemaType<BulkUploadCreate> = {
 	type: 'object',

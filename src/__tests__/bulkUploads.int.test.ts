@@ -38,6 +38,7 @@ describe('GET /bulkUploads', () => {
 						{
 							id: 2,
 							fileName: 'bar.csv',
+							fileSize: null,
 							sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 							status: BulkUploadStatus.COMPLETED,
 							createdAt: expectTimestamp,
@@ -45,6 +46,7 @@ describe('GET /bulkUploads', () => {
 						{
 							id: 1,
 							fileName: 'foo.csv',
+							fileSize: null,
 							sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 							status: BulkUploadStatus.PENDING,
 							createdAt: expectTimestamp,
@@ -79,6 +81,7 @@ describe('GET /bulkUploads', () => {
 						{
 							id: 15,
 							fileName: 'bar-15.csv',
+							fileSize: null,
 							sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 							status: BulkUploadStatus.COMPLETED,
 							createdAt: expectTimestamp,
@@ -86,6 +89,7 @@ describe('GET /bulkUploads', () => {
 						{
 							id: 14,
 							fileName: 'bar-14.csv',
+							fileSize: null,
 							sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 							status: BulkUploadStatus.COMPLETED,
 							createdAt: expectTimestamp,
@@ -93,6 +97,7 @@ describe('GET /bulkUploads', () => {
 						{
 							id: 13,
 							fileName: 'bar-13.csv',
+							fileSize: null,
 							sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 							status: BulkUploadStatus.COMPLETED,
 							createdAt: expectTimestamp,
@@ -100,6 +105,7 @@ describe('GET /bulkUploads', () => {
 						{
 							id: 12,
 							fileName: 'bar-12.csv',
+							fileSize: null,
 							sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 							status: BulkUploadStatus.COMPLETED,
 							createdAt: expectTimestamp,
@@ -107,6 +113,7 @@ describe('GET /bulkUploads', () => {
 						{
 							id: 11,
 							fileName: 'bar-11.csv',
+							fileSize: null,
 							sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 							status: BulkUploadStatus.COMPLETED,
 							createdAt: expectTimestamp,

@@ -39,19 +39,16 @@ npm ci
 
 2. Set up environment variables
 
+See the `.env.example` file for relevant environment variables. One option to manage environment variables is to use a `.env` file and source it prior to running a command. For example:
+
 ```bash
 cp .env.example .env
 edit .env
+set -a
+source .env
 ```
 
-3. Set up test environment variables
-
-```bash
-cp .env.example .env.test
-edit .env.test
-```
-
-4. Run migrations
+3. Run migrations
 
 ```bash
 npm run migrate:dev

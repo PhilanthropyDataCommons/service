@@ -59,6 +59,22 @@ const updateBulkUploadSourceKey = async (id: number, sourceKey: string) => {
 	}
 };
 
+const updateBulkUploadFileSize = async (
+	id: number,
+	fileSize: number,
+): Promise<void> => {
+	const bulkUploadsQueryResult = await db.sql<BulkUpload>(
+		'bulkUploads.updateFileSizeById',
+		{
+			id,
+			fileSize,
+		},
+	);
+	if (bulkUploadsQueryResult.row_count !== 1) {
+		throw new NotFoundError(`The bulk upload was not found (id: ${id})`);
+	}
+};
+
 const downloadS3ObjectToTemporaryStorage = async (
 	key: string,
 	logger: Logger,
@@ -428,6 +444,17 @@ export const processBulkUpload = async (
 	} catch (err) {
 		helpers.logger.info('Bulk upload has failed', { err });
 		bulkUploadHasFailed = true;
+	}
+
+	try {
+		const fileStats = await fs.promises.stat(bulkUploadFile.path);
+		const fileSize = fileStats.size;
+		await updateBulkUploadFileSize(bulkUpload.id, fileSize);
+	} catch (err) {
+		helpers.logger.warn(
+			`Unable to update the fileSize for bulkUpload ${bulkUpload.id}`,
+			{ err },
+		);
 	}
 
 	try {

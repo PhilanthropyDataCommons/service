@@ -62,7 +62,7 @@
 		"eslint-config-airbnb-typescript": "^17.1.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-import": "^2.29.1",
-		"eslint-plugin-sort-exports": "^0.8.0",
+		"eslint-plugin-sort-exports": "^0.9.1",
 		"jest": "^28.1.1",
 		"mock-jwks": "^1.0.10",
 		"nock": "^13.5.0",

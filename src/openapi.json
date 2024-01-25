@@ -484,6 +484,7 @@
 	"paths": {
 		"/applicants": {
 			"get": {
+				"operationId": "getApplicants",
 				"summary": "Get a list of applicants.",
 				"tags": ["Applicants"],
 				"security": [
@@ -518,6 +519,7 @@
 				}
 			},
 			"post": {
+				"operationId": "addApplicant",
 				"summary": "Add a new applicant.",
 				"tags": ["Applicants"],
 				"security": [
@@ -561,6 +563,7 @@
 		},
 		"/applicants/{externalId}": {
 			"get": {
+				"operationId": "getApplicantByExternalId",
 				"summary": "Get a specific applicant, including all known field values associated with the applicant. (In Development)",
 				"tags": ["Applicants"],
 				"security": [
@@ -605,6 +608,7 @@
 		},
 		"/applicationForms": {
 			"get": {
+				"operationId": "getApplicationForms",
 				"summary": "Get a list of application forms.",
 				"tags": ["Application Forms"],
 				"security": [
@@ -642,6 +646,7 @@
 				}
 			},
 			"post": {
+				"operationId": "addApplicationForm",
 				"summary": "Add a new application form.",
 				"tags": ["Application Forms"],
 				"security": [
@@ -695,6 +700,7 @@
 		},
 		"/applicationForms/{applicationFormId}": {
 			"get": {
+				"operationId": "getApplicationFormById",
 				"summary": "Get a specific application form.",
 				"tags": ["Application Forms"],
 				"security": [
@@ -771,6 +777,7 @@
 		},
 		"/bulkUploads": {
 			"get": {
+				"operationId": "getBulkUploads",
 				"summary": "Get a list of bulk uploads.",
 				"tags": ["Bulk Uploads"],
 				"security": [
@@ -806,6 +813,7 @@
 				}
 			},
 			"post": {
+				"operationId": "addBulkUpload",
 				"summary": "Register a bulk upload.",
 				"tags": ["Bulk Uploads"],
 				"security": [
@@ -849,6 +857,7 @@
 		},
 		"/presignedPostRequests": {
 			"post": {
+				"operationId": "addPresignedPostRequest",
 				"summary": "Request a presigned post URL.",
 				"tags": ["Presigned Posts"],
 				"security": [
@@ -892,6 +901,7 @@
 		},
 		"/proposals": {
 			"get": {
+				"operationId": "getProposals",
 				"summary": "Get a list of proposals.",
 				"tags": ["Proposals"],
 				"security": [
@@ -928,6 +938,7 @@
 				}
 			},
 			"post": {
+				"operationId": "addProposal",
 				"summary": "Add a new proposal.",
 				"tags": ["Proposals"],
 				"security": [
@@ -981,6 +992,7 @@
 		},
 		"/proposals/{proposalId}": {
 			"get": {
+				"operationId": "getProposalById",
 				"summary": "Get a specific proposal.",
 				"tags": ["Proposals"],
 				"security": [
@@ -1073,6 +1085,7 @@
 		},
 		"/proposalVersions": {
 			"post": {
+				"operationId": "addProposalVersion",
 				"summary": "Add a new proposal version.",
 				"tags": ["Proposals"],
 				"security": [
@@ -1126,6 +1139,7 @@
 		},
 		"/baseFields": {
 			"get": {
+				"operationId": "getBaseFields",
 				"summary": "Get a list of base fields.",
 				"tags": ["Base Fields"],
 				"security": [
@@ -1150,6 +1164,7 @@
 				}
 			},
 			"post": {
+				"operationId": "addBaseField",
 				"summary": "Add a new base field.",
 				"tags": ["Base Fields"],
 				"security": [
@@ -1203,6 +1218,7 @@
 		},
 		"/baseFields/{baseFieldId}": {
 			"put": {
+				"operationId": "updateBaseFieldById",
 				"summary": "Update a base field.",
 				"tags": ["Base Fields"],
 				"security": [
@@ -1260,6 +1276,7 @@
 		},
 		"/opportunities": {
 			"get": {
+				"operationId": "getOpportunities",
 				"summary": "Get a list of opportunities.",
 				"tags": ["Opportunities"],
 				"security": [
@@ -1284,6 +1301,7 @@
 				}
 			},
 			"post": {
+				"operationId": "addOpportunity",
 				"summary": "Add a new opportunity. (In Development)",
 				"tags": ["Opportunities"],
 				"security": [
@@ -1327,6 +1345,7 @@
 		},
 		"/opportunities/{opportunityId}": {
 			"get": {
+				"operationId": "getOpportunityById",
 				"summary": "Get a specific opportunity.",
 				"tags": ["Opportunities"],
 				"security": [
@@ -1361,6 +1380,7 @@
 		},
 		"/platformProviderResponses": {
 			"get": {
+				"operationId": "getPlatformProviderResponses",
 				"summary": "Get a list of platform provider responses.",
 				"tags": ["Internal Use Only"],
 				"security": [
@@ -1396,6 +1416,7 @@
 				}
 			},
 			"post": {
+				"operationId": "addPlatformProviderResponse",
 				"summary": "Add a new platform provider response.",
 				"tags": ["Internal Use Only"],
 				"security": [

@@ -7,7 +7,7 @@ const logger = getLogger(__filename);
 // The .env file is loaded in 'logger' to ensure correct order of events. See
 // more discussion in the 'logger.ts' code.
 
-const port = Number(process.env.PORT ?? 3000);
+const port = Number(process.env.PORT ?? 3001);
 const host = process.env.HOST ?? 'localhost';
 
 app.listen(port, host, () => {

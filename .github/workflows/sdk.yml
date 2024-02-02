@@ -22,12 +22,19 @@ jobs:
           path: 'sdk'
       - name: Copy API definition
         run: cp service/src/openapi.json sdk/openapi.json
-      - name: Invoke the typescript generator
+      - name: Invoke the TypeScript generator
         working-directory: sdk
         run: ./gradlew generateSwaggerCode
-      - name: Install dependencies for the typescript sdk
+      - name: Install dependencies for the TypeScript SDK
         working-directory: sdk/build/typescript
         run: npm ci
-      - name: Build the typescript sdk
+      - name: Build the TypeScript SDK
         working-directory: sdk/build/typescript
         run: npm run build
+      - name: Publish to NPM if there is a new version
+        uses: JS-DevTools/npm-publish@v3
+        with:
+          package: sdk/build/typescript
+          token: ${{ secrets.NPM_TOKEN }}
+          access: public
+          dry-run: ${{ github.event_name == 'pull_request' }}

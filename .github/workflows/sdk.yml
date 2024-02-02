@@ -1,0 +1,33 @@
+name: Build (sdk)
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out our code
+        uses: actions/checkout@v4
+        with:
+          path: 'service'
+      - name: Check out sdk generators
+        uses: actions/checkout@v4
+        with:
+          repository: 'PhilanthropyDataCommons/sdk'
+          path: 'sdk'
+      - name: Copy API definition
+        run: cp service/src/openapi.json sdk/openapi.json
+      - name: Invoke the typescript generator
+        working-directory: sdk
+        run: ./gradlew generateSwaggerCode
+      - name: Install dependencies for the typescript sdk
+        working-directory: sdk/build/typescript
+        run: npm ci
+      - name: Build the typescript sdk
+        working-directory: sdk/build/typescript
+        run: npm run build

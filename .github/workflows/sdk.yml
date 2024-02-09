@@ -34,7 +34,7 @@ jobs:
         working-directory: sdk/build/typescript
         run: npm run build
       - name: Publish to NPM if there is a new version
-        if: ${{ env.npm_token_exists }}
+        if: ${{ env.npm_token_exists == 'true' }}
         uses: JS-DevTools/npm-publish@v3
         with:
           package: sdk/build/typescript

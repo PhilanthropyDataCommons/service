@@ -10,6 +10,8 @@ on:
 jobs:
   typescript:
     runs-on: ubuntu-latest
+    env:
+      npm_token_exists: ${{ secrets.NPM_TOKEN != '' }}
     steps:
       - name: Check out our code
         uses: actions/checkout@v4
@@ -32,6 +34,7 @@ jobs:
         working-directory: sdk/build/typescript
         run: npm run build
       - name: Publish to NPM if there is a new version
+        if: ${{ env.npm_token_exists }}
         uses: JS-DevTools/npm-publish@v3
         with:
           package: sdk/build/typescript

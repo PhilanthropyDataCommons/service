@@ -86,7 +86,7 @@
 		"express-jwt": "^8.4.1",
 		"graphile-worker": "^0.16.2",
 		"jwks-rsa": "^3.1.0",
-		"pino": "^8.18.0",
+		"pino": "^8.19.0",
 		"pino-http": "^9.0.0",
 		"postgres-schema-migrations": "^6.1.0",
 		"require-env-variable": "^4.0.2",

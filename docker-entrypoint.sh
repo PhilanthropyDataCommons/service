@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
 
-npm run migrate
-exec npm run start
+node dist/scripts/migrate.js
+exec node dist/index.js

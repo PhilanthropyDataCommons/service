@@ -13,14 +13,12 @@
 		"lint:ts": "eslint ./src --ext .ts",
 		"lint:swagger": "swagger-spec-validator src/openapi.json",
 		"lint:prettier": "prettier . --check",
-		"migrate": "node dist/scripts/migrate.js",
-		"migrate:dev": "ts-node src/scripts/migrate.ts | pino-pretty",
+		"migrate": "ts-node src/scripts/migrate.ts | pino-pretty",
 		"test": "npm run test:unit && npm run test:integration",
 		"test:unit": "jest --config=jest.config.unit.js",
 		"test:integration": "jest --config=jest.config.int.js --runInBand",
 		"test:ci": "jest --config=jest.config.ci.js --runInBand",
-		"start": "node dist/index.js",
-		"start:dev": "ts-node src/index.ts | pino-pretty"
+		"start": "ts-node src/index.ts | pino-pretty"
 	},
 	"repository": {
 		"type": "git",

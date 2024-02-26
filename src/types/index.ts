@@ -6,6 +6,7 @@ export * from './BulkUpload';
 export * from './Bundle';
 export * from './JsonObject';
 export * from './Opportunity';
+export * from './Organization';
 export * from './PaginationParameters';
 export * from './PaginationParametersQuery';
 export * from './PlatformProviderResponse';

@@ -51,7 +51,7 @@ source .env
 3. Run migrations
 
 ```bash
-npm run migrate:dev
+npm run migrate
 ```
 
 ### Common Commands
@@ -109,7 +109,7 @@ npm start
 To start the server in a development environment:
 
 ```bash
-npm run start:dev
+npm run start
 ```
 
 ### Logging

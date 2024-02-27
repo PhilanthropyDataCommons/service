@@ -23,7 +23,6 @@ erDiagram
   }
   Proposal {
     int id
-    int applicantId
     int opportunityId
     string externalId
     datetime createdAt

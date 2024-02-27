@@ -40,18 +40,12 @@ describe('/proposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
-			await db.sql('applicants.insertOne', {
-				externalId: '12345',
-				optedIn: true,
-			});
 			await createTestBaseFields();
 			await db.sql('proposals.insertOne', {
-				applicantId: 1,
 				externalId: 'proposal-1',
 				opportunityId: 1,
 			});
 			await db.sql('proposals.insertOne', {
-				applicantId: 1,
 				externalId: 'proposal-2',
 				opportunityId: 1,
 			});
@@ -86,7 +80,6 @@ describe('/proposals', () => {
 							{
 								id: 2,
 								externalId: 'proposal-2',
-								applicantId: 1,
 								opportunityId: 1,
 								createdAt: expectTimestamp,
 								versions: [],
@@ -94,7 +87,6 @@ describe('/proposals', () => {
 							{
 								id: 1,
 								externalId: 'proposal-1',
-								applicantId: 1,
 								opportunityId: 1,
 								createdAt: expectTimestamp,
 								versions: [
@@ -134,18 +126,13 @@ describe('/proposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
-			await db.sql('applicants.insertOne', {
-				externalId: '12345',
-				optedIn: true,
-			});
+
 			await createTestBaseFields();
 			await db.sql('proposals.insertOne', {
-				applicantId: 1,
 				externalId: 'proposal-1',
 				opportunityId: 1,
 			});
 			await db.sql('proposals.insertOne', {
-				applicantId: 1,
 				externalId: 'proposal-2',
 				opportunityId: 1,
 			});
@@ -189,7 +176,6 @@ describe('/proposals', () => {
 							{
 								id: 1,
 								externalId: 'proposal-1',
-								applicantId: 1,
 								opportunityId: 1,
 								createdAt: expectTimestamp,
 								versions: [
@@ -232,18 +218,12 @@ describe('/proposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: 'Grand opportunity',
 			});
-			await db.sql('applicants.insertOne', {
-				externalId: '4993',
-				optedIn: true,
-			});
 			await createTestBaseFields();
 			await db.sql('proposals.insertOne', {
-				applicantId: 1,
 				externalId: 'proposal-4999',
 				opportunityId: 1,
 			});
 			await db.sql('proposals.insertOne', {
-				applicantId: 1,
 				externalId: 'proposal-5003',
 				opportunityId: 1,
 			});
@@ -287,7 +267,6 @@ describe('/proposals', () => {
 							{
 								id: 1,
 								externalId: 'proposal-4999',
-								applicantId: 1,
 								opportunityId: 1,
 								createdAt: expectTimestamp,
 								versions: [
@@ -327,14 +306,9 @@ describe('/proposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
-			await db.sql('applicants.insertOne', {
-				externalId: '12345',
-				optedIn: 'true',
-			});
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
 				await db.sql('proposals.insertOne', {
-					applicantId: 1,
 					externalId: `proposal-${i + 1}`,
 					opportunityId: 1,
 				});
@@ -354,7 +328,6 @@ describe('/proposals', () => {
 							{
 								id: 15,
 								externalId: 'proposal-15',
-								applicantId: 1,
 								opportunityId: 1,
 								versions: [],
 								createdAt: expectTimestamp,
@@ -362,7 +335,6 @@ describe('/proposals', () => {
 							{
 								id: 14,
 								externalId: 'proposal-14',
-								applicantId: 1,
 								opportunityId: 1,
 								versions: [],
 								createdAt: expectTimestamp,
@@ -370,7 +342,6 @@ describe('/proposals', () => {
 							{
 								id: 13,
 								externalId: 'proposal-13',
-								applicantId: 1,
 								opportunityId: 1,
 								versions: [],
 								createdAt: expectTimestamp,
@@ -378,7 +349,6 @@ describe('/proposals', () => {
 							{
 								id: 12,
 								externalId: 'proposal-12',
-								applicantId: 1,
 								opportunityId: 1,
 								versions: [],
 								createdAt: expectTimestamp,
@@ -386,7 +356,6 @@ describe('/proposals', () => {
 							{
 								id: 11,
 								externalId: 'proposal-11',
-								applicantId: 1,
 								opportunityId: 1,
 								versions: [],
 								createdAt: expectTimestamp,
@@ -468,30 +437,18 @@ describe('/proposals', () => {
           ( '⛰️', '2525-01-03T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '🐕', 'true', '2525-01-03T00:00:02Z' ),
-          ( '🐈', 'false', '2525-01-03T00:00:03Z' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-03T00:00:04Z' ),
-          ( 1, 'proposal-2', 1, '2525-01-03T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-03T00:00:04Z' ),
+          ( 'proposal-2', 1, '2525-01-03T00:00:05Z' );
       `);
 			await agent.get('/proposals/2').set(authHeader).expect(200, {
 				id: 2,
 				externalId: 'proposal-2',
-				applicantId: 1,
 				opportunityId: 1,
 				createdAt: '2525-01-03T00:00:05.000Z',
 			});
@@ -506,16 +463,6 @@ describe('/proposals', () => {
         )
         VALUES
           ( '🌎', '2525-01-04T00:00:01Z' )
-      `);
-			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '🐯', 'true', '2525-01-04T00:00:02Z' ),
-          ( '🐅', 'false', '2525-01-04T00:00:03Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -540,13 +487,12 @@ describe('/proposals', () => {
       `);
 			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 2, 'proposal-2525-01-04T00Z', 1, '2525-01-04T00:00:07Z' );
+          ( 'proposal-2525-01-04T00Z', 1, '2525-01-04T00:00:07Z' );
       `);
 			await db.query(`
         INSERT INTO proposal_versions (
@@ -578,7 +524,6 @@ describe('/proposals', () => {
 				.set(authHeader)
 				.expect(200, {
 					id: 1,
-					applicantId: 2,
 					opportunityId: 1,
 					externalId: 'proposal-2525-01-04T00Z',
 					createdAt: '2525-01-04T00:00:07.000Z',
@@ -779,23 +724,13 @@ describe('/proposals', () => {
           ( '🧳', '2525-01-04T00:00:14Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '🐴', 'true', '2525-01-04T00:00:15Z' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-🧳-🐴', 1, '2525-01-04T00:00:16Z' );
+          ( 'proposal-🧳-🐴', 1, '2525-01-04T00:00:16Z' );
       `);
 			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
 				throw new TinyPgError('Something went wrong', undefined, {
@@ -828,7 +763,6 @@ describe('/proposals', () => {
 					rows: [
 						{
 							id: 9005,
-							applicantId: 9006,
 							opportunityId: 9007,
 							externalId: 'nine thousand eight',
 							createdAt: new Date(),
@@ -868,16 +802,6 @@ describe('/proposals', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' ),
-          ( '67890', 'false', '2022-07-20 12:00:00+0000' );
-      `);
 			const before = await loadTableMetrics('proposals');
 			logger.debug('before: %o', before);
 			const result = await agent
@@ -885,7 +809,6 @@ describe('/proposals', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					applicantId: 1,
 					externalId: 'proposal123',
 					opportunityId: 1,
 				})
@@ -895,28 +818,11 @@ describe('/proposals', () => {
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: 1,
-				applicantId: 1,
 				externalId: 'proposal123',
 				opportunityId: 1,
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(1);
-		});
-
-		it('returns 400 bad request when no applicant ID is sent', async () => {
-			const result = await agent
-				.post('/proposals')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					externalId: 'proposal123',
-					opportunityId: 1,
-				})
-				.expect(400);
-			expect(result.body).toMatchObject({
-				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
-			});
 		});
 
 		it('returns 400 bad request when no external ID is sent', async () => {
@@ -925,7 +831,6 @@ describe('/proposals', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					applicantId: 1,
 					opportunityId: 1,
 				})
 				.expect(400);
@@ -941,7 +846,6 @@ describe('/proposals', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					applicantId: 1,
 					externalId: 'proposal123',
 				})
 				.expect(400);
@@ -951,53 +855,12 @@ describe('/proposals', () => {
 			});
 		});
 
-		it('returns 409 conflict when a non-existent applicant id is provided', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
-			const result = await agent
-				.post('/proposals')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					applicantId: 1,
-					externalId: 'proposal123',
-					opportunityId: 1,
-				})
-				.expect(409);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
-					{
-						code: PostgresErrorCode.FOREIGN_KEY_VIOLATION,
-						constraint: 'fk_applicant',
-					},
-				],
-			});
-		});
-
 		it('returns 409 conflict when a non-existent opportunity id is provided', async () => {
-			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' ),
-          ( '67890', 'false', '2022-07-20 12:00:00+0000' );
-      `);
 			const result = await agent
 				.post('/proposals')
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					applicantId: 1,
 					externalId: 'proposal123',
 					opportunityId: 1,
 				})
@@ -1022,16 +885,6 @@ describe('/proposals', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' ),
-          ( '67890', 'false', '2022-07-20 12:00:00+0000' );
-      `);
 			jest.spyOn(db, 'sql').mockImplementationOnce(
 				async () =>
 					({
@@ -1043,7 +896,6 @@ describe('/proposals', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					applicantId: 1,
 					externalId: 'proposal123',
 					opportunityId: 1,
 				})
@@ -1063,16 +915,6 @@ describe('/proposals', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' ),
-          ( '67890', 'false', '2022-07-20 12:00:00+0000' );
-      `);
 			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
 				throw new Error('This is unexpected');
 			});
@@ -1081,7 +923,6 @@ describe('/proposals', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					applicantId: 1,
 					externalId: 'proposal123',
 					opportunityId: 1,
 				})
@@ -1101,16 +942,6 @@ describe('/proposals', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' ),
-          ( '67890', 'false', '2022-07-20 12:00:00+0000' );
-      `);
 			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
 				throw new TinyPgError('Something went wrong', undefined, {
 					error: {
@@ -1123,7 +954,6 @@ describe('/proposals', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					applicantId: 1,
 					externalId: 'proposal123',
 					opportunityId: 1,
 				})

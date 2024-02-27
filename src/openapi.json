@@ -936,6 +936,51 @@
 				}
 			}
 		},
+		"/organizations/{organizationId}": {
+			"get": {
+				"operationId": "getOrganizationById",
+				"summary": "Gets a specific organization.",
+				"tags": ["Organizations"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "organizationId",
+						"description": "The PDC-generated ID of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The requested organization.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Organization"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/presignedPostRequests": {
 			"post": {
 				"operationId": "addPresignedPostRequest",

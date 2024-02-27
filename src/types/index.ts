@@ -4,6 +4,7 @@ export * from './ApplicationFormField';
 export * from './BaseField';
 export * from './BulkUpload';
 export * from './Bundle';
+export * from './IdParameters';
 export * from './JsonObject';
 export * from './Opportunity';
 export * from './Organization';

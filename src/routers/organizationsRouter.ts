@@ -10,4 +10,10 @@ organizationsRouter.get(
 	organizationsHandlers.getOrganizations,
 );
 
+organizationsRouter.get(
+	'/:id',
+	verifyAuth,
+	organizationsHandlers.getOrganization,
+);
+
 export { organizationsRouter };

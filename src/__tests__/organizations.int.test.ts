@@ -108,4 +108,31 @@ describe('/organizations', () => {
 				);
 		});
 	});
+
+	describe('GET /:id', () => {
+		it('returns 404 when given id is not present', async () => {
+			await agent.get('/organizations/9001').set(authHeader).expect(404);
+		});
+
+		it('returns the specified organization', async () => {
+			await insertTestOrganizations();
+			await agent
+				.get('/organizations/2')
+				.set(authHeader)
+				.expect(200)
+				.expect((res) =>
+					expect(res.body).toEqual({
+						id: 2,
+						employerIdentificationNumber: '22-2222222',
+						name: 'Another Inc.',
+						createdAt: expectTimestamp,
+					}),
+				);
+		});
+
+		it('returns a 400 bad request when a non-integer ID is sent', async () => {
+			await insertTestOrganizations();
+			await agent.get('/organizations/foo').set(authHeader).expect(400);
+		});
+	});
 });

@@ -934,6 +934,48 @@
 						}
 					}
 				}
+			},
+			"post": {
+				"operationId": "addOrganization",
+				"summary": "Adds a new organization.",
+				"tags": ["Organizations"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Organization"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new organization that was created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Organization"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
 			}
 		},
 		"/organizations/{organizationId}": {

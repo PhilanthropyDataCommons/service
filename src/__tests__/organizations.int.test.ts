@@ -1,8 +1,9 @@
 import request from 'supertest';
 import { app } from '../app';
-import { createOrganization, db } from '../database';
+import { createOrganization, db, loadTableMetrics } from '../database';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
+import { PostgresErrorCode } from '../types';
 
 const agent = request.agent(app);
 
@@ -133,6 +134,84 @@ describe('/organizations', () => {
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
 			await insertTestOrganizations();
 			await agent.get('/organizations/foo').set(authHeader).expect(400);
+		});
+	});
+
+	describe('POST /', () => {
+		it('creates exactly one organization', async () => {
+			const before = await loadTableMetrics('organizations');
+			const result = await agent
+				.post('/organizations')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					employerIdentificationNumber: '11-1111111',
+					name: 'Example Inc.',
+				})
+				.expect(201);
+			const after = await loadTableMetrics('organizations');
+			expect(before.count).toEqual(0);
+			expect(result.body).toMatchObject({
+				id: 1,
+				employerIdentificationNumber: '11-1111111',
+				name: 'Example Inc.',
+				createdAt: expectTimestamp,
+			});
+			expect(after.count).toEqual(1);
+		});
+
+		it('returns 400 bad request when no employerIdentificationNumber is sent', async () => {
+			const result = await agent
+				.post('/organizations')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					name: 'Foo Co.',
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 400 bad request when no name is sent', async () => {
+			const result = await agent
+				.post('/organizations')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					employerIdentificationNumber: '11-1111111',
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 409 conflict when an existing EIN + name combination is submitted', async () => {
+			await createOrganization({
+				employerIdentificationNumber: '11-1111111',
+				name: 'Example Inc.',
+			});
+			const result = await agent
+				.post('/organizations')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					employerIdentificationNumber: '11-1111111',
+					name: 'Example Inc.',
+				})
+				.expect(409);
+			expect(result.body).toMatchObject({
+				name: 'DatabaseError',
+				details: [
+					{
+						code: PostgresErrorCode.UNIQUE_VIOLATION,
+					},
+				],
+			});
 		});
 	});
 });

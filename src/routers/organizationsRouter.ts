@@ -16,4 +16,10 @@ organizationsRouter.get(
 	organizationsHandlers.getOrganization,
 );
 
+organizationsRouter.post(
+	'/',
+	verifyAuth,
+	organizationsHandlers.postOrganization,
+);
+
 export { organizationsRouter };

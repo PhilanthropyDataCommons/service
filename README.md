@@ -122,11 +122,35 @@ LOG_LEVEL=trace npm run test
 
 Alternatively, one may set `LOG_LEVEL` in the `.env` file.
 
-### Authentication
+### Authentication and Authorization
 
-The service validates a Bearer JSON Web Token (JWT) found in the `Authorization` HTTP header.
+A valid Bearer JSON Web Token (Bearer JWT) is required in requests to the PDC service. The PDC officially reccomends using [KeyCloak](https://www.keycloak.org/) as the authentication provider, but supports any valid Bearer JWT provider. Please refer to [the relevant documentation for setup and configuration](https://www.keycloak.org/guides#getting-started)
 
-See the `.env.example` for relevant variables.
+See `.env.example` for documentation on the necessary environment variables for Keycloak (or chosen authentication provider)
+
+#### An example with a Keycloak authentication and Swagger-UI
+
+We use Swagger to generate an interactive api interface as the default route for the service.
+From the Keycloak admin interface, e.g. https://my-host/admin:
+
+1. Add a realm e.g. "pdc" (avoid spaces in the name).
+2. Within the realm just added in step (1) add a client e.g. "pdc-openapi-docs", with Client authentication off and Authorization off:
+   - Standard flow Checked,
+   - Direct access grants unchecked,
+   - Implicit flow unchecked,
+   - Service accounts roles unchecked,
+   - OAuth 2.0 Device Authorization Grant (optional), and
+   - OIDC CIBA Grant unchecked.
+3. In the settings for the client added in step (2), set the root URL and Home URL to the URL of the PDC service (not the auth service). [For development purposes, all callback routes can be authorized](https://www.keycloak.org/docs/23.0.7/authorization_services/#_resource_overview)
+   - `/*`
+4. In the settings for the client added in step (2), add a Web origins of `+`.
+5. Within the realm, add a user, e.g. `test-user`. Set a password for this user.
+6. Set your environment variables (see `.env.example`)
+7. Run the service repository with `npm run start`.
+8. Go to swagger ui page at `http://localhost:3001/`
+9. Click "Authorize" in the top left and click the "Authorize" button in the popup
+10. Proceed through keycloak login
+11. Once logged in and redirected to swagger ui, query any of the endpoints to test authentication
 
 ### Understanding the Project
 

@@ -1,4 +1,3 @@
-export * from './Applicant';
 export * from './ApplicationForm';
 export * from './ApplicationFormField';
 export * from './BaseField';

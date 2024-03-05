@@ -5,7 +5,6 @@ import type { ProposalVersion } from './ProposalVersion';
 
 export interface Proposal {
 	id: number;
-	applicantId: number;
 	opportunityId: number;
 	externalId: string;
 	versions?: ProposalVersion[];
@@ -18,9 +17,6 @@ export const proposalSchema: JSONSchemaType<Proposal> = {
 	type: 'object',
 	properties: {
 		id: {
-			type: 'integer',
-		},
-		applicantId: {
 			type: 'integer',
 		},
 		opportunityId: {
@@ -41,15 +37,12 @@ export const proposalSchema: JSONSchemaType<Proposal> = {
 			instanceof: 'Date',
 		},
 	},
-	required: ['id', 'applicantId', 'opportunityId', 'externalId', 'createdAt'],
+	required: ['id', 'opportunityId', 'externalId', 'createdAt'],
 };
 
 export const proposalWriteSchema: JSONSchemaType<ProposalWrite> = {
 	type: 'object',
 	properties: {
-		applicantId: {
-			type: 'integer',
-		},
 		opportunityId: {
 			type: 'integer',
 		},
@@ -58,7 +51,7 @@ export const proposalWriteSchema: JSONSchemaType<ProposalWrite> = {
 			pattern: '.+',
 		},
 	},
-	required: ['applicantId', 'opportunityId', 'externalId'],
+	required: ['opportunityId', 'externalId'],
 };
 
 export const isProposal = ajv.compile(proposalSchema);

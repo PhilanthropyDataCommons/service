@@ -4,7 +4,7 @@ import type { Result } from 'tinypg';
 
 describe('loadTableMetrics', () => {
 	it('Should reflect metrics properly for an empty table', async () => {
-		const metrics = await loadTableMetrics('applicants');
+		const metrics = await loadTableMetrics('organizations');
 		expect(metrics).toMatchObject({
 			count: 0,
 			now: expect.any(Date) as Date,
@@ -19,8 +19,8 @@ describe('loadTableMetrics', () => {
 				}) as unknown as Result<object>,
 		);
 
-		await expect(loadTableMetrics('applicants')).rejects.toThrow(
-			'Something went wrong collecting table metrics for applicants',
+		await expect(loadTableMetrics('organizations')).rejects.toThrow(
+			'Something went wrong collecting table metrics for organizations',
 		);
 	});
 });

@@ -6,7 +6,6 @@ import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUpload } from '../processBulkUpload';
 import { BulkUploadStatus, Proposal } from '../../types';
 import type {
-	Applicant,
 	ApplicationForm,
 	ApplicationFormField,
 	BaseField,
@@ -285,47 +284,6 @@ describe('processBulkUpload', () => {
 		expect(requests.getRequest.isDone()).toEqual(false);
 	});
 
-	it('should fail if the csv does not have a proposal_submitter_email field', async () => {
-		await createTestBaseFields();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/missingEmail.csv`,
-		);
-
-		await processBulkUpload(
-			{
-				bulkUploadId: bulkUpload.id,
-			},
-			getMockJobHelpers(),
-		);
-		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
-		expect(updatedBulkUpload).toMatchObject({
-			status: BulkUploadStatus.FAILED,
-			fileSize: 36,
-		});
-	});
-
-	it('should move the csv file to processed location if the csv does not have a proposal_submitter_email field', async () => {
-		await createTestBaseFields();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		const requests = await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/missingEmail.csv`,
-		);
-
-		await processBulkUpload(
-			{
-				bulkUploadId: bulkUpload.id,
-			},
-			getMockJobHelpers(),
-		);
-		expect(requests.copyRequest.isDone()).toEqual(true);
-		expect(requests.deleteRequest.isDone()).toEqual(true);
-	});
-
 	it('should fail if the csv contains an invalid short code', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
@@ -446,13 +404,6 @@ describe('processBulkUpload', () => {
 			createdAt: expect.any(Date) as Date,
 		});
 
-		const {
-			rows: [applicant],
-		} = await db.sql<Applicant>('applicants.selectAll');
-		if (applicant === undefined) {
-			fail('The applicant was not created');
-		}
-
 		const [firstProposal, secondProposal] = await getProposalsByExternalIds([
 			'1',
 			'2',
@@ -464,13 +415,11 @@ describe('processBulkUpload', () => {
 			fail('The second proposal was not created');
 		}
 		expect(firstProposal).toMatchObject({
-			applicantId: applicant.id,
 			externalId: '1',
 			opportunityId: opportunity.id,
 			createdAt: expect.any(Date) as Date,
 		});
 		expect(secondProposal).toMatchObject({
-			applicantId: applicant.id,
 			externalId: '2',
 			opportunityId: opportunity.id,
 			createdAt: expect.any(Date) as Date,

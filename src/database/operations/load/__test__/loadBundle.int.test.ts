@@ -1,27 +1,29 @@
-import { loadBundle } from '..';
-import { isApplicant } from '../../../../types';
-import { db } from '../../..';
+import { createOrganization, loadBundle } from '../../..';
+import { isOrganization } from '../../../../types';
 
 describe('loadBundle', () => {
 	it('Should return a bundle for the query', async () => {
-		await db.sql('applicants.insertOne', {
-			externalId: '12345',
-			optedIn: true,
+		await createOrganization({
+			employerIdentificationNumber: '11-1111111',
+			name: 'Foo Inc.',
 		});
 		const objects = await loadBundle(
-			'applicants.selectAll',
-			{},
-			'applicants',
-			isApplicant,
+			'organizations.selectWithPagination',
+			{
+				limit: 10,
+				offset: 0,
+			},
+			'organizations',
+			isOrganization,
 		);
 		expect(objects).toMatchObject({
 			total: 1,
 			entries: [
 				{
 					createdAt: expect.any(Date) as Date,
-					externalId: '12345',
+					employerIdentificationNumber: '11-1111111',
 					id: 1,
-					optedIn: true,
+					name: 'Foo Inc.',
 				},
 			],
 		});

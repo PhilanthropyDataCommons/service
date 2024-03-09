@@ -38,23 +38,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -98,23 +88,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -233,23 +213,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -292,23 +262,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -357,23 +317,13 @@ describe('/proposalVersions', () => {
           ( '💧', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -424,23 +374,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -494,23 +434,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -580,23 +510,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -636,23 +556,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -703,23 +613,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -770,23 +670,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -856,23 +746,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -945,23 +825,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -1012,23 +882,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -1103,23 +963,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (
@@ -1173,23 +1023,13 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			await db.query(`
-        INSERT INTO applicants (
-          external_id,
-          opted_in,
-          created_at
-        )
-        VALUES
-          ( '12345', 'true', '2022-07-20 12:00:00+0000' );
-      `);
-			await db.query(`
         INSERT INTO proposals (
-          applicant_id,
           external_id,
           opportunity_id,
           created_at
         )
         VALUES
-          ( 1, 'proposal-1', 1, '2525-01-01T00:00:05Z' );
+          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
       `);
 			await db.query(`
         INSERT INTO application_forms (

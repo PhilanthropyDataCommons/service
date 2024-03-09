@@ -17,7 +17,6 @@ import type { GetObjectCommandOutput } from '@aws-sdk/client-s3';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
-	Applicant,
 	ApplicationForm,
 	ApplicationFormField,
 	BulkUpload,
@@ -28,10 +27,6 @@ import type {
 } from '../types';
 
 const { S3_BUCKET } = requireEnv('S3_BUCKET');
-
-enum RequiredBulkUploadFields {
-	PROPOSAL_SUBMITTER_EMAIL = 'proposal_submitter_email',
-}
 
 const updateBulkUploadStatus = async (
 	id: number,
@@ -134,17 +129,6 @@ const loadShortCodesFromBulkUploadCsv = async (
 	return shortCodes ?? [];
 };
 
-const assertShortCodesIncludeRequiredFields = (shortCodes: string[]): void => {
-	const requiredFields = Object.values(RequiredBulkUploadFields);
-	requiredFields.forEach((requiredField) => {
-		if (
-			!shortCodes.find((shortCode) => shortCode === requiredField.valueOf())
-		) {
-			throw new Error(`${requiredField.valueOf()} is a required field.`);
-		}
-	});
-};
-
 const assertShortCodesReferToExistingBaseFields = async (
 	shortCodes: string[],
 ): Promise<void> => {
@@ -162,7 +146,6 @@ const assertShortCodesReferToExistingBaseFields = async (
 const assertShortCodesAreValid = async (
 	shortCodes: string[],
 ): Promise<void> => {
-	assertShortCodesIncludeRequiredFields(shortCodes);
 	await assertShortCodesReferToExistingBaseFields(shortCodes);
 };
 
@@ -195,16 +178,6 @@ const assertCsvContainsRowsOfEqualLength = async (
 const assertBulkUploadCsvIsValid = async (csvPath: string): Promise<void> => {
 	await assertCsvContainsValidShortCodes(csvPath);
 	await assertCsvContainsRowsOfEqualLength(csvPath);
-};
-
-export const getApplicantEmailFieldIndexForBulkUpload = async (
-	csvPath: string,
-): Promise<number> => {
-	const shortCodes = await loadShortCodesFromBulkUploadCsv(csvPath);
-	return shortCodes.findIndex(
-		(shortCode) =>
-			shortCode === RequiredBulkUploadFields.PROPOSAL_SUBMITTER_EMAIL.valueOf(),
-	);
 };
 
 const createOpportunityForBulkUpload = async (
@@ -270,29 +243,11 @@ const createApplicationFormFieldsForBulkUpload = async (
 	return applicationFormFields;
 };
 
-const createOrLoadApplicantForBulkUploadCsvRecord = async (
-	externalId: string,
-): Promise<Applicant> => {
-	const result = await db.sql<Applicant>('applicants.insertOrLoadOne', {
-		externalId,
-		optedIn: false,
-	});
-	const applicant = result.rows[0];
-	if (applicant === undefined) {
-		throw new NotFoundError(
-			'The applicant did not exist and could not be created',
-		);
-	}
-	return applicant;
-};
-
 const createProposalForBulkUploadCsvRecord = async (
-	applicantId: number,
 	opportunityId: number,
 	externalId: string,
 ): Promise<Proposal> => {
 	const result = await db.sql<Proposal>('proposals.insertOne', {
-		applicantId,
 		opportunityId,
 		externalId,
 	});
@@ -399,8 +354,6 @@ export const processBulkUpload = async (
 				applicationForm.id,
 			);
 
-		const applicantEmailFieldIndex =
-			await getApplicantEmailFieldIndexForBulkUpload(bulkUploadFile.path);
 		const csvReadStream = fs.createReadStream(bulkUploadFile.path);
 		const parser = parse({
 			from: 2,
@@ -409,14 +362,7 @@ export const processBulkUpload = async (
 		let recordNumber = 0;
 		await parser.forEach(async (record: string[]) => {
 			recordNumber += 1;
-			const applicantEmail = record[applicantEmailFieldIndex];
-			if (applicantEmail === undefined) {
-				throw new Error("The applicant's email address must be provided.");
-			}
-			const applicant =
-				await createOrLoadApplicantForBulkUploadCsvRecord(applicantEmail);
 			const proposal = await createProposalForBulkUploadCsvRecord(
-				applicant.id,
 				opportunity.id,
 				`${recordNumber}`,
 			);

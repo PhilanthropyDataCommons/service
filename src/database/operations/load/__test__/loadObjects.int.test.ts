@@ -1,32 +1,45 @@
 import { loadObjects } from '..';
-import { isApplicant, isProposal } from '../../../../types';
+import { isOrganization, isProposal } from '../../../../types';
 import { InternalValidationError } from '../../../../errors';
-import { db } from '../../..';
+import { createOrganization } from '../../..';
 
 describe('loadObjects', () => {
 	it('Should return objects provided by the database', async () => {
-		await db.sql('applicants.insertOne', {
-			externalId: '12345',
-			optedIn: true,
+		await createOrganization({
+			employerIdentificationNumber: '11-1111111',
+			name: 'Foo Inc.',
 		});
-		const objects = await loadObjects('applicants.selectAll', {}, isApplicant);
+		const objects = await loadObjects(
+			'organizations.selectWithPagination',
+			{
+				limit: 10,
+				offset: 0,
+			},
+			isOrganization,
+		);
 		expect(objects).toMatchObject([
 			{
 				createdAt: expect.any(Date) as Date,
-				externalId: '12345',
+				employerIdentificationNumber: '11-1111111',
 				id: 1,
-				optedIn: true,
 			},
 		]);
 	});
 
 	it('Should throw an error if the format returned by the database does not align with the expected schema', async () => {
-		await db.sql('applicants.insertOne', {
-			externalId: '12345',
-			optedIn: true,
+		await createOrganization({
+			employerIdentificationNumber: '11-1111111',
+			name: 'Foo Inc.',
 		});
 		await expect(
-			loadObjects('applicants.selectAll', {}, isProposal),
+			loadObjects(
+				'organizations.selectWithPagination',
+				{
+					limit: 10,
+					offset: 0,
+				},
+				isProposal,
+			),
 		).rejects.toBeInstanceOf(InternalValidationError);
 	});
 });

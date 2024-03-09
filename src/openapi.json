@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.3.1"
+		"version": "0.4.0"
 	},
 	"components": {
 		"parameters": {
@@ -59,29 +59,6 @@
 			}
 		},
 		"schemas": {
-			"Applicant": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3407
-					},
-					"externalId": {
-						"type": "string",
-						"example": "111-11-1111"
-					},
-					"optedIn": {
-						"type": "boolean"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["id", "externalId", "optedIn", "createdAt"]
-			},
 			"BulkUpload": {
 				"type": "object",
 				"properties": {
@@ -194,10 +171,6 @@
 						"readOnly": true,
 						"example": 3709
 					},
-					"applicantId": {
-						"type": "integer",
-						"example": 3407
-					},
 					"opportunityId": {
 						"type": "integer",
 						"example": 3203
@@ -220,13 +193,7 @@
 						"readOnly": true
 					}
 				},
-				"required": [
-					"id",
-					"applicantId",
-					"opportunityId",
-					"externalId",
-					"createdAt"
-				]
+				"required": ["id", "opportunityId", "externalId", "createdAt"]
 			},
 			"ProposalVersion": {
 				"type": "object",
@@ -525,130 +492,6 @@
 		}
 	},
 	"paths": {
-		"/applicants": {
-			"get": {
-				"operationId": "getApplicants",
-				"summary": "Gets a list of applicants.",
-				"tags": ["Applicants"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "All applicants currently registered in the PDC.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/Applicant"
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication was not provided or was invalid.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PdcError"
-								}
-							}
-						}
-					}
-				}
-			},
-			"post": {
-				"operationId": "addApplicant",
-				"summary": "Adds a new applicant.",
-				"tags": ["Applicants"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/Applicant"
-							}
-						}
-					}
-				},
-				"responses": {
-					"201": {
-						"description": "The new applicant that was created",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Applicant"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication was not provided or was invalid.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PdcError"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/applicants/{externalId}": {
-			"get": {
-				"operationId": "getApplicantByExternalId",
-				"summary": "Gets a specific applicant, including all known field values associated with the applicant.",
-				"tags": ["Applicants"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"parameters": [
-					{
-						"name": "externalId",
-						"description": "The external identifier of an applicant.",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "The populated applicant.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Applicant"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication was not provided or was invalid.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PdcError"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
 		"/applicationForms": {
 			"get": {
 				"operationId": "getApplicationForms",
@@ -1201,7 +1044,6 @@
 										"summary": "The default, shallow response with no parameters or where `includeFieldsAndValues=false`",
 										"value": {
 											"id": 3709,
-											"applicantId": 3407,
 											"externalId": "AnIdGeneratedByAGms",
 											"opportunityId": 3203,
 											"createdAt": "2022-12-30T15:50:58.839Z"
@@ -1211,7 +1053,6 @@
 										"summary": "The response when `includeFieldsAndValues` is set to `true`.",
 										"value": {
 											"id": 3709,
-											"applicantId": 3407,
 											"externalId": "AnIdGeneratedByAGms",
 											"opportunityId": 3203,
 											"createdAt": "2022-12-30T15:50:58.839Z",

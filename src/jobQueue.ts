@@ -42,7 +42,7 @@ export const startJobQueue = async () => {
 	});
 	runner.promise.catch((err) => {
 		logger.error(err, 'The queue worker failed.');
-	})
+	});
 };
 
 export const runJobQueueMigrations = async () =>

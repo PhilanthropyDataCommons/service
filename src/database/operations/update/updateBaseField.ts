@@ -1,10 +1,10 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
-import type { BaseField, BaseFieldWrite } from '../../../types';
+import type { BaseField, WritableBaseField } from '../../../types';
 
 export const updateBaseField = async (
 	id: number,
-	updateValues: BaseFieldWrite,
+	updateValues: WritableBaseField,
 ): Promise<BaseField> => {
 	const { label, description, shortCode, dataType } = updateValues;
 	const result = await db.sql<BaseField>('baseFields.updateById', {

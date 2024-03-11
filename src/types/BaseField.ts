@@ -1,18 +1,19 @@
 import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
+import type { Writable } from './Writable';
 
-export interface BaseField {
-	id: number;
+interface BaseField {
+	readonly id: number;
 	label: string;
 	description: string;
 	shortCode: string;
 	dataType: string;
-	createdAt: Date;
+	readonly createdAt: Date;
 }
 
-export type BaseFieldWrite = Omit<BaseField, 'createdAt' | 'id'>;
+type WritableBaseField = Writable<BaseField>;
 
-export const baseFieldWriteSchema: JSONSchemaType<BaseFieldWrite> = {
+const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 	type: 'object',
 	properties: {
 		label: {
@@ -31,4 +32,11 @@ export const baseFieldWriteSchema: JSONSchemaType<BaseFieldWrite> = {
 	required: ['label', 'description', 'shortCode', 'dataType'],
 };
 
-export const isBaseFieldWrite = ajv.compile(baseFieldWriteSchema);
+const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
+
+export {
+	BaseField,
+	isWritableBaseField,
+	WritableBaseField,
+	writableBaseFieldSchema,
+};

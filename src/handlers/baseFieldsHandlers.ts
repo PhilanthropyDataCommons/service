@@ -1,6 +1,6 @@
 import { getLogger } from '../logger';
 import { db, updateBaseField } from '../database';
-import { isTinyPgErrorWithQueryContext, isBaseFieldWrite } from '../types';
+import { isTinyPgErrorWithQueryContext, isWritableBaseField } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import type { Request, Response, NextFunction } from 'express';
 import type { Result } from 'tinypg';
@@ -33,11 +33,11 @@ const postBaseField = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (!isBaseFieldWrite(req.body)) {
+	if (!isWritableBaseField(req.body)) {
 		next(
 			new InputValidationError(
 				'Invalid request body.',
-				isBaseFieldWrite.errors ?? [],
+				isWritableBaseField.errors ?? [],
 			),
 		);
 		return;
@@ -69,11 +69,11 @@ const putBaseField = (
 		return;
 	}
 	const body = req.body as unknown;
-	if (!isBaseFieldWrite(body)) {
+	if (!isWritableBaseField(body)) {
 		next(
 			new InputValidationError(
 				'Invalid request body.',
-				isBaseFieldWrite.errors ?? [],
+				isWritableBaseField.errors ?? [],
 			),
 		);
 		return;

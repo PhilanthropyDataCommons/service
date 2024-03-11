@@ -260,7 +260,7 @@ describe('/baseFields', () => {
 				description: '😍',
 				shortCode: '🩳',
 				dataType: '📊',
-				createdAt: expect.any(Date) as Date,
+				createdAt: expectTimestamp,
 			});
 		});
 

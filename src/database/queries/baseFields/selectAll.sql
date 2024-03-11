@@ -1,8 +1,2 @@
-SELECT
-  id,
-  label,
-  description,
-  short_code as "shortCode",
-  data_type as "dataType",
-  created_at as "createdAt"
+SELECT base_field_to_json(base_fields.*) as "object"
 FROM base_fields;

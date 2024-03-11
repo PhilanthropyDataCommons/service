@@ -1,5 +1,5 @@
 import { getLogger } from '../logger';
-import { db, updateBaseField } from '../database';
+import { db, loadBaseFields, updateBaseField } from '../database';
 import { isTinyPgErrorWithQueryContext, isWritableBaseField } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import type { Request, Response, NextFunction } from 'express';
@@ -13,10 +13,8 @@ const getBaseFields = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	db.sql('baseFields.selectAll')
-		.then((baseFieldsQueryResult: Result<BaseField>) => {
-			logger.debug(baseFieldsQueryResult);
-			const { rows: baseFields } = baseFieldsQueryResult;
+	loadBaseFields()
+		.then((baseFields) => {
 			res.status(200).contentType('application/json').send(baseFields);
 		})
 		.catch((error: unknown) => {

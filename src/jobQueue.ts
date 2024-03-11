@@ -40,7 +40,9 @@ export const startJobQueue = async () => {
 			processBulkUpload,
 		},
 	});
-	await runner.promise;
+	runner.promise.catch((err) => {
+		logger.error(err, 'The queue worker failed.');
+	})
 };
 
 export const runJobQueueMigrations = async () =>

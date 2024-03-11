@@ -1,6 +1,6 @@
 import nock from 'nock';
 import { requireEnv } from 'require-env-variable';
-import { db, loadBulkUpload } from '../../database';
+import { db, createBaseField, loadBulkUpload } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUpload } from '../processBulkUpload';
@@ -58,17 +58,13 @@ const createTestBulkUpload = async (
 };
 
 const createTestBaseFields = async (): Promise<[BaseField, BaseField]> => {
-	const {
-		rows: [proposalSubmitterEmailBaseField],
-	} = await db.sql<BaseField>('baseFields.insertOne', {
+	const proposalSubmitterEmailBaseField = await createBaseField({
 		label: 'Proposal Submitter Email',
 		description: 'The email address of the person who submitted the proposal.',
 		shortCode: 'proposal_submitter_email',
 		dataType: 'string',
 	});
-	const {
-		rows: [organizationNameBaseField],
-	} = await db.sql<BaseField>('baseFields.insertOne', {
+	const organizationNameBaseField = await createBaseField({
 		label: 'Organization Name',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_name',

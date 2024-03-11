@@ -1,12 +1,7 @@
-import { getLogger } from '../logger';
-import { db, loadBaseFields, updateBaseField } from '../database';
+import { createBaseField, loadBaseFields, updateBaseField } from '../database';
 import { isTinyPgErrorWithQueryContext, isWritableBaseField } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import type { Request, Response, NextFunction } from 'express';
-import type { Result } from 'tinypg';
-import type { BaseField } from '../types';
-
-const logger = getLogger(__filename);
 
 const getBaseFields = (
 	req: Request,
@@ -41,10 +36,8 @@ const postBaseField = (
 		return;
 	}
 
-	db.sql('baseFields.insertOne', req.body)
-		.then((baseFieldsQueryResult: Result<BaseField>) => {
-			logger.debug(baseFieldsQueryResult);
-			const baseField = baseFieldsQueryResult.rows[0];
+	createBaseField(req.body)
+		.then((baseField) => {
 			res.status(201).contentType('application/json').send(baseField);
 		})
 		.catch((error: unknown) => {

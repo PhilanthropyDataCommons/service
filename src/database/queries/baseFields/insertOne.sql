@@ -10,10 +10,4 @@ VALUES (
   :shortCode,
   :dataType
 )
-RETURNING
-  id as "id",
-  label as "label",
-  description as "description",
-  short_code as "shortCode",
-  data_type as "dataType",
-  created_at as "createdAt"
+RETURNING base_field_to_json(base_fields) AS "object";

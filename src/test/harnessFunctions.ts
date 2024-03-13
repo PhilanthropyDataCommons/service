@@ -1,4 +1,4 @@
-import { db, migrate } from '../database';
+import { db, migrate, initializeDatabase } from '../database';
 
 const generateSchemaName = (workerId: string): string => `test_${workerId}`;
 
@@ -44,6 +44,7 @@ export const prepareDatabaseForCurrentWorker = async (): Promise<void> => {
 	await createSchema(schemaName);
 	await setSchema(schemaName);
 	await migrate(schemaName);
+	await initializeDatabase();
 };
 
 export const cleanupDatabaseForCurrentWorker = async (): Promise<void> => {

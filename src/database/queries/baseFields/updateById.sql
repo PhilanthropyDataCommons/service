@@ -4,10 +4,4 @@ UPDATE base_fields SET
   short_code = :shortCode,
   data_type = :dataType
 WHERE id = :id
-RETURNING
-  id,
-  label,
-  description,
-  short_code as "shortCode",
-  data_type as "dataType",
-  created_at as "createdAt"
+RETURNING base_field_to_json(base_fields) AS "object";

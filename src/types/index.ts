@@ -5,6 +5,7 @@ export * from './BulkUpload';
 export * from './Bundle';
 export * from './IdParameters';
 export * from './JsonObject';
+export * from './JsonResultSet';
 export * from './Opportunity';
 export * from './Organization';
 export * from './PaginationParameters';

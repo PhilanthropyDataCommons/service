@@ -6,15 +6,13 @@ import type {
 	WritableBaseField,
 } from '../../../types';
 
-export const updateBaseField = async (
-	id: number,
-	updateValues: WritableBaseField,
+export const createBaseField = async (
+	createValues: WritableBaseField,
 ): Promise<BaseField> => {
-	const { label, description, shortCode, dataType } = updateValues;
+	const { label, description, shortCode, dataType } = createValues;
 	const result = await db.sql<JsonResultSet<BaseField>>(
-		'baseFields.updateById',
+		'baseFields.insertOne',
 		{
-			id,
 			label,
 			description,
 			shortCode,
@@ -23,7 +21,7 @@ export const updateBaseField = async (
 	);
 	const baseField = result.rows[0]?.object;
 	if (baseField === undefined) {
-		throw new NotFoundError('This base field does not exist.');
+		throw new NotFoundError('The base field could not be created.');
 	}
 	return baseField;
 };

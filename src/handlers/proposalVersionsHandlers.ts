@@ -1,9 +1,8 @@
 import { getLogger } from '../logger';
-import { db } from '../database';
+import { db, loadProposal } from '../database';
 import {
 	isApplicationForm,
 	isApplicationFormField,
-	isProposal,
 	isProposalVersionWrite,
 	isProposalVersion,
 	isProposalFieldValue,
@@ -14,16 +13,17 @@ import {
 	InternalValidationError,
 	InputValidationError,
 	InputConflictError,
+	NotFoundError,
 } from '../errors';
 import type { Request, Response, NextFunction } from 'express';
 import type {
 	ApplicationForm,
 	ApplicationFormField,
-	Proposal,
 	ProposalVersion,
 	ProposalVersionWrite,
 	ProposalFieldValue,
 	ProposalFieldValueWrite,
+	Proposal,
 } from '../types';
 
 const logger = getLogger(__filename);
@@ -50,21 +50,22 @@ const assertApplicationFormExistsForProposal = async (
 		);
 	}
 
-	const proposalsQueryResult = await db.sql<Proposal>('proposals.selectById', {
-		id: proposalId,
-	});
-	const proposal = proposalsQueryResult.rows[0];
-	if (proposal === undefined) {
-		throw new InputConflictError('The Proposal does not exist.', {
-			entityType: 'Proposal',
-			entityId: proposalId,
-		});
-	}
-	if (!isProposal(proposal)) {
-		throw new InternalValidationError(
-			'The database responded with an unexpected format when looking up the Proposal.',
-			isProposal.errors ?? [],
-		);
+	let proposal: Proposal;
+	try {
+		proposal = await loadProposal(proposalId);
+	} catch (err) {
+		if (err instanceof NotFoundError) {
+			throw new InputConflictError(
+				`The specified Proposal does not exist (${proposalId}).`,
+				{
+					entityType: 'Proposal',
+					entityId: proposalId,
+					contextEntityType: 'ApplicationForm',
+					contextEntityId: applicationFormId,
+				},
+			);
+		}
+		throw err;
 	}
 
 	if (proposal.opportunityId !== applicationForm.opportunityId) {

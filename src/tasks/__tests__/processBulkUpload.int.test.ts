@@ -1,10 +1,16 @@
 import nock from 'nock';
 import { requireEnv } from 'require-env-variable';
-import { db, createBaseField, loadBulkUpload } from '../../database';
+import {
+	db,
+	createBaseField,
+	loadBulkUpload,
+	loadProposalBundle,
+} from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUpload } from '../processBulkUpload';
 import { BulkUploadStatus, Proposal } from '../../types';
+import { expectTimestamp } from '../../test/utils';
 import type {
 	ApplicationForm,
 	ApplicationFormField,
@@ -125,16 +131,13 @@ const mockS3ResponsesForBulkUploadProcessing = async (
 const getProposalsByExternalIds = async (
 	externalIds: string[],
 ): Promise<Proposal[]> => {
-	const { rows: proposals } = await db.sql<Proposal>(
-		'proposals.selectWithPagination',
-		{
-			offset: 0,
-			limit: 100,
-			search: '',
-		},
-	);
+	const proposals = await loadProposalBundle({
+		offset: 0,
+		limit: 100,
+		search: '',
+	});
 	return externalIds.map((externalId) => {
-		const proposal = proposals.find(
+		const proposal = proposals.entries.find(
 			(proposalCandidate) => proposalCandidate.externalId === externalId,
 		);
 		if (proposal === undefined) {
@@ -413,12 +416,12 @@ describe('processBulkUpload', () => {
 		expect(firstProposal).toMatchObject({
 			externalId: '1',
 			opportunityId: opportunity.id,
-			createdAt: expect.any(Date) as Date,
+			createdAt: expectTimestamp,
 		});
 		expect(secondProposal).toMatchObject({
 			externalId: '2',
 			opportunityId: opportunity.id,
-			createdAt: expect.any(Date) as Date,
+			createdAt: expectTimestamp,
 		});
 
 		const { rows: proposalVersions } = await db.sql<ProposalVersion>(

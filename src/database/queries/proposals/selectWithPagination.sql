@@ -1,7 +1,4 @@
-SELECT p.id AS "id",
-  p.external_id AS "externalId",
-  p.opportunity_id AS "opportunityId",
-  p.created_at AS "createdAt"
+SELECT proposal_to_json(p.*) as "object"
 FROM proposals p
   LEFT JOIN proposal_versions pv ON pv.proposal_id = p.id
   LEFT JOIN proposal_field_values pfv on pfv.proposal_version_id = pv.id
@@ -14,4 +11,4 @@ WHERE
     END
 GROUP BY p.id
 ORDER BY p.id DESC
-OFFSET :offset FETCH NEXT :limit ROWS ONLY
+OFFSET :offset FETCH NEXT :limit ROWS ONLY;

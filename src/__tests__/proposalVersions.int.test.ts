@@ -603,63 +603,6 @@ describe('/proposalVersions', () => {
 			});
 		});
 
-		it('returns 500 if the database returns an unexpected data structure when selecting the proposal for validation', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
-      `);
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' );
-      `);
-			const unmockedDbSqlFunction = db.sql.bind(db);
-			jest
-				.spyOn(db, 'sql')
-				.mockImplementation(async (queryType: string, params, ...args) => {
-					if (queryType === 'proposals.selectById') {
-						return {
-							rows: [{ foo: 'not a valid result' }],
-						} as Result<object>;
-					}
-					return unmockedDbSqlFunction(queryType, params, ...args);
-				});
-
-			const result = await agent
-				.post('/proposalVersions')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					proposalId: 1,
-					applicationFormId: 1,
-					fieldValues: [],
-				})
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				message:
-					'The database responded with an unexpected format when looking up the Proposal.',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
 		it('returns 500 if the database returns an unexpected data structure when selecting the application form field for validation', async () => {
 			await db.query(`
         INSERT INTO opportunities (

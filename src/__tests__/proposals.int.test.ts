@@ -28,7 +28,11 @@ describe('/proposals', () => {
 	describe('GET /', () => {
 		logger.debug('Now running an proposals test');
 		it('returns an empty Bundle when no data is present', async () => {
-			await agent.get('/proposals').set(authHeader).expect(200, {
+			const response = await agent
+				.get('/proposals')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
 				total: 0,
 				entries: [],
 			});
@@ -67,57 +71,55 @@ describe('/proposals', () => {
 				value: 'This is a summary',
 			});
 
-			await agent
+			const response = await agent
 				.get('/proposals')
 				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						total: 2,
-						entries: [
-							{
-								id: 2,
-								externalId: 'proposal-2',
-								opportunityId: 1,
-								createdAt: expectTimestamp,
-								versions: [],
-							},
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 2,
+						externalId: 'proposal-2',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						versions: [],
+					},
+					{
+						id: 1,
+						externalId: 'proposal-1',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						versions: [
 							{
 								id: 1,
-								externalId: 'proposal-1',
-								opportunityId: 1,
+								proposalId: 1,
+								version: 1,
+								applicationFormId: 1,
 								createdAt: expectTimestamp,
-								versions: [
+								fieldValues: [
 									{
 										id: 1,
-										proposalId: 1,
-										version: 1,
-										applicationFormId: 1,
+										applicationFormFieldId: 1,
+										proposalVersionId: 1,
+										position: 1,
+										value: 'This is a summary',
 										createdAt: expectTimestamp,
-										fieldValues: [
-											{
-												id: 1,
-												applicationFormFieldId: 1,
-												proposalVersionId: 1,
-												position: 1,
-												value: 'This is a summary',
-												createdAt: expectTimestamp,
-												applicationFormField: {
-													id: 1,
-													applicationFormId: 1,
-													baseFieldId: 1,
-													label: 'Short summary',
-													position: 1,
-													createdAt: expectTimestamp,
-												},
-											},
-										],
+										applicationFormField: {
+											id: 1,
+											applicationFormId: 1,
+											baseFieldId: 1,
+											label: 'Short summary',
+											position: 1,
+											createdAt: expectTimestamp,
+										},
 									},
 								],
 							},
 						],
-					}),
-				);
+					},
+				],
+			});
 		});
 
 		it('returns a subset of proposals present in the database when search is provided', async () => {
@@ -163,50 +165,48 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'This is a pair of pants',
 			});
-			await agent
+			const response = await agent
 				.get('/proposals?_content=summary')
 				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						total: 2,
-						entries: [
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 1,
+						externalId: 'proposal-1',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						versions: [
 							{
 								id: 1,
-								externalId: 'proposal-1',
-								opportunityId: 1,
+								proposalId: 1,
+								version: 1,
+								applicationFormId: 1,
 								createdAt: expectTimestamp,
-								versions: [
+								fieldValues: [
 									{
 										id: 1,
-										proposalId: 1,
-										version: 1,
-										applicationFormId: 1,
+										applicationFormFieldId: 1,
+										proposalVersionId: 1,
+										position: 1,
+										value: 'This is a summary',
 										createdAt: expectTimestamp,
-										fieldValues: [
-											{
-												id: 1,
-												applicationFormFieldId: 1,
-												proposalVersionId: 1,
-												position: 1,
-												value: 'This is a summary',
-												createdAt: expectTimestamp,
-												applicationFormField: {
-													id: 1,
-													applicationFormId: 1,
-													baseFieldId: 1,
-													label: 'Short summary',
-													position: 1,
-													createdAt: expectTimestamp,
-												},
-											},
-										],
+										applicationFormField: {
+											id: 1,
+											applicationFormId: 1,
+											baseFieldId: 1,
+											label: 'Short summary',
+											position: 1,
+											createdAt: expectTimestamp,
+										},
 									},
 								],
 							},
 						],
-					}),
-				);
+					},
+				],
+			});
 		});
 
 		it('returns a subset of proposals present in the database when search is provided - tscfg simple', async () => {
@@ -254,50 +254,48 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'This is a pair of pants',
 			});
-			await agent
+			const response = await agent
 				.get('/proposals?_content=summary')
 				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						total: 2,
-						entries: [
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 1,
+						externalId: 'proposal-4999',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						versions: [
 							{
 								id: 1,
-								externalId: 'proposal-4999',
-								opportunityId: 1,
+								proposalId: 1,
+								version: 1,
+								applicationFormId: 1,
 								createdAt: expectTimestamp,
-								versions: [
+								fieldValues: [
 									{
 										id: 1,
-										proposalId: 1,
-										version: 1,
-										applicationFormId: 1,
+										applicationFormFieldId: 1,
+										proposalVersionId: 1,
+										position: 1,
+										value: 'This is a summary',
 										createdAt: expectTimestamp,
-										fieldValues: [
-											{
-												id: 1,
-												applicationFormFieldId: 1,
-												proposalVersionId: 1,
-												position: 1,
-												value: 'This is a summary',
-												createdAt: expectTimestamp,
-												applicationFormField: {
-													id: 1,
-													applicationFormId: 1,
-													baseFieldId: 1,
-													label: 'Concise summary',
-													position: 1,
-													createdAt: expectTimestamp,
-												},
-											},
-										],
+										applicationFormField: {
+											id: 1,
+											applicationFormId: 1,
+											baseFieldId: 1,
+											label: 'Concise summary',
+											position: 1,
+											createdAt: expectTimestamp,
+										},
 									},
 								],
 							},
 						],
-					}),
-				);
+					},
+				],
+			});
 		});
 
 		it('returns according to pagination parameters', async () => {
@@ -311,74 +309,73 @@ describe('/proposals', () => {
 					opportunityId: 1,
 				});
 			}, Promise.resolve());
-			await agent
+			const response = await agent
 				.get('/proposals')
 				.query({
 					_page: 2,
 					_count: 5,
 				})
 				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						total: 20,
-						entries: [
-							{
-								id: 15,
-								externalId: 'proposal-15',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-							{
-								id: 14,
-								externalId: 'proposal-14',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-							{
-								id: 13,
-								externalId: 'proposal-13',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-							{
-								id: 12,
-								externalId: 'proposal-12',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-							{
-								id: 11,
-								externalId: 'proposal-11',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-						],
-					}),
-				);
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 20,
+				entries: [
+					{
+						id: 15,
+						externalId: 'proposal-15',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
+					},
+					{
+						id: 14,
+						externalId: 'proposal-14',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
+					},
+					{
+						id: 13,
+						externalId: 'proposal-13',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
+					},
+					{
+						id: 12,
+						externalId: 'proposal-12',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
+					},
+					{
+						id: 11,
+						externalId: 'proposal-11',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
+					},
+				],
+			});
 		});
 	});
 
 	describe('GET /:id', () => {
 		it('returns 404 when given id is not present', async () => {
-			await agent
+			const response = await agent
 				.get('/proposals/9001')
 				.set(authHeader)
-				.expect(404, {
-					name: 'NotFoundError',
-					message:
-						'Not found. Find existing proposals by calling with no parameters.',
-					details: [
-						{
-							name: 'NotFoundError',
-						},
-					],
-				});
+				.expect(404);
+			expect(response.body).toEqual({
+				name: 'NotFoundError',
+				message:
+					'Not found. Find existing proposals by calling with no parameters.',
+				details: [
+					{
+						name: 'NotFoundError',
+					},
+				],
+			});
 		});
 
 		it('returns the one proposal asked for', async () => {
@@ -400,7 +397,11 @@ describe('/proposals', () => {
           ( 'proposal-1', 1, '2525-01-03T00:00:04Z' ),
           ( 'proposal-2', 1, '2525-01-03T00:00:05Z' );
       `);
-			await agent.get('/proposals/2').set(authHeader).expect(200, {
+			const response = await agent
+				.get('/proposals/2')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
 				id: 2,
 				externalId: 'proposal-2',
 				opportunityId: 1,
@@ -473,99 +474,100 @@ describe('/proposals', () => {
           ( 2, 1, 1, 'Title for version 2 from 2525-01-04', '2525-01-04T00:00:12Z' ),
           ( 2, 2, 2, 'Abstract for version 2 from 2525-01-04', '2525-01-04T00:00:13Z' );
       `);
-			await agent
+			const response = await agent
 				.get('/proposals/1/?includeFieldsAndValues=true')
 				.set(authHeader)
-				.expect(200, {
-					id: 1,
-					opportunityId: 1,
-					externalId: 'proposal-2525-01-04T00Z',
-					createdAt: '2525-01-04T00:00:07.000Z',
-					versions: [
-						{
-							id: 2,
-							proposalId: 1,
-							applicationFormId: 1,
-							version: 2,
-							createdAt: '2525-01-04T00:00:09.000Z',
-							fieldValues: [
-								{
-									id: 3,
-									proposalVersionId: 2,
-									applicationFormFieldId: 1,
-									position: 1,
-									value: 'Title for version 2 from 2525-01-04',
-									createdAt: '2525-01-04T00:00:12.000Z',
-									applicationFormField: {
-										id: 1,
-										applicationFormId: 1,
-										baseFieldId: 2,
-										position: 1,
-										label: 'Short summary or title',
-										createdAt: '2525-01-04T00:00:05.000Z',
-									},
-								},
-								{
-									id: 4,
-									proposalVersionId: 2,
-									applicationFormFieldId: 2,
-									position: 2,
-									value: 'Abstract for version 2 from 2525-01-04',
-									createdAt: '2525-01-04T00:00:13.000Z',
-									applicationFormField: {
-										id: 2,
-										applicationFormId: 1,
-										baseFieldId: 1,
-										position: 2,
-										label: 'Long summary or abstract',
-										createdAt: '2525-01-04T00:00:06.000Z',
-									},
-								},
-							],
-						},
-						{
-							id: 1,
-							proposalId: 1,
-							applicationFormId: 1,
-							version: 1,
-							createdAt: '2525-01-04T00:00:08.000Z',
-							fieldValues: [
-								{
+				.expect(200);
+			expect(response.body).toEqual({
+				id: 1,
+				opportunityId: 1,
+				externalId: 'proposal-2525-01-04T00Z',
+				createdAt: '2525-01-04T00:00:07.000Z',
+				versions: [
+					{
+						id: 2,
+						proposalId: 1,
+						applicationFormId: 1,
+						version: 2,
+						createdAt: '2525-01-04T00:00:09.000Z',
+						fieldValues: [
+							{
+								id: 3,
+								proposalVersionId: 2,
+								applicationFormFieldId: 1,
+								position: 1,
+								value: 'Title for version 2 from 2525-01-04',
+								createdAt: '2525-01-04T00:00:12.000Z',
+								applicationFormField: {
 									id: 1,
-									proposalVersionId: 1,
-									applicationFormFieldId: 1,
+									applicationFormId: 1,
+									baseFieldId: 2,
 									position: 1,
-									value: 'Title for version 1 from 2525-01-04',
-									createdAt: '2525-01-04T00:00:10.000Z',
-									applicationFormField: {
-										id: 1,
-										applicationFormId: 1,
-										baseFieldId: 2,
-										position: 1,
-										label: 'Short summary or title',
-										createdAt: '2525-01-04T00:00:05.000Z',
-									},
+									label: 'Short summary or title',
+									createdAt: '2525-01-04T00:00:05.000Z',
 								},
-								{
+							},
+							{
+								id: 4,
+								proposalVersionId: 2,
+								applicationFormFieldId: 2,
+								position: 2,
+								value: 'Abstract for version 2 from 2525-01-04',
+								createdAt: '2525-01-04T00:00:13.000Z',
+								applicationFormField: {
 									id: 2,
-									proposalVersionId: 1,
-									applicationFormFieldId: 2,
+									applicationFormId: 1,
+									baseFieldId: 1,
 									position: 2,
-									value: 'Abstract for version 1 from 2525-01-04',
-									createdAt: '2525-01-04T00:00:11.000Z',
-									applicationFormField: {
-										id: 2,
-										applicationFormId: 1,
-										baseFieldId: 1,
-										position: 2,
-										label: 'Long summary or abstract',
-										createdAt: '2525-01-04T00:00:06.000Z',
-									},
+									label: 'Long summary or abstract',
+									createdAt: '2525-01-04T00:00:06.000Z',
 								},
-							],
-						},
-					],
-				});
+							},
+						],
+					},
+					{
+						id: 1,
+						proposalId: 1,
+						applicationFormId: 1,
+						version: 1,
+						createdAt: '2525-01-04T00:00:08.000Z',
+						fieldValues: [
+							{
+								id: 1,
+								proposalVersionId: 1,
+								applicationFormFieldId: 1,
+								position: 1,
+								value: 'Title for version 1 from 2525-01-04',
+								createdAt: '2525-01-04T00:00:10.000Z',
+								applicationFormField: {
+									id: 1,
+									applicationFormId: 1,
+									baseFieldId: 2,
+									position: 1,
+									label: 'Short summary or title',
+									createdAt: '2525-01-04T00:00:05.000Z',
+								},
+							},
+							{
+								id: 2,
+								proposalVersionId: 1,
+								applicationFormFieldId: 2,
+								position: 2,
+								value: 'Abstract for version 1 from 2525-01-04',
+								createdAt: '2525-01-04T00:00:11.000Z',
+								applicationFormField: {
+									id: 2,
+									applicationFormId: 1,
+									baseFieldId: 1,
+									position: 2,
+									label: 'Long summary or abstract',
+									createdAt: '2525-01-04T00:00:06.000Z',
+								},
+							},
+						],
+					},
+				],
+			});
 		});
 
 		it('returns 404 when given id is not present and includeFieldsAndValues=true', async () => {
@@ -585,19 +587,20 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when given id is not present and includeFieldsAndValues=true', async () => {
-			await agent
+			const response = await agent
 				.get('/proposals/9002?includeFieldsAndValues=true')
 				.set(authHeader)
-				.expect(404, {
-					name: 'NotFoundError',
-					message:
-						'Not found. Find existing proposals by calling with no parameters.',
-					details: [
-						{
-							name: 'NotFoundError',
-						},
-					],
-				});
+				.expect(404);
+			expect(response.body).toEqual({
+				name: 'NotFoundError',
+				message:
+					'Not found. Find existing proposals by calling with no parameters.',
+				details: [
+					{
+						name: 'NotFoundError',
+					},
+				],
+			});
 		});
 	});
 

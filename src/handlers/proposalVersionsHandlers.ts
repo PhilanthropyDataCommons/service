@@ -210,7 +210,7 @@ const postProposalVersion = (
 			if (isTinyPgErrorWithQueryContext(error)) {
 				next(
 					new DatabaseError(
-						'Something went wrong when asserting the vailidity of the provided Proposal Version.',
+						'Something went wrong when asserting the validity of the provided Proposal Version.',
 						error,
 					),
 				);

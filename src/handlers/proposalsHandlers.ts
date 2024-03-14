@@ -1,12 +1,13 @@
 import { getLogger } from '../logger';
 import {
+	createProposal,
 	db,
 	getLimitValues,
 	loadProposalBundle,
 	enrichProposals,
 } from '../database';
 import {
-	isProposalWrite,
+	isWritableProposal,
 	isProposal,
 	isProposalVersionArray,
 	isTinyPgErrorWithQueryContext,
@@ -29,7 +30,6 @@ import type {
 	ApplicationFormField,
 	Proposal,
 	ProposalFieldValue,
-	ProposalWrite,
 	ProposalVersion,
 } from '../types';
 
@@ -252,34 +252,23 @@ const getProposal = (req: Request, res: Response, next: NextFunction): void => {
 };
 
 const postProposal = (
-	req: Request<unknown, unknown, ProposalWrite>,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (!isProposalWrite(req.body)) {
+	if (!isWritableProposal(req.body)) {
 		next(
 			new InputValidationError(
 				'Invalid request body.',
-				isProposalWrite.errors ?? [],
+				isWritableProposal.errors ?? [],
 			),
 		);
 		return;
 	}
 
-	db.sql('proposals.insertOne', req.body)
-		.then((proposalQueryResult: Result<Proposal>) => {
-			logger.debug(proposalQueryResult);
-			const proposal = proposalQueryResult.rows[0];
-			if (isProposal(proposal)) {
-				res.status(201).contentType('application/json').send(proposal);
-			} else {
-				next(
-					new InternalValidationError(
-						'The database responded with an unexpected format when creating the proposal.',
-						isProposal.errors ?? [],
-					),
-				);
-			}
+	createProposal(req.body)
+		.then((proposal) => {
+			res.status(201).contentType('application/json').send(proposal);
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {

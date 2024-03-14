@@ -2,18 +2,19 @@ import { ajv } from '../ajv';
 import { proposalVersionSchema } from './ProposalVersion';
 import type { JSONSchemaType } from 'ajv';
 import type { ProposalVersion } from './ProposalVersion';
+import type { Writable } from './Writable';
 
-export interface Proposal {
-	id: number;
+interface Proposal {
+	readonly id: number;
 	opportunityId: number;
 	externalId: string;
-	versions?: ProposalVersion[];
-	createdAt: Date;
+	readonly versions?: ProposalVersion[];
+	readonly createdAt: Date;
 }
 
-export type ProposalWrite = Omit<Proposal, 'createdAt' | 'id' | 'versions'>;
+type WritableProposal = Writable<Proposal>;
 
-export const proposalSchema: JSONSchemaType<Proposal> = {
+const proposalSchema: JSONSchemaType<Proposal> = {
 	type: 'object',
 	properties: {
 		id: {
@@ -40,7 +41,7 @@ export const proposalSchema: JSONSchemaType<Proposal> = {
 	required: ['id', 'opportunityId', 'externalId', 'createdAt'],
 };
 
-export const proposalWriteSchema: JSONSchemaType<ProposalWrite> = {
+const writableProposalSchema: JSONSchemaType<WritableProposal> = {
 	type: 'object',
 	properties: {
 		opportunityId: {
@@ -54,6 +55,15 @@ export const proposalWriteSchema: JSONSchemaType<ProposalWrite> = {
 	required: ['opportunityId', 'externalId'],
 };
 
-export const isProposal = ajv.compile(proposalSchema);
+const isProposal = ajv.compile(proposalSchema);
 
-export const isProposalWrite = ajv.compile(proposalWriteSchema);
+const isWritableProposal = ajv.compile(writableProposalSchema);
+
+export {
+	isProposal,
+	isWritableProposal,
+	Proposal,
+	proposalSchema,
+	WritableProposal,
+	writableProposalSchema,
+};

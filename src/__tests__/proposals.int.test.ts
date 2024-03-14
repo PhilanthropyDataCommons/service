@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { app } from '../app';
-import { db, loadTableMetrics } from '../database';
+import { createProposal, db, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
@@ -43,11 +43,11 @@ describe('/proposals', () => {
 				title: '🔥',
 			});
 			await createTestBaseFields();
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 			});
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
 			});
@@ -128,11 +128,11 @@ describe('/proposals', () => {
 			});
 
 			await createTestBaseFields();
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 			});
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
 			});
@@ -217,11 +217,11 @@ describe('/proposals', () => {
 				title: 'Grand opportunity',
 			});
 			await createTestBaseFields();
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-4999',
 				opportunityId: 1,
 			});
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-5003',
 				opportunityId: 1,
 			});
@@ -304,7 +304,7 @@ describe('/proposals', () => {
 			});
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
-				await db.sql('proposals.insertOne', {
+				await createProposal({
 					externalId: `proposal-${i + 1}`,
 					opportunityId: 1,
 				});

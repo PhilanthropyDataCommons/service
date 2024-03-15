@@ -1,5 +1,4 @@
 import { db } from '../../db';
-import { NotFoundError } from '../../../errors';
 import type { Proposal, JsonResultSet, WritableProposal } from '../../../types';
 
 export const createProposal = async (
@@ -12,7 +11,9 @@ export const createProposal = async (
 	});
 	const proposal = result.rows[0]?.object;
 	if (proposal === undefined) {
-		throw new NotFoundError('The proposal could not be created.');
+		throw new Error(
+			'The proposal creation did not appear to fail, but no data was returned by the operation.',
+		);
 	}
 	return proposal;
 };

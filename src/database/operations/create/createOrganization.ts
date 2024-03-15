@@ -1,5 +1,4 @@
 import { db } from '../../db';
-import { NotFoundError } from '../../../errors';
 import type { Organization, WritableOrganization } from '../../../types';
 
 export const createOrganization = async (
@@ -12,7 +11,9 @@ export const createOrganization = async (
 	});
 	const organization = result.rows[0];
 	if (organization === undefined) {
-		throw new NotFoundError('The organization could not be created.');
+		throw new Error(
+			'The organization creation did not appear to fail, but no data was returned by the operation.',
+		);
 	}
 	return organization;
 };

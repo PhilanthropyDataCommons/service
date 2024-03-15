@@ -9,7 +9,11 @@ import {
 	S3_UNPROCESSED_KEY_PREFIX,
 } from '../s3Client';
 import { db } from '../database/db';
-import { loadBaseFields, loadBulkUpload } from '../database/operations/load';
+import {
+	createProposal,
+	loadBaseFields,
+	loadBulkUpload,
+} from '../database/operations';
 import { BulkUploadStatus, isProcessBulkUploadJobPayload } from '../types';
 import { NotFoundError } from '../errors';
 import type { Readable } from 'stream';
@@ -247,14 +251,10 @@ const createProposalForBulkUploadCsvRecord = async (
 	opportunityId: number,
 	externalId: string,
 ): Promise<Proposal> => {
-	const result = await db.sql<Proposal>('proposals.insertOne', {
+	const proposal = await createProposal({
 		opportunityId,
 		externalId,
 	});
-	const proposal = result.rows[0];
-	if (proposal === undefined) {
-		throw new NotFoundError('The proposal could not be created');
-	}
 	return proposal;
 };
 

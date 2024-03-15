@@ -1,12 +1,10 @@
 import request from 'supertest';
-import { TinyPgError } from 'tinypg';
 import { app } from '../app';
-import { db, loadTableMetrics } from '../database';
+import { createProposal, db, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
-import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
@@ -30,7 +28,11 @@ describe('/proposals', () => {
 	describe('GET /', () => {
 		logger.debug('Now running an proposals test');
 		it('returns an empty Bundle when no data is present', async () => {
-			await agent.get('/proposals').set(authHeader).expect(200, {
+			const response = await agent
+				.get('/proposals')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
 				total: 0,
 				entries: [],
 			});
@@ -41,11 +43,11 @@ describe('/proposals', () => {
 				title: '🔥',
 			});
 			await createTestBaseFields();
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 			});
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
 			});
@@ -69,57 +71,63 @@ describe('/proposals', () => {
 				value: 'This is a summary',
 			});
 
-			await agent
+			const response = await agent
 				.get('/proposals')
 				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						total: 2,
-						entries: [
-							{
-								id: 2,
-								externalId: 'proposal-2',
-								opportunityId: 1,
-								createdAt: expectTimestamp,
-								versions: [],
-							},
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 2,
+						externalId: 'proposal-2',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						versions: [],
+					},
+					{
+						id: 1,
+						externalId: 'proposal-1',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						versions: [
 							{
 								id: 1,
-								externalId: 'proposal-1',
-								opportunityId: 1,
+								proposalId: 1,
+								version: 1,
+								applicationFormId: 1,
 								createdAt: expectTimestamp,
-								versions: [
+								fieldValues: [
 									{
 										id: 1,
-										proposalId: 1,
-										version: 1,
-										applicationFormId: 1,
+										applicationFormFieldId: 1,
+										proposalVersionId: 1,
+										position: 1,
+										value: 'This is a summary',
 										createdAt: expectTimestamp,
-										fieldValues: [
-											{
-												id: 1,
-												applicationFormFieldId: 1,
-												proposalVersionId: 1,
-												position: 1,
-												value: 'This is a summary',
+										applicationFormField: {
+											id: 1,
+											applicationFormId: 1,
+											baseFieldId: 1,
+											baseField: {
 												createdAt: expectTimestamp,
-												applicationFormField: {
-													id: 1,
-													applicationFormId: 1,
-													baseFieldId: 1,
-													label: 'Short summary',
-													position: 1,
-													createdAt: expectTimestamp,
-												},
+												dataType: 'string',
+												description: 'A summary of the proposal',
+												id: 1,
+												label: 'Summary',
+												shortCode: 'summary',
 											},
-										],
+											label: 'Short summary',
+											position: 1,
+											createdAt: expectTimestamp,
+										},
 									},
 								],
 							},
 						],
-					}),
-				);
+					},
+				],
+			});
 		});
 
 		it('returns a subset of proposals present in the database when search is provided', async () => {
@@ -128,11 +136,11 @@ describe('/proposals', () => {
 			});
 
 			await createTestBaseFields();
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 			});
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
 			});
@@ -165,50 +173,56 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'This is a pair of pants',
 			});
-			await agent
+			const response = await agent
 				.get('/proposals?_content=summary')
 				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						total: 2,
-						entries: [
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 1,
+						externalId: 'proposal-1',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						versions: [
 							{
 								id: 1,
-								externalId: 'proposal-1',
-								opportunityId: 1,
+								proposalId: 1,
+								version: 1,
+								applicationFormId: 1,
 								createdAt: expectTimestamp,
-								versions: [
+								fieldValues: [
 									{
 										id: 1,
-										proposalId: 1,
-										version: 1,
-										applicationFormId: 1,
+										applicationFormFieldId: 1,
+										proposalVersionId: 1,
+										position: 1,
+										value: 'This is a summary',
 										createdAt: expectTimestamp,
-										fieldValues: [
-											{
-												id: 1,
-												applicationFormFieldId: 1,
-												proposalVersionId: 1,
-												position: 1,
-												value: 'This is a summary',
+										applicationFormField: {
+											id: 1,
+											applicationFormId: 1,
+											baseFieldId: 1,
+											baseField: {
 												createdAt: expectTimestamp,
-												applicationFormField: {
-													id: 1,
-													applicationFormId: 1,
-													baseFieldId: 1,
-													label: 'Short summary',
-													position: 1,
-													createdAt: expectTimestamp,
-												},
+												dataType: 'string',
+												description: 'A summary of the proposal',
+												id: 1,
+												label: 'Summary',
+												shortCode: 'summary',
 											},
-										],
+											label: 'Short summary',
+											position: 1,
+											createdAt: expectTimestamp,
+										},
 									},
 								],
 							},
 						],
-					}),
-				);
+					},
+				],
+			});
 		});
 
 		it('returns a subset of proposals present in the database when search is provided - tscfg simple', async () => {
@@ -219,11 +233,11 @@ describe('/proposals', () => {
 				title: 'Grand opportunity',
 			});
 			await createTestBaseFields();
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-4999',
 				opportunityId: 1,
 			});
-			await db.sql('proposals.insertOne', {
+			await createProposal({
 				externalId: 'proposal-5003',
 				opportunityId: 1,
 			});
@@ -256,50 +270,56 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'This is a pair of pants',
 			});
-			await agent
+			const response = await agent
 				.get('/proposals?_content=summary')
 				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						total: 2,
-						entries: [
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 1,
+						externalId: 'proposal-4999',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						versions: [
 							{
 								id: 1,
-								externalId: 'proposal-4999',
-								opportunityId: 1,
+								proposalId: 1,
+								version: 1,
+								applicationFormId: 1,
 								createdAt: expectTimestamp,
-								versions: [
+								fieldValues: [
 									{
 										id: 1,
-										proposalId: 1,
-										version: 1,
-										applicationFormId: 1,
+										applicationFormFieldId: 1,
+										proposalVersionId: 1,
+										position: 1,
+										value: 'This is a summary',
 										createdAt: expectTimestamp,
-										fieldValues: [
-											{
-												id: 1,
-												applicationFormFieldId: 1,
-												proposalVersionId: 1,
-												position: 1,
-												value: 'This is a summary',
+										applicationFormField: {
+											id: 1,
+											applicationFormId: 1,
+											baseFieldId: 1,
+											baseField: {
 												createdAt: expectTimestamp,
-												applicationFormField: {
-													id: 1,
-													applicationFormId: 1,
-													baseFieldId: 1,
-													label: 'Concise summary',
-													position: 1,
-													createdAt: expectTimestamp,
-												},
+												dataType: 'string',
+												description: 'A summary of the proposal',
+												id: 1,
+												label: 'Summary',
+												shortCode: 'summary',
 											},
-										],
+											label: 'Concise summary',
+											position: 1,
+											createdAt: expectTimestamp,
+										},
 									},
 								],
 							},
 						],
-					}),
-				);
+					},
+				],
+			});
 		});
 
 		it('returns according to pagination parameters', async () => {
@@ -308,102 +328,56 @@ describe('/proposals', () => {
 			});
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
-				await db.sql('proposals.insertOne', {
+				await createProposal({
 					externalId: `proposal-${i + 1}`,
 					opportunityId: 1,
 				});
 			}, Promise.resolve());
-			await agent
+			const response = await agent
 				.get('/proposals')
 				.query({
 					_page: 2,
 					_count: 5,
 				})
 				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						total: 20,
-						entries: [
-							{
-								id: 15,
-								externalId: 'proposal-15',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-							{
-								id: 14,
-								externalId: 'proposal-14',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-							{
-								id: 13,
-								externalId: 'proposal-13',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-							{
-								id: 12,
-								externalId: 'proposal-12',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-							{
-								id: 11,
-								externalId: 'proposal-11',
-								opportunityId: 1,
-								versions: [],
-								createdAt: expectTimestamp,
-							},
-						],
-					}),
-				);
-		});
-
-		it('should error if the database returns an unexpected data structure', async () => {
-			jest.spyOn(db, 'query').mockImplementationOnce(
-				async () =>
-					({
-						rows: [{ foo: 'not a valid result' }],
-					}) as Result<object>,
-			);
-			const result = await agent.get('/proposals').set(authHeader).expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new Error('This is unexpected');
-			});
-			const result = await agent.get('/proposals').set(authHeader).expect(500);
-			expect(result.body).toMatchObject({
-				name: 'UnknownError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new TinyPgError('Something went wrong', undefined, {
-					error: {
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				});
-			});
-			const result = await agent.get('/proposals').set(authHeader).expect(503);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 20,
+				entries: [
 					{
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+						id: 15,
+						externalId: 'proposal-15',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
+					},
+					{
+						id: 14,
+						externalId: 'proposal-14',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
+					},
+					{
+						id: 13,
+						externalId: 'proposal-13',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
+					},
+					{
+						id: 12,
+						externalId: 'proposal-12',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
+					},
+					{
+						id: 11,
+						externalId: 'proposal-11',
+						opportunityId: 1,
+						versions: [],
+						createdAt: expectTimestamp,
 					},
 				],
 			});
@@ -412,19 +386,31 @@ describe('/proposals', () => {
 
 	describe('GET /:id', () => {
 		it('returns 404 when given id is not present', async () => {
-			await agent
+			const response = await agent
 				.get('/proposals/9001')
 				.set(authHeader)
-				.expect(404, {
-					name: 'NotFoundError',
-					message:
-						'Not found. Find existing proposals by calling with no parameters.',
-					details: [
-						{
-							name: 'NotFoundError',
-						},
-					],
-				});
+				.expect(404);
+			expect(response.body).toEqual({
+				name: 'NotFoundError',
+				message: expect.any(String) as string,
+				details: [
+					{
+						name: 'NotFoundError',
+					},
+				],
+			});
+		});
+
+		it('returns 400 when given id a string', async () => {
+			const response = await agent
+				.get('/proposals/foobar')
+				.set(authHeader)
+				.expect(400);
+			expect(response.body).toEqual({
+				name: 'InputValidationError',
+				message: expect.any(String) as string,
+				details: [],
+			});
 		});
 
 		it('returns the one proposal asked for', async () => {
@@ -446,15 +432,20 @@ describe('/proposals', () => {
           ( 'proposal-1', 1, '2525-01-03T00:00:04Z' ),
           ( 'proposal-2', 1, '2525-01-03T00:00:05Z' );
       `);
-			await agent.get('/proposals/2').set(authHeader).expect(200, {
+			const response = await agent
+				.get('/proposals/2')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
 				id: 2,
 				externalId: 'proposal-2',
+				versions: [],
 				opportunityId: 1,
-				createdAt: '2525-01-03T00:00:05.000Z',
+				createdAt: expectTimestamp,
 			});
 		});
 
-		it('returns one proposal with deep fields when includeFieldsAndValues=true', async () => {
+		it('returns one proposal with deep fields', async () => {
 			await createTestBaseFields();
 			await db.query(`
         INSERT INTO opportunities (
@@ -519,273 +510,129 @@ describe('/proposals', () => {
           ( 2, 1, 1, 'Title for version 2 from 2525-01-04', '2525-01-04T00:00:12Z' ),
           ( 2, 2, 2, 'Abstract for version 2 from 2525-01-04', '2525-01-04T00:00:13Z' );
       `);
-			await agent
-				.get('/proposals/1/?includeFieldsAndValues=true')
+			const response = await agent
+				.get('/proposals/1')
 				.set(authHeader)
-				.expect(200, {
-					id: 1,
-					opportunityId: 1,
-					externalId: 'proposal-2525-01-04T00Z',
-					createdAt: '2525-01-04T00:00:07.000Z',
-					versions: [
-						{
-							id: 2,
-							proposalId: 1,
-							applicationFormId: 1,
-							version: 2,
-							createdAt: '2525-01-04T00:00:09.000Z',
-							fieldValues: [
-								{
-									id: 3,
-									proposalVersionId: 2,
-									applicationFormFieldId: 1,
-									position: 1,
-									value: 'Title for version 2 from 2525-01-04',
-									createdAt: '2525-01-04T00:00:12.000Z',
-									applicationFormField: {
-										id: 1,
-										applicationFormId: 1,
-										baseFieldId: 2,
-										position: 1,
-										label: 'Short summary or title',
-										createdAt: '2525-01-04T00:00:05.000Z',
-									},
-								},
-								{
-									id: 4,
-									proposalVersionId: 2,
-									applicationFormFieldId: 2,
-									position: 2,
-									value: 'Abstract for version 2 from 2525-01-04',
-									createdAt: '2525-01-04T00:00:13.000Z',
-									applicationFormField: {
-										id: 2,
-										applicationFormId: 1,
-										baseFieldId: 1,
-										position: 2,
-										label: 'Long summary or abstract',
-										createdAt: '2525-01-04T00:00:06.000Z',
-									},
-								},
-							],
-						},
-						{
-							id: 1,
-							proposalId: 1,
-							applicationFormId: 1,
-							version: 1,
-							createdAt: '2525-01-04T00:00:08.000Z',
-							fieldValues: [
-								{
+				.expect(200);
+			expect(response.body).toEqual({
+				id: 1,
+				opportunityId: 1,
+				externalId: 'proposal-2525-01-04T00Z',
+				createdAt: expectTimestamp,
+				versions: [
+					{
+						id: 2,
+						proposalId: 1,
+						applicationFormId: 1,
+						version: 2,
+						createdAt: expectTimestamp,
+						fieldValues: [
+							{
+								id: 3,
+								proposalVersionId: 2,
+								applicationFormFieldId: 1,
+								position: 1,
+								value: 'Title for version 2 from 2525-01-04',
+								createdAt: expectTimestamp,
+								applicationFormField: {
 									id: 1,
-									proposalVersionId: 1,
-									applicationFormFieldId: 1,
-									position: 1,
-									value: 'Title for version 1 from 2525-01-04',
-									createdAt: '2525-01-04T00:00:10.000Z',
-									applicationFormField: {
-										id: 1,
-										applicationFormId: 1,
-										baseFieldId: 2,
-										position: 1,
-										label: 'Short summary or title',
-										createdAt: '2525-01-04T00:00:05.000Z',
-									},
-								},
-								{
-									id: 2,
-									proposalVersionId: 1,
-									applicationFormFieldId: 2,
-									position: 2,
-									value: 'Abstract for version 1 from 2525-01-04',
-									createdAt: '2525-01-04T00:00:11.000Z',
-									applicationFormField: {
+									applicationFormId: 1,
+									baseFieldId: 2,
+									baseField: {
+										createdAt: expectTimestamp,
+										dataType: 'string',
+										description: 'The title of the proposal',
 										id: 2,
-										applicationFormId: 1,
-										baseFieldId: 1,
-										position: 2,
-										label: 'Long summary or abstract',
-										createdAt: '2525-01-04T00:00:06.000Z',
+										label: 'Title',
+										shortCode: 'title',
 									},
+									position: 1,
+									label: 'Short summary or title',
+									createdAt: expectTimestamp,
 								},
-							],
-						},
-					],
-				});
-		});
-
-		it('should error if the database returns an unexpected data structure', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(
-				async () =>
-					({
-						rows: [{ foo: 'not a valid result' }],
-					}) as Result<object>,
-			);
-			const result = await agent
-				.get('/proposals/2')
-				.set(authHeader)
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new Error('This is unexpected');
-			});
-			const result = await agent
-				.get('/proposals/2')
-				.set(authHeader)
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'UnknownError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new TinyPgError('Something went wrong', undefined, {
-					error: {
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+							},
+							{
+								id: 4,
+								proposalVersionId: 2,
+								applicationFormFieldId: 2,
+								position: 2,
+								value: 'Abstract for version 2 from 2525-01-04',
+								createdAt: expectTimestamp,
+								applicationFormField: {
+									id: 2,
+									applicationFormId: 1,
+									baseFieldId: 1,
+									baseField: {
+										createdAt: expectTimestamp,
+										dataType: 'string',
+										description: 'A summary of the proposal',
+										id: 1,
+										label: 'Summary',
+										shortCode: 'summary',
+									},
+									position: 2,
+									label: 'Long summary or abstract',
+									createdAt: expectTimestamp,
+								},
+							},
+						],
 					},
-				});
-			});
-			const result = await agent
-				.get('/proposals/2')
-				.set(authHeader)
-				.expect(503);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
 					{
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				],
-			});
-		});
-
-		it('returns 404 when given id is not present and includeFieldsAndValues=true', async () => {
-			await agent
-				.get('/proposals/9002?includeFieldsAndValues=true')
-				.set(authHeader)
-				.expect(404, {
-					name: 'NotFoundError',
-					message:
-						'Not found. Find existing proposals by calling with no parameters.',
-					details: [
-						{
-							name: 'NotFoundError',
-						},
-					],
-				});
-		});
-
-		it('should error if the database returns an unexpected data structure when includeFieldsAndValues=true', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(
-				async () =>
-					({
-						rows: [{ foo: 'not a valid result' }],
-					}) as Result<object>,
-			);
-			const result = await agent
-				.get('/proposals/9003?includeFieldsAndValues=true')
-				.set(authHeader)
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 500 UnknownError if a generic Error is thrown when selecting and includeFieldsAndValues=true', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new Error('This is unexpected');
-			});
-			const result = await agent
-				.get('/proposals/9004?includeFieldsAndValues=true')
-				.set(authHeader)
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'UnknownError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 503 DatabaseError if db error is thrown when includeFieldsAndValues=true', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🧳', '2525-01-04T00:00:14Z' )
-      `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-🧳-🐴', 1, '2525-01-04T00:00:16Z' );
-      `);
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new TinyPgError('Something went wrong', undefined, {
-					error: {
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				});
-			});
-			const result = await agent
-				.get('/proposals/1?includeFieldsAndValues=true')
-				.type('application/json')
-				.set(authHeader)
-				.expect(503);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
-					{
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				],
-			});
-		});
-
-		it('should return 503 when the db has insufficient resources on proposal field values select', async () => {
-			jest
-				.spyOn(db, 'sql')
-				.mockImplementationOnce(async () => ({
-					command: '',
-					row_count: 1,
-					rows: [
-						{
-							id: 9005,
-							opportunityId: 9007,
-							externalId: 'nine thousand eight',
-							createdAt: new Date(),
-						},
-					],
-				}))
-				.mockImplementationOnce(async () => {
-					throw new TinyPgError('Something went wrong', undefined, {
-						error: {
-							code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-						},
-					});
-				});
-			const result = await agent
-				.get('/proposals/9005')
-				.query({ includeFieldsAndValues: 'true' })
-				.set(authHeader)
-				.expect(503);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
-					{
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
+						id: 1,
+						proposalId: 1,
+						applicationFormId: 1,
+						version: 1,
+						createdAt: expectTimestamp,
+						fieldValues: [
+							{
+								id: 1,
+								proposalVersionId: 1,
+								applicationFormFieldId: 1,
+								position: 1,
+								value: 'Title for version 1 from 2525-01-04',
+								createdAt: expectTimestamp,
+								applicationFormField: {
+									id: 1,
+									applicationFormId: 1,
+									baseFieldId: 2,
+									baseField: {
+										createdAt: expectTimestamp,
+										dataType: 'string',
+										description: 'The title of the proposal',
+										id: 2,
+										label: 'Title',
+										shortCode: 'title',
+									},
+									position: 1,
+									label: 'Short summary or title',
+									createdAt: expectTimestamp,
+								},
+							},
+							{
+								id: 2,
+								proposalVersionId: 1,
+								applicationFormFieldId: 2,
+								position: 2,
+								value: 'Abstract for version 1 from 2525-01-04',
+								createdAt: expectTimestamp,
+								applicationFormField: {
+									id: 2,
+									applicationFormId: 1,
+									baseFieldId: 1,
+									baseField: {
+										createdAt: expectTimestamp,
+										dataType: 'string',
+										description: 'A summary of the proposal',
+										id: 1,
+										label: 'Summary',
+										shortCode: 'summary',
+									},
+									position: 2,
+									label: 'Long summary or abstract',
+									createdAt: expectTimestamp,
+								},
+							},
+						],
 					},
 				],
 			});
@@ -871,98 +718,6 @@ describe('/proposals', () => {
 					{
 						code: PostgresErrorCode.FOREIGN_KEY_VIOLATION,
 						constraint: 'fk_opportunity',
-					},
-				],
-			});
-		});
-
-		it('returns 500 if the database returns an unexpected data structure', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
-			jest.spyOn(db, 'sql').mockImplementationOnce(
-				async () =>
-					({
-						rows: [{ foo: 'not a valid result' }],
-					}) as Result<object>,
-			);
-			const result = await agent
-				.post('/proposals')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					externalId: 'proposal123',
-					opportunityId: 1,
-				})
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 500 UnknownError if a generic Error is thrown when inserting', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new Error('This is unexpected');
-			});
-			const result = await agent
-				.post('/proposals')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					externalId: 'proposal123',
-					opportunityId: 1,
-				})
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'UnknownError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 503 DatabaseError if an insufficient resources database error is thrown when inserting', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new TinyPgError('Something went wrong', undefined, {
-					error: {
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				});
-			});
-			const result = await agent
-				.post('/proposals')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					externalId: 'proposal123',
-					opportunityId: 1,
-				})
-				.expect(503);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
-					{
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
 					},
 				],
 			});

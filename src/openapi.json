@@ -323,6 +323,9 @@
 						"type": "integer",
 						"example": 3011
 					},
+					"baseField": {
+						"$ref": "#/components/schemas/BaseField"
+					},
 					"position": {
 						"type": "integer",
 						"example": 19
@@ -1020,15 +1023,6 @@
 						"schema": {
 							"type": "integer"
 						}
-					},
-					{
-						"name": "includeFieldsAndValues",
-						"in": "query",
-						"description": "Include the application form fields and the associated proposal values when `true`. This necessarily includes all proposal versions because form fields are related to a particular proposal version.",
-						"required": false,
-						"schema": {
-							"type": "boolean"
-						}
 					}
 				],
 				"responses": {
@@ -1038,53 +1032,6 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Proposal"
-								},
-								"examples": {
-									"default": {
-										"summary": "The default, shallow response with no parameters or where `includeFieldsAndValues=false`",
-										"value": {
-											"id": 3709,
-											"externalId": "AnIdGeneratedByAGms",
-											"opportunityId": 3203,
-											"createdAt": "2022-12-30T15:50:58.839Z"
-										}
-									},
-									"includeFieldsAndValues": {
-										"summary": "The response when `includeFieldsAndValues` is set to `true`.",
-										"value": {
-											"id": 3709,
-											"externalId": "AnIdGeneratedByAGms",
-											"opportunityId": 3203,
-											"createdAt": "2022-12-30T15:50:58.839Z",
-											"versions": [
-												{
-													"id": 3821,
-													"proposalId": 3709,
-													"applicationFormId": 3529,
-													"version": 17,
-													"createdAt": "2023-02-14T09:52:00.000",
-													"fieldValues": [
-														{
-															"id": 3943,
-															"proposalVersionId": 3821,
-															"applicationFormFieldId": 3613,
-															"value": "John",
-															"position": 23,
-															"createdAt": "2023-02-14T09:57:00.000Z",
-															"applicationFormField": {
-																"id": 3613,
-																"applicationFormId": 3529,
-																"baseFieldId": 3011,
-																"position": 19,
-																"label": "Your First Name",
-																"createdAt": "2023-02-14T09:58:00.000Z"
-															}
-														}
-													]
-												}
-											]
-										}
-									}
 								}
 							}
 						}

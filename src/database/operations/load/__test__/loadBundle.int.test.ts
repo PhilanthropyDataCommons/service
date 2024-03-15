@@ -1,5 +1,4 @@
 import { createOrganization, loadBundle } from '../../..';
-import { isOrganization } from '../../../../types';
 
 describe('loadBundle', () => {
 	it('Should return a bundle for the query', async () => {
@@ -14,7 +13,6 @@ describe('loadBundle', () => {
 				offset: 0,
 			},
 			'organizations',
-			isOrganization,
 		);
 		expect(objects).toMatchObject({
 			total: 1,

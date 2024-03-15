@@ -1,4 +1,3 @@
-import { isOrganization } from '../../../types';
 import { loadBundle } from './loadBundle';
 import type { TinyPgParams } from 'tinypg';
 import type { Bundle, Organization } from '../../../types';
@@ -10,5 +9,4 @@ export const loadOrganizationBundle = async (
 		'organizations.selectWithPagination',
 		queryParameters,
 		'organizations',
-		isOrganization,
 	);

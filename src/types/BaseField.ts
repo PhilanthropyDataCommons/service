@@ -8,7 +8,7 @@ interface BaseField {
 	description: string;
 	shortCode: string;
 	dataType: string;
-	readonly createdAt: Date;
+	readonly createdAt: string;
 }
 
 type WritableBaseField = Writable<BaseField>;

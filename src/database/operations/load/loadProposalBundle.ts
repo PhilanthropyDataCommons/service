@@ -1,14 +1,18 @@
-import { isProposal } from '../../../types';
 import { loadBundle } from './loadBundle';
 import type { TinyPgParams } from 'tinypg';
-import type { Bundle, Proposal } from '../../../types';
+import type { JsonResultSet, Bundle, Proposal } from '../../../types';
 
 export const loadProposalBundle = async (
 	queryParameters: TinyPgParams,
-): Promise<Bundle<Proposal>> =>
-	loadBundle(
+): Promise<Bundle<Proposal>> => {
+	const bundle = await loadBundle<JsonResultSet<Proposal>>(
 		'proposals.selectWithPagination',
 		queryParameters,
 		'proposals',
-		isProposal,
 	);
+	const entries = bundle.entries.map((entry) => entry.object);
+	return {
+		...bundle,
+		entries,
+	};
+};

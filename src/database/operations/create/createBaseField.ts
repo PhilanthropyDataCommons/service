@@ -1,5 +1,4 @@
 import { db } from '../../db';
-import { NotFoundError } from '../../../errors';
 import type {
 	BaseField,
 	JsonResultSet,
@@ -21,7 +20,9 @@ export const createBaseField = async (
 	);
 	const baseField = result.rows[0]?.object;
 	if (baseField === undefined) {
-		throw new NotFoundError('The base field could not be created.');
+		throw new Error(
+			'The base field creation did not appear to fail, but no data was returned by the operation.',
+		);
 	}
 	return baseField;
 };

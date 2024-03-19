@@ -38,15 +38,15 @@
 	},
 	"homepage": "https://github.com/PhilanthropyDataCommons/pdc#readme",
 	"engines": {
-		"node": "18"
+		"node": "20"
 	},
 	"type": "commonjs",
 	"devDependencies": {
-		"@tsconfig/node18": "^18.2.2",
+		"@tsconfig/node20": "^20.1.2",
 		"@types/cors": "^2.8.17",
 		"@types/express": "^4.17.21",
 		"@types/jest": "^28.1.2",
-		"@types/node": "^18.19.24",
+		"@types/node": "^20.11.30",
 		"@types/pg": "^8.11.3",
 		"@types/supertest": "^6.0.2",
 		"@types/swagger-ui-express": "^4.1.6",

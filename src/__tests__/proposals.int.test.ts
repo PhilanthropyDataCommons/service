@@ -1,6 +1,10 @@
 import request from 'supertest';
 import { app } from '../app';
-import { createProposal, db, loadTableMetrics } from '../database';
+import {
+	createProposal,
+	db,
+	loadTableMetrics,
+} from '../database';
 import { getLogger } from '../logger';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';

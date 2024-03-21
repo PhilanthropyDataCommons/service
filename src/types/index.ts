@@ -4,7 +4,6 @@ export * from './BaseField';
 export * from './BulkUpload';
 export * from './Bundle';
 export * from './Id';
-export * from './IdParameters';
 export * from './JsonObject';
 export * from './JsonResultSet';
 export * from './Opportunity';

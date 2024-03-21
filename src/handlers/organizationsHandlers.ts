@@ -5,7 +5,7 @@ import {
 	createOrganization,
 } from '../database';
 import {
-	isIdParameters,
+	isId,
 	isWritableOrganization,
 	isTinyPgErrorWithQueryContext,
 } from '../types';
@@ -66,16 +66,12 @@ const getOrganization = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (!isIdParameters(req.params)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isIdParameters.errors ?? [],
-			),
-		);
+	const { organizationId } = req.params;
+	if (!isId(organizationId)) {
+		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
 		return;
 	}
-	loadOrganization(req.params.id)
+	loadOrganization(organizationId)
 		.then((organization) => {
 			res.status(200).contentType('application/json').send(organization);
 		})

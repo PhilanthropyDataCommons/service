@@ -32,13 +32,6 @@
 				"newlines-between": "never"
 			}
 		],
-		"@typescript-eslint/no-type-alias": [
-			"error",
-			{
-				"allowGenerics": "always",
-				"allowLiterals": "in-intersections"
-			}
-		],
 		"import/no-extraneous-dependencies": [
 			"error",
 			{

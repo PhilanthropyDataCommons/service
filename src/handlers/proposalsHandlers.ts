@@ -7,6 +7,7 @@ import {
 import { isTinyPgErrorWithQueryContext, isWritableProposal } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import {
+	extractOrganizationParameters,
 	extractPaginationParameters,
 	extractSearchParameters,
 } from '../queryParameters';
@@ -19,10 +20,12 @@ const getProposals = (
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	const searchParameters = extractSearchParameters(req);
+	const organizationParameters = extractOrganizationParameters(req);
 	(async () => {
 		const proposalBundle = await loadProposalBundle({
 			...getLimitValues(paginationParameters),
 			...searchParameters,
+			...organizationParameters,
 		});
 
 		res.status(200).contentType('application/json').send(proposalBundle);

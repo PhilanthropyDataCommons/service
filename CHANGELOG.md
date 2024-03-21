@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `OrganizationProposal` entity now exists.
 - The `OrganizationProposalBundle` entity now exists.
+- It is now possible to filter `/proposals` in terms of organization.
 
 ## 0.4.0 - 2024-02-29
 

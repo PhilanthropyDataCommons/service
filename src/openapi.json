@@ -1086,11 +1086,12 @@
 				"parameters": [
 					{ "$ref": "#/components/parameters/pageParam" },
 					{ "$ref": "#/components/parameters/countParam" },
-					{ "$ref": "#/components/parameters/searchParam" }
+					{ "$ref": "#/components/parameters/searchParam" },
+					{ "$ref": "#/components/parameters/organizationParam" }
 				],
 				"responses": {
 					"200": {
-						"description": "All proposals currently registered in the PDC.",
+						"description": "A set of proposals currently registered in the PDC.",
 						"content": {
 							"application/json": {
 								"schema": {

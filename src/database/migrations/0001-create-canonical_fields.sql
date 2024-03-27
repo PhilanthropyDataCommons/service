@@ -1,8 +1,10 @@
+CREATE TYPE fieldType AS ENUM ('string', 'number', 'integer', 'date-time', 'email');
+
 CREATE TABLE canonical_fields (
   id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   label VARCHAR NOT NULL,
   short_code VARCHAR NOT NULL UNIQUE,
-  data_type VARCHAR NOT NULL,
+  data_type fieldType NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 

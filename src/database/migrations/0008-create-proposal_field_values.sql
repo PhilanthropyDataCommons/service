@@ -1,5 +1,6 @@
 CREATE TABLE proposal_field_values (
   id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  is_valid BOOLEAN
   proposal_version_id INTEGER NOT NULL,
   application_form_field_id INTEGER NOT NULL,
   sequence INTEGER NOT NULL,

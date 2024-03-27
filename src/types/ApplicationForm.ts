@@ -13,7 +13,7 @@ export interface ApplicationForm {
 	readonly id: number;
 	opportunityId: number;
 	version: number;
-	fields?: ApplicationFormField[];
+	fields: ApplicationFormField[];
 	readonly createdAt: Date;
 }
 
@@ -37,7 +37,6 @@ export const applicationFormSchema: JSONSchemaType<ApplicationForm> = {
 		fields: {
 			type: 'array',
 			items: applicationFormFieldSchema,
-			nullable: true,
 		},
 		createdAt: {
 			type: 'object',

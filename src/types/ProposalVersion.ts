@@ -14,7 +14,7 @@ export interface ProposalVersion {
 	proposalId: number;
 	applicationFormId: number;
 	version: number;
-	fieldValues?: ProposalFieldValue[];
+	fieldValues: ProposalFieldValue[];
 	createdAt: Date;
 }
 
@@ -41,7 +41,6 @@ export const proposalVersionSchema: JSONSchemaType<ProposalVersion> = {
 		fieldValues: {
 			type: 'array',
 			items: proposalFieldValueSchema,
-			nullable: true,
 		},
 		createdAt: {
 			type: 'object',

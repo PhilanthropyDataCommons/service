@@ -11,7 +11,7 @@ organizationsRouter.get(
 );
 
 organizationsRouter.get(
-	'/:id',
+	'/:organizationId',
 	verifyAuth,
 	organizationsHandlers.getOrganization,
 );

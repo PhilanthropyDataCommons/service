@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.4.0"
+		"version": "0.5.0"
 	},
 	"components": {
 		"parameters": {
@@ -38,6 +38,24 @@
 				"name": "_content",
 				"required": false,
 				"description": "A web-search formatted string to select specific entities returned."
+			},
+			"organizationParam": {
+				"schema": {
+					"type": "integer"
+				},
+				"in": "query",
+				"name": "organization",
+				"required": false,
+				"description": "A reference (ID) to an existing organization entity."
+			},
+			"proposalParam": {
+				"schema": {
+					"type": "integer"
+				},
+				"in": "query",
+				"name": "proposal",
+				"required": false,
+				"description": "A reference (ID) to an existing proposal entity."
 			}
 		},
 		"securitySchemes": {
@@ -127,6 +145,47 @@
 					}
 				},
 				"required": ["id", "employerIdentificationNumber", "name", "createdAt"]
+			},
+			"OrganizationProposal": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true
+					},
+					"organizationId": {
+						"type": "integer"
+					},
+					"organization": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Organization"
+							},
+							{
+								"readOnly": true
+							}
+						]
+					},
+					"proposalId": {
+						"type": "integer"
+					},
+					"proposal": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Proposal"
+							},
+							{
+								"readOnly": true
+							}
+						]
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "organizationId", "proposalId", "createdAt"]
 			},
 			"PresignedPostRequest": {
 				"type": "object",
@@ -473,6 +532,25 @@
 					}
 				]
 			},
+			"OrganizationProposalBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/OrganizationProposal"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
 			"ProposalBundle": {
 				"allOf": [
 					{
@@ -744,6 +822,88 @@
 				}
 			}
 		},
+		"/organizationProposals": {
+			"get": {
+				"operationId": "getOrganizationProposals",
+				"summary": "Gets a list of OrganizationProposals.",
+				"tags": ["Organization Proposals"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" },
+					{ "$ref": "#/components/parameters/organizationParam" },
+					{ "$ref": "#/components/parameters/proposalParam" }
+				],
+				"responses": {
+					"200": {
+						"description": "The requested OrganizationProposals.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OrganizationProposalBundle"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"operationId": "addOrganizationProposal",
+				"summary": "Adds a new OrganizationProposal associated with a specific organization.",
+				"tags": ["Organization Proposals"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OrganizationProposal"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new OrganizationProposal",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OrganizationProposal"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/organizations": {
 			"get": {
 				"operationId": "getOrganizations",
@@ -756,7 +916,8 @@
 				],
 				"parameters": [
 					{ "$ref": "#/components/parameters/pageParam" },
-					{ "$ref": "#/components/parameters/countParam" }
+					{ "$ref": "#/components/parameters/countParam" },
+					{ "$ref": "#/components/parameters/proposalParam" }
 				],
 				"responses": {
 					"200": {
@@ -926,11 +1087,12 @@
 				"parameters": [
 					{ "$ref": "#/components/parameters/pageParam" },
 					{ "$ref": "#/components/parameters/countParam" },
-					{ "$ref": "#/components/parameters/searchParam" }
+					{ "$ref": "#/components/parameters/searchParam" },
+					{ "$ref": "#/components/parameters/organizationParam" }
 				],
 				"responses": {
 					"200": {
-						"description": "All proposals currently registered in the PDC.",
+						"description": "A set of proposals currently registered in the PDC.",
 						"content": {
 							"application/json": {
 								"schema": {

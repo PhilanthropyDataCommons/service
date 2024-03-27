@@ -1,6 +1,12 @@
 import request from 'supertest';
 import { app } from '../app';
-import { createProposal, db, loadTableMetrics } from '../database';
+import {
+	createOrganization,
+	createOrganizationProposal,
+	createProposal,
+	db,
+	loadTableMetrics,
+} from '../database';
 import { getLogger } from '../logger';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
@@ -127,6 +133,57 @@ describe('/proposals', () => {
 						],
 					},
 				],
+			});
+		});
+
+		it('returns a subset of proposals present in the database when an organization filter is provided', async () => {
+			await db.sql('opportunities.insertOne', {
+				title: '🔥',
+			});
+
+			await createTestBaseFields();
+			const proposal = await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+			});
+			await createProposal({
+				externalId: 'proposal-2',
+				opportunityId: 1,
+			});
+			const organization = await createOrganization({
+				employerIdentificationNumber: '123-123-123',
+				name: 'Canadian Company',
+			});
+			await createOrganizationProposal({
+				organizationId: organization.id,
+				proposalId: proposal.id,
+			});
+			const response = await agent
+				.get(`/proposals?organization=${organization.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 1,
+						externalId: 'proposal-1',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						versions: [],
+					},
+				],
+			});
+		});
+
+		it('returns a 400 error if an invalid organization filter is provided', async () => {
+			const response = await agent
+				.get(`/proposals?organization=foo`)
+				.set(authHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({
+				name: 'InputValidationError',
+				message: expect.any(String) as string,
 			});
 		});
 

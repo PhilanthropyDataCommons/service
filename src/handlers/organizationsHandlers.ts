@@ -5,12 +5,15 @@ import {
 	createOrganization,
 } from '../database';
 import {
-	isIdParameters,
+	isId,
 	isWritableOrganization,
 	isTinyPgErrorWithQueryContext,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
-import { extractPaginationParameters } from '../queryParameters';
+import {
+	extractPaginationParameters,
+	extractProposalParameters,
+} from '../queryParameters';
 import type { Request, Response, NextFunction } from 'express';
 
 const postOrganization = (
@@ -46,8 +49,10 @@ const getOrganizations = (
 	next: NextFunction,
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
+	const proposalParameters = extractProposalParameters(req);
 	loadOrganizationBundle({
 		...getLimitValues(paginationParameters),
+		...proposalParameters,
 	})
 		.then((organizationBundle) => {
 			res.status(200).contentType('application/json').send(organizationBundle);
@@ -66,16 +71,12 @@ const getOrganization = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (!isIdParameters(req.params)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isIdParameters.errors ?? [],
-			),
-		);
+	const { organizationId } = req.params;
+	if (!isId(organizationId)) {
+		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
 		return;
 	}
-	loadOrganization(req.params.id)
+	loadOrganization(organizationId)
 		.then((organization) => {
 			res.status(200).contentType('application/json').send(organization);
 		})

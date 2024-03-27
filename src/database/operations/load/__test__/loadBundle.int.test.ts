@@ -11,6 +11,7 @@ describe('loadBundle', () => {
 			{
 				limit: 10,
 				offset: 0,
+				proposalId: 0,
 			},
 			'organizations',
 		);

@@ -1,12 +1,20 @@
 import { loadBundle } from './loadBundle';
-import type { TinyPgParams } from 'tinypg';
 import type { Bundle, Organization } from '../../../types';
 
-export const loadOrganizationBundle = async (
-	queryParameters: TinyPgParams,
-): Promise<Bundle<Organization>> =>
-	loadBundle(
+export const loadOrganizationBundle = async (queryParameters: {
+	offset: number;
+	limit: number;
+	proposalId?: number;
+}): Promise<Bundle<Organization>> => {
+	const defaultQueryParameters = {
+		proposalId: 0,
+	};
+	return loadBundle(
 		'organizations.selectWithPagination',
-		queryParameters,
+		{
+			...defaultQueryParameters,
+			...queryParameters,
+		},
 		'organizations',
 	);
+};

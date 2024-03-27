@@ -1,5 +1,5 @@
 {
-	"openapi": "3.0.3",
+	"openapi": "3.1.0",
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
@@ -92,8 +92,7 @@
 					},
 					"fileSize": {
 						"description": "File size in bytes",
-						"type": "integer",
-						"nullable": true,
+						"type": ["integer", "null"],
 						"readOnly": true,
 						"example": 42,
 						"minimum": 0
@@ -157,27 +156,15 @@
 						"type": "integer"
 					},
 					"organization": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Organization"
-							},
-							{
-								"readOnly": true
-							}
-						]
+						"$ref": "#/components/schemas/Organization",
+						"readOnly": true
 					},
 					"proposalId": {
 						"type": "integer"
 					},
 					"proposal": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Proposal"
-							},
-							{
-								"readOnly": true
-							}
-						]
+						"$ref": "#/components/schemas/Proposal",
+						"readOnly": true
 					},
 					"createdAt": {
 						"type": "string",

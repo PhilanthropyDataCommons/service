@@ -10,7 +10,10 @@ import {
 	isTinyPgErrorWithQueryContext,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
-import { extractPaginationParameters } from '../queryParameters';
+import {
+	extractPaginationParameters,
+	extractProposalParameters,
+} from '../queryParameters';
 import type { Request, Response, NextFunction } from 'express';
 
 const postOrganization = (
@@ -46,8 +49,10 @@ const getOrganizations = (
 	next: NextFunction,
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
+	const proposalParameters = extractProposalParameters(req);
 	loadOrganizationBundle({
 		...getLimitValues(paginationParameters),
+		...proposalParameters,
 	})
 		.then((organizationBundle) => {
 			res.status(200).contentType('application/json').send(organizationBundle);

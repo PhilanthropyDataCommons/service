@@ -916,7 +916,8 @@
 				],
 				"parameters": [
 					{ "$ref": "#/components/parameters/pageParam" },
-					{ "$ref": "#/components/parameters/countParam" }
+					{ "$ref": "#/components/parameters/countParam" },
+					{ "$ref": "#/components/parameters/proposalParam" }
 				],
 				"responses": {
 					"200": {

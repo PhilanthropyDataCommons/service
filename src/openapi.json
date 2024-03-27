@@ -243,8 +243,7 @@
 						"items": {
 							"$ref": "#/components/schemas/ProposalVersion"
 						},
-						"readOnly": true,
-						"nullable": true
+						"readOnly": true
 					},
 					"createdAt": {
 						"type": "string",
@@ -279,8 +278,7 @@
 						"type": "array",
 						"items": {
 							"$ref": "#/components/schemas/ProposalFieldValue"
-						},
-						"nullable": true
+						}
 					},
 					"createdAt": {
 						"type": "string",
@@ -354,8 +352,7 @@
 						"type": "array",
 						"items": {
 							"$ref": "#/components/schemas/ApplicationFormField"
-						},
-						"nullable": true
+						}
 					},
 					"createdAt": {
 						"type": "string",

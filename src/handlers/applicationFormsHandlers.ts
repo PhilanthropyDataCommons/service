@@ -1,10 +1,7 @@
 import { getLogger } from '../logger';
 import { db } from '../database';
 import {
-	isApplicationForm,
 	isApplicationFormWrite,
-	isApplicationFormFieldArray,
-	isApplicationFormArray,
 	isTinyPgErrorWithQueryContext,
 } from '../types';
 import {
@@ -32,16 +29,7 @@ const getApplicationForms = (
 		.then((applicationFormsQueryResult: Result<ApplicationForm>) => {
 			logger.debug(applicationFormsQueryResult);
 			const { rows: applicationForms } = applicationFormsQueryResult;
-			if (isApplicationFormArray(applicationForms)) {
-				res.status(200).contentType('application/json').send(applicationForms);
-			} else {
-				next(
-					new InternalValidationError(
-						'The database responded with an unexpected format.',
-						isApplicationFormArray.errors ?? [],
-					),
-				);
-			}
+			res.status(200).contentType('application/json').send(applicationForms);
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
@@ -65,10 +53,10 @@ const getShallowApplicationForm = (
 				);
 			}
 			const applicationForm = applicationFormsQueryResult.rows[0];
-			if (!isApplicationForm(applicationForm)) {
+			if (applicationForm === undefined) {
 				throw new InternalValidationError(
 					'The database responded with an unexpected format.',
-					isApplicationForm.errors ?? [],
+					[],
 				);
 			}
 			res.status(200).contentType('application/json').send(applicationForm);
@@ -95,24 +83,16 @@ const getApplicationFormWithFields = (
 				);
 			}
 			const baseApplicationForm = applicationFormsQueryResult.rows[0];
-			if (!isApplicationForm(baseApplicationForm)) {
+			if (baseApplicationForm === undefined) {
 				throw new InternalValidationError(
 					'The database responded with an unexpected format.',
-					isApplicationForm.errors ?? [],
+					[],
 				);
 			}
 			db.sql('applicationFormFields.selectByApplicationFormId', {
 				applicationFormId: req.params.id,
 			})
 				.then((applicationFormFieldsQueryResult) => {
-					if (
-						!isApplicationFormFieldArray(applicationFormFieldsQueryResult.rows)
-					) {
-						throw new InternalValidationError(
-							'The database responded with an unexpected format.',
-							isApplicationFormFieldArray.errors ?? [],
-						);
-					}
 					const applicationForm = {
 						...baseApplicationForm,
 						fields: applicationFormFieldsQueryResult.rows,
@@ -175,7 +155,7 @@ const postApplicationForms = (
 		.then((applicationFormsQueryResult: Result<ApplicationForm>) => {
 			logger.debug(applicationFormsQueryResult);
 			const applicationForm = applicationFormsQueryResult.rows[0];
-			if (isApplicationForm(applicationForm)) {
+			if (applicationForm !== undefined) {
 				const queries = req.body.fields.map(async (field) =>
 					db.sql('applicationFormFields.insertOne', {
 						...field,
@@ -188,22 +168,13 @@ const postApplicationForms = (
 							(applicationFormFieldsQueryResult) =>
 								applicationFormFieldsQueryResult.rows[0],
 						);
-						if (isApplicationFormFieldArray(applicationFormFields)) {
-							res
-								.status(201)
-								.contentType('application/json')
-								.send({
-									...applicationForm,
-									fields: applicationFormFields,
-								});
-						} else {
-							next(
-								new InternalValidationError(
-									'The database responded with an unexpected format when creating a field.',
-									isApplicationFormFieldArray.errors ?? [],
-								),
-							);
-						}
+						res
+							.status(201)
+							.contentType('application/json')
+							.send({
+								...applicationForm,
+								fields: applicationFormFields,
+							});
 					})
 					.catch((error: unknown) => {
 						if (isTinyPgErrorWithQueryContext(error)) {
@@ -218,7 +189,7 @@ const postApplicationForms = (
 				next(
 					new InternalValidationError(
 						'The database responded with an unexpected format when creating the form.',
-						isApplicationForm.errors ?? [],
+						[],
 					),
 				);
 			}

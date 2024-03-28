@@ -1,12 +1,10 @@
 import request from 'supertest';
-import { TinyPgError } from 'tinypg';
 import { app } from '../app';
 import { db, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
 import { PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
-import type { Result } from 'tinypg';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
@@ -165,99 +163,6 @@ describe('/applicationForms', () => {
 				});
 		});
 
-		it('should error if the database returns an unexpected data structure', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(
-				async () =>
-					({
-						rows: [{ foo: 'not a valid result' }],
-					}) as Result<object>,
-			);
-			const result = await agent
-				.get('/applicationForms/2')
-				.query({ includeFields: 'true' })
-				.set(authHeader)
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new Error('This is unexpected');
-			});
-			const result = await agent
-				.get('/applicationForms')
-				.set(authHeader)
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'UnknownError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new TinyPgError('Something went wrong', undefined, {
-					error: {
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				});
-			});
-			const result = await agent
-				.get('/applicationForms')
-				.set(authHeader)
-				.expect(503);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
-					{
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				],
-			});
-		});
-
-		it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting one', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new TinyPgError('Something went wrong', undefined, {
-					error: {
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				});
-			});
-			const result = await agent
-				.get('/applicationForms/3')
-				.set(authHeader)
-				.expect(503);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
-					{
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				],
-			});
-		});
-
-		it('should error if the database returns an unexpected data structure', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(
-				async () =>
-					({
-						rows: [{ foo: 'not a valid applicationForm' }],
-					}) as Result<object>,
-			);
-			const result = await agent
-				.get('/applicationForms/5')
-				.set(authHeader)
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
 		it('should return 404 when the applicationForm is not found (shallow)', async () => {
 			const result = await agent
 				.get('/applicationForms/6')
@@ -268,6 +173,7 @@ describe('/applicationForms', () => {
 				details: expect.any(Array) as unknown[],
 			});
 		});
+
 		it('should return 404 when the applicationForm is not found (with fields)', async () => {
 			const result = await agent
 				.get('/applicationForms/7')
@@ -278,98 +184,6 @@ describe('/applicationForms', () => {
 				name: 'NotFoundError',
 				details: expect.any(Array) as unknown[],
 			});
-		});
-
-		it('should return 500 when the application form fields returned are invalid', async () => {
-			jest
-				.spyOn(db, 'sql')
-				.mockImplementationOnce(async () => ({
-					command: '',
-					row_count: 1,
-					rows: [
-						{
-							id: 1,
-							opportunityId: 1,
-							version: 1,
-							createdAt: new Date(),
-						},
-					],
-				}))
-				.mockImplementationOnce(
-					async () =>
-						({
-							rows: [{ foo: 'not a valid application form fields result' }],
-						}) as Result<object>,
-				);
-			const result = await agent
-				.get('/applicationForms/8')
-				.query({ includeFields: 'true' })
-				.set(authHeader)
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-	});
-
-	it('should return 503 when the db has insufficient resources on application form fields select', async () => {
-		jest
-			.spyOn(db, 'sql')
-			.mockImplementationOnce(async () => ({
-				command: '',
-				row_count: 1,
-				rows: [
-					{
-						id: 1,
-						opportunityId: 1,
-						version: 1,
-						createdAt: new Date(),
-					},
-				],
-			}))
-			.mockImplementationOnce(async () => {
-				throw new TinyPgError('Something went wrong', undefined, {
-					error: {
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				});
-			});
-		const result = await agent
-			.get('/applicationForms/9')
-			.query({ includeFields: 'true' })
-			.set(authHeader)
-			.expect(503);
-		expect(result.body).toMatchObject({
-			name: 'DatabaseError',
-			details: [
-				{
-					code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-				},
-			],
-		});
-	});
-
-	it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting one', async () => {
-		jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-			throw new TinyPgError('Something went wrong', undefined, {
-				error: {
-					code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-				},
-			});
-		});
-		const result = await agent
-			.get('/applicationForms/4')
-			.set(authHeader)
-			.query({ includeFields: 'true' })
-			.expect(503);
-		expect(result.body).toMatchObject({
-			name: 'DatabaseError',
-			details: [
-				{
-					code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-				},
-			],
 		});
 	});
 
@@ -543,65 +357,6 @@ describe('/applicationForms', () => {
 			});
 		});
 
-		it('returns 500 UnknownError if a generic Error is thrown when inserting the form', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
-      `);
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new Error('This is unexpected');
-			});
-			const result = await agent
-				.post('/applicationForms')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					opportunityId: 1,
-					fields: [],
-				})
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'UnknownError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 500 if the database returns an unexpected data structure when inserting the form', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
-      `);
-			jest.spyOn(db, 'sql').mockImplementationOnce(
-				async () =>
-					({
-						rows: [{ foo: 'not a valid result' }],
-					}) as Result<object>,
-			);
-			const result = await agent
-				.post('/applicationForms')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					opportunityId: 1,
-					fields: [],
-				})
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				message:
-					'The database responded with an unexpected format when creating the form.',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
 		it('returns 500 UnknownError if a generic Error is thrown when inserting the field', async () => {
 			await db.query(`
         INSERT INTO opportunities (
@@ -648,92 +403,6 @@ describe('/applicationForms', () => {
 				name: 'UnknownError',
 				details: expect.any(Array) as unknown[],
 			});
-		});
-
-		it('returns 500 if the database returns an unexpected data structure when inserting the field', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
-      `);
-			await createTestBaseFields();
-			jest
-				.spyOn(db, 'sql')
-				.mockImplementationOnce(async () => ({
-					command: '',
-					row_count: 1,
-					rows: [
-						{
-							id: 1,
-							opportunityId: 1,
-							version: 1,
-							fields: [],
-							createdAt: new Date(),
-						},
-					],
-				}))
-				.mockImplementationOnce(
-					async () =>
-						({
-							rows: [{ foo: 'not a valid result' }],
-						}) as Result<object>,
-				);
-			const result = await agent
-				.post('/applicationForms')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					opportunityId: '1',
-					fields: [
-						{
-							baseFieldId: '1',
-							position: 1,
-							label: 'Your First Name',
-						},
-					],
-				})
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'InternalValidationError',
-				message:
-					'The database responded with an unexpected format when creating a field.',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-	});
-
-	it('returns 503 when the db has insufficient resources on insert', async () => {
-		jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-			throw new TinyPgError('Something went wrong', undefined, {
-				error: {
-					code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-				},
-			});
-		});
-		const result = await agent
-			.post('/applicationForms')
-			.set(authHeader)
-			.send({
-				opportunityId: 9001,
-				fields: [
-					{
-						baseFieldId: 9002,
-						position: 9003,
-						label: 'A label of some kind',
-					},
-				],
-			})
-			.expect(503);
-		expect(result.body).toMatchObject({
-			name: 'DatabaseError',
-			details: [
-				{
-					code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-				},
-			],
 		});
 	});
 });

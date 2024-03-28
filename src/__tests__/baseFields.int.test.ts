@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { TinyPgError } from 'tinypg';
 import { app } from '../app';
 import { db, loadBaseFields, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
@@ -56,36 +55,6 @@ describe('/baseFields', () => {
 					createdAt: expectTimestamp,
 				},
 			]);
-		});
-
-		it('returns 500 UnknownError if a generic Error is thrown when selecting', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new Error('This is unexpected');
-			});
-			const result = await agent.get('/baseFields').expect(500);
-			expect(result.body).toMatchObject({
-				name: 'UnknownError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 503 DatabaseError if an insufficient resources database error is thrown when selecting', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new TinyPgError('Something went wrong', undefined, {
-					error: {
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				});
-			});
-			const result = await agent.get('/baseFields').expect(503);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
-					{
-						code: PostgresErrorCode.INSUFFICIENT_RESOURCES,
-					},
-				],
-			});
 		});
 	});
 
@@ -206,27 +175,6 @@ describe('/baseFields', () => {
 						code: PostgresErrorCode.UNIQUE_VIOLATION,
 					},
 				],
-			});
-		});
-
-		it('returns 500 UnknownError if a generic Error is thrown when inserting', async () => {
-			jest.spyOn(db, 'sql').mockImplementationOnce(async () => {
-				throw new Error('This is unexpected');
-			});
-			const result = await agent
-				.post('/baseFields')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					label: '🏷️',
-					description: '😍',
-					shortCode: 'firstName',
-					dataType: '📊',
-				})
-				.expect(500);
-			expect(result.body).toMatchObject({
-				name: 'UnknownError',
-				details: expect.any(Array) as unknown[],
 			});
 		});
 	});

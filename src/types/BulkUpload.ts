@@ -18,36 +18,6 @@ export interface BulkUpload {
 	readonly createdAt: Date;
 }
 
-export const bulkUploadSchema: JSONSchemaType<BulkUpload> = {
-	type: 'object',
-	properties: {
-		id: {
-			type: 'integer',
-		},
-		fileName: {
-			type: 'string',
-		},
-		sourceKey: {
-			type: 'string',
-		},
-		status: {
-			type: 'string',
-		},
-		fileSize: {
-			type: 'integer',
-			nullable: true,
-		},
-		createdAt: {
-			type: 'object',
-			required: [],
-			instanceof: 'Date',
-		},
-	},
-	required: ['id', 'fileName', 'sourceKey', 'createdAt'],
-};
-
-export const isBulkUpload = ajv.compile(bulkUploadSchema);
-
 export type BulkUploadCreate = Omit<
 	BulkUpload,
 	'createdAt' | 'status' | 'id' | 'fileSize'

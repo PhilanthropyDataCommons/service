@@ -1,7 +1,12 @@
 import { getLogger } from '../logger';
-import { db } from '../database';
+import {
+	createApplicationFormField,
+	db,
+	loadApplicationFormFieldBundle,
+} from '../database';
 import {
 	isApplicationFormWrite,
+	isId,
 	isTinyPgErrorWithQueryContext,
 } from '../types';
 import {
@@ -12,11 +17,7 @@ import {
 } from '../errors';
 import type { Request, Response, NextFunction } from 'express';
 import type { Result } from 'tinypg';
-import type {
-	ApplicationForm,
-	ApplicationFormWrite,
-	ApplicationFormField,
-} from '../types';
+import type { ApplicationForm, ApplicationFormWrite } from '../types';
 
 const logger = getLogger(__filename);
 
@@ -75,6 +76,11 @@ const getApplicationFormWithFields = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	const { id: applicationFormId } = req.params;
+	if (!isId(applicationFormId)) {
+		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
+		return;
+	}
 	db.sql('applicationForms.selectById', { id: req.params.id })
 		.then((applicationFormsQueryResult: Result<ApplicationForm>) => {
 			if (applicationFormsQueryResult.row_count === 0) {
@@ -89,13 +95,13 @@ const getApplicationFormWithFields = (
 					[],
 				);
 			}
-			db.sql('applicationFormFields.selectByApplicationFormId', {
-				applicationFormId: req.params.id,
+			loadApplicationFormFieldBundle({
+				applicationFormId,
 			})
-				.then((applicationFormFieldsQueryResult) => {
+				.then(({ entries: applicationFormFields }) => {
 					const applicationForm = {
 						...baseApplicationForm,
-						fields: applicationFormFieldsQueryResult.rows,
+						fields: applicationFormFields,
 					};
 					res.status(200).contentType('application/json').send(applicationForm);
 				})
@@ -157,17 +163,13 @@ const postApplicationForms = (
 			const applicationForm = applicationFormsQueryResult.rows[0];
 			if (applicationForm !== undefined) {
 				const queries = req.body.fields.map(async (field) =>
-					db.sql('applicationFormFields.insertOne', {
+					createApplicationFormField({
 						...field,
 						applicationFormId: applicationForm.id,
 					}),
 				);
-				Promise.all<Result<ApplicationFormField>>(queries)
-					.then((applicationFormFieldsQueryResults) => {
-						const applicationFormFields = applicationFormFieldsQueryResults.map(
-							(applicationFormFieldsQueryResult) =>
-								applicationFormFieldsQueryResult.rows[0],
-						);
+				Promise.all(queries)
+					.then((applicationFormFields) => {
 						res
 							.status(201)
 							.contentType('application/json')

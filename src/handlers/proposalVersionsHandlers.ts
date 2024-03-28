@@ -1,5 +1,5 @@
 import { getLogger } from '../logger';
-import { db, loadProposal } from '../database';
+import { db, loadApplicationFormField, loadProposal } from '../database';
 import {
 	isProposalVersionWrite,
 	isTinyPgErrorWithQueryContext,
@@ -14,7 +14,6 @@ import {
 import type { Request, Response, NextFunction } from 'express';
 import type {
 	ApplicationForm,
-	ApplicationFormField,
 	ProposalVersion,
 	ProposalVersionWrite,
 	ProposalFieldValue,
@@ -76,35 +75,36 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 	proposalFieldValues: ProposalFieldValueWrite[],
 ): Promise<void> => {
 	const applicationFormFieldQueries = proposalFieldValues.map(
-		async (proposalFieldValue) =>
-			db
-				.sql<ApplicationFormField>('applicationFormFields.selectById', {
-					id: proposalFieldValue.applicationFormFieldId,
-				})
-				.then((applicationFormFieldQueryResult) => {
-					const { applicationFormFieldId } = proposalFieldValue;
-					const applicationFormField = applicationFormFieldQueryResult.rows[0];
-					if (applicationFormField === undefined) {
-						throw new InputConflictError(
-							'The Application Form Field does not exist.',
-							{
-								entityType: 'ApplicationFormField',
-								entityId: applicationFormFieldId,
-							},
-						);
-					}
-					if (applicationFormField.applicationFormId !== applicationFormId) {
-						throw new InputConflictError(
-							`Application Form Field (${applicationFormFieldId}) does not exist in Application Form (${applicationFormId}).`,
-							{
-								entityType: 'ApplicationForm',
-								entityId: applicationFormId,
-								contextEntityType: 'ApplicationFormField',
-								contextEntityId: applicationFormFieldId,
-							},
-						);
-					}
-				}),
+		async (proposalFieldValue) => {
+			const { applicationFormFieldId } = proposalFieldValue;
+			try {
+				const applicationFormField = await loadApplicationFormField(
+					proposalFieldValue.applicationFormFieldId,
+				);
+				if (applicationFormField.applicationFormId !== applicationFormId) {
+					throw new InputConflictError(
+						`Application Form Field (${applicationFormFieldId}) does not exist in Application Form (${applicationFormId}).`,
+						{
+							entityType: 'ApplicationForm',
+							entityId: applicationFormId,
+							contextEntityType: 'ApplicationFormField',
+							contextEntityId: applicationFormFieldId,
+						},
+					);
+				}
+			} catch (error) {
+				if (error instanceof NotFoundError) {
+					throw new InputConflictError(
+						'The Application Form Field does not exist.',
+						{
+							entityType: 'ApplicationFormField',
+							entityId: applicationFormFieldId,
+						},
+					);
+				}
+				throw error;
+			}
+		},
 	);
 	await Promise.all(applicationFormFieldQueries);
 };

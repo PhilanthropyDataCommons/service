@@ -10,6 +10,7 @@ import {
 } from '../s3Client';
 import { db } from '../database/db';
 import {
+	createApplicationFormField,
 	createProposal,
 	loadBaseFields,
 	loadBulkUpload,
@@ -226,21 +227,12 @@ const createApplicationFormFieldsForBulkUpload = async (
 					`No base field could be found with shortCode "${shortCode}"`,
 				);
 			}
-			const result = await db.sql<ApplicationFormField>(
-				'applicationFormFields.insertOne',
-				{
-					applicationFormId,
-					baseFieldId: baseField.id,
-					position: index,
-					label: baseField.label,
-				},
-			);
-			const applicationFormField = result.rows[0];
-			if (applicationFormField === undefined) {
-				throw new NotFoundError(
-					'The application form field could not be created',
-				);
-			}
+			const applicationFormField = await createApplicationFormField({
+				applicationFormId,
+				baseFieldId: baseField.id,
+				position: index,
+				label: baseField.label,
+			});
 			return applicationFormField;
 		}),
 	);

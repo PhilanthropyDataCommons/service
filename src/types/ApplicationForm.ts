@@ -5,21 +5,23 @@ import type {
 	ApplicationFormField,
 	WritableApplicationFormFieldWithApplicationContext,
 } from './ApplicationFormField';
+import type { Writable } from './Writable';
 
-export interface ApplicationForm {
+interface ApplicationForm {
 	readonly id: number;
 	opportunityId: number;
-	version: number;
-	fields?: ApplicationFormField[];
+	readonly version: number;
+	readonly fields: ApplicationFormField[];
 	readonly createdAt: Date;
 }
 
-export type ApplicationFormWrite = Omit<
-	ApplicationForm,
-	'createdAt' | 'fields' | 'id' | 'version'
-> & { fields: WritableApplicationFormFieldWithApplicationContext[] };
+type WritableApplicationForm = Writable<ApplicationForm>;
 
-export const applicationFormWriteSchema: JSONSchemaType<ApplicationFormWrite> =
+type WritableApplicationFormWithFields = WritableApplicationForm & {
+	fields: WritableApplicationFormFieldWithApplicationContext[];
+};
+
+const writableApplicationFormWithFieldsSchema: JSONSchemaType<WritableApplicationFormWithFields> =
 	{
 		type: 'object',
 		properties: {
@@ -34,4 +36,13 @@ export const applicationFormWriteSchema: JSONSchemaType<ApplicationFormWrite> =
 		required: ['opportunityId', 'fields'],
 	};
 
-export const isApplicationFormWrite = ajv.compile(applicationFormWriteSchema);
+const isWritableApplicationFormWithFields = ajv.compile(
+	writableApplicationFormWithFieldsSchema,
+);
+
+export {
+	ApplicationForm,
+	isWritableApplicationFormWithFields,
+	writableApplicationFormWithFieldsSchema,
+	WritableApplicationForm,
+};

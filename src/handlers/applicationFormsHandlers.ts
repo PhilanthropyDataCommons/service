@@ -1,13 +1,14 @@
 import { getLogger } from '../logger';
 import {
+	createApplicationForm,
 	createApplicationFormField,
 	db,
 	loadApplicationFormFieldBundle,
 } from '../database';
 import {
-	isApplicationFormWrite,
-	isId,
 	isTinyPgErrorWithQueryContext,
+	isWritableApplicationFormWithFields,
+	isId,
 } from '../types';
 import {
 	DatabaseError,
@@ -17,7 +18,7 @@ import {
 } from '../errors';
 import type { Request, Response, NextFunction } from 'express';
 import type { Result } from 'tinypg';
-import type { ApplicationForm, ApplicationFormWrite } from '../types';
+import type { ApplicationForm } from '../types';
 
 const logger = getLogger(__filename);
 
@@ -140,61 +141,46 @@ const getApplicationForm = (
 };
 
 const postApplicationForms = (
-	req: Request<unknown, unknown, ApplicationFormWrite>,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (!isApplicationFormWrite(req.body)) {
+	if (!isWritableApplicationFormWithFields(req.body)) {
 		next(
 			new InputValidationError(
 				'Invalid request body.',
-				isApplicationFormWrite.errors ?? [],
+				isWritableApplicationFormWithFields.errors ?? [],
 			),
 		);
 		return;
 	}
+	const { fields } = req.body;
 
-	db.sql('applicationForms.insertOne', {
-		...req.body,
-		optedIn: false,
-	})
-		.then((applicationFormsQueryResult: Result<ApplicationForm>) => {
-			logger.debug(applicationFormsQueryResult);
-			const applicationForm = applicationFormsQueryResult.rows[0];
-			if (applicationForm !== undefined) {
-				const queries = req.body.fields.map(async (field) =>
-					createApplicationFormField({
-						...field,
-						applicationFormId: applicationForm.id,
-					}),
-				);
-				Promise.all(queries)
-					.then((applicationFormFields) => {
-						res
-							.status(201)
-							.contentType('application/json')
-							.send({
-								...applicationForm,
-								fields: applicationFormFields,
-							});
-					})
-					.catch((error: unknown) => {
-						if (isTinyPgErrorWithQueryContext(error)) {
-							next(
-								new DatabaseError('Error creating application form.', error),
-							);
-							return;
-						}
-						next(error);
-					});
-			} else {
-				next(
-					new InternalValidationError(
-						'The database responded with an unexpected format when creating the form.',
-						[],
-					),
-				);
-			}
+	createApplicationForm(req.body)
+		.then((applicationForm) => {
+			const queries = fields.map(async (field) =>
+				createApplicationFormField({
+					...field,
+					applicationFormId: applicationForm.id,
+				}),
+			);
+			Promise.all(queries)
+				.then((applicationFormFields) => {
+					res
+						.status(201)
+						.contentType('application/json')
+						.send({
+							...applicationForm,
+							fields: applicationFormFields,
+						});
+				})
+				.catch((error: unknown) => {
+					if (isTinyPgErrorWithQueryContext(error)) {
+						next(new DatabaseError('Error creating application form.', error));
+						return;
+					}
+					next(error);
+				});
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {

@@ -27,7 +27,14 @@ const createTestBaseFields = async () => {
 describe('/applicationForms', () => {
 	describe('GET /', () => {
 		it('returns an empty array when no data is present', async () => {
-			await agent.get('/applicationForms').set(authHeader).expect(200, []);
+			const response = await agent
+				.get('/applicationForms')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				entries: [],
+				total: 0,
+			});
 		});
 
 		it('returns all application forms present in the database', async () => {
@@ -48,10 +55,12 @@ describe('/applicationForms', () => {
           ( 1, 2, '2022-08-20 12:00:00+0000' ),
           ( 2, 1, '2022-09-20 12:00:00+0000' )
       `);
-			await agent
+			const response = await agent
 				.get('/applicationForms')
 				.set(authHeader)
-				.expect(200, [
+				.expect(200);
+			expect(response.body).toMatchObject({
+				entries: [
 					{
 						createdAt: '2022-07-20T12:00:00.000Z',
 						id: 1,
@@ -70,7 +79,9 @@ describe('/applicationForms', () => {
 						opportunityId: 2,
 						version: 1,
 					},
-				]);
+				],
+				total: 3,
+			});
 		});
 
 		it('returns an application form without its fields', async () => {

@@ -513,6 +513,25 @@
 				},
 				"required": ["entries", "total"]
 			},
+			"ApplicationFormBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/ApplicationForm"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
 			"OrganizationBundle": {
 				"allOf": [
 					{
@@ -589,23 +608,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/ApplicationForm"
-									}
-								},
-								"examples": {
-									"default": {
-										"summary": "The default is a shallow response. To get deep objects, request by applicationFormId.",
-										"value": [
-											{
-												"id": 3529,
-												"opportunityId": 3203,
-												"version": 13,
-												"createdAt": "2022-09-13T14:45:06.139Z"
-											}
-										]
-									}
+									"$ref": "#/components/schemas/ApplicationFormBundle"
 								}
 							}
 						}

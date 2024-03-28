@@ -6,6 +6,7 @@ import {
 	loadBulkUpload,
 	loadProposalBundle,
 	loadApplicationFormFieldBundle,
+	loadApplicationFormBundle,
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -13,7 +14,6 @@ import { processBulkUpload } from '../processBulkUpload';
 import { BulkUploadStatus, Proposal } from '../../types';
 import { expectTimestamp } from '../../test/utils';
 import type {
-	ApplicationForm,
 	ApplicationFormField,
 	BaseField,
 	BulkUpload,
@@ -391,8 +391,8 @@ describe('processBulkUpload', () => {
 		}
 
 		const {
-			rows: [applicationForm],
-		} = await db.sql<ApplicationForm>('applicationForms.selectAll');
+			entries: [applicationForm],
+		} = await loadApplicationFormBundle();
 		if (applicationForm === undefined) {
 			fail('The application form was not created');
 		}

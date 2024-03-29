@@ -12,8 +12,4 @@ INSERT INTO application_forms (
     1
   )
 )
-RETURNING
-  id as "id",
-  opportunity_id as "opportunityId",
-  version as "version",
-  created_at as "createdAt"
+RETURNING application_form_to_json(application_forms) AS "object";

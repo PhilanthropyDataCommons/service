@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.0 2024-04-29
+
+### Changed
+
+- The `/applicationForms` endpoint now returns an `ApplicationFormBundle`.
+- The `/applicationForms` endpoint now returns deep `ApplicationForm` objects.
+- The `/applicationForms/:id` endpoint now returns a deep `ApplicationForm object.
+
+### Removed
+
+- The `/applicationForms/:id` endpoint no longer has a `includeFields` query parameter, as it always includes deep fields.
+
 ## 0.5.0 - 2024-04-27
 
 ### Added

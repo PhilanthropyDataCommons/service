@@ -1,7 +1,4 @@
-SELECT af.id AS "id",
-  af.opportunity_id as "opportunityId",
-  af.version AS "version",
-  af.created_at AS "createdAt"
-FROM application_forms af
-WHERE af.id = :id;
+SELECT application_form_to_json(application_forms) AS "object"
+FROM application_forms
+WHERE id = :id;
 

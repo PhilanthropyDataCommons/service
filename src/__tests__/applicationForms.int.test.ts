@@ -27,7 +27,14 @@ const createTestBaseFields = async () => {
 describe('/applicationForms', () => {
 	describe('GET /', () => {
 		it('returns an empty array when no data is present', async () => {
-			await agent.get('/applicationForms').set(authHeader).expect(200, []);
+			const response = await agent
+				.get('/applicationForms')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				entries: [],
+				total: 0,
+			});
 		});
 
 		it('returns all application forms present in the database', async () => {
@@ -48,55 +55,32 @@ describe('/applicationForms', () => {
           ( 1, 2, '2022-08-20 12:00:00+0000' ),
           ( 2, 1, '2022-09-20 12:00:00+0000' )
       `);
-			await agent
+			const response = await agent
 				.get('/applicationForms')
 				.set(authHeader)
-				.expect(200, [
+				.expect(200);
+			expect(response.body).toMatchObject({
+				entries: [
 					{
-						createdAt: '2022-07-20T12:00:00.000Z',
+						createdAt: expectTimestamp,
 						id: 1,
 						opportunityId: 1,
 						version: 1,
 					},
 					{
-						createdAt: '2022-08-20T12:00:00.000Z',
+						createdAt: expectTimestamp,
 						id: 2,
 						opportunityId: 1,
 						version: 2,
 					},
 					{
-						createdAt: '2022-09-20T12:00:00.000Z',
+						createdAt: expectTimestamp,
 						id: 3,
 						opportunityId: 2,
 						version: 1,
 					},
-				]);
-		});
-
-		it('returns an application form without its fields', async () => {
-			await db.query(`
-        INSERT INTO opportunities (title)
-        VALUES
-          ( 'Summer opportunity 🩴' ),
-          ( 'Spring opportunity 🌺' );
-      `);
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2510-02-02 00:00:01+0000' ),
-          ( 1, 2, '2510-02-02 00:00:02+0000' ),
-          ( 2, 1, '2510-02-02 00:00:03+0000' )
-      `);
-			await createTestBaseFields();
-			await agent.get('/applicationForms/2').set(authHeader).expect(200, {
-				id: 2,
-				opportunityId: 1,
-				version: 2,
-				createdAt: '2510-02-02T00:00:02.000Z',
+				],
+				total: 3,
 			});
 		});
 
@@ -135,7 +119,6 @@ describe('/applicationForms', () => {
       `);
 			const result = await agent
 				.get('/applicationForms/2')
-				.query({ includeFields: 'true' })
 				.set(authHeader)
 				.expect(200);
 
@@ -223,12 +206,12 @@ describe('/applicationForms', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics('application_forms');
-			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: 1,
 				opportunityId: 1,
 				version: 1,
+				fields: [],
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(1);

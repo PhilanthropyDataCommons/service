@@ -1,5 +1,10 @@
 import { getLogger } from '../logger';
-import { db, loadApplicationFormField, loadProposal } from '../database';
+import {
+	db,
+	loadApplicationForm,
+	loadApplicationFormField,
+	loadProposal,
+} from '../database';
 import {
 	isProposalVersionWrite,
 	isTinyPgErrorWithQueryContext,
@@ -13,12 +18,12 @@ import {
 } from '../errors';
 import type { Request, Response, NextFunction } from 'express';
 import type {
-	ApplicationForm,
 	ProposalVersion,
 	ProposalVersionWrite,
 	ProposalFieldValue,
 	ProposalFieldValueWrite,
 	Proposal,
+	ApplicationForm,
 } from '../types';
 
 const logger = getLogger(__filename);
@@ -27,12 +32,10 @@ const assertApplicationFormExistsForProposal = async (
 	applicationFormId: number,
 	proposalId: number,
 ): Promise<void> => {
-	const applicationFormsQueryResult = await db.sql<ApplicationForm>(
-		'applicationForms.selectById',
-		{ id: applicationFormId },
-	);
-	const applicationForm = applicationFormsQueryResult.rows[0];
-	if (applicationForm === undefined) {
+	let applicationForm: ApplicationForm;
+	try {
+		applicationForm = await loadApplicationForm(applicationFormId);
+	} catch {
 		throw new InputConflictError('The Application Form does not exist.', {
 			entityType: 'ApplicationForm',
 			entityId: applicationFormId,

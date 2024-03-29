@@ -12,6 +12,7 @@ import { getLogger } from '../logger';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
+import { createApplicationForm } from '../database/operations/create/createApplicationForm';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
@@ -58,7 +59,7 @@ describe('/proposals', () => {
 				externalId: 'proposal-2',
 				opportunityId: 1,
 			});
-			await db.sql('applicationForms.insertOne', {
+			await createApplicationForm({
 				opportunityId: 1,
 			});
 			await db.sql('proposalVersions.insertOne', {
@@ -202,7 +203,7 @@ describe('/proposals', () => {
 				externalId: 'proposal-2',
 				opportunityId: 1,
 			});
-			await db.sql('applicationForms.insertOne', {
+			await createApplicationForm({
 				opportunityId: 1,
 			});
 			await db.sql('proposalVersions.insertOne', {
@@ -299,7 +300,7 @@ describe('/proposals', () => {
 				externalId: 'proposal-5003',
 				opportunityId: 1,
 			});
-			await db.sql('applicationForms.insertOne', {
+			await createApplicationForm({
 				opportunityId: 1,
 			});
 			await db.sql('proposalVersions.insertOne', {

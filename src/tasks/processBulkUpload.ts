@@ -10,6 +10,7 @@ import {
 } from '../s3Client';
 import { db } from '../database/db';
 import {
+	createApplicationForm,
 	createApplicationFormField,
 	createProposal,
 	loadBaseFields,
@@ -22,7 +23,6 @@ import type { GetObjectCommandOutput } from '@aws-sdk/client-s3';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
-	ApplicationForm,
 	ApplicationFormField,
 	BulkUpload,
 	Opportunity,
@@ -198,19 +198,6 @@ const createOpportunityForBulkUpload = async (
 	return opportunity;
 };
 
-const createApplicationFormForBulkUpload = async (
-	opportunityId: number,
-): Promise<ApplicationForm> => {
-	const result = await db.sql<ApplicationForm>('applicationForms.insertOne', {
-		opportunityId,
-	});
-	const applicationForm = result.rows[0];
-	if (applicationForm === undefined) {
-		throw new NotFoundError('The application form could not be created');
-	}
-	return applicationForm;
-};
-
 const createApplicationFormFieldsForBulkUpload = async (
 	csvPath: string,
 	applicationFormId: number,
@@ -337,9 +324,9 @@ export const processBulkUpload = async (
 	try {
 		await assertBulkUploadCsvIsValid(bulkUploadFile.path);
 		const opportunity = await createOpportunityForBulkUpload(bulkUpload);
-		const applicationForm = await createApplicationFormForBulkUpload(
-			opportunity.id,
-		);
+		const applicationForm = await createApplicationForm({
+			opportunityId: opportunity.id,
+		});
 		const applicationFormFields =
 			await createApplicationFormFieldsForBulkUpload(
 				bulkUploadFile.path,

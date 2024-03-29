@@ -380,7 +380,7 @@ describe('processBulkUpload', () => {
 			rows: [opportunity],
 		} = await db.sql<Opportunity>('opportunities.selectAll');
 		if (opportunity === undefined) {
-			fail('The opportunity was not created');
+			throw new Error('The opportunity was not created');
 		}
 
 		const {

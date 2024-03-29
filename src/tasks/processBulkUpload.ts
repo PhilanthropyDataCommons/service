@@ -148,7 +148,7 @@ const createOpportunityForBulkUpload = async (
 	bulkUpload: BulkUpload,
 ): Promise<Opportunity> => {
 	const result = await db.sql<Opportunity>('opportunities.insertOne', {
-		title: `Bulk Upload (${bulkUpload.createdAt.getFullYear()}-${bulkUpload.createdAt.getMonth()}-${bulkUpload.createdAt.getDate()})`,
+		title: `Bulk Upload (${bulkUpload.createdAt})`,
 	});
 	const opportunity = result.rows[0];
 	if (opportunity === undefined) {

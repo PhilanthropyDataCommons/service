@@ -16,7 +16,7 @@ interface BulkUpload {
 	sourceKey: string;
 	readonly status: BulkUploadStatus;
 	readonly fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
-	readonly createdAt: Date;
+	readonly createdAt: string;
 }
 
 type WritableBulkUpload = Writable<BulkUpload>;

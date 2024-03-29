@@ -1,11 +1,7 @@
 import { getLogger } from '../logger';
 import { db, loadProposal } from '../database';
 import {
-	isApplicationForm,
-	isApplicationFormField,
 	isProposalVersionWrite,
-	isProposalVersion,
-	isProposalFieldValue,
 	isTinyPgErrorWithQueryContext,
 } from '../types';
 import {
@@ -42,12 +38,6 @@ const assertApplicationFormExistsForProposal = async (
 			entityType: 'ApplicationForm',
 			entityId: applicationFormId,
 		});
-	}
-	if (!isApplicationForm(applicationForm)) {
-		throw new InternalValidationError(
-			'The database responded with an unexpected format when looking up the Application Form.',
-			isApplicationForm.errors ?? [],
-		);
 	}
 
 	let proposal: Proposal;
@@ -103,12 +93,6 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 							},
 						);
 					}
-					if (!isApplicationFormField(applicationFormField)) {
-						throw new InternalValidationError(
-							'The database responded with an unexpected format when looking up the Application Form Field.',
-							isApplicationFormField.errors ?? [],
-						);
-					}
 					if (applicationFormField.applicationFormId !== applicationFormId) {
 						throw new InputConflictError(
 							`Application Form Field (${applicationFormFieldId}) does not exist in Application Form (${applicationFormId}).`,
@@ -159,7 +143,7 @@ const postProposalVersion = (
 					);
 				logger.debug(proposalVersionQueryResult);
 				const proposalVersion = proposalVersionQueryResult.rows[0];
-				if (isProposalVersion(proposalVersion)) {
+				if (proposalVersion !== undefined) {
 					const proposalFieldValueQueries = req.body.fieldValues.map(
 						async (fieldValue) =>
 							transactionDb.sql<ProposalFieldValue>(
@@ -176,12 +160,12 @@ const postProposalVersion = (
 					const proposalFieldValues = proposalFieldValueResults.map(
 						(proposalFieldValueResult) => {
 							const proposalFieldValue = proposalFieldValueResult.rows[0];
-							if (isProposalFieldValue(proposalFieldValue)) {
+							if (proposalFieldValue !== undefined) {
 								return proposalFieldValue;
 							}
 							throw new InternalValidationError(
 								'The database responded with an unexpected format when creating the Proposal Field Value.',
-								isProposalFieldValue.errors ?? [],
+								[],
 							);
 						},
 					);
@@ -193,7 +177,7 @@ const postProposalVersion = (
 				}
 				throw new InternalValidationError(
 					'The database responded with an unexpected format when creating the Proposal Version.',
-					isProposalVersion.errors ?? [],
+					[],
 				);
 			})
 				.then((proposalVersion) => {

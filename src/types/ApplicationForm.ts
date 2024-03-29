@@ -1,8 +1,5 @@
 import { ajv } from '../ajv';
-import {
-	applicationFormFieldSchema,
-	applicationFormFieldWriteSchema,
-} from './ApplicationFormField';
+import { applicationFormFieldWriteSchema } from './ApplicationFormField';
 import type { JSONSchemaType } from 'ajv';
 import type {
 	ApplicationFormField,
@@ -22,34 +19,6 @@ export type ApplicationFormWrite = Omit<
 	'createdAt' | 'fields' | 'id' | 'version'
 > & { fields: ApplicationFormFieldWrite[] };
 
-export const applicationFormSchema: JSONSchemaType<ApplicationForm> = {
-	type: 'object',
-	properties: {
-		id: {
-			type: 'integer',
-		},
-		opportunityId: {
-			type: 'integer',
-		},
-		version: {
-			type: 'integer',
-		},
-		fields: {
-			type: 'array',
-			items: applicationFormFieldSchema,
-			nullable: true,
-		},
-		createdAt: {
-			type: 'object',
-			required: [],
-			instanceof: 'Date',
-		},
-	},
-	required: ['id', 'opportunityId', 'version', 'createdAt'],
-};
-
-export const isApplicationForm = ajv.compile(applicationFormSchema);
-
 export const applicationFormWriteSchema: JSONSchemaType<ApplicationFormWrite> =
 	{
 		type: 'object',
@@ -66,10 +35,3 @@ export const applicationFormWriteSchema: JSONSchemaType<ApplicationFormWrite> =
 	};
 
 export const isApplicationFormWrite = ajv.compile(applicationFormWriteSchema);
-
-const applicationFormArraySchema: JSONSchemaType<ApplicationForm[]> = {
-	type: 'array',
-	items: applicationFormSchema,
-};
-
-export const isApplicationFormArray = ajv.compile(applicationFormArraySchema);

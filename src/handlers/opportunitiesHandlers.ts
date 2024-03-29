@@ -1,11 +1,7 @@
 import { ajv } from '../ajv';
 import { getLogger } from '../logger';
 import { db } from '../database';
-import {
-	isOpportunityArray,
-	isOpportunity,
-	isTinyPgErrorWithQueryContext,
-} from '../types';
+import { isTinyPgErrorWithQueryContext } from '../types';
 import {
 	DatabaseError,
 	InputValidationError,
@@ -27,16 +23,7 @@ const getOpportunities = (
 		.then((opportunitiesQueryResult: Result<Opportunity>) => {
 			logger.debug(opportunitiesQueryResult);
 			const { rows: opportunities } = opportunitiesQueryResult;
-			if (isOpportunityArray(opportunities)) {
-				res.status(200).contentType('application/json').send(opportunities);
-			} else {
-				next(
-					new InternalValidationError(
-						'The database responded with an unexpected format.',
-						isOpportunityArray.errors ?? [],
-					),
-				);
-			}
+			res.status(200).contentType('application/json').send(opportunities);
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
@@ -87,13 +74,13 @@ const getOpportunity = (
 			}
 
 			const opportunity = opportunitiesQueryResult.rows[0];
-			if (isOpportunity(opportunity)) {
+			if (opportunity !== undefined) {
 				res.status(200).contentType('application/json').send(opportunity);
 			} else {
 				next(
 					new InternalValidationError(
 						'The database responded with an unexpected format.',
-						isOpportunity.errors ?? [],
+						[],
 					),
 				);
 			}
@@ -140,13 +127,13 @@ const postOpportunity = (
 		.then((opportunitiesQueryResult: Result<Opportunity>) => {
 			logger.debug(opportunitiesQueryResult);
 			const opportunity = opportunitiesQueryResult.rows[0];
-			if (isOpportunity(opportunity)) {
+			if (opportunity !== undefined) {
 				res.status(201).contentType('application/json').send(opportunity);
 			} else {
 				next(
 					new InternalValidationError(
 						'The database responded with an unexpected format.',
-						isOpportunity.errors ?? [],
+						[],
 					),
 				);
 			}

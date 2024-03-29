@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	createApplicationFormField,
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
@@ -64,7 +65,7 @@ describe('/proposals', () => {
 				proposalId: 1,
 				applicationFormId: 1,
 			});
-			await db.sql('applicationFormFields.insertOne', {
+			await createApplicationFormField({
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 1,
@@ -212,7 +213,7 @@ describe('/proposals', () => {
 				proposalId: 2,
 				applicationFormId: 1,
 			});
-			await db.sql('applicationFormFields.insertOne', {
+			await createApplicationFormField({
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 1,
@@ -309,7 +310,7 @@ describe('/proposals', () => {
 				proposalId: 2,
 				applicationFormId: 1,
 			});
-			await db.sql('applicationFormFields.insertOne', {
+			await createApplicationFormField({
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 1,

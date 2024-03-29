@@ -1,20 +1,25 @@
 import type { JSONSchemaType } from 'ajv';
+import type { BaseField } from './BaseField';
+import type { Writable } from './Writable';
 
-export interface ApplicationFormField {
+interface ApplicationFormField {
 	readonly id: number;
 	applicationFormId: number;
 	baseFieldId: number;
+	readonly baseField: BaseField;
 	position: number;
 	label: string;
 	readonly createdAt: Date;
 }
 
-export type ApplicationFormFieldWrite = Omit<
-	ApplicationFormField,
-	'applicationFormId' | 'createdAt' | 'id'
+type WritableApplicationFormField = Writable<ApplicationFormField>;
+
+type WritableApplicationFormFieldWithApplicationContext = Omit<
+	WritableApplicationFormField,
+	'applicationFormId'
 >;
 
-export const applicationFormFieldWriteSchema: JSONSchemaType<ApplicationFormFieldWrite> =
+const writableApplicationFormFieldWithApplicationContextSchema: JSONSchemaType<WritableApplicationFormFieldWithApplicationContext> =
 	{
 		type: 'object',
 		properties: {
@@ -30,3 +35,10 @@ export const applicationFormFieldWriteSchema: JSONSchemaType<ApplicationFormFiel
 		},
 		required: ['baseFieldId', 'position', 'label'],
 	};
+
+export {
+	ApplicationFormField,
+	WritableApplicationFormField,
+	WritableApplicationFormFieldWithApplicationContext,
+	writableApplicationFormFieldWithApplicationContextSchema,
+};

@@ -1,9 +1,3 @@
-SELECT
-  aff.id as "id",
-  aff.application_form_id as "applicationFormId",
-  aff.base_field_id as "baseFieldId",
-  aff.position as "position",
-  aff.label as "label",
-  aff.created_at as "createdAt"
-FROM application_form_fields aff
-WHERE aff.id = :id;
+SELECT application_form_field_to_json(application_form_fields) AS "object"
+FROM application_form_fields
+WHERE id = :id;

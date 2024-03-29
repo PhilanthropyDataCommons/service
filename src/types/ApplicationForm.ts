@@ -1,9 +1,9 @@
 import { ajv } from '../ajv';
-import { applicationFormFieldWriteSchema } from './ApplicationFormField';
+import { writableApplicationFormFieldWithApplicationContextSchema } from './ApplicationFormField';
 import type { JSONSchemaType } from 'ajv';
 import type {
 	ApplicationFormField,
-	ApplicationFormFieldWrite,
+	WritableApplicationFormFieldWithApplicationContext,
 } from './ApplicationFormField';
 
 export interface ApplicationForm {
@@ -17,7 +17,7 @@ export interface ApplicationForm {
 export type ApplicationFormWrite = Omit<
 	ApplicationForm,
 	'createdAt' | 'fields' | 'id' | 'version'
-> & { fields: ApplicationFormFieldWrite[] };
+> & { fields: WritableApplicationFormFieldWithApplicationContext[] };
 
 export const applicationFormWriteSchema: JSONSchemaType<ApplicationFormWrite> =
 	{
@@ -28,7 +28,7 @@ export const applicationFormWriteSchema: JSONSchemaType<ApplicationFormWrite> =
 			},
 			fields: {
 				type: 'array',
-				items: applicationFormFieldWriteSchema,
+				items: writableApplicationFormFieldWithApplicationContextSchema,
 			},
 		},
 		required: ['opportunityId', 'fields'],

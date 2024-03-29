@@ -5,6 +5,7 @@ import {
 	createBaseField,
 	loadBulkUpload,
 	loadProposalBundle,
+	loadApplicationFormFieldBundle,
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -151,10 +152,8 @@ const getApplicationFormFieldsByBaseFieldIds = async (
 	applicationFormId: number,
 	baseFieldIds: number[],
 ): Promise<ApplicationFormField[]> => {
-	const { rows: applicationFormFields } = await db.sql<ApplicationFormField>(
-		'applicationFormFields.selectByApplicationFormId',
-		{ applicationFormId },
-	);
+	const { entries: applicationFormFields } =
+		await loadApplicationFormFieldBundle({ applicationFormId });
 	return baseFieldIds.map((baseFieldId) => {
 		const applicationFormField = applicationFormFields.find(
 			(applicationFormFieldCandidate) =>

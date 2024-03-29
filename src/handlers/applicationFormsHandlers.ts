@@ -3,7 +3,6 @@ import {
 	createApplicationFormField,
 	loadApplicationForm,
 	loadApplicationFormBundle,
-	loadApplicationFormFieldBundle,
 } from '../database';
 import {
 	isTinyPgErrorWithQueryContext,
@@ -31,7 +30,7 @@ const getApplicationForms = (
 		});
 };
 
-const getShallowApplicationForm = (
+const getApplicationForm = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
@@ -47,67 +46,11 @@ const getShallowApplicationForm = (
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving application forms.', error));
-				return;
-			}
-			next(error);
-		});
-};
-
-const getApplicationFormWithFields = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
-	const { id: applicationFormId } = req.params;
-	if (!isId(applicationFormId)) {
-		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
-		return;
-	}
-	loadApplicationForm(applicationFormId)
-		.then((baseApplicationForm) => {
-			loadApplicationFormFieldBundle({
-				applicationFormId,
-			})
-				.then(({ entries: applicationFormFields }) => {
-					const applicationForm = {
-						...baseApplicationForm,
-						fields: applicationFormFields,
-					};
-					res.status(200).contentType('application/json').send(applicationForm);
-				})
-				.catch((error: unknown) => {
-					if (isTinyPgErrorWithQueryContext(error)) {
-						next(
-							new DatabaseError('Error retrieving application form.', error),
-						);
-						return;
-					}
-					next(error);
-				});
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
 				next(new DatabaseError('Error retrieving application form.', error));
 				return;
 			}
 			next(error);
 		});
-};
-
-const getApplicationForm = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
-	if (
-		req.query.includeFields !== undefined &&
-		req.query.includeFields === 'true'
-	) {
-		getApplicationFormWithFields(req, res, next);
-	} else {
-		getShallowApplicationForm(req, res, next);
-	}
 };
 
 const postApplicationForms = (

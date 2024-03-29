@@ -1,5 +1,5 @@
 import { loadBundle } from './loadBundle';
-import type { Bundle, ApplicationForm } from '../../../types';
+import type { JsonResultSet, Bundle, ApplicationForm } from '../../../types';
 
 export const loadApplicationFormBundle = async (
 	queryParameters: {
@@ -11,7 +11,7 @@ export const loadApplicationFormBundle = async (
 		offset: 0,
 		limit: 0,
 	};
-	const bundle = await loadBundle<ApplicationForm>(
+	const bundle = await loadBundle<JsonResultSet<ApplicationForm>>(
 		'applicationForms.selectWithPagination',
 		{
 			...defaultQueryParameters,
@@ -19,5 +19,9 @@ export const loadApplicationFormBundle = async (
 		},
 		'application_forms',
 	);
-	return bundle;
+	const entries = bundle.entries.map((entry) => entry.object);
+	return {
+		...bundle,
+		entries,
+	};
 };

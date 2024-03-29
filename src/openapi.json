@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.5.0"
+		"version": "0.6.0"
 	},
 	"components": {
 		"parameters": {
@@ -687,57 +687,15 @@
 						"schema": {
 							"type": "integer"
 						}
-					},
-					{
-						"name": "includeFields",
-						"in": "query",
-						"description": "Include the fields associated with the application form when `true`, otherwise do not include them.",
-						"required": false,
-						"schema": {
-							"type": "boolean"
-						}
 					}
 				],
 				"responses": {
 					"200": {
-						"description": "All application forms currently registered in the PDC.",
+						"description": "The requested application form.",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/ApplicationForm"
-									}
-								},
-								"examples": {
-									"default": {
-										"summary": "The default, shallow response with no parameters or where `includeFields=false`.",
-										"value": {
-											"id": 3529,
-											"opportunityId": 3203,
-											"version": 13,
-											"createdAt": "2022-09-13T14:45:06.139Z"
-										}
-									},
-									"includeFields": {
-										"summary": "The response when `includeFields` is set to `true`.",
-										"value": {
-											"id": 3529,
-											"opportunityId": 3203,
-											"version": 13,
-											"createdAt": "2022-09-13T14:45:06.139Z",
-											"fields": [
-												{
-													"id": 3613,
-													"applicationFormId": 3529,
-													"baseFieldId": 3011,
-													"position": 29,
-													"label": "Your First Name",
-													"createdAt": "2022-12-12T17:54:24.988Z"
-												}
-											]
-										}
-									}
+									"$ref": "#/components/schemas/ApplicationForm"
 								}
 							}
 						}

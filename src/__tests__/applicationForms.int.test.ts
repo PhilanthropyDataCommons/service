@@ -62,52 +62,25 @@ describe('/applicationForms', () => {
 			expect(response.body).toMatchObject({
 				entries: [
 					{
-						createdAt: '2022-07-20T12:00:00.000Z',
+						createdAt: expectTimestamp,
 						id: 1,
 						opportunityId: 1,
 						version: 1,
 					},
 					{
-						createdAt: '2022-08-20T12:00:00.000Z',
+						createdAt: expectTimestamp,
 						id: 2,
 						opportunityId: 1,
 						version: 2,
 					},
 					{
-						createdAt: '2022-09-20T12:00:00.000Z',
+						createdAt: expectTimestamp,
 						id: 3,
 						opportunityId: 2,
 						version: 1,
 					},
 				],
 				total: 3,
-			});
-		});
-
-		it('returns an application form without its fields', async () => {
-			await db.query(`
-        INSERT INTO opportunities (title)
-        VALUES
-          ( 'Summer opportunity 🩴' ),
-          ( 'Spring opportunity 🌺' );
-      `);
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2510-02-02 00:00:01+0000' ),
-          ( 1, 2, '2510-02-02 00:00:02+0000' ),
-          ( 2, 1, '2510-02-02 00:00:03+0000' )
-      `);
-			await createTestBaseFields();
-			await agent.get('/applicationForms/2').set(authHeader).expect(200, {
-				id: 2,
-				opportunityId: 1,
-				version: 2,
-				createdAt: '2510-02-02T00:00:02.000Z',
 			});
 		});
 
@@ -146,7 +119,6 @@ describe('/applicationForms', () => {
       `);
 			const result = await agent
 				.get('/applicationForms/2')
-				.query({ includeFields: 'true' })
 				.set(authHeader)
 				.expect(200);
 
@@ -234,12 +206,12 @@ describe('/applicationForms', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics('application_forms');
-			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: 1,
 				opportunityId: 1,
 				version: 1,
+				fields: [],
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(1);

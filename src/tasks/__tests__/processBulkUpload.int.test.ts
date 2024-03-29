@@ -399,7 +399,7 @@ describe('processBulkUpload', () => {
 		expect(applicationForm).toMatchObject({
 			opportunityId: opportunity.id,
 			version: 1,
-			createdAt: expect.any(Date) as Date,
+			createdAt: expectTimestamp,
 		});
 
 		const [firstProposal, secondProposal] = await getProposalsByExternalIds([

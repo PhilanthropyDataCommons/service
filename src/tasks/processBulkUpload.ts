@@ -15,6 +15,7 @@ import {
 	createProposal,
 	loadBaseFields,
 	loadBulkUpload,
+	updateBulkUpload,
 } from '../database/operations';
 import { BulkUploadStatus, isProcessBulkUploadJobPayload } from '../types';
 import { NotFoundError } from '../errors';
@@ -32,48 +33,6 @@ import type {
 } from '../types';
 
 const { S3_BUCKET } = requireEnv('S3_BUCKET');
-
-const updateBulkUploadStatus = async (
-	id: number,
-	status: BulkUploadStatus,
-): Promise<void> => {
-	const bulkUploadsQueryResult = await db.sql<BulkUpload>(
-		'bulkUploads.updateStatusById',
-		{
-			id,
-			status,
-		},
-	);
-	if (bulkUploadsQueryResult.row_count !== 1) {
-		throw new NotFoundError(`The bulk upload was not found (id: ${id})`);
-	}
-};
-
-const updateBulkUploadSourceKey = async (id: number, sourceKey: string) => {
-	const result = await db.sql<BulkUpload>('bulkUploads.updateSourceKeyById', {
-		id,
-		sourceKey,
-	});
-	if (result.row_count !== 1) {
-		throw new NotFoundError(`The bulk upload was not found (id: ${id})`);
-	}
-};
-
-const updateBulkUploadFileSize = async (
-	id: number,
-	fileSize: number,
-): Promise<void> => {
-	const bulkUploadsQueryResult = await db.sql<BulkUpload>(
-		'bulkUploads.updateFileSizeById',
-		{
-			id,
-			fileSize,
-		},
-	);
-	if (bulkUploadsQueryResult.row_count !== 1) {
-		throw new NotFoundError(`The bulk upload was not found (id: ${id})`);
-	}
-};
 
 const downloadS3ObjectToTemporaryStorage = async (
 	key: string,
@@ -303,21 +262,23 @@ export const processBulkUpload = async (
 			`Bulk upload cannot be processed because the associated sourceKey does not begin with ${S3_UNPROCESSED_KEY_PREFIX}`,
 			{ bulkUpload },
 		);
-		await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.FAILED);
+		await updateBulkUpload(bulkUpload.id, { status: BulkUploadStatus.FAILED });
 		return;
 	}
 
 	let bulkUploadFile: FileResult;
 	let bulkUploadHasFailed = false;
 	try {
-		await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.IN_PROGRESS);
+		await updateBulkUpload(bulkUpload.id, {
+			status: BulkUploadStatus.IN_PROGRESS,
+		});
 		bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
 			bulkUpload.sourceKey,
 			helpers.logger,
 		);
 	} catch (err) {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
-		await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.FAILED);
+		await updateBulkUpload(bulkUpload.id, { status: BulkUploadStatus.FAILED });
 		return;
 	}
 
@@ -374,7 +335,7 @@ export const processBulkUpload = async (
 	try {
 		const fileStats = await fs.promises.stat(bulkUploadFile.path);
 		const fileSize = fileStats.size;
-		await updateBulkUploadFileSize(bulkUpload.id, fileSize);
+		await updateBulkUpload(bulkUpload.id, { fileSize });
 	} catch (err) {
 		helpers.logger.warn(
 			`Unable to update the fileSize for bulkUpload ${bulkUpload.id}`,
@@ -403,7 +364,7 @@ export const processBulkUpload = async (
 			Bucket: S3_BUCKET,
 			Key: bulkUpload.sourceKey,
 		});
-		await updateBulkUploadSourceKey(bulkUpload.id, copyDestination);
+		await updateBulkUpload(bulkUpload.id, { sourceKey: copyDestination });
 	} catch (err) {
 		helpers.logger.warn(
 			`Moving the bulk upload file to final processed destination failed (${bulkUploadFile.path})`,
@@ -412,8 +373,10 @@ export const processBulkUpload = async (
 	}
 
 	if (bulkUploadHasFailed) {
-		await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.FAILED);
+		await updateBulkUpload(bulkUpload.id, { status: BulkUploadStatus.FAILED });
 	} else {
-		await updateBulkUploadStatus(bulkUpload.id, BulkUploadStatus.COMPLETED);
+		await updateBulkUpload(bulkUpload.id, {
+			status: BulkUploadStatus.COMPLETED,
+		});
 	}
 };

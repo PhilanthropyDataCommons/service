@@ -1,57 +1,49 @@
-import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
-import { db, getLimitValues, loadBulkUploadBundle } from '../database';
 import {
-	isTinyPgErrorWithQueryContext,
-	isBulkUploadCreate,
+	createBulkUpload,
+	getLimitValues,
+	loadBulkUploadBundle,
+} from '../database';
+import {
 	BulkUploadStatus,
+	isTinyPgErrorWithQueryContext,
+	isWritableBulkUpload,
 } from '../types';
-import { DatabaseError, InputValidationError, NotFoundError } from '../errors';
+import { DatabaseError, InputValidationError } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
+import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
 import type { Request, Response, NextFunction } from 'express';
-import type { BulkUpload, BulkUploadCreate } from '../types';
 
-const createBulkUpload = (
-	req: Request<unknown, unknown, BulkUploadCreate>,
+const postBulkUpload = (
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
-	const { body } = req;
-	if (!isBulkUploadCreate(body)) {
+	if (!isWritableBulkUpload(req.body)) {
 		next(
 			new InputValidationError(
 				'Invalid request body.',
-				isBulkUploadCreate.errors ?? [],
+				isWritableBulkUpload.errors ?? [],
 			),
 		);
 		return;
 	}
 
-	if (!body.sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
-		next(
-			new InputValidationError(
-				`sourceKey must be unprocessed, and begin with '${S3_UNPROCESSED_KEY_PREFIX}/'.`,
-				[],
-			),
+	const { fileName, sourceKey } = req.body;
+
+	if (!sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
+		throw new InputValidationError(
+			`sourceKey must be unprocessed, and begin with '${S3_UNPROCESSED_KEY_PREFIX}/'.`,
+			[],
 		);
-		return;
 	}
 
 	(async () => {
-		const bulkUploadsQueryResult = await db.sql<BulkUpload>(
-			'bulkUploads.insertOne',
-			{
-				fileName: body.fileName,
-				sourceKey: body.sourceKey,
-				status: BulkUploadStatus.PENDING,
-			},
-		);
-		const bulkUpload = bulkUploadsQueryResult.rows[0];
-		if (!bulkUpload) {
-			throw new NotFoundError(
-				'The database did not return an entity after bulk upload creation.',
-			);
-		}
+		const bulkUpload = await createBulkUpload({
+			fileName,
+			sourceKey,
+			status: BulkUploadStatus.PENDING,
+		});
 		await addProcessBulkUploadJob({
 			bulkUploadId: bulkUpload.id,
 		});
@@ -65,7 +57,7 @@ const createBulkUpload = (
 	});
 };
 
-const readBulkUploads = (
+const getBulkUploads = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
@@ -87,6 +79,6 @@ const readBulkUploads = (
 };
 
 export const bulkUploadsHandlers = {
-	createBulkUpload,
-	readBulkUploads,
+	postBulkUpload,
+	getBulkUploads,
 };

@@ -133,34 +133,53 @@ describe('/applicationForms', () => {
           ( 2, 1, 2, 'Name of Organization', '2510-02-01 00:00:08+0000' ),
           ( 2, 2, 1, 'Duration of work in years', '2510-02-01 00:00:09+0000' )
       `);
-			await agent
+			const result = await agent
 				.get('/applicationForms/2')
 				.query({ includeFields: 'true' })
 				.set(authHeader)
-				.expect(200, {
-					id: 2,
-					opportunityId: 1,
-					version: 2,
-					fields: [
-						{
-							id: 4,
-							applicationFormId: 2,
-							baseFieldId: 2,
-							position: 1,
-							label: 'Duration of work in years',
-							createdAt: '2510-02-01T00:00:09.000Z',
+				.expect(200);
+
+			expect(result.body).toMatchObject({
+				id: 2,
+				opportunityId: 1,
+				version: 2,
+				fields: [
+					{
+						id: 4,
+						applicationFormId: 2,
+						baseFieldId: 2,
+						baseField: {
+							id: 2,
+							label: 'Years of work',
+							description:
+								'The number of years the project will take to complete',
+							shortCode: 'yearsOfWork',
+							dataType: '{ type: "integer" }',
+							createdAt: expectTimestamp,
 						},
-						{
-							id: 3,
-							applicationFormId: 2,
-							baseFieldId: 1,
-							position: 2,
-							label: 'Name of Organization',
-							createdAt: '2510-02-01T00:00:08.000Z',
+						position: 1,
+						label: 'Duration of work in years',
+						createdAt: expectTimestamp,
+					},
+					{
+						id: 3,
+						applicationFormId: 2,
+						baseFieldId: 1,
+						baseField: {
+							id: 1,
+							label: 'Organization Name',
+							description: 'The organizational name of the applicant',
+							shortCode: 'organizationName',
+							dataType: '{ type: "string" }',
+							createdAt: expectTimestamp,
 						},
-					],
-					createdAt: '2510-02-01T00:00:02.000Z',
-				});
+						position: 2,
+						label: 'Name of Organization',
+						createdAt: expectTimestamp,
+					},
+				],
+				createdAt: expectTimestamp,
+			});
 		});
 
 		it('should return 404 when the applicationForm is not found (shallow)', async () => {

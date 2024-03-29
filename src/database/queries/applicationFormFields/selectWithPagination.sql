@@ -1,10 +1,4 @@
-SELECT
-  id as "id",
-  application_form_id as "applicationFormId",
-  base_field_id as "baseFieldId",
-  position as "position",
-  label as "label",
-  created_at as "createdAt"
+SELECT application_form_field_to_json(application_form_fields) AS "object"
 FROM application_form_fields
 WHERE
   CASE

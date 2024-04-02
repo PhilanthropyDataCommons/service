@@ -7,6 +7,7 @@ import {
 	loadProposalBundle,
 	loadApplicationFormFieldBundle,
 	loadApplicationFormBundle,
+	createBulkUpload,
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -50,18 +51,10 @@ const createTestBulkUpload = async (
 		sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
 		status: BulkUploadStatus.PENDING,
 	};
-	const bulkUploadsQueryResult = await db.sql<BulkUpload>(
-		'bulkUploads.insertOne',
-		{
-			...defaultValues,
-			...overrideValues,
-		},
-	);
-	const bulkUpload = bulkUploadsQueryResult.rows[0];
-	if (bulkUpload === undefined) {
-		throw new Error("Couldn't create a bulk upload");
-	}
-	return bulkUpload;
+	return createBulkUpload({
+		...defaultValues,
+		...overrideValues,
+	});
 };
 
 const createTestBaseFields = async (): Promise<[BaseField, BaseField]> => {
@@ -387,7 +380,7 @@ describe('processBulkUpload', () => {
 			rows: [opportunity],
 		} = await db.sql<Opportunity>('opportunities.selectAll');
 		if (opportunity === undefined) {
-			fail('The opportunity was not created');
+			throw new Error('The opportunity was not created');
 		}
 
 		const {

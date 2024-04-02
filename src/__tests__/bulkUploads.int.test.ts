@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { app } from '../app';
-import { db, loadTableMetrics } from '../database';
+import { createBulkUpload, loadTableMetrics } from '../database';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { BulkUploadStatus } from '../types';
@@ -16,12 +16,12 @@ describe('GET /bulkUploads', () => {
 	});
 
 	it('returns bulk uploads present in the database', async () => {
-		await db.sql('bulkUploads.insertOne', {
+		await createBulkUpload({
 			fileName: 'foo.csv',
 			sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 			status: BulkUploadStatus.PENDING,
 		});
-		await db.sql('bulkUploads.insertOne', {
+		await createBulkUpload({
 			fileName: 'bar.csv',
 			sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 			status: BulkUploadStatus.COMPLETED,
@@ -59,7 +59,7 @@ describe('GET /bulkUploads', () => {
 	it('supports pagination', async () => {
 		await Array.from(Array(20)).reduce(async (p, _, i) => {
 			await p;
-			await db.sql('bulkUploads.insertOne', {
+			await createBulkUpload({
 				fileName: `bar-${i + 1}.csv`,
 				sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: BulkUploadStatus.COMPLETED,

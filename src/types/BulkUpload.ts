@@ -1,7 +1,8 @@
 import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
+import type { Writable } from './Writable';
 
-export enum BulkUploadStatus {
+enum BulkUploadStatus {
 	PENDING = 'pending',
 	IN_PROGRESS = 'in_progress',
 	COMPLETED = 'completed',
@@ -9,21 +10,21 @@ export enum BulkUploadStatus {
 	CANCELED = 'canceled',
 }
 
-export interface BulkUpload {
+interface BulkUpload {
 	readonly id: number;
 	fileName: string;
 	sourceKey: string;
-	status: BulkUploadStatus;
-	fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
-	readonly createdAt: Date;
+	readonly status: BulkUploadStatus;
+	readonly fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
+	readonly createdAt: string;
 }
 
-export type BulkUploadCreate = Omit<
-	BulkUpload,
-	'createdAt' | 'status' | 'id' | 'fileSize'
->;
+type WritableBulkUpload = Writable<BulkUpload>;
 
-export const bulkUploadCreateSchema: JSONSchemaType<BulkUploadCreate> = {
+type InternallyWritableBulkUpload = WritableBulkUpload &
+	Pick<BulkUpload, 'status' | 'fileSize'>;
+
+const writableBulkUploadSchema: JSONSchemaType<WritableBulkUpload> = {
 	type: 'object',
 	properties: {
 		fileName: {
@@ -38,4 +39,13 @@ export const bulkUploadCreateSchema: JSONSchemaType<BulkUploadCreate> = {
 	required: ['fileName', 'sourceKey'],
 };
 
-export const isBulkUploadCreate = ajv.compile(bulkUploadCreateSchema);
+const isWritableBulkUpload = ajv.compile(writableBulkUploadSchema);
+
+export {
+	BulkUpload,
+	BulkUploadStatus,
+	InternallyWritableBulkUpload,
+	WritableBulkUpload,
+	isWritableBulkUpload,
+	writableBulkUploadSchema,
+};

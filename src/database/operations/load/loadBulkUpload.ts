@@ -1,17 +1,17 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
-import type { BulkUpload } from '../../../types';
+import type { JsonResultSet, BulkUpload } from '../../../types';
 
 export const loadBulkUpload = async (id: number): Promise<BulkUpload> => {
-	const bulkUploadsQueryResult = await db.sql<BulkUpload>(
+	const bulkUploadsQueryResult = await db.sql<JsonResultSet<BulkUpload>>(
 		'bulkUploads.selectById',
 		{
 			id,
 		},
 	);
-	const bulkUpload = bulkUploadsQueryResult.rows[0];
-	if (bulkUpload === undefined) {
+	const { object } = bulkUploadsQueryResult.rows[0] ?? {};
+	if (object === undefined) {
 		throw new NotFoundError(`The bulk upload was not found (id: ${id})`);
 	}
-	return bulkUpload;
+	return object;
 };

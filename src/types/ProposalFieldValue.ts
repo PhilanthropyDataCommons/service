@@ -1,19 +1,20 @@
 import type { JSONSchemaType } from 'ajv';
 import type { ApplicationFormField } from './ApplicationFormField';
 
-export interface ProposalFieldValue {
-	id: number;
+interface ProposalFieldValue {
+	readonly id: number;
 	proposalVersionId: number;
 	applicationFormFieldId: number;
 	position: number;
 	value: string;
-	createdAt: Date;
-	applicationFormField?: ApplicationFormField;
+	readonly createdAt: Date;
+	readonly applicationFormField?: ApplicationFormField;
+	readonly isValid: boolean;
 }
 
-export type ProposalFieldValueWrite = Omit<
+type ProposalFieldValueWrite = Omit<
 	ProposalFieldValue,
-	'applicationFormField' | 'createdAt' | 'id' | 'proposalVersionId'
+	'applicationFormField' | 'createdAt' | 'id' | 'proposalVersionId' | 'isValid'
 >;
 
 export const proposalFieldValueWriteSchema: JSONSchemaType<ProposalFieldValueWrite> =
@@ -32,3 +33,5 @@ export const proposalFieldValueWriteSchema: JSONSchemaType<ProposalFieldValueWri
 		},
 		required: ['applicationFormFieldId', 'position', 'value'],
 	};
+
+export { ProposalFieldValue, ProposalFieldValueWrite };

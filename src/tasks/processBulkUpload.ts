@@ -19,6 +19,7 @@ import {
 } from '../database/operations';
 import { BulkUploadStatus, isProcessBulkUploadJobPayload } from '../types';
 import { NotFoundError } from '../errors';
+import { fieldValueIsValid } from '../fieldValidation';
 import type { Readable } from 'stream';
 import type { GetObjectCommandOutput } from '@aws-sdk/client-s3';
 import type { JobHelpers, Logger } from 'graphile-worker';
@@ -216,6 +217,7 @@ const createProposalFieldValueForBulkUploadCsvRecord = async (
 	applicationFormFieldId: number,
 	value: string,
 	position: number,
+	isValid: boolean,
 ): Promise<ProposalFieldValue> => {
 	const result = await db.sql<ProposalFieldValue>(
 		'proposalFieldValues.insertOne',
@@ -224,6 +226,7 @@ const createProposalFieldValueForBulkUploadCsvRecord = async (
 			applicationFormFieldId,
 			value,
 			position,
+			isValid,
 		},
 	);
 	const proposalFieldValue = result.rows[0];
@@ -293,7 +296,6 @@ export const processBulkUpload = async (
 				bulkUploadFile.path,
 				applicationForm.id,
 			);
-
 		const csvReadStream = fs.createReadStream(bulkUploadFile.path);
 		const parser = parse({
 			from: 2,
@@ -318,11 +320,16 @@ export const processBulkUpload = async (
 							'There is no form field associated with this column',
 						);
 					}
+					const isValid = fieldValueIsValid(
+						fieldValue,
+						applicationFormField.baseField.dataType,
+					);
 					return createProposalFieldValueForBulkUploadCsvRecord(
 						proposalVersion.id,
 						applicationFormField.id,
 						fieldValue,
 						index,
+						isValid,
 					);
 				}),
 			);

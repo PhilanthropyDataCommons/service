@@ -16,6 +16,7 @@ import {
 	InputConflictError,
 	NotFoundError,
 } from '../errors';
+import { fieldValueIsValid } from '../fieldValidation';
 import type { Request, Response, NextFunction } from 'express';
 import type {
 	ProposalVersion,
@@ -148,14 +149,26 @@ const postProposalVersion = (
 				const proposalVersion = proposalVersionQueryResult.rows[0];
 				if (proposalVersion !== undefined) {
 					const proposalFieldValueQueries = req.body.fieldValues.map(
-						async (fieldValue) =>
-							transactionDb.sql<ProposalFieldValue>(
+						async (fieldValue) => {
+							const { value, applicationFormFieldId, position } = fieldValue;
+							const applicationFormField = await loadApplicationFormField(
+								applicationFormFieldId,
+							);
+							const isValid = fieldValueIsValid(
+								value,
+								applicationFormField.baseField.dataType,
+							);
+							return transactionDb.sql<ProposalFieldValue>(
 								'proposalFieldValues.insertOne',
 								{
-									...fieldValue,
 									proposalVersionId: proposalVersion.id,
+									applicationFormFieldId,
+									value,
+									position,
+									isValid,
 								},
-							),
+							);
+						},
 					);
 					const proposalFieldValueResults = await Promise.all(
 						proposalFieldValueQueries,

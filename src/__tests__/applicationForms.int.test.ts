@@ -2,7 +2,7 @@ import request from 'supertest';
 import { app } from '../app';
 import { db, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
-import { PostgresErrorCode } from '../types';
+import { BaseFieldDataType, PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
@@ -14,13 +14,13 @@ const createTestBaseFields = async () => {
 		label: 'Organization Name',
 		description: 'The organizational name of the applicant',
 		shortCode: 'organizationName',
-		dataType: '{ type: "string" }',
+		dataType: BaseFieldDataType.STRING,
 	});
 	await db.sql('baseFields.insertOne', {
 		label: 'Years of work',
 		description: 'The number of years the project will take to complete',
 		shortCode: 'yearsOfWork',
-		dataType: '{ type: "integer" }',
+		dataType: BaseFieldDataType.STRING,
 	});
 };
 
@@ -115,7 +115,7 @@ describe('/applicationForms', () => {
           ( 3, 2, 1, 'Anni Worki', '2510-02-01 00:00:06+0000' ),
           ( 3, 1, 2, 'Org Nomen', '2510-02-01 00:00:07+0000' ),
           ( 2, 1, 2, 'Name of Organization', '2510-02-01 00:00:08+0000' ),
-          ( 2, 2, 1, 'Duration of work in years', '2510-02-01 00:00:09+0000' )
+          ( 2, 2, 1, 'Duration of work in years','2510-02-01 00:00:09+0000' )
       `);
 			const result = await agent
 				.get('/applicationForms/2')
@@ -137,7 +137,7 @@ describe('/applicationForms', () => {
 							description:
 								'The number of years the project will take to complete',
 							shortCode: 'yearsOfWork',
-							dataType: '{ type: "integer" }',
+							dataType: BaseFieldDataType.STRING,
 							createdAt: expectTimestamp,
 						},
 						position: 1,
@@ -153,7 +153,7 @@ describe('/applicationForms', () => {
 							label: 'Organization Name',
 							description: 'The organizational name of the applicant',
 							shortCode: 'organizationName',
-							dataType: '{ type: "string" }',
+							dataType: BaseFieldDataType.STRING,
 							createdAt: expectTimestamp,
 						},
 						position: 2,

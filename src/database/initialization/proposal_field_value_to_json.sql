@@ -15,6 +15,7 @@ BEGIN
     'applicationFormField', application_form_field_json,
     'position', proposal_field_value.position,
     'value', proposal_field_value.value,
+    'isValid', proposal_field_value.is_valid,
     'createdAt', proposal_field_value.created_at
   );
 END;

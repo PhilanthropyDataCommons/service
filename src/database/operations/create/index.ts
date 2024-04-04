@@ -5,3 +5,4 @@ export * from './createBulkUpload';
 export * from './createOrganization';
 export * from './createOrganizationProposal';
 export * from './createProposal';
+export * from './createUser';

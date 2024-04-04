@@ -4,9 +4,11 @@
 const customMiddleware = jest.fn();
 import { requireEnv } from 'require-env-variable';
 import { processJwt } from '../processJwt';
-import { allowNextToResolve } from '../../test/utils';
+import {
+	allowNextToResolve,
+	generateNextWithAssertions,
+} from '../../test/utils';
 import { mockJwt as authHeader } from '../../test/mockJwt';
-import { generateNextWithAssertions } from './generateNextWithAssertions';
 import type { NextFunction, Response } from 'express';
 import type { Request as JWTRequest } from 'express-jwt';
 

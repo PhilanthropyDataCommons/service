@@ -70,7 +70,7 @@
 		"swagger-spec-validator": "^5.0.0",
 		"ts-jest": "^28.0.5",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.4.3"
+		"typescript": "^5.4.4"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.549.0",

@@ -1,10 +1,10 @@
-import { UnauthorizedError } from 'express-jwt';
 import {
 	DatabaseError,
 	InternalValidationError,
 	InputValidationError,
 	InputConflictError,
 	NotFoundError,
+	UnauthorizedError,
 } from '../errors';
 import { PostgresErrorCode } from '../types';
 import { getLogger } from '../logger';
@@ -60,7 +60,7 @@ const getHttpStatusCodeForError = (error: unknown): number => {
 		return 409;
 	}
 	if (error instanceof UnauthorizedError) {
-		return error.status;
+		return 401;
 	}
 	if (error instanceof NotFoundError) {
 		return 404;

@@ -1,22 +1,22 @@
 import express from 'express';
 import { applicationFormsHandlers } from '../handlers/applicationFormsHandlers';
-import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
+import { requireAuthentication } from '../middleware';
 
 const applicationFormsRouter = express.Router();
 
 applicationFormsRouter.get(
 	'/:id',
-	verifyAuth,
+	requireAuthentication,
 	applicationFormsHandlers.getApplicationForm,
 );
 applicationFormsRouter.get(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	applicationFormsHandlers.getApplicationForms,
 );
 applicationFormsRouter.post(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	applicationFormsHandlers.postApplicationForms,
 );
 

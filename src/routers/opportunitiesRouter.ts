@@ -1,22 +1,22 @@
 import express from 'express';
 import { opportunitiesHandlers } from '../handlers/opportunitiesHandlers';
-import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
+import { requireAuthentication } from '../middleware';
 
 const opportunitiesRouter = express.Router();
 
 opportunitiesRouter.post(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	opportunitiesHandlers.postOpportunity,
 );
 opportunitiesRouter.get(
 	'/:id',
-	verifyAuth,
+	requireAuthentication,
 	opportunitiesHandlers.getOpportunity,
 );
 opportunitiesRouter.get(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	opportunitiesHandlers.getOpportunities,
 );
 

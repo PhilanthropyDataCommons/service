@@ -18,6 +18,10 @@ const agent = request.agent(app);
 
 describe('/presignedPostRequests', () => {
 	describe('POST /', () => {
+		it('requires authentication', async () => {
+			await agent.post('/presignedPostRequests').expect(401);
+		});
+
 		it('invokes the S3 API to generate a presigned post', async () => {
 			const mockedPresignedPost = {
 				url: 'https://example.com',

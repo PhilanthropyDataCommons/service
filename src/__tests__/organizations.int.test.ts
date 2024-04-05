@@ -26,6 +26,10 @@ const insertTestOrganizations = async () => {
 
 describe('/organizations', () => {
 	describe('GET /', () => {
+		it('requires authentication', async () => {
+			await agent.get('/organizations').expect(401);
+		});
+
 		it('returns an empty Bundle when no data is present', async () => {
 			await agent.get('/organizations').set(authHeader).expect(200, {
 				total: 0,
@@ -161,6 +165,10 @@ describe('/organizations', () => {
 	});
 
 	describe('GET /:id', () => {
+		it('requires authentication', async () => {
+			await agent.get('/organizations/1').expect(401);
+		});
+
 		it('returns 404 when given id is not present', async () => {
 			await agent.get('/organizations/9001').set(authHeader).expect(404);
 		});
@@ -188,6 +196,10 @@ describe('/organizations', () => {
 	});
 
 	describe('POST /', () => {
+		it('requires authentication', async () => {
+			await agent.post('/organizations').expect(401);
+		});
+
 		it('creates exactly one organization', async () => {
 			const before = await loadTableMetrics('organizations');
 			const result = await agent

@@ -26,6 +26,10 @@ const createTestBaseFields = async () => {
 
 describe('/applicationForms', () => {
 	describe('GET /', () => {
+		it('requires authentication', async () => {
+			await agent.get('/applicationForms').expect(401);
+		});
+
 		it('returns an empty array when no data is present', async () => {
 			const response = await agent
 				.get('/applicationForms')
@@ -190,6 +194,10 @@ describe('/applicationForms', () => {
 	});
 
 	describe('POST /', () => {
+		it('requires authentication', async () => {
+			await agent.post('/applicationForms').expect(401);
+		});
+
 		it('creates exactly one application form', async () => {
 			await db.query(`
         INSERT INTO opportunities ( title )

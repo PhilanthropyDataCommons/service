@@ -1,17 +1,17 @@
 import express from 'express';
 import { platformProviderResponsesHandlers } from '../handlers/platformProviderResponsesHandlers';
-import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
+import { requireAuthentication } from '../middleware';
 
 const platformProviderResponsesRouter = express.Router();
 
 platformProviderResponsesRouter.get(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	platformProviderResponsesHandlers.getPlatformProviderResponsesByExternalId,
 );
 platformProviderResponsesRouter.post(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	platformProviderResponsesHandlers.postPlatformProviderResponse,
 );
 

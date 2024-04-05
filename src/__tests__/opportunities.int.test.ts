@@ -11,7 +11,10 @@ const agent = request.agent(app);
 
 describe('/opportunities', () => {
 	describe('GET /', () => {
-		logger.debug('Now running an opportunities test');
+		it('requires authentication', async () => {
+			await agent.get('/opportunities').expect(401);
+		});
+
 		it('returns an empty array when no data is present', async () => {
 			await agent.get('/opportunities').set(authHeader).expect(200, []);
 		});
@@ -44,7 +47,11 @@ describe('/opportunities', () => {
 		});
 	});
 
-	describe('GET /id', () => {
+	describe('GET /:id', () => {
+		it('requires authentication', async () => {
+			await agent.get('/opportunities/1').expect(401);
+		});
+
 		it('returns exactly one opportunity selected by id', async () => {
 			const opportunityIds: Result<{ id: number; title: string }> =
 				await db.query(`
@@ -113,6 +120,10 @@ describe('/opportunities', () => {
 	});
 
 	describe('POST /', () => {
+		it('requires authentication', async () => {
+			await agent.post('/opportunities').expect(401);
+		});
+
 		it('creates exactly one opportunity', async () => {
 			const before = await loadTableMetrics('opportunities');
 			logger.debug('before: %o', before);

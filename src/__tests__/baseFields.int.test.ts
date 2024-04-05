@@ -19,6 +19,10 @@ const createTestBaseField = async () =>
 
 describe('/baseFields', () => {
 	describe('GET /', () => {
+		it('does not require authentication', async () => {
+			await agent.get('/baseFields').expect(200);
+		});
+
 		it('returns an empty array when no data is present', async () => {
 			await agent.get('/baseFields').expect(200, []);
 		});
@@ -59,6 +63,10 @@ describe('/baseFields', () => {
 	});
 
 	describe('POST /', () => {
+		it('requires authentication', async () => {
+			await agent.post('/baseFields').expect(401);
+		});
+
 		it('creates exactly one base field', async () => {
 			const before = await loadTableMetrics('base_fields');
 			logger.debug('before: %o', before);
@@ -179,7 +187,11 @@ describe('/baseFields', () => {
 		});
 	});
 
-	describe('PUT /', () => {
+	describe('PUT /:baseFieldId', () => {
+		it('requires authentication', async () => {
+			await agent.put('/baseFields/1').expect(401);
+		});
+
 		it('updates the specified base field', async () => {
 			// Not using the helper here because observing a change in values is explicitly
 			// the point of the test, so having full explicit control of the original value

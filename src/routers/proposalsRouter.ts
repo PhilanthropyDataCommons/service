@@ -1,13 +1,21 @@
 import express from 'express';
 import { proposalsHandlers } from '../handlers/proposalsHandlers';
-import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
+import { requireAuthentication } from '../middleware';
 
 const proposalsRouter = express.Router();
 
-proposalsRouter.get('/:id', verifyAuth, proposalsHandlers.getProposal);
+proposalsRouter.get(
+	'/:id',
+	requireAuthentication,
+	proposalsHandlers.getProposal,
+);
 
-proposalsRouter.get('/', verifyAuth, proposalsHandlers.getProposals);
+proposalsRouter.get('/', requireAuthentication, proposalsHandlers.getProposals);
 
-proposalsRouter.post('/', verifyAuth, proposalsHandlers.postProposal);
+proposalsRouter.post(
+	'/',
+	requireAuthentication,
+	proposalsHandlers.postProposal,
+);
 
 export { proposalsRouter };

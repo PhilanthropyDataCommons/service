@@ -1,12 +1,12 @@
 import express from 'express';
 import { presignedPostRequestsHandlers } from '../handlers/presignedPostRequestsHandlers';
-import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
+import { requireAuthentication } from '../middleware';
 
 const presignedPostRequestsRouter = express.Router();
 
 presignedPostRequestsRouter.post(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	presignedPostRequestsHandlers.createPresignedPostRequest,
 );
 

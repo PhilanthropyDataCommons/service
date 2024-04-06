@@ -1,18 +1,18 @@
 import express from 'express';
 import { organizationProposalsHandlers } from '../handlers/organizationProposalsHandlers';
-import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
+import { requireAuthentication } from '../middleware';
 
 const organizationProposalsRouter = express.Router();
 
 organizationProposalsRouter.get(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	organizationProposalsHandlers.getOrganizationProposals,
 );
 
 organizationProposalsRouter.post(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	organizationProposalsHandlers.postOrganizationProposal,
 );
 

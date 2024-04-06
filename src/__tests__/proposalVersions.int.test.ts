@@ -26,6 +26,10 @@ const createTestBaseFields = async () => {
 
 describe('/proposalVersions', () => {
 	describe('POST /', () => {
+		it('requires authentication', async () => {
+			await agent.post('/proposalVersions').expect(401);
+		});
+
 		it('creates exactly one proposal version', async () => {
 			await db.query(`
         INSERT INTO opportunities (

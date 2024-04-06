@@ -35,7 +35,10 @@ const createTestBaseFields = async () => {
 
 describe('/proposals', () => {
 	describe('GET /', () => {
-		logger.debug('Now running an proposals test');
+		it('requires authentication', async () => {
+			await agent.get('/proposals').expect(401);
+		});
+
 		it('returns an empty Bundle when no data is present', async () => {
 			const response = await agent
 				.get('/proposals')
@@ -453,6 +456,10 @@ describe('/proposals', () => {
 	});
 
 	describe('GET /:id', () => {
+		it('requires authentication', async () => {
+			await agent.get('/proposals/9001').expect(401);
+		});
+
 		it('returns 404 when given id is not present', async () => {
 			const response = await agent
 				.get('/proposals/9001')
@@ -713,6 +720,10 @@ describe('/proposals', () => {
 	});
 
 	describe('POST /', () => {
+		it('requires authentication', async () => {
+			await agent.post('/proposals').expect(401);
+		});
+
 		it('creates exactly one proposal', async () => {
 			await db.query(`
         INSERT INTO opportunities (

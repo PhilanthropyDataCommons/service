@@ -21,5 +21,5 @@ export const jwtOptions: Params = {
 	}) as GetVerificationKey,
 	issuer,
 	algorithms: ['RS256'],
-	credentialsRequired: true,
+	credentialsRequired: false,
 };

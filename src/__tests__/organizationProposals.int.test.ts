@@ -25,6 +25,10 @@ const insertTestOrganizations = async () => {
 
 describe('/organizationProposals', () => {
 	describe('GET /', () => {
+		it('requires authentication', async () => {
+			await agent.get('/organizationProposals').expect(401);
+		});
+
 		it('returns the OrganizationProposals for the specified organization', async () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
@@ -156,6 +160,10 @@ describe('/organizationProposals', () => {
 	});
 
 	describe('POST /', () => {
+		it('requires authentication', async () => {
+			await agent.post('/organizationProposals').expect(401);
+		});
+
 		it('creates exactly one OrganizationProposal', async () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',

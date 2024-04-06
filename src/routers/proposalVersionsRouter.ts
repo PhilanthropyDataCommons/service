@@ -1,12 +1,12 @@
 import express from 'express';
 import { proposalVersionsHandlers } from '../handlers/proposalVersionsHandlers';
-import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
+import { requireAuthentication } from '../middleware';
 
 const proposalVersionsRouter = express.Router();
 
 proposalVersionsRouter.post(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	proposalVersionsHandlers.postProposalVersion,
 );
 

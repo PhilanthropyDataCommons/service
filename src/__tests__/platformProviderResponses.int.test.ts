@@ -8,6 +8,10 @@ const agent = request.agent(app);
 
 describe('/platformProviderResponses', () => {
 	describe('GET /', () => {
+		it('requires authentication', async () => {
+			await agent.get('/platformProviderResponses').expect(401);
+		});
+
 		it('returns no platform provider responses if none exist', async () => {
 			const result = await agent
 				.get('/platformProviderResponses?externalId=000000000')

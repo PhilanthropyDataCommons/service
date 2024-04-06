@@ -1,24 +1,24 @@
 import express from 'express';
 import { organizationsHandlers } from '../handlers/organizationsHandlers';
-import { verifyJwt as verifyAuth } from '../middleware/verifyJwt';
+import { requireAuthentication } from '../middleware';
 
 const organizationsRouter = express.Router();
 
 organizationsRouter.get(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	organizationsHandlers.getOrganizations,
 );
 
 organizationsRouter.get(
 	'/:organizationId',
-	verifyAuth,
+	requireAuthentication,
 	organizationsHandlers.getOrganization,
 );
 
 organizationsRouter.post(
 	'/',
-	verifyAuth,
+	requireAuthentication,
 	organizationsHandlers.postOrganization,
 );
 

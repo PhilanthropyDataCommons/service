@@ -2,7 +2,7 @@ import request from 'supertest';
 import { app } from '../app';
 import { db, loadBaseFields, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
-import { PostgresErrorCode } from '../types';
+import { BaseFieldDataType, PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
@@ -14,7 +14,7 @@ const createTestBaseField = async () =>
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
-		dataType: 'string',
+		dataType: BaseFieldDataType.STRING,
 	});
 
 describe('/baseFields', () => {
@@ -28,13 +28,13 @@ describe('/baseFields', () => {
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
-				dataType: 'string',
+				dataType: BaseFieldDataType.STRING,
 			});
 			await db.sql('baseFields.insertOne', {
 				label: 'Last Name',
 				description: 'The last name of the applicant',
 				shortCode: 'lastName',
-				dataType: 'string',
+				dataType: BaseFieldDataType.STRING,
 			});
 			const result = await agent.get('/baseFields').expect(200);
 			expect(result.body).toMatchObject([
@@ -43,7 +43,7 @@ describe('/baseFields', () => {
 					label: 'First Name',
 					description: 'The first name of the applicant',
 					shortCode: 'firstName',
-					dataType: 'string',
+					dataType: BaseFieldDataType.STRING,
 					createdAt: expectTimestamp,
 				},
 				{
@@ -51,7 +51,7 @@ describe('/baseFields', () => {
 					label: 'Last Name',
 					description: 'The last name of the applicant',
 					shortCode: 'lastName',
-					dataType: 'string',
+					dataType: BaseFieldDataType.STRING,
 					createdAt: expectTimestamp,
 				},
 			]);
@@ -70,7 +70,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: '🩳',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('base_fields');
@@ -81,7 +81,7 @@ describe('/baseFields', () => {
 				label: '🏷️',
 				description: '😍',
 				shortCode: '🩳',
-				dataType: '📊',
+				dataType: BaseFieldDataType.STRING,
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(1);
@@ -94,7 +94,7 @@ describe('/baseFields', () => {
 				.send({
 					shortCode: '🩳',
 					description: '😍',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -110,7 +110,7 @@ describe('/baseFields', () => {
 				.send({
 					label: '🏷️',
 					shortCode: '🩳',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -126,7 +126,7 @@ describe('/baseFields', () => {
 				.send({
 					label: '🏷️',
 					description: '😍',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -165,7 +165,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: 'firstName',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(409);
 			expect(result.body).toMatchObject({
@@ -188,7 +188,7 @@ describe('/baseFields', () => {
 				label: 'Summary',
 				description: 'A summary of the proposal',
 				shortCode: 'summary',
-				dataType: 'string',
+				dataType: BaseFieldDataType.STRING,
 			});
 			await agent
 				.put('/baseFields/1')
@@ -198,7 +198,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: '🩳',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(200);
 			const baseFields = await loadBaseFields();
@@ -207,7 +207,7 @@ describe('/baseFields', () => {
 				label: '🏷️',
 				description: '😍',
 				shortCode: '🩳',
-				dataType: '📊',
+				dataType: BaseFieldDataType.STRING,
 				createdAt: expectTimestamp,
 			});
 		});
@@ -222,7 +222,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: '🩳',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(200);
 			expect(result.body).toMatchObject({
@@ -230,7 +230,7 @@ describe('/baseFields', () => {
 				label: '🏷️',
 				description: '😍',
 				shortCode: '🩳',
-				dataType: '📊',
+				dataType: BaseFieldDataType.STRING,
 				createdAt: expectTimestamp,
 			});
 		});
@@ -245,7 +245,7 @@ describe('/baseFields', () => {
 				.send({
 					shortCode: '🩳',
 					description: '😍',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -263,7 +263,7 @@ describe('/baseFields', () => {
 				.send({
 					label: '🏷️',
 					shortCode: '🩳',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -281,7 +281,7 @@ describe('/baseFields', () => {
 				.send({
 					label: '🏷️',
 					description: '😍',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -317,7 +317,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: 'firstName',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -335,7 +335,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: '🩳',
-					dataType: '📊',
+					dataType: BaseFieldDataType.STRING,
 				})
 				.expect(404);
 		});

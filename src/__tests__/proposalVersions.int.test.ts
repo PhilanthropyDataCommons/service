@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app } from '../app';
 import { db, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
+import { BaseFieldDataType } from '../types';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
@@ -13,13 +14,13 @@ const createTestBaseFields = async () => {
 		label: 'First Name',
 		description: 'The first name of the applicant',
 		shortCode: 'firstName',
-		dataType: 'string',
+		dataType: BaseFieldDataType.STRING,
 	});
 	await db.sql('baseFields.insertOne', {
 		label: 'Last Name',
 		description: 'The last name of the applicant',
 		shortCode: 'lastName',
-		dataType: 'string',
+		dataType: BaseFieldDataType.STRING,
 	});
 };
 
@@ -129,11 +130,13 @@ describe('/proposalVersions', () => {
 							applicationFormFieldId: 1,
 							position: 1,
 							value: 'Gronald',
+							isValid: true,
 						},
 						{
 							applicationFormFieldId: 2,
 							position: 1,
 							value: 'Plorp',
+							isValid: true,
 						},
 					],
 				})
@@ -150,6 +153,7 @@ describe('/proposalVersions', () => {
 						applicationFormFieldId: 1,
 						position: 1,
 						value: 'Gronald',
+						isValid: true,
 						createdAt: expectTimestamp,
 					},
 					{
@@ -157,6 +161,7 @@ describe('/proposalVersions', () => {
 						applicationFormFieldId: 2,
 						position: 1,
 						value: 'Plorp',
+						isValid: true,
 						createdAt: expectTimestamp,
 					},
 				],
@@ -402,6 +407,7 @@ describe('/proposalVersions', () => {
 							applicationFormFieldId: 1,
 							position: 1,
 							value: 'Gronald',
+							isValid: true,
 						},
 					],
 				})
@@ -476,6 +482,7 @@ describe('/proposalVersions', () => {
 							applicationFormFieldId: 1,
 							position: 1,
 							value: 'Gronald',
+							isValid: true,
 						},
 					],
 				})

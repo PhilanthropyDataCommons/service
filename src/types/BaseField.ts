@@ -2,12 +2,21 @@ import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 
+export enum BaseFieldDataType {
+	STRING = 'string',
+	NUMBER = 'number',
+	PHONE_NUMBER = 'phone_number',
+	EMAIL = 'email',
+	URL = 'URL',
+	BOOLEAN = 'boolean',
+}
+
 interface BaseField {
 	readonly id: number;
 	label: string;
 	description: string;
 	shortCode: string;
-	dataType: string;
+	dataType: BaseFieldDataType;
 	readonly createdAt: string;
 }
 

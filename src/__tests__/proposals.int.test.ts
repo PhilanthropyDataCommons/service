@@ -13,6 +13,7 @@ import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import { createApplicationForm } from '../database/operations/create/createApplicationForm';
+import { BaseFieldDataType } from '../types';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
@@ -22,13 +23,13 @@ const createTestBaseFields = async () => {
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
-		dataType: 'string',
+		dataType: BaseFieldDataType.STRING,
 	});
 	await db.sql('baseFields.insertOne', {
 		label: 'Title',
 		description: 'The title of the proposal',
 		shortCode: 'title',
-		dataType: 'string',
+		dataType: BaseFieldDataType.STRING,
 	});
 };
 
@@ -77,6 +78,7 @@ describe('/proposals', () => {
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'This is a summary',
+				isValid: true,
 			});
 
 			const response = await agent
@@ -112,6 +114,7 @@ describe('/proposals', () => {
 										proposalVersionId: 1,
 										position: 1,
 										value: 'This is a summary',
+										isValid: true,
 										createdAt: expectTimestamp,
 										applicationFormField: {
 											id: 1,
@@ -225,12 +228,14 @@ describe('/proposals', () => {
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'This is a summary',
+				isValid: true,
 			});
 			await db.sql('proposalFieldValues.insertOne', {
 				proposalVersionId: 2,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'This is a pair of pants',
+				isValid: true,
 			});
 			const response = await agent
 				.get('/proposals?_content=summary')
@@ -258,6 +263,7 @@ describe('/proposals', () => {
 										proposalVersionId: 1,
 										position: 1,
 										value: 'This is a summary',
+										isValid: true,
 										createdAt: expectTimestamp,
 										applicationFormField: {
 											id: 1,
@@ -322,12 +328,14 @@ describe('/proposals', () => {
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'This is a summary',
+				isValid: true,
 			});
 			await db.sql('proposalFieldValues.insertOne', {
 				proposalVersionId: 2,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'This is a pair of pants',
+				isValid: true,
 			});
 			const response = await agent
 				.get('/proposals?_content=summary')
@@ -355,6 +363,7 @@ describe('/proposals', () => {
 										proposalVersionId: 1,
 										position: 1,
 										value: 'This is a summary',
+										isValid: true,
 										createdAt: expectTimestamp,
 										applicationFormField: {
 											id: 1,
@@ -561,13 +570,14 @@ describe('/proposals', () => {
           application_form_field_id,
           position,
           value,
+					is_valid,
           created_at
         )
         VALUES
-          ( 1, 1, 1, 'Title for version 1 from 2525-01-04', '2525-01-04T00:00:10Z' ),
-          ( 1, 2, 2, 'Abstract for version 1 from 2525-01-04', '2525-01-04T00:00:11Z' ),
-          ( 2, 1, 1, 'Title for version 2 from 2525-01-04', '2525-01-04T00:00:12Z' ),
-          ( 2, 2, 2, 'Abstract for version 2 from 2525-01-04', '2525-01-04T00:00:13Z' );
+          ( 1, 1, 1, 'Title for version 1 from 2525-01-04', true, '2525-01-04T00:00:10Z' ),
+          ( 1, 2, 2, 'Abstract for version 1 from 2525-01-04', true, '2525-01-04T00:00:11Z'),
+          ( 2, 1, 1, 'Title for version 2 from 2525-01-04', true, '2525-01-04T00:00:12Z' ),
+          ( 2, 2, 2, 'Abstract for version 2 from 2525-01-04', true, '2525-01-04T00:00:13Z' );
       `);
 			const response = await agent
 				.get('/proposals/1')
@@ -592,6 +602,7 @@ describe('/proposals', () => {
 								applicationFormFieldId: 1,
 								position: 1,
 								value: 'Title for version 2 from 2525-01-04',
+								isValid: true,
 								createdAt: expectTimestamp,
 								applicationFormField: {
 									id: 1,
@@ -616,6 +627,7 @@ describe('/proposals', () => {
 								applicationFormFieldId: 2,
 								position: 2,
 								value: 'Abstract for version 2 from 2525-01-04',
+								isValid: true,
 								createdAt: expectTimestamp,
 								applicationFormField: {
 									id: 2,
@@ -650,6 +662,7 @@ describe('/proposals', () => {
 								position: 1,
 								value: 'Title for version 1 from 2525-01-04',
 								createdAt: expectTimestamp,
+								isValid: true,
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
@@ -673,6 +686,7 @@ describe('/proposals', () => {
 								applicationFormFieldId: 2,
 								position: 2,
 								value: 'Abstract for version 1 from 2525-01-04',
+								isValid: true,
 								createdAt: expectTimestamp,
 								applicationFormField: {
 									id: 2,

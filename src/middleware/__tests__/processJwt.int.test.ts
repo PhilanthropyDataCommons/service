@@ -6,6 +6,7 @@ import { requireEnv } from 'require-env-variable';
 import { processJwt } from '../processJwt';
 import { allowNextToResolve } from '../../test/utils';
 import { mockJwt as authHeader } from '../../test/mockJwt';
+import { generateNextWithAssertions } from './generateNextWithAssertions';
 import type { NextFunction, Response } from 'express';
 import type { Request as JWTRequest } from 'express-jwt';
 
@@ -38,18 +39,10 @@ describe('processJwt', () => {
 	it('does NOT populate an auth value when no auth header is sent', (done) => {
 		const mockRequest = {} as unknown as JWTRequest;
 		const mockResponse = {} as unknown as Response;
-		const makeAssertions = () => {
+		const makeAssertions = async () => {
 			expect(mockRequest.auth).toBe(undefined);
 		};
-		const nextMock: NextFunction = jest.fn(() => {
-			try {
-				makeAssertions();
-			} catch (e) {
-				done(e);
-				return;
-			}
-			done();
-		});
+		const nextMock = generateNextWithAssertions(makeAssertions, done);
 
 		processJwt(mockRequest, mockResponse, nextMock);
 	});
@@ -59,7 +52,7 @@ describe('processJwt', () => {
 			headers: { ...authHeader },
 		} as unknown as JWTRequest;
 		const mockResponse = {} as unknown as Response;
-		const makeAssertions = () => {
+		const makeAssertions = async () => {
 			expect(mockRequest.auth).toMatchObject({
 				exp: expect.any(Number) as number,
 				iat: expect.any(Number) as number,
@@ -70,15 +63,7 @@ describe('processJwt', () => {
 				realm_access: { roles: ['default-roles-pdc'] },
 			});
 		};
-		const nextMock: NextFunction = jest.fn(() => {
-			try {
-				makeAssertions();
-			} catch (e) {
-				done(e);
-				return;
-			}
-			done();
-		});
+		const nextMock = generateNextWithAssertions(makeAssertions, done);
 
 		processJwt(mockRequest, mockResponse, nextMock);
 	});

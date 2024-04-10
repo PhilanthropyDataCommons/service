@@ -10,3 +10,11 @@ export const expectTimestamp = expect.stringMatching(
 // through the event loop. Otherwise jest misses the call (it hasn't happened yet). Kudos:
 // https://stackoverflow.com/questions/41792927/jest-tests-cant-fail-within-setimmediate-or-process-nexttick-callback#answer-59604256
 export const allowNextToResolve = async () => new Promise(setImmediate);
+
+export const generateNextWithAssertions = (
+	runAssertions: (err?: unknown) => Promise<void>,
+	done: jest.DoneCallback,
+) =>
+	jest.fn((err?) => {
+		runAssertions(err).then(done).catch(done);
+	});

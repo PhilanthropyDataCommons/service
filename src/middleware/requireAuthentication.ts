@@ -1,9 +1,9 @@
 import { Response, NextFunction } from 'express';
 import { UnauthorizedError } from '../errors';
-import type { Request as JWTRequest } from 'express-jwt';
+import type { AuthenticatedRequest } from '../types';
 
 const requireAuthentication = (
-	req: JWTRequest,
+	req: AuthenticatedRequest,
 	res: Response,
 	next: NextFunction,
 ) => {

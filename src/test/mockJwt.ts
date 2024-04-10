@@ -1,16 +1,21 @@
 import createJWKSMock from 'mock-jwks';
 import { issuer } from '../auth/jwtOptions';
+import { getTestUserAuthenticationId } from './utils';
 import type { JWKSMock } from 'mock-jwks';
 
 const getMockJwks = (): JWKSMock =>
 	createJWKSMock(issuer, '/protocol/openid-connect/certs');
 
-const getMockJwt = (jwksMock: JWKSMock): string => {
+const mockJwks = getMockJwks();
+
+const getMockJwt = (sub?: string): { Authorization: string } => {
 	const aMomentAgo = Math.round(new Date().getTime() / 1000);
-	return jwksMock.token({
+
+	const token = mockJwks.token({
 		exp: aMomentAgo + 1000000,
 		iat: aMomentAgo,
 		iss: issuer,
+		sub,
 		aud: 'account',
 		typ: 'Bearer',
 		azp: 'pdc-service',
@@ -18,7 +23,11 @@ const getMockJwt = (jwksMock: JWKSMock): string => {
 			roles: ['default-roles-pdc'],
 		},
 	});
+	return { Authorization: `Bearer ${token}` };
 };
 
-export const mockJwks = getMockJwks();
-export const mockJwt = { Authorization: `Bearer ${getMockJwt(mockJwks)}` };
+const mockJwt = getMockJwt(getTestUserAuthenticationId());
+
+const mockJwtWithoutSub = getMockJwt();
+
+export { mockJwks, mockJwt, mockJwtWithoutSub, getMockJwt };

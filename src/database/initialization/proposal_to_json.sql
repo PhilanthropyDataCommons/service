@@ -16,7 +16,8 @@ BEGIN
     'opportunityId', proposal.opportunity_id,
     'externalId', proposal.external_id,
     'versions', COALESCE(proposal_versions_json, '[]'::JSONB),
-    'createdAt', proposal.created_at
+    'createdAt', proposal.created_at,
+    'createdBy', proposal.created_by
   );
 END;
 $$ LANGUAGE plpgsql;

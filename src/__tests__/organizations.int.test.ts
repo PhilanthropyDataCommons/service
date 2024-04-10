@@ -7,7 +7,7 @@ import {
 	db,
 	loadTableMetrics,
 } from '../database';
-import { expectTimestamp } from '../test/utils';
+import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types';
 
@@ -123,9 +123,11 @@ describe('/organizations', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
+			const testUser = await loadTestUser();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
+				createdBy: testUser.id,
 			});
 			await createOrganization({
 				employerIdentificationNumber: '123-123-123',

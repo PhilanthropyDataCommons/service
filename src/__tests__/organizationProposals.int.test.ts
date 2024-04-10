@@ -7,7 +7,7 @@ import {
 	db,
 	loadTableMetrics,
 } from '../database';
-import { expectTimestamp } from '../test/utils';
+import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
 const agent = request.agent(app);
@@ -33,14 +33,17 @@ describe('/organizationProposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
+			const testUser = await loadTestUser();
 			await insertTestOrganizations();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
+				createdBy: testUser.id,
 			});
 			await createProposal({
 				opportunityId: 1,
 				externalId: '2',
+				createdBy: testUser.id,
 			});
 			await createOrganizationProposal({
 				organizationId: 1,
@@ -72,6 +75,7 @@ describe('/organizationProposals', () => {
 							externalId: '2',
 							versions: [],
 							createdAt: expectTimestamp,
+							createdBy: testUser.id,
 						},
 						createdAt: expectTimestamp,
 					},
@@ -91,6 +95,7 @@ describe('/organizationProposals', () => {
 							externalId: '1',
 							versions: [],
 							createdAt: expectTimestamp,
+							createdBy: testUser.id,
 						},
 						createdAt: expectTimestamp,
 					},
@@ -103,14 +108,17 @@ describe('/organizationProposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
+			const testUser = await loadTestUser();
 			await insertTestOrganizations();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
+				createdBy: testUser.id,
 			});
 			await createProposal({
 				opportunityId: 1,
 				externalId: '2',
+				createdBy: testUser.id,
 			});
 			await createOrganizationProposal({
 				organizationId: 1,
@@ -142,6 +150,7 @@ describe('/organizationProposals', () => {
 							externalId: '1',
 							versions: [],
 							createdAt: expectTimestamp,
+							createdBy: testUser.id,
 						},
 						createdAt: expectTimestamp,
 					},
@@ -169,9 +178,11 @@ describe('/organizationProposals', () => {
 				title: '🔥',
 			});
 			await insertTestOrganizations();
+			const testUser = await loadTestUser();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
+				createdBy: testUser.id,
 			});
 			const before = await loadTableMetrics('organizations_proposals');
 			const result = await agent
@@ -201,6 +212,7 @@ describe('/organizationProposals', () => {
 					externalId: '1',
 					versions: [],
 					createdAt: expectTimestamp,
+					createdBy: testUser.id,
 				},
 				createdAt: expectTimestamp,
 			});
@@ -211,10 +223,12 @@ describe('/organizationProposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
+			const testUser = await loadTestUser();
 			await insertTestOrganizations();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
+				createdBy: testUser.id,
 			});
 			const result = await agent
 				.post('/organizationProposals')
@@ -234,10 +248,12 @@ describe('/organizationProposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
+			const testUser = await loadTestUser();
 			await insertTestOrganizations();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
+				createdBy: testUser.id,
 			});
 			const result = await agent
 				.post('/organizationProposals')
@@ -276,9 +292,11 @@ describe('/organizationProposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
+			const testUser = await loadTestUser();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
+				createdBy: testUser.id,
 			});
 			const result = await agent
 				.post('/organizationProposals')
@@ -298,10 +316,12 @@ describe('/organizationProposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
+			const testUser = await loadTestUser();
 			await insertTestOrganizations();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
+				createdBy: testUser.id,
 			});
 			await createOrganizationProposal({
 				organizationId: 1,

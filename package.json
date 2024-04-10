@@ -9,7 +9,7 @@
 		"cleanup": "rimraf dist",
 		"format": "prettier . --write",
 		"lint": "npm run lint:ts && npm run lint:prettier && npm run lint:swagger",
-		"lint:ts": "eslint ./src --ext .ts",
+		"lint:ts": "eslint ./src --ext .ts --max-warnings=0",
 		"lint:swagger": "swagger-spec-validator src/openapi.json",
 		"lint:prettier": "prettier . --check",
 		"migrate": "ts-node src/scripts/migrate.ts | pino-pretty",

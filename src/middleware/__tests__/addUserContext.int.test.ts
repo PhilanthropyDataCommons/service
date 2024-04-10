@@ -9,15 +9,21 @@ describe('requireAuthentication', () => {
 		const mockRequest = {} as unknown as AuthenticatedRequest;
 		const mockResponse = {} as unknown as Response;
 
-		const runAssertions = async (err: unknown) => {
-			expect(err).toBe(undefined);
-			const metrics = await loadTableMetrics('users');
-			expect(metrics.count).toEqual(0);
-			expect(mockRequest.user).toBe(undefined);
-		};
+		loadTableMetrics('users')
+			.then(({ count: baselineUserCount }) => {
+				const runAssertions = async (err: unknown) => {
+					expect(err).toBe(undefined);
+					const { count: userCount } = await loadTableMetrics('users');
+					expect(userCount).toEqual(baselineUserCount);
+					expect(mockRequest.user).toBe(undefined);
+				};
 
-		const nextMock = generateNextWithAssertions(runAssertions, done);
-		addUserContext(mockRequest, mockResponse, nextMock);
+				const nextMock = generateNextWithAssertions(runAssertions, done);
+				addUserContext(mockRequest, mockResponse, nextMock);
+			})
+			.catch((e) => {
+				done(e);
+			});
 	});
 
 	it('creates and assigns a user when an authenticationId is provided', (done) => {
@@ -28,14 +34,22 @@ describe('requireAuthentication', () => {
 		} as unknown as AuthenticatedRequest;
 		const mockResponse = {} as unknown as Response;
 
-		const runAssertions = async (err: unknown) => {
-			expect(err).toBe(undefined);
-			const user = await loadUserByAuthenticationId('foo@example.com');
-			expect(mockRequest.user).toEqual(user);
-		};
+		loadTableMetrics('users')
+			.then(({ count: baselineUserCount }) => {
+				const runAssertions = async (err: unknown) => {
+					expect(err).toBe(undefined);
+					const { count: userCount } = await loadTableMetrics('users');
+					const user = await loadUserByAuthenticationId('foo@example.com');
+					expect(mockRequest.user).toEqual(user);
+					expect(userCount).toEqual(baselineUserCount + 1);
+				};
 
-		const nextMock = generateNextWithAssertions(runAssertions, done);
-		addUserContext(mockRequest, mockResponse, nextMock);
+				const nextMock = generateNextWithAssertions(runAssertions, done);
+				addUserContext(mockRequest, mockResponse, nextMock);
+			})
+			.catch((e) => {
+				done(e);
+			});
 	});
 
 	it('does not creates or assign a user when a blank authenticationId is provided', (done) => {
@@ -46,14 +60,20 @@ describe('requireAuthentication', () => {
 		} as unknown as AuthenticatedRequest;
 		const mockResponse = {} as unknown as Response;
 
-		const runAssertions = async () => {
-			const metrics = await loadTableMetrics('users');
-			expect(metrics.count).toEqual(0);
-			expect(mockRequest.user).toBe(undefined);
-		};
+		loadTableMetrics('users')
+			.then(({ count: baselineUserCount }) => {
+				const runAssertions = async () => {
+					const { count: userCount } = await loadTableMetrics('users');
+					expect(userCount).toEqual(baselineUserCount);
+					expect(mockRequest.user).toBe(undefined);
+				};
 
-		const nextMock = generateNextWithAssertions(runAssertions, done);
-		addUserContext(mockRequest, mockResponse, nextMock);
+				const nextMock = generateNextWithAssertions(runAssertions, done);
+				addUserContext(mockRequest, mockResponse, nextMock);
+			})
+			.catch((e) => {
+				done(e);
+			});
 	});
 
 	it('does not creates or assign a user when no authenticationId is provided', (done) => {
@@ -62,13 +82,19 @@ describe('requireAuthentication', () => {
 		} as unknown as AuthenticatedRequest;
 		const mockResponse = {} as unknown as Response;
 
-		const runAssertions = async () => {
-			const metrics = await loadTableMetrics('users');
-			expect(metrics.count).toEqual(0);
-			expect(mockRequest.user).toBe(undefined);
-		};
+		loadTableMetrics('users')
+			.then(({ count: baselineUserCount }) => {
+				const runAssertions = async () => {
+					const metrics = await loadTableMetrics('users');
+					expect(metrics.count).toEqual(baselineUserCount);
+					expect(mockRequest.user).toBe(undefined);
+				};
 
-		const nextMock = generateNextWithAssertions(runAssertions, done);
-		addUserContext(mockRequest, mockResponse, nextMock);
+				const nextMock = generateNextWithAssertions(runAssertions, done);
+				addUserContext(mockRequest, mockResponse, nextMock);
+			})
+			.catch((e) => {
+				done(e);
+			});
 	});
 });

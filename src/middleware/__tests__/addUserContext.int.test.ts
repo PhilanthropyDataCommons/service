@@ -29,7 +29,7 @@ describe('requireAuthentication', () => {
 	it('creates and assigns a user when an authenticationId is provided', (done) => {
 		const mockRequest = {
 			auth: {
-				sub: 'foo@example.com',
+				sub: 'notYourStandardTestUser@example.com',
 			},
 		} as unknown as AuthenticatedRequest;
 		const mockResponse = {} as unknown as Response;
@@ -39,7 +39,9 @@ describe('requireAuthentication', () => {
 				const runAssertions = async (err: unknown) => {
 					expect(err).toBe(undefined);
 					const { count: userCount } = await loadTableMetrics('users');
-					const user = await loadUserByAuthenticationId('foo@example.com');
+					const user = await loadUserByAuthenticationId(
+						'notYourStandardTestUser@example.com',
+					);
 					expect(mockRequest.user).toEqual(user);
 					expect(userCount).toEqual(baselineUserCount + 1);
 				};

@@ -1,3 +1,5 @@
+import { createUser, loadUserByAuthenticationId } from '../database';
+
 export const isoTimestampPattern =
 	/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3,6})?(Z|(\+|-)\d{2}:\d{2})$/;
 
@@ -18,3 +20,13 @@ export const generateNextWithAssertions = (
 	jest.fn((err?) => {
 		runAssertions(err).then(done).catch(done);
 	});
+
+export const getTestUserAuthenticationId = () => 'foo@example.com';
+
+export const createTestUser = async () =>
+	createUser({
+		authenticationId: getTestUserAuthenticationId(),
+	});
+
+export const loadTestUser = async () =>
+	loadUserByAuthenticationId(getTestUserAuthenticationId());

@@ -9,6 +9,7 @@ import {
 	cleanupDatabaseForCurrentWorker,
 } from './harnessFunctions';
 import { mockJwks } from './mockJwt';
+import { createTestUser } from './utils';
 
 // This mock prevents our queue manager from actually being invoked.
 // It's necessary because of the way we leverage PGOPTIONS to specify
@@ -28,6 +29,7 @@ afterAll(async () => {
 beforeEach(async () => {
 	mockJwks.start();
 	await prepareDatabaseForCurrentWorker();
+	await createTestUser();
 });
 
 afterEach(async () => {

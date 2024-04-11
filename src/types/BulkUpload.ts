@@ -17,12 +17,13 @@ interface BulkUpload {
 	readonly status: BulkUploadStatus;
 	readonly fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
 	readonly createdAt: string;
+	readonly createdBy: number;
 }
 
 type WritableBulkUpload = Writable<BulkUpload>;
 
 type InternallyWritableBulkUpload = WritableBulkUpload &
-	Pick<BulkUpload, 'status' | 'fileSize'>;
+	Pick<BulkUpload, 'status' | 'fileSize' | 'createdBy'>;
 
 const writableBulkUploadSchema: JSONSchemaType<WritableBulkUpload> = {
 	type: 'object',

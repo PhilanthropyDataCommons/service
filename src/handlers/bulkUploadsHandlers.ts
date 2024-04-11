@@ -4,21 +4,30 @@ import {
 	loadBulkUploadBundle,
 } from '../database';
 import {
+	AuthenticatedRequest,
 	BulkUploadStatus,
 	isTinyPgErrorWithQueryContext,
 	isWritableBulkUpload,
 } from '../types';
-import { DatabaseError, InputValidationError } from '../errors';
+import {
+	DatabaseError,
+	FailedMiddlewareError,
+	InputValidationError,
+} from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
 import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
 import type { Request, Response, NextFunction } from 'express';
 
 const postBulkUpload = (
-	req: Request,
+	req: AuthenticatedRequest,
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (req.user === undefined) {
+		next(new FailedMiddlewareError('Unexpected lack of user context.'));
+		return;
+	}
 	if (!isWritableBulkUpload(req.body)) {
 		next(
 			new InputValidationError(
@@ -30,6 +39,7 @@ const postBulkUpload = (
 	}
 
 	const { fileName, sourceKey } = req.body;
+	const createdBy = req.user.id;
 
 	if (!sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
 		throw new InputValidationError(
@@ -43,6 +53,7 @@ const postBulkUpload = (
 			fileName,
 			sourceKey,
 			status: BulkUploadStatus.PENDING,
+			createdBy,
 		});
 		await addProcessBulkUploadJob({
 			bulkUploadId: bulkUpload.id,

@@ -7,6 +7,7 @@ BEGIN
     'sourceKey', bulk_upload.source_key,
     'status', bulk_upload.status,
     'fileSize', bulk_upload.file_size,
+    'createdBy', bulk_upload.created_by,
     'createdAt', to_json(bulk_upload.created_at)::jsonb
   );
 END;

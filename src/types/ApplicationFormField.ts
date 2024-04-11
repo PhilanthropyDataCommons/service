@@ -9,7 +9,7 @@ interface ApplicationFormField {
 	readonly baseField: BaseField;
 	position: number;
 	label: string;
-	readonly createdAt: Date;
+	readonly createdAt: string;
 }
 
 type WritableApplicationFormField = Writable<ApplicationFormField>;

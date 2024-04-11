@@ -12,7 +12,7 @@ export interface ProposalVersion {
 	applicationFormId: number;
 	version: number;
 	fieldValues?: ProposalFieldValue[];
-	createdAt: Date;
+	createdAt: string;
 }
 
 export type ProposalVersionWrite = Omit<

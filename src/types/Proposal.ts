@@ -8,7 +8,7 @@ interface Proposal {
 	opportunityId: number;
 	externalId: string;
 	readonly versions?: ProposalVersion[];
-	readonly createdAt: Date;
+	readonly createdAt: string;
 }
 
 type WritableProposal = Writable<Proposal>;

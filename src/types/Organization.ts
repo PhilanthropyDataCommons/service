@@ -6,7 +6,7 @@ interface Organization {
 	readonly id: number;
 	employerIdentificationNumber: string;
 	name: string;
-	readonly createdAt: Date;
+	readonly createdAt: string;
 }
 
 type WritableOrganization = Writable<Organization>;

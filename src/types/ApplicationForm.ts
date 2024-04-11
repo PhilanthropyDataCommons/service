@@ -12,7 +12,7 @@ interface ApplicationForm {
 	opportunityId: number;
 	readonly version: number;
 	readonly fields: ApplicationFormField[];
-	readonly createdAt: Date;
+	readonly createdAt: string;
 }
 
 type WritableApplicationForm = Writable<ApplicationForm>;

@@ -6,7 +6,7 @@ interface OrganizationProposal {
 	readonly id: number;
 	organizationId: number;
 	proposalId: number;
-	readonly createdAt: Date;
+	readonly createdAt: string;
 }
 
 type WritableOrganizationProposal = Writable<OrganizationProposal>;

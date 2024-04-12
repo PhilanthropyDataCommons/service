@@ -114,13 +114,18 @@
 							"canceled"
 						]
 					},
+					"createdBy": {
+						"description": "The id of the PDC user that created this bulk upload",
+						"type": "integer",
+						"readOnly": true
+					},
 					"createdAt": {
 						"type": "string",
 						"format": "date-time",
 						"readOnly": true
 					}
 				},
-				"required": ["id", "fileName", "sourceKey", "createdAt"]
+				"required": ["fileName", "sourceKey"]
 			},
 			"Organization": {
 				"type": "object",

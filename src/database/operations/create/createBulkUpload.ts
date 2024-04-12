@@ -8,7 +8,7 @@ import type {
 export const createBulkUpload = async (
 	createValues: InternallyWritableBulkUpload,
 ): Promise<BulkUpload> => {
-	const { fileName, sourceKey, status } = createValues;
+	const { fileName, sourceKey, status, createdBy } = createValues;
 
 	const result = await db.sql<JsonResultSet<BulkUpload>>(
 		'bulkUploads.insertOne',
@@ -16,6 +16,7 @@ export const createBulkUpload = async (
 			fileName,
 			sourceKey,
 			status,
+			createdBy,
 		},
 	);
 	const { object } = result.rows[0] ?? {};

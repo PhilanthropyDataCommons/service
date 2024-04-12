@@ -11,5 +11,6 @@ export * from './loadOrganizationBundle';
 export * from './loadOrganizationProposalBundle';
 export * from './loadProposal';
 export * from './loadProposalBundle';
+export * from './loadSystemUser';
 export * from './loadTableMetrics';
 export * from './loadUserByAuthenticationId';

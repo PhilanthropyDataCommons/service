@@ -8,6 +8,7 @@ import {
 	loadApplicationFormFieldBundle,
 	loadApplicationFormBundle,
 	createBulkUpload,
+	loadSystemUser,
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -18,6 +19,7 @@ import type {
 	ApplicationFormField,
 	BaseField,
 	BulkUpload,
+	InternallyWritableBulkUpload,
 	Opportunity,
 	ProposalFieldValue,
 	ProposalVersion,
@@ -44,12 +46,14 @@ const getS3Path = () => (S3_PATH_STYLE === 'true' ? `/${S3_BUCKET}` : '');
 const getS3KeyPath = (key: string) => `${getS3Path()}/${key}`;
 
 const createTestBulkUpload = async (
-	overrideValues?: Partial<BulkUpload>,
+	overrideValues?: Partial<InternallyWritableBulkUpload>,
 ): Promise<BulkUpload> => {
+	const systemUser = await loadSystemUser();
 	const defaultValues = {
 		fileName: 'bar.csv',
 		sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
 		status: BulkUploadStatus.PENDING,
+		createdBy: systemUser.id,
 	};
 	return createBulkUpload({
 		...defaultValues,

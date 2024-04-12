@@ -28,7 +28,6 @@ import type {
 	ApplicationFormField,
 	BulkUpload,
 	Opportunity,
-	Proposal,
 	ProposalFieldValue,
 	ProposalVersion,
 } from '../types';
@@ -186,17 +185,6 @@ const createApplicationFormFieldsForBulkUpload = async (
 	return applicationFormFields;
 };
 
-const createProposalForBulkUploadCsvRecord = async (
-	opportunityId: number,
-	externalId: string,
-): Promise<Proposal> => {
-	const proposal = await createProposal({
-		opportunityId,
-		externalId,
-	});
-	return proposal;
-};
-
 const createProposalVersionForBulkUploadCsvRecord = async (
 	proposalId: number,
 	applicationFormId: number,
@@ -304,10 +292,11 @@ export const processBulkUpload = async (
 		let recordNumber = 0;
 		await parser.forEach(async (record: string[]) => {
 			recordNumber += 1;
-			const proposal = await createProposalForBulkUploadCsvRecord(
-				opportunity.id,
-				`${recordNumber}`,
-			);
+			const proposal = await createProposal({
+				opportunityId: opportunity.id,
+				externalId: `${recordNumber}`,
+				createdBy: bulkUpload.createdBy,
+			});
 			const proposalVersion = await createProposalVersionForBulkUploadCsvRecord(
 				proposal.id,
 				applicationForm.id,

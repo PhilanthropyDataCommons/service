@@ -8,14 +8,15 @@ import {
 	db,
 	loadTableMetrics,
 } from '../database';
-import { getLogger } from '../logger';
-import { expectTimestamp } from '../test/utils';
-import { mockJwt as authHeader } from '../test/mockJwt';
+import { expectTimestamp, loadTestUser } from '../test/utils';
+import {
+	mockJwt as authHeader,
+	mockJwtWithoutSub as authHeaderWithNoSubj,
+} from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import { createApplicationForm } from '../database/operations/create/createApplicationForm';
 import { BaseFieldDataType } from '../types';
 
-const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
@@ -54,14 +55,17 @@ describe('/proposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
+			const testUser = await loadTestUser();
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
+				createdBy: testUser.id,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
+				createdBy: testUser.id,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -96,6 +100,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-2',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 						versions: [],
 					},
 					{
@@ -103,6 +108,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-1',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 						versions: [
 							{
 								id: 1,
@@ -149,14 +155,17 @@ describe('/proposals', () => {
 				title: '🔥',
 			});
 
+			const testUser = await loadTestUser();
 			await createTestBaseFields();
 			const proposal = await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
+				createdBy: testUser.id,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
+				createdBy: testUser.id,
 			});
 			const organization = await createOrganization({
 				employerIdentificationNumber: '123-123-123',
@@ -178,6 +187,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-1',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 						versions: [],
 					},
 				],
@@ -200,14 +210,17 @@ describe('/proposals', () => {
 				title: '🔥',
 			});
 
+			const testUser = await loadTestUser();
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
+				createdBy: testUser.id,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
+				createdBy: testUser.id,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -252,6 +265,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-1',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 						versions: [
 							{
 								id: 1,
@@ -300,14 +314,17 @@ describe('/proposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: 'Grand opportunity',
 			});
+			const testUser = await loadTestUser();
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-4999',
 				opportunityId: 1,
+				createdBy: testUser.id,
 			});
 			await createProposal({
 				externalId: 'proposal-5003',
 				opportunityId: 1,
+				createdBy: testUser.id,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -352,6 +369,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-4999',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 						versions: [
 							{
 								id: 1,
@@ -397,11 +415,14 @@ describe('/proposals', () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
+
+			const testUser = await loadTestUser();
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
 				await createProposal({
 					externalId: `proposal-${i + 1}`,
 					opportunityId: 1,
+					createdBy: testUser.id,
 				});
 			}, Promise.resolve());
 			const response = await agent
@@ -421,6 +442,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 					},
 					{
 						id: 14,
@@ -428,6 +450,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 					},
 					{
 						id: 13,
@@ -435,6 +458,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 					},
 					{
 						id: 12,
@@ -442,6 +466,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 					},
 					{
 						id: 11,
@@ -449,6 +474,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 					},
 				],
 			});
@@ -497,16 +523,19 @@ describe('/proposals', () => {
         VALUES
           ( '⛰️', '2525-01-03T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-1', 1, '2525-01-03T00:00:04Z' ),
-          ( 'proposal-2', 1, '2525-01-03T00:00:05Z' );
-      `);
+
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: `proposal-1`,
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
+			await createProposal({
+				externalId: `proposal-2`,
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
+
 			const response = await agent
 				.get('/proposals/2')
 				.set(authHeader)
@@ -517,6 +546,7 @@ describe('/proposals', () => {
 				versions: [],
 				opportunityId: 1,
 				createdAt: expectTimestamp,
+				createdBy: testUser.id,
 			});
 		});
 
@@ -551,15 +581,12 @@ describe('/proposals', () => {
           ( 1, 2, 1, 'Short summary or title', '2525-01-04T00:00:05Z' ),
           ( 1, 1, 2, 'Long summary or abstract', '2525-01-04T00:00:06Z' );
       `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-2525-01-04T00Z', 1, '2525-01-04T00:00:07Z' );
-      `);
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: `proposal-2525-01-04T00Z`,
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
 			await db.query(`
         INSERT INTO proposal_versions (
           proposal_id,
@@ -595,6 +622,7 @@ describe('/proposals', () => {
 				opportunityId: 1,
 				externalId: 'proposal-2525-01-04T00Z',
 				createdAt: expectTimestamp,
+				createdBy: testUser.id,
 				versions: [
 					{
 						id: 2,
@@ -724,6 +752,10 @@ describe('/proposals', () => {
 			await agent.post('/proposals').expect(401);
 		});
 
+		it('requires a user', async () => {
+			await agent.post('/proposals').set(authHeaderWithNoSubj).expect(401);
+		});
+
 		it('creates exactly one proposal', async () => {
 			await db.query(`
         INSERT INTO opportunities (
@@ -734,7 +766,7 @@ describe('/proposals', () => {
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
 			const before = await loadTableMetrics('proposals');
-			logger.debug('before: %o', before);
+			const testUser = await loadTestUser();
 			const result = await agent
 				.post('/proposals')
 				.type('application/json')
@@ -745,13 +777,13 @@ describe('/proposals', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics('proposals');
-			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: 1,
 				externalId: 'proposal123',
 				opportunityId: 1,
 				createdAt: expectTimestamp,
+				createdBy: testUser.id,
 			});
 			expect(after.count).toEqual(1);
 		});

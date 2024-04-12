@@ -9,9 +9,13 @@ interface Proposal {
 	externalId: string;
 	readonly versions?: ProposalVersion[];
 	readonly createdAt: string;
+	readonly createdBy: number;
 }
 
 type WritableProposal = Writable<Proposal>;
+
+type InternallyWritableProposal = WritableProposal &
+	Pick<Proposal, 'createdBy'>;
 
 const writableProposalSchema: JSONSchemaType<WritableProposal> = {
 	type: 'object',
@@ -31,6 +35,7 @@ const isWritableProposal = ajv.compile(writableProposalSchema);
 
 export {
 	isWritableProposal,
+	InternallyWritableProposal,
 	Proposal,
 	WritableProposal,
 	writableProposalSchema,

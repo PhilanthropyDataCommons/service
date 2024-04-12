@@ -1,13 +1,18 @@
 import { db } from '../../db';
-import type { Proposal, JsonResultSet, WritableProposal } from '../../../types';
+import type {
+	Proposal,
+	JsonResultSet,
+	InternallyWritableProposal,
+} from '../../../types';
 
 export const createProposal = async (
-	createValues: WritableProposal,
+	createValues: InternallyWritableProposal,
 ): Promise<Proposal> => {
-	const { opportunityId, externalId } = createValues;
+	const { opportunityId, externalId, createdBy } = createValues;
 	const result = await db.sql<JsonResultSet<Proposal>>('proposals.insertOne', {
 		opportunityId,
 		externalId,
+		createdBy,
 	});
 	const proposal = result.rows[0]?.object;
 	if (proposal === undefined) {

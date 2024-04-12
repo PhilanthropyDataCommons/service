@@ -1,9 +1,9 @@
 import request from 'supertest';
 import { app } from '../app';
-import { db, loadTableMetrics } from '../database';
+import { createProposal, db, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
 import { BaseFieldDataType } from '../types';
-import { expectTimestamp } from '../test/utils';
+import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
 const logger = getLogger(__filename);
@@ -39,15 +39,12 @@ describe('/proposalVersions', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
-      `);
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
 			await db.query(`
         INSERT INTO application_forms (
           opportunity_id,
@@ -89,15 +86,12 @@ describe('/proposalVersions', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
-      `);
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
 			await db.query(`
         INSERT INTO application_forms (
           opportunity_id,
@@ -218,15 +212,12 @@ describe('/proposalVersions', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
-      `);
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
 			await db.query(`
         INSERT INTO application_forms (
           opportunity_id,
@@ -267,15 +258,12 @@ describe('/proposalVersions', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
-      `);
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
 			await db.query(`
         INSERT INTO application_forms (
           opportunity_id,
@@ -322,15 +310,12 @@ describe('/proposalVersions', () => {
           ( '🔥', '2525-01-02T00:00:01Z' ),
           ( '💧', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
-      `);
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
 			await db.query(`
         INSERT INTO application_forms (
           opportunity_id,
@@ -379,15 +364,12 @@ describe('/proposalVersions', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
-      `);
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
 			await db.query(`
         INSERT INTO application_forms (
           opportunity_id,
@@ -440,15 +422,13 @@ describe('/proposalVersions', () => {
         VALUES
           ( '🔥', '2525-01-02T00:00:01Z' )
       `);
-			await db.query(`
-        INSERT INTO proposals (
-          external_id,
-          opportunity_id,
-          created_at
-        )
-        VALUES
-          ( 'proposal-1', 1, '2525-01-01T00:00:05Z' );
-      `);
+
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
 			await db.query(`
         INSERT INTO application_forms (
           opportunity_id,

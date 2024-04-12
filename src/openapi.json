@@ -255,6 +255,11 @@
 						"type": "string",
 						"format": "date-time",
 						"readOnly": true
+					},
+					"createdBy": {
+						"description": "The id of the PDC user that created this proposal",
+						"type": "integer",
+						"readOnly": true
 					}
 				},
 				"required": ["id", "opportunityId", "externalId", "createdAt"]

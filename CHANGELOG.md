@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `BulkUpload` entity now has a `createdBy` attribute.
 - The `Proposal` entity now has a `createdBy` attribute.
 
+### Changed
+
+- The `/bulkUploads` endpoint will now only return bulk uploads associated with the current user.
+
 ## 0.7.0 2024-04-04
 
 ### Changed

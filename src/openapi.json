@@ -743,7 +743,7 @@
 				],
 				"responses": {
 					"200": {
-						"description": "All bulk uploads currently registered in the PDC.",
+						"description": "Requested bulk uploads registered in the PDC.",
 						"content": {
 							"application/json": {
 								"schema": {

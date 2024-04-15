@@ -17,7 +17,7 @@ import {
 import { extractPaginationParameters } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
 import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
-import type { Request, Response, NextFunction } from 'express';
+import type { Response, NextFunction } from 'express';
 
 const postBulkUpload = (
 	req: AuthenticatedRequest,
@@ -69,14 +69,20 @@ const postBulkUpload = (
 };
 
 const getBulkUploads = (
-	req: Request,
+	req: AuthenticatedRequest,
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (req.user === undefined) {
+		next(new FailedMiddlewareError('Unexpected lack of user context.'));
+		return;
+	}
+	const { user } = req;
 	const paginationParameters = extractPaginationParameters(req);
 	(async () => {
 		const bulkUploadBundle = await loadBulkUploadBundle({
 			...getLimitValues(paginationParameters),
+			createdBy: user.id,
 		});
 
 		res.status(200).contentType('application/json').send(bulkUploadBundle);

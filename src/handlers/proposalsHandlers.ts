@@ -22,10 +22,15 @@ import {
 import type { Request, Response, NextFunction } from 'express';
 
 const getProposals = (
-	req: Request,
+	req: AuthenticatedRequest,
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (req.user === undefined) {
+		next(new FailedMiddlewareError('Unexpected lack of user context.'));
+		return;
+	}
+	const { user } = req;
 	const paginationParameters = extractPaginationParameters(req);
 	const searchParameters = extractSearchParameters(req);
 	const organizationParameters = extractOrganizationParameters(req);
@@ -34,6 +39,7 @@ const getProposals = (
 			...getLimitValues(paginationParameters),
 			...searchParameters,
 			...organizationParameters,
+			createdBy: user.id,
 		});
 
 		res.status(200).contentType('application/json').send(proposalBundle);

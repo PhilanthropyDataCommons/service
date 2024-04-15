@@ -5,6 +5,13 @@ FROM proposals p
   LEFT JOIN organizations_proposals op on op.proposal_id = p.id
 WHERE
   CASE
+    WHEN :createdBy != 0 THEN
+      p.created_by = :createdBy
+    ELSE
+      true
+    END
+  AND
+  CASE
     WHEN :search::text != '' THEN
       pfv.value_search @@ websearch_to_tsquery('english', :search::text)
     ELSE

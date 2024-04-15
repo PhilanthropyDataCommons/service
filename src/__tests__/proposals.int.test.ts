@@ -5,6 +5,7 @@ import {
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
+	createUser,
 	db,
 	loadTableMetrics,
 } from '../database';
@@ -51,11 +52,14 @@ describe('/proposals', () => {
 			});
 		});
 
-		it('returns proposals present in the database', async () => {
+		it('returns proposals associated with the requesting user', async () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
+			const secondUser = await createUser({
+				authenticationId: 'totallyDifferentUser@example.com',
+			});
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-1',
@@ -66,6 +70,11 @@ describe('/proposals', () => {
 				externalId: 'proposal-2',
 				opportunityId: 1,
 				createdBy: testUser.id,
+			});
+			await createProposal({
+				externalId: 'proposal-3',
+				opportunityId: 1,
+				createdBy: secondUser.id,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -93,7 +102,7 @@ describe('/proposals', () => {
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 2,
+				total: 3,
 				entries: [
 					{
 						id: 2,

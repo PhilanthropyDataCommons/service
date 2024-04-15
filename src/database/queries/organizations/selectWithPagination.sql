@@ -1,4 +1,4 @@
-SELECT o.id AS "id",
+SELECT DISTINCT o.id AS "id",
   o.employer_identification_number AS "employerIdentificationNumber",
   o.name AS "name",
   o.created_at AS "createdAt"

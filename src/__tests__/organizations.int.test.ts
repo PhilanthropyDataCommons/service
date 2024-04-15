@@ -133,6 +133,10 @@ describe('/organizations', () => {
 				employerIdentificationNumber: '123-123-123',
 				name: 'Canadian Company',
 			});
+			await createOrganization({
+				employerIdentificationNumber: '123-123-123',
+				name: 'Another Canadian Company',
+			});
 			await createOrganizationProposal({
 				organizationId: 1,
 				proposalId: 1,
@@ -142,7 +146,7 @@ describe('/organizations', () => {
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 1,
+				total: 2,
 				entries: [
 					{
 						id: 1,

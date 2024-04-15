@@ -6,10 +6,12 @@ export const loadProposalBundle = async (queryParameters: {
 	limit: number;
 	search?: string;
 	organizationId?: number;
+	createdBy?: number;
 }): Promise<Bundle<Proposal>> => {
 	const defaultQueryParameters = {
 		search: '',
 		organizationId: 0,
+		createdBy: 0,
 	};
 	const bundle = await loadBundle<JsonResultSet<Proposal>>(
 		'proposals.selectWithPagination',

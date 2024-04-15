@@ -158,6 +158,50 @@ describe('/organizations', () => {
 			});
 		});
 
+		it('does not return duplicate organizations when an organization has multiple proposals', async () => {
+			await db.sql('opportunities.insertOne', {
+				title: '🔥',
+			});
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
+			await createProposal({
+				externalId: 'proposal-2',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
+			await createOrganization({
+				employerIdentificationNumber: '123-123-123',
+				name: 'Canadian Company',
+			});
+			await createOrganizationProposal({
+				organizationId: 1,
+				proposalId: 1,
+			});
+			await createOrganizationProposal({
+				organizationId: 1,
+				proposalId: 2,
+			});
+			const response = await agent
+				.get(`/organizations`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 1,
+				entries: [
+					{
+						id: 1,
+						employerIdentificationNumber: '123-123-123',
+						name: 'Canadian Company',
+						createdAt: expectTimestamp,
+					},
+				],
+			});
+		});
+
 		it('returns a 400 error if an invalid organization filter is provided', async () => {
 			const response = await agent
 				.get(`/proposals?organization=foo`)

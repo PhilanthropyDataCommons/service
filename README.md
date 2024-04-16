@@ -152,6 +152,16 @@ From the Keycloak admin interface, e.g. https://my-host/admin:
 10. Proceed through keycloak login
 11. Once logged in and redirected to swagger ui, query any of the endpoints to test authentication
 
+#### Authorization
+
+The application looks for Keycloak group membership to drive authorization within the application. The names are hard-coded into the application therefore specific group names added to Keycloak are required.
+
+To add a `pdc-admin` group to the PDC realm in Keycloak, visit the [Keycloak admin interface, select the PDC Realm, and click Groups](https://auth.philanthropydatacommons.org/admin/master/console/#/pdc/groups). Click "Create Group" and name it `pdc-admin`.
+
+To add a user to the `pdc-admin` group, visit the [Keycloak admin interface, select the PDC Realm, and click Users](https://auth.philanthropydatacommons.org/admin/master/console/#/pdc/users), click the User, click the Groups tab, and click "Join Group". Alternatively, click [Groups](https://auth.philanthropydatacommons.org/admin/master/console/#/pdc/groups) in the PDC Realm, click the "Members" tab, and click "Add member."
+
+When these users are logged in, their JWTs will include a list of group memberships. The application can first validate the JWT (same as authentication) and then check the validated JWT for group membership.
+
 ### Understanding the Project
 
 #### Project Structure

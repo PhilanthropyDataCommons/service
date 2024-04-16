@@ -4,7 +4,7 @@ import { generateNextWithAssertions } from '../../test/utils';
 import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../../types';
 
-describe('requireAuthentication', () => {
+describe('addUserContext', () => {
 	it('does not creates or assign a user when auth is not provided', (done) => {
 		const mockRequest = {} as unknown as AuthenticatedRequest;
 		const mockResponse = {} as unknown as Response;

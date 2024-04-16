@@ -240,7 +240,6 @@ describe('/organizations', () => {
 		});
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
-			await insertTestOrganizations();
 			await agent.get('/organizations/foo').set(authHeader).expect(400);
 		});
 	});

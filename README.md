@@ -160,7 +160,9 @@ To add a `pdc-admin` group to the PDC realm in Keycloak, visit the [Keycloak adm
 
 To add a user to the `pdc-admin` group, visit the [Keycloak admin interface, select the PDC Realm, and click Users](https://auth.philanthropydatacommons.org/admin/master/console/#/pdc/users), click the User, click the Groups tab, and click "Join Group". Alternatively, click [Groups](https://auth.philanthropydatacommons.org/admin/master/console/#/pdc/groups) in the PDC Realm, click the "Members" tab, and click "Add member."
 
-When these users are logged in, their JWTs will include a list of group memberships. The application can first validate the JWT (same as authentication) and then check the validated JWT for group membership.
+To have a visible `role` in the JWT of a user, a role must be associated with the user or one of the user's groups. Create a `pdc-admin` role in the PDC realm in the Keycloak admin interface. Select the PDC Realm, click [Realm roles](https://auth.philanthropydatacommons.org/admin/master/console/#/pdc/roles), and click "Create role." Go back to the `pdc-admin` [Group](https://auth-test.philanthropydatacommons.org/admin/master/console/#/pdc/groups), click the "Role mapping" tab, click "Assign role", and finally bind the `pdc-admin` role to the `pdc-admin` group.
+
+When users are logged in, their JWTs will include a list of associated roles. The application can first validate the JWT (same as authentication) and then check the validated JWT for role presence.
 
 ### Understanding the Project
 

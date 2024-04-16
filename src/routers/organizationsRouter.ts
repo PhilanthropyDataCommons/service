@@ -4,15 +4,10 @@ import { requireAuthentication } from '../middleware';
 
 const organizationsRouter = express.Router();
 
-organizationsRouter.get(
-	'/',
-	requireAuthentication,
-	organizationsHandlers.getOrganizations,
-);
+organizationsRouter.get('/', organizationsHandlers.getOrganizations);
 
 organizationsRouter.get(
 	'/:organizationId',
-	requireAuthentication,
 	organizationsHandlers.getOrganization,
 );
 

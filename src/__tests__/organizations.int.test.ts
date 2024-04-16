@@ -26,8 +26,8 @@ const insertTestOrganizations = async () => {
 
 describe('/organizations', () => {
 	describe('GET /', () => {
-		it('requires authentication', async () => {
-			await agent.get('/organizations').expect(401);
+		it('does not require authentication', async () => {
+			await agent.get('/organizations').expect(200);
 		});
 
 		it('returns an empty Bundle when no data is present', async () => {
@@ -215,8 +215,9 @@ describe('/organizations', () => {
 	});
 
 	describe('GET /:id', () => {
-		it('requires authentication', async () => {
-			await agent.get('/organizations/1').expect(401);
+		it('does not require authentication', async () => {
+			await insertTestOrganizations();
+			await agent.get('/organizations/1').expect(200);
 		});
 
 		it('returns 404 when given id is not present', async () => {
@@ -240,7 +241,6 @@ describe('/organizations', () => {
 		});
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
-			await insertTestOrganizations();
 			await agent.get('/organizations/foo').set(authHeader).expect(400);
 		});
 	});

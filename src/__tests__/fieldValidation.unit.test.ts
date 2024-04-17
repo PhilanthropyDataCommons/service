@@ -65,12 +65,14 @@ describe('field value validation against BaseFieldDataType', () => {
 		expect(
 			fieldValueIsValid('http://www.test.com', BaseFieldDataType.URL),
 		).toBe(true);
-		expect(fieldValueIsValid('www.test.com', BaseFieldDataType.URL)).toBe(true);
-		expect(fieldValueIsValid('test.com', BaseFieldDataType.URL)).toBe(true);
-		expect(fieldValueIsValid('test.org', BaseFieldDataType.URL)).toBe(true);
-		expect(fieldValueIsValid('test.net', BaseFieldDataType.URL)).toBe(true);
 	});
 	test('validate an invalid URL as URL', () => {
 		expect(fieldValueIsValid('testdotcom', BaseFieldDataType.URL)).toBe(false);
+		expect(fieldValueIsValid('www.testdotcom', BaseFieldDataType.URL)).toBe(
+			false,
+		);
+		expect(fieldValueIsValid('www.testdotcom.com', BaseFieldDataType.URL)).toBe(
+			false,
+		);
 	});
 });

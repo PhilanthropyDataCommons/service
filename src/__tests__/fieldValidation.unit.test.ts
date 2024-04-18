@@ -9,9 +9,13 @@ describe('field value validation against BaseFieldDataType', () => {
 	});
 	test('validate a valid numeric string as NUMBER', () => {
 		expect(fieldValueIsValid('123456', BaseFieldDataType.NUMBER)).toBe(true);
+		expect(fieldValueIsValid(' 123456 ', BaseFieldDataType.NUMBER)).toBe(true);
 	});
 	test('validate an invalid numeric string as NUMBER', () => {
 		expect(fieldValueIsValid('abc123', BaseFieldDataType.NUMBER)).toBe(false);
+		expect(fieldValueIsValid('abc123    4', BaseFieldDataType.NUMBER)).toBe(
+			false,
+		);
 	});
 	test('validate a valid email string as EMAIL', () => {
 		expect(fieldValueIsValid('abc@def.com', BaseFieldDataType.EMAIL)).toBe(
@@ -27,6 +31,9 @@ describe('field value validation against BaseFieldDataType', () => {
 		).toBe(true);
 		expect(
 			fieldValueIsValid('+1(800)-555-5555', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(true);
+		expect(
+			fieldValueIsValid('800-555-5555', BaseFieldDataType.PHONE_NUMBER),
 		).toBe(true);
 		expect(
 			fieldValueIsValid('800-555-5555', BaseFieldDataType.PHONE_NUMBER),
@@ -49,14 +56,14 @@ describe('field value validation against BaseFieldDataType', () => {
 	test('validate a valid boolean as BOOLEAN', () => {
 		expect(fieldValueIsValid('true', BaseFieldDataType.BOOLEAN)).toBe(true);
 		expect(fieldValueIsValid('false', BaseFieldDataType.BOOLEAN)).toBe(true);
-		expect(fieldValueIsValid('True', BaseFieldDataType.BOOLEAN)).toBe(true);
-		expect(fieldValueIsValid('False', BaseFieldDataType.BOOLEAN)).toBe(true);
 	});
 	test('validate an invalid boolean as BOOLEAN', () => {
 		expect(fieldValueIsValid('true123', BaseFieldDataType.BOOLEAN)).toBe(false);
 		expect(fieldValueIsValid('123false', BaseFieldDataType.BOOLEAN)).toBe(
 			false,
 		);
+		expect(fieldValueIsValid('TrUE', BaseFieldDataType.BOOLEAN)).toBe(false);
+		expect(fieldValueIsValid('FaLSE', BaseFieldDataType.BOOLEAN)).toBe(false);
 	});
 	test('validate a valid URL as URL', () => {
 		expect(

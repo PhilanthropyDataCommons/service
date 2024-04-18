@@ -8,6 +8,7 @@ export * from './loadBulkUploadBundle';
 export * from './loadBundle';
 export * from './loadOrganization';
 export * from './loadOrganizationBundle';
+export * from './loadOrganizationByEmployerIdentificationNumber';
 export * from './loadOrganizationProposalBundle';
 export * from './loadProposal';
 export * from './loadProposalBundle';

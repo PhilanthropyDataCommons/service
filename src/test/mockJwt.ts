@@ -8,26 +8,44 @@ const getMockJwks = (): JWKSMock =>
 
 const mockJwks = getMockJwks();
 
-const getMockJwt = (sub?: string): { Authorization: string } => {
+const getMockJwt = (
+	settings: {
+		sub?: string;
+		roles?: string[];
+	} = {},
+): { Authorization: string } => {
 	const aMomentAgo = Math.round(new Date().getTime() / 1000);
 
 	const token = mockJwks.token({
 		exp: aMomentAgo + 1000000,
 		iat: aMomentAgo,
 		iss: issuer,
-		sub,
+		sub: settings.sub,
 		aud: 'account',
 		typ: 'Bearer',
 		azp: 'pdc-service',
 		realm_access: {
-			roles: ['default-roles-pdc'],
+			roles: settings.roles ?? ['default-roles-pdc'],
 		},
 	});
 	return { Authorization: `Bearer ${token}` };
 };
 
-const mockJwt = getMockJwt(getTestUserAuthenticationId());
+const mockJwt = getMockJwt({
+	sub: getTestUserAuthenticationId(),
+});
 
 const mockJwtWithoutSub = getMockJwt();
 
-export { mockJwks, mockJwt, mockJwtWithoutSub, getMockJwt };
+const mockJwtWithAdminRole = getMockJwt({
+	sub: getTestUserAuthenticationId(),
+	roles: ['pdc-admin'],
+});
+
+export {
+	mockJwks,
+	mockJwt,
+	mockJwtWithoutSub,
+	mockJwtWithAdminRole,
+	getMockJwt,
+};

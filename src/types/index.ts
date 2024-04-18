@@ -3,6 +3,7 @@ export * from './ApplicationFormField';
 export * from './BaseField';
 export * from './BulkUpload';
 export * from './Bundle';
+export * from './CheckResult';
 export * from './express/AuthenticatedRequest';
 export * from './Id';
 export * from './JsonObject';

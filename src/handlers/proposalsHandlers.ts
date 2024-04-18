@@ -1,4 +1,5 @@
 import {
+	assertProposalAuthorization,
 	createProposal,
 	getLimitValues,
 	loadProposal,
@@ -6,6 +7,7 @@ import {
 } from '../database';
 import {
 	AuthenticatedRequest,
+	isId,
 	isTinyPgErrorWithQueryContext,
 	isWritableProposal,
 } from '../types';
@@ -19,7 +21,7 @@ import {
 	extractPaginationParameters,
 	extractSearchParameters,
 } from '../queryParameters';
-import type { Request, Response, NextFunction } from 'express';
+import type { Response, NextFunction } from 'express';
 
 const getProposals = (
 	req: AuthenticatedRequest,
@@ -53,26 +55,31 @@ const getProposals = (
 };
 
 const getProposal = (
-	req: Request<{ id: string }>,
+	req: AuthenticatedRequest,
 	res: Response,
 	next: NextFunction,
 ): void => {
-	const id = Number.parseInt(req.params.id, 10);
-	if (Number.isNaN(id)) {
-		next(new InputValidationError('The entity id must be a number.', []));
+	const { user } = req;
+	const { proposalId } = req.params;
+	if (user === undefined) {
+		next(new FailedMiddlewareError('Unexpected lack of user context.'));
 		return;
 	}
-	loadProposal(id)
-		.then((proposal) => {
-			res.status(200).contentType('application/json').send(proposal);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error loading the proposal.', error));
-				return;
-			}
-			next(error);
-		});
+	if (!isId(proposalId)) {
+		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
+		return;
+	}
+	(async () => {
+		await assertProposalAuthorization(proposalId, user.id);
+		const proposal = await loadProposal(proposalId);
+		res.status(200).contentType('application/json').send(proposal);
+	})().catch((error: unknown) => {
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(new DatabaseError('Error loading the proposal.', error));
+			return;
+		}
+		next(error);
+	});
 };
 
 const postProposal = (

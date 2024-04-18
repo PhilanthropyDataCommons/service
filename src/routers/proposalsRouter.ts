@@ -5,7 +5,7 @@ import { requireAuthentication } from '../middleware';
 const proposalsRouter = express.Router();
 
 proposalsRouter.get(
-	'/:id',
+	'/:proposalId',
 	requireAuthentication,
 	proposalsHandlers.getProposal,
 );

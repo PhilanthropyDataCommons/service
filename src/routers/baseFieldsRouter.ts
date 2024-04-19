@@ -1,18 +1,18 @@
 import express from 'express';
 import { baseFieldsHandlers } from '../handlers/baseFieldsHandlers';
-import { requireAuthentication } from '../middleware';
+import { requireAdministratorRole } from '../middleware';
 
 const baseFieldsRouter = express.Router();
 
 baseFieldsRouter.get('/', baseFieldsHandlers.getBaseFields);
 baseFieldsRouter.post(
 	'/',
-	requireAuthentication,
+	requireAdministratorRole,
 	baseFieldsHandlers.postBaseField,
 );
 baseFieldsRouter.put(
 	'/:id',
-	requireAuthentication,
+	requireAdministratorRole,
 	baseFieldsHandlers.putBaseField,
 );
 

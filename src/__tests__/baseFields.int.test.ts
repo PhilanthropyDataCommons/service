@@ -4,7 +4,10 @@ import { db, loadBaseFields, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
 import { BaseFieldDataType, PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
-import { mockJwt as authHeader } from '../test/mockJwt';
+import {
+	mockJwt as authHeader,
+	mockJwtWithAdminRole as adminUserAuthHeader,
+} from '../test/mockJwt';
 
 const logger = getLogger(__filename);
 const agent = request.agent(app);
@@ -67,13 +70,17 @@ describe('/baseFields', () => {
 			await agent.post('/baseFields').expect(401);
 		});
 
+		it('requires administrator role', async () => {
+			await agent.post('/baseFields').set(authHeader).expect(401);
+		});
+
 		it('creates exactly one base field', async () => {
 			const before = await loadTableMetrics('base_fields');
 			logger.debug('before: %o', before);
 			const result = await agent
 				.post('/baseFields')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
@@ -98,7 +105,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.post('/baseFields')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					shortCode: '🩳',
 					description: '😍',
@@ -114,7 +121,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.post('/baseFields')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					shortCode: '🩳',
@@ -130,7 +137,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.post('/baseFields')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
@@ -146,7 +153,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.post('/baseFields')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
@@ -168,7 +175,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.post('/baseFields')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
@@ -192,6 +199,10 @@ describe('/baseFields', () => {
 			await agent.put('/baseFields/1').expect(401);
 		});
 
+		it('requires administrator role', async () => {
+			await agent.put('/baseFields/1').set(authHeader).expect(401);
+		});
+
 		it('updates the specified base field', async () => {
 			// Not using the helper here because observing a change in values is explicitly
 			// the point of the test, so having full explicit control of the original value
@@ -205,7 +216,7 @@ describe('/baseFields', () => {
 			await agent
 				.put('/baseFields/1')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
@@ -229,7 +240,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.put('/baseFields/1')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
@@ -253,7 +264,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.put('/baseFields/1')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					shortCode: '🩳',
 					description: '😍',
@@ -271,7 +282,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.put('/baseFields/1')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					shortCode: '🩳',
@@ -289,7 +300,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.put('/baseFields/1')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
@@ -307,7 +318,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.put('/baseFields/1')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
@@ -324,7 +335,7 @@ describe('/baseFields', () => {
 			const result = await agent
 				.put('/baseFields/notanumber')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
@@ -342,7 +353,7 @@ describe('/baseFields', () => {
 			await agent
 				.put('/baseFields/1')
 				.type('application/json')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',

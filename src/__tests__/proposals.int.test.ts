@@ -13,6 +13,7 @@ import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithoutSub as authHeaderWithNoSubj,
+	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import { createApplicationForm } from '../database/operations/create/createApplicationForm';
@@ -214,6 +215,17 @@ describe('/proposals', () => {
 			});
 		});
 
+		it('returns a 400 error if an invalid createdBy filter is provided', async () => {
+			const response = await agent
+				.get(`/proposals?createdBy=foo`)
+				.set(authHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({
+				name: 'InputValidationError',
+				message: expect.any(String) as string,
+			});
+		});
+
 		it('returns a subset of proposals present in the database when search is provided', async () => {
 			await db.sql('opportunities.insertOne', {
 				title: '🔥',
@@ -311,6 +323,92 @@ describe('/proposals', () => {
 								],
 							},
 						],
+					},
+				],
+			});
+		});
+
+		it('returns all proposals present in the database regardless of createdBy value when loading as an administrator', async () => {
+			await db.sql('opportunities.insertOne', {
+				title: '🔥',
+			});
+
+			const testUser = await loadTestUser();
+			const anotherUser = await createUser({
+				authenticationId: 'anotherUser',
+			});
+			await createTestBaseFields();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
+			await createProposal({
+				externalId: 'proposal-2',
+				opportunityId: 1,
+				createdBy: anotherUser.id,
+			});
+			const response = await agent
+				.get('/proposals')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 2,
+						externalId: 'proposal-2',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						createdBy: anotherUser.id,
+						versions: [],
+					},
+					{
+						id: 1,
+						externalId: 'proposal-1',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						createdBy: testUser.id,
+						versions: [],
+					},
+				],
+			});
+		});
+
+		it('returns a correct subset of proposals when createdBy is provided as an administrator', async () => {
+			await db.sql('opportunities.insertOne', {
+				title: '🔥',
+			});
+
+			const testUser = await loadTestUser();
+			const anotherUser = await createUser({
+				authenticationId: 'anotherUser',
+			});
+			await createTestBaseFields();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
+			await createProposal({
+				externalId: 'proposal-2',
+				opportunityId: 1,
+				createdBy: anotherUser.id,
+			});
+			const response = await agent
+				.get(`/proposals?createdBy=${testUser.id}`)
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 1,
+						externalId: 'proposal-1',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						createdBy: testUser.id,
+						versions: [],
 					},
 				],
 			});

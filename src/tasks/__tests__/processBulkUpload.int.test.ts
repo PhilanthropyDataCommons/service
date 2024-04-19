@@ -9,6 +9,8 @@ import {
 	loadApplicationFormBundle,
 	createBulkUpload,
 	loadSystemUser,
+	loadOrganizationBundle,
+	loadOrganizationProposalBundle,
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -21,6 +23,7 @@ import type {
 	BulkUpload,
 	InternallyWritableBulkUpload,
 	Opportunity,
+	Organization,
 	ProposalFieldValue,
 	ProposalVersion,
 } from '../../types';
@@ -61,7 +64,9 @@ const createTestBulkUpload = async (
 	});
 };
 
-const createTestBaseFields = async (): Promise<[BaseField, BaseField]> => {
+const createTestBaseFields = async (): Promise<
+	[BaseField, BaseField, BaseField]
+> => {
 	const proposalSubmitterEmailBaseField = await createBaseField({
 		label: 'Proposal Submitter Email',
 		description: 'The email address of the person who submitted the proposal.',
@@ -74,13 +79,23 @@ const createTestBaseFields = async (): Promise<[BaseField, BaseField]> => {
 		shortCode: 'organization_name',
 		dataType: BaseFieldDataType.STRING,
 	});
+	const organizationTaxIdBaseField = await createBaseField({
+		label: 'Organization EIN',
+		description: 'The name of the applying organization.',
+		shortCode: 'organization_tax_id',
+		dataType: BaseFieldDataType.STRING,
+	});
 	if (proposalSubmitterEmailBaseField === undefined) {
 		throw new Error("Couldn't create the proposal submitter email base field");
 	}
 	if (organizationNameBaseField === undefined) {
 		throw new Error("Couldn't create the organization name base field");
 	}
-	return [proposalSubmitterEmailBaseField, organizationNameBaseField];
+	return [
+		proposalSubmitterEmailBaseField,
+		organizationNameBaseField,
+		organizationTaxIdBaseField,
+	];
 };
 
 const mockS3GetObjectReplyWithFile = async (
@@ -502,9 +517,87 @@ describe('processBulkUpload', () => {
 				createdAt: expect.any(Date) as Date,
 			},
 		]);
+		const organizationBundle = await loadOrganizationBundle({
+			limit: 100,
+			offset: 0,
+		});
+		expect(organizationBundle).toEqual({
+			entries: [],
+			total: 0,
+		});
+
+		const organizationProposalBundle = await loadOrganizationProposalBundle({
+			limit: 100,
+			offset: 0,
+		});
+		expect(organizationProposalBundle).toEqual({
+			entries: [],
+			total: 0,
+		});
+
 		expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.COMPLETED);
 		expect(requests.getRequest.isDone()).toEqual(true);
 		expect(requests.copyRequest.isDone()).toEqual(true);
 		expect(requests.deleteRequest.isDone()).toEqual(true);
+	});
+
+	it('should create organizations and organization-proposal relationships', async () => {
+		await createTestBaseFields();
+		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const bulkUpload = await createTestBulkUpload({ sourceKey });
+		await mockS3ResponsesForBulkUploadProcessing(
+			bulkUpload,
+			`${__dirname}/fixtures/processBulkUpload/validCsvTemplateWithOrganizations.csv`,
+		);
+
+		await processBulkUpload(
+			{
+				bulkUploadId: bulkUpload.id,
+			},
+			getMockJobHelpers(),
+		);
+
+		const organizationBundle = await loadOrganizationBundle({
+			limit: 100,
+			offset: 0,
+		});
+
+		const organizationProposalBundle = await loadOrganizationProposalBundle({
+			limit: 100,
+			offset: 0,
+		});
+
+		expect(organizationBundle).toEqual({
+			entries: [
+				{
+					createdAt: expect.any(Date) as Date,
+					employerIdentificationNumber: '51-2144346',
+					id: 1,
+					name: 'Foo LLC.',
+				},
+			],
+			total: 1,
+		});
+		expect(organizationProposalBundle).toEqual({
+			entries: [
+				{
+					createdAt: expectTimestamp,
+					id: 2,
+					organizationId: 1,
+					proposalId: 2,
+					organization: expect.any(Object) as Organization,
+					proposal: expect.any(Object) as Proposal,
+				},
+				{
+					createdAt: expectTimestamp,
+					id: 1,
+					organizationId: 1,
+					proposalId: 1,
+					organization: expect.any(Object) as Organization,
+					proposal: expect.any(Object) as Proposal,
+				},
+			],
+			total: 2,
+		});
 	});
 });

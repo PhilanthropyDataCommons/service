@@ -12,9 +12,12 @@ import { db } from '../database/db';
 import {
 	createApplicationForm,
 	createApplicationFormField,
+	createOrganization,
+	createOrganizationProposal,
 	createProposal,
 	loadBaseFields,
 	loadBulkUpload,
+	loadOrganizationByEmployerIdentificationNumber,
 	updateBulkUpload,
 } from '../database/operations';
 import { BulkUploadStatus, isProcessBulkUploadJobPayload } from '../types';
@@ -28,11 +31,15 @@ import type {
 	ApplicationFormField,
 	BulkUpload,
 	Opportunity,
+	Organization,
 	ProposalFieldValue,
 	ProposalVersion,
+	WritableOrganization,
 } from '../types';
 
 const { S3_BUCKET } = requireEnv('S3_BUCKET');
+const ORGANIZATION_TAX_ID_SHORT_CODE = 'organization_tax_id';
+const ORGANIZATION_NAME_SHORT_CODE = 'organization_name';
 
 const downloadS3ObjectToTemporaryStorage = async (
 	key: string,
@@ -227,6 +234,30 @@ const createProposalFieldValueForBulkUploadCsvRecord = async (
 const getProcessedKey = (bulkUpload: BulkUpload): string =>
 	`${S3_BULK_UPLOADS_KEY_PREFIX}/${bulkUpload.id}`;
 
+const getOrganizationTaxIdIndex = (columns: string[]): number =>
+	columns.indexOf(ORGANIZATION_TAX_ID_SHORT_CODE);
+
+const getOrganizationNameIndex = (columns: string[]): number =>
+	columns.indexOf(ORGANIZATION_NAME_SHORT_CODE);
+
+const createOrLoadOrganization = async (
+	writeValues: Omit<WritableOrganization, 'name'> & { name?: string },
+): Promise<Organization | undefined> => {
+	try {
+		return await loadOrganizationByEmployerIdentificationNumber(
+			writeValues.employerIdentificationNumber,
+		);
+	} catch {
+		if (writeValues.name !== undefined) {
+			return createOrganization({
+				...writeValues,
+				name: writeValues.name, // This looks silly, but TypeScript isn't guarding `writeValues`, just `writeValues.name`.
+			});
+		}
+	}
+	return undefined;
+};
+
 export const processBulkUpload = async (
 	payload: unknown,
 	helpers: JobHelpers,
@@ -273,6 +304,10 @@ export const processBulkUpload = async (
 		return;
 	}
 
+	const shortCodes = await loadShortCodesFromBulkUploadCsv(bulkUploadFile.path);
+	const organizationNameIndex = getOrganizationNameIndex(shortCodes);
+	const organizationTaxIdIndex = getOrganizationTaxIdIndex(shortCodes);
+
 	try {
 		await assertBulkUploadCsvIsValid(bulkUploadFile.path);
 		const opportunity = await createOpportunityForBulkUpload(bulkUpload);
@@ -301,6 +336,23 @@ export const processBulkUpload = async (
 				proposal.id,
 				applicationForm.id,
 			);
+
+			const organizationName = record[organizationNameIndex];
+			const organizationTaxId = record[organizationTaxIdIndex];
+			if (organizationTaxId !== undefined) {
+				const organization = await createOrLoadOrganization({
+					name: organizationName,
+					employerIdentificationNumber: organizationTaxId,
+				});
+
+				if (organization !== undefined) {
+					await createOrganizationProposal({
+						organizationId: organization.id,
+						proposalId: proposal.id,
+					});
+				}
+			}
+
 			await Promise.all(
 				record.map<Promise<ProposalFieldValue>>(async (fieldValue, index) => {
 					const applicationFormField = applicationFormFields[index];

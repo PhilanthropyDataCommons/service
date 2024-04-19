@@ -8,6 +8,7 @@ import {
 import {
 	AuthenticatedRequest,
 	isId,
+	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableProposal,
 } from '../types';
@@ -28,8 +29,8 @@ const getProposals = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (req.user === undefined) {
-		next(new FailedMiddlewareError('Unexpected lack of user context.'));
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
 	}
 	const { user } = req;
@@ -87,8 +88,8 @@ const postProposal = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (req.user === undefined) {
-		next(new FailedMiddlewareError('Unexpected lack of user context.'));
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
 	}
 	if (!isWritableProposal(req.body)) {

@@ -1,3 +1,4 @@
+export * from './extractAuthenticationIdParameters';
 export * from './extractCreatedByParameters';
 export * from './extractOrganizationParameters';
 export * from './extractPaginationParameters';

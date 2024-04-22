@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `BulkUpload` entity now has a `createdBy` attribute.
 - The `Proposal` entity now has a `createdBy` attribute.
 - The `/proposals` endpoint now supports a `createdBy` filter.
+- The `User` type now exists.
+- The GET `/users` endpoint now exists.
 
 ### Changed
 

@@ -7,6 +7,15 @@
 	},
 	"components": {
 		"parameters": {
+			"authenticationIdParam": {
+				"name": "authenticationId",
+				"description": "The authentication ID associated with the desired user.",
+				"in": "query",
+				"required": false,
+				"schema": {
+					"type": "string"
+				}
+			},
 			"pageParam": {
 				"schema": {
 					"type": "integer",
@@ -615,6 +624,45 @@
 								"type": "array",
 								"items": {
 									"$ref": "#/components/schemas/Proposal"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
+			"User": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3407
+					},
+					"authenticationId": {
+						"type": "string",
+						"example": "foo@example.com"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "authenticationId", "createdAt"]
+			},
+			"UserBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/User"
 								}
 							}
 						},
@@ -1575,6 +1623,35 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/users": {
+			"get": {
+				"operationId": "getUsers",
+				"summary": "Gets a list of users.",
+				"tags": ["Users"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" },
+					{ "$ref": "#/components/parameters/authenticationIdParam" }
+				],
+				"responses": {
+					"200": {
+						"description": "A list of users.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserBundle"
 								}
 							}
 						}

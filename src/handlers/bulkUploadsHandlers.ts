@@ -6,6 +6,7 @@ import {
 import {
 	AuthenticatedRequest,
 	BulkUploadStatus,
+	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableBulkUpload,
 } from '../types';
@@ -24,8 +25,8 @@ const postBulkUpload = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (req.user === undefined) {
-		next(new FailedMiddlewareError('Unexpected lack of user context.'));
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
 	}
 	if (!isWritableBulkUpload(req.body)) {
@@ -73,8 +74,8 @@ const getBulkUploads = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (req.user === undefined) {
-		next(new FailedMiddlewareError('Unexpected lack of user context.'));
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
 	}
 	const { user } = req;

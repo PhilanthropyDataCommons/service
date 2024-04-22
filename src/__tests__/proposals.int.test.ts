@@ -511,7 +511,40 @@ describe('/proposals', () => {
 			});
 		});
 
-		it('returns 400 when given id a string', async () => {
+		it('returns 404 when given id is not owned by the current user', async () => {
+			await db.query(`
+        INSERT INTO opportunities (
+          title,
+          created_at
+        )
+        VALUES
+          ( '⛰️', '2525-01-03T00:00:01Z' )
+      `);
+			const anotherUser = await createUser({
+				authenticationId: 'totallySeparateUser',
+			});
+			await createProposal({
+				externalId: `proposal-1`,
+				opportunityId: 1,
+				createdBy: anotherUser.id,
+			});
+
+			const response = await agent
+				.get('/proposals/1')
+				.set(authHeader)
+				.expect(404);
+			expect(response.body).toEqual({
+				name: 'NotFoundError',
+				message: expect.any(String) as string,
+				details: [
+					{
+						name: 'NotFoundError',
+					},
+				],
+			});
+		});
+
+		it('returns 400 when given id is a string', async () => {
 			const response = await agent
 				.get('/proposals/foobar')
 				.set(authHeader)
@@ -519,7 +552,7 @@ describe('/proposals', () => {
 			expect(response.body).toEqual({
 				name: 'InputValidationError',
 				message: expect.any(String) as string,
-				details: [],
+				details: [expect.any(Object)],
 			});
 		});
 

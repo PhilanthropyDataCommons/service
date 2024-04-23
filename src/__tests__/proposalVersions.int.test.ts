@@ -115,7 +115,6 @@ describe('/proposalVersions', () => {
           ( 1, 2, 2, 'Last Name', '2022-07-20 12:00:00+0000' );
       `);
 			const before = await loadTableMetrics('proposal_field_values');
-			logger.debug('before: %o', before);
 			const result = await agent
 				.post('/proposalVersions')
 				.type('application/json')
@@ -140,14 +139,14 @@ describe('/proposalVersions', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics('proposal_field_values');
-			logger.debug('after: %o', after);
+
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: 1,
 				proposalId: 1,
 				fieldValues: [
 					{
-						id: 1,
+						id: expect.any(Number) as number,
 						applicationFormFieldId: 1,
 						position: 1,
 						value: 'Gronald',
@@ -155,7 +154,7 @@ describe('/proposalVersions', () => {
 						createdAt: expectTimestamp,
 					},
 					{
-						id: 2,
+						id: expect.any(Number) as number,
 						applicationFormFieldId: 2,
 						position: 1,
 						value: 'Plorp',

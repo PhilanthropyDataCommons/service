@@ -1,15 +1,27 @@
 import { loadBundle } from './loadBundle';
-import type { JsonResultSet, Bundle, BulkUpload } from '../../../types';
+import type {
+	JsonResultSet,
+	Bundle,
+	BulkUpload,
+	AuthContext,
+} from '../../../types';
 
-export const loadBulkUploadBundle = async (queryParameters: {
-	offset: number;
-	limit: number;
-	createdBy?: number;
-}): Promise<Bundle<BulkUpload>> => {
+export const loadBulkUploadBundle = async (
+	queryParameters: {
+		offset: number;
+		limit: number;
+		createdBy?: number;
+	},
+	authContext?: AuthContext,
+): Promise<Bundle<BulkUpload>> => {
 	const defaultQueryParameters = {
 		createdBy: 0,
+		userId: 0,
+		isAdministrator: false,
 	};
 	const { offset, limit, createdBy } = queryParameters;
+	const userId = authContext?.user.id;
+	const isAdministrator = authContext?.role.isAdministrator;
 
 	const bundle = await loadBundle<JsonResultSet<BulkUpload>>(
 		'bulkUploads.selectWithPagination',
@@ -18,6 +30,8 @@ export const loadBulkUploadBundle = async (queryParameters: {
 			offset,
 			limit,
 			createdBy,
+			userId,
+			isAdministrator,
 		},
 		'bulk_uploads',
 	);

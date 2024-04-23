@@ -15,7 +15,10 @@ import {
 	FailedMiddlewareError,
 	InputValidationError,
 } from '../errors';
-import { extractPaginationParameters } from '../queryParameters';
+import {
+	extractCreatedByParameters,
+	extractPaginationParameters,
+} from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
 import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
 import type { Response, NextFunction } from 'express';
@@ -78,13 +81,16 @@ const getBulkUploads = (
 		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
 	}
-	const { user } = req;
 	const paginationParameters = extractPaginationParameters(req);
+	const createdByParameters = extractCreatedByParameters(req);
 	(async () => {
-		const bulkUploadBundle = await loadBulkUploadBundle({
-			...getLimitValues(paginationParameters),
-			createdBy: user.id,
-		});
+		const bulkUploadBundle = await loadBulkUploadBundle(
+			{
+				...getLimitValues(paginationParameters),
+				...createdByParameters,
+			},
+			req,
+		);
 
 		res.status(200).contentType('application/json').send(bulkUploadBundle);
 	})().catch((error: unknown) => {

@@ -748,7 +748,8 @@
 				],
 				"parameters": [
 					{ "$ref": "#/components/parameters/pageParam" },
-					{ "$ref": "#/components/parameters/countParam" }
+					{ "$ref": "#/components/parameters/countParam" },
+					{ "$ref": "#/components/parameters/createdByParam" }
 				],
 				"responses": {
 					"200": {

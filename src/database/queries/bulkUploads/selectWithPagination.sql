@@ -7,6 +7,15 @@ WHERE
     ELSE
       true
     END
+  AND CASE
+    WHEN :userId != 0 THEN
+      (
+        bulk_uploads.created_by = :userId
+        OR :isAdministrator
+      )
+    ELSE
+      true
+    END
 ORDER BY id DESC
 LIMIT
   CASE WHEN :limit != 0 THEN

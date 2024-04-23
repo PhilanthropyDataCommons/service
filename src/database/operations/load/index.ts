@@ -14,4 +14,5 @@ export * from './loadProposal';
 export * from './loadProposalBundle';
 export * from './loadSystemUser';
 export * from './loadTableMetrics';
+export * from './loadUserBundle';
 export * from './loadUserByAuthenticationId';

@@ -9,6 +9,7 @@ import { platformProviderResponsesRouter } from './platformProviderResponsesRout
 import { presignedPostRequestsRouter } from './presignedPostRequestsRouter';
 import { proposalsRouter } from './proposalsRouter';
 import { proposalVersionsRouter } from './proposalVersionsRouter';
+import { usersRouter } from './usersRouter';
 import { documentationRouter } from './documentationRouter';
 
 const rootRouter = express.Router();
@@ -23,6 +24,7 @@ rootRouter.use('/platformProviderResponses', platformProviderResponsesRouter);
 rootRouter.use('/presignedPostRequests', presignedPostRequestsRouter);
 rootRouter.use('/proposals', proposalsRouter);
 rootRouter.use('/proposalVersions', proposalVersionsRouter);
+rootRouter.use('/users', usersRouter);
 rootRouter.use('/', documentationRouter);
 
 export { rootRouter };

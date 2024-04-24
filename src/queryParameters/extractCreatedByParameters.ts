@@ -2,35 +2,56 @@ import { ajv } from '../ajv';
 import { InputValidationError } from '../errors';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
+import type { AuthContext } from '../types';
+
+interface CreatedByQueryParameters {
+	createdBy: number | 'me' | undefined;
+}
 
 interface CreatedByParameters {
 	createdBy: number | undefined;
 }
 
-const createdByParametersSchema: JSONSchemaType<CreatedByParameters> = {
-	type: 'object',
-	properties: {
-		createdBy: {
-			type: 'integer',
-			minimum: 1,
-			nullable: true,
+const createdByQueryParametersSchema: JSONSchemaType<CreatedByQueryParameters> =
+	{
+		type: 'object',
+		properties: {
+			createdBy: {
+				type: ['integer', 'string'],
+				oneOf: [
+					{
+						type: 'integer',
+						minimum: 1,
+						nullable: true,
+					},
+					{
+						enum: ['me'],
+					},
+				],
+				nullable: true,
+			},
 		},
-	},
-	required: [],
-};
+		required: [],
+	};
 
-const isCreatedByParameters = ajv.compile(createdByParametersSchema);
+const isCreatedByQueryParameters = ajv.compile(createdByQueryParametersSchema);
 
-const extractCreatedByParameters = (request: Request): CreatedByParameters => {
+const extractCreatedByParameters = (
+	request: Pick<Request, 'query'> & Partial<AuthContext>,
+): CreatedByParameters => {
 	const { query } = request;
-	if (!isCreatedByParameters(query)) {
+	if (!isCreatedByQueryParameters(query)) {
 		throw new InputValidationError(
 			'Invalid createdBy parameters.',
-			isCreatedByParameters.errors ?? [],
+			isCreatedByQueryParameters.errors ?? [],
 		);
 	}
+
+	const createdBy =
+		query.createdBy === 'me' ? request.user?.id : query.createdBy;
+
 	return {
-		createdBy: query.createdBy,
+		createdBy,
 	};
 };
 

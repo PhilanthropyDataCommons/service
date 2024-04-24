@@ -414,6 +414,45 @@ describe('/proposals', () => {
 			});
 		});
 
+		it("returns just the administrator's proposals when createdBy is set to `me` as an administrator", async () => {
+			await db.sql('opportunities.insertOne', {
+				title: '🔥',
+			});
+
+			const testUser = await loadTestUser();
+			const anotherUser = await createUser({
+				authenticationId: 'anotherUser',
+			});
+			await createTestBaseFields();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
+			await createProposal({
+				externalId: 'proposal-2',
+				opportunityId: 1,
+				createdBy: anotherUser.id,
+			});
+			const response = await agent
+				.get(`/proposals?createdBy=me`)
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 1,
+						externalId: 'proposal-1',
+						opportunityId: 1,
+						createdAt: expectTimestamp,
+						createdBy: testUser.id,
+						versions: [],
+					},
+				],
+			});
+		});
+
 		it('returns a subset of proposals present in the database when search is provided - tscfg simple', async () => {
 			// This should pass even if the default text search config is 'simple'.
 			// See https://github.com/PhilanthropyDataCommons/service/issues/336

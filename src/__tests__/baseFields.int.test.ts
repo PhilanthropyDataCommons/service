@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { app } from '../app';
-import { db, loadBaseFields, loadTableMetrics } from '../database';
+import { createBaseField, loadBaseFields, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
 import { BaseFieldDataType, PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
@@ -13,7 +13,7 @@ const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 const createTestBaseField = async () =>
-	db.sql('baseFields.insertOne', {
+	createBaseField({
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
@@ -31,13 +31,13 @@ describe('/baseFields', () => {
 		});
 
 		it('returns all base fields present in the database', async () => {
-			await db.sql('baseFields.insertOne', {
+			await createBaseField({
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
 				dataType: BaseFieldDataType.STRING,
 			});
-			await db.sql('baseFields.insertOne', {
+			await createBaseField({
 				label: 'Last Name',
 				description: 'The last name of the applicant',
 				shortCode: 'lastName',
@@ -166,7 +166,7 @@ describe('/baseFields', () => {
 			});
 		});
 		it('returns 409 conflict when a duplicate short name is submitted', async () => {
-			await db.sql('baseFields.insertOne', {
+			await createBaseField({
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
@@ -207,7 +207,7 @@ describe('/baseFields', () => {
 			// Not using the helper here because observing a change in values is explicitly
 			// the point of the test, so having full explicit control of the original value
 			// seems important.  Some day when we add better test tooling we can have it all.
-			await db.sql('baseFields.insertOne', {
+			await createBaseField({
 				label: 'Summary',
 				description: 'A summary of the proposal',
 				shortCode: 'summary',

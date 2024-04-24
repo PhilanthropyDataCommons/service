@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	createApplicationFormField,
+	createBaseField,
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
@@ -22,13 +23,13 @@ import { BaseFieldDataType } from '../types';
 const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
-	await db.sql('baseFields.insertOne', {
+	await createBaseField({
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
 	});
-	await db.sql('baseFields.insertOne', {
+	await createBaseField({
 		label: 'Title',
 		description: 'The title of the proposal',
 		shortCode: 'title',

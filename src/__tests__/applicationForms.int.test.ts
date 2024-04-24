@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { app } from '../app';
-import { db, loadTableMetrics } from '../database';
+import { createBaseField, db, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
 import { BaseFieldDataType, PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
@@ -10,13 +10,13 @@ const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
-	await db.sql('baseFields.insertOne', {
+	await createBaseField({
 		label: 'Organization Name',
 		description: 'The organizational name of the applicant',
 		shortCode: 'organizationName',
 		dataType: BaseFieldDataType.STRING,
 	});
-	await db.sql('baseFields.insertOne', {
+	await createBaseField({
 		label: 'Years of work',
 		description: 'The number of years the project will take to complete',
 		shortCode: 'yearsOfWork',

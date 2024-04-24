@@ -65,18 +65,17 @@ const getProposal = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	const { user } = req;
-	const { proposalId } = req.params;
-	if (user === undefined) {
-		next(new FailedMiddlewareError('Unexpected lack of user context.'));
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
 	}
+	const { proposalId } = req.params;
 	if (!isId(proposalId)) {
 		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
 		return;
 	}
 	(async () => {
-		await assertProposalAuthorization(proposalId, user.id);
+		await assertProposalAuthorization(proposalId, req);
 		const proposal = await loadProposal(proposalId);
 		res.status(200).contentType('application/json').send(proposal);
 	})().catch((error: unknown) => {

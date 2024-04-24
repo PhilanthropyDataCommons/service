@@ -885,6 +885,196 @@ describe('/proposals', () => {
 				],
 			});
 		});
+
+		it('returns the proposal if an administrator requests a proposal they do not own', async () => {
+			const testUser = await loadTestUser();
+			await createTestBaseFields();
+			await db.query(`
+        INSERT INTO opportunities (
+          title,
+          created_at
+        )
+        VALUES
+          ( '🌎', '2525-01-04T00:00:01Z' )
+      `);
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			await createApplicationFormField({
+				applicationFormId: 1,
+				baseFieldId: 2,
+				position: 1,
+				label: 'Short summary or title',
+			});
+			await createApplicationFormField({
+				applicationFormId: 1,
+				baseFieldId: 1,
+				position: 2,
+				label: 'Long summary or abstract',
+			});
+			await createProposal({
+				externalId: `proposal-2525-01-04T00Z`,
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
+			await db.query(`
+        INSERT INTO proposal_versions (
+          proposal_id,
+          application_form_id,
+          version,
+          created_at
+        )
+        VALUES
+          ( 1, 1, 1, '2525-01-04T00:00:08Z' ),
+          ( 1, 1, 2, '2525-01-04T00:00:09Z' );
+      `);
+			await db.query(`
+        INSERT INTO proposal_field_values (
+          proposal_version_id,
+          application_form_field_id,
+          position,
+          value,
+					is_valid,
+          created_at
+        )
+        VALUES
+          ( 1, 1, 1, 'Title for version 1 from 2525-01-04', true, '2525-01-04T00:00:10Z' ),
+          ( 1, 2, 2, 'Abstract for version 1 from 2525-01-04', true, '2525-01-04T00:00:11Z'),
+          ( 2, 1, 1, 'Title for version 2 from 2525-01-04', true, '2525-01-04T00:00:12Z' ),
+          ( 2, 2, 2, 'Abstract for version 2 from 2525-01-04', true, '2525-01-04T00:00:13Z' );
+      `);
+			const response = await agent
+				.get('/proposals/1')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				id: 1,
+				opportunityId: 1,
+				externalId: 'proposal-2525-01-04T00Z',
+				createdAt: expectTimestamp,
+				createdBy: testUser.id,
+				versions: [
+					{
+						id: 2,
+						proposalId: 1,
+						applicationFormId: 1,
+						version: 2,
+						createdAt: expectTimestamp,
+						fieldValues: [
+							{
+								id: 3,
+								proposalVersionId: 2,
+								applicationFormFieldId: 1,
+								position: 1,
+								value: 'Title for version 2 from 2525-01-04',
+								isValid: true,
+								createdAt: expectTimestamp,
+								applicationFormField: {
+									id: 1,
+									applicationFormId: 1,
+									baseFieldId: 2,
+									baseField: {
+										createdAt: expectTimestamp,
+										dataType: 'string',
+										description: 'The title of the proposal',
+										id: 2,
+										label: 'Title',
+										shortCode: 'title',
+									},
+									position: 1,
+									label: 'Short summary or title',
+									createdAt: expectTimestamp,
+								},
+							},
+							{
+								id: 4,
+								proposalVersionId: 2,
+								applicationFormFieldId: 2,
+								position: 2,
+								value: 'Abstract for version 2 from 2525-01-04',
+								isValid: true,
+								createdAt: expectTimestamp,
+								applicationFormField: {
+									id: 2,
+									applicationFormId: 1,
+									baseFieldId: 1,
+									baseField: {
+										createdAt: expectTimestamp,
+										dataType: 'string',
+										description: 'A summary of the proposal',
+										id: 1,
+										label: 'Summary',
+										shortCode: 'summary',
+									},
+									position: 2,
+									label: 'Long summary or abstract',
+									createdAt: expectTimestamp,
+								},
+							},
+						],
+					},
+					{
+						id: 1,
+						proposalId: 1,
+						applicationFormId: 1,
+						version: 1,
+						createdAt: expectTimestamp,
+						fieldValues: [
+							{
+								id: 1,
+								proposalVersionId: 1,
+								applicationFormFieldId: 1,
+								position: 1,
+								value: 'Title for version 1 from 2525-01-04',
+								createdAt: expectTimestamp,
+								isValid: true,
+								applicationFormField: {
+									id: 1,
+									applicationFormId: 1,
+									baseFieldId: 2,
+									baseField: {
+										createdAt: expectTimestamp,
+										dataType: 'string',
+										description: 'The title of the proposal',
+										id: 2,
+										label: 'Title',
+										shortCode: 'title',
+									},
+									position: 1,
+									label: 'Short summary or title',
+									createdAt: expectTimestamp,
+								},
+							},
+							{
+								id: 2,
+								proposalVersionId: 1,
+								applicationFormFieldId: 2,
+								position: 2,
+								value: 'Abstract for version 1 from 2525-01-04',
+								isValid: true,
+								createdAt: expectTimestamp,
+								applicationFormField: {
+									id: 2,
+									applicationFormId: 1,
+									baseFieldId: 1,
+									baseField: {
+										createdAt: expectTimestamp,
+										dataType: 'string',
+										description: 'A summary of the proposal',
+										id: 1,
+										label: 'Summary',
+										shortCode: 'summary',
+									},
+									position: 2,
+									label: 'Long summary or abstract',
+									createdAt: expectTimestamp,
+								},
+							},
+						],
+					},
+				],
+			});
+		});
 	});
 
 	describe('POST /', () => {

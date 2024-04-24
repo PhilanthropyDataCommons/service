@@ -10,7 +10,7 @@ export const updateBaseField = async (
 	id: number,
 	updateValues: WritableBaseField,
 ): Promise<BaseField> => {
-	const { label, description, shortCode, dataType } = updateValues;
+	const { label, description, shortCode, dataType, scope } = updateValues;
 	const result = await db.sql<JsonResultSet<BaseField>>(
 		'baseFields.updateById',
 		{
@@ -19,6 +19,7 @@ export const updateBaseField = async (
 			description,
 			shortCode,
 			dataType,
+			scope,
 		},
 	);
 	const baseField = result.rows[0]?.object;

@@ -7,7 +7,7 @@ import {
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { BaseFieldDataType } from '../types';
+import { BaseFieldDataType, BaseFieldScope } from '../types';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
@@ -20,12 +20,14 @@ const createTestBaseFields = async () => {
 		description: 'The first name of the applicant',
 		shortCode: 'firstName',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.PROPOSAL,
 	});
 	await createBaseField({
 		label: 'Last Name',
 		description: 'The last name of the applicant',
 		shortCode: 'lastName',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.PROPOSAL,
 	});
 };
 

@@ -69,12 +69,8 @@ const putBaseField = (
 		);
 		return;
 	}
-	updateBaseField(id, {
-		label: body.label,
-		description: body.description,
-		shortCode: body.shortCode,
-		dataType: body.dataType,
-	})
+
+	updateBaseField(id, body)
 		.then((baseField) => {
 			res.status(200).contentType('application/json').send(baseField);
 		})

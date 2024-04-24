@@ -2,7 +2,7 @@ import request from 'supertest';
 import { app } from '../app';
 import { createBaseField, db, loadTableMetrics } from '../database';
 import { getLogger } from '../logger';
-import { BaseFieldDataType, PostgresErrorCode } from '../types';
+import { BaseFieldDataType, BaseFieldScope, PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
@@ -15,12 +15,14 @@ const createTestBaseFields = async () => {
 		description: 'The organizational name of the applicant',
 		shortCode: 'organizationName',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.ORGANIZATION,
 	});
 	await createBaseField({
 		label: 'Years of work',
 		description: 'The number of years the project will take to complete',
 		shortCode: 'yearsOfWork',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.PROPOSAL,
 	});
 };
 

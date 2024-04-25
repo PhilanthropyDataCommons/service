@@ -68,12 +68,21 @@
 			},
 			"createdByParam": {
 				"schema": {
-					"type": "integer"
+					"oneOf": [
+						{
+							"type": "integer",
+							"minimum": 1,
+							"nullable": true
+						},
+						{
+							"enum": ["me"]
+						}
+					]
 				},
 				"in": "query",
 				"name": "createdBy",
 				"required": false,
-				"description": "A reference (ID) to a user entity."
+				"description": "A reference (ID) to a user entity, or 'me'."
 			}
 		},
 		"securitySchemes": {

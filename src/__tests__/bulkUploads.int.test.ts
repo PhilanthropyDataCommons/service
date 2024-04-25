@@ -184,6 +184,46 @@ describe('/bulkUploads', () => {
 				);
 		});
 
+		it('returns uploads for the admin user when createdBy is set to me as an admin', async () => {
+			const testUser = await loadTestUser();
+			const anotherUser = await createUser({
+				authenticationId: 'totallyDifferentUser@example.com',
+			});
+			await createBulkUpload({
+				fileName: 'foo.csv',
+				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
+				status: BulkUploadStatus.PENDING,
+				createdBy: testUser.id,
+			});
+			await createBulkUpload({
+				fileName: 'bar.csv',
+				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+				status: BulkUploadStatus.COMPLETED,
+				createdBy: anotherUser.id,
+			});
+
+			await agent
+				.get(`/bulkUploads?createdBy=me`)
+				.set(authHeaderWithAdminRole)
+				.expect(200)
+				.expect((res) =>
+					expect(res.body).toEqual({
+						total: 2,
+						entries: [
+							{
+								id: 1,
+								fileName: 'foo.csv',
+								fileSize: null,
+								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
+								status: BulkUploadStatus.PENDING,
+								createdAt: expectTimestamp,
+								createdBy: testUser.id,
+							},
+						],
+					}),
+				);
+		});
+
 		it('supports pagination', async () => {
 			const testUser = await loadTestUser();
 			await Array.from(Array(20)).reduce(async (p, _, i) => {

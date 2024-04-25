@@ -1,31 +1,30 @@
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import { phone } from 'phone';
 import { BaseFieldDataType } from './types';
+import { ajv } from './ajv';
 
-const ajv = new Ajv();
-addFormats(ajv, ['email', 'uri']);
+const isEmailString = ajv.compile({
+	type: 'string',
+	format: 'email',
+});
 
-function isValidEmail(email: string): boolean {
-	const emailSchema = {
-		type: 'string',
-		format: 'email',
-	};
+const isUrlString = ajv.compile({
+	type: 'string',
+	format: 'uri',
+});
 
-	return ajv.validate(emailSchema, email);
-}
+const isNumericString = ajv.compile({
+	type: 'number',
+});
 
-function isValidUrl(url: string): boolean {
-	const uriSchema = {
-		type: 'string',
-		format: 'uri',
-	};
-	return ajv.validate(uriSchema, url);
-}
+const isBooleanString = ajv.compile({
+	type: 'boolean',
+});
 
-function isValidPhoneNumber(phoneNumber: string): boolean {
-	return phone(phoneNumber).isValid;
-}
+const isString = ajv.compile({
+	type: 'string',
+});
+
+const isPhoneNumberString = (value: string) => phone(value).isValid;
 
 export const fieldValueIsValid = (
 	fieldValue: string,
@@ -33,16 +32,16 @@ export const fieldValueIsValid = (
 ): boolean => {
 	switch (dataType) {
 		case BaseFieldDataType.NUMBER:
-			return /^[0-9]*$/.test(fieldValue);
+			return isNumericString(fieldValue);
 		case BaseFieldDataType.PHONE_NUMBER:
-			return isValidPhoneNumber(fieldValue);
+			return isPhoneNumberString(fieldValue);
 		case BaseFieldDataType.EMAIL:
-			return isValidEmail(fieldValue);
+			return isEmailString(fieldValue);
 		case BaseFieldDataType.URL:
-			return isValidUrl(fieldValue);
+			return isUrlString(fieldValue);
 		case BaseFieldDataType.BOOLEAN:
-			return /^(true|false)$/i.test(fieldValue);
+			return isBooleanString(fieldValue);
 		default:
-			return true;
+			return isString(fieldValue);
 	}
 };

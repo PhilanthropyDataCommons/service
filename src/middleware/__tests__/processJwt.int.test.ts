@@ -8,7 +8,7 @@ import {
 	allowNextToResolve,
 	generateNextWithAssertions,
 } from '../../test/utils';
-import { mockJwt as authHeader } from '../../test/mockJwt';
+import { mockJwt as authHeader, getMockJwt } from '../../test/mockJwt';
 import type { NextFunction, Response } from 'express';
 import type { Request as JWTRequest } from 'express-jwt';
 
@@ -42,6 +42,23 @@ describe('processJwt', () => {
 		const mockRequest = {} as unknown as JWTRequest;
 		const mockResponse = {} as unknown as Response;
 		const makeAssertions = async () => {
+			expect(mockRequest.auth).toBe(undefined);
+		};
+		const nextMock = generateNextWithAssertions(makeAssertions, done);
+
+		processJwt(mockRequest, mockResponse, nextMock);
+	});
+
+	it('does NOT populate an auth value when an auth header with an invalid issuer is sent', (done) => {
+		const mockJwt = getMockJwt({
+			iss: 'NotTheCorrectIssuer',
+		});
+		const mockRequest = {
+			headers: mockJwt,
+		} as unknown as JWTRequest;
+		const mockResponse = {} as unknown as Response;
+		const makeAssertions = async (err: unknown) => {
+			expect(err).toBeInstanceOf(Error);
 			expect(mockRequest.auth).toBe(undefined);
 		};
 		const nextMock = generateNextWithAssertions(makeAssertions, done);

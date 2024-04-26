@@ -12,6 +12,7 @@ const getMockJwt = (
 	settings: {
 		sub?: string;
 		roles?: string[];
+		iss?: string;
 	} = {},
 ): { Authorization: string } => {
 	const aMomentAgo = Math.round(new Date().getTime() / 1000);
@@ -19,7 +20,7 @@ const getMockJwt = (
 	const token = mockJwks.token({
 		exp: aMomentAgo + 1000000,
 		iat: aMomentAgo,
-		iss: issuer,
+		iss: settings.iss ?? issuer,
 		sub: settings.sub,
 		aud: 'account',
 		typ: 'Bearer',

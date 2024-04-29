@@ -483,6 +483,11 @@
 						],
 						"example": "string"
 					},
+					"scope": {
+						"type": "string",
+						"readOnly": true,
+						"enum": ["proposal", "organization"]
+					},
 					"createdAt": {
 						"type": "string",
 						"format": "date-time",

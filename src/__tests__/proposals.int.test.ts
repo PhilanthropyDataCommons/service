@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	createApplicationFormField,
+	createBaseField,
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
@@ -17,22 +18,24 @@ import {
 } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import { createApplicationForm } from '../database/operations/create/createApplicationForm';
-import { BaseFieldDataType } from '../types';
+import { BaseFieldDataType, BaseFieldScope } from '../types';
 
 const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
-	await db.sql('baseFields.insertOne', {
+	await createBaseField({
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.PROPOSAL,
 	});
-	await db.sql('baseFields.insertOne', {
+	await createBaseField({
 		label: 'Title',
 		description: 'The title of the proposal',
 		shortCode: 'title',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.PROPOSAL,
 	});
 };
 
@@ -145,6 +148,7 @@ describe('/proposals', () => {
 												description: 'A summary of the proposal',
 												id: 1,
 												label: 'Summary',
+												scope: 'proposal',
 												shortCode: 'summary',
 											},
 											label: 'Short summary',
@@ -313,6 +317,7 @@ describe('/proposals', () => {
 												description: 'A summary of the proposal',
 												id: 1,
 												label: 'Summary',
+												scope: 'proposal',
 												shortCode: 'summary',
 											},
 											label: 'Short summary',
@@ -542,6 +547,7 @@ describe('/proposals', () => {
 												description: 'A summary of the proposal',
 												id: 1,
 												label: 'Summary',
+												scope: 'proposal',
 												shortCode: 'summary',
 											},
 											label: 'Concise summary',
@@ -828,6 +834,7 @@ describe('/proposals', () => {
 										description: 'The title of the proposal',
 										id: 2,
 										label: 'Title',
+										scope: 'proposal',
 										shortCode: 'title',
 									},
 									position: 1,
@@ -853,6 +860,7 @@ describe('/proposals', () => {
 										description: 'A summary of the proposal',
 										id: 1,
 										label: 'Summary',
+										scope: 'proposal',
 										shortCode: 'summary',
 									},
 									position: 2,
@@ -887,6 +895,7 @@ describe('/proposals', () => {
 										description: 'The title of the proposal',
 										id: 2,
 										label: 'Title',
+										scope: 'proposal',
 										shortCode: 'title',
 									},
 									position: 1,
@@ -912,6 +921,7 @@ describe('/proposals', () => {
 										description: 'A summary of the proposal',
 										id: 1,
 										label: 'Summary',
+										scope: 'proposal',
 										shortCode: 'summary',
 									},
 									position: 2,
@@ -1018,6 +1028,7 @@ describe('/proposals', () => {
 										description: 'The title of the proposal',
 										id: 2,
 										label: 'Title',
+										scope: 'proposal',
 										shortCode: 'title',
 									},
 									position: 1,
@@ -1043,6 +1054,7 @@ describe('/proposals', () => {
 										description: 'A summary of the proposal',
 										id: 1,
 										label: 'Summary',
+										scope: 'proposal',
 										shortCode: 'summary',
 									},
 									position: 2,
@@ -1077,6 +1089,7 @@ describe('/proposals', () => {
 										description: 'The title of the proposal',
 										id: 2,
 										label: 'Title',
+										scope: 'proposal',
 										shortCode: 'title',
 									},
 									position: 1,
@@ -1102,6 +1115,7 @@ describe('/proposals', () => {
 										description: 'A summary of the proposal',
 										id: 1,
 										label: 'Summary',
+										scope: 'proposal',
 										shortCode: 'summary',
 									},
 									position: 2,

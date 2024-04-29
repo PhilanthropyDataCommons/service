@@ -7,6 +7,7 @@ BEGIN
     'description', base_field.description,
     'shortCode', base_field.short_code,
     'dataType', base_field.data_type,
+    'scope', base_field.scope,
     'createdAt', to_json(base_field.created_at)::jsonb
   );
 END;

@@ -11,12 +11,18 @@ export enum BaseFieldDataType {
 	BOOLEAN = 'boolean',
 }
 
+export enum BaseFieldScope {
+	PROPOSAL = 'proposal',
+	ORGANIZATION = 'organization',
+}
+
 interface BaseField {
 	readonly id: number;
 	label: string;
 	description: string;
 	shortCode: string;
 	dataType: BaseFieldDataType;
+	scope: BaseFieldScope;
 	readonly createdAt: string;
 }
 
@@ -37,8 +43,11 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 		dataType: {
 			type: 'string',
 		},
+		scope: {
+			type: 'string',
+		},
 	},
-	required: ['label', 'description', 'shortCode', 'dataType'],
+	required: ['label', 'description', 'shortCode', 'dataType', 'scope'],
 };
 
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);

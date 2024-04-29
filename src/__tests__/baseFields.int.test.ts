@@ -1,23 +1,22 @@
 import request from 'supertest';
 import { app } from '../app';
-import { db, loadBaseFields, loadTableMetrics } from '../database';
-import { getLogger } from '../logger';
-import { BaseFieldDataType, PostgresErrorCode } from '../types';
+import { createBaseField, loadBaseFields, loadTableMetrics } from '../database';
+import { BaseFieldDataType, BaseFieldScope, PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
 
-const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 const createTestBaseField = async () =>
-	db.sql('baseFields.insertOne', {
+	createBaseField({
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.PROPOSAL,
 	});
 
 describe('/baseFields', () => {
@@ -31,17 +30,19 @@ describe('/baseFields', () => {
 		});
 
 		it('returns all base fields present in the database', async () => {
-			await db.sql('baseFields.insertOne', {
+			await createBaseField({
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
 				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
 			});
-			await db.sql('baseFields.insertOne', {
+			await createBaseField({
 				label: 'Last Name',
 				description: 'The last name of the applicant',
 				shortCode: 'lastName',
 				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
 			});
 			const result = await agent.get('/baseFields').expect(200);
 			expect(result.body).toMatchObject([
@@ -76,7 +77,6 @@ describe('/baseFields', () => {
 
 		it('creates exactly one base field', async () => {
 			const before = await loadTableMetrics('base_fields');
-			logger.debug('before: %o', before);
 			const result = await agent
 				.post('/baseFields')
 				.type('application/json')
@@ -86,10 +86,10 @@ describe('/baseFields', () => {
 					description: '😍',
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.PROPOSAL,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('base_fields');
-			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: expect.any(Number) as number,
@@ -97,10 +97,12 @@ describe('/baseFields', () => {
 				description: '😍',
 				shortCode: '🩳',
 				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(1);
 		});
+
 		it('returns 400 bad request when no label is sent', async () => {
 			const result = await agent
 				.post('/baseFields')
@@ -110,6 +112,7 @@ describe('/baseFields', () => {
 					shortCode: '🩳',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.PROPOSAL,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -117,6 +120,7 @@ describe('/baseFields', () => {
 				details: expect.any(Array) as unknown[],
 			});
 		});
+
 		it('returns 400 bad request when no description is sent', async () => {
 			const result = await agent
 				.post('/baseFields')
@@ -126,6 +130,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.PROPOSAL,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -133,6 +138,7 @@ describe('/baseFields', () => {
 				details: expect.any(Array) as unknown[],
 			});
 		});
+
 		it('returns 400 bad request when no shortCode is sent', async () => {
 			const result = await agent
 				.post('/baseFields')
@@ -142,6 +148,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.PROPOSAL,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -149,6 +156,7 @@ describe('/baseFields', () => {
 				details: expect.any(Array) as unknown[],
 			});
 		});
+
 		it('returns 400 bad request when no dataType is sent', async () => {
 			const result = await agent
 				.post('/baseFields')
@@ -158,6 +166,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: '🩳',
+					scope: BaseFieldScope.PROPOSAL,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -165,12 +174,32 @@ describe('/baseFields', () => {
 				details: expect.any(Array) as unknown[],
 			});
 		});
+
+		it('returns 400 bad request when no scope is sent', async () => {
+			const result = await agent
+				.post('/baseFields')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: '🏷️',
+					description: '😍',
+					shortCode: '🩳',
+					dataType: BaseFieldDataType.STRING,
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
 		it('returns 409 conflict when a duplicate short name is submitted', async () => {
-			await db.sql('baseFields.insertOne', {
+			await createBaseField({
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
-				dataType: 'string',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
 			});
 			const result = await agent
 				.post('/baseFields')
@@ -181,6 +210,7 @@ describe('/baseFields', () => {
 					description: '😍',
 					shortCode: 'firstName',
 					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.PROPOSAL,
 				})
 				.expect(409);
 			expect(result.body).toMatchObject({
@@ -207,11 +237,12 @@ describe('/baseFields', () => {
 			// Not using the helper here because observing a change in values is explicitly
 			// the point of the test, so having full explicit control of the original value
 			// seems important.  Some day when we add better test tooling we can have it all.
-			await db.sql('baseFields.insertOne', {
+			await createBaseField({
 				label: 'Summary',
 				description: 'A summary of the proposal',
 				shortCode: 'summary',
 				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
 			});
 			await agent
 				.put('/baseFields/1')
@@ -221,7 +252,8 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: '🩳',
-					dataType: BaseFieldDataType.STRING,
+					dataType: BaseFieldDataType.NUMBER,
+					scope: BaseFieldScope.ORGANIZATION,
 				})
 				.expect(200);
 			const baseFields = await loadBaseFields();
@@ -230,7 +262,8 @@ describe('/baseFields', () => {
 				label: '🏷️',
 				description: '😍',
 				shortCode: '🩳',
-				dataType: BaseFieldDataType.STRING,
+				dataType: BaseFieldDataType.NUMBER,
+				scope: BaseFieldScope.ORGANIZATION,
 				createdAt: expectTimestamp,
 			});
 		});
@@ -245,7 +278,8 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: '🩳',
-					dataType: BaseFieldDataType.STRING,
+					dataType: BaseFieldDataType.NUMBER,
+					scope: BaseFieldScope.ORGANIZATION,
 				})
 				.expect(200);
 			expect(result.body).toMatchObject({
@@ -253,7 +287,8 @@ describe('/baseFields', () => {
 				label: '🏷️',
 				description: '😍',
 				shortCode: '🩳',
-				dataType: BaseFieldDataType.STRING,
+				dataType: BaseFieldDataType.NUMBER,
+				scope: BaseFieldScope.ORGANIZATION,
 				createdAt: expectTimestamp,
 			});
 		});
@@ -359,6 +394,7 @@ describe('/baseFields', () => {
 					description: '😍',
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.PROPOSAL,
 				})
 				.expect(404);
 		});

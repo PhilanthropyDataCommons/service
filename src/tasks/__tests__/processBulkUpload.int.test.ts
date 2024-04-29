@@ -15,7 +15,12 @@ import {
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUpload } from '../processBulkUpload';
-import { BaseFieldDataType, BulkUploadStatus, Proposal } from '../../types';
+import {
+	BaseFieldDataType,
+	BaseFieldScope,
+	BulkUploadStatus,
+	Proposal,
+} from '../../types';
 import { expectTimestamp } from '../../test/utils';
 import type {
 	ApplicationFormField,
@@ -72,18 +77,21 @@ const createTestBaseFields = async (): Promise<
 		description: 'The email address of the person who submitted the proposal.',
 		shortCode: 'proposal_submitter_email',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.PROPOSAL,
 	});
 	const organizationNameBaseField = await createBaseField({
 		label: 'Organization Name',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_name',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.ORGANIZATION,
 	});
 	const organizationTaxIdBaseField = await createBaseField({
 		label: 'Organization EIN',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_tax_id',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.ORGANIZATION,
 	});
 	if (proposalSubmitterEmailBaseField === undefined) {
 		throw new Error("Couldn't create the proposal submitter email base field");

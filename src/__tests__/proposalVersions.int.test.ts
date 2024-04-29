@@ -1,8 +1,13 @@
 import request from 'supertest';
 import { app } from '../app';
-import { createProposal, db, loadTableMetrics } from '../database';
+import {
+	createBaseField,
+	createProposal,
+	db,
+	loadTableMetrics,
+} from '../database';
 import { getLogger } from '../logger';
-import { BaseFieldDataType } from '../types';
+import { BaseFieldDataType, BaseFieldScope } from '../types';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
@@ -10,17 +15,19 @@ const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
-	await db.sql('baseFields.insertOne', {
+	await createBaseField({
 		label: 'First Name',
 		description: 'The first name of the applicant',
 		shortCode: 'firstName',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.PROPOSAL,
 	});
-	await db.sql('baseFields.insertOne', {
+	await createBaseField({
 		label: 'Last Name',
 		description: 'The last name of the applicant',
 		shortCode: 'lastName',
 		dataType: BaseFieldDataType.STRING,
+		scope: BaseFieldScope.PROPOSAL,
 	});
 };
 

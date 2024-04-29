@@ -3,6 +3,7 @@ import { app } from '../app';
 import {
 	createApplicationFormField,
 	createBaseField,
+	createOpportunity,
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
@@ -57,7 +58,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns proposals associated with the requesting user', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
@@ -165,7 +166,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when an organization filter is provided', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 
@@ -231,7 +232,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when search is provided', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 
@@ -334,7 +335,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns all proposals present in the database regardless of createdBy value when loading as an administrator', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 
@@ -381,7 +382,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns a correct subset of proposals when createdBy is provided as an administrator', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 
@@ -420,7 +421,7 @@ describe('/proposals', () => {
 		});
 
 		it("returns just the administrator's proposals when createdBy is set to `me` as an administrator", async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 
@@ -462,7 +463,7 @@ describe('/proposals', () => {
 			// This should pass even if the default text search config is 'simple'.
 			// See https://github.com/PhilanthropyDataCommons/service/issues/336
 			await db.query("set default_text_search_config = 'simple';");
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: 'Grand opportunity',
 			});
 			const testUser = await loadTestUser();
@@ -564,7 +565,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns according to pagination parameters', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 

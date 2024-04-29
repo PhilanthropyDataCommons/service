@@ -11,6 +11,7 @@ import {
 	loadSystemUser,
 	loadOrganizationBundle,
 	loadOrganizationProposalBundle,
+	loadOpportunityBundle,
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -27,7 +28,6 @@ import type {
 	BaseField,
 	BulkUpload,
 	InternallyWritableBulkUpload,
-	Opportunity,
 	Organization,
 	ProposalFieldValue,
 	ProposalVersion,
@@ -404,8 +404,8 @@ describe('processBulkUpload', () => {
 		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
 
 		const {
-			rows: [opportunity],
-		} = await db.sql<Opportunity>('opportunities.selectAll');
+			entries: [opportunity],
+		} = await loadOpportunityBundle();
 		if (opportunity === undefined) {
 			throw new Error('The opportunity was not created');
 		}

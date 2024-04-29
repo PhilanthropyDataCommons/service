@@ -12,6 +12,7 @@ import { db } from '../database/db';
 import {
 	createApplicationForm,
 	createApplicationFormField,
+	createOpportunity,
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
@@ -153,16 +154,10 @@ const assertBulkUploadCsvIsValid = async (csvPath: string): Promise<void> => {
 
 const createOpportunityForBulkUpload = async (
 	bulkUpload: BulkUpload,
-): Promise<Opportunity> => {
-	const result = await db.sql<Opportunity>('opportunities.insertOne', {
+): Promise<Opportunity> =>
+	createOpportunity({
 		title: `Bulk Upload (${bulkUpload.createdAt})`,
 	});
-	const opportunity = result.rows[0];
-	if (opportunity === undefined) {
-		throw new NotFoundError('The opportunity could not be created');
-	}
-	return opportunity;
-};
 
 const createApplicationFormFieldsForBulkUpload = async (
 	csvPath: string,

@@ -83,7 +83,7 @@
 		"csv-parse": "^5.5.5",
 		"express": "^4.19.2",
 		"express-jwt": "^8.4.1",
-		"graphile-worker": "^0.16.5",
+		"graphile-worker": "^0.16.6",
 		"jwks-rsa": "^3.1.0",
 		"phone": "^3.1.42",
 		"pino": "^9.0.0",

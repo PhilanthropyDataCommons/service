@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	createOpportunity,
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
@@ -120,7 +121,7 @@ describe('/organizations', () => {
 		});
 
 		it('returns a subset of organizations present in the database when a proposal filter is provided', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
@@ -159,7 +160,7 @@ describe('/organizations', () => {
 		});
 
 		it('does not return duplicate organizations when an organization has multiple proposals', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();

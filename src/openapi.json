@@ -531,6 +531,25 @@
 				},
 				"required": ["id", "title", "createdAt"]
 			},
+			"OpportunityBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/Opportunity"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
 			"PlatformProviderResponse": {
 				"type": "object",
 				"properties": {
@@ -1460,16 +1479,17 @@
 						"auth": []
 					}
 				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" }
+				],
 				"responses": {
 					"200": {
 						"description": "A list of known funding opportunities.",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/Opportunity"
-									}
+									"$ref": "#/components/schemas/OpportunityBundle"
 								}
 							}
 						}

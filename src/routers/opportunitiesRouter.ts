@@ -10,7 +10,7 @@ opportunitiesRouter.post(
 	opportunitiesHandlers.postOpportunity,
 );
 opportunitiesRouter.get(
-	'/:id',
+	'/:opportunityId',
 	requireAuthentication,
 	opportunitiesHandlers.getOpportunity,
 );

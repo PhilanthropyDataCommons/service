@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `BaseField` now has a `scope` attribute.
 
+### Changed
+
+- The GET `/opportunities` endpoint now returns an `OpportunityBundle` and accepts pagination parameters.
+
 ## 0.8.0 2024-04-23
 
 ### Added

@@ -4,11 +4,11 @@ import {
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
-	db,
 	loadTableMetrics,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
+import { createOpportunity } from '../database/operations/create/createOpportunity';
 
 const agent = request.agent(app);
 
@@ -30,7 +30,7 @@ describe('/organizationProposals', () => {
 		});
 
 		it('returns the OrganizationProposals for the specified organization', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
@@ -105,7 +105,7 @@ describe('/organizationProposals', () => {
 		});
 
 		it('returns the ProposalOrganizations for the specified proposal', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
@@ -174,7 +174,7 @@ describe('/organizationProposals', () => {
 		});
 
 		it('creates exactly one OrganizationProposal', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			await insertTestOrganizations();
@@ -220,7 +220,7 @@ describe('/organizationProposals', () => {
 		});
 
 		it('returns 400 bad request when no proposalId is sent', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
@@ -245,7 +245,7 @@ describe('/organizationProposals', () => {
 		});
 
 		it('returns 400 bad request when no organizationId is sent', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
@@ -270,7 +270,7 @@ describe('/organizationProposals', () => {
 		});
 
 		it('returns 409 Conflict when a non-existent proposal is sent', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			await insertTestOrganizations();
@@ -289,7 +289,7 @@ describe('/organizationProposals', () => {
 		});
 
 		it('returns 409 Conflict when a non-existent organization is sent', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
@@ -313,7 +313,7 @@ describe('/organizationProposals', () => {
 		});
 
 		it('returns 409 Conflict when attempting to create a duplicate OrganizationProposal', async () => {
-			await db.sql('opportunities.insertOne', {
+			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();

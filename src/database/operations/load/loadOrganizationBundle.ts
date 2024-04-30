@@ -1,5 +1,5 @@
 import { loadBundle } from './loadBundle';
-import type { Bundle, Organization } from '../../../types';
+import type { Bundle, JsonResultSet, Organization } from '../../../types';
 
 export const loadOrganizationBundle = async (queryParameters: {
 	offset: number;
@@ -9,7 +9,7 @@ export const loadOrganizationBundle = async (queryParameters: {
 	const defaultQueryParameters = {
 		proposalId: 0,
 	};
-	return loadBundle(
+	const jsonResultSetBundle = await loadBundle<JsonResultSet<Organization>>(
 		'organizations.selectWithPagination',
 		{
 			...defaultQueryParameters,
@@ -17,4 +17,9 @@ export const loadOrganizationBundle = async (queryParameters: {
 		},
 		'organizations',
 	);
+	const entries = jsonResultSetBundle.entries.map((entry) => entry.object);
+	return {
+		...jsonResultSetBundle,
+		entries,
+	};
 };

@@ -1,7 +1,5 @@
-SELECT DISTINCT o.id AS "id",
-  o.employer_identification_number AS "employerIdentificationNumber",
-  o.name AS "name",
-  o.created_at AS "createdAt"
+SELECT DISTINCT o.id,
+  organization_to_json(o.*) AS "object"
 FROM organizations o
   LEFT JOIN organizations_proposals op on op.organization_id = o.id
 WHERE

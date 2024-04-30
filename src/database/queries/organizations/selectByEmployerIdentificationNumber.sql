@@ -1,6 +1,3 @@
-SELECT id AS "id",
-  employer_identification_number AS "employerIdentificationNumber",
-  name AS "name",
-  created_at AS "createdAt"
+SELECT organization_to_json(organizations) AS "object"
 FROM organizations
 WHERE employer_identification_number = :employerIdentificationNumber

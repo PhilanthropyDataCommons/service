@@ -578,7 +578,7 @@ describe('processBulkUpload', () => {
 		expect(organizationBundle).toEqual({
 			entries: [
 				{
-					createdAt: expect.any(Date) as Date,
+					createdAt: expectTimestamp,
 					employerIdentificationNumber: '51-2144346',
 					id: 1,
 					name: 'Foo LLC.',

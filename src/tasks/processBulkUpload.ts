@@ -16,6 +16,7 @@ import {
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
+	createProposalFieldValue,
 	loadBaseFields,
 	loadBulkUpload,
 	loadOrganizationByTaxId,
@@ -202,30 +203,6 @@ const createProposalVersionForBulkUploadCsvRecord = async (
 	return proposalVersion;
 };
 
-const createProposalFieldValueForBulkUploadCsvRecord = async (
-	proposalVersionId: number,
-	applicationFormFieldId: number,
-	value: string,
-	position: number,
-	isValid: boolean,
-): Promise<ProposalFieldValue> => {
-	const result = await db.sql<ProposalFieldValue>(
-		'proposalFieldValues.insertOne',
-		{
-			proposalVersionId,
-			applicationFormFieldId,
-			value,
-			position,
-			isValid,
-		},
-	);
-	const proposalFieldValue = result.rows[0];
-	if (proposalFieldValue === undefined) {
-		throw new NotFoundError('The proposal field value could not be created');
-	}
-	return proposalFieldValue;
-};
-
 const getProcessedKey = (bulkUpload: BulkUpload): string =>
 	`${S3_BULK_UPLOADS_KEY_PREFIX}/${bulkUpload.id}`;
 
@@ -358,13 +335,13 @@ export const processBulkUpload = async (
 						fieldValue,
 						applicationFormField.baseField.dataType,
 					);
-					return createProposalFieldValueForBulkUploadCsvRecord(
-						proposalVersion.id,
-						applicationFormField.id,
-						fieldValue,
-						index,
+					return createProposalFieldValue({
+						proposalVersionId: proposalVersion.id,
+						applicationFormFieldId: applicationFormField.id,
+						value: fieldValue,
+						position: index,
 						isValid,
-					);
+					});
 				}),
 			);
 		});

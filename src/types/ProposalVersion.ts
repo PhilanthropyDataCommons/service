@@ -1,9 +1,9 @@
 import { ajv } from '../ajv';
-import { proposalFieldValueWriteSchema } from './ProposalFieldValue';
+import { writableProposalFieldValueWithProposalVersionContextSchema } from './ProposalFieldValue';
 import type { JSONSchemaType } from 'ajv';
 import type {
 	ProposalFieldValue,
-	ProposalFieldValueWrite,
+	WritableProposalFieldValueWithProposalVersionContext,
 } from './ProposalFieldValue';
 
 export interface ProposalVersion {
@@ -18,7 +18,7 @@ export interface ProposalVersion {
 export type ProposalVersionWrite = Omit<
 	ProposalVersion,
 	'createdAt' | 'fieldValues' | 'id' | 'version'
-> & { fieldValues: ProposalFieldValueWrite[] };
+> & { fieldValues: WritableProposalFieldValueWithProposalVersionContext[] };
 
 export const proposalVersionWriteSchema: JSONSchemaType<ProposalVersionWrite> =
 	{
@@ -32,7 +32,7 @@ export const proposalVersionWriteSchema: JSONSchemaType<ProposalVersionWrite> =
 			},
 			fieldValues: {
 				type: 'array',
-				items: proposalFieldValueWriteSchema,
+				items: writableProposalFieldValueWithProposalVersionContextSchema,
 			},
 		},
 		required: ['proposalId', 'applicationFormId', 'fieldValues'],

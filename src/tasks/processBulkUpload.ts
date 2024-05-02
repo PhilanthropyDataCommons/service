@@ -18,7 +18,7 @@ import {
 	createProposal,
 	loadBaseFields,
 	loadBulkUpload,
-	loadOrganizationByEmployerIdentificationNumber,
+	loadOrganizationByTaxId,
 	updateBulkUpload,
 } from '../database/operations';
 import { BulkUploadStatus, isProcessBulkUploadJobPayload } from '../types';
@@ -239,9 +239,7 @@ const createOrLoadOrganization = async (
 	writeValues: Omit<WritableOrganization, 'name'> & { name?: string },
 ): Promise<Organization | undefined> => {
 	try {
-		return await loadOrganizationByEmployerIdentificationNumber(
-			writeValues.employerIdentificationNumber,
-		);
+		return await loadOrganizationByTaxId(writeValues.taxId);
 	} catch {
 		if (writeValues.name !== undefined) {
 			return createOrganization({
@@ -337,7 +335,7 @@ export const processBulkUpload = async (
 			if (organizationTaxId !== undefined) {
 				const organization = await createOrLoadOrganization({
 					name: organizationName,
-					employerIdentificationNumber: organizationTaxId,
+					taxId: organizationTaxId,
 				});
 
 				if (organization !== undefined) {

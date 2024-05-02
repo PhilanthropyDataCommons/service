@@ -8,11 +8,11 @@ import type {
 export const createOrganization = async (
 	createValues: WritableOrganization,
 ): Promise<Organization> => {
-	const { employerIdentificationNumber, name } = createValues;
+	const { taxId, name } = createValues;
 	const result = await db.sql<JsonResultSet<Organization>>(
 		'organizations.insertOne',
 		{
-			employerIdentificationNumber,
+			taxId,
 			name,
 		},
 	);

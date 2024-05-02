@@ -183,7 +183,7 @@ describe('/proposals', () => {
 				createdBy: testUser.id,
 			});
 			const organization = await createOrganization({
-				employerIdentificationNumber: '123-123-123',
+				taxId: '123-123-123',
 				name: 'Canadian Company',
 			});
 			await createOrganizationProposal({

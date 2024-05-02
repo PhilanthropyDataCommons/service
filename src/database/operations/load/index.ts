@@ -10,7 +10,7 @@ export * from './loadOpportunity';
 export * from './loadOpportunityBundle';
 export * from './loadOrganization';
 export * from './loadOrganizationBundle';
-export * from './loadOrganizationByEmployerIdentificationNumber';
+export * from './loadOrganizationByTaxId';
 export * from './loadOrganizationProposalBundle';
 export * from './loadProposal';
 export * from './loadProposalBundle';

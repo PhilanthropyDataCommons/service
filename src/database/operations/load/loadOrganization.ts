@@ -1,17 +1,17 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
-import type { Organization } from '../../../types';
+import type { JsonResultSet, Organization } from '../../../types';
 
 export const loadOrganization = async (id: number): Promise<Organization> => {
-	const organizationsQueryResult = await db.sql<Organization>(
+	const result = await db.sql<JsonResultSet<Organization>>(
 		'organizations.selectById',
 		{
 			id,
 		},
 	);
-	const organization = organizationsQueryResult.rows[0];
-	if (organization === undefined) {
+	const { object } = result.rows[0] ?? {};
+	if (object === undefined) {
 		throw new NotFoundError(`The organization was not found (id: ${id})`);
 	}
-	return organization;
+	return object;
 };

@@ -8,7 +8,6 @@ import {
 	S3_BULK_UPLOADS_KEY_PREFIX,
 	S3_UNPROCESSED_KEY_PREFIX,
 } from '../s3Client';
-import { db } from '../database/db';
 import {
 	createApplicationForm,
 	createApplicationFormField,
@@ -17,13 +16,13 @@ import {
 	createOrganizationProposal,
 	createProposal,
 	createProposalFieldValue,
+	createProposalVersion,
 	loadBaseFields,
 	loadBulkUpload,
 	loadOrganizationByTaxId,
 	updateBulkUpload,
 } from '../database/operations';
 import { BulkUploadStatus, isProcessBulkUploadJobPayload } from '../types';
-import { NotFoundError } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
 import type { Readable } from 'stream';
 import type { GetObjectCommandOutput } from '@aws-sdk/client-s3';
@@ -35,7 +34,6 @@ import type {
 	Opportunity,
 	Organization,
 	ProposalFieldValue,
-	ProposalVersion,
 	WritableOrganization,
 } from '../types';
 
@@ -188,21 +186,6 @@ const createApplicationFormFieldsForBulkUpload = async (
 	return applicationFormFields;
 };
 
-const createProposalVersionForBulkUploadCsvRecord = async (
-	proposalId: number,
-	applicationFormId: number,
-): Promise<ProposalVersion> => {
-	const result = await db.sql<ProposalVersion>('proposalVersions.insertOne', {
-		proposalId,
-		applicationFormId,
-	});
-	const proposalVersion = result.rows[0];
-	if (proposalVersion === undefined) {
-		throw new NotFoundError('The proposal version form could not be created');
-	}
-	return proposalVersion;
-};
-
 const getProcessedKey = (bulkUpload: BulkUpload): string =>
 	`${S3_BULK_UPLOADS_KEY_PREFIX}/${bulkUpload.id}`;
 
@@ -302,10 +285,10 @@ export const processBulkUpload = async (
 				externalId: `${recordNumber}`,
 				createdBy: bulkUpload.createdBy,
 			});
-			const proposalVersion = await createProposalVersionForBulkUploadCsvRecord(
-				proposal.id,
-				applicationForm.id,
-			);
+			const proposalVersion = await createProposalVersion({
+				proposalId: proposal.id,
+				applicationFormId: applicationForm.id,
+			});
 
 			const organizationName = record[organizationNameIndex];
 			const organizationTaxId = record[organizationTaxIdIndex];

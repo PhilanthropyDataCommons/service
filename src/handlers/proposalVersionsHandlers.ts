@@ -1,17 +1,17 @@
 import {
 	createProposalFieldValue,
+	createProposalVersion,
 	db,
 	loadApplicationForm,
 	loadApplicationFormField,
 	loadProposal,
 } from '../database';
 import {
-	isProposalVersionWrite,
 	isTinyPgErrorWithQueryContext,
+	isWritableProposalVersionWithFieldValues,
 } from '../types';
 import {
 	DatabaseError,
-	InternalValidationError,
 	InputValidationError,
 	InputConflictError,
 	NotFoundError,
@@ -19,8 +19,6 @@ import {
 import { fieldValueIsValid } from '../fieldValidation';
 import type { Request, Response, NextFunction } from 'express';
 import type {
-	ProposalVersion,
-	ProposalVersionWrite,
 	Proposal,
 	ApplicationForm,
 	WritableProposalFieldValueWithProposalVersionContext,
@@ -111,21 +109,21 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 };
 
 const postProposalVersion = (
-	req: Request<unknown, unknown, ProposalVersionWrite>,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (!isProposalVersionWrite(req.body)) {
+	if (!isWritableProposalVersionWithFieldValues(req.body)) {
 		next(
 			new InputValidationError(
 				'Invalid request body.',
-				isProposalVersionWrite.errors ?? [],
+				isWritableProposalVersionWithFieldValues.errors ?? [],
 			),
 		);
 		return;
 	}
 
-	const { fieldValues } = req.body;
+	const { fieldValues, proposalId, applicationFormId } = req.body;
 
 	Promise.all([
 		assertApplicationFormExistsForProposal(
@@ -139,43 +137,35 @@ const postProposalVersion = (
 	])
 		.then(() => {
 			db.transaction(async (transactionDb) => {
-				const proposalVersionQueryResult =
-					await transactionDb.sql<ProposalVersion>(
-						'proposalVersions.insertOne',
-						req.body,
-					);
-				const proposalVersion = proposalVersionQueryResult.rows[0];
-				if (proposalVersion !== undefined) {
-					const proposalFieldValues = await Promise.all(
-						fieldValues.map(async (fieldValue) => {
-							const { value, applicationFormFieldId } = fieldValue;
-							const applicationFormField = await loadApplicationFormField(
-								applicationFormFieldId,
-							);
-							const isValid = fieldValueIsValid(
-								value,
-								applicationFormField.baseField.dataType,
-							);
-							const proposalFieldValue = await createProposalFieldValue(
-								{
-									...fieldValue,
-									proposalVersionId: proposalVersion.id,
-									isValid,
-								},
-								transactionDb,
-							);
-							return proposalFieldValue;
-						}),
-					);
-					return {
-						...proposalVersion,
-						fieldValues: proposalFieldValues,
-					};
-				}
-				throw new InternalValidationError(
-					'The database responded with an unexpected format when creating the Proposal Version.',
-					[],
+				const proposalVersion = await createProposalVersion(
+					{ proposalId, applicationFormId },
+					transactionDb,
 				);
+				const proposalFieldValues = await Promise.all(
+					fieldValues.map(async (fieldValue) => {
+						const { value, applicationFormFieldId } = fieldValue;
+						const applicationFormField = await loadApplicationFormField(
+							applicationFormFieldId,
+						);
+						const isValid = fieldValueIsValid(
+							value,
+							applicationFormField.baseField.dataType,
+						);
+						const proposalFieldValue = await createProposalFieldValue(
+							{
+								...fieldValue,
+								proposalVersionId: proposalVersion.id,
+								isValid,
+							},
+							transactionDb,
+						);
+						return proposalFieldValue;
+					}),
+				);
+				return {
+					...proposalVersion,
+					fieldValues: proposalFieldValues,
+				};
 			})
 				.then((proposalVersion) => {
 					res.status(201).contentType('application/json').send(proposalVersion);

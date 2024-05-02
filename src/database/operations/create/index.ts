@@ -7,4 +7,5 @@ export * from './createOrganization';
 export * from './createOrganizationProposal';
 export * from './createProposal';
 export * from './createProposalFieldValue';
+export * from './createProposalVersion';
 export * from './createUser';

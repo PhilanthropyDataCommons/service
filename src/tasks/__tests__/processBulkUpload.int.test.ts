@@ -1,11 +1,9 @@
 import nock from 'nock';
 import { requireEnv } from 'require-env-variable';
 import {
-	db,
 	createBaseField,
 	loadBulkUpload,
 	loadProposalBundle,
-	loadApplicationFormFieldBundle,
 	loadApplicationFormBundle,
 	createBulkUpload,
 	loadSystemUser,
@@ -24,13 +22,9 @@ import {
 } from '../../types';
 import { expectTimestamp } from '../../test/utils';
 import type {
-	ApplicationFormField,
-	BaseField,
 	BulkUpload,
 	InternallyWritableBulkUpload,
 	Organization,
-	ProposalFieldValue,
-	ProposalVersion,
 } from '../../types';
 
 const { S3_BUCKET, S3_PATH_STYLE } = requireEnv('S3_BUCKET', 'S3_PATH_STYLE');
@@ -69,41 +63,28 @@ const createTestBulkUpload = async (
 	});
 };
 
-const createTestBaseFields = async (): Promise<
-	[BaseField, BaseField, BaseField]
-> => {
-	const proposalSubmitterEmailBaseField = await createBaseField({
+const createTestBaseFields = async (): Promise<void> => {
+	await createBaseField({
 		label: 'Proposal Submitter Email',
 		description: 'The email address of the person who submitted the proposal.',
 		shortCode: 'proposal_submitter_email',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 	});
-	const organizationNameBaseField = await createBaseField({
+	await createBaseField({
 		label: 'Organization Name',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_name',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 	});
-	const organizationTaxIdBaseField = await createBaseField({
+	await createBaseField({
 		label: 'Organization EIN',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_tax_id',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 	});
-	if (proposalSubmitterEmailBaseField === undefined) {
-		throw new Error("Couldn't create the proposal submitter email base field");
-	}
-	if (organizationNameBaseField === undefined) {
-		throw new Error("Couldn't create the organization name base field");
-	}
-	return [
-		proposalSubmitterEmailBaseField,
-		organizationNameBaseField,
-		organizationTaxIdBaseField,
-	];
 };
 
 const mockS3GetObjectReplyWithFile = async (
@@ -147,45 +128,6 @@ const mockS3ResponsesForBulkUploadProcessing = async (
 		copyRequest,
 		deleteRequest,
 	};
-};
-
-const getProposalsByExternalIds = async (
-	externalIds: string[],
-): Promise<Proposal[]> => {
-	const proposals = await loadProposalBundle({
-		offset: 0,
-		limit: 100,
-		search: '',
-	});
-	return externalIds.map((externalId) => {
-		const proposal = proposals.entries.find(
-			(proposalCandidate) => proposalCandidate.externalId === externalId,
-		);
-		if (proposal === undefined) {
-			throw new Error(`There is no proposal with externalId "${externalId}"`);
-		}
-		return proposal;
-	});
-};
-
-const getApplicationFormFieldsByBaseFieldIds = async (
-	applicationFormId: number,
-	baseFieldIds: number[],
-): Promise<ApplicationFormField[]> => {
-	const { entries: applicationFormFields } =
-		await loadApplicationFormFieldBundle({ applicationFormId });
-	return baseFieldIds.map((baseFieldId) => {
-		const applicationFormField = applicationFormFields.find(
-			(applicationFormFieldCandidate) =>
-				applicationFormFieldCandidate.baseFieldId === baseFieldId,
-		);
-		if (applicationFormField === undefined) {
-			throw new Error(
-				`There is no application form field with baseFieldId "${baseFieldId}"`,
-			);
-		}
-		return applicationFormField;
-	});
 };
 
 describe('processBulkUpload', () => {
@@ -386,8 +328,7 @@ describe('processBulkUpload', () => {
 	});
 
 	it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
-		const [proposalSubmitterEmailBaseField, organizationNameBaseField] =
-			await createTestBaseFields();
+		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUpload = await createTestBulkUpload({ sourceKey });
 		const requests = await mockS3ResponsesForBulkUploadProcessing(
@@ -422,109 +363,158 @@ describe('processBulkUpload', () => {
 			createdAt: expectTimestamp,
 		});
 
-		const [firstProposal, secondProposal] = await getProposalsByExternalIds([
-			'1',
-			'2',
-		]);
-		if (firstProposal === undefined) {
-			fail('The first proposal was not created');
-		}
-		if (secondProposal === undefined) {
-			fail('The second proposal was not created');
-		}
-		expect(firstProposal).toMatchObject({
-			externalId: '1',
-			opportunityId: opportunity.id,
-			createdAt: expectTimestamp,
+		const proposalBundle = await loadProposalBundle({
+			limit: 100,
+			offset: 0,
 		});
-		expect(secondProposal).toMatchObject({
-			externalId: '2',
-			opportunityId: opportunity.id,
-			createdAt: expectTimestamp,
+		expect(proposalBundle).toEqual({
+			entries: [
+				{
+					createdAt: expectTimestamp,
+					createdBy: 1,
+					externalId: '2',
+					id: 2,
+					opportunityId: 1,
+					versions: [
+						{
+							applicationFormId: 1,
+							createdAt: expectTimestamp,
+							fieldValues: [
+								{
+									applicationFormField: {
+										applicationFormId: 1,
+										baseField: {
+											createdAt: expectTimestamp,
+											dataType: 'string',
+											description:
+												'The email address of the person who submitted the proposal.',
+											id: 1,
+											label: 'Proposal Submitter Email',
+											scope: 'proposal',
+											shortCode: 'proposal_submitter_email',
+										},
+										baseFieldId: 1,
+										createdAt: expectTimestamp,
+										id: expect.any(Number) as number,
+										label: 'Proposal Submitter Email',
+										position: 0,
+									},
+									applicationFormFieldId: expect.any(Number) as number,
+									createdAt: expectTimestamp,
+									id: expect.any(Number) as number,
+									isValid: true,
+									position: 0,
+									proposalVersionId: 2,
+									value: 'foo@example.com',
+								},
+								{
+									applicationFormField: {
+										applicationFormId: 1,
+										baseField: {
+											createdAt: expectTimestamp,
+											dataType: 'string',
+											description: 'The name of the applying organization.',
+											id: 2,
+											label: 'Organization Name',
+											scope: 'organization',
+											shortCode: 'organization_name',
+										},
+										baseFieldId: 2,
+										createdAt: expectTimestamp,
+										id: expect.any(Number) as number,
+										label: 'Organization Name',
+										position: 1,
+									},
+									applicationFormFieldId: expect.any(Number) as number,
+									createdAt: expectTimestamp,
+									id: expect.any(Number) as number,
+									isValid: true,
+									position: 1,
+									proposalVersionId: 2,
+									value: 'Bar Inc.',
+								},
+							],
+							id: 2,
+							proposalId: 2,
+							version: 1,
+						},
+					],
+				},
+				{
+					createdAt: expectTimestamp,
+					createdBy: 1,
+					externalId: '1',
+					id: 1,
+					opportunityId: 1,
+					versions: [
+						{
+							applicationFormId: 1,
+							createdAt: expectTimestamp,
+							fieldValues: [
+								{
+									applicationFormField: {
+										applicationFormId: 1,
+										baseField: {
+											createdAt: expectTimestamp,
+											dataType: 'string',
+											description:
+												'The email address of the person who submitted the proposal.',
+											id: 1,
+											label: 'Proposal Submitter Email',
+											scope: 'proposal',
+											shortCode: 'proposal_submitter_email',
+										},
+										baseFieldId: 1,
+										createdAt: expectTimestamp,
+										id: expect.any(Number) as number,
+										label: 'Proposal Submitter Email',
+										position: 0,
+									},
+									applicationFormFieldId: expect.any(Number) as number,
+									createdAt: expectTimestamp,
+									id: expect.any(Number) as number,
+									isValid: true,
+									position: 0,
+									proposalVersionId: 1,
+									value: 'foo@example.com',
+								},
+								{
+									applicationFormField: {
+										applicationFormId: 1,
+										baseField: {
+											createdAt: expectTimestamp,
+											dataType: 'string',
+											description: 'The name of the applying organization.',
+											id: 2,
+											label: 'Organization Name',
+											scope: 'organization',
+											shortCode: 'organization_name',
+										},
+										baseFieldId: 2,
+										createdAt: expectTimestamp,
+										id: expect.any(Number) as number,
+										label: 'Organization Name',
+										position: 1,
+									},
+									applicationFormFieldId: expect.any(Number) as number,
+									createdAt: expectTimestamp,
+									id: expect.any(Number) as number,
+									isValid: true,
+									position: 1,
+									proposalVersionId: 1,
+									value: 'Foo LLC.',
+								},
+							],
+							id: 1,
+							proposalId: 1,
+							version: 1,
+						},
+					],
+				},
+			],
+			total: 2,
 		});
 
-		const { rows: proposalVersions } = await db.sql<ProposalVersion>(
-			'proposalVersions.selectByProposalIds',
-			{ proposalIds: [firstProposal.id, secondProposal.id] },
-		);
-		const firstProposalVersion = proposalVersions.find(
-			(proposalVersion) => proposalVersion.proposalId === firstProposal.id,
-		);
-		const secondProposalVersion = proposalVersions.find(
-			(proposalVersion) => proposalVersion.proposalId === secondProposal.id,
-		);
-		if (firstProposalVersion === undefined) {
-			fail('The first proposal version was not created');
-		}
-		if (secondProposalVersion === undefined) {
-			fail('The second proposal version was not created');
-		}
-		expect(firstProposalVersion).toMatchObject({
-			applicationFormId: applicationForm.id,
-			proposalId: firstProposal.id,
-			version: 1,
-			createdAt: expect.any(Date) as Date,
-		});
-		expect(secondProposalVersion).toMatchObject({
-			applicationFormId: applicationForm.id,
-			proposalId: secondProposal.id,
-			version: 1,
-			createdAt: expect.any(Date) as Date,
-		});
-
-		const [proposalSubmitterEmailFormField, organizationNameFormField] =
-			await getApplicationFormFieldsByBaseFieldIds(applicationForm.id, [
-				proposalSubmitterEmailBaseField.id,
-				organizationNameBaseField.id,
-			]);
-		if (proposalSubmitterEmailFormField === undefined) {
-			fail('The proposal submitter email form field was not created');
-		}
-		if (organizationNameFormField === undefined) {
-			fail('The organization name form field was not created');
-		}
-
-		const { rows: firstProposalFieldValues } = await db.sql<ProposalFieldValue>(
-			'proposalFieldValues.selectByProposalId',
-			{ proposalId: firstProposal.id },
-		);
-		const { rows: secondProposalFieldValues } =
-			await db.sql<ProposalFieldValue>(
-				'proposalFieldValues.selectByProposalId',
-				{ proposalId: secondProposal.id },
-			);
-		expect(firstProposalFieldValues).toMatchObject([
-			{
-				applicationFormFieldId: proposalSubmitterEmailFormField.id,
-				position: 0,
-				proposalVersionId: firstProposalVersion.id,
-				value: 'foo@example.com',
-				createdAt: expect.any(Date) as Date,
-			},
-			{
-				applicationFormFieldId: organizationNameFormField.id,
-				position: 1,
-				proposalVersionId: firstProposalVersion.id,
-				value: 'Foo LLC.',
-				createdAt: expect.any(Date) as Date,
-			},
-		]);
-		expect(secondProposalFieldValues).toMatchObject([
-			{
-				applicationFormFieldId: proposalSubmitterEmailFormField.id,
-				position: 0,
-				proposalVersionId: secondProposalVersion.id,
-				value: 'foo@example.com',
-				createdAt: expect.any(Date) as Date,
-			},
-			{
-				applicationFormFieldId: organizationNameFormField.id,
-				position: 1,
-				proposalVersionId: secondProposalVersion.id,
-				value: 'Bar Inc.',
-				createdAt: expect.any(Date) as Date,
-			},
-		]);
 		const organizationBundle = await loadOrganizationBundle({
 			limit: 100,
 			offset: 0,

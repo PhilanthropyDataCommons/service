@@ -16,11 +16,11 @@ const agent = request.agent(app);
 
 const insertTestOrganizations = async () => {
 	await createOrganization({
-		employerIdentificationNumber: '11-1111111',
+		taxId: '11-1111111',
 		name: 'Example Inc.',
 	});
 	await createOrganization({
-		employerIdentificationNumber: '22-2222222',
+		taxId: '22-2222222',
 		name: 'Another Inc.',
 	});
 };
@@ -50,12 +50,14 @@ describe('/organizations', () => {
 						entries: [
 							{
 								id: 2,
+								taxId: '22-2222222',
 								employerIdentificationNumber: '22-2222222',
 								name: 'Another Inc.',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 1,
+								taxId: '11-1111111',
 								employerIdentificationNumber: '11-1111111',
 								name: 'Example Inc.',
 								createdAt: expectTimestamp,
@@ -69,7 +71,7 @@ describe('/organizations', () => {
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
 				await db.sql('organizations.insertOne', {
-					employerIdentificationNumber: '11-1111111',
+					taxId: '11-1111111',
 					name: `Organization ${i + 1}`,
 				});
 			}, Promise.resolve());
@@ -87,30 +89,35 @@ describe('/organizations', () => {
 						entries: [
 							{
 								id: 15,
+								taxId: '11-1111111',
 								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 15',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 14,
+								taxId: '11-1111111',
 								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 14',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 13,
+								taxId: '11-1111111',
 								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 13',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 12,
+								taxId: '11-1111111',
 								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 12',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 11,
+								taxId: '11-1111111',
 								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 11',
 								createdAt: expectTimestamp,
@@ -131,11 +138,11 @@ describe('/organizations', () => {
 				createdBy: testUser.id,
 			});
 			await createOrganization({
-				employerIdentificationNumber: '123-123-123',
+				taxId: '123-123-123',
 				name: 'Canadian Company',
 			});
 			await createOrganization({
-				employerIdentificationNumber: '123-123-123',
+				taxId: '123-123-123',
 				name: 'Another Canadian Company',
 			});
 			await createOrganizationProposal({
@@ -151,6 +158,7 @@ describe('/organizations', () => {
 				entries: [
 					{
 						id: 1,
+						taxId: '123-123-123',
 						employerIdentificationNumber: '123-123-123',
 						name: 'Canadian Company',
 						createdAt: expectTimestamp,
@@ -175,7 +183,7 @@ describe('/organizations', () => {
 				createdBy: testUser.id,
 			});
 			await createOrganization({
-				employerIdentificationNumber: '123-123-123',
+				taxId: '123-123-123',
 				name: 'Canadian Company',
 			});
 			await createOrganizationProposal({
@@ -195,6 +203,7 @@ describe('/organizations', () => {
 				entries: [
 					{
 						id: 1,
+						taxId: '123-123-123',
 						employerIdentificationNumber: '123-123-123',
 						name: 'Canadian Company',
 						createdAt: expectTimestamp,
@@ -234,6 +243,7 @@ describe('/organizations', () => {
 				.expect((res) =>
 					expect(res.body).toEqual({
 						id: 2,
+						taxId: '22-2222222',
 						employerIdentificationNumber: '22-2222222',
 						name: 'Another Inc.',
 						createdAt: expectTimestamp,
@@ -258,7 +268,7 @@ describe('/organizations', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					employerIdentificationNumber: '11-1111111',
+					taxId: '11-1111111',
 					name: 'Example Inc.',
 				})
 				.expect(201);
@@ -266,6 +276,7 @@ describe('/organizations', () => {
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: 1,
+				taxId: '11-1111111',
 				employerIdentificationNumber: '11-1111111',
 				name: 'Example Inc.',
 				createdAt: expectTimestamp,
@@ -273,7 +284,7 @@ describe('/organizations', () => {
 			expect(after.count).toEqual(1);
 		});
 
-		it('returns 400 bad request when no employerIdentificationNumber is sent', async () => {
+		it('returns 400 bad request when no taxId is sent', async () => {
 			const result = await agent
 				.post('/organizations')
 				.type('application/json')
@@ -294,7 +305,7 @@ describe('/organizations', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					employerIdentificationNumber: '11-1111111',
+					taxId: '11-1111111',
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -305,7 +316,7 @@ describe('/organizations', () => {
 
 		it('returns 409 conflict when an existing EIN + name combination is submitted', async () => {
 			await createOrganization({
-				employerIdentificationNumber: '11-1111111',
+				taxId: '11-1111111',
 				name: 'Example Inc.',
 			});
 			const result = await agent
@@ -313,7 +324,7 @@ describe('/organizations', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					employerIdentificationNumber: '11-1111111',
+					taxId: '11-1111111',
 					name: 'Example Inc.',
 				})
 				.expect(409);

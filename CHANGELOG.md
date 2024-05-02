@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.9.0 2024-05-02
+
 ### Added
 
 - `BaseField` now has a `scope` attribute.
@@ -14,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The GET `/opportunities` endpoint now returns an `OpportunityBundle` and accepts pagination parameters.
+- Added a new `Organization` attribute `taxId` which contains the same value as `employerIdentificationNumber`.
+- Deprecated the `Organizations` attribute `employerIdentificationNumber`. Please update your clients to use `taxId` instead.
 
 ## 0.8.0 2024-04-23
 

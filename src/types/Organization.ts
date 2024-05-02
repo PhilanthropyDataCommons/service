@@ -4,7 +4,8 @@ import type { Writable } from './Writable';
 
 interface Organization {
 	readonly id: number;
-	employerIdentificationNumber: string;
+	taxId: string;
+	readonly employerIdentificationNumber: string;
 	name: string;
 	readonly createdAt: string;
 }
@@ -14,14 +15,14 @@ type WritableOrganization = Writable<Organization>;
 const writableOrganizationSchema: JSONSchemaType<WritableOrganization> = {
 	type: 'object',
 	properties: {
-		employerIdentificationNumber: {
+		taxId: {
 			type: 'string',
 		},
 		name: {
 			type: 'string',
 		},
 	},
-	required: ['employerIdentificationNumber', 'name'],
+	required: ['taxId', 'name'],
 };
 
 const isWritableOrganization = ajv.compile(writableOrganizationSchema);

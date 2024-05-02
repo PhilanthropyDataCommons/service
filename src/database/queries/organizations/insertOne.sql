@@ -1,8 +1,8 @@
 INSERT INTO organizations (
-  employer_identification_number,
+  tax_id,
   name
 ) VALUES (
-  :employerIdentificationNumber,
+  :taxId,
   :name
 )
 RETURNING organization_to_json(organizations) AS "object";

@@ -14,11 +14,11 @@ const agent = request.agent(app);
 
 const insertTestOrganizations = async () => {
 	await createOrganization({
-		employerIdentificationNumber: '11-1111111',
+		taxId: '11-1111111',
 		name: 'Example Inc.',
 	});
 	await createOrganization({
-		employerIdentificationNumber: '22-2222222',
+		taxId: '22-2222222',
 		name: 'Another Inc.',
 	});
 };
@@ -65,6 +65,7 @@ describe('/organizationProposals', () => {
 						organization: {
 							id: 1,
 							name: 'Example Inc.',
+							taxId: '11-1111111',
 							employerIdentificationNumber: '11-1111111',
 							createdAt: expectTimestamp,
 						},
@@ -85,6 +86,7 @@ describe('/organizationProposals', () => {
 						organization: {
 							id: 1,
 							name: 'Example Inc.',
+							taxId: '11-1111111',
 							employerIdentificationNumber: '11-1111111',
 							createdAt: expectTimestamp,
 						},
@@ -140,6 +142,7 @@ describe('/organizationProposals', () => {
 						organization: {
 							id: 1,
 							name: 'Example Inc.',
+							taxId: '11-1111111',
 							employerIdentificationNumber: '11-1111111',
 							createdAt: expectTimestamp,
 						},
@@ -202,6 +205,7 @@ describe('/organizationProposals', () => {
 				organization: {
 					id: 1,
 					name: 'Example Inc.',
+					taxId: '11-1111111',
 					employerIdentificationNumber: '11-1111111',
 					createdAt: expectTimestamp,
 				},

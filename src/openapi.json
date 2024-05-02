@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.8.0"
+		"version": "0.9.0"
 	},
 	"components": {
 		"parameters": {
@@ -162,9 +162,14 @@
 						"readOnly": true,
 						"example": 3407
 					},
-					"employerIdentificationNumber": {
+					"taxId": {
 						"type": "string",
 						"example": "11-1111111"
+					},
+					"employerIdentificationNumber": {
+						"type": "string",
+						"example": "11-1111111",
+						"deprecated": true
 					},
 					"name": {
 						"type": "string",
@@ -176,7 +181,7 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "employerIdentificationNumber", "name", "createdAt"]
+				"required": ["id", "taxId", "name", "createdAt"]
 			},
 			"OrganizationProposal": {
 				"type": "object",

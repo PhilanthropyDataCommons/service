@@ -579,6 +579,7 @@ describe('processBulkUpload', () => {
 			entries: [
 				{
 					createdAt: expectTimestamp,
+					taxId: '51-2144346',
 					employerIdentificationNumber: '51-2144346',
 					id: 1,
 					name: 'Foo LLC.',

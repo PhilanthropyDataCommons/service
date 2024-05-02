@@ -2,6 +2,7 @@ import { db as defaultDb } from '../../db';
 import type {
 	ProposalFieldValue,
 	InternallyWritableProposalFieldValue,
+	JsonResultSet,
 } from '../../../types';
 
 const createProposalFieldValue = async (
@@ -15,7 +16,7 @@ const createProposalFieldValue = async (
 		value,
 		isValid,
 	} = createValues;
-	const result = await db.sql<ProposalFieldValue>(
+	const result = await db.sql<JsonResultSet<ProposalFieldValue>>(
 		'proposalFieldValues.insertOne',
 		{
 			proposalVersionId,
@@ -25,7 +26,7 @@ const createProposalFieldValue = async (
 			isValid,
 		},
 	);
-	const object = result.rows[0];
+	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
 		throw new Error(
 			'The entity creation did not appear to fail, but no data was returned by the operation.',

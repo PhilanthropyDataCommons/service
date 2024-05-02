@@ -5,7 +5,6 @@ import type { Writable } from './Writable';
 interface Organization {
 	readonly id: number;
 	taxId: string;
-	readonly employerIdentificationNumber: string;
 	name: string;
 	readonly createdAt: string;
 }

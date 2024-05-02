@@ -51,14 +51,12 @@ describe('/organizations', () => {
 							{
 								id: 2,
 								taxId: '22-2222222',
-								employerIdentificationNumber: '22-2222222',
 								name: 'Another Inc.',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 1,
 								taxId: '11-1111111',
-								employerIdentificationNumber: '11-1111111',
 								name: 'Example Inc.',
 								createdAt: expectTimestamp,
 							},
@@ -90,35 +88,30 @@ describe('/organizations', () => {
 							{
 								id: 15,
 								taxId: '11-1111111',
-								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 15',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 14,
 								taxId: '11-1111111',
-								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 14',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 13,
 								taxId: '11-1111111',
-								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 13',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 12,
 								taxId: '11-1111111',
-								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 12',
 								createdAt: expectTimestamp,
 							},
 							{
 								id: 11,
 								taxId: '11-1111111',
-								employerIdentificationNumber: '11-1111111',
 								name: 'Organization 11',
 								createdAt: expectTimestamp,
 							},
@@ -159,7 +152,6 @@ describe('/organizations', () => {
 					{
 						id: 1,
 						taxId: '123-123-123',
-						employerIdentificationNumber: '123-123-123',
 						name: 'Canadian Company',
 						createdAt: expectTimestamp,
 					},
@@ -204,7 +196,6 @@ describe('/organizations', () => {
 					{
 						id: 1,
 						taxId: '123-123-123',
-						employerIdentificationNumber: '123-123-123',
 						name: 'Canadian Company',
 						createdAt: expectTimestamp,
 					},
@@ -244,7 +235,6 @@ describe('/organizations', () => {
 					expect(res.body).toEqual({
 						id: 2,
 						taxId: '22-2222222',
-						employerIdentificationNumber: '22-2222222',
 						name: 'Another Inc.',
 						createdAt: expectTimestamp,
 					}),
@@ -277,7 +267,6 @@ describe('/organizations', () => {
 			expect(result.body).toMatchObject({
 				id: 1,
 				taxId: '11-1111111',
-				employerIdentificationNumber: '11-1111111',
 				name: 'Example Inc.',
 				createdAt: expectTimestamp,
 			});

@@ -173,11 +173,6 @@
 						"type": "string",
 						"example": "11-1111111"
 					},
-					"employerIdentificationNumber": {
-						"type": "string",
-						"example": "11-1111111",
-						"deprecated": true
-					},
 					"name": {
 						"type": "string",
 						"example": "Example Inc."

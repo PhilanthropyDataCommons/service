@@ -14,9 +14,4 @@ INSERT INTO proposal_versions (
     1
   )
 )
-RETURNING
-  id as "id",
-  proposal_id as "proposalId",
-  application_form_id as "applicationFormId",
-  version as "version",
-  created_at AS "createdAt"
+RETURNING proposal_version_to_json(proposal_versions) AS "object";

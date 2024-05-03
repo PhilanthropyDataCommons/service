@@ -8,7 +8,7 @@ interface ProposalFieldValue {
 	position: number;
 	value: string;
 	readonly createdAt: string;
-	readonly applicationFormField?: ApplicationFormField;
+	readonly applicationFormField: ApplicationFormField;
 	readonly isValid: boolean;
 }
 

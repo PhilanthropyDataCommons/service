@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.9.0"
+		"version": "0.9.1"
 	},
 	"components": {
 		"parameters": {
@@ -152,7 +152,14 @@
 						"readOnly": true
 					}
 				},
-				"required": ["fileName", "sourceKey"]
+				"required": [
+					"id",
+					"fileName",
+					"sourceKey",
+					"status",
+					"createdBy",
+					"createdAt"
+				]
 			},
 			"Organization": {
 				"type": "object",
@@ -222,7 +229,14 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "organizationId", "proposalId", "createdAt"]
+				"required": [
+					"id",
+					"organizationId",
+					"organization",
+					"proposalId",
+					"proposal",
+					"createdAt"
+				]
 			},
 			"PresignedPostRequest": {
 				"type": "object",
@@ -280,8 +294,7 @@
 						"items": {
 							"$ref": "#/components/schemas/ProposalVersion"
 						},
-						"readOnly": true,
-						"nullable": true
+						"readOnly": true
 					},
 					"createdAt": {
 						"type": "string",
@@ -294,7 +307,14 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "opportunityId", "externalId", "createdAt"]
+				"required": [
+					"id",
+					"opportunityId",
+					"externalId",
+					"versions",
+					"createdAt",
+					"createdBy"
+				]
 			},
 			"ProposalVersion": {
 				"type": "object",
@@ -321,8 +341,7 @@
 						"type": "array",
 						"items": {
 							"$ref": "#/components/schemas/ProposalFieldValue"
-						},
-						"nullable": true
+						}
 					},
 					"createdAt": {
 						"type": "string",
@@ -330,7 +349,14 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "proposalId", "version", "createdAt"]
+				"required": [
+					"id",
+					"proposalId",
+					"applicationFormId",
+					"version",
+					"fieldValues",
+					"createdAt"
+				]
 			},
 			"ProposalFieldValue": {
 				"type": "object",
@@ -350,7 +376,14 @@
 						"example": 3613
 					},
 					"applicationFormField": {
-						"$ref": "#/components/schemas/ApplicationFormField"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApplicationFormField"
+							},
+							{
+								"readOnly": true
+							}
+						]
 					},
 					"position": {
 						"type": "integer",
@@ -375,6 +408,7 @@
 					"id",
 					"proposalVersionId",
 					"applicationFormFieldId",
+					"applicationFormField",
 					"position",
 					"value",
 					"isValid",
@@ -402,8 +436,7 @@
 						"type": "array",
 						"items": {
 							"$ref": "#/components/schemas/ApplicationFormField"
-						},
-						"nullable": true
+						}
 					},
 					"createdAt": {
 						"type": "string",
@@ -411,7 +444,7 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "opportunityId", "version", "createdAt"]
+				"required": ["id", "opportunityId", "version", "fields", "createdAt"]
 			},
 			"ApplicationFormField": {
 				"type": "object",
@@ -431,7 +464,14 @@
 						"example": 3011
 					},
 					"baseField": {
-						"$ref": "#/components/schemas/BaseField"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/BaseField"
+							},
+							{
+								"readOnly": true
+							}
+						]
 					},
 					"position": {
 						"type": "integer",
@@ -451,6 +491,7 @@
 					"id",
 					"applicationFormId",
 					"baseFieldId",
+					"baseField",
 					"position",
 					"label",
 					"createdAt"
@@ -499,7 +540,15 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "label", "shortCode", "dataType", "createdAt"]
+				"required": [
+					"id",
+					"label",
+					"description",
+					"shortCode",
+					"dataType",
+					"scope",
+					"createdAt"
+				]
 			},
 			"PdcError": {
 				"type": "object",

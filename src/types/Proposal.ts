@@ -7,7 +7,7 @@ interface Proposal {
 	readonly id: number;
 	opportunityId: number;
 	externalId: string;
-	readonly versions?: ProposalVersion[];
+	readonly versions: ProposalVersion[];
 	readonly createdAt: string;
 	readonly createdBy: number;
 }

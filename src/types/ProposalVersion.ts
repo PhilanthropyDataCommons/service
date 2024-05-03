@@ -11,7 +11,7 @@ export interface ProposalVersion {
 	proposalId: number;
 	applicationFormId: number;
 	version: number;
-	fieldValues?: ProposalFieldValue[];
+	fieldValues: ProposalFieldValue[];
 	createdAt: string;
 }
 

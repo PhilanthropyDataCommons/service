@@ -90,7 +90,7 @@
 		"pino-http": "^10.0.0",
 		"postgres-schema-migrations": "^6.1.0",
 		"require-env-variable": "^4.0.2",
-		"swagger-ui-dist": "^5.17.2",
+		"swagger-ui-dist": "^5.17.5",
 		"swagger-ui-express": "^5.0.0",
 		"tinypg": "^7.0.0",
 		"tmp-promise": "^3.0.3",

@@ -3,8 +3,8 @@ import { issuer } from '../auth/jwtOptions';
 import { getTestUserAuthenticationId } from './utils';
 import type { JWKSMock } from 'mock-jwks';
 
-const getMockJwks = (): JWKSMock =>
-	createJWKSMock(issuer, '/protocol/openid-connect/certs');
+const getMockJwks = (jwksPath = '/protocol/openid-connect/certs'): JWKSMock =>
+	createJWKSMock(issuer, jwksPath);
 
 const mockJwks = getMockJwks();
 
@@ -14,10 +14,11 @@ const getMockJwt = (
 		roles?: string[];
 		iss?: string;
 	} = {},
+	jwks = mockJwks,
 ): { Authorization: string } => {
 	const aMomentAgo = Math.round(new Date().getTime() / 1000);
 
-	const token = mockJwks.token({
+	const token = jwks.token({
 		exp: aMomentAgo + 1000000,
 		iat: aMomentAgo,
 		iss: settings.iss ?? issuer,
@@ -49,4 +50,5 @@ export {
 	mockJwtWithoutSub,
 	mockJwtWithAdminRole,
 	getMockJwt,
+	getMockJwks,
 };

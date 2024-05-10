@@ -8,7 +8,12 @@ import {
 	allowNextToResolve,
 	generateNextWithAssertions,
 } from '../../test/utils';
-import { mockJwt as authHeader, getMockJwt } from '../../test/mockJwt';
+import {
+	mockJwks,
+	mockJwt as authHeader,
+	getMockJwt,
+	getMockJwks,
+} from '../../test/mockJwt';
 import type { NextFunction, Response } from 'express';
 import type { Request as JWTRequest } from 'express-jwt';
 
@@ -55,6 +60,32 @@ describe('processJwt', () => {
 		});
 		const mockRequest = {
 			headers: mockJwt,
+		} as unknown as JWTRequest;
+		const mockResponse = {} as unknown as Response;
+		const makeAssertions = async (err: unknown) => {
+			expect(err).toBeInstanceOf(Error);
+			expect(mockRequest.auth).toBe(undefined);
+		};
+		const nextMock = generateNextWithAssertions(makeAssertions, done);
+
+		processJwt(mockRequest, mockResponse, nextMock);
+	});
+
+	it('does NOT populate an auth value when an auth header with an invalid jwt server is used', (done) => {
+		// This test is a little complicated -- we want to make sure that a JWT that looks exactly like a
+		// correctly generated JWT, but is signed by a different cert, does not properly authenticate.
+		// This covers the case where a third party generates a false JWT using a different private key.
+		// To accomplish this with our mock jwt tooling we are going to need to create a temporary jwks
+		// server, generate a cert, and then turn the original server back on.
+		const badMockJwks = getMockJwks('/protocol/openid-connect/badCerts');
+		mockJwks.stop();
+		badMockJwks.start();
+		const badJwt = getMockJwt({}, badMockJwks);
+		badMockJwks.stop();
+		mockJwks.start();
+
+		const mockRequest = {
+			headers: badJwt,
 		} as unknown as JWTRequest;
 		const mockResponse = {} as unknown as Response;
 		const makeAssertions = async (err: unknown) => {

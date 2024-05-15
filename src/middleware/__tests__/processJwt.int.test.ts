@@ -3,19 +3,16 @@
 // See https://stackoverflow.com/a/67595592/159522
 const customMiddleware = jest.fn();
 import { requireEnv } from 'require-env-variable';
+import jwt from 'jsonwebtoken';
 import { processJwt } from '../processJwt';
 import {
 	allowNextToResolve,
 	generateNextWithAssertions,
 } from '../../test/utils';
-import {
-	mockJwks,
-	mockJwt as authHeader,
-	getMockJwt,
-	getMockJwks,
-} from '../../test/mockJwt';
+import { mockJwt as authHeader, getMockJwt } from '../../test/mockJwt';
 import type { NextFunction, Response } from 'express';
 import type { Request as JWTRequest } from 'express-jwt';
+import type { JwtPayload } from 'jsonwebtoken';
 
 const { AUTH_SERVER_ISSUER } = requireEnv('AUTH_SERVER_ISSUER');
 
@@ -71,25 +68,58 @@ describe('processJwt', () => {
 		processJwt(mockRequest, mockResponse, nextMock);
 	});
 
-	it('does NOT populate an auth value when an auth header with an invalid jwt server is used', (done) => {
-		// This test is a little complicated -- we want to make sure that a JWT that looks exactly like a
-		// correctly generated JWT, but is signed by a different cert, does not properly authenticate.
-		// This covers the case where a third party generates a false JWT using a different private key.
-		// To accomplish this with our mock jwt tooling we are going to need to create a temporary jwks
-		// server, generate a cert, and then turn the original server back on.
-		const badMockJwks = getMockJwks('/protocol/openid-connect/badCerts');
-		mockJwks.stop();
-		badMockJwks.start();
-		const badJwt = getMockJwt({}, badMockJwks);
-		badMockJwks.stop();
-		mockJwks.start();
+	it('does NOT populate an auth value when an auth header signed with an invalid key is used', (done) => {
+		const badPrivateKey = `-----BEGIN PRIVATE KEY-----
+MIIG/gIBADANBgkqhkiG9w0BAQEFAASCBugwggbkAgEAAoIBgQCn97AWQpdfGamH
+SR182ZHNhQsUhMMgjI2ArvmRjscou5xXo1IJYW4wT5ug/2aAsUavMx0ZcfEAhL+B
+/GsOE1FpQ+TAtouJDROtbJuIdhQxASIhgxr+XpdwHcHqZic4k8QNV8EKqGAi9MlG
+h3FKH13nurs8LFuTojggXnzJ6W79Y8L0cGyAoh+S7MQvQqEGPMXCPAwwDOsgRfs5
+jOIkR6M1TV62bgHcBNpKYBNrMwt5qVOS2EERd/OKIb+tydM3YaOIZExzTcm9dD66
+yjuSsqKVpX7T0obd0sJWJHWVsEp0y1XNnIRCZT/V8NxuTi+J3/86uVKQtb+Ykq9X
+H+Aw0p6VF+nRZEOo6UNVrFX8hQWtXB1c/ZPlyNaBnBNtTSfAkbLbB7aBkPU2QHVn
+BXHIkZoJH5dCYyott6H7BVAU26/HANFAGcDBx3lzHVXtAYhV0SFrUDpb9DmxZb6w
+vY2eVXomLKGt88QjNtn6H/rsM7BqBU+QXcA7J3+tJSzfYplVixUCAwEAAQKCAYAE
+UojrAbqwfVISA60pFdY9MjPHSuVUlJldmuMcPk7cuvs6fB7z09iIkLviCECEhktZ
+3dhdW8PGbiQZfbvpiFC7gz5DQU9U7wu3FkjoWZWKb0uIDj4nFpsSDQn89LUErTTJ
+3RzAH/YdYCw/zuN481awzGreEQwoP+/u0U+nyISNK8CMFsqMAuAKIWKpDq9jIDQ8
+m9v6bpKsaXCeGgSFx3wpNnz999W/ajaN3GwTgaRFdLiMWllOUEZpoxWyLLPtRGts
+uFYOTPGH2LEc62MLyen4IzX+HXdVQbKmTNosvPLTMrWbOUuZHLlPWuWmn7+ZHWUP
+NI5MwSO7kHFEO77yTOONjHpC4P1tuSN96QVuFIBzu5ByzkoT0eCgHiCvB3IApjxD
+34Cf/VbHzJxC+V/jwnw3aAFpLtBe1NbIZjYpxp7zWeMT8tVOaXSNje3FUkZKHH+6
++TuE0tiYvS/+Ahm+Oypi1D6ZaMjW9DpAvGb+ARLkOFCkZ1MmfYleCbeLivDjTQEC
+gcEA3a9iNXKzrrmOwHUdLJm0WwT45D+nHZiXU24JHHyQ/V23OuPcKXoXRcqH0eEp
+5Hc8E4Lrt7c1k4uzqRMJQfsg5Kn5YcgncxwS68yRsjQlfXxc5Z+nYkZfgI2I/8N/
+7C2lCBvZbHFkrd5pa6IkXr/XK2nN65QOiS5qcW9h/J10shnoYwJad+UcfPL+VxjI
+iE/qH8+ad/3HCmTFCZJnxfTbLlk6E9yjf7io+9Dvs4YVT2xD7KAaoVIcLZne/Zsk
+CyKVAoHBAMH3qY6Iw4OALVevhGCjjg9Wp+NcT+SAT5fZfep/TuKW3HBuTgWXiC5c
++a71wSHOIlAHCpX8kVnHBx0V2BB9Mi5p3p88IUNNCunCHYeTNGWbQ/B2TfLbbJtk
+fHBm90d9fg8RIRZX1srPLV0fUcuEgHkJh0e/UDeXnriRECydwCIOid2i2/el9F/R
+CcDcIi6vTzTkDPIZmaaBW4e7sXHuOgauh5tl8k4suQGMfFJlq+iM7ELTWF2x4/rw
+ibmhv3smgQKBwQDOZi6QCN1Wvpk0g1XIYstTO0voZ4NWwO2T1g1RooD0BT9F60Te
+sTfd2PWf6X4xovoiSHDjOgb9+sIplvm1nvU/MSppagug1vCe7nZwbrDBJvrvKDiV
+/WOJsz1stD70TIMtC5DhsKnGYB/TAMHQHdleKEJ7JfxqqPad6tBWfNtbv1doZ5aH
+rp9ZjnxT51U95Pnc6FOviG67NJtnkBJictlnS9gRCgqILgvXeO7UPPC2Y9zSATcK
+IALwSiUeBkYGwAkCgcAfqBP8N0XxiFHeJb8tJoRg7HuqF77SRD65Qb3TL8PoJ0cC
+8n25W+nV50a4z1Md+U6QURXhNL9kL59xl8cTqdsuyAiVZHLpUQGe9RdssRG0I4sL
+C8PdBwLKubO1hJiHCmwweVM1GlDr+LQmpp3q4U02c9+oTgkBibVV2hcRsQ1SgZzu
+l03fNS6VFMDKwSKzC9mZgD68pID3M9WEaZWkSoUd4g4vxoutRo9LOWpw6DcOVTGa
+FnQtloLmyaswqL1flAECgcEAnJ7AmYV6IXgjr5y58XtYoMakqRv6YNIn2da7FSaF
+30giNQeQQG6PA8T50pHSZuAxGmb0MMJZIJqYU2HdVi9Lr170g4d//xkDKYGNwEtb
+QZTDn6isr91MBTaPLQPheJPiV5ISrCF/HMy1LnQb4pBvNEeE4QFNUSHT4HofLro1
+DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
++GfkC1U5a882gMp8nhMbzTQQ
+-----END PRIVATE KEY-----`;
 
+		const badJwt = getMockJwt({}, (payload: JwtPayload) =>
+			jwt.sign(payload, badPrivateKey, { algorithm: 'RS256' }),
+		);
 		const mockRequest = {
 			headers: badJwt,
 		} as unknown as JWTRequest;
 		const mockResponse = {} as unknown as Response;
 		const makeAssertions = async (err: unknown) => {
 			expect(err).toBeInstanceOf(Error);
+			expect((err as Error).message).toBe('invalid signature');
 			expect(mockRequest.auth).toBe(undefined);
 		};
 		const nextMock = generateNextWithAssertions(makeAssertions, done);

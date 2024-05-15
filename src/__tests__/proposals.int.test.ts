@@ -7,6 +7,7 @@ import {
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
+	createProposalFieldValue,
 	createUser,
 	db,
 	loadTableMetrics,
@@ -94,7 +95,7 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Short summary',
 			});
-			await db.sql('proposalFieldValues.insertOne', {
+			await createProposalFieldValue({
 				proposalVersionId: 1,
 				applicationFormFieldId: 1,
 				position: 1,
@@ -265,14 +266,14 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Short summary',
 			});
-			await db.sql('proposalFieldValues.insertOne', {
+			await createProposalFieldValue({
 				proposalVersionId: 1,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'This is a summary',
 				isValid: true,
 			});
-			await db.sql('proposalFieldValues.insertOne', {
+			await createProposalFieldValue({
 				proposalVersionId: 2,
 				applicationFormFieldId: 1,
 				position: 1,
@@ -495,14 +496,14 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Concise summary',
 			});
-			await db.sql('proposalFieldValues.insertOne', {
+			await createProposalFieldValue({
 				proposalVersionId: 1,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'This is a summary',
 				isValid: true,
 			});
-			await db.sql('proposalFieldValues.insertOne', {
+			await createProposalFieldValue({
 				proposalVersionId: 2,
 				applicationFormFieldId: 1,
 				position: 1,

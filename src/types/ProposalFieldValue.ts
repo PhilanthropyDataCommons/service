@@ -1,5 +1,6 @@
 import type { JSONSchemaType } from 'ajv';
 import type { ApplicationFormField } from './ApplicationFormField';
+import type { Writable } from './Writable';
 
 interface ProposalFieldValue {
 	readonly id: number;
@@ -12,12 +13,14 @@ interface ProposalFieldValue {
 	readonly isValid: boolean;
 }
 
-type ProposalFieldValueWrite = Omit<
-	ProposalFieldValue,
-	'applicationFormField' | 'createdAt' | 'id' | 'proposalVersionId' | 'isValid'
+type WritableProposalFieldValue = Writable<ProposalFieldValue>;
+
+type WritableProposalFieldValueWithProposalVersionContext = Omit<
+	WritableProposalFieldValue,
+	'proposalVersionId'
 >;
 
-export const proposalFieldValueWriteSchema: JSONSchemaType<ProposalFieldValueWrite> =
+const writableProposalFieldValueWithProposalVersionContextSchema: JSONSchemaType<WritableProposalFieldValueWithProposalVersionContext> =
 	{
 		type: 'object',
 		properties: {
@@ -34,4 +37,12 @@ export const proposalFieldValueWriteSchema: JSONSchemaType<ProposalFieldValueWri
 		required: ['applicationFormFieldId', 'position', 'value'],
 	};
 
-export { ProposalFieldValue, ProposalFieldValueWrite };
+type InternallyWritableProposalFieldValue = WritableProposalFieldValue &
+	Pick<ProposalFieldValue, 'isValid'>;
+
+export {
+	InternallyWritableProposalFieldValue,
+	ProposalFieldValue,
+	WritableProposalFieldValueWithProposalVersionContext,
+	writableProposalFieldValueWithProposalVersionContextSchema,
+};

@@ -1,5 +1,5 @@
-import { getLogger } from '../logger';
 import {
+	createProposalFieldValue,
 	db,
 	loadApplicationForm,
 	loadApplicationFormField,
@@ -21,13 +21,10 @@ import type { Request, Response, NextFunction } from 'express';
 import type {
 	ProposalVersion,
 	ProposalVersionWrite,
-	ProposalFieldValue,
-	ProposalFieldValueWrite,
 	Proposal,
 	ApplicationForm,
+	WritableProposalFieldValueWithProposalVersionContext,
 } from '../types';
-
-const logger = getLogger(__filename);
 
 const assertApplicationFormExistsForProposal = async (
 	applicationFormId: number,
@@ -76,7 +73,7 @@ const assertApplicationFormExistsForProposal = async (
 
 const assertProposalFieldValuesMapToApplicationForm = async (
 	applicationFormId: number,
-	proposalFieldValues: ProposalFieldValueWrite[],
+	proposalFieldValues: WritableProposalFieldValueWithProposalVersionContext[],
 ): Promise<void> => {
 	const applicationFormFieldQueries = proposalFieldValues.map(
 		async (proposalFieldValue) => {
@@ -128,6 +125,8 @@ const postProposalVersion = (
 		return;
 	}
 
+	const { fieldValues } = req.body;
+
 	Promise.all([
 		assertApplicationFormExistsForProposal(
 			req.body.applicationFormId,
@@ -145,12 +144,11 @@ const postProposalVersion = (
 						'proposalVersions.insertOne',
 						req.body,
 					);
-				logger.debug(proposalVersionQueryResult);
 				const proposalVersion = proposalVersionQueryResult.rows[0];
 				if (proposalVersion !== undefined) {
-					const proposalFieldValueQueries = req.body.fieldValues.map(
-						async (fieldValue) => {
-							const { value, applicationFormFieldId, position } = fieldValue;
+					const proposalFieldValues = await Promise.all(
+						fieldValues.map(async (fieldValue) => {
+							const { value, applicationFormFieldId } = fieldValue;
 							const applicationFormField = await loadApplicationFormField(
 								applicationFormFieldId,
 							);
@@ -158,34 +156,17 @@ const postProposalVersion = (
 								value,
 								applicationFormField.baseField.dataType,
 							);
-							return transactionDb.sql<ProposalFieldValue>(
-								'proposalFieldValues.insertOne',
+							const proposalFieldValue = await createProposalFieldValue(
 								{
+									...fieldValue,
 									proposalVersionId: proposalVersion.id,
-									applicationFormFieldId,
-									value,
-									position,
 									isValid,
 								},
+								transactionDb,
 							);
-						},
+							return proposalFieldValue;
+						}),
 					);
-					const proposalFieldValueResults = await Promise.all(
-						proposalFieldValueQueries,
-					);
-					const proposalFieldValues = proposalFieldValueResults.map(
-						(proposalFieldValueResult) => {
-							const proposalFieldValue = proposalFieldValueResult.rows[0];
-							if (proposalFieldValue !== undefined) {
-								return proposalFieldValue;
-							}
-							throw new InternalValidationError(
-								'The database responded with an unexpected format when creating the Proposal Field Value.',
-								[],
-							);
-						},
-					);
-
 					return {
 						...proposalVersion,
 						fieldValues: proposalFieldValues,

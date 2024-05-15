@@ -67,7 +67,7 @@
 		"nock": "^13.5.4",
 		"pino-pretty": "^11.0.0",
 		"prettier": "3.2.5",
-		"rimraf": "^5.0.5",
+		"rimraf": "^5.0.7",
 		"supertest": "^7.0.0",
 		"swagger-spec-validator": "^5.0.0",
 		"ts-jest": "^28.0.5",

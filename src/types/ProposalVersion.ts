@@ -5,22 +5,24 @@ import type {
 	ProposalFieldValue,
 	WritableProposalFieldValueWithProposalVersionContext,
 } from './ProposalFieldValue';
+import type { Writable } from './Writable';
 
-export interface ProposalVersion {
-	id: number;
+interface ProposalVersion {
+	readonly id: number;
 	proposalId: number;
+	readonly version: number;
 	applicationFormId: number;
-	version: number;
-	fieldValues: ProposalFieldValue[];
-	createdAt: string;
+	readonly fieldValues: ProposalFieldValue[];
+	readonly createdAt: string;
 }
 
-export type ProposalVersionWrite = Omit<
-	ProposalVersion,
-	'createdAt' | 'fieldValues' | 'id' | 'version'
-> & { fieldValues: WritableProposalFieldValueWithProposalVersionContext[] };
+type WritableProposalVersion = Writable<ProposalVersion>;
 
-export const proposalVersionWriteSchema: JSONSchemaType<ProposalVersionWrite> =
+type WritableProposalVersionWithFieldValues = WritableProposalVersion & {
+	fieldValues: WritableProposalFieldValueWithProposalVersionContext[];
+};
+
+const writableProposalVersionWithFieldValuesSchema: JSONSchemaType<WritableProposalVersionWithFieldValues> =
 	{
 		type: 'object',
 		properties: {
@@ -38,4 +40,13 @@ export const proposalVersionWriteSchema: JSONSchemaType<ProposalVersionWrite> =
 		required: ['proposalId', 'applicationFormId', 'fieldValues'],
 	};
 
-export const isProposalVersionWrite = ajv.compile(proposalVersionWriteSchema);
+const isWritableProposalVersionWithFieldValues = ajv.compile(
+	writableProposalVersionWithFieldValuesSchema,
+);
+
+export {
+	ProposalVersion,
+	WritableProposalVersion,
+	WritableProposalVersionWithFieldValues,
+	isWritableProposalVersionWithFieldValues,
+};

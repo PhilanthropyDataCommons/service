@@ -8,6 +8,7 @@ import {
 	createOrganizationProposal,
 	createProposal,
 	createProposalFieldValue,
+	createProposalVersion,
 	createUser,
 	db,
 	loadTableMetrics,
@@ -85,7 +86,7 @@ describe('/proposals', () => {
 			await createApplicationForm({
 				opportunityId: 1,
 			});
-			await db.sql('proposalVersions.insertOne', {
+			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
 			});
@@ -252,11 +253,11 @@ describe('/proposals', () => {
 			await createApplicationForm({
 				opportunityId: 1,
 			});
-			await db.sql('proposalVersions.insertOne', {
+			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
 			});
-			await db.sql('proposalVersions.insertOne', {
+			await createProposalVersion({
 				proposalId: 2,
 				applicationFormId: 1,
 			});
@@ -482,11 +483,11 @@ describe('/proposals', () => {
 			await createApplicationForm({
 				opportunityId: 1,
 			});
-			await db.sql('proposalVersions.insertOne', {
+			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
 			});
-			await db.sql('proposalVersions.insertOne', {
+			await createProposalVersion({
 				proposalId: 2,
 				applicationFormId: 1,
 			});

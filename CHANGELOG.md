@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Several read-only fields were improperly defined, resulting in improper SDK results.
+
 ## 0.10.0 2024-05-03
 
 ### Removed

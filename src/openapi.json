@@ -196,12 +196,10 @@
 						"type": "integer"
 					},
 					"organization": {
+						"readOnly": true,
 						"allOf": [
 							{
 								"$ref": "#/components/schemas/Organization"
-							},
-							{
-								"readOnly": true
 							}
 						]
 					},
@@ -209,12 +207,10 @@
 						"type": "integer"
 					},
 					"proposal": {
+						"readOnly": true,
 						"allOf": [
 							{
 								"$ref": "#/components/schemas/Proposal"
-							},
-							{
-								"readOnly": true
 							}
 						]
 					},
@@ -371,12 +367,10 @@
 						"example": 3613
 					},
 					"applicationFormField": {
+						"readOnly": true,
 						"allOf": [
 							{
 								"$ref": "#/components/schemas/ApplicationFormField"
-							},
-							{
-								"readOnly": true
 							}
 						]
 					},
@@ -459,12 +453,10 @@
 						"example": 3011
 					},
 					"baseField": {
+						"readOnly": true,
 						"allOf": [
 							{
 								"$ref": "#/components/schemas/BaseField"
-							},
-							{
-								"readOnly": true
 							}
 						]
 					},

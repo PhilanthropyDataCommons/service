@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Several read-only fields were improperly defined, resulting in improper SDK results.
+- `WritablePresignedPostRequest` will no longer require a populated `presignedPost`.
+
+### Changed
+
+- Created a new `PresignedPost` entity type instead of directly embedding the definition in `PresignedPostRequest`.
 
 ## 0.10.0 2024-05-03
 

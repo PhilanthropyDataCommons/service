@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- The `BulkUploadBundle` entity now exists, and the `/bulkUploads` endpoint is properly documented to return that type.
+
 ### Fixed
 
 - Several read-only fields were improperly defined, resulting in improper SDK results.

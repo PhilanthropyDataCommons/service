@@ -161,6 +161,25 @@
 					"createdAt"
 				]
 			},
+			"BulkUploadBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/BulkUpload"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
 			"Organization": {
 				"type": "object",
 				"properties": {
@@ -879,7 +898,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/BulkUpload"
+									"$ref": "#/components/schemas/BulkUploadBundle"
 								}
 							}
 						}

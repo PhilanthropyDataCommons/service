@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.11.0 2024-05-20
+
 ### Added
 
 - The `BulkUploadBundle` entity now exists, and the `/bulkUploads` endpoint is properly documented to return that type.

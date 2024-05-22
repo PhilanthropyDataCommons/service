@@ -1,5 +1,5 @@
 {
-	"openapi": "3.0.3",
+	"openapi": "3.1.0",
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
@@ -215,23 +215,15 @@
 						"type": "integer"
 					},
 					"organization": {
-						"readOnly": true,
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Organization"
-							}
-						]
+						"$ref": "#/components/schemas/Organization",
+						"readOnly": true
 					},
 					"proposalId": {
 						"type": "integer"
 					},
 					"proposal": {
-						"readOnly": true,
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Proposal"
-							}
-						]
+						"$ref": "#/components/schemas/Proposal",
+						"readOnly": true
 					},
 					"createdAt": {
 						"type": "string",
@@ -261,12 +253,8 @@
 						"example": 512
 					},
 					"presignedPost": {
-						"readOnly": true,
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/PresignedPost"
-							}
-						]
+						"$ref": "#/components/schemas/PresignedPost",
+						"readOnly": true
 					}
 				},
 				"required": ["fileType", "fileSize", "presignedPost"]
@@ -393,12 +381,8 @@
 						"example": 3613
 					},
 					"applicationFormField": {
-						"readOnly": true,
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ApplicationFormField"
-							}
-						]
+						"$ref": "#/components/schemas/ApplicationFormField",
+						"readOnly": true
 					},
 					"position": {
 						"type": "integer",

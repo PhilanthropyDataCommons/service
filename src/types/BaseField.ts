@@ -7,7 +7,7 @@ export enum BaseFieldDataType {
 	NUMBER = 'number',
 	PHONE_NUMBER = 'phone_number',
 	EMAIL = 'email',
-	URL = 'URL',
+	URL = 'url',
 	BOOLEAN = 'boolean',
 }
 

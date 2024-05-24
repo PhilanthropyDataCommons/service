@@ -80,6 +80,17 @@ describe('/opportunities', () => {
 			});
 		});
 
+		it('returns 400 bad request when id is a number greater than 2^32-1', async () => {
+			const result = await agent
+				.get('/opportunities/555555555555555555555555555555')
+				.set(authHeader)
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
 		it('returns 404 when id is not found', async () => {
 			await createOpportunity({
 				title: 'This definitely should not be returned',

@@ -837,7 +837,17 @@
 						}
 					},
 					"409": {
-						"description": "There was a unique key or foreign key conflict.",
+						"description": "There was a unique key conflict.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "The application references entities that do not exist in the database.",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1298,7 +1308,17 @@
 						}
 					},
 					"409": {
-						"description": "There was a unique key or foreign key conflict.",
+						"description": "There was a unique key conflict.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "The proposal references entities that do not exist in the database.",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1386,8 +1406,8 @@
 							}
 						}
 					},
-					"409": {
-						"description": "There was a foreign key conflict.",
+					"422": {
+						"description": "The proposal version references entities that do not exist in the database.",
 						"content": {
 							"application/json": {
 								"schema": {

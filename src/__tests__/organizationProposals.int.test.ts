@@ -269,7 +269,7 @@ describe('/organizationProposals', () => {
 			});
 		});
 
-		it('returns 409 Conflict when a non-existent proposal is sent', async () => {
+		it('returns 422 Conflict when a non-existent proposal is sent', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
@@ -282,13 +282,13 @@ describe('/organizationProposals', () => {
 					organizationId: 1,
 					proposalId: 42,
 				})
-				.expect(409);
+				.expect(422);
 			expect(result.body).toMatchObject({
 				name: 'DatabaseError',
 			});
 		});
 
-		it('returns 409 Conflict when a non-existent organization is sent', async () => {
+		it('returns 422 Conflict when a non-existent organization is sent', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
@@ -306,7 +306,7 @@ describe('/organizationProposals', () => {
 					organizationId: 42,
 					proposalId: 1,
 				})
-				.expect(409);
+				.expect(422);
 			expect(result.body).toMatchObject({
 				name: 'DatabaseError',
 			});

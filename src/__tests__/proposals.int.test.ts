@@ -1193,7 +1193,7 @@ describe('/proposals', () => {
 			});
 		});
 
-		it('returns 409 conflict when a non-existent opportunity id is provided', async () => {
+		it('returns 422 conflict when a non-existent opportunity id is provided', async () => {
 			const result = await agent
 				.post('/proposals')
 				.type('application/json')
@@ -1202,7 +1202,7 @@ describe('/proposals', () => {
 					externalId: 'proposal123',
 					opportunityId: 1,
 				})
-				.expect(409);
+				.expect(422);
 			expect(result.body).toMatchObject({
 				name: 'DatabaseError',
 				details: [

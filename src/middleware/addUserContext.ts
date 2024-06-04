@@ -6,7 +6,8 @@ const selectOrCreateUser = async (authenticationId: string) => {
 	try {
 		return await loadUserByAuthenticationId(authenticationId);
 	} catch {
-		return await createUser({ authenticationId });
+		const user = await createUser({ authenticationId });
+		return user;
 	}
 };
 

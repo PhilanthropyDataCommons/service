@@ -95,6 +95,6 @@
 		"swagger-ui-express": "^5.0.1",
 		"tinypg": "^7.0.0",
 		"tmp-promise": "^3.0.3",
-		"uuid": "^9.0.1"
+		"uuid": "^10.0.0"
 	}
 }

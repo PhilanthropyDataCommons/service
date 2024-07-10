@@ -5,7 +5,6 @@ import {
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
-	db,
 	loadTableMetrics,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
@@ -68,7 +67,7 @@ describe('/organizations', () => {
 		it('returns according to pagination parameters', async () => {
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
-				await db.sql('organizations.insertOne', {
+				await createOrganization({
 					taxId: '11-1111111',
 					name: `Organization ${i + 1}`,
 				});

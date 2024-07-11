@@ -1,6 +1,13 @@
 import request from 'supertest';
 import { app } from '../app';
-import { createBaseField, db, loadTableMetrics } from '../database';
+import {
+	createApplicationForm,
+	createApplicationFormField,
+	createBaseField,
+	createOpportunity,
+	db,
+	loadTableMetrics,
+} from '../database';
 import { getLogger } from '../logger';
 import { BaseFieldDataType, BaseFieldScope, PostgresErrorCode } from '../types';
 import { expectTimestamp } from '../test/utils';
@@ -44,23 +51,21 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns all application forms present in the database', async () => {
-			await db.query(`
-        INSERT INTO opportunities (title)
-        VALUES
-          ( 'Tremendous opportunity 👌' ),
-          ( 'Good opportunity' );
-      `);
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' ),
-          ( 1, 2, '2022-08-20 12:00:00+0000' ),
-          ( 2, 1, '2022-09-20 12:00:00+0000' )
-      `);
+			await createOpportunity({
+				title: 'Tremendous opportunity 👌',
+			});
+			await createOpportunity({
+				title: 'Good opportunity',
+			});
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			await createApplicationForm({
+				opportunityId: 2,
+			});
 			const response = await agent
 				.get('/applicationForms')
 				.set(authHeader)
@@ -91,38 +96,46 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns an application form with its fields', async () => {
-			await db.query(`
-        INSERT INTO opportunities (title)
-        VALUES
-          ( 'Holiday opportunity 🎄' ),
-          ( 'Another holiday opportunity 🕎' );
-      `);
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2510-02-01 00:00:01+0000' ),
-          ( 1, 2, '2510-02-01 00:00:02+0000' ),
-          ( 2, 1, '2510-02-01 00:00:03+0000' )
-      `);
+			await createOpportunity({
+				title: 'Holiday opportunity 🎄',
+			});
+			await createOpportunity({
+				title: 'Another holiday opportunity 🕎',
+			});
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			await createApplicationForm({
+				opportunityId: 2,
+			});
 			await createTestBaseFields();
-			await db.query(`
-        INSERT INTO application_form_fields (
-          application_form_id,
-          base_field_id,
-          position,
-          label,
-          created_at
-        )
-        VALUES
-          ( 3, 2, 1, 'Anni Worki', '2510-02-01 00:00:06+0000' ),
-          ( 3, 1, 2, 'Org Nomen', '2510-02-01 00:00:07+0000' ),
-          ( 2, 1, 2, 'Name of Organization', '2510-02-01 00:00:08+0000' ),
-          ( 2, 2, 1, 'Duration of work in years','2510-02-01 00:00:09+0000' )
-      `);
+			await createApplicationFormField({
+				applicationFormId: 3,
+				baseFieldId: 2,
+				position: 1,
+				label: 'Anni Worki',
+			});
+			await createApplicationFormField({
+				applicationFormId: 3,
+				baseFieldId: 1,
+				position: 2,
+				label: 'Org Nomen',
+			});
+			await createApplicationFormField({
+				applicationFormId: 2,
+				baseFieldId: 1,
+				position: 2,
+				label: 'Name of Organization',
+			});
+			await createApplicationFormField({
+				applicationFormId: 2,
+				baseFieldId: 2,
+				position: 1,
+				label: 'Duration of work in years',
+			});
 			const result = await agent
 				.get('/applicationForms/2')
 				.set(authHeader)
@@ -201,10 +214,9 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly one application form', async () => {
-			await db.query(`
-        INSERT INTO opportunities ( title )
-        VALUES ( 'Tremendous opportunity 👌' );
-      `);
+			await createOpportunity({
+				title: 'Tremendous opportunity 👌',
+			});
 			const before = await loadTableMetrics('application_forms');
 			const result = await agent
 				.post('/applicationForms')
@@ -228,10 +240,9 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly the number of provided fields', async () => {
-			await db.query(`
-        INSERT INTO opportunities ( title )
-        VALUES ( 'Tremendous opportunity 👌' );
-      `);
+			await createOpportunity({
+				title: 'Tremendous opportunity 👌',
+			});
 			await createTestBaseFields();
 			const before = await loadTableMetrics('application_form_fields');
 			const result = await agent
@@ -272,24 +283,15 @@ describe('/applicationForms', () => {
 		});
 
 		it('increments version when creating a second form for an opportunity', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
-      `);
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' ),
-          ( 1, 2, '2022-08-20 12:00:00+0000' )
-      `);
+			await createOpportunity({
+				title: 'Tremendous opportunity 👌',
+			});
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			await createApplicationForm({
+				opportunityId: 1,
+			});
 			const result = await agent
 				.post('/applicationForms')
 				.type('application/json')
@@ -370,14 +372,9 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 500 UnknownError if a generic Error is thrown when inserting the field', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( 'Tremendous opportunity 👌', '2525-01-01T00:00:05Z' );
-      `);
+			await createOpportunity({
+				title: 'Tremendous opportunity 👌',
+			});
 			await createTestBaseFields();
 			jest
 				.spyOn(db, 'sql')

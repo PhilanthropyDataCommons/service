@@ -42,9 +42,11 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 		},
 		dataType: {
 			type: 'string',
+			enum: Object.values(BaseFieldDataType),
 		},
 		scope: {
 			type: 'string',
+			enum: Object.values(BaseFieldScope),
 		},
 	},
 	required: ['label', 'description', 'shortCode', 'dataType', 'scope'],

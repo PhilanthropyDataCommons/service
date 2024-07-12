@@ -175,6 +175,25 @@ describe('/baseFields', () => {
 			});
 		});
 
+		it('returns 400 bad request when an invalid dataType is sent', async () => {
+			const result = await agent
+				.post('/baseFields')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: '🏷️',
+					description: '😍',
+					shortCode: '🩳',
+					dataType: '🤡',
+					scope: BaseFieldScope.PROPOSAL,
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
 		it('returns 400 bad request when no scope is sent', async () => {
 			const result = await agent
 				.post('/baseFields')
@@ -185,6 +204,25 @@ describe('/baseFields', () => {
 					description: '😍',
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 400 bad request when an invalid scope is sent', async () => {
+			const result = await agent
+				.post('/baseFields')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: '🏷️',
+					description: '😍',
+					shortCode: '🩳',
+					dataType: BaseFieldDataType.STRING,
+					scope: '🤡',
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({

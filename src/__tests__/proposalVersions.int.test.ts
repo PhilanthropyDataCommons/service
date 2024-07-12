@@ -1,9 +1,11 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	createApplicationForm,
+	createApplicationFormField,
 	createBaseField,
+	createOpportunity,
 	createProposal,
-	db,
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
@@ -38,29 +40,16 @@ describe('/proposalVersions', () => {
 		});
 
 		it('creates exactly one proposal version', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
+			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.id,
 			});
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' );
-      `);
+			await createApplicationForm({
+				opportunityId: 1,
+			});
 			const before = await loadTableMetrics('proposal_versions');
 			logger.debug('before: %o', before);
 			const result = await agent
@@ -85,42 +74,29 @@ describe('/proposalVersions', () => {
 		});
 
 		it('creates exactly the number of provided field values', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
+			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.id,
 			});
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' );
-      `);
+			await createApplicationForm({
+				opportunityId: 1,
+			});
 			await createTestBaseFields();
-			await db.query(`
-        INSERT INTO application_form_fields (
-          application_form_id,
-          base_field_id,
-          position,
-          label,
-          created_at
-        )
-        VALUES
-          ( 1, 1, 1, 'First Name', '2022-07-20 12:00:00+0000' ),
-          ( 1, 2, 2, 'Last Name', '2022-07-20 12:00:00+0000' );
-      `);
+			await createApplicationFormField({
+				applicationFormId: 1,
+				baseFieldId: 1,
+				position: 1,
+				label: 'First Name',
+			});
+			await createApplicationFormField({
+				applicationFormId: 1,
+				baseFieldId: 2,
+				position: 2,
+				label: 'Last Name',
+			});
 			const before = await loadTableMetrics('proposal_field_values');
 			const result = await agent
 				.post('/proposalVersions')
@@ -210,29 +186,16 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 409 Conflict when the provided proposal does not exist', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
+			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.id,
 			});
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' );
-      `);
+			await createApplicationForm({
+				opportunityId: 1,
+			});
 			const result = await agent
 				.post('/proposalVersions')
 				.type('application/json')
@@ -256,29 +219,16 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if the provided application form does not exist', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
+			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.id,
 			});
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' );
-      `);
+			await createApplicationForm({
+				opportunityId: 1,
+			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
 			const result = await agent
@@ -307,31 +257,20 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if the provided application form ID is not associated with the proposal opportunity', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' ),
-          ( '💧', '2525-01-02T00:00:01Z' )
-      `);
+			await createOpportunity({ title: '🔥' });
+			await createOpportunity({ title: '💧' });
 			const testUser = await loadTestUser();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.id,
 			});
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' ),
-          ( 2, 1, '2022-07-20 12:00:00+0000' );
-      `);
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			await createApplicationForm({
+				opportunityId: 2,
+			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
 			const result = await agent
@@ -362,29 +301,16 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if a provided application form field ID does not exist', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
+			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.id,
 			});
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' );
-      `);
+			await createApplicationForm({
+				opportunityId: 1,
+			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
 			const result = await agent
@@ -420,44 +346,32 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if a provided application form field ID is not associated with the supplied application form ID', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
-
+			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.id,
 			});
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2022-07-20 12:00:00+0000' ),
-          ( 1, 2, '2022-07-20 12:00:00+0000' );
-      `);
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			await createApplicationForm({
+				opportunityId: 1,
+			});
 			await createTestBaseFields();
-			await db.query(`
-        INSERT INTO application_form_fields (
-          application_form_id,
-          base_field_id,
-          position,
-          label,
-          created_at
-        )
-        VALUES
-          ( 1, 1, 1, 'First Name', '2022-07-20 12:00:00+0000' ),
-          ( 1, 2, 2, 'Last Name', '2022-07-20 12:00:00+0000' );
-      `);
+			await createApplicationFormField({
+				applicationFormId: 1,
+				baseFieldId: 1,
+				position: 1,
+				label: 'First Name',
+			});
+			await createApplicationFormField({
+				applicationFormId: 1,
+				baseFieldId: 2,
+				position: 2,
+				label: 'Last Name',
+			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
 			const result = await agent

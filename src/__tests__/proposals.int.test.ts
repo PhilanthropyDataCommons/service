@@ -658,14 +658,9 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when given id is not owned by the current user', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '⛰️', '2525-01-03T00:00:01Z' )
-      `);
+			await createOpportunity({
+				title: '⛰️',
+			});
 			const anotherUser = await createUser({
 				authenticationId: 'totallySeparateUser',
 			});
@@ -703,14 +698,9 @@ describe('/proposals', () => {
 		});
 
 		it('returns the one proposal asked for', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '⛰️', '2525-01-03T00:00:01Z' )
-      `);
+			await createOpportunity({
+				title: '⛰️',
+			});
 
 			const testUser = await loadTestUser();
 			await createProposal({
@@ -739,68 +729,67 @@ describe('/proposals', () => {
 		});
 
 		it('returns one proposal with deep fields', async () => {
+			await createOpportunity({
+				title: '🌎',
+			});
 			await createTestBaseFields();
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🌎', '2525-01-04T00:00:01Z' )
-      `);
-			await db.query(`
-        INSERT INTO application_forms (
-          opportunity_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, '2525-01-04T00:00:04Z' )
-      `);
-			await db.query(`
-        INSERT INTO application_form_fields (
-          application_form_id,
-          base_field_id,
-          position,
-          label,
-          created_at
-        )
-        VALUES
-          ( 1, 2, 1, 'Short summary or title', '2525-01-04T00:00:05Z' ),
-          ( 1, 1, 2, 'Long summary or abstract', '2525-01-04T00:00:06Z' );
-      `);
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			await createApplicationFormField({
+				applicationFormId: 1,
+				baseFieldId: 2,
+				position: 1,
+				label: 'Short summary or title',
+			});
+			await createApplicationFormField({
+				applicationFormId: 1,
+				baseFieldId: 1,
+				position: 2,
+				label: 'Long summary or abstract',
+			});
 			const testUser = await loadTestUser();
 			await createProposal({
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: 1,
 				createdBy: testUser.id,
 			});
-			await db.query(`
-        INSERT INTO proposal_versions (
-          proposal_id,
-          application_form_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, 1, '2525-01-04T00:00:08Z' ),
-          ( 1, 1, 2, '2525-01-04T00:00:09Z' );
-      `);
-			await db.query(`
-        INSERT INTO proposal_field_values (
-          proposal_version_id,
-          application_form_field_id,
-          position,
-          value,
-					is_valid,
-          created_at
-        )
-        VALUES
-          ( 1, 1, 1, 'Title for version 1 from 2525-01-04', true, '2525-01-04T00:00:10Z' ),
-          ( 1, 2, 2, 'Abstract for version 1 from 2525-01-04', true, '2525-01-04T00:00:11Z'),
-          ( 2, 1, 1, 'Title for version 2 from 2525-01-04', true, '2525-01-04T00:00:12Z' ),
-          ( 2, 2, 2, 'Abstract for version 2 from 2525-01-04', true, '2525-01-04T00:00:13Z' );
-      `);
+			await createProposalVersion({
+				proposalId: 1,
+				applicationFormId: 1,
+			});
+			await createProposalVersion({
+				proposalId: 1,
+				applicationFormId: 1,
+			});
+			await createProposalFieldValue({
+				proposalVersionId: 1,
+				applicationFormFieldId: 1,
+				position: 1,
+				value: 'Title for version 1 from 2525-01-04',
+				isValid: true,
+			});
+			await createProposalFieldValue({
+				proposalVersionId: 1,
+				applicationFormFieldId: 2,
+				position: 2,
+				value: 'Abstract for version 1 from 2525-01-04',
+				isValid: true,
+			});
+			await createProposalFieldValue({
+				proposalVersionId: 2,
+				applicationFormFieldId: 1,
+				position: 1,
+				value: 'Title for version 2 from 2525-01-04',
+				isValid: true,
+			});
+			await createProposalFieldValue({
+				proposalVersionId: 2,
+				applicationFormFieldId: 2,
+				position: 2,
+				value: 'Abstract for version 2 from 2525-01-04',
+				isValid: true,
+			});
 			const response = await agent
 				.get('/proposals/1')
 				.set(authHeader)
@@ -941,14 +930,9 @@ describe('/proposals', () => {
 		it('returns the proposal if an administrator requests a proposal they do not own', async () => {
 			const testUser = await loadTestUser();
 			await createTestBaseFields();
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🌎', '2525-01-04T00:00:01Z' )
-      `);
+			await createOpportunity({
+				title: '🌎',
+			});
 			await createApplicationForm({
 				opportunityId: 1,
 			});
@@ -969,32 +953,42 @@ describe('/proposals', () => {
 				opportunityId: 1,
 				createdBy: testUser.id,
 			});
-			await db.query(`
-        INSERT INTO proposal_versions (
-          proposal_id,
-          application_form_id,
-          version,
-          created_at
-        )
-        VALUES
-          ( 1, 1, 1, '2525-01-04T00:00:08Z' ),
-          ( 1, 1, 2, '2525-01-04T00:00:09Z' );
-      `);
-			await db.query(`
-        INSERT INTO proposal_field_values (
-          proposal_version_id,
-          application_form_field_id,
-          position,
-          value,
-					is_valid,
-          created_at
-        )
-        VALUES
-          ( 1, 1, 1, 'Title for version 1 from 2525-01-04', true, '2525-01-04T00:00:10Z' ),
-          ( 1, 2, 2, 'Abstract for version 1 from 2525-01-04', true, '2525-01-04T00:00:11Z'),
-          ( 2, 1, 1, 'Title for version 2 from 2525-01-04', true, '2525-01-04T00:00:12Z' ),
-          ( 2, 2, 2, 'Abstract for version 2 from 2525-01-04', true, '2525-01-04T00:00:13Z' );
-      `);
+			await createProposalVersion({
+				proposalId: 1,
+				applicationFormId: 1,
+			});
+			await createProposalVersion({
+				proposalId: 1,
+				applicationFormId: 1,
+			});
+			await createProposalFieldValue({
+				proposalVersionId: 1,
+				applicationFormFieldId: 1,
+				position: 1,
+				value: 'Title for version 1 from 2525-01-04',
+				isValid: true,
+			});
+			await createProposalFieldValue({
+				proposalVersionId: 1,
+				applicationFormFieldId: 2,
+				position: 2,
+				value: 'Abstract for version 1 from 2525-01-04',
+				isValid: true,
+			});
+			await createProposalFieldValue({
+				proposalVersionId: 2,
+				applicationFormFieldId: 1,
+				position: 1,
+				value: 'Title for version 2 from 2525-01-04',
+				isValid: true,
+			});
+			await createProposalFieldValue({
+				proposalVersionId: 2,
+				applicationFormFieldId: 2,
+				position: 2,
+				value: 'Abstract for version 2 from 2525-01-04',
+				isValid: true,
+			});
 			const response = await agent
 				.get('/proposals/1')
 				.set(authHeaderWithAdminRole)
@@ -1143,14 +1137,9 @@ describe('/proposals', () => {
 		});
 
 		it('creates exactly one proposal', async () => {
-			await db.query(`
-        INSERT INTO opportunities (
-          title,
-          created_at
-        )
-        VALUES
-          ( '🔥', '2525-01-02T00:00:01Z' )
-      `);
+			await createOpportunity({
+				title: '🔥',
+			});
 			const before = await loadTableMetrics('proposals');
 			const testUser = await loadTestUser();
 			const result = await agent

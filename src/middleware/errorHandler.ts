@@ -15,7 +15,7 @@ const logger = getLogger(__filename);
 const getHttpStatusCodeForDatabaseErrorCode = (errorCode: string): number => {
 	switch (errorCode) {
 		case PostgresErrorCode.FOREIGN_KEY_VIOLATION.valueOf():
-			return 409;
+			return 422;
 		case PostgresErrorCode.UNIQUE_VIOLATION.valueOf():
 			return 409;
 		case PostgresErrorCode.INSUFFICIENT_RESOURCES.valueOf():

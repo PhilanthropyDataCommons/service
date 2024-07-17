@@ -351,7 +351,7 @@ describe('/applicationForms', () => {
 			});
 		});
 
-		it('returns 409 conflict when a non-existent opportunity id is provided', async () => {
+		it('returns 422 conflict when a non-existent opportunity id is provided', async () => {
 			const result = await agent
 				.post('/applicationForms')
 				.type('application/json')
@@ -360,7 +360,7 @@ describe('/applicationForms', () => {
 					opportunityId: 1,
 					fields: [],
 				})
-				.expect(409);
+				.expect(422);
 			expect(result.body).toMatchObject({
 				name: 'DatabaseError',
 				details: [

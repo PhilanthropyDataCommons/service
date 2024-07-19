@@ -31,7 +31,7 @@
 				"schema": {
 					"type": "integer",
 					"minimum": 1,
-					"default": 100
+					"default": 10
 				},
 				"in": "query",
 				"name": "_count",

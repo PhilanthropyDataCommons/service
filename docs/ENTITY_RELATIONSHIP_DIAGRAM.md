@@ -11,15 +11,11 @@ erDiagram
     string dataType
     datetime createdAt
   }
-  Applicant {
+  Organization {
     int id
-    string externalId
-    bool optedIn
-    datetime createdAt
-  }
-  ExternalSource {
-    int id
+    string taxId
     string name
+    datetime createdAt
   }
   Proposal {
     int id
@@ -81,7 +77,7 @@ erDiagram
     datetime createdAt
   }
 
-  Applicant ||--o{ Proposal : submits
+  Organization ||--o{ Proposal : submits
   Proposal }|--|| Opportunity : "responds to"
   Opportunity ||--|{ ApplicationForm : establishes
   Proposal ||--o{ Outcome : "has"
@@ -90,7 +86,7 @@ erDiagram
   Proposal ||--|{ ProposalVersion : has
   ProposalVersion ||--|{ ProposalFieldValue : contains
   ProposalFieldValue }o--|| ApplicationFormField : populates
-  Applicant ||--o{ ExternalFieldValue : "is described by"
+  Organization ||--o{ ExternalFieldValue : "is described by"
   ExternalFieldValue }o--|| BaseField : "contains potential defaults for"
   ExternalSource ||--o{ ExternalFieldValue : "populates"
 ```

@@ -6,6 +6,8 @@ export * from './loadBaseFields';
 export * from './loadBulkUpload';
 export * from './loadBulkUploadBundle';
 export * from './loadBundle';
+export * from './loadFunder';
+export * from './loadFunderBundle';
 export * from './loadOpportunity';
 export * from './loadOpportunityBundle';
 export * from './loadOrganization';

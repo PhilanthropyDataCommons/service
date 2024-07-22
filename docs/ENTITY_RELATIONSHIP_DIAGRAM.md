@@ -76,6 +76,11 @@ erDiagram
     string log
     datetime createdAt
   }
+  Funder {
+    int id
+    string name
+    datetime createdAt
+  }
 
   Organization ||--o{ Proposal : submits
   Proposal }|--|| Opportunity : "responds to"

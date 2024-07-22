@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.12.0",
+		"version": "0.12.1",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -183,6 +183,25 @@
 						"required": ["entries"]
 					}
 				]
+			},
+			"Funder": {
+				"type": "object",
+				"properties": {
+					"shortCode": {
+						"$ref": "#/components/schemas/shortCode",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"example": "Example Foundation"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "name", "createdAt"]
 			},
 			"Organization": {
 				"type": "object",
@@ -498,6 +517,10 @@
 					"createdAt"
 				]
 			},
+			"shortCode": {
+				"type": "string",
+				"pattern": "^[\\w\\-]+$"
+			},
 			"BaseField": {
 				"type": "object",
 				"properties": {
@@ -515,8 +538,7 @@
 						"example": "The first name of the applicant"
 					},
 					"shortCode": {
-						"type": "string",
-						"example": "firstName"
+						"$ref": "#/components/schemas/shortCode"
 					},
 					"localizations": {
 						"type": "object",
@@ -711,6 +733,25 @@
 								"type": "array",
 								"items": {
 									"$ref": "#/components/schemas/ApplicationForm"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
+			"FunderBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/Funder"
 								}
 							}
 						},
@@ -1596,6 +1637,122 @@
 					},
 					"404": {
 						"description": "The base field could not be found."
+					}
+				}
+			}
+		},
+		"/funders": {
+			"get": {
+				"operationId": "getFunders",
+				"summary": "Gets a list of funders.",
+				"tags": ["Funders"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" }
+				],
+				"responses": {
+					"200": {
+						"description": "A list of funders.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/FunderBundle"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/funders/{funderShortCode}": {
+			"get": {
+				"operationId": "getFunderById",
+				"summary": "Gets a specific funder.",
+				"tags": ["Funders"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "funderShortCode",
+						"description": "The short code of a funder.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The funder.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Funder"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"operationId": "createOrUpdateFunder",
+				"summary": "Creates or updates a new funder.",
+				"tags": ["Funders"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "funderShortCode",
+						"description": "The short code of a funder.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Funder"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new funder that was created.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Funder"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
 					}
 				}
 			}

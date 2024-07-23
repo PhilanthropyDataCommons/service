@@ -5,6 +5,7 @@ export * from './BaseField';
 export * from './BulkUpload';
 export * from './Bundle';
 export * from './CheckResult';
+export * from './DataProvider';
 export * from './express/AuthenticatedRequest';
 export * from './Funder';
 export * from './Id';

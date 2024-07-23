@@ -76,6 +76,11 @@ erDiagram
     string log
     datetime createdAt
   }
+  DataProvider {
+    int id
+    string name
+    datetime createdAt
+  }
   Funder {
     int id
     string name

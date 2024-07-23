@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.12.1",
+		"version": "0.12.2",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -183,6 +183,25 @@
 						"required": ["entries"]
 					}
 				]
+			},
+			"DataProvider": {
+				"type": "object",
+				"properties": {
+					"shortCode": {
+						"$ref": "#/components/schemas/shortCode",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"example": "Philanthropy Data Warehouse"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "name", "createdAt"]
 			},
 			"Funder": {
 				"type": "object",
@@ -733,6 +752,25 @@
 								"type": "array",
 								"items": {
 									"$ref": "#/components/schemas/ApplicationForm"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
+			"DataProviderBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/DataProvider"
 								}
 							}
 						},
@@ -1637,6 +1675,157 @@
 					},
 					"404": {
 						"description": "The base field could not be found."
+					}
+				}
+			}
+		},
+		"/dataProviders": {
+			"get": {
+				"operationId": "getDataProviders",
+				"summary": "Gets a list of data providers.",
+				"tags": ["Data Providers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" }
+				],
+				"responses": {
+					"200": {
+						"description": "A list of data providers.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DataProviderBundle"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/dataProviders/{dataProviderShortCode}": {
+			"get": {
+				"operationId": "getDataProviderByShortCode",
+				"summary": "Gets a specific data provider.",
+				"tags": ["Data Providers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "dataProviderShortCode",
+						"description": "The short code of a data provider.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The data provider.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DataProvider"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"operationId": "createOrUpdateDataProvider",
+				"summary": "Creates or updates a new data provider.",
+				"tags": ["Data Providers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "dataProviderShortCode",
+						"description": "The short code of a data provider.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DataProvider"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new data provider that was created.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DataProvider"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/dataProviders/{dataProviderId}": {
+			"get": {
+				"operationId": "getDataPRoviderById",
+				"summary": "Gets a specific data provider.",
+				"tags": ["Data Providers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "dataProviderId",
+						"description": "The PDC-generated ID of a data provider.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The data provider.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DataProvider"
+								}
+							}
+						}
 					}
 				}
 			}

@@ -76,6 +76,11 @@ erDiagram
     string log
     datetime createdAt
   }
+  DataProvider {
+    string shortCode
+    string name
+    datetime createdAt
+  }
   Funder {
     string shortCode
     string name

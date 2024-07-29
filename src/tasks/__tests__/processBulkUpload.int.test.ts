@@ -10,6 +10,7 @@ import {
 	loadOrganizationBundle,
 	loadOrganizationProposalBundle,
 	loadOpportunityBundle,
+	createBaseFieldLocalization,
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -64,26 +65,38 @@ const createTestBulkUpload = async (
 };
 
 const createTestBaseFields = async (): Promise<void> => {
-	await createBaseField({
-		label: 'Proposal Submitter Email',
-		description: 'The email address of the person who submitted the proposal.',
+	const baseFieldOne = await createBaseField({
 		shortCode: 'proposal_submitter_email',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 	});
-	await createBaseField({
-		label: 'Organization Name',
-		description: 'The name of the applying organization.',
+	await createBaseFieldLocalization({
+		baseFieldId: baseFieldOne.id,
+		language: 'en',
+		label: 'Proposal Submitter Email',
+		description: 'The email address of the person who submitted the proposal.',
+	});
+	const baseFieldTwo = await createBaseField({
 		shortCode: 'organization_name',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 	});
-	await createBaseField({
-		label: 'Organization EIN',
+	await createBaseFieldLocalization({
+		baseFieldId: baseFieldTwo.id,
+		language: 'en',
+		label: 'Organization Name',
 		description: 'The name of the applying organization.',
+	});
+	const baseFieldThree = await createBaseField({
 		shortCode: 'organization_tax_id',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
+	});
+	await createBaseFieldLocalization({
+		baseFieldId: baseFieldThree.id,
+		language: 'en',
+		label: 'Organization EIN',
+		description: 'The name of the applying organization.',
 	});
 };
 
@@ -386,10 +399,17 @@ describe('processBulkUpload', () => {
 										baseField: {
 											createdAt: expectTimestamp,
 											dataType: 'string',
-											description:
-												'The email address of the person who submitted the proposal.',
 											id: 1,
-											label: 'Proposal Submitter Email',
+											localizations: [
+												{
+													baseFieldId: 1,
+													createdAt: expectTimestamp,
+													description:
+														'The email address of the person who submitted the proposal.',
+													label: 'Proposal Submitter Email',
+													language: 'en',
+												},
+											],
 											scope: 'proposal',
 											shortCode: 'proposal_submitter_email',
 										},
@@ -413,9 +433,16 @@ describe('processBulkUpload', () => {
 										baseField: {
 											createdAt: expectTimestamp,
 											dataType: 'string',
-											description: 'The name of the applying organization.',
 											id: 2,
-											label: 'Organization Name',
+											localizations: [
+												{
+													baseFieldId: 2,
+													createdAt: expectTimestamp,
+													description: 'The name of the applying organization.',
+													label: 'Organization Name',
+													language: 'en',
+												},
+											],
 											scope: 'organization',
 											shortCode: 'organization_name',
 										},
@@ -457,10 +484,17 @@ describe('processBulkUpload', () => {
 										baseField: {
 											createdAt: expectTimestamp,
 											dataType: 'string',
-											description:
-												'The email address of the person who submitted the proposal.',
 											id: 1,
-											label: 'Proposal Submitter Email',
+											localizations: [
+												{
+													baseFieldId: 1,
+													createdAt: expectTimestamp,
+													description:
+														'The email address of the person who submitted the proposal.',
+													label: 'Proposal Submitter Email',
+													language: 'en',
+												},
+											],
 											scope: 'proposal',
 											shortCode: 'proposal_submitter_email',
 										},
@@ -484,9 +518,16 @@ describe('processBulkUpload', () => {
 										baseField: {
 											createdAt: expectTimestamp,
 											dataType: 'string',
-											description: 'The name of the applying organization.',
 											id: 2,
-											label: 'Organization Name',
+											localizations: [
+												{
+													baseFieldId: 2,
+													createdAt: expectTimestamp,
+													description: 'The name of the applying organization.',
+													label: 'Organization Name',
+													language: 'en',
+												},
+											],
 											scope: 'organization',
 											shortCode: 'organization_name',
 										},

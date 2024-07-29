@@ -15,5 +15,15 @@ baseFieldsRouter.put(
 	requireAdministratorRole,
 	baseFieldsHandlers.putBaseField,
 );
+baseFieldsRouter.post(
+	'/:id/localizations',
+	requireAdministratorRole,
+	baseFieldsHandlers.postBaseFieldLocalization,
+);
+baseFieldsRouter.put(
+	'/:id/:language',
+	requireAdministratorRole,
+	baseFieldsHandlers.putBaseFieldLocalization,
+);
 
 export { baseFieldsRouter };

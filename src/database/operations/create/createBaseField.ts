@@ -1,4 +1,4 @@
-import { db } from '../../db';
+import { db as defaultDb } from '../../db';
 import type {
 	BaseField,
 	JsonResultSet,
@@ -7,13 +7,12 @@ import type {
 
 export const createBaseField = async (
 	createValues: WritableBaseField,
+	db = defaultDb,
 ): Promise<BaseField> => {
-	const { label, description, shortCode, dataType, scope } = createValues;
+	const { shortCode, dataType, scope } = createValues;
 	const result = await db.sql<JsonResultSet<BaseField>>(
 		'baseFields.insertOne',
 		{
-			label,
-			description,
 			shortCode,
 			dataType,
 			scope,
@@ -25,5 +24,6 @@ export const createBaseField = async (
 			'The base field creation did not appear to fail, but no data was returned by the operation.',
 		);
 	}
+
 	return baseField;
 };

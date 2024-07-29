@@ -1,4 +1,9 @@
 import { ajv } from '../ajv';
+import {
+	writableBaseFieldLocalizationWithBaseFieldContextSchema,
+	type BaseFieldLocalization,
+	type WritableBaseFieldLocalizationWithBaseFieldContext,
+} from './BaseFieldLocalization';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 
@@ -18,25 +23,22 @@ export enum BaseFieldScope {
 
 interface BaseField {
 	readonly id: number;
-	label: string;
-	description: string;
 	shortCode: string;
 	dataType: BaseFieldDataType;
 	scope: BaseFieldScope;
+	readonly localizations: BaseFieldLocalization[];
 	readonly createdAt: string;
 }
 
 type WritableBaseField = Writable<BaseField>;
 
+type WritableBaseFieldWithLocalizations = WritableBaseField & {
+	localizations: WritableBaseFieldLocalizationWithBaseFieldContext[];
+};
+
 const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 	type: 'object',
 	properties: {
-		label: {
-			type: 'string',
-		},
-		description: {
-			type: 'string',
-		},
 		shortCode: {
 			type: 'string',
 		},
@@ -49,14 +51,47 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 			enum: Object.values(BaseFieldScope),
 		},
 	},
-	required: ['label', 'description', 'shortCode', 'dataType', 'scope'],
+	required: ['shortCode', 'dataType', 'scope'],
+	additionalProperties: false,
 };
+
+const writableBaseFieldWithLocalizationsSchema: JSONSchemaType<WritableBaseFieldWithLocalizations> =
+	{
+		type: 'object',
+		properties: {
+			shortCode: {
+				type: 'string',
+			},
+			dataType: {
+				type: 'string',
+				enum: Object.values(BaseFieldDataType),
+			},
+			scope: {
+				type: 'string',
+				enum: Object.values(BaseFieldScope),
+			},
+			localizations: {
+				type: 'array',
+				items: writableBaseFieldLocalizationWithBaseFieldContextSchema,
+				minItems: 1,
+			},
+		},
+		required: ['shortCode', 'dataType', 'scope', 'localizations'],
+		additionalProperties: false,
+	};
 
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 
+const isWritableBaseFieldWithLocalizations = ajv.compile(
+	writableBaseFieldWithLocalizationsSchema,
+);
+
 export {
 	BaseField,
-	isWritableBaseField,
+	WritableBaseFieldWithLocalizations,
 	WritableBaseField,
 	writableBaseFieldSchema,
+	isWritableBaseField,
+	isWritableBaseFieldWithLocalizations,
+	writableBaseFieldWithLocalizationsSchema,
 };

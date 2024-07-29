@@ -4,6 +4,7 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	createBaseField,
+	createBaseFieldLocalization,
 	createOpportunity,
 	createProposal,
 	loadTableMetrics,
@@ -17,19 +18,27 @@ const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
-	await createBaseField({
-		label: 'First Name',
-		description: 'The first name of the applicant',
+	const baseFieldOne = await createBaseField({
 		shortCode: 'firstName',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 	});
-	await createBaseField({
-		label: 'Last Name',
-		description: 'The last name of the applicant',
+	await createBaseFieldLocalization({
+		baseFieldId: baseFieldOne.id,
+		language: 'en',
+		label: 'First Name',
+		description: 'The first name of the applicant',
+	});
+	const baseFieldTwo = await createBaseField({
 		shortCode: 'lastName',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
+	});
+	await createBaseFieldLocalization({
+		baseFieldId: baseFieldTwo.id,
+		language: 'en',
+		label: 'Last Name',
+		description: 'The last name of the applicant',
 	});
 };
 

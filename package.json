@@ -87,7 +87,7 @@
 		"graphile-worker": "^0.16.6",
 		"jwks-rsa": "^3.1.0",
 		"phone": "^3.1.49",
-		"pino": "^9.3.1",
+		"pino": "^9.3.2",
 		"pino-http": "^10.2.0",
 		"postgres-schema-migrations": "^6.1.0",
 		"require-env-variable": "^4.0.2",

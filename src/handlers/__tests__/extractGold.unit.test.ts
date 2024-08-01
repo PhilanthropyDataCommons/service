@@ -8,9 +8,9 @@ describe('extractGold', () => {
 	it('should return same contents when empty allFieldValues is passed', () => {
 		const organization: Organization = {
 			id: 1,
-			taxId: "0123456",
-			name: "Mah org",
-			createdAt: "2024-08-01T10:49:30-0600",
+			taxId: '0123456',
+			name: 'Mah org',
+			createdAt: '2024-08-01T10:49:30-0600',
 		};
 		const organizationDetail = {
 			organization,
@@ -20,4 +20,3 @@ describe('extractGold', () => {
 		expect(extractGold(organizationDetail)).toEqual(organizationDetail);
 	});
 });
-

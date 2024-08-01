@@ -2,7 +2,7 @@ import { loadBaseFields, loadOrganization } from '../database';
 import { BaseFieldScope, isId, isTinyPgErrorWithQueryContext } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import { OrganizationDetail } from '../types/OrganizationDetail';
-import { loadProposalFieldValuesByBaseFieldId } from '../database/operations/load/loadProposalFieldValuesByBaseFieldId';
+import { loadProposalFieldValuesByBaseFieldIdAndOrganizationId } from '../database/operations/load/loadProposalFieldValuesByBaseFieldIdAndOrganizationId';
 import type { Request, Response, NextFunction } from 'express';
 
 const getOrganizationDetail = (
@@ -15,7 +15,6 @@ const getOrganizationDetail = (
 		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
 		return;
 	}
-	// TODO: load the base fields that are of scope ORGANIZATION, use those to get PFVs.
 	loadBaseFields()
 		.then((baseFields) => {
 			// This could be a dedicated query but this is OK assuming only hundreds of base fields.
@@ -27,14 +26,15 @@ const getOrganizationDetail = (
 					// TODO: keep the context of the base field ID around.
 					Promise.all(
 						orgBaseFields.map((bf) =>
-							loadProposalFieldValuesByBaseFieldId(bf.id),
+							loadProposalFieldValuesByBaseFieldIdAndOrganizationId(
+								bf.id,
+								organizationId,
+							),
 						),
 					)
 						.then((fieldsAndValues) => {
-							// TODO: we need to only find proposal and external field values associated with the org.
-							// This will have to be a helper function somewhere because it's not explicit at the moment.
-							// Since we'll have one base field per call to loadProposalFieldValuesByBaseFieldId, we can
-							// make a map from either the id or the whole daggum base field. I think the latter is better.
+							// Since we'll have one base field per call to `loadProposalFieldValuesBy...`, we can
+							// make a map from either the id or the whole base field to pfvs. I lean latter.
 							const allFieldValues = fieldsAndValues.flat();
 							const organizationDetail: OrganizationDetail = {
 								organization,

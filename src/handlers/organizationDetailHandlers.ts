@@ -12,9 +12,36 @@ import { loadProposalFieldValuesByBaseFieldIdAndOrganizationId } from '../databa
 import type { Request, Response, NextFunction } from 'express';
 
 /** Takes a raw OrganizationDetail (with field values) and returns a better OrganizationDetail */
-const extractGold = (rawDetail: OrganizationDetail): OrganizationDetail => {
-	// TODO: actually pick best values
-	const bestValues = rawDetail.bestAvailableFieldValues;
+export const extractGold = (rawDetail: OrganizationDetail): OrganizationDetail => {
+	// TODO: pick even better values based on `Source`, etc.
+	const bestValues = new Map<BaseField,ProposalFieldValue>();
+	rawDetail.allFieldValues.forEach((fieldValues, baseField) => {
+		const validFieldValues = fieldValues.filter((value) => value.isValid);
+		// Simplest case: after filtering for validity, we have nothing left. Skip it.
+		if (validFieldValues.length === 0) {
+			return;
+		}
+		// After filtering, only one value is left. It is therefore the only candidate, so use it.
+		if (validFieldValues.length === 1 && validFieldValues[0] !== undefined) {
+			bestValues.set(baseField, validFieldValues[0]);
+			return;
+		}
+		// N (not 0, not 1) candidates remain.
+		// Sort by insert date (latest first). The `createdAt` property is not a Date for reasons explained
+		// at https://github.com/PhilanthropyDataCommons/service/issues/862.
+		// Lexical order should be date order so we could avoid creating new objects here.
+		validFieldValues.sort((a,b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf());
+		// Because we want to choose exactly one here, I think imperative iteration is key.
+		// TODO: satisfy the linter here
+		for (const fieldValue of validFieldValues.values()) {
+			// Choose the first not-undefined one (should be the first).
+			if (fieldValue !== undefined) {
+				bestValues.set(baseField, fieldValue);
+				return;
+			}
+		};
+  });
+
 	return {
 		organization: rawDetail.organization,
 		bestAvailableFieldValues: bestValues,

@@ -1,5 +1,11 @@
 import { loadBaseFields, loadOrganization } from '../database';
-import { BaseFieldScope, isId, isTinyPgErrorWithQueryContext } from '../types';
+import {
+	BaseField,
+	BaseFieldScope,
+	isId,
+	isTinyPgErrorWithQueryContext,
+	ProposalFieldValue,
+} from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import { OrganizationDetail } from '../types/OrganizationDetail';
 import { loadProposalFieldValuesByBaseFieldIdAndOrganizationId } from '../database/operations/load/loadProposalFieldValuesByBaseFieldIdAndOrganizationId';
@@ -34,22 +40,25 @@ const getOrganizationDetail = (
 			);
 			loadOrganization(organizationId)
 				.then((organization) => {
-					// TODO: keep the context of the base field ID around.
 					Promise.all(
-						orgBaseFields.map((bf) =>
+						orgBaseFields.map((baseField) =>
 							loadProposalFieldValuesByBaseFieldIdAndOrganizationId(
-								bf.id,
+								baseField.id,
 								organizationId,
-							),
+							).then((fieldValues) => ({ baseField, fieldValues })),
 						),
 					)
 						.then((fieldsAndValues) => {
-							// Since we'll have one base field per call to `loadProposalFieldValuesBy...`, we can
-							// make a map from either the id or the whole base field to pfvs. I lean latter.
-							const allFieldValues = fieldsAndValues.flat();
+							const allFieldValues = new Map<BaseField, ProposalFieldValue[]>();
+							fieldsAndValues.map((entry) =>
+								allFieldValues.set(entry.baseField, entry.fieldValues),
+							);
 							const rawOrganizationDetail: OrganizationDetail = {
 								organization,
-								bestAvailableFieldValues: [],
+								bestAvailableFieldValues: new Map<
+									BaseField,
+									ProposalFieldValue
+								>(),
 								allFieldValues,
 							};
 							const organizationDetail = extractGold(rawOrganizationDetail);

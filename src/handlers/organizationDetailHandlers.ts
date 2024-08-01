@@ -5,6 +5,17 @@ import { OrganizationDetail } from '../types/OrganizationDetail';
 import { loadProposalFieldValuesByBaseFieldIdAndOrganizationId } from '../database/operations/load/loadProposalFieldValuesByBaseFieldIdAndOrganizationId';
 import type { Request, Response, NextFunction } from 'express';
 
+/** Takes a raw OrganizationDetail (with field values) and returns a better OrganizationDetail */
+const extractGold = (rawDetail: OrganizationDetail): OrganizationDetail => {
+	// TODO: actually pick best values
+	const bestValues = rawDetail.bestAvailableFieldValues;
+	return {
+		organization: rawDetail.organization,
+		bestAvailableFieldValues: bestValues,
+		allFieldValues: rawDetail.allFieldValues,
+	};
+};
+
 const getOrganizationDetail = (
 	req: Request,
 	res: Response,
@@ -36,12 +47,12 @@ const getOrganizationDetail = (
 							// Since we'll have one base field per call to `loadProposalFieldValuesBy...`, we can
 							// make a map from either the id or the whole base field to pfvs. I lean latter.
 							const allFieldValues = fieldsAndValues.flat();
-							const organizationDetail: OrganizationDetail = {
+							const rawOrganizationDetail: OrganizationDetail = {
 								organization,
-								// TODO: create and call a function that purifies gold from the larger list.
 								bestAvailableFieldValues: [],
 								allFieldValues,
 							};
+							const organizationDetail = extractGold(rawOrganizationDetail);
 							res
 								.status(200)
 								.contentType('application/json')

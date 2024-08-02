@@ -1,5 +1,5 @@
 // TODO: I expect this and the corresponding function will be moved somewhere TBD.
-// TODO: Add more meaningful tests.
+// TODO: Add more meaningful tests as more meaningful extraction is added.
 
 import {
 	BaseField,
@@ -8,6 +8,7 @@ import {
 	Organization,
 	ProposalFieldValue,
 } from '../../types';
+import { OrganizationDetail } from '../../types/OrganizationDetail';
 import { extractGold } from '../organizationDetailHandlers';
 
 describe('extractGold', () => {
@@ -18,10 +19,10 @@ describe('extractGold', () => {
 			name: 'My org',
 			createdAt: '2024-08-01T10:49:30-0600',
 		};
-		const organizationDetail = {
+		const organizationDetail: OrganizationDetail = {
 			organization,
-			bestAvailableFieldValues: new Map(),
-			allFieldValues: new Map(),
+			bestVisibleFieldValues: new Map(),
+			allVisibleFieldValues: new Map(),
 		};
 		expect(extractGold(organizationDetail)).toEqual(organizationDetail);
 	});
@@ -33,7 +34,7 @@ describe('extractGold', () => {
 			name: 'Five thousand one hundred forty seven reasons',
 			createdAt: '2024-08-01T13:41:42-0600',
 		};
-		const allFieldValues = new Map<BaseField, ProposalFieldValue[]>();
+		const allVisibleFieldValues = new Map<BaseField, ProposalFieldValue[]>();
 		const baseField: BaseField = {
 			id: 5153,
 			label: 'Fifty one fifty three',
@@ -97,22 +98,22 @@ describe('extractGold', () => {
 			isValid: true,
 			createdAt: '2024-08-01T15:29:07-0600', // Between the above PFV.createdAt values.
 		};
-		allFieldValues.set(baseField, [
+		allVisibleFieldValues.set(baseField, [
 			latestValueButInvalid,
 			validButEarliestValue,
 			latestValidValue,
 		]);
-		const organizationDetail = {
+		const organizationDetail: OrganizationDetail = {
 			organization,
-			bestAvailableFieldValues: new Map(),
-			allFieldValues,
+			bestVisibleFieldValues: new Map(),
+			allVisibleFieldValues,
 		};
 		const expectedBest = new Map<BaseField, ProposalFieldValue>();
 		expectedBest.set(baseField, latestValidValue);
 		expect(extractGold(organizationDetail)).toEqual({
 			organization,
-			bestAvailableFieldValues: expectedBest,
-			allFieldValues,
+			bestVisibleFieldValues: expectedBest,
+			allVisibleFieldValues,
 		});
 	});
 });

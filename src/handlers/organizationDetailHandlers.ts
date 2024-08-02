@@ -17,7 +17,7 @@ export const extractGold = (
 ): OrganizationDetail => {
 	// TODO: pick even better values based on `Source`, etc.
 	const bestValues = new Map<BaseField, ProposalFieldValue>();
-	rawDetail.allFieldValues.forEach((fieldValues, baseField) => {
+	rawDetail.allVisibleFieldValues.forEach((fieldValues, baseField) => {
 		const validFieldValues = fieldValues.filter((value) => value.isValid);
 		// Simplest case: after filtering for validity, we have nothing left. Skip it.
 		if (validFieldValues.length === 0) {
@@ -49,8 +49,8 @@ export const extractGold = (
 
 	return {
 		organization: rawDetail.organization,
-		bestAvailableFieldValues: bestValues,
-		allFieldValues: rawDetail.allFieldValues,
+		bestVisibleFieldValues: bestValues,
+		allVisibleFieldValues: rawDetail.allVisibleFieldValues,
 	};
 };
 
@@ -87,11 +87,11 @@ const getOrganizationDetail = (
 							);
 							const rawOrganizationDetail: OrganizationDetail = {
 								organization,
-								bestAvailableFieldValues: new Map<
+								bestVisibleFieldValues: new Map<
 									BaseField,
 									ProposalFieldValue
 								>(),
-								allFieldValues,
+								allVisibleFieldValues: allFieldValues,
 							};
 							const organizationDetail = extractGold(rawOrganizationDetail);
 							res

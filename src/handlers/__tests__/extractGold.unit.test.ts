@@ -1,6 +1,3 @@
-// TODO: I expect this and the corresponding function will be moved somewhere TBD.
-// TODO: Add more meaningful tests as more meaningful extraction is added.
-
 import {
 	BaseField,
 	BaseFieldDataType,
@@ -8,8 +5,8 @@ import {
 	Organization,
 	ProposalFieldValue,
 } from '../../types';
-import { OrganizationDetail } from '../../types/OrganizationDetail';
-import { extractGold } from '../organizationDetailHandlers';
+import { OrganizationDetails } from '../../types/OrganizationDetails';
+import { extractGold } from '../organizationsHandlers';
 
 describe('extractGold', () => {
 	it('should return same contents when empty allFieldValues is passed', () => {
@@ -19,12 +16,12 @@ describe('extractGold', () => {
 			name: 'My org',
 			createdAt: '2024-08-01T10:49:30-0600',
 		};
-		const organizationDetail: OrganizationDetail = {
+		const organizationDetails: OrganizationDetails = {
 			organization,
 			bestVisibleFieldValues: new Map(),
 			allVisibleFieldValues: new Map(),
 		};
-		expect(extractGold(organizationDetail)).toEqual(organizationDetail);
+		expect(extractGold(organizationDetails)).toEqual(organizationDetails);
 	});
 
 	it('should return the latest valid value for a base field', () => {
@@ -103,14 +100,14 @@ describe('extractGold', () => {
 			validButEarliestValue,
 			latestValidValue,
 		]);
-		const organizationDetail: OrganizationDetail = {
+		const organizationDetails: OrganizationDetails = {
 			organization,
 			bestVisibleFieldValues: new Map(),
 			allVisibleFieldValues,
 		};
 		const expectedBest = new Map<BaseField, ProposalFieldValue>();
 		expectedBest.set(baseField, latestValidValue);
-		expect(extractGold(organizationDetail)).toEqual({
+		expect(extractGold(organizationDetails)).toEqual({
 			organization,
 			bestVisibleFieldValues: expectedBest,
 			allVisibleFieldValues,

@@ -1,6 +1,6 @@
 import type { BaseField, Organization, ProposalFieldValue } from '.';
 
-interface OrganizationDetail {
+interface OrganizationDetails {
 	readonly organization: Organization;
 	// TODO: Make these a type that covers either ProposalFieldValue or ExternalFieldValue.
 	// TODO: improve the types below for better JSONification, e.g. use base field ID as key.
@@ -10,4 +10,4 @@ interface OrganizationDetail {
 	readonly allVisibleFieldValues: Map<BaseField, ProposalFieldValue[]>;
 }
 
-export { OrganizationDetail };
+export { OrganizationDetails };

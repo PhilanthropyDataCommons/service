@@ -24,6 +24,13 @@ jobs:
           path: 'sdk'
       - name: Copy API definition
         run: cp service/src/openapi.json sdk/openapi.json
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
       - name: Invoke the TypeScript generator
         working-directory: sdk
         run: ./gradlew generateSwaggerCode

@@ -17,10 +17,4 @@ organizationsRouter.post(
 	organizationsHandlers.postOrganization,
 );
 
-organizationsRouter.get(
-	'/:organizationId/details',
-	requireAuthentication,
-	organizationsHandlers.getOrganizationDetails,
-);
-
 export { organizationsRouter };

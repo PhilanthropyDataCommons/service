@@ -12,13 +12,13 @@ import {
 	BaseField,
 	ProposalFieldValue,
 	BaseFieldScope,
+	Organization,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import {
 	extractPaginationParameters,
 	extractProposalParameters,
 } from '../queryParameters';
-import { OrganizationDetails } from '../types/OrganizationDetails';
 import { loadProposalFieldValuesByBaseFieldIdAndOrganizationId } from '../database/operations/load/loadProposalFieldValuesByBaseFieldIdAndOrganizationId';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -72,36 +72,13 @@ const getOrganizations = (
 		});
 };
 
-const getOrganization = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
-	const { organizationId } = req.params;
-	if (!isId(organizationId)) {
-		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
-		return;
-	}
-	loadOrganization(organizationId)
-		.then((organization) => {
-			res.status(200).contentType('application/json').send(organization);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving organization.', error));
-				return;
-			}
-			next(error);
-		});
-};
-
-/** Takes a raw OrganizationDetails (with field values) and returns a better OrganizationDetails */
+/** Takes a map of base fields to array of field values and returns a map of base fields to single best value */
 export const extractGold = (
-	rawDetail: OrganizationDetails,
-): OrganizationDetails => {
+	rawDetail: Map<BaseField, ProposalFieldValue[]>,
+): Map<BaseField, ProposalFieldValue> => {
 	// TODO: pick even better values based on `Source`, etc.
 	const bestValues = new Map<BaseField, ProposalFieldValue>();
-	rawDetail.allVisibleFieldValues.forEach((fieldValues, baseField) => {
+	rawDetail.forEach((fieldValues, baseField) => {
 		const validFieldValues = fieldValues.filter((value) => value.isValid);
 		// Simplest case: after filtering for validity, we have nothing left. Skip it.
 		if (validFieldValues.length === 0) {
@@ -131,14 +108,51 @@ export const extractGold = (
 		}
 	});
 
-	return {
-		organization: rawDetail.organization,
-		bestVisibleFieldValues: bestValues,
-		allVisibleFieldValues: rawDetail.allVisibleFieldValues,
-	};
+	return bestValues;
 };
 
-const getOrganizationDetails = (
+// TODO: refactor error handling now that this is not middleware.
+const getFieldValues = (organization: Organization): void => {
+	loadBaseFields()
+		.then((baseFields) => {
+			// This could be a dedicated query but this is OK assuming only hundreds of base fields.
+			const orgBaseFields = baseFields.filter(
+				(f) => f.scope === BaseFieldScope.ORGANIZATION,
+			);
+			Promise.all(
+				orgBaseFields.map((baseField) =>
+					loadProposalFieldValuesByBaseFieldIdAndOrganizationId(
+						baseField.id,
+						organization.id,
+					).then((fieldValues) => ({ baseField, fieldValues })),
+				),
+			)
+				.then((fieldsAndValues) => {
+					const allFieldValues = new Map<BaseField, ProposalFieldValue[]>();
+					fieldsAndValues.map((entry) =>
+						allFieldValues.set(entry.baseField, entry.fieldValues),
+					);
+					return extractGold(allFieldValues);
+				})
+				.catch((error: unknown) => {
+					if (isTinyPgErrorWithQueryContext(error)) {
+						throw new DatabaseError(
+							'Error retrieving proposal field values.',
+							error,
+						);
+					}
+					throw error;
+				});
+		})
+		.catch((error: unknown) => {
+			if (isTinyPgErrorWithQueryContext(error)) {
+				throw new DatabaseError('Error retrieving organization.', error);
+			}
+			throw error;
+		});
+};
+
+const getOrganization = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
@@ -148,65 +162,26 @@ const getOrganizationDetails = (
 		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
 		return;
 	}
-	loadBaseFields()
-		.then((baseFields) => {
-			// This could be a dedicated query but this is OK assuming only hundreds of base fields.
-			const orgBaseFields = baseFields.filter(
-				(f) => f.scope === BaseFieldScope.ORGANIZATION,
-			);
-			loadOrganization(organizationId)
-				.then((organization) => {
-					Promise.all(
-						orgBaseFields.map((baseField) =>
-							loadProposalFieldValuesByBaseFieldIdAndOrganizationId(
-								baseField.id,
-								organizationId,
-							).then((fieldValues) => ({ baseField, fieldValues })),
-						),
-					)
-						.then((fieldsAndValues) => {
-							const allFieldValues = new Map<BaseField, ProposalFieldValue[]>();
-							fieldsAndValues.map((entry) =>
-								allFieldValues.set(entry.baseField, entry.fieldValues),
-							);
-							const rawOrganizationDetail: OrganizationDetails = {
-								organization,
-								bestVisibleFieldValues: new Map<
-									BaseField,
-									ProposalFieldValue
-								>(),
-								allVisibleFieldValues: allFieldValues,
-							};
-							const organizationDetail = extractGold(rawOrganizationDetail);
-							res
-								.status(200)
-								.contentType('application/json')
-								.send(organizationDetail);
-						})
-						.catch((error: unknown) => {
-							if (isTinyPgErrorWithQueryContext(error)) {
-								next(
-									new DatabaseError(
-										'Error retrieving proposal field values.',
-										error,
-									),
-								);
-								return;
-							}
-							next(error);
-						});
-				})
-				.catch((error: unknown) => {
-					if (isTinyPgErrorWithQueryContext(error)) {
-						next(new DatabaseError('Error retrieving organization.', error));
-						return;
-					}
-					next(error);
-				});
+	loadOrganization(organizationId)
+		.then((organization) => {
+			// When no authenticated user is present, don't bother diving into field values.
+			if (req.user === undefined) {
+				res.status(200).contentType('application/json').send(organization);
+				return;
+			}
+			// TODO: better integrate such that pagination works too.
+			const organizationWithFieldValues = {
+				...organization,
+				fieldValues: getFieldValues(organization),
+			};
+			res
+				.status(200)
+				.contentType('application/json')
+				.send(organizationWithFieldValues);
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving base fields.', error));
+				next(new DatabaseError('Error retrieving organization.', error));
 				return;
 			}
 			next(error);
@@ -217,5 +192,4 @@ export const organizationsHandlers = {
 	postOrganization,
 	getOrganizations,
 	getOrganization,
-	getOrganizationDetails,
 };

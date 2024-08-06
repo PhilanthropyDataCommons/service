@@ -2,35 +2,16 @@ import {
 	BaseField,
 	BaseFieldDataType,
 	BaseFieldScope,
-	Organization,
 	ProposalFieldValue,
 } from '../../types';
-import { OrganizationDetails } from '../../types/OrganizationDetails';
 import { extractGold } from '../organizationsHandlers';
 
 describe('extractGold', () => {
-	it('should return same contents when empty allFieldValues is passed', () => {
-		const organization: Organization = {
-			id: 5101,
-			taxId: '05107',
-			name: 'My org',
-			createdAt: '2024-08-01T10:49:30-0600',
-		};
-		const organizationDetails: OrganizationDetails = {
-			organization,
-			bestVisibleFieldValues: new Map(),
-			allVisibleFieldValues: new Map(),
-		};
-		expect(extractGold(organizationDetails)).toEqual(organizationDetails);
+	it('should return empty map when empty map is passed', () => {
+		expect(extractGold(new Map())).toEqual(new Map());
 	});
 
 	it('should return the latest valid value for a base field', () => {
-		const organization: Organization = {
-			id: 5113,
-			taxId: '05119',
-			name: 'Five thousand one hundred forty seven reasons',
-			createdAt: '2024-08-01T13:41:42-0600',
-		};
 		const allVisibleFieldValues = new Map<BaseField, ProposalFieldValue[]>();
 		const baseField: BaseField = {
 			id: 5153,
@@ -100,17 +81,8 @@ describe('extractGold', () => {
 			validButEarliestValue,
 			latestValidValue,
 		]);
-		const organizationDetails: OrganizationDetails = {
-			organization,
-			bestVisibleFieldValues: new Map(),
-			allVisibleFieldValues,
-		};
 		const expectedBest = new Map<BaseField, ProposalFieldValue>();
 		expectedBest.set(baseField, latestValidValue);
-		expect(extractGold(organizationDetails)).toEqual({
-			organization,
-			bestVisibleFieldValues: expectedBest,
-			allVisibleFieldValues,
-		});
+		expect(extractGold(allVisibleFieldValues)).toEqual(expectedBest);
 	});
 });

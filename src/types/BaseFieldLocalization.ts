@@ -21,6 +21,7 @@ const writableBaseFieldLocalizationSchema: JSONSchemaType<WritableBaseFieldLocal
 			},
 			language: {
 				type: 'string',
+				isValidLanguage: true,
 			},
 			label: {
 				type: 'string',
@@ -47,6 +48,7 @@ const writableBaseFieldLocalizationWithBaseFieldContextSchema: JSONSchemaType<Wr
 		properties: {
 			language: {
 				type: 'string',
+				isValidLanguage: true,
 			},
 			label: {
 				type: 'string',

@@ -23,6 +23,7 @@ export * from './ProcessBulkUploadJobPayload';
 export * from './Proposal';
 export * from './ProposalFieldValue';
 export * from './ProposalVersion';
+export * from './Source';
 export * from './TableMetrics';
 export * from './TinyPgErrorWithQueryContext';
 export * from './User';

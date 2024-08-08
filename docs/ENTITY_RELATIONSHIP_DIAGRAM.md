@@ -11,15 +11,11 @@ erDiagram
     string dataType
     datetime createdAt
   }
-  Applicant {
+  Organization {
     int id
-    string externalId
-    bool optedIn
-    datetime createdAt
-  }
-  ExternalSource {
-    int id
+    string taxId
     string name
+    datetime createdAt
   }
   Proposal {
     int id
@@ -80,8 +76,26 @@ erDiagram
     string log
     datetime createdAt
   }
+  DataProvider {
+    int id
+    string name
+    datetime createdAt
+  }
+  Funder {
+    int id
+    string name
+    datetime createdAt
+  }
+  Source {
+    int id
+    string name
+    funder_id int
+    organization_id int
+    data_provider_id int
+    datetime createdAt
+  }
 
-  Applicant ||--o{ Proposal : submits
+  Organization ||--o{ Proposal : submits
   Proposal }|--|| Opportunity : "responds to"
   Opportunity ||--|{ ApplicationForm : establishes
   Proposal ||--o{ Outcome : "has"
@@ -90,9 +104,13 @@ erDiagram
   Proposal ||--|{ ProposalVersion : has
   ProposalVersion ||--|{ ProposalFieldValue : contains
   ProposalFieldValue }o--|| ApplicationFormField : populates
-  Applicant ||--o{ ExternalFieldValue : "is described by"
+  Organization ||--o{ ExternalFieldValue : "is described by"
   ExternalFieldValue }o--|| BaseField : "contains potential defaults for"
-  ExternalSource ||--o{ ExternalFieldValue : "populates"
+  Source }|--o| Funder : "represents"
+  Source }|--o| Organization : "represents"
+  Source }|--o| DataProvider : "represents"
+  ProposalVersion }o--|| Source : "comes from"
+  ExternalFieldValue }o--|| Source : "comes from"
 ```
 
 ## Narrative

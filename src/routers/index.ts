@@ -11,6 +11,7 @@ import { platformProviderResponsesRouter } from './platformProviderResponsesRout
 import { presignedPostRequestsRouter } from './presignedPostRequestsRouter';
 import { proposalsRouter } from './proposalsRouter';
 import { proposalVersionsRouter } from './proposalVersionsRouter';
+import { sourcesRouter } from './sourcesRouter';
 import { usersRouter } from './usersRouter';
 import { documentationRouter } from './documentationRouter';
 
@@ -28,6 +29,7 @@ rootRouter.use('/platformProviderResponses', platformProviderResponsesRouter);
 rootRouter.use('/presignedPostRequests', presignedPostRequestsRouter);
 rootRouter.use('/proposals', proposalsRouter);
 rootRouter.use('/proposalVersions', proposalVersionsRouter);
+rootRouter.use('/sources', sourcesRouter);
 rootRouter.use('/users', usersRouter);
 rootRouter.use('/', documentationRouter);
 

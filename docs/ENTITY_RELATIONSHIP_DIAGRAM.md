@@ -86,6 +86,14 @@ erDiagram
     string name
     datetime createdAt
   }
+  Source {
+    int id
+    string name
+    string funder_short_code
+    int organization_id
+    string data_provider_short_code
+    datetime createdAt
+  }
 
   Organization ||--o{ Proposal : submits
   Proposal }|--|| Opportunity : "responds to"
@@ -98,7 +106,11 @@ erDiagram
   ProposalFieldValue }o--|| ApplicationFormField : populates
   Organization ||--o{ ExternalFieldValue : "is described by"
   ExternalFieldValue }o--|| BaseField : "contains potential defaults for"
-  ExternalSource ||--o{ ExternalFieldValue : "populates"
+  Source }|--o| Funder : "represents"
+  Source }|--o| Organization : "represents"
+  Source }|--o| DataProvider : "represents"
+  ProposalVersion }o--|| Source : "comes from"
+  ExternalFieldValue }o--|| Source : "comes from"
 ```
 
 ## Narrative

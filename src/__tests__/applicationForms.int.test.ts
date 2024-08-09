@@ -4,6 +4,7 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	createBaseField,
+	createBaseFieldLocalization,
 	createOpportunity,
 	db,
 	loadTableMetrics,
@@ -17,19 +18,27 @@ const logger = getLogger(__filename);
 const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
-	await createBaseField({
-		label: 'Organization Name',
-		description: 'The organizational name of the applicant',
+	const baseFieldOne = await createBaseField({
 		shortCode: 'organizationName',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 	});
-	await createBaseField({
-		label: 'Years of work',
-		description: 'The number of years the project will take to complete',
+	await createBaseFieldLocalization({
+		baseFieldId: baseFieldOne.id,
+		language: 'en',
+		label: 'Organization Name',
+		description: 'The organizational name of the applicant',
+	});
+	const baseFieldTwo = await createBaseField({
 		shortCode: 'yearsOfWork',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
+	});
+	await createBaseFieldLocalization({
+		baseFieldId: baseFieldTwo.id,
+		language: 'en',
+		label: 'Years of Work',
+		description: 'The number of years the project will take to complete',
 	});
 };
 
@@ -152,15 +161,12 @@ describe('/applicationForms', () => {
 						baseFieldId: 2,
 						baseField: {
 							id: 2,
-							label: 'Years of work',
-							description:
-								'The number of years the project will take to complete',
 							shortCode: 'yearsOfWork',
 							dataType: BaseFieldDataType.STRING,
 							createdAt: expectTimestamp,
 						},
-						position: 1,
 						label: 'Duration of work in years',
+						position: 1,
 						createdAt: expectTimestamp,
 					},
 					{
@@ -169,14 +175,12 @@ describe('/applicationForms', () => {
 						baseFieldId: 1,
 						baseField: {
 							id: 1,
-							label: 'Organization Name',
-							description: 'The organizational name of the applicant',
 							shortCode: 'organizationName',
 							dataType: BaseFieldDataType.STRING,
 							createdAt: expectTimestamp,
 						},
-						position: 2,
 						label: 'Name of Organization',
+						position: 2,
 						createdAt: expectTimestamp,
 					},
 				],
@@ -273,8 +277,8 @@ describe('/applicationForms', () => {
 						baseFieldId: 1,
 						createdAt: expectTimestamp,
 						id: 1,
-						label: 'Your First Name',
 						position: 1,
+						label: 'Your First Name',
 					},
 				],
 				createdAt: expectTimestamp,

@@ -3,6 +3,7 @@ import { app } from '../app';
 import {
 	createApplicationFormField,
 	createBaseField,
+	createBaseFieldLocalization,
 	createOpportunity,
 	createOrganization,
 	createOrganizationProposal,
@@ -26,19 +27,27 @@ import { BaseFieldDataType, BaseFieldScope } from '../types';
 const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
-	await createBaseField({
-		label: 'Summary',
-		description: 'A summary of the proposal',
+	const baseFieldOne = await createBaseField({
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 	});
-	await createBaseField({
-		label: 'Title',
-		description: 'The title of the proposal',
+	await createBaseFieldLocalization({
+		baseFieldId: baseFieldOne.id,
+		language: 'en',
+		label: 'Summary',
+		description: 'A summary of the proposal',
+	});
+	const baseFieldTwo = await createBaseField({
 		shortCode: 'title',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
+	});
+	await createBaseFieldLocalization({
+		baseFieldId: baseFieldTwo.id,
+		language: 'en',
+		label: 'Title',
+		description: 'The title of the proposal',
 	});
 };
 
@@ -148,9 +157,16 @@ describe('/proposals', () => {
 											baseField: {
 												createdAt: expectTimestamp,
 												dataType: 'string',
-												description: 'A summary of the proposal',
 												id: 1,
-												label: 'Summary',
+												localizations: [
+													{
+														baseFieldId: 1,
+														createdAt: expectTimestamp,
+														description: 'A summary of the proposal',
+														label: 'Summary',
+														language: 'en',
+													},
+												],
 												scope: 'proposal',
 												shortCode: 'summary',
 											},
@@ -317,9 +333,16 @@ describe('/proposals', () => {
 											baseField: {
 												createdAt: expectTimestamp,
 												dataType: 'string',
-												description: 'A summary of the proposal',
 												id: 1,
-												label: 'Summary',
+												localizations: [
+													{
+														baseFieldId: 1,
+														createdAt: expectTimestamp,
+														description: 'A summary of the proposal',
+														label: 'Summary',
+														language: 'en',
+													},
+												],
 												scope: 'proposal',
 												shortCode: 'summary',
 											},
@@ -547,9 +570,16 @@ describe('/proposals', () => {
 											baseField: {
 												createdAt: expectTimestamp,
 												dataType: 'string',
-												description: 'A summary of the proposal',
 												id: 1,
-												label: 'Summary',
+												localizations: [
+													{
+														baseFieldId: 1,
+														createdAt: expectTimestamp,
+														description: 'A summary of the proposal',
+														label: 'Summary',
+														language: 'en',
+													},
+												],
 												scope: 'proposal',
 												shortCode: 'summary',
 											},
@@ -823,9 +853,16 @@ describe('/proposals', () => {
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
-										description: 'The title of the proposal',
 										id: 2,
-										label: 'Title',
+										localizations: [
+											{
+												baseFieldId: 2,
+												createdAt: expectTimestamp,
+												description: 'The title of the proposal',
+												label: 'Title',
+												language: 'en',
+											},
+										],
 										scope: 'proposal',
 										shortCode: 'title',
 									},
@@ -849,9 +886,16 @@ describe('/proposals', () => {
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
-										description: 'A summary of the proposal',
 										id: 1,
-										label: 'Summary',
+										localizations: [
+											{
+												baseFieldId: 1,
+												createdAt: expectTimestamp,
+												description: 'A summary of the proposal',
+												label: 'Summary',
+												language: 'en',
+											},
+										],
 										scope: 'proposal',
 										shortCode: 'summary',
 									},
@@ -884,9 +928,16 @@ describe('/proposals', () => {
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
-										description: 'The title of the proposal',
 										id: 2,
-										label: 'Title',
+										localizations: [
+											{
+												baseFieldId: 2,
+												createdAt: expectTimestamp,
+												description: 'The title of the proposal',
+												label: 'Title',
+												language: 'en',
+											},
+										],
 										scope: 'proposal',
 										shortCode: 'title',
 									},
@@ -910,9 +961,16 @@ describe('/proposals', () => {
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
-										description: 'A summary of the proposal',
 										id: 1,
-										label: 'Summary',
+										localizations: [
+											{
+												baseFieldId: 1,
+												createdAt: expectTimestamp,
+												description: 'A summary of the proposal',
+												label: 'Summary',
+												language: 'en',
+											},
+										],
 										scope: 'proposal',
 										shortCode: 'summary',
 									},
@@ -1022,9 +1080,16 @@ describe('/proposals', () => {
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
-										description: 'The title of the proposal',
 										id: 2,
-										label: 'Title',
+										localizations: [
+											{
+												baseFieldId: 2,
+												createdAt: expectTimestamp,
+												description: 'The title of the proposal',
+												label: 'Title',
+												language: 'en',
+											},
+										],
 										scope: 'proposal',
 										shortCode: 'title',
 									},
@@ -1048,9 +1113,16 @@ describe('/proposals', () => {
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
-										description: 'A summary of the proposal',
 										id: 1,
-										label: 'Summary',
+										localizations: [
+											{
+												baseFieldId: 1,
+												createdAt: expectTimestamp,
+												description: 'A summary of the proposal',
+												label: 'Summary',
+												language: 'en',
+											},
+										],
 										scope: 'proposal',
 										shortCode: 'summary',
 									},
@@ -1083,9 +1155,16 @@ describe('/proposals', () => {
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
-										description: 'The title of the proposal',
 										id: 2,
-										label: 'Title',
+										localizations: [
+											{
+												baseFieldId: 2,
+												createdAt: expectTimestamp,
+												description: 'The title of the proposal',
+												label: 'Title',
+												language: 'en',
+											},
+										],
 										scope: 'proposal',
 										shortCode: 'title',
 									},
@@ -1109,9 +1188,16 @@ describe('/proposals', () => {
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
-										description: 'A summary of the proposal',
 										id: 1,
-										label: 'Summary',
+										localizations: [
+											{
+												baseFieldId: 1,
+												createdAt: expectTimestamp,
+												description: 'A summary of the proposal',
+												label: 'Summary',
+												language: 'en',
+											},
+										],
 										scope: 'proposal',
 										shortCode: 'summary',
 									},

@@ -174,11 +174,14 @@ const createApplicationFormFieldsForBulkUpload = async (
 					`No base field could be found with shortCode "${shortCode}"`,
 				);
 			}
+			const baseFieldLabel = baseField.localizations.find(
+				(localization) => localization.language === 'en',
+			);
 			const applicationFormField = await createApplicationFormField({
 				applicationFormId,
 				baseFieldId: baseField.id,
 				position: index,
-				label: baseField.label,
+				label: baseFieldLabel?.label ?? baseField.shortCode,
 			});
 			return applicationFormField;
 		}),

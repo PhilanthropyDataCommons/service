@@ -10,6 +10,7 @@ import {
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
+	loadSystemSource,
 	loadTableMetrics,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
@@ -258,6 +259,8 @@ describe('/organizations', () => {
 		});
 
 		it('returns the latest valid value for a base field when auth id is sent', async () => {
+			const systemSource = await loadSystemSource();
+
 			// Make a base field associated with one opportunity/org, and we'll make three responses.
 			const baseFieldId = (
 				await createBaseField({
@@ -305,6 +308,7 @@ describe('/organizations', () => {
 					await createProposalVersion({
 						proposalId,
 						applicationFormId: applicationFormIdEarliest,
+						sourceId: systemSource.id,
 					})
 				).id,
 				applicationFormFieldId: (
@@ -329,6 +333,7 @@ describe('/organizations', () => {
 					await createProposalVersion({
 						proposalId,
 						applicationFormId: applicationFormIdLatestValid,
+						sourceId: systemSource.id,
 					})
 				).id,
 				applicationFormFieldId: (
@@ -354,6 +359,7 @@ describe('/organizations', () => {
 					await createProposalVersion({
 						proposalId,
 						applicationFormId: applicationFormIdLatest,
+						sourceId: systemSource.id,
 					})
 				).id,
 				applicationFormFieldId: (

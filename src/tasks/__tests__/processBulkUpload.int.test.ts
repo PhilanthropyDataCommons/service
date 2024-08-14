@@ -10,6 +10,7 @@ import {
 	loadOrganizationBundle,
 	loadOrganizationProposalBundle,
 	loadOpportunityBundle,
+	loadSystemSource,
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -329,6 +330,7 @@ describe('processBulkUpload', () => {
 
 	it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
 		await createTestBaseFields();
+		const systemSource = await loadSystemSource();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUpload = await createTestBulkUpload({ sourceKey });
 		const requests = await mockS3ResponsesForBulkUploadProcessing(
@@ -438,6 +440,8 @@ describe('processBulkUpload', () => {
 							],
 							id: 2,
 							proposalId: 2,
+							sourceId: systemSource.id,
+							source: systemSource,
 							version: 1,
 						},
 					],
@@ -511,6 +515,8 @@ describe('processBulkUpload', () => {
 							],
 							id: 1,
 							proposalId: 1,
+							sourceId: systemSource.id,
+							source: systemSource,
 							version: 1,
 						},
 					],

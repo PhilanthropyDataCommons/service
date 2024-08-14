@@ -6,10 +6,13 @@ import type {
 	WritableProposalFieldValueWithProposalVersionContext,
 } from './ProposalFieldValue';
 import type { Writable } from './Writable';
+import type { Source } from './Source';
 
 interface ProposalVersion {
 	readonly id: number;
 	proposalId: number;
+	readonly sourceId: number;
+	readonly source: Source;
 	readonly version: number;
 	applicationFormId: number;
 	readonly fieldValues: ProposalFieldValue[];
@@ -17,6 +20,9 @@ interface ProposalVersion {
 }
 
 type WritableProposalVersion = Writable<ProposalVersion>;
+
+type InternallyWritableProposalVersion = WritableProposalVersion &
+	Pick<ProposalVersion, 'sourceId'>;
 
 type WritableProposalVersionWithFieldValues = WritableProposalVersion & {
 	fieldValues: WritableProposalFieldValueWithProposalVersionContext[];
@@ -45,8 +51,8 @@ const isWritableProposalVersionWithFieldValues = ajv.compile(
 );
 
 export {
+	InternallyWritableProposalVersion,
 	ProposalVersion,
-	WritableProposalVersion,
 	WritableProposalVersionWithFieldValues,
 	isWritableProposalVersionWithFieldValues,
 };

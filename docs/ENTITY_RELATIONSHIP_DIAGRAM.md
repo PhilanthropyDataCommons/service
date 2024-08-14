@@ -51,6 +51,7 @@ erDiagram
   ExternalFieldValue {
     int id
     int baseFieldId
+    int sourceId
     string name
     string value
     int position
@@ -59,6 +60,7 @@ erDiagram
   ProposalVersion {
     int id
     int proposalId
+    int sourceId
     int version
     datetime createdAt
   }

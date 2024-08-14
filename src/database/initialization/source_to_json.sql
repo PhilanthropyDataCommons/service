@@ -20,7 +20,7 @@ BEGIN
   FROM organizations
   WHERE organizations.id = source.organization_id;
 
-  RETURN jsonb_build_object(
+  RETURN jsonb_strip_nulls(jsonb_build_object(
     'id', source.id,
     'label', source.label,
     'dataProviderShortCode', source.data_provider_short_code,
@@ -30,6 +30,6 @@ BEGIN
     'organizationId', source.organization_id,
     'organization', organization_json,
     'createdAt', source.created_at
-  );
+  ));
 END;
 $$ LANGUAGE plpgsql;

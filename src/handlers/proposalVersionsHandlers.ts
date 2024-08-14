@@ -5,6 +5,7 @@ import {
 	loadApplicationForm,
 	loadApplicationFormField,
 	loadProposal,
+	loadSystemSource,
 } from '../database';
 import {
 	isTinyPgErrorWithQueryContext,
@@ -137,8 +138,12 @@ const postProposalVersion = (
 	])
 		.then(() => {
 			db.transaction(async (transactionDb) => {
+				// TODO: Once accounts are associated with sources we should replace this system source with a real source.
+				// See Issue https://github.com/PhilanthropyDataCommons/service/issues/1146
+				const source = await loadSystemSource();
+				const sourceId = source.id;
 				const proposalVersion = await createProposalVersion(
-					{ proposalId, applicationFormId },
+					{ proposalId, applicationFormId, sourceId },
 					transactionDb,
 				);
 				const proposalFieldValues = await Promise.all(

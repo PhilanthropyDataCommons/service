@@ -9,6 +9,7 @@ import {
 } from '../database';
 import {
 	isTinyPgErrorWithQueryContext,
+	isValidLanguageTag,
 	isWritableBaseField,
 	isWritableBaseFieldLocalization,
 	isId,
@@ -157,6 +158,16 @@ const putBaseFieldLocalization = (
 	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
 	if (!isId(baseFieldId)) {
 		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
+		return;
+	}
+
+	if (!isValidLanguageTag(req.params.language)) {
+		next(
+			new InputValidationError(
+				'The entity language must be a valid IETF language tag',
+				isValidLanguageTag.errors ?? [],
+			),
+		);
 		return;
 	}
 

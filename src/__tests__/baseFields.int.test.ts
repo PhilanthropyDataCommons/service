@@ -691,6 +691,25 @@ describe('/baseFields', () => {
 			});
 		});
 
+		it('returns 400 when an invalid IETF language tag is sent', async () => {
+			await createTestBaseField();
+			const result = await agent
+				.put(
+					'/baseFields/1/localizations/theLanguageKlingonWhichIsNotARealLanguage',
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: 'Ejyo',
+					description: 'HoSghaj je nguv',
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
 		it('returns 404 when a base field is referenced that does not exist', async () => {
 			const result = await agent
 				.put('/baseFields/1/localizations/fr')

@@ -1,7 +1,32 @@
-import { createBaseField, loadBaseFields, updateBaseField } from '../database';
-import { isTinyPgErrorWithQueryContext, isWritableBaseField } from '../types';
-import { DatabaseError, InputValidationError } from '../errors';
+import { DatabaseError, InputValidationError, NotFoundError } from '../errors';
+import {
+	createBaseField,
+	loadBaseFields,
+	updateBaseField,
+	createOrUpdateBaseFieldLocalization,
+	loadBaseFieldLocalizationsBundle,
+	loadBaseField,
+} from '../database';
+import {
+	isTinyPgErrorWithQueryContext,
+	isWritableBaseField,
+	isWritableBaseFieldLocalization,
+	isId,
+} from '../types';
 import type { Request, Response, NextFunction } from 'express';
+
+const assertBaseFieldExists = async (baseFieldId: number): Promise<void> => {
+	try {
+		await loadBaseField(baseFieldId);
+	} catch (err) {
+		if (err instanceof NotFoundError) {
+			throw new NotFoundError(
+				`The specified Base Field does not exist (${baseFieldId}).`,
+			);
+		}
+		throw err;
+	}
+};
 
 const getBaseFields = (
 	req: Request,
@@ -56,7 +81,7 @@ const putBaseField = (
 ) => {
 	const id = Number.parseInt(req.params.id, 10);
 	if (Number.isNaN(id)) {
-		next(new InputValidationError('The entity id must be a number.', []));
+		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
 		return;
 	}
 	const body = req.body as unknown;
@@ -83,8 +108,113 @@ const putBaseField = (
 		});
 };
 
+const getBaseFieldLocalizationsByBaseFieldId = (
+	req: Request<{ baseFieldId: string }>,
+	res: Response,
+	next: NextFunction,
+): void => {
+	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
+	if (!isId(baseFieldId)) {
+		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
+		return;
+	}
+	assertBaseFieldExists(baseFieldId)
+		.then(() => {
+			loadBaseFieldLocalizationsBundle({ baseFieldId })
+				.then((baseFieldLocalizations) => {
+					res
+						.status(200)
+						.contentType('application/json')
+						.send(baseFieldLocalizations);
+				})
+				.catch((error: unknown) => {
+					if (isTinyPgErrorWithQueryContext(error)) {
+						next(new DatabaseError('Error retrieving base fields.', error));
+						return;
+					}
+					next(error);
+				});
+		})
+		.catch((error: unknown) => {
+			if (isTinyPgErrorWithQueryContext(error)) {
+				next(
+					new DatabaseError(
+						'Something went wrong when asserting the validity of the provided Base Field.',
+						error,
+					),
+				);
+				return;
+			}
+			next(error);
+		});
+};
+
+const putBaseFieldLocalization = (
+	req: Request<{ baseFieldId: string; language: string }>,
+	res: Response,
+	next: NextFunction,
+) => {
+	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
+	if (!isId(baseFieldId)) {
+		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
+		return;
+	}
+
+	if (!isWritableBaseFieldLocalization(req.body)) {
+		next(
+			new InputValidationError(
+				'Invalid request body.',
+				isWritableBaseField.errors ?? [],
+			),
+		);
+		return;
+	}
+	const { label, description } = req.body;
+	assertBaseFieldExists(baseFieldId)
+		.then(() => {
+			createOrUpdateBaseFieldLocalization({
+				label,
+				description,
+				baseFieldId,
+				language: req.params.language,
+			})
+				.then((baseFieldLocalization) => {
+					res
+						.status(200)
+						.contentType('application/json')
+						.send(baseFieldLocalization);
+				})
+				.catch((error: unknown) => {
+					if (isTinyPgErrorWithQueryContext(error)) {
+						next(
+							new DatabaseError(
+								'Error updating base field localization.',
+								error,
+							),
+						);
+						return;
+					}
+					next(error);
+				});
+		})
+		.catch((error: unknown) => {
+			if (isTinyPgErrorWithQueryContext(error)) {
+				next(
+					new DatabaseError(
+						'Something went wrong when asserting the validity of the provided Base Field.',
+						error,
+					),
+				);
+				return;
+			}
+			next(error);
+		});
+};
+
 export const baseFieldsHandlers = {
 	getBaseFields,
 	postBaseField,
 	putBaseField,
+	getBaseFieldLocalizationsByBaseFieldId,
+	putBaseFieldLocalization,
 };

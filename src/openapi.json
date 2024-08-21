@@ -978,7 +978,7 @@
 			},
 			"post": {
 				"operationId": "addBulkUpload",
-				"summary": "Registers a bulk upload.",
+				"summary": "Registers a bulk upload. This lets PDC ingest data previously uploaded via a POST to the /presignedPostRequests endpoint.",
 				"tags": ["Bulk Uploads"],
 				"security": [
 					{
@@ -1249,7 +1249,7 @@
 				},
 				"responses": {
 					"201": {
-						"description": "The presigned post request",
+						"description": "The presigned post request. Use the contents of this JSON to POST form data to S3. After posting data to S3, use the /bulkUploads endpoint to let PDC ingest the data.",
 						"content": {
 							"application/json": {
 								"schema": {

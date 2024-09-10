@@ -10,8 +10,6 @@ import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { createOpportunity } from '../database/operations/create/createOpportunity';
 
-const agent = request.agent(app);
-
 const insertTestOrganizations = async () => {
 	await createOrganization({
 		taxId: '11-1111111',
@@ -26,7 +24,7 @@ const insertTestOrganizations = async () => {
 describe('/organizationProposals', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
-			await agent.get('/organizationProposals').expect(401);
+			await request(app).get('/organizationProposals').expect(401);
 		});
 
 		it('returns the OrganizationProposals for the specified organization', async () => {
@@ -53,7 +51,7 @@ describe('/organizationProposals', () => {
 				organizationId: 1,
 				proposalId: 2,
 			});
-			const result = await agent
+			const result = await request(app)
 				.get(`/organizationProposals?organization=1`)
 				.set(authHeader)
 				.expect(200);
@@ -128,7 +126,7 @@ describe('/organizationProposals', () => {
 				organizationId: 2,
 				proposalId: 2,
 			});
-			const result = await agent
+			const result = await request(app)
 				.get(`/organizationProposals?proposal=1`)
 				.set(authHeader)
 				.expect(200);
@@ -161,7 +159,7 @@ describe('/organizationProposals', () => {
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
 			await insertTestOrganizations();
-			await agent
+			await request(app)
 				.get('/organizationProposals?organization=foo')
 				.set(authHeader)
 				.expect(400);
@@ -170,7 +168,7 @@ describe('/organizationProposals', () => {
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await agent.post('/organizationProposals').expect(401);
+			await request(app).post('/organizationProposals').expect(401);
 		});
 
 		it('creates exactly one OrganizationProposal', async () => {
@@ -185,7 +183,7 @@ describe('/organizationProposals', () => {
 				createdBy: testUser.id,
 			});
 			const before = await loadTableMetrics('organizations_proposals');
-			const result = await agent
+			const result = await request(app)
 				.post('/organizationProposals')
 				.type('application/json')
 				.set(authHeader)
@@ -230,7 +228,7 @@ describe('/organizationProposals', () => {
 				externalId: '1',
 				createdBy: testUser.id,
 			});
-			const result = await agent
+			const result = await request(app)
 				.post('/organizationProposals')
 				.type('application/json')
 				.set(authHeader)
@@ -255,7 +253,7 @@ describe('/organizationProposals', () => {
 				externalId: '1',
 				createdBy: testUser.id,
 			});
-			const result = await agent
+			const result = await request(app)
 				.post('/organizationProposals')
 				.type('application/json')
 				.set(authHeader)
@@ -274,7 +272,7 @@ describe('/organizationProposals', () => {
 				title: '🔥',
 			});
 			await insertTestOrganizations();
-			const result = await agent
+			const result = await request(app)
 				.post('/organizationProposals')
 				.type('application/json')
 				.set(authHeader)
@@ -298,7 +296,7 @@ describe('/organizationProposals', () => {
 				externalId: '1',
 				createdBy: testUser.id,
 			});
-			const result = await agent
+			const result = await request(app)
 				.post('/organizationProposals')
 				.type('application/json')
 				.set(authHeader)
@@ -327,7 +325,7 @@ describe('/organizationProposals', () => {
 				organizationId: 1,
 				proposalId: 1,
 			});
-			const result = await agent
+			const result = await request(app)
 				.post('/organizationProposals')
 				.type('application/json')
 				.set(authHeader)

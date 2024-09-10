@@ -7,12 +7,10 @@ import {
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
 
-const agent = request.agent(app);
-
 describe('/users', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
-			await agent.get('/users').expect(401);
+			await request(app).get('/users').expect(401);
 		});
 
 		it('returns the user associated with the requesting user', async () => {
@@ -22,7 +20,10 @@ describe('/users', () => {
 			});
 			const { count: userCount } = await loadTableMetrics('users');
 
-			const response = await agent.get('/users').set(authHeader).expect(200);
+			const response = await request(app)
+				.get('/users')
+				.set(authHeader)
+				.expect(200);
 			expect(response.body).toEqual({
 				total: userCount,
 				entries: [testUser],
@@ -37,7 +38,7 @@ describe('/users', () => {
 			});
 			const { count: userCount } = await loadTableMetrics('users');
 
-			const response = await agent
+			const response = await request(app)
 				.get('/users')
 				.set(authHeaderWithAdminRole)
 				.expect(200);
@@ -53,7 +54,7 @@ describe('/users', () => {
 			});
 			const { count: userCount } = await loadTableMetrics('users');
 
-			const response = await agent
+			const response = await request(app)
 				.get('/users?authenticationId=totallyDifferentUser@example.com')
 				.set(authHeaderWithAdminRole)
 				.expect(200);
@@ -73,7 +74,7 @@ describe('/users', () => {
 			}, Promise.resolve());
 			const { count: userCount } = await loadTableMetrics('users');
 
-			const response = await agent
+			const response = await request(app)
 				.get('/users')
 				.query({
 					_page: 2,

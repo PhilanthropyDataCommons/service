@@ -11,8 +11,6 @@ import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types';
 
-const agent = request.agent(app);
-
 const insertTestOrganizations = async () => {
 	await createOrganization({
 		taxId: '11-1111111',
@@ -27,11 +25,11 @@ const insertTestOrganizations = async () => {
 describe('/organizations', () => {
 	describe('GET /', () => {
 		it('does not require authentication', async () => {
-			await agent.get('/organizations').expect(200);
+			await request(app).get('/organizations').expect(200);
 		});
 
 		it('returns an empty Bundle when no data is present', async () => {
-			await agent.get('/organizations').set(authHeader).expect(200, {
+			await request(app).get('/organizations').set(authHeader).expect(200, {
 				total: 0,
 				entries: [],
 			});
@@ -39,7 +37,7 @@ describe('/organizations', () => {
 
 		it('returns organizations present in the database', async () => {
 			await insertTestOrganizations();
-			await agent
+			await request(app)
 				.get('/organizations')
 				.set(authHeader)
 				.expect(200)
@@ -72,7 +70,7 @@ describe('/organizations', () => {
 					name: `Organization ${i + 1}`,
 				});
 			}, Promise.resolve());
-			await agent
+			await request(app)
 				.get('/organizations')
 				.query({
 					_page: 2,
@@ -141,7 +139,7 @@ describe('/organizations', () => {
 				organizationId: 1,
 				proposalId: 1,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get(`/organizations?proposal=1`)
 				.set(authHeader)
 				.expect(200);
@@ -185,7 +183,7 @@ describe('/organizations', () => {
 				organizationId: 1,
 				proposalId: 2,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get(`/organizations`)
 				.set(authHeader)
 				.expect(200);
@@ -203,7 +201,7 @@ describe('/organizations', () => {
 		});
 
 		it('returns a 400 error if an invalid organization filter is provided', async () => {
-			const response = await agent
+			const response = await request(app)
 				.get(`/proposals?organization=foo`)
 				.set(authHeader)
 				.expect(400);
@@ -217,16 +215,16 @@ describe('/organizations', () => {
 	describe('GET /:id', () => {
 		it('does not require authentication', async () => {
 			await insertTestOrganizations();
-			await agent.get('/organizations/1').expect(200);
+			await request(app).get('/organizations/1').expect(200);
 		});
 
 		it('returns 404 when given id is not present', async () => {
-			await agent.get('/organizations/9001').set(authHeader).expect(404);
+			await request(app).get('/organizations/9001').set(authHeader).expect(404);
 		});
 
 		it('returns the specified organization', async () => {
 			await insertTestOrganizations();
-			await agent
+			await request(app)
 				.get('/organizations/2')
 				.set(authHeader)
 				.expect(200)
@@ -241,18 +239,18 @@ describe('/organizations', () => {
 		});
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
-			await agent.get('/organizations/foo').set(authHeader).expect(400);
+			await request(app).get('/organizations/foo').set(authHeader).expect(400);
 		});
 	});
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await agent.post('/organizations').expect(401);
+			await request(app).post('/organizations').expect(401);
 		});
 
 		it('creates exactly one organization', async () => {
 			const before = await loadTableMetrics('organizations');
-			const result = await agent
+			const result = await request(app)
 				.post('/organizations')
 				.type('application/json')
 				.set(authHeader)
@@ -273,7 +271,7 @@ describe('/organizations', () => {
 		});
 
 		it('returns 400 bad request when no taxId is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/organizations')
 				.type('application/json')
 				.set(authHeader)
@@ -288,7 +286,7 @@ describe('/organizations', () => {
 		});
 
 		it('returns 400 bad request when no name is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/organizations')
 				.type('application/json')
 				.set(authHeader)
@@ -307,7 +305,7 @@ describe('/organizations', () => {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 			});
-			const result = await agent
+			const result = await request(app)
 				.post('/organizations')
 				.type('application/json')
 				.set(authHeader)

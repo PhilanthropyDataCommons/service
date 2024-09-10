@@ -14,7 +14,6 @@ import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
 const logger = getLogger(__filename);
-const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
 	await createBaseField({
@@ -36,7 +35,7 @@ const createTestBaseFields = async () => {
 describe('/proposalVersions', () => {
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await agent.post('/proposalVersions').expect(401);
+			await request(app).post('/proposalVersions').expect(401);
 		});
 
 		it('creates exactly one proposal version', async () => {
@@ -52,7 +51,7 @@ describe('/proposalVersions', () => {
 			});
 			const before = await loadTableMetrics('proposal_versions');
 			logger.debug('before: %o', before);
-			const result = await agent
+			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)
@@ -98,7 +97,7 @@ describe('/proposalVersions', () => {
 				label: 'Last Name',
 			});
 			const before = await loadTableMetrics('proposal_field_values');
-			const result = await agent
+			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)
@@ -150,7 +149,7 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 400 bad request when no proposal id is provided', async () => {
-			await agent
+			await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)
@@ -162,7 +161,7 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 400 bad request when no application id is provided', async () => {
-			await agent
+			await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)
@@ -174,7 +173,7 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 400 bad request when no field values array is provided', async () => {
-			await agent
+			await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)
@@ -196,7 +195,7 @@ describe('/proposalVersions', () => {
 			await createApplicationForm({
 				opportunityId: 1,
 			});
-			const result = await agent
+			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)
@@ -231,7 +230,7 @@ describe('/proposalVersions', () => {
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
-			const result = await agent
+			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)
@@ -273,7 +272,7 @@ describe('/proposalVersions', () => {
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
-			const result = await agent
+			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)
@@ -313,7 +312,7 @@ describe('/proposalVersions', () => {
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
-			const result = await agent
+			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)
@@ -374,7 +373,7 @@ describe('/proposalVersions', () => {
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
-			const result = await agent
+			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeader)

@@ -65,6 +65,7 @@ describe('/organizationProposals', () => {
 							name: 'Example Inc.',
 							taxId: '11-1111111',
 							createdAt: expectTimestamp,
+							fields: [],
 						},
 						proposalId: 2,
 						proposal: {
@@ -85,6 +86,7 @@ describe('/organizationProposals', () => {
 							name: 'Example Inc.',
 							taxId: '11-1111111',
 							createdAt: expectTimestamp,
+							fields: [],
 						},
 						proposalId: 1,
 						proposal: {
@@ -140,6 +142,7 @@ describe('/organizationProposals', () => {
 							name: 'Example Inc.',
 							taxId: '11-1111111',
 							createdAt: expectTimestamp,
+							fields: [],
 						},
 						proposalId: 1,
 						proposal: {
@@ -202,6 +205,7 @@ describe('/organizationProposals', () => {
 					name: 'Example Inc.',
 					taxId: '11-1111111',
 					createdAt: expectTimestamp,
+					fields: [],
 				},
 				proposalId: 1,
 				proposal: {

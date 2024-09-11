@@ -576,6 +576,7 @@ describe('processBulkUpload', () => {
 					taxId: '51-2144346',
 					id: 1,
 					name: 'Foo LLC.',
+					fields: [],
 				},
 			],
 			total: 1,

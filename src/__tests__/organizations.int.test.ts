@@ -1,15 +1,20 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	createApplicationForm,
+	createApplicationFormField,
+	createBaseField,
 	createOpportunity,
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
+	createProposalFieldValue,
+	createProposalVersion,
 	loadTableMetrics,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
-import { PostgresErrorCode } from '../types';
+import { BaseFieldDataType, BaseFieldScope, PostgresErrorCode } from '../types';
 
 const insertTestOrganizations = async () => {
 	await createOrganization({
@@ -50,12 +55,14 @@ describe('/organizations', () => {
 								taxId: '22-2222222',
 								name: 'Another Inc.',
 								createdAt: expectTimestamp,
+								fields: [],
 							},
 							{
 								id: 1,
 								taxId: '11-1111111',
 								name: 'Example Inc.',
 								createdAt: expectTimestamp,
+								fields: [],
 							},
 						],
 					}),
@@ -87,30 +94,35 @@ describe('/organizations', () => {
 								taxId: '11-1111111',
 								name: 'Organization 15',
 								createdAt: expectTimestamp,
+								fields: [],
 							},
 							{
 								id: 14,
 								taxId: '11-1111111',
 								name: 'Organization 14',
 								createdAt: expectTimestamp,
+								fields: [],
 							},
 							{
 								id: 13,
 								taxId: '11-1111111',
 								name: 'Organization 13',
 								createdAt: expectTimestamp,
+								fields: [],
 							},
 							{
 								id: 12,
 								taxId: '11-1111111',
 								name: 'Organization 12',
 								createdAt: expectTimestamp,
+								fields: [],
 							},
 							{
 								id: 11,
 								taxId: '11-1111111',
 								name: 'Organization 11',
 								createdAt: expectTimestamp,
+								fields: [],
 							},
 						],
 					}),
@@ -151,6 +163,7 @@ describe('/organizations', () => {
 						taxId: '123-123-123',
 						name: 'Canadian Company',
 						createdAt: expectTimestamp,
+						fields: [],
 					},
 				],
 			});
@@ -195,6 +208,7 @@ describe('/organizations', () => {
 						taxId: '123-123-123',
 						name: 'Canadian Company',
 						createdAt: expectTimestamp,
+						fields: [],
 					},
 				],
 			});
@@ -234,12 +248,139 @@ describe('/organizations', () => {
 						taxId: '22-2222222',
 						name: 'Another Inc.',
 						createdAt: expectTimestamp,
+						fields: [],
 					}),
 				);
 		});
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
 			await request(app).get('/organizations/foo').set(authHeader).expect(400);
+		});
+
+		it('returns the latest valid value for a base field when auth id is sent', async () => {
+			// Make a base field associated with one opportunity/org, and we'll make three responses.
+			const baseFieldId = (
+				await createBaseField({
+					label: 'Fifty one fifty three',
+					shortCode: 'fifty_one_fifty_three',
+					description: 'Five thousand one hundred fifty three.',
+					dataType: BaseFieldDataType.EMAIL,
+					scope: BaseFieldScope.ORGANIZATION,
+				})
+			).id;
+			// To advance test organization IDs beyond 1-2.
+			await insertTestOrganizations();
+			// This should be ID 3, although unfortunately implicitly, and only when tests run in serial.
+			const organizationId = (
+				await createOrganization({
+					name: 'Five thousand one hundred forty seven reasons',
+					taxId: '05119',
+				})
+			).id;
+			const opportunityId = (
+				await createOpportunity({
+					title: 'Fifty one thirteen',
+				})
+			).id;
+			const proposalId = (
+				await createProposal({
+					opportunityId,
+					externalId: 'Proposal',
+					createdBy: 1,
+				})
+			).id;
+			await createOrganizationProposal({
+				organizationId,
+				proposalId,
+			});
+			// I need 3 application form fields here. May as well make them use distinct forms too.
+			const applicationFormIdEarliest = (
+				await createApplicationForm({
+					opportunityId,
+				})
+			).id;
+			// Older field that is valid
+			await createProposalFieldValue({
+				proposalVersionId: (
+					await createProposalVersion({
+						proposalId,
+						applicationFormId: applicationFormIdEarliest,
+					})
+				).id,
+				applicationFormFieldId: (
+					await createApplicationFormField({
+						label: 'Org email',
+						applicationFormId: applicationFormIdEarliest,
+						baseFieldId,
+						position: 5279,
+					})
+				).id,
+				position: 5297,
+				value: 'validbutold@emailaddress.com',
+				isValid: true,
+			});
+			const applicationFormIdLatestValid = (
+				await createApplicationForm({
+					opportunityId,
+				})
+			).id;
+			const latestValidValue = await createProposalFieldValue({
+				proposalVersionId: (
+					await createProposalVersion({
+						proposalId,
+						applicationFormId: applicationFormIdLatestValid,
+					})
+				).id,
+				applicationFormFieldId: (
+					await createApplicationFormField({
+						label: 'Email contact',
+						applicationFormId: applicationFormIdLatestValid,
+						baseFieldId,
+						position: 5347,
+					})
+				).id,
+				position: 5381,
+				value: 'valid@emailaddress.com',
+				isValid: true,
+			});
+			const applicationFormIdLatest = (
+				await createApplicationForm({
+					opportunityId,
+				})
+			).id;
+			// Latest value but invalid
+			await createProposalFieldValue({
+				proposalVersionId: (
+					await createProposalVersion({
+						proposalId,
+						applicationFormId: applicationFormIdLatest,
+					})
+				).id,
+				applicationFormFieldId: (
+					await createApplicationFormField({
+						label: 'Contact email address',
+						applicationFormId: applicationFormIdLatest,
+						baseFieldId,
+						position: 5209,
+					})
+				).id,
+				position: 5231,
+				value: 'invalid-email-address.com',
+				isValid: false,
+			});
+			await request(app)
+				.get(`/organizations/${organizationId}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) =>
+					expect(res.body).toEqual({
+						id: organizationId,
+						name: 'Five thousand one hundred forty seven reasons',
+						taxId: '05119',
+						createdAt: expectTimestamp,
+						fields: [latestValidValue],
+					}),
+				);
 		});
 	});
 
@@ -266,6 +407,7 @@ describe('/organizations', () => {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				createdAt: expectTimestamp,
+				fields: [],
 			});
 			expect(after.count).toEqual(1);
 		});

@@ -1,3 +1,3 @@
-SELECT organization_to_json(organizations.*) AS "object"
+SELECT organization_to_json(organizations.*, :authenticationId) AS "object"
 FROM organizations
 WHERE id = :id

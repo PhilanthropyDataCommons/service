@@ -1,11 +1,13 @@
 import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
+import type { ProposalFieldValue } from './ProposalFieldValue';
 
 interface Organization {
 	readonly id: number;
 	taxId: string;
 	name: string;
+	readonly fields: ProposalFieldValue[];
 	readonly createdAt: string;
 }
 

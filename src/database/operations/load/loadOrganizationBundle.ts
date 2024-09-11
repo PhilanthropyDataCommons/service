@@ -1,11 +1,14 @@
 import { loadBundle } from './loadBundle';
 import type { Bundle, JsonResultSet, Organization } from '../../../types';
 
-export const loadOrganizationBundle = async (queryParameters: {
-	offset: number;
-	limit: number;
-	proposalId?: number;
-}): Promise<Bundle<Organization>> => {
+export const loadOrganizationBundle = async (
+	queryParameters: {
+		offset: number;
+		limit: number;
+		proposalId?: number;
+	},
+	authenticationId?: string,
+): Promise<Bundle<Organization>> => {
 	const defaultQueryParameters = {
 		proposalId: 0,
 	};
@@ -14,6 +17,7 @@ export const loadOrganizationBundle = async (queryParameters: {
 		{
 			...defaultQueryParameters,
 			...queryParameters,
+			authenticationId,
 		},
 		'organizations',
 	);

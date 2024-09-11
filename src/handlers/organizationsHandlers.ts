@@ -8,6 +8,7 @@ import {
 	isId,
 	isWritableOrganization,
 	isTinyPgErrorWithQueryContext,
+	AuthenticatedRequest,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import {
@@ -44,16 +45,20 @@ const postOrganization = (
 };
 
 const getOrganizations = (
-	req: Request,
+	req: AuthenticatedRequest,
 	res: Response,
 	next: NextFunction,
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	const proposalParameters = extractProposalParameters(req);
-	loadOrganizationBundle({
-		...getLimitValues(paginationParameters),
-		...proposalParameters,
-	})
+	const authenticationId = req.user?.authenticationId;
+	loadOrganizationBundle(
+		{
+			...getLimitValues(paginationParameters),
+			...proposalParameters,
+		},
+		authenticationId,
+	)
 		.then((organizationBundle) => {
 			res.status(200).contentType('application/json').send(organizationBundle);
 		})
@@ -67,7 +72,7 @@ const getOrganizations = (
 };
 
 const getOrganization = (
-	req: Request,
+	req: AuthenticatedRequest,
 	res: Response,
 	next: NextFunction,
 ): void => {
@@ -76,7 +81,8 @@ const getOrganization = (
 		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
 		return;
 	}
-	loadOrganization(organizationId)
+	const authenticationId = req.user?.authenticationId;
+	loadOrganization(organizationId, authenticationId)
 		.then((organization) => {
 			res.status(200).contentType('application/json').send(organization);
 		})

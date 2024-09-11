@@ -14,7 +14,6 @@ import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
 const logger = getLogger(__filename);
-const agent = request.agent(app);
 
 const createTestBaseFields = async () => {
 	await createBaseField({
@@ -36,11 +35,11 @@ const createTestBaseFields = async () => {
 describe('/applicationForms', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
-			await agent.get('/applicationForms').expect(401);
+			await request(app).get('/applicationForms').expect(401);
 		});
 
 		it('returns an empty array when no data is present', async () => {
-			const response = await agent
+			const response = await request(app)
 				.get('/applicationForms')
 				.set(authHeader)
 				.expect(200);
@@ -66,7 +65,7 @@ describe('/applicationForms', () => {
 			await createApplicationForm({
 				opportunityId: 2,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get('/applicationForms')
 				.set(authHeader)
 				.expect(200);
@@ -136,7 +135,7 @@ describe('/applicationForms', () => {
 				position: 1,
 				label: 'Duration of work in years',
 			});
-			const result = await agent
+			const result = await request(app)
 				.get('/applicationForms/2')
 				.set(authHeader)
 				.expect(200);
@@ -185,7 +184,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('should return 404 when the applicationForm is not found (shallow)', async () => {
-			const result = await agent
+			const result = await request(app)
 				.get('/applicationForms/6')
 				.set(authHeader)
 				.expect(404);
@@ -196,7 +195,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('should return 404 when the applicationForm is not found (with fields)', async () => {
-			const result = await agent
+			const result = await request(app)
 				.get('/applicationForms/7')
 				.query({ includeFields: 'true' })
 				.set(authHeader)
@@ -210,7 +209,7 @@ describe('/applicationForms', () => {
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await agent.post('/applicationForms').expect(401);
+			await request(app).post('/applicationForms').expect(401);
 		});
 
 		it('creates exactly one application form', async () => {
@@ -218,7 +217,7 @@ describe('/applicationForms', () => {
 				title: 'Tremendous opportunity 👌',
 			});
 			const before = await loadTableMetrics('application_forms');
-			const result = await agent
+			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
 				.set(authHeader)
@@ -245,7 +244,7 @@ describe('/applicationForms', () => {
 			});
 			await createTestBaseFields();
 			const before = await loadTableMetrics('application_form_fields');
-			const result = await agent
+			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
 				.set(authHeader)
@@ -292,7 +291,7 @@ describe('/applicationForms', () => {
 			await createApplicationForm({
 				opportunityId: 1,
 			});
-			const result = await agent
+			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
 				.set(authHeader)
@@ -310,7 +309,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 400 bad request when no opportunity id is provided', async () => {
-			await agent
+			await request(app)
 				.post('/applicationForms')
 				.type('application/json')
 				.set(authHeader)
@@ -321,7 +320,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 400 bad request when no fields value is provided', async () => {
-			await agent
+			await request(app)
 				.post('/applicationForms')
 				.type('application/json')
 				.set(authHeader)
@@ -332,7 +331,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 400 bad request when an invalid field is provided', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
 				.set(authHeader)
@@ -352,7 +351,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 422 conflict when a non-existent opportunity id is provided', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
 				.set(authHeader)
@@ -393,7 +392,7 @@ describe('/applicationForms', () => {
 				.mockImplementationOnce(async () => {
 					throw new Error('This is unexpected');
 				});
-			const result = await agent
+			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
 				.set(authHeader)

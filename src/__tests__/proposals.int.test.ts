@@ -23,8 +23,6 @@ import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import { createApplicationForm } from '../database/operations/create/createApplicationForm';
 import { BaseFieldDataType, BaseFieldScope } from '../types';
 
-const agent = request.agent(app);
-
 const createTestBaseFields = async () => {
 	await createBaseField({
 		label: 'Summary',
@@ -45,11 +43,11 @@ const createTestBaseFields = async () => {
 describe('/proposals', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
-			await agent.get('/proposals').expect(401);
+			await request(app).get('/proposals').expect(401);
 		});
 
 		it('returns an empty Bundle when no data is present', async () => {
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals')
 				.set(authHeader)
 				.expect(200);
@@ -104,7 +102,7 @@ describe('/proposals', () => {
 				isValid: true,
 			});
 
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals')
 				.set(authHeader)
 				.expect(200);
@@ -193,7 +191,7 @@ describe('/proposals', () => {
 				organizationId: organization.id,
 				proposalId: proposal.id,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get(`/proposals?organization=${organization.id}`)
 				.set(authHeader)
 				.expect(200);
@@ -213,7 +211,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns a 400 error if an invalid organization filter is provided', async () => {
-			const response = await agent
+			const response = await request(app)
 				.get(`/proposals?organization=foo`)
 				.set(authHeader)
 				.expect(400);
@@ -224,7 +222,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns a 400 error if an invalid createdBy filter is provided', async () => {
-			const response = await agent
+			const response = await request(app)
 				.get(`/proposals?createdBy=foo`)
 				.set(authHeader)
 				.expect(400);
@@ -282,7 +280,7 @@ describe('/proposals', () => {
 				value: 'This is a pair of pants',
 				isValid: true,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals?_content=summary')
 				.set(authHeader)
 				.expect(200);
@@ -358,7 +356,7 @@ describe('/proposals', () => {
 				opportunityId: 1,
 				createdBy: anotherUser.id,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals')
 				.set(authHeaderWithAdminRole)
 				.expect(200);
@@ -405,7 +403,7 @@ describe('/proposals', () => {
 				opportunityId: 1,
 				createdBy: anotherUser.id,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get(`/proposals?createdBy=${testUser.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
@@ -444,7 +442,7 @@ describe('/proposals', () => {
 				opportunityId: 1,
 				createdBy: anotherUser.id,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get(`/proposals?createdBy=me`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
@@ -513,7 +511,7 @@ describe('/proposals', () => {
 				value: 'This is a pair of pants',
 				isValid: true,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals?_content=summary')
 				.set(authHeader)
 				.expect(200);
@@ -583,7 +581,7 @@ describe('/proposals', () => {
 					createdBy: testUser.id,
 				});
 			}, Promise.resolve());
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals')
 				.query({
 					_page: 2,
@@ -641,11 +639,11 @@ describe('/proposals', () => {
 
 	describe('GET /:id', () => {
 		it('requires authentication', async () => {
-			await agent.get('/proposals/9001').expect(401);
+			await request(app).get('/proposals/9001').expect(401);
 		});
 
 		it('returns 404 when given id is not present', async () => {
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals/9001')
 				.set(authHeader)
 				.expect(404);
@@ -673,7 +671,7 @@ describe('/proposals', () => {
 				createdBy: anotherUser.id,
 			});
 
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals/1')
 				.set(authHeader)
 				.expect(404);
@@ -689,7 +687,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns 400 when given id is a string', async () => {
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals/foobar')
 				.set(authHeader)
 				.expect(400);
@@ -717,7 +715,7 @@ describe('/proposals', () => {
 				createdBy: testUser.id,
 			});
 
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals/2')
 				.set(authHeader)
 				.expect(200);
@@ -793,7 +791,7 @@ describe('/proposals', () => {
 				value: 'Abstract for version 2 from 2525-01-04',
 				isValid: true,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals/1')
 				.set(authHeader)
 				.expect(200);
@@ -996,7 +994,7 @@ describe('/proposals', () => {
 				value: 'Abstract for version 2 from 2525-01-04',
 				isValid: true,
 			});
-			const response = await agent
+			const response = await request(app)
 				.get('/proposals/1')
 				.set(authHeaderWithAdminRole)
 				.expect(200);
@@ -1140,11 +1138,14 @@ describe('/proposals', () => {
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await agent.post('/proposals').expect(401);
+			await request(app).post('/proposals').expect(401);
 		});
 
 		it('requires a user', async () => {
-			await agent.post('/proposals').set(authHeaderWithNoSubj).expect(401);
+			await request(app)
+				.post('/proposals')
+				.set(authHeaderWithNoSubj)
+				.expect(401);
 		});
 
 		it('creates exactly one proposal', async () => {
@@ -1153,7 +1154,7 @@ describe('/proposals', () => {
 			});
 			const before = await loadTableMetrics('proposals');
 			const testUser = await loadTestUser();
-			const result = await agent
+			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
 				.set(authHeader)
@@ -1175,7 +1176,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns 400 bad request when no external ID is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
 				.set(authHeader)
@@ -1190,7 +1191,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns 400 bad request when no opportunity ID is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
 				.set(authHeader)
@@ -1205,7 +1206,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns 422 conflict when a non-existent opportunity id is provided', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
 				.set(authHeader)

@@ -14,12 +14,10 @@ jest.mock('@aws-sdk/s3-presigned-post', () => ({
 	createPresignedPost: mockedCreatePresignedPost,
 }));
 
-const agent = request.agent(app);
-
 describe('/presignedPostRequests', () => {
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await agent.post('/presignedPostRequests').expect(401);
+			await request(app).post('/presignedPostRequests').expect(401);
 		});
 
 		it('invokes the S3 API to generate a presigned post', async () => {
@@ -34,7 +32,7 @@ describe('/presignedPostRequests', () => {
 				() => mockedPresignedPost,
 			);
 
-			const result = await agent
+			const result = await request(app)
 				.post('/presignedPostRequests')
 				.type('application/json')
 				.set(authHeader)
@@ -64,7 +62,7 @@ describe('/presignedPostRequests', () => {
 		});
 
 		it('Returns 400 when an invalid file size is provided', async () => {
-			await agent
+			await request(app)
 				.post('/presignedPostRequests')
 				.type('application/json')
 				.set(authHeader)
@@ -76,7 +74,7 @@ describe('/presignedPostRequests', () => {
 		});
 
 		it('Returns 400 when file type is missing', async () => {
-			await agent
+			await request(app)
 				.post('/presignedPostRequests')
 				.type('application/json')
 				.set(authHeader)
@@ -87,7 +85,7 @@ describe('/presignedPostRequests', () => {
 		});
 
 		it('Returns 400 when file size is missing', async () => {
-			await agent
+			await request(app)
 				.post('/presignedPostRequests')
 				.type('application/json')
 				.set(authHeader)
@@ -102,7 +100,7 @@ describe('/presignedPostRequests', () => {
 				throw new Error('Failed to create the presigned post!');
 			});
 
-			await agent
+			await request(app)
 				.post('/presignedPostRequests')
 				.type('application/json')
 				.set(authHeader)

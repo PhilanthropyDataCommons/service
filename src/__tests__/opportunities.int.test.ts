@@ -4,16 +4,14 @@ import { createOpportunity, loadTableMetrics } from '../database';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
-const agent = request.agent(app);
-
 describe('/opportunities', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
-			await agent.get('/opportunities').expect(401);
+			await request(app).get('/opportunities').expect(401);
 		});
 
 		it('returns an empty bundle when no data is present', async () => {
-			await agent.get('/opportunities').set(authHeader).expect(200, {
+			await request(app).get('/opportunities').set(authHeader).expect(200, {
 				entries: [],
 				total: 0,
 			});
@@ -26,7 +24,7 @@ describe('/opportunities', () => {
 			await createOpportunity({
 				title: 'Terrific opportunity 👐',
 			});
-			const response = await agent
+			const response = await request(app)
 				.get('/opportunities')
 				.set(authHeader)
 				.expect(200);
@@ -50,7 +48,7 @@ describe('/opportunities', () => {
 
 	describe('GET /:id', () => {
 		it('requires authentication', async () => {
-			await agent.get('/opportunities/1').expect(401);
+			await request(app).get('/opportunities/1').expect(401);
 		});
 
 		it('returns exactly one opportunity selected by id', async () => {
@@ -58,7 +56,7 @@ describe('/opportunities', () => {
 			await createOpportunity({ title: '✨' });
 			await createOpportunity({ title: '🚀' });
 
-			const response = await agent
+			const response = await request(app)
 				.get(`/opportunities/2`)
 				.set(authHeader)
 				.expect(200);
@@ -70,7 +68,7 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 400 bad request when id is a letter', async () => {
-			const result = await agent
+			const result = await request(app)
 				.get('/opportunities/a')
 				.set(authHeader)
 				.expect(400);
@@ -81,7 +79,7 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 400 bad request when id is a number greater than 2^32-1', async () => {
-			const result = await agent
+			const result = await request(app)
 				.get('/opportunities/555555555555555555555555555555')
 				.set(authHeader)
 				.expect(400);
@@ -95,18 +93,18 @@ describe('/opportunities', () => {
 			await createOpportunity({
 				title: 'This definitely should not be returned',
 			});
-			await agent.get('/opportunities/9001').set(authHeader).expect(404);
+			await request(app).get('/opportunities/9001').set(authHeader).expect(404);
 		});
 	});
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await agent.post('/opportunities').expect(401);
+			await request(app).post('/opportunities').expect(401);
 		});
 
 		it('creates and returns exactly one opportunity', async () => {
 			const before = await loadTableMetrics('opportunities');
-			const result = await agent
+			const result = await request(app)
 				.post('/opportunities')
 				.type('application/json')
 				.set(authHeader)
@@ -123,7 +121,7 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 400 bad request when no title sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/opportunities')
 				.type('application/json')
 				.set(authHeader)

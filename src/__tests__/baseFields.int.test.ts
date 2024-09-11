@@ -14,8 +14,6 @@ import {
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
 
-const agent = request.agent(app);
-
 const createTestBaseField = async () =>
 	createBaseField({
 		label: 'Summary',
@@ -44,11 +42,11 @@ const createTestBaseFieldWithLocalization = async () => {
 describe('/baseFields', () => {
 	describe('GET /', () => {
 		it('does not require authentication', async () => {
-			await agent.get('/baseFields').expect(200);
+			await request(app).get('/baseFields').expect(200);
 		});
 
 		it('returns an empty array when no data is present', async () => {
-			await agent.get('/baseFields').expect(200, []);
+			await request(app).get('/baseFields').expect(200, []);
 		});
 
 		it('returns all base fields present in the database', async () => {
@@ -81,7 +79,7 @@ describe('/baseFields', () => {
 				description: 'le postnom',
 			});
 
-			const result = await agent.get('/baseFields').expect(200);
+			const result = await request(app).get('/baseFields').expect(200);
 			expect(result.body).toMatchObject([
 				{
 					id: 1,
@@ -125,16 +123,16 @@ describe('/baseFields', () => {
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await agent.post('/baseFields').expect(401);
+			await request(app).post('/baseFields').expect(401);
 		});
 
 		it('requires administrator role', async () => {
-			await agent.post('/baseFields').set(authHeader).expect(401);
+			await request(app).post('/baseFields').set(authHeader).expect(401);
 		});
 
 		it('creates exactly one base field', async () => {
 			const before = await loadTableMetrics('base_fields');
-			const result = await agent
+			const result = await request(app)
 				.post('/baseFields')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -162,7 +160,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no label is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/baseFields')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -180,7 +178,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no description is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/baseFields')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -198,7 +196,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no shortCode is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/baseFields')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -216,7 +214,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no dataType is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/baseFields')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -234,7 +232,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when an invalid dataType is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/baseFields')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -253,7 +251,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no scope is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/baseFields')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -271,7 +269,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when an invalid scope is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/baseFields')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -297,7 +295,7 @@ describe('/baseFields', () => {
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 			});
-			const result = await agent
+			const result = await request(app)
 				.post('/baseFields')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -322,11 +320,11 @@ describe('/baseFields', () => {
 
 	describe('PUT /:baseFieldId', () => {
 		it('requires authentication', async () => {
-			await agent.put('/baseFields/1').expect(401);
+			await request(app).put('/baseFields/1').expect(401);
 		});
 
 		it('requires administrator role', async () => {
-			await agent.put('/baseFields/1').set(authHeader).expect(401);
+			await request(app).put('/baseFields/1').set(authHeader).expect(401);
 		});
 
 		it('updates the specified base field', async () => {
@@ -340,7 +338,7 @@ describe('/baseFields', () => {
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 			});
-			await agent
+			await request(app)
 				.put('/baseFields/1')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -367,7 +365,7 @@ describe('/baseFields', () => {
 
 		it('returns the updated base field', async () => {
 			await createTestBaseField();
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/1')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -394,7 +392,7 @@ describe('/baseFields', () => {
 		it('returns 400 bad request when no label is sent', async () => {
 			await createTestBaseField();
 
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/1')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -412,7 +410,7 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when no description is sent', async () => {
 			await createTestBaseField();
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/1')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -430,7 +428,7 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when no shortCode is sent', async () => {
 			await createTestBaseField();
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/1')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -448,7 +446,7 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when no dataType is sent', async () => {
 			await createTestBaseField();
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/1')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -465,7 +463,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 when a non-numeric ID is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/notanumber')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -483,7 +481,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 404 when attempting to update a non-existent record', async () => {
-			await agent
+			await request(app)
 				.put('/baseFields/1')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -500,7 +498,7 @@ describe('/baseFields', () => {
 	describe('GET /:baseFieldId/localizations', () => {
 		it('does not require authentication', async () => {
 			await createTestBaseFieldWithLocalization();
-			await agent.get('/baseFields/1/localizations').expect(200);
+			await request(app).get('/baseFields/1/localizations').expect(200);
 		});
 
 		it('returns all base field localizations related to the given baseFieldId', async () => {
@@ -526,7 +524,9 @@ describe('/baseFields', () => {
 				description: 'The First Name of the applicant',
 			});
 
-			const result = await agent.get('/baseFields/1/localizations').expect(200);
+			const result = await request(app)
+				.get('/baseFields/1/localizations')
+				.expect(200);
 			expect(result.body).toMatchObject({
 				total: 2,
 				entries: [
@@ -548,7 +548,9 @@ describe('/baseFields', () => {
 			});
 		});
 		it('returns 404 when a base field is referenced that does not exist', async () => {
-			const result = await agent.get('/baseFields/1/localizations').expect(404);
+			const result = await request(app)
+				.get('/baseFields/1/localizations')
+				.expect(404);
 			expect(result.body).toMatchObject({
 				name: 'NotFoundError',
 				details: [
@@ -562,11 +564,11 @@ describe('/baseFields', () => {
 
 	describe('PUT /:baseFieldId/localizations/:language', () => {
 		it('requires authentication', async () => {
-			await agent.put('/baseFields/1/localizations/fr').expect(401);
+			await request(app).put('/baseFields/1/localizations/fr').expect(401);
 		});
 
 		it('requires administrator role', async () => {
-			await agent
+			await request(app)
 				.put('/baseFields/1/localizations/fr')
 				.set(authHeader)
 				.expect(401);
@@ -575,7 +577,7 @@ describe('/baseFields', () => {
 		it('creates the specified base field localization if it does not exist', async () => {
 			await createTestBaseField();
 			const before = await loadTableMetrics('base_field_localizations');
-			await agent
+			await request(app)
 				.put('/baseFields/1/localizations/fr')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -613,7 +615,7 @@ describe('/baseFields', () => {
 				description: 'The Summary of a proposal',
 			});
 			const before = await loadTableMetrics('base_field_localizations');
-			await agent
+			await request(app)
 				.put('/baseFields/1/localizations/fr')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -645,7 +647,7 @@ describe('/baseFields', () => {
 		it('returns 400 bad request when no label is sent', async () => {
 			await createTestBaseField();
 
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/1/localizations/fr')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -661,7 +663,7 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when no description is sent', async () => {
 			await createTestBaseField();
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/1/localizations/fr')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -676,7 +678,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 when a non-numeric ID is sent', async () => {
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/notanumber/localizations/fr')
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -693,7 +695,7 @@ describe('/baseFields', () => {
 
 		it('returns 400 when an invalid IETF language tag is sent', async () => {
 			await createTestBaseField();
-			const result = await agent
+			const result = await request(app)
 				.put(
 					'/baseFields/1/localizations/theLanguageKlingonWhichIsNotARealLanguage',
 				)
@@ -711,7 +713,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 404 when a base field is referenced that does not exist', async () => {
-			const result = await agent
+			const result = await request(app)
 				.put('/baseFields/1/localizations/fr')
 				.type('application/json')
 				.set(adminUserAuthHeader)

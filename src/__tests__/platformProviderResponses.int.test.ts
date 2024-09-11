@@ -4,16 +4,14 @@ import { db, loadTableMetrics } from '../database';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
-const agent = request.agent(app);
-
 describe('/platformProviderResponses', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
-			await agent.get('/platformProviderResponses').expect(401);
+			await request(app).get('/platformProviderResponses').expect(401);
 		});
 
 		it('returns no platform provider responses if none exist', async () => {
-			const result = await agent
+			const result = await request(app)
 				.get('/platformProviderResponses?externalId=000000000')
 				.set(authHeader)
 				.expect(200);
@@ -31,7 +29,7 @@ describe('/platformProviderResponses', () => {
 				platformProvider: 'anotherExample',
 				data: JSON.stringify({ goodbyeGalaxy: '17' }),
 			});
-			const result = await agent
+			const result = await request(app)
 				.get('/platformProviderResponses?externalId=000000000')
 				.set(authHeader)
 				.expect(200);
@@ -56,7 +54,7 @@ describe('/platformProviderResponses', () => {
 		});
 
 		it('returns a 400 error if no external ID is provided', async () => {
-			const result = await agent
+			const result = await request(app)
 				.get('/platformProviderResponses')
 				.set(authHeader)
 				.expect(400);
@@ -70,7 +68,7 @@ describe('/platformProviderResponses', () => {
 	describe('POST /', () => {
 		it('creates exactly one platform provider response', async () => {
 			const before = await loadTableMetrics('platform_provider_responses');
-			const result = await agent
+			const result = await request(app)
 				.post('/platformProviderResponses')
 				.type('application/json')
 				.set(authHeader)
@@ -102,7 +100,7 @@ describe('/platformProviderResponses', () => {
 				data: JSON.stringify({ helloWorld: 42 }),
 			});
 			const before = await loadTableMetrics('platform_provider_responses');
-			const result = await agent
+			const result = await request(app)
 				.post('/platformProviderResponses')
 				.type('application/json')
 				.set(authHeader)
@@ -129,7 +127,7 @@ describe('/platformProviderResponses', () => {
 
 		it('returns a 400 error if no external ID is provided', async () => {
 			const before = await loadTableMetrics('platform_provider_responses');
-			const result = await agent
+			const result = await request(app)
 				.post('/platformProviderResponses')
 				.type('application/json')
 				.set(authHeader)

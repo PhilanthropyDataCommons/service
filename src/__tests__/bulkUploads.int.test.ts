@@ -14,20 +14,21 @@ import {
 } from '../test/mockJwt';
 import { BulkUploadStatus } from '../types';
 
-const agent = request.agent(app);
-
 describe('/bulkUploads', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
-			await agent.get('/bulkUploads').expect(401);
+			await request(app).get('/bulkUploads').expect(401);
 		});
 
 		it('requires a user', async () => {
-			await agent.get('/bulkUploads').set(authHeaderWithNoSub).expect(401);
+			await request(app)
+				.get('/bulkUploads')
+				.set(authHeaderWithNoSub)
+				.expect(401);
 		});
 
 		it('returns an empty Bundle when no data is present', async () => {
-			await agent.get('/bulkUploads').set(authHeader).expect(200, {
+			await request(app).get('/bulkUploads').set(authHeader).expect(200, {
 				total: 0,
 				entries: [],
 			});
@@ -64,7 +65,7 @@ describe('/bulkUploads', () => {
 				createdBy: thirdUser.id,
 			});
 
-			await agent
+			await request(app)
 				.get('/bulkUploads')
 				.set(authHeader)
 				.expect(200)
@@ -113,7 +114,7 @@ describe('/bulkUploads', () => {
 				createdBy: anotherUser.id,
 			});
 
-			await agent
+			await request(app)
 				.get('/bulkUploads')
 				.set(authHeaderWithAdminRole)
 				.expect(200)
@@ -162,7 +163,7 @@ describe('/bulkUploads', () => {
 				createdBy: anotherUser.id,
 			});
 
-			await agent
+			await request(app)
 				.get(`/bulkUploads?createdBy=${anotherUser.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200)
@@ -202,7 +203,7 @@ describe('/bulkUploads', () => {
 				createdBy: anotherUser.id,
 			});
 
-			await agent
+			await request(app)
 				.get(`/bulkUploads?createdBy=me`)
 				.set(authHeaderWithAdminRole)
 				.expect(200)
@@ -236,7 +237,7 @@ describe('/bulkUploads', () => {
 				});
 			}, Promise.resolve());
 
-			await agent
+			await request(app)
 				.get('/bulkUploads')
 				.query({
 					_page: 2,
@@ -306,16 +307,19 @@ describe('/bulkUploads', () => {
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await agent.post('/bulkUploads').expect(401);
+			await request(app).post('/bulkUploads').expect(401);
 		});
 
 		it('requires a user', async () => {
-			await agent.post('/bulkUploads').set(authHeaderWithNoSub).expect(401);
+			await request(app)
+				.post('/bulkUploads')
+				.set(authHeaderWithNoSub)
+				.expect(401);
 		});
 
 		it('creates exactly one bulk upload', async () => {
 			const before = await loadTableMetrics('bulk_uploads');
-			const result = await agent
+			const result = await request(app)
 				.post('/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
@@ -341,7 +345,7 @@ describe('/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when no file name is provided', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
@@ -356,7 +360,7 @@ describe('/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when an invalid file name is provided', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
@@ -372,7 +376,7 @@ describe('/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when an invalid source key is provided', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
@@ -388,7 +392,7 @@ describe('/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when no source key is provided', async () => {
-			const result = await agent
+			const result = await request(app)
 				.post('/bulkUploads')
 				.type('application/json')
 				.set(authHeader)

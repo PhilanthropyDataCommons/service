@@ -65,4 +65,13 @@ describe('Writable', () => {
 		};
 		expectTypeOf(writable).toEqualTypeOf<{ a: Map<string, { b: number }> }>();
 	});
+
+	it('should support optional parameters', () => {
+		interface Foo {
+			readonly a: string;
+			b?: number;
+		}
+		const writable: Writable<Foo> = {};
+		expectTypeOf(writable).toEqualTypeOf<{ b?: number }>();
+	});
 });

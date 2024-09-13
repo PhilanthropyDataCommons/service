@@ -8,6 +8,7 @@ const logger = getLogger(__filename);
 
 enum JobType {
 	PROCESS_BULK_UPLOAD = 'processBulkUpload',
+	SYNC_BASE_FIELDS = 'syncBaseFields',
 }
 
 export const jobQueueLogger = new Logger((scope) => (level, message, meta) => {
@@ -64,3 +65,6 @@ export const addJob = async (jobType: JobType, payload: unknown) =>
 export const addProcessBulkUploadJob = async (
 	payload: ProcessBulkUploadJobPayload,
 ) => addJob(JobType.PROCESS_BULK_UPLOAD, payload);
+
+export const addSyncBaseFieldsJob = async () =>
+	addJob(JobType.SYNC_BASE_FIELDS, {});

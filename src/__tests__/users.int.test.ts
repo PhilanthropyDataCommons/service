@@ -1,6 +1,12 @@
 import request from 'supertest';
 import { app } from '../app';
-import { createUser, loadSystemUser, loadTableMetrics } from '../database';
+import {
+	createOrUpdateFunder,
+	createSource,
+	createUser,
+	loadSystemUser,
+	loadTableMetrics,
+} from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
@@ -61,6 +67,40 @@ describe('/users', () => {
 			expect(response.body).toEqual({
 				total: userCount,
 				entries: [anotherUser],
+			});
+		});
+
+		it('returns the user with source if a sourceId has been assigned', async () => {
+			await createOrUpdateFunder({
+				shortCode: 'corpCorp',
+				name: 'CorpCorp',
+			});
+			const source = await createSource({
+				funderShortCode: 'corpCorp',
+				label: 'CorpCorp',
+			});
+
+			await createUser({
+				authenticationId: 'totallyDifferentUser@example.com',
+				sourceId: source.id,
+			});
+			const { count: userCount } = await loadTableMetrics('users');
+
+			const response = await request(app)
+				.get('/users?authenticationId=totallyDifferentUser@example.com')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: userCount,
+				entries: [
+					{
+						authenticationId: 'totallyDifferentUser@example.com',
+						createdAt: expectTimestamp,
+						id: 3,
+						source,
+						sourceId: source.id,
+					},
+				],
 			});
 		});
 

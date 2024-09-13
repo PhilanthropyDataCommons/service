@@ -1,7 +1,9 @@
 INSERT INTO users (
-  authentication_id
+  authentication_id,
+  source_id
 )
 VALUES (
-  :authenticationId
+  :authenticationId,
+  :sourceId
 )
 RETURNING user_to_json(users) AS "object";

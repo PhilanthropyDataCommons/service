@@ -4,6 +4,7 @@ import type { Writable } from './Writable';
 interface User {
 	readonly id: number;
 	authenticationId: string;
+	sourceId?: number;
 	readonly createdAt: string;
 }
 
@@ -15,6 +16,10 @@ const userSchema: JSONSchemaType<User> = {
 		},
 		authenticationId: {
 			type: 'string',
+		},
+		sourceId: {
+			type: 'number',
+			nullable: true,
 		},
 		createdAt: {
 			type: 'string',

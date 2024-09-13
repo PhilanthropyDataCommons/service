@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.12.0",
+		"version": "0.12.2",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -184,6 +184,44 @@
 					}
 				]
 			},
+			"DataProvider": {
+				"type": "object",
+				"properties": {
+					"shortCode": {
+						"$ref": "#/components/schemas/shortCode",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"example": "Philanthropy Data Warehouse"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "name", "createdAt"]
+			},
+			"Funder": {
+				"type": "object",
+				"properties": {
+					"shortCode": {
+						"$ref": "#/components/schemas/shortCode",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"example": "Example Foundation"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "name", "createdAt"]
+			},
 			"Organization": {
 				"type": "object",
 				"properties": {
@@ -336,6 +374,14 @@
 					"proposalId": {
 						"type": "integer",
 						"example": 3709
+					},
+					"sourceId": {
+						"type": "integer",
+						"readOnly": true
+					},
+					"source": {
+						"$ref": "#/components/schemas/Source",
+						"readOnly": true
 					},
 					"applicationFormId": {
 						"type": "integer",
@@ -498,6 +544,10 @@
 					"createdAt"
 				]
 			},
+			"shortCode": {
+				"type": "string",
+				"pattern": "^[\\w\\-]+$"
+			},
 			"BaseField": {
 				"type": "object",
 				"properties": {
@@ -515,8 +565,7 @@
 						"example": "The first name of the applicant"
 					},
 					"shortCode": {
-						"type": "string",
-						"example": "firstName"
+						"$ref": "#/components/schemas/shortCode"
 					},
 					"localizations": {
 						"type": "object",
@@ -718,6 +767,44 @@
 					}
 				]
 			},
+			"DataProviderBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/DataProvider"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
+			"FunderBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/Funder"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
 			"OrganizationBundle": {
 				"allOf": [
 					{
@@ -772,6 +859,75 @@
 							}
 						},
 						"required": ["entries"]
+					}
+				]
+			},
+			"Source": {
+				"allOf": [
+					{
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "integer",
+								"readOnly": true
+							},
+							"label": {
+								"type": "string",
+								"example": "A Source"
+							},
+							"relatedEntityId": {
+								"type": "integer"
+							},
+							"createdAt": {
+								"type": "string",
+								"format": "date-time",
+								"readOnly": true
+							}
+						},
+						"required": ["id", "label", "relatedEntityId", "createdAt"]
+					},
+					{
+						"oneOf": [
+							{
+								"type": "object",
+								"properties": {
+									"dataProviderShortCode": {
+										"type": "string"
+									},
+									"dataProvider": {
+										"$ref": "#/components/schemas/DataProvider",
+										"readOnly": true
+									}
+								},
+								"required": ["dataProviderShortCode", "dataProvider"]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"funderShortCode": {
+										"type": "string"
+									},
+									"funder": {
+										"$ref": "#/components/schemas/Funder",
+										"readOnly": true
+									}
+								},
+								"required": ["funderShortCode", "funder"]
+							},
+							{
+								"type": "object",
+								"properties": {
+									"organizationId": {
+										"type": "number"
+									},
+									"organization": {
+										"$ref": "#/components/schemas/Organization",
+										"readOnly": true
+									}
+								},
+								"required": ["organizationId", "organization"]
+							}
+						]
 					}
 				]
 			},
@@ -1600,6 +1756,273 @@
 				}
 			}
 		},
+		"/dataProviders": {
+			"get": {
+				"operationId": "getDataProviders",
+				"summary": "Gets a list of data providers.",
+				"tags": ["Data Providers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" }
+				],
+				"responses": {
+					"200": {
+						"description": "A list of data providers.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DataProviderBundle"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/dataProviders/{dataProviderShortCode}": {
+			"get": {
+				"operationId": "getDataProviderByShortCode",
+				"summary": "Gets a specific data provider.",
+				"tags": ["Data Providers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "dataProviderShortCode",
+						"description": "The short code of a data provider.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The data provider.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DataProvider"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"operationId": "createOrUpdateDataProvider",
+				"summary": "Creates or updates a new data provider.",
+				"tags": ["Data Providers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "dataProviderShortCode",
+						"description": "The short code of a data provider.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DataProvider"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new data provider that was created.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DataProvider"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/dataProviders/{dataProviderId}": {
+			"get": {
+				"operationId": "getDataPRoviderById",
+				"summary": "Gets a specific data provider.",
+				"tags": ["Data Providers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "dataProviderId",
+						"description": "The PDC-generated ID of a data provider.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The data provider.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DataProvider"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/funders": {
+			"get": {
+				"operationId": "getFunders",
+				"summary": "Gets a list of funders.",
+				"tags": ["Funders"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" }
+				],
+				"responses": {
+					"200": {
+						"description": "A list of funders.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/FunderBundle"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/funders/{funderShortCode}": {
+			"get": {
+				"operationId": "getFunderById",
+				"summary": "Gets a specific funder.",
+				"tags": ["Funders"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "funderShortCode",
+						"description": "The short code of a funder.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The funder.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Funder"
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"operationId": "createOrUpdateFunder",
+				"summary": "Creates or updates a new funder.",
+				"tags": ["Funders"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "funderShortCode",
+						"description": "The short code of a funder.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Funder"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new funder that was created.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Funder"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/baseFields/{baseFieldId}/localizations": {
 			"get": {
 				"operationId": "getBaseFieldLocalizationsByBaseFieldId",
@@ -1903,6 +2326,110 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/sources": {
+			"get": {
+				"operationId": "getSources",
+				"summary": "Gets a list of sources.",
+				"tags": ["Sources"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "All sources currently registered in the PDC.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Source"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"operationId": "addSource",
+				"summary": "Adds a new source.",
+				"tags": ["Sources"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Source"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The new source that was created.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Source"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/sources/{sourceId}": {
+			"get": {
+				"operationId": "getSourceById",
+				"summary": "Gets a specific source.",
+				"tags": ["Sources"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "sourceId",
+						"description": "The PDC-generated ID of a source.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The source.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Source"
 								}
 							}
 						}

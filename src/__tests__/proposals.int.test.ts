@@ -11,6 +11,7 @@ import {
 	createProposalVersion,
 	createUser,
 	db,
+	loadSystemSource,
 	loadTableMetrics,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
@@ -65,6 +66,7 @@ describe('/proposals', () => {
 			const secondUser = await createUser({
 				authenticationId: 'totallyDifferentUser@example.com',
 			});
+			const systemSource = await loadSystemSource();
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-1',
@@ -87,6 +89,7 @@ describe('/proposals', () => {
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
+				sourceId: systemSource.id,
 			});
 			await createApplicationFormField({
 				applicationFormId: 1,
@@ -128,6 +131,8 @@ describe('/proposals', () => {
 								id: 1,
 								proposalId: 1,
 								version: 1,
+								sourceId: systemSource.id,
+								source: systemSource,
 								applicationFormId: 1,
 								createdAt: expectTimestamp,
 								fieldValues: [
@@ -238,6 +243,7 @@ describe('/proposals', () => {
 			});
 
 			const testUser = await loadTestUser();
+			const systemSource = await loadSystemSource();
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-1',
@@ -255,10 +261,12 @@ describe('/proposals', () => {
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
+				sourceId: systemSource.id,
 			});
 			await createProposalVersion({
 				proposalId: 2,
 				applicationFormId: 1,
+				sourceId: systemSource.id,
 			});
 			await createApplicationFormField({
 				applicationFormId: 1,
@@ -297,6 +305,8 @@ describe('/proposals', () => {
 							{
 								id: 1,
 								proposalId: 1,
+								sourceId: systemSource.id,
+								source: systemSource,
 								version: 1,
 								applicationFormId: 1,
 								createdAt: expectTimestamp,
@@ -469,6 +479,7 @@ describe('/proposals', () => {
 				title: 'Grand opportunity',
 			});
 			const testUser = await loadTestUser();
+			const systemSource = await loadSystemSource();
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-4999',
@@ -486,10 +497,12 @@ describe('/proposals', () => {
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
+				sourceId: systemSource.id,
 			});
 			await createProposalVersion({
 				proposalId: 2,
 				applicationFormId: 1,
+				sourceId: systemSource.id,
 			});
 			await createApplicationFormField({
 				applicationFormId: 1,
@@ -528,6 +541,8 @@ describe('/proposals', () => {
 							{
 								id: 1,
 								proposalId: 1,
+								sourceId: systemSource.id,
+								source: systemSource,
 								version: 1,
 								applicationFormId: 1,
 								createdAt: expectTimestamp,
@@ -750,6 +765,7 @@ describe('/proposals', () => {
 				label: 'Long summary or abstract',
 			});
 			const testUser = await loadTestUser();
+			const systemSource = await loadSystemSource();
 			await createProposal({
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: 1,
@@ -758,10 +774,12 @@ describe('/proposals', () => {
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
+				sourceId: systemSource.id,
 			});
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
+				sourceId: systemSource.id,
 			});
 			await createProposalFieldValue({
 				proposalVersionId: 1,
@@ -805,6 +823,8 @@ describe('/proposals', () => {
 					{
 						id: 2,
 						proposalId: 1,
+						sourceId: systemSource.id,
+						source: systemSource,
 						applicationFormId: 1,
 						version: 2,
 						createdAt: expectTimestamp,
@@ -868,6 +888,8 @@ describe('/proposals', () => {
 					{
 						id: 1,
 						proposalId: 1,
+						sourceId: systemSource.id,
+						source: systemSource,
 						applicationFormId: 1,
 						version: 1,
 						createdAt: expectTimestamp,
@@ -934,6 +956,7 @@ describe('/proposals', () => {
 
 		it('returns the proposal if an administrator requests a proposal they do not own', async () => {
 			const testUser = await loadTestUser();
+			const systemSource = await loadSystemSource();
 			await createTestBaseFields();
 			await createOpportunity({
 				title: '🌎',
@@ -961,10 +984,12 @@ describe('/proposals', () => {
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
+				sourceId: systemSource.id,
 			});
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
+				sourceId: systemSource.id,
 			});
 			await createProposalFieldValue({
 				proposalVersionId: 1,
@@ -1008,6 +1033,8 @@ describe('/proposals', () => {
 					{
 						id: 2,
 						proposalId: 1,
+						sourceId: systemSource.id,
+						source: systemSource,
 						applicationFormId: 1,
 						version: 2,
 						createdAt: expectTimestamp,
@@ -1071,6 +1098,8 @@ describe('/proposals', () => {
 					{
 						id: 1,
 						proposalId: 1,
+						sourceId: systemSource.id,
+						source: systemSource,
 						applicationFormId: 1,
 						version: 1,
 						createdAt: expectTimestamp,

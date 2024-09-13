@@ -20,6 +20,7 @@ import {
 	loadBaseFields,
 	loadBulkUpload,
 	loadOrganizationByTaxId,
+	loadSystemSource,
 	updateBulkUpload,
 } from '../database/operations';
 import { BulkUploadStatus, isProcessBulkUploadJobPayload } from '../types';
@@ -267,6 +268,10 @@ export const processBulkUpload = async (
 		const applicationForm = await createApplicationForm({
 			opportunityId: opportunity.id,
 		});
+
+		// TODO: Once accounts are associated with sources we should replace this system source with a real source.
+		// See Issue https://github.com/PhilanthropyDataCommons/service/issues/1146
+		const source = await loadSystemSource();
 		const applicationFormFields =
 			await createApplicationFormFieldsForBulkUpload(
 				bulkUploadFile.path,
@@ -288,6 +293,7 @@ export const processBulkUpload = async (
 			const proposalVersion = await createProposalVersion({
 				proposalId: proposal.id,
 				applicationFormId: applicationForm.id,
+				sourceId: source.id,
 			});
 
 			const organizationName = record[organizationNameIndex];

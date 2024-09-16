@@ -11,7 +11,10 @@ export const loadBaseField = async (id: number): Promise<BaseField> => {
 	);
 	const baseField = result.rows[0]?.object;
 	if (baseField === undefined) {
-		throw new NotFoundError(`The base field was not found (id: ${id})`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'BaseField',
+			entityId: id,
+		});
 	}
 	return baseField;
 };

@@ -20,6 +20,9 @@ export const assertProposalAuthorization = async (
 	});
 
 	if (result.rows[0]?.result !== true) {
-		throw new NotFoundError(`The proposal was not found (id: ${id})`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'Proposal',
+			entityId: id,
+		});
 	}
 };

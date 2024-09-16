@@ -15,7 +15,10 @@ export const loadOrganization = async (
 	);
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError(`The organization was not found (id: ${id})`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'Organization',
+			entityId: id,
+		});
 	}
 	return object;
 };

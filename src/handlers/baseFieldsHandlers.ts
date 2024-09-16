@@ -1,4 +1,4 @@
-import { DatabaseError, InputValidationError, NotFoundError } from '../errors';
+import { DatabaseError, InputValidationError } from '../errors';
 import {
 	createBaseField,
 	loadBaseFields,
@@ -17,16 +17,7 @@ import {
 import type { Request, Response, NextFunction } from 'express';
 
 const assertBaseFieldExists = async (baseFieldId: number): Promise<void> => {
-	try {
-		await loadBaseField(baseFieldId);
-	} catch (err) {
-		if (err instanceof NotFoundError) {
-			throw new NotFoundError(
-				`The specified Base Field does not exist (${baseFieldId}).`,
-			);
-		}
-		throw err;
-	}
+	await loadBaseField(baseFieldId);
 };
 
 const getBaseFields = (

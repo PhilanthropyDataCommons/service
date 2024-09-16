@@ -13,9 +13,10 @@ export const loadApplicationFormField = async (
 	);
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError(
-			`The Application Form Field was not found (id: ${id})`,
-		);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'ApplicationFormField',
+			entityId: id,
+		});
 	}
 	return object;
 };

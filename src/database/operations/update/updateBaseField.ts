@@ -24,7 +24,10 @@ export const updateBaseField = async (
 	);
 	const baseField = result.rows[0]?.object;
 	if (baseField === undefined) {
-		throw new NotFoundError('This base field does not exist.');
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'BaseField',
+			entityId: id,
+		});
 	}
 	return baseField;
 };

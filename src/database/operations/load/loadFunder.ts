@@ -11,9 +11,10 @@ export const loadFunder = async (shortCode: ShortCode): Promise<Funder> => {
 	);
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError(
-			`The funder was not found (short code: ${shortCode})`,
-		);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'Funder',
+			entityShortCode: shortCode,
+		});
 	}
 	return object;
 };

@@ -11,7 +11,10 @@ const loadOpportunity = async (id: number): Promise<Opportunity> => {
 	);
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError(`The opportunity was not found (id: ${id})`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'Opportunity',
+			entityId: id,
+		});
 	}
 	return object;
 };

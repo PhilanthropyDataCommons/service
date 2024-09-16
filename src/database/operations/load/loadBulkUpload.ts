@@ -11,7 +11,10 @@ export const loadBulkUpload = async (id: number): Promise<BulkUpload> => {
 	);
 	const { object } = bulkUploadsQueryResult.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError(`The bulk upload was not found (id: ${id})`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'BulkUpload',
+			entityId: id,
+		});
 	}
 	return object;
 };

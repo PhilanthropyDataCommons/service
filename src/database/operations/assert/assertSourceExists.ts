@@ -1,5 +1,5 @@
 import { db } from '../../db';
-import { InputConflictError } from '../../../errors';
+import { NotFoundError } from '../../../errors';
 import type { CheckResult } from '../../../types';
 
 export const assertSourceExists = async (sourceId: number): Promise<void> => {
@@ -8,7 +8,7 @@ export const assertSourceExists = async (sourceId: number): Promise<void> => {
 	});
 
 	if (result.rows[0]?.result !== true) {
-		throw new InputConflictError('The source was not found', {
+		throw new NotFoundError(`Entity not found`, {
 			entityType: 'Source',
 			entityId: sourceId,
 		});

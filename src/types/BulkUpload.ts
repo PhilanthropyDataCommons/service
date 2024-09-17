@@ -1,6 +1,7 @@
 import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
+import type { Source } from './Source';
 
 enum BulkUploadStatus {
 	PENDING = 'pending',
@@ -12,6 +13,8 @@ enum BulkUploadStatus {
 
 interface BulkUpload {
 	readonly id: number;
+	sourceId: number;
+	readonly source: Source;
 	fileName: string;
 	sourceKey: string;
 	readonly status: BulkUploadStatus;
@@ -28,6 +31,9 @@ type InternallyWritableBulkUpload = WritableBulkUpload &
 const writableBulkUploadSchema: JSONSchemaType<WritableBulkUpload> = {
 	type: 'object',
 	properties: {
+		sourceId: {
+			type: 'integer',
+		},
 		fileName: {
 			type: 'string',
 			pattern: '^.+\\.csv$',
@@ -37,7 +43,7 @@ const writableBulkUploadSchema: JSONSchemaType<WritableBulkUpload> = {
 			minLength: 1,
 		},
 	},
-	required: ['fileName', 'sourceKey'],
+	required: ['sourceId', 'fileName', 'sourceKey'],
 };
 
 const isWritableBulkUpload = ajv.compile(writableBulkUploadSchema);

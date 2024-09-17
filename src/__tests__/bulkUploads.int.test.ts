@@ -3,6 +3,7 @@ import { app } from '../app';
 import {
 	createBulkUpload,
 	createUser,
+	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
 } from '../database';
@@ -36,29 +37,34 @@ describe('/bulkUploads', () => {
 
 		it('returns bulk uploads associated with the requesting user', async () => {
 			const systemUser = await loadSystemUser();
+			const systemSource = await loadSystemSource();
 			const testUser = await loadTestUser();
 			const thirdUser = await createUser({
 				authenticationId: 'totallyDifferentUser@example.com',
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: BulkUploadStatus.PENDING,
 				createdBy: testUser.id,
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: BulkUploadStatus.COMPLETED,
 				createdBy: testUser.id,
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'baz.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-baz',
 				status: BulkUploadStatus.COMPLETED,
 				createdBy: systemUser.id,
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'boop.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-boop',
 				status: BulkUploadStatus.COMPLETED,
@@ -75,6 +81,8 @@ describe('/bulkUploads', () => {
 						entries: [
 							{
 								id: 2,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'bar.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -84,6 +92,8 @@ describe('/bulkUploads', () => {
 							},
 							{
 								id: 1,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'foo.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
@@ -97,17 +107,20 @@ describe('/bulkUploads', () => {
 		});
 
 		it('returns all bulk uploads for administrative users', async () => {
+			const systemSource = await loadSystemSource();
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
 				authenticationId: 'totallyDifferentUser@example.com',
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: BulkUploadStatus.PENDING,
 				createdBy: testUser.id,
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: BulkUploadStatus.COMPLETED,
@@ -124,6 +137,8 @@ describe('/bulkUploads', () => {
 						entries: [
 							{
 								id: 2,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'bar.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -133,6 +148,8 @@ describe('/bulkUploads', () => {
 							},
 							{
 								id: 1,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'foo.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
@@ -146,17 +163,20 @@ describe('/bulkUploads', () => {
 		});
 
 		it('returns uploads for specified createdBy user', async () => {
+			const systemSource = await loadSystemSource();
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
 				authenticationId: 'totallyDifferentUser@example.com',
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: BulkUploadStatus.PENDING,
 				createdBy: testUser.id,
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: BulkUploadStatus.COMPLETED,
@@ -173,6 +193,8 @@ describe('/bulkUploads', () => {
 						entries: [
 							{
 								id: 2,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'bar.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -186,17 +208,20 @@ describe('/bulkUploads', () => {
 		});
 
 		it('returns uploads for the admin user when createdBy is set to me as an admin', async () => {
+			const systemSource = await loadSystemSource();
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
 				authenticationId: 'totallyDifferentUser@example.com',
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: BulkUploadStatus.PENDING,
 				createdBy: testUser.id,
 			});
 			await createBulkUpload({
+				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: BulkUploadStatus.COMPLETED,
@@ -213,6 +238,8 @@ describe('/bulkUploads', () => {
 						entries: [
 							{
 								id: 1,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'foo.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
@@ -226,10 +253,12 @@ describe('/bulkUploads', () => {
 		});
 
 		it('supports pagination', async () => {
+			const systemSource = await loadSystemSource();
 			const testUser = await loadTestUser();
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
 				await createBulkUpload({
+					sourceId: systemSource.id,
 					fileName: `bar-${i + 1}.csv`,
 					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 					status: BulkUploadStatus.COMPLETED,
@@ -251,6 +280,8 @@ describe('/bulkUploads', () => {
 						entries: [
 							{
 								id: 15,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'bar-15.csv',
 								fileSize: null,
 								sourceKey:
@@ -261,6 +292,8 @@ describe('/bulkUploads', () => {
 							},
 							{
 								id: 14,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'bar-14.csv',
 								fileSize: null,
 								sourceKey:
@@ -271,6 +304,8 @@ describe('/bulkUploads', () => {
 							},
 							{
 								id: 13,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'bar-13.csv',
 								fileSize: null,
 								sourceKey:
@@ -281,6 +316,8 @@ describe('/bulkUploads', () => {
 							},
 							{
 								id: 12,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'bar-12.csv',
 								fileSize: null,
 								sourceKey:
@@ -291,6 +328,8 @@ describe('/bulkUploads', () => {
 							},
 							{
 								id: 11,
+								sourceId: systemSource.id,
+								source: systemSource,
 								fileName: 'bar-11.csv',
 								fileSize: null,
 								sourceKey:
@@ -318,12 +357,14 @@ describe('/bulkUploads', () => {
 		});
 
 		it('creates exactly one bulk upload', async () => {
+			const systemSource = await loadSystemSource();
 			const before = await loadTableMetrics('bulk_uploads');
 			const result = await request(app)
 				.post('/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
 				.send({
+					sourceId: systemSource.id,
 					fileName: 'foo.csv',
 					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				})
@@ -334,6 +375,8 @@ describe('/bulkUploads', () => {
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({
 				id: expect.any(Number) as number,
+				sourceId: systemSource.id,
+				source: systemSource,
 				fileName: 'foo.csv',
 				fileSize: null,
 				sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -345,11 +388,13 @@ describe('/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when no file name is provided', async () => {
+			const systemSource = await loadSystemSource();
 			const result = await request(app)
 				.post('/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
 				.send({
+					sourceId: systemSource.id,
 					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				})
 				.expect(400);
@@ -360,11 +405,13 @@ describe('/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when an invalid file name is provided', async () => {
+			const systemSource = await loadSystemSource();
 			const result = await request(app)
 				.post('/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
 				.send({
+					sourceId: systemSource.id,
 					fileName: 'foo.png',
 					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				})

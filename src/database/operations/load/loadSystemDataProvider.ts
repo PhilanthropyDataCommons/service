@@ -9,7 +9,10 @@ const loadSystemDataProvider = async (): Promise<DataProvider> => {
 	);
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError(`The system data provider was not found`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'DataProvider',
+			lookupValues: { specialQuery: 'selectSystemDataProvider' },
+		});
 	}
 	return object;
 };

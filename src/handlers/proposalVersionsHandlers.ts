@@ -1,11 +1,11 @@
 import {
+	assertSourceExists,
 	createProposalFieldValue,
 	createProposalVersion,
 	db,
 	loadApplicationForm,
 	loadApplicationFormField,
 	loadProposal,
-	loadSystemSource,
 } from '../database';
 import {
 	isTinyPgErrorWithQueryContext,
@@ -124,7 +124,7 @@ const postProposalVersion = (
 		return;
 	}
 
-	const { fieldValues, proposalId, applicationFormId } = req.body;
+	const { sourceId, fieldValues, proposalId, applicationFormId } = req.body;
 
 	Promise.all([
 		assertApplicationFormExistsForProposal(
@@ -135,13 +135,10 @@ const postProposalVersion = (
 			req.body.applicationFormId,
 			req.body.fieldValues,
 		),
+		assertSourceExists(sourceId),
 	])
 		.then(() => {
 			db.transaction(async (transactionDb) => {
-				// TODO: Once accounts are associated with sources we should replace this system source with a real source.
-				// See Issue https://github.com/PhilanthropyDataCommons/service/issues/1146
-				const source = await loadSystemSource();
-				const sourceId = source.id;
 				const proposalVersion = await createProposalVersion(
 					{ proposalId, applicationFormId, sourceId },
 					transactionDb,
@@ -184,6 +181,17 @@ const postProposalVersion = (
 				});
 		})
 		.catch((error: unknown) => {
+			if (error instanceof NotFoundError) {
+				if (error.details.entityType === 'Source') {
+					next(
+						new InputConflictError(`The related entity does not exist`, {
+							entityType: 'Source',
+							entityId: sourceId,
+						}),
+					);
+					return;
+				}
+			}
 			if (isTinyPgErrorWithQueryContext(error)) {
 				next(
 					new DatabaseError(

@@ -13,9 +13,10 @@ export const loadUserByAuthenticationId = async (
 	);
 	const { object } = userQueryResult.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError(
-			`The entity was not found (authenticationId: ${authenticationId})`,
-		);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'User',
+			lookupValues: { authenticationId },
+		});
 	}
 	return object;
 };

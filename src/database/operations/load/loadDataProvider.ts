@@ -13,7 +13,10 @@ const loadDataProvider = async (
 	);
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError(`The item was not found (short cod: ${shortCode})`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'DataProvider',
+			entityShortCode: shortCode,
+		});
 	}
 	return object;
 };

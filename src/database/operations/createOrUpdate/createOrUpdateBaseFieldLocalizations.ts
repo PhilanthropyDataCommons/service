@@ -21,7 +21,13 @@ export const createOrUpdateBaseFieldLocalization = async (
 	);
 	const baseFieldLocalization = result.rows[0]?.object;
 	if (baseFieldLocalization === undefined) {
-		throw new NotFoundError('This base field localization does not exist.');
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'BaseFieldLocalization',
+			entityPrimaryKey: {
+				baseFieldId,
+				language,
+			},
+		});
 	}
 	return baseFieldLocalization;
 };

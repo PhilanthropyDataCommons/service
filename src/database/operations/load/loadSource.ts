@@ -8,7 +8,10 @@ export const loadSource = async (id: number): Promise<Source> => {
 	});
 	const item = result.rows[0]?.object;
 	if (item === undefined) {
-		throw new NotFoundError(`The item was not found (id: ${id})`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'Source',
+			entityId: id,
+		});
 	}
 	return item;
 };

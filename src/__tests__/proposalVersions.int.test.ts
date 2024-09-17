@@ -6,6 +6,7 @@ import {
 	createBaseField,
 	createOpportunity,
 	createProposal,
+	loadSystemSource,
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
@@ -39,6 +40,7 @@ describe('/proposalVersions', () => {
 		});
 
 		it('creates exactly one proposal version', async () => {
+			const systemSource = await loadSystemSource();
 			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
@@ -58,6 +60,7 @@ describe('/proposalVersions', () => {
 				.send({
 					proposalId: 1,
 					applicationFormId: 1,
+					sourceId: systemSource.id,
 					fieldValues: [],
 				})
 				.expect(201);
@@ -73,6 +76,7 @@ describe('/proposalVersions', () => {
 		});
 
 		it('creates exactly the number of provided field values', async () => {
+			const systemSource = await loadSystemSource();
 			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
@@ -104,6 +108,7 @@ describe('/proposalVersions', () => {
 				.send({
 					proposalId: 1,
 					applicationFormId: 1,
+					sourceId: systemSource.id,
 					fieldValues: [
 						{
 							applicationFormFieldId: 1,
@@ -154,6 +159,20 @@ describe('/proposalVersions', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
+					sourceId: 0,
+					applicationFormId: 1,
+					fieldValues: [],
+				})
+				.expect(400);
+		});
+
+		it('returns 400 bad request when no source id is provided', async () => {
+			await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					proposalId: 0,
 					applicationFormId: 1,
 					fieldValues: [],
 				})
@@ -166,6 +185,7 @@ describe('/proposalVersions', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
+					sourceId: 0,
 					proposalId: 1,
 					fieldValues: [],
 				})
@@ -178,6 +198,7 @@ describe('/proposalVersions', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
+					sourceId: 0,
 					proposalId: 1,
 					applicationFormId: 1,
 				})
@@ -185,6 +206,7 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 409 Conflict when the provided proposal does not exist', async () => {
+			const systemSource = await loadSystemSource();
 			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
@@ -202,6 +224,7 @@ describe('/proposalVersions', () => {
 				.send({
 					proposalId: 2,
 					applicationFormId: 1,
+					sourceId: systemSource.id,
 					fieldValues: [],
 				})
 				.expect(409);
@@ -217,7 +240,41 @@ describe('/proposalVersions', () => {
 			});
 		});
 
+		it('returns 409 conflict when the provided source does not exist', async () => {
+			await createOpportunity({ title: '🔥' });
+			const testUser = await loadTestUser();
+			await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.id,
+			});
+			await createApplicationForm({
+				opportunityId: 1,
+			});
+			const result = await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					proposalId: 1,
+					applicationFormId: 1,
+					sourceId: 9001,
+					fieldValues: [],
+				})
+				.expect(409);
+			expect(result.body).toMatchObject({
+				name: 'InputConflictError',
+				details: [
+					{
+						entityType: 'Source',
+						entityId: 9001,
+					},
+				],
+			});
+		});
+
 		it('Returns 409 Conflict if the provided application form does not exist', async () => {
+			const systemSource = await loadSystemSource();
 			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
@@ -237,6 +294,7 @@ describe('/proposalVersions', () => {
 				.send({
 					proposalId: 1,
 					applicationFormId: 2,
+					sourceId: systemSource.id,
 					fieldValues: [],
 				})
 				.expect(409);
@@ -256,6 +314,7 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if the provided application form ID is not associated with the proposal opportunity', async () => {
+			const systemSource = await loadSystemSource();
 			await createOpportunity({ title: '🔥' });
 			await createOpportunity({ title: '💧' });
 			const testUser = await loadTestUser();
@@ -279,6 +338,7 @@ describe('/proposalVersions', () => {
 				.send({
 					proposalId: 1,
 					applicationFormId: 2,
+					sourceId: systemSource.id,
 					fieldValues: [],
 				})
 				.expect(409);
@@ -300,6 +360,7 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if a provided application form field ID does not exist', async () => {
+			const systemSource = await loadSystemSource();
 			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
@@ -318,6 +379,7 @@ describe('/proposalVersions', () => {
 				.set(authHeader)
 				.send({
 					proposalId: 1,
+					sourceId: systemSource.id,
 					applicationFormId: 1,
 					fieldValues: [
 						{
@@ -345,6 +407,7 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if a provided application form field ID is not associated with the supplied application form ID', async () => {
+			const systemSource = await loadSystemSource();
 			await createOpportunity({ title: '🔥' });
 			const testUser = await loadTestUser();
 			await createProposal({
@@ -379,6 +442,7 @@ describe('/proposalVersions', () => {
 				.set(authHeader)
 				.send({
 					proposalId: 1,
+					sourceId: systemSource.id,
 					applicationFormId: 2,
 					fieldValues: [
 						{

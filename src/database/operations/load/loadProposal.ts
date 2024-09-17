@@ -8,7 +8,10 @@ export const loadProposal = async (id: number): Promise<Proposal> => {
 	});
 	const proposal = result.rows[0]?.object;
 	if (proposal === undefined) {
-		throw new NotFoundError(`The proposal was not found (id: ${id})`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'Proposal',
+			entityId: id,
+		});
 	}
 	return proposal;
 };

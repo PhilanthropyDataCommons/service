@@ -9,7 +9,12 @@ const loadSystemSource = async (): Promise<Source> => {
 	);
 	const item = result.rows[0]?.object;
 	if (item === undefined) {
-		throw new NotFoundError(`The system source was not found.`);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'Source',
+			lookupValues: {
+				specialQuery: 'selectSystemSource',
+			},
+		});
 	}
 	return item;
 };

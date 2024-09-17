@@ -13,9 +13,12 @@ export const loadOrganizationByTaxId = async (
 	);
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError(
-			`The organization was not found (Tax ID: ${taxId})`,
-		);
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'Organization',
+			lookupValues: {
+				taxId,
+			},
+		});
 	}
 	return object;
 };

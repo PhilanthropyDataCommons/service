@@ -11,7 +11,7 @@ import type { Source } from './Source';
 interface ProposalVersion {
 	readonly id: number;
 	proposalId: number;
-	readonly sourceId: number;
+	sourceId: number;
 	readonly source: Source;
 	readonly version: number;
 	applicationFormId: number;
@@ -35,6 +35,9 @@ const writableProposalVersionWithFieldValuesSchema: JSONSchemaType<WritablePropo
 			proposalId: {
 				type: 'integer',
 			},
+			sourceId: {
+				type: 'integer',
+			},
 			applicationFormId: {
 				type: 'integer',
 			},
@@ -43,7 +46,7 @@ const writableProposalVersionWithFieldValuesSchema: JSONSchemaType<WritablePropo
 				items: writableProposalFieldValueWithProposalVersionContextSchema,
 			},
 		},
-		required: ['proposalId', 'applicationFormId', 'fieldValues'],
+		required: ['proposalId', 'sourceId', 'applicationFormId', 'fieldValues'],
 	};
 
 const isWritableProposalVersionWithFieldValues = ajv.compile(

@@ -28,7 +28,10 @@ export const updateBulkUpload = async (
 	);
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
-		throw new NotFoundError('This bulk upload does not exist.');
+		throw new NotFoundError(`Entity not found`, {
+			entityType: 'BulkUpload',
+			entityId: id,
+		});
 	}
 	return object;
 };

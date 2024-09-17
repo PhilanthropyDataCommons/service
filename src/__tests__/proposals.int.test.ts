@@ -668,6 +668,10 @@ describe('/proposals', () => {
 				details: [
 					{
 						name: 'NotFoundError',
+						details: {
+							entityId: '9001',
+							entityType: 'Proposal',
+						},
 					},
 				],
 			});
@@ -696,6 +700,10 @@ describe('/proposals', () => {
 				details: [
 					{
 						name: 'NotFoundError',
+						details: {
+							entityId: '1',
+							entityType: 'Proposal',
+						},
 					},
 				],
 			});

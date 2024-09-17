@@ -376,8 +376,7 @@
 						"example": 3709
 					},
 					"sourceId": {
-						"type": "integer",
-						"readOnly": true
+						"type": "integer"
 					},
 					"source": {
 						"$ref": "#/components/schemas/Source",
@@ -407,6 +406,7 @@
 				"required": [
 					"id",
 					"proposalId",
+					"sourceId",
 					"applicationFormId",
 					"version",
 					"fieldValues",

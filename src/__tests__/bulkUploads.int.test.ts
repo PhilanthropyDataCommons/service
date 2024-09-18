@@ -366,7 +366,7 @@ describe('/bulkUploads', () => {
 				.set(authHeader)
 				.send({
 					fileName: 'foo.png',
-					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({

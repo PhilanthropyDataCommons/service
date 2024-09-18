@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	createApplicationForm,
 	createApplicationFormField,
 	createBaseField,
 	createOpportunity,
@@ -21,7 +22,6 @@ import {
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
-import { createApplicationForm } from '../database/operations/create/createApplicationForm';
 import { BaseFieldDataType, BaseFieldScope } from '../types';
 
 const createTestBaseFields = async () => {

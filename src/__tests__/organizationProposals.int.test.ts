@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	createOpportunity,
 	createOrganization,
 	createOrganizationProposal,
 	createProposal,
@@ -8,7 +9,6 @@ import {
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
-import { createOpportunity } from '../database/operations/create/createOpportunity';
 
 const insertTestOrganizations = async () => {
 	await createOrganization({

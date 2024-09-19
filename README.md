@@ -124,7 +124,7 @@ Alternatively, one may set `LOG_LEVEL` in the `.env` file.
 
 ### Authentication and Authorization
 
-A valid Bearer JSON Web Token (Bearer JWT) is required in requests to the PDC service. The PDC officially reccomends using [KeyCloak](https://www.keycloak.org/) as the authentication provider, but supports any valid Bearer JWT provider. Please refer to [the relevant documentation for setup and configuration](https://www.keycloak.org/guides#getting-started)
+A valid Bearer JSON Web Token (Bearer JWT) is required in requests to the PDC service. The PDC officially recommends using [KeyCloak](https://www.keycloak.org/) as the authentication provider, but supports any valid Bearer JWT provider. Please refer to [the relevant documentation for setup and configuration](https://www.keycloak.org/guides#getting-started)
 
 See `.env.example` for documentation on the necessary environment variables for Keycloak (or chosen authentication provider)
 

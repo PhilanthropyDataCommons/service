@@ -2,31 +2,22 @@ import { loadBundle } from '../generic/loadBundle';
 import type { JsonResultSet, Bundle, User, AuthContext } from '../../../types';
 
 export const loadUserBundle = async (
-	queryParameters: {
-		offset: number;
-		limit: number;
-		authenticationId?: string;
-	},
-	authContext?: AuthContext,
+	authContext: AuthContext | undefined,
+	authenticationId: string | undefined,
+	limit: number | undefined,
+	offset: number,
 ): Promise<Bundle<User>> => {
-	const defaultQueryParameters = {
-		authenticationId: '',
-		userId: 0,
-		isAdministrator: false,
-	};
-	const { offset, limit, authenticationId } = queryParameters;
 	const userId = authContext?.user.id;
 	const isAdministrator = authContext?.role.isAdministrator;
 
 	const bundle = await loadBundle<JsonResultSet<User>>(
 		'users.selectWithPagination',
 		{
-			...defaultQueryParameters,
-			offset,
-			limit,
 			authenticationId,
-			userId,
 			isAdministrator,
+			limit,
+			offset,
+			userId,
 		},
 		'users',
 	);

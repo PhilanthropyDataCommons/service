@@ -5,21 +5,17 @@ import type {
 	BaseFieldLocalization,
 } from '../../../types';
 
-export const loadBaseFieldLocalizationsBundle = async (queryParameters: {
-	offset?: number;
-	limit?: number;
-	baseFieldId?: number;
-}): Promise<Bundle<BaseFieldLocalization>> => {
-	const defaultQueryParameters = {
-		baseFieldId: 0,
-		offset: 0,
-		limit: 0,
-	};
+const loadBaseFieldLocalizationsBundleByBaseFieldId = async (
+	baseFieldId: number,
+	limit: number | undefined,
+	offset: number,
+): Promise<Bundle<BaseFieldLocalization>> => {
 	const bundle = await loadBundle<JsonResultSet<BaseFieldLocalization>>(
 		'baseFieldLocalizations.selectWithPagination',
 		{
-			...defaultQueryParameters,
-			...queryParameters,
+			baseFieldId,
+			limit,
+			offset,
 		},
 		'base_field_localizations',
 	);
@@ -30,3 +26,5 @@ export const loadBaseFieldLocalizationsBundle = async (queryParameters: {
 		entries,
 	};
 };
+
+export { loadBaseFieldLocalizationsBundleByBaseFieldId };

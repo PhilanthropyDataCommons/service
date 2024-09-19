@@ -9,6 +9,7 @@ import {
 	isWritableOrganization,
 	isTinyPgErrorWithQueryContext,
 	AuthenticatedRequest,
+	isAuthContext,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import {
@@ -50,15 +51,10 @@ const getOrganizations = (
 	next: NextFunction,
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
-	const proposalParameters = extractProposalParameters(req);
-	const authenticationId = req.user?.authenticationId;
-	loadOrganizationBundle(
-		{
-			...getLimitValues(paginationParameters),
-			...proposalParameters,
-		},
-		authenticationId,
-	)
+	const { limit, offset } = getLimitValues(paginationParameters);
+	const { proposalId } = extractProposalParameters(req);
+	const authContext = isAuthContext(req) ? req : undefined;
+	loadOrganizationBundle(authContext, proposalId, limit, offset)
 		.then((organizationBundle) => {
 			res.status(200).contentType('application/json').send(organizationBundle);
 		})

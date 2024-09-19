@@ -2,14 +2,14 @@ import { loadBundle } from '../generic/loadBundle';
 import type { Bundle, JsonResultSet, Funder } from '../../../types';
 
 const loadFunderBundle = async (
+	limit: number | undefined,
 	offset: number,
-	limit: number,
 ): Promise<Bundle<Funder>> => {
 	const bundle = await loadBundle<JsonResultSet<Funder>>(
 		'funders.selectWithPagination',
 		{
-			offset,
 			limit,
+			offset,
 		},
 		'funders',
 	);

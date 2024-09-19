@@ -8,7 +8,6 @@ import { DatabaseError, FailedMiddlewareError } from '../errors';
 import {
 	extractAuthenticationIdParameters,
 	extractPaginationParameters,
-	extractSearchParameters,
 } from '../queryParameters';
 import type { Response, NextFunction } from 'express';
 
@@ -22,17 +21,15 @@ const getUsers = (
 		return;
 	}
 	const paginationParameters = extractPaginationParameters(req);
-	const searchParameters = extractSearchParameters(req);
-	const authenticationIdParameters = extractAuthenticationIdParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	const { authenticationId } = extractAuthenticationIdParameters(req);
 
 	(async () => {
 		const userBundle = await loadUserBundle(
-			{
-				...getLimitValues(paginationParameters),
-				...searchParameters,
-				...authenticationIdParameters,
-			},
 			req,
+			authenticationId,
+			limit,
+			offset,
 		);
 
 		res.status(200).contentType('application/json').send(userBundle);

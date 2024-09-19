@@ -35,19 +35,19 @@ const getProposals = (
 		return;
 	}
 	const paginationParameters = extractPaginationParameters(req);
-	const searchParameters = extractSearchParameters(req);
-	const organizationParameters = extractOrganizationParameters(req);
-	const createdByParameters = extractCreatedByParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	const { search } = extractSearchParameters(req);
+	const { organizationId } = extractOrganizationParameters(req);
+	const { createdBy } = extractCreatedByParameters(req);
 
 	(async () => {
 		const proposalBundle = await loadProposalBundle(
-			{
-				...getLimitValues(paginationParameters),
-				...searchParameters,
-				...organizationParameters,
-				...createdByParameters,
-			},
 			req,
+			createdBy,
+			organizationId,
+			search,
+			limit,
+			offset,
 		);
 
 		res.status(200).contentType('application/json').send(proposalBundle);

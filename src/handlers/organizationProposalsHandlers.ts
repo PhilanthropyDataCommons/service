@@ -21,15 +21,17 @@ const getOrganizationProposals = (
 	next: NextFunction,
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
-	const organizationParameters = extractOrganizationParameters(req);
-	const proposalParameters = extractProposalParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	const { organizationId } = extractOrganizationParameters(req);
+	const { proposalId } = extractProposalParameters(req);
 
 	(async () => {
-		const organizationProposalBundle = await loadOrganizationProposalBundle({
-			...getLimitValues(paginationParameters),
-			...organizationParameters,
-			...proposalParameters,
-		});
+		const organizationProposalBundle = await loadOrganizationProposalBundle(
+			organizationId,
+			proposalId,
+			limit,
+			offset,
+		);
 		res
 			.status(200)
 			.contentType('application/json')

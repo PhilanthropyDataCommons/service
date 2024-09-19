@@ -7,31 +7,22 @@ import type {
 } from '../../../types';
 
 export const loadBulkUploadBundle = async (
-	queryParameters: {
-		offset: number;
-		limit: number;
-		createdBy?: number;
-	},
-	authContext?: AuthContext,
+	authContext: AuthContext | undefined,
+	createdBy: number | undefined,
+	limit: number | undefined,
+	offset: number,
 ): Promise<Bundle<BulkUpload>> => {
-	const defaultQueryParameters = {
-		createdBy: 0,
-		userId: 0,
-		isAdministrator: false,
-	};
-	const { offset, limit, createdBy } = queryParameters;
 	const userId = authContext?.user.id;
 	const isAdministrator = authContext?.role.isAdministrator;
 
 	const bundle = await loadBundle<JsonResultSet<BulkUpload>>(
 		'bulkUploads.selectWithPagination',
 		{
-			...defaultQueryParameters,
-			offset,
-			limit,
 			createdBy,
-			userId,
 			isAdministrator,
+			limit,
+			offset,
+			userId,
 		},
 		'bulk_uploads',
 	);

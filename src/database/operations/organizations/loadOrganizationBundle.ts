@@ -1,23 +1,25 @@
 import { loadBundle } from '../generic/loadBundle';
-import type { Bundle, JsonResultSet, Organization } from '../../../types';
+import type {
+	AuthContext,
+	Bundle,
+	JsonResultSet,
+	Organization,
+} from '../../../types';
 
 export const loadOrganizationBundle = async (
-	queryParameters: {
-		offset: number;
-		limit: number;
-		proposalId?: number;
-	},
-	authenticationId?: string,
+	authContext: AuthContext | undefined,
+	proposalId: number | undefined,
+	limit: number | undefined,
+	offset: number,
 ): Promise<Bundle<Organization>> => {
-	const defaultQueryParameters = {
-		proposalId: 0,
-	};
+	const authenticationId = authContext?.user?.authenticationId;
 	const jsonResultSetBundle = await loadBundle<JsonResultSet<Organization>>(
 		'organizations.selectWithPagination',
 		{
-			...defaultQueryParameters,
-			...queryParameters,
 			authenticationId,
+			limit,
+			offset,
+			proposalId,
 		},
 		'organizations',
 	);

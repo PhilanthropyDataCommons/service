@@ -2,19 +2,14 @@ import { loadBundle } from '../generic/loadBundle';
 import type { Bundle, DataProvider, JsonResultSet } from '../../../types';
 
 const loadDataProviderBundle = async (
+	limit: number | undefined,
 	offset: number,
-	limit: number,
 ): Promise<Bundle<DataProvider>> => {
-	const defaultQueryParameters = {
-		offset: 0,
-		limit: 0,
-	};
 	const bundle = await loadBundle<JsonResultSet<DataProvider>>(
 		'dataProviders.selectWithPagination',
 		{
-			...defaultQueryParameters,
-			offset,
 			limit,
+			offset,
 		},
 		'data_providers',
 	);

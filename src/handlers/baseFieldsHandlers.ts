@@ -4,9 +4,11 @@ import {
 	loadBaseFields,
 	updateBaseField,
 	createOrUpdateBaseFieldLocalization,
-	loadBaseFieldLocalizationsBundle,
+	loadBaseFieldLocalizationsBundleByBaseFieldId,
 	loadBaseField,
+	getLimitValues,
 } from '../database';
+import { extractPaginationParameters } from '../queryParameters';
 import {
 	isTinyPgErrorWithQueryContext,
 	isValidLanguageTag,
@@ -110,9 +112,11 @@ const getBaseFieldLocalizationsByBaseFieldId = (
 		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
 		return;
 	}
+	const paginationParameters = extractPaginationParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
 	assertBaseFieldExists(baseFieldId)
 		.then(() => {
-			loadBaseFieldLocalizationsBundle({ baseFieldId })
+			loadBaseFieldLocalizationsBundleByBaseFieldId(baseFieldId, limit, offset)
 				.then((baseFieldLocalizations) => {
 					res
 						.status(200)

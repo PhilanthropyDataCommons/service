@@ -2,23 +2,14 @@ import { loadBundle } from '../generic/loadBundle';
 import type { Bundle, JsonResultSet, Opportunity } from '../../../types';
 
 const loadOpportunityBundle = async (
-	queryParameters: {
-		offset?: number;
-		limit?: number;
-	} = {},
+	limit: number | undefined,
+	offset: number,
 ): Promise<Bundle<Opportunity>> => {
-	const defaultQueryParameters = {
-		offset: 0,
-		limit: 0,
-	};
-	const { offset, limit } = queryParameters;
-
 	const bundle = await loadBundle<JsonResultSet<Opportunity>>(
 		'opportunities.selectWithPagination',
 		{
-			...defaultQueryParameters,
-			offset,
 			limit,
+			offset,
 		},
 		'opportunities',
 	);

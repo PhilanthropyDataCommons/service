@@ -1,6 +1,7 @@
 import {
 	createApplicationForm,
 	createApplicationFormField,
+	getLimitValues,
 	loadApplicationForm,
 	loadApplicationFormBundle,
 } from '../database';
@@ -10,6 +11,7 @@ import {
 	isId,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
+import { extractPaginationParameters } from '../queryParameters';
 import type { Request, Response, NextFunction } from 'express';
 
 const getApplicationForms = (
@@ -17,7 +19,9 @@ const getApplicationForms = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	loadApplicationFormBundle()
+	const paginationParameters = extractPaginationParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	loadApplicationFormBundle(limit, offset)
 		.then((applicationForms) => {
 			res.status(200).contentType('application/json').send(applicationForms);
 		})

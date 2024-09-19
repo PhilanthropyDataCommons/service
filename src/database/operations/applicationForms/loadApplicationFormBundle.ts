@@ -2,20 +2,14 @@ import { loadBundle } from '../generic/loadBundle';
 import type { JsonResultSet, Bundle, ApplicationForm } from '../../../types';
 
 export const loadApplicationFormBundle = async (
-	queryParameters: {
-		offset?: number;
-		limit?: number;
-	} = {},
+	limit: number | undefined,
+	offset: number,
 ): Promise<Bundle<ApplicationForm>> => {
-	const defaultQueryParameters = {
-		offset: 0,
-		limit: 0,
-	};
 	const bundle = await loadBundle<JsonResultSet<ApplicationForm>>(
 		'applicationForms.selectWithPagination',
 		{
-			...defaultQueryParameters,
-			...queryParameters,
+			limit,
+			offset,
 		},
 		'application_forms',
 	);

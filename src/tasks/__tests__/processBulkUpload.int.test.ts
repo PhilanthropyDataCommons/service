@@ -52,8 +52,10 @@ const createTestBulkUpload = async (
 	overrideValues?: Partial<InternallyWritableBulkUpload>,
 ): Promise<BulkUpload> => {
 	const systemUser = await loadSystemUser();
+	const systemSource = await loadSystemSource();
 	const defaultValues = {
 		fileName: 'bar.csv',
+		sourceId: systemSource.id,
 		sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
 		status: BulkUploadStatus.PENDING,
 		createdBy: systemUser.id,

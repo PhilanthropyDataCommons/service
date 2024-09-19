@@ -2,11 +2,11 @@ import { db as defaultDb } from '../../db';
 import type {
 	JsonResultSet,
 	ProposalVersion,
-	InternallyWritableProposalVersion,
+	WritableProposalVersion,
 } from '../../../types';
 
 const createProposalVersion = async (
-	createValues: InternallyWritableProposalVersion,
+	createValues: WritableProposalVersion,
 	db = defaultDb,
 ): Promise<ProposalVersion> => {
 	const { proposalId, applicationFormId, sourceId } = createValues;

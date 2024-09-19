@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgraded to use OpenAPI Specification 3.1.
 
+## 0.12.3 2024-09-19
+
+### Added
+
+- New `Funder` entity type with corresponding `PUT` and `GET` endpoints.
+- New `DataProvider` entity type with corresponding `PUT` and `GET` endpoints.
+- New `Source` entity type with corresponding `PUT` and `GET` endpoints.
+- `sourceId` is now an attribute of `BulkUpload`.
+- `sourceId` is now an attribute of `ProposalVersion`.
+
 ## 0.11.0 2024-05-20
 
 ### Added

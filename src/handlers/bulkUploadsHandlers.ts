@@ -1,4 +1,5 @@
 import {
+	assertSourceExists,
 	createBulkUpload,
 	getLimitValues,
 	loadBulkUploadBundle,
@@ -13,7 +14,9 @@ import {
 import {
 	DatabaseError,
 	FailedMiddlewareError,
+	InputConflictError,
 	InputValidationError,
+	NotFoundError,
 } from '../errors';
 import {
 	extractCreatedByParameters,
@@ -42,7 +45,7 @@ const postBulkUpload = (
 		return;
 	}
 
-	const { fileName, sourceKey } = req.body;
+	const { sourceId, fileName, sourceKey } = req.body;
 	const createdBy = req.user.id;
 
 	if (!sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
@@ -52,24 +55,38 @@ const postBulkUpload = (
 		);
 	}
 
-	(async () => {
-		const bulkUpload = await createBulkUpload({
-			fileName,
-			sourceKey,
-			status: BulkUploadStatus.PENDING,
-			createdBy,
+	assertSourceExists(sourceId)
+		.then(async () => {
+			const bulkUpload = await createBulkUpload({
+				sourceId,
+				fileName,
+				sourceKey,
+				status: BulkUploadStatus.PENDING,
+				createdBy,
+			});
+			await addProcessBulkUploadJob({
+				bulkUploadId: bulkUpload.id,
+			});
+			res.status(201).contentType('application/json').send(bulkUpload);
+		})
+		.catch((error: unknown) => {
+			if (isTinyPgErrorWithQueryContext(error)) {
+				next(new DatabaseError('Error creating bulk upload.', error));
+				return;
+			}
+			if (error instanceof NotFoundError) {
+				if (error.details.entityType === 'Source') {
+					next(
+						new InputConflictError(`The related entity does not exist`, {
+							entityType: 'Source',
+							entityId: sourceId,
+						}),
+					);
+					return;
+				}
+			}
+			next(error);
 		});
-		await addProcessBulkUploadJob({
-			bulkUploadId: bulkUpload.id,
-		});
-		res.status(201).contentType('application/json').send(bulkUpload);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error creating bulk upload.', error));
-			return;
-		}
-		next(error);
-	});
 };
 
 const getBulkUploads = (

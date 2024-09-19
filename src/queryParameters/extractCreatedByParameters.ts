@@ -14,24 +14,30 @@ interface CreatedByParameters {
 
 const createdByQueryParametersSchema: JSONSchemaType<CreatedByQueryParameters> =
 	{
-		type: 'object',
-		properties: {
-			createdBy: {
-				type: ['integer', 'string'],
-				oneOf: [
-					{
+		anyOf: [
+			{
+				type: 'object',
+				properties: {
+					createdBy: {
 						type: 'integer',
 						minimum: 1,
 						nullable: true,
 					},
-					{
-						enum: ['me'],
-					},
-				],
-				nullable: true,
+				},
+				required: [],
 			},
-		},
-		required: [],
+			{
+				type: 'object',
+				properties: {
+					createdBy: {
+						type: 'string',
+						enum: ['me'],
+						nullable: true,
+					},
+				},
+				required: [],
+			},
+		],
 	};
 
 const isCreatedByQueryParameters = ajv.compile(createdByQueryParametersSchema);

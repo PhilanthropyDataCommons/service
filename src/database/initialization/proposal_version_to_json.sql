@@ -25,7 +25,8 @@ BEGIN
     'applicationFormId', proposal_version.application_form_id,
     'version', proposal_version.version,
     'fieldValues', COALESCE(proposal_field_values_json, '[]'::JSONB),
-    'createdAt', proposal_version.created_at
+    'createdAt', proposal_version.created_at,
+    'createdBy', proposal_version.created_by
   );
 END;
 $$ LANGUAGE plpgsql;

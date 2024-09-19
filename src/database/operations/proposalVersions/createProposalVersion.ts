@@ -2,20 +2,21 @@ import { db as defaultDb } from '../../db';
 import type {
 	JsonResultSet,
 	ProposalVersion,
-	WritableProposalVersion,
+	InternallyWritableProposalVersion,
 } from '../../../types';
 
 const createProposalVersion = async (
-	createValues: WritableProposalVersion,
+	createValues: InternallyWritableProposalVersion,
 	db = defaultDb,
 ): Promise<ProposalVersion> => {
-	const { proposalId, applicationFormId, sourceId } = createValues;
+	const { proposalId, applicationFormId, sourceId, createdBy } = createValues;
 	const result = await db.sql<JsonResultSet<ProposalVersion>>(
 		'proposalVersions.insertOne',
 		{
 			proposalId,
 			applicationFormId,
 			sourceId,
+			createdBy,
 		},
 	);
 	const { object } = result.rows[0] ?? {};

@@ -8,6 +8,7 @@ import {
 	loadProposal,
 } from '../database';
 import {
+	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableProposalVersionWithFieldValues,
 } from '../types';
@@ -16,6 +17,7 @@ import {
 	InputValidationError,
 	InputConflictError,
 	NotFoundError,
+	FailedMiddlewareError,
 } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
 import type { Request, Response, NextFunction } from 'express';
@@ -114,6 +116,10 @@ const postProposalVersion = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
 	if (!isWritableProposalVersionWithFieldValues(req.body)) {
 		next(
 			new InputValidationError(
@@ -125,6 +131,7 @@ const postProposalVersion = (
 	}
 
 	const { sourceId, fieldValues, proposalId, applicationFormId } = req.body;
+	const createdBy = req.user.id;
 
 	Promise.all([
 		assertApplicationFormExistsForProposal(
@@ -140,7 +147,7 @@ const postProposalVersion = (
 		.then(() => {
 			db.transaction(async (transactionDb) => {
 				const proposalVersion = await createProposalVersion(
-					{ proposalId, applicationFormId, sourceId },
+					{ proposalId, applicationFormId, sourceId, createdBy },
 					transactionDb,
 				);
 				const proposalFieldValues = await Promise.all(

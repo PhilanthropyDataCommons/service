@@ -17,9 +17,13 @@ interface ProposalVersion {
 	applicationFormId: number;
 	readonly fieldValues: ProposalFieldValue[];
 	readonly createdAt: string;
+	readonly createdBy: number;
 }
 
 type WritableProposalVersion = Writable<ProposalVersion>;
+
+type InternallyWritableProposalVersion = WritableProposalVersion &
+	Pick<ProposalVersion, 'createdBy'>;
 
 type WritableProposalVersionWithFieldValues = WritableProposalVersion & {
 	fieldValues: WritableProposalFieldValueWithProposalVersionContext[];
@@ -51,7 +55,7 @@ const isWritableProposalVersionWithFieldValues = ajv.compile(
 );
 
 export {
-	WritableProposalVersion,
+	InternallyWritableProposalVersion,
 	ProposalVersion,
 	WritableProposalVersionWithFieldValues,
 	isWritableProposalVersionWithFieldValues,

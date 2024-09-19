@@ -290,6 +290,7 @@ export const processBulkUpload = async (
 				proposalId: proposal.id,
 				applicationFormId: applicationForm.id,
 				sourceId: bulkUpload.sourceId,
+				createdBy: bulkUpload.createdBy,
 			});
 
 			const organizationName = record[organizationNameIndex];

@@ -90,6 +90,7 @@ describe('/proposals', () => {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
+				createdBy: testUser.id,
 			});
 			await createApplicationFormField({
 				applicationFormId: 1,
@@ -135,6 +136,7 @@ describe('/proposals', () => {
 								source: systemSource,
 								applicationFormId: 1,
 								createdAt: expectTimestamp,
+								createdBy: testUser.id,
 								fieldValues: [
 									{
 										id: 1,
@@ -262,11 +264,13 @@ describe('/proposals', () => {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
+				createdBy: testUser.id,
 			});
 			await createProposalVersion({
 				proposalId: 2,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
+				createdBy: testUser.id,
 			});
 			await createApplicationFormField({
 				applicationFormId: 1,
@@ -310,6 +314,7 @@ describe('/proposals', () => {
 								version: 1,
 								applicationFormId: 1,
 								createdAt: expectTimestamp,
+								createdBy: testUser.id,
 								fieldValues: [
 									{
 										id: 1,
@@ -498,11 +503,13 @@ describe('/proposals', () => {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
+				createdBy: testUser.id,
 			});
 			await createProposalVersion({
 				proposalId: 2,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
+				createdBy: testUser.id,
 			});
 			await createApplicationFormField({
 				applicationFormId: 1,
@@ -546,6 +553,7 @@ describe('/proposals', () => {
 								version: 1,
 								applicationFormId: 1,
 								createdAt: expectTimestamp,
+								createdBy: testUser.id,
 								fieldValues: [
 									{
 										id: 1,
@@ -783,11 +791,13 @@ describe('/proposals', () => {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
+				createdBy: testUser.id,
 			});
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
+				createdBy: testUser.id,
 			});
 			await createProposalFieldValue({
 				proposalVersionId: 1,
@@ -836,6 +846,7 @@ describe('/proposals', () => {
 						applicationFormId: 1,
 						version: 2,
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 						fieldValues: [
 							{
 								id: 3,
@@ -901,6 +912,7 @@ describe('/proposals', () => {
 						applicationFormId: 1,
 						version: 1,
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 						fieldValues: [
 							{
 								id: 1,
@@ -993,11 +1005,13 @@ describe('/proposals', () => {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
+				createdBy: testUser.id,
 			});
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
+				createdBy: testUser.id,
 			});
 			await createProposalFieldValue({
 				proposalVersionId: 1,
@@ -1046,6 +1060,7 @@ describe('/proposals', () => {
 						applicationFormId: 1,
 						version: 2,
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 						fieldValues: [
 							{
 								id: 3,
@@ -1111,6 +1126,7 @@ describe('/proposals', () => {
 						applicationFormId: 1,
 						version: 1,
 						createdAt: expectTimestamp,
+						createdBy: testUser.id,
 						fieldValues: [
 							{
 								id: 1,

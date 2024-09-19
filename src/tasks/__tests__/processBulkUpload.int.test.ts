@@ -333,8 +333,12 @@ describe('processBulkUpload', () => {
 	it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
 		await createTestBaseFields();
 		const systemSource = await loadSystemSource();
+		const systemUser = await loadSystemUser();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
+		const bulkUpload = await createTestBulkUpload({
+			sourceKey,
+			createdBy: systemUser.id,
+		});
 		const requests = await mockS3ResponsesForBulkUploadProcessing(
 			bulkUpload,
 			`${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
@@ -383,6 +387,7 @@ describe('processBulkUpload', () => {
 						{
 							applicationFormId: 1,
 							createdAt: expectTimestamp,
+							createdBy: systemUser.id,
 							fieldValues: [
 								{
 									applicationFormField: {
@@ -458,6 +463,7 @@ describe('processBulkUpload', () => {
 						{
 							applicationFormId: 1,
 							createdAt: expectTimestamp,
+							createdBy: systemUser.id,
 							fieldValues: [
 								{
 									applicationFormField: {

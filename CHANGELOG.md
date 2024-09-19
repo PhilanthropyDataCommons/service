@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgraded to use OpenAPI Specification 3.1.
 
+## 0.12.4 2024-09-19
+
+### Added
+
+- `createdBy` is now an attribute of `ProposalVersion`.
+
 ## 0.12.3 2024-09-19
 
 ### Added

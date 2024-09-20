@@ -1,11 +1,17 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
-import type { Id, JsonResultSet, Organization } from '../../../types';
+import type {
+	AuthContext,
+	Id,
+	JsonResultSet,
+	Organization,
+} from '../../../types';
 
 export const loadOrganization = async (
+	authContext: AuthContext | undefined,
 	id: Id,
-	authenticationId?: string,
 ): Promise<Organization> => {
+	const authenticationId = authContext?.user?.authenticationId;
 	const result = await db.sql<JsonResultSet<Organization>>(
 		'organizations.selectById',
 		{

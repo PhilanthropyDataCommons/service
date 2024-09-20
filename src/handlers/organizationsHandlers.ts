@@ -77,8 +77,8 @@ const getOrganization = (
 		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
 		return;
 	}
-	const authenticationId = req.user?.authenticationId;
-	loadOrganization(organizationId, authenticationId)
+	const authContext = isAuthContext(req) ? req : undefined;
+	loadOrganization(authContext, organizationId)
 		.then((organization) => {
 			res.status(200).contentType('application/json').send(organization);
 		})

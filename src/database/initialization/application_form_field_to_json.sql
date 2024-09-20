@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION application_form_field_to_json(application_form_field application_form_fields)
+SELECT drop_function('application_form_field_to_json');
+
+CREATE FUNCTION application_form_field_to_json(application_form_field application_form_fields)
 RETURNS JSONB AS $$
 DECLARE
   base_field_json JSONB;

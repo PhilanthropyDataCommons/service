@@ -1,6 +1,6 @@
--- An explicit DROP is needed to remove the old function instead of overloading it.
-DROP FUNCTION IF EXISTS organization_to_json(organizations);
-CREATE OR REPLACE FUNCTION organization_to_json(organization organizations, authenticationId VARCHAR DEFAULT NULL)
+SELECT drop_function('organization_to_json');
+
+CREATE FUNCTION organization_to_json(organization organizations, authenticationId VARCHAR DEFAULT NULL)
 RETURNS JSONB AS $$
 DECLARE
   proposal_field_values_json JSONB;

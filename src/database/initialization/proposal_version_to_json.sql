@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION proposal_version_to_json(proposal_version proposal_versions)
+SELECT drop_function('proposal_version_to_json');
+
+CREATE FUNCTION proposal_version_to_json(proposal_version proposal_versions)
 RETURNS JSONB AS $$
 DECLARE
   proposal_field_values_json JSONB;

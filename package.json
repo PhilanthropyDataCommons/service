@@ -11,7 +11,7 @@
 		"lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:tsc && npm run lint:swagger",
 		"lint:eslint": "eslint ./src --ext .ts --max-warnings=0",
 		"lint:swagger": "swagger-spec-validator src/openapi.json",
-		"lint:tsc": "tsc --noEmit -p tsconfig.json",
+		"lint:tsc": "tsc --noEmit -p tsconfig.dev.json",
 		"lint:prettier": "prettier . --check",
 		"migrate": "ts-node src/scripts/migrate.ts | pino-pretty",
 		"start": "ts-node src/index.ts | pino-pretty",

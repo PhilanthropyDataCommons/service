@@ -1,21 +1,13 @@
 import { getLimitValues, loadUserBundle } from '../database';
-import {
-	AuthenticatedRequest,
-	isAuthContext,
-	isTinyPgErrorWithQueryContext,
-} from '../types';
+import { isAuthContext, isTinyPgErrorWithQueryContext } from '../types';
 import { DatabaseError, FailedMiddlewareError } from '../errors';
 import {
 	extractAuthenticationIdParameters,
 	extractPaginationParameters,
 } from '../queryParameters';
-import type { Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
-const getUsers = (
-	req: AuthenticatedRequest,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getUsers = (req: Request, res: Response, next: NextFunction): void => {
 	if (!isAuthContext(req)) {
 		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;

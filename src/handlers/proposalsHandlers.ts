@@ -6,7 +6,6 @@ import {
 	loadProposalBundle,
 } from '../database';
 import {
-	AuthenticatedRequest,
 	isId,
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
@@ -23,10 +22,10 @@ import {
 	extractPaginationParameters,
 	extractSearchParameters,
 } from '../queryParameters';
-import type { Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 const getProposals = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
@@ -60,11 +59,7 @@ const getProposals = (
 	});
 };
 
-const getProposal = (
-	req: AuthenticatedRequest,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getProposal = (req: Request, res: Response, next: NextFunction): void => {
 	if (!isAuthContext(req)) {
 		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
@@ -88,7 +83,7 @@ const getProposal = (
 };
 
 const postProposal = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {

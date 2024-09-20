@@ -5,7 +5,6 @@ import {
 	loadDataProvider,
 } from '../database';
 import {
-	AuthenticatedRequest,
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableDataProvider,
@@ -17,10 +16,10 @@ import {
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { isShortCode } from '../types/ShortCode';
-import type { Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 const getDataProviders = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
@@ -44,7 +43,7 @@ const getDataProviders = (
 };
 
 const getDataProvider = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
@@ -69,7 +68,7 @@ const getDataProvider = (
 };
 
 const putDataProvider = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {

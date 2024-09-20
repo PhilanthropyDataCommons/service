@@ -5,7 +5,6 @@ import {
 	loadBulkUploadBundle,
 } from '../database';
 import {
-	AuthenticatedRequest,
 	BulkUploadStatus,
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
@@ -24,10 +23,10 @@ import {
 } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
 import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
-import type { Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 const postBulkUpload = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
@@ -90,7 +89,7 @@ const postBulkUpload = (
 };
 
 const getBulkUploads = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {

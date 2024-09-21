@@ -30,3 +30,7 @@ export const createTestUser = async () =>
 
 export const loadTestUser = async () =>
 	loadUserByAuthenticationId(getTestUserAuthenticationId());
+
+export const NO_OFFSET = 0;
+
+export const NO_LIMIT = undefined;

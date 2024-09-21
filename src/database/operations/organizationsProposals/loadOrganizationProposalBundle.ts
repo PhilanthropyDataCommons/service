@@ -5,17 +5,12 @@ import type {
 	OrganizationProposal,
 } from '../../../types';
 
-interface LoadOrganizationProposalBundleParameters {
-	organizationId?: number;
-	proposalId?: number;
-	offset: number;
-	limit: number;
-}
-
 export const loadOrganizationProposalBundle = async (
-	queryParameters: LoadOrganizationProposalBundleParameters,
+	organizationId: number | undefined,
+	proposalId: number | undefined,
+	limit: number | undefined,
+	offset: number,
 ): Promise<Bundle<OrganizationProposal>> => {
-	const { organizationId, proposalId, offset, limit } = queryParameters;
 	const bundle = await loadBundle<JsonResultSet<OrganizationProposal>>(
 		'organizationsProposals.selectWithPagination',
 		{

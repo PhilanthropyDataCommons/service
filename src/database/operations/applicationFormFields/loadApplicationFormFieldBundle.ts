@@ -5,21 +5,17 @@ import type {
 	JsonResultSet,
 } from '../../../types';
 
-export const loadApplicationFormFieldBundle = async (queryParameters: {
-	offset?: number;
-	limit?: number;
-	applicationFormId?: number;
-}): Promise<Bundle<ApplicationFormField>> => {
-	const defaultQueryParameters = {
-		applicationFormId: 0,
-		offset: 0,
-		limit: 0,
-	};
+export const loadApplicationFormFieldBundle = async (
+	applicationFormId: number | undefined,
+	limit: number | undefined,
+	offset: number,
+): Promise<Bundle<ApplicationFormField>> => {
 	const bundle = await loadBundle<JsonResultSet<ApplicationFormField>>(
 		'applicationFormFields.selectWithPagination',
 		{
-			...defaultQueryParameters,
-			...queryParameters,
+			applicationFormId,
+			limit,
+			offset,
 		},
 		'application_form_fields',
 	);

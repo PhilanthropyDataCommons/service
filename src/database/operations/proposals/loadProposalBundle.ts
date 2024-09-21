@@ -7,37 +7,26 @@ import type {
 } from '../../../types';
 
 export const loadProposalBundle = async (
-	queryParameters: {
-		offset: number;
-		limit: number;
-		search?: string;
-		organizationId?: number;
-		createdBy?: number;
-	},
-	authContext?: AuthContext,
+	authContext: AuthContext | undefined,
+	createdBy: number | undefined,
+	organizationId: number | undefined,
+	search: string | undefined,
+	limit: number | undefined,
+	offset: number,
 ): Promise<Bundle<Proposal>> => {
-	const defaultQueryParameters = {
-		search: '',
-		organizationId: 0,
-		createdBy: 0,
-		userId: 0,
-		isAdministrator: false,
-	};
-	const { offset, limit, search, organizationId, createdBy } = queryParameters;
 	const userId = authContext?.user.id;
 	const isAdministrator = authContext?.role.isAdministrator;
 
 	const bundle = await loadBundle<JsonResultSet<Proposal>>(
 		'proposals.selectWithPagination',
 		{
-			...defaultQueryParameters,
-			offset,
-			limit,
-			search,
-			organizationId,
 			createdBy,
-			userId,
 			isAdministrator,
+			limit,
+			offset,
+			organizationId,
+			search,
+			userId,
 		},
 		'proposals',
 	);

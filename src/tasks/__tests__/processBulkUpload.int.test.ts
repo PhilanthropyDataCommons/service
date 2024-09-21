@@ -21,7 +21,7 @@ import {
 	BulkUploadStatus,
 	Proposal,
 } from '../../types';
-import { expectTimestamp } from '../../test/utils';
+import { expectTimestamp, NO_LIMIT, NO_OFFSET } from '../../test/utils';
 import type {
 	BulkUpload,
 	InternallyWritableBulkUpload,
@@ -354,14 +354,14 @@ describe('processBulkUpload', () => {
 
 		const {
 			entries: [opportunity],
-		} = await loadOpportunityBundle();
+		} = await loadOpportunityBundle(NO_LIMIT, NO_OFFSET);
 		if (opportunity === undefined) {
 			throw new Error('The opportunity was not created');
 		}
 
 		const {
 			entries: [applicationForm],
-		} = await loadApplicationFormBundle();
+		} = await loadApplicationFormBundle(NO_LIMIT, NO_OFFSET);
 		if (applicationForm === undefined) {
 			fail('The application form was not created');
 		}
@@ -371,10 +371,14 @@ describe('processBulkUpload', () => {
 			createdAt: expectTimestamp,
 		});
 
-		const proposalBundle = await loadProposalBundle({
-			limit: 100,
-			offset: 0,
-		});
+		const proposalBundle = await loadProposalBundle(
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
 		expect(proposalBundle).toEqual({
 			entries: [
 				{
@@ -533,19 +537,23 @@ describe('processBulkUpload', () => {
 			total: 2,
 		});
 
-		const organizationBundle = await loadOrganizationBundle({
-			limit: 100,
-			offset: 0,
-		});
+		const organizationBundle = await loadOrganizationBundle(
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
 		expect(organizationBundle).toEqual({
 			entries: [],
 			total: 0,
 		});
 
-		const organizationProposalBundle = await loadOrganizationProposalBundle({
-			limit: 100,
-			offset: 0,
-		});
+		const organizationProposalBundle = await loadOrganizationProposalBundle(
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
 		expect(organizationProposalBundle).toEqual({
 			entries: [],
 			total: 0,
@@ -573,15 +581,19 @@ describe('processBulkUpload', () => {
 			getMockJobHelpers(),
 		);
 
-		const organizationBundle = await loadOrganizationBundle({
-			limit: 100,
-			offset: 0,
-		});
+		const organizationBundle = await loadOrganizationBundle(
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
 
-		const organizationProposalBundle = await loadOrganizationProposalBundle({
-			limit: 100,
-			offset: 0,
-		});
+		const organizationProposalBundle = await loadOrganizationProposalBundle(
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
 
 		expect(organizationBundle).toEqual({
 			entries: [

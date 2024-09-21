@@ -3,7 +3,7 @@ import { InternalValidationError } from '../../errors';
 import type { PaginationParameters } from '../../types';
 
 interface LimitValues {
-	limit: number;
+	limit: number | undefined;
 	offset: number;
 }
 

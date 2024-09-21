@@ -31,7 +31,7 @@ const getFunders = (
 	const paginationParameters = extractPaginationParameters(req);
 	(async () => {
 		const { offset, limit } = getLimitValues(paginationParameters);
-		const funderBundle = await loadFunderBundle(offset, limit);
+		const funderBundle = await loadFunderBundle(limit, offset);
 
 		res.status(200).contentType('application/json').send(funderBundle);
 	})().catch((error: unknown) => {

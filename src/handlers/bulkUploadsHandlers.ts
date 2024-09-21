@@ -99,14 +99,14 @@ const getBulkUploads = (
 		return;
 	}
 	const paginationParameters = extractPaginationParameters(req);
-	const createdByParameters = extractCreatedByParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	const { createdBy } = extractCreatedByParameters(req);
 	(async () => {
 		const bulkUploadBundle = await loadBulkUploadBundle(
-			{
-				...getLimitValues(paginationParameters),
-				...createdByParameters,
-			},
 			req,
+			createdBy,
+			limit,
+			offset,
 		);
 
 		res.status(200).contentType('application/json').send(bulkUploadBundle);

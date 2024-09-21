@@ -66,7 +66,7 @@ const getSources = (
 	const paginationParameters = extractPaginationParameters(req);
 	(async () => {
 		const { offset, limit } = getLimitValues(paginationParameters);
-		const bundle = await loadSourceBundle(offset, limit);
+		const bundle = await loadSourceBundle(limit, offset);
 
 		res.status(200).contentType('application/json').send(bundle);
 	})().catch((error: unknown) => {

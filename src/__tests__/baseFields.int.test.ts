@@ -3,12 +3,12 @@ import { app } from '../app';
 import {
 	createBaseField,
 	createOrUpdateBaseFieldLocalization,
-	loadBaseFieldLocalizationsBundle,
+	loadBaseFieldLocalizationsBundleByBaseFieldId,
 	loadBaseFields,
 	loadTableMetrics,
 } from '../database';
 import { BaseFieldDataType, BaseFieldScope, PostgresErrorCode } from '../types';
-import { expectTimestamp } from '../test/utils';
+import { expectTimestamp, NO_LIMIT, NO_OFFSET } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -575,7 +575,7 @@ describe('/baseFields', () => {
 		});
 
 		it('creates the specified base field localization if it does not exist', async () => {
-			await createTestBaseField();
+			const testBaseField = await createTestBaseField();
 			const before = await loadTableMetrics('base_field_localizations');
 			await request(app)
 				.put('/baseFields/1/localizations/fr')
@@ -587,9 +587,12 @@ describe('/baseFields', () => {
 				})
 				.expect(200);
 			const after = await loadTableMetrics('base_field_localizations');
-			const baseFieldLocalizations = await loadBaseFieldLocalizationsBundle({
-				baseFieldId: 1,
-			});
+			const baseFieldLocalizations =
+				await loadBaseFieldLocalizationsBundleByBaseFieldId(
+					testBaseField.id,
+					NO_LIMIT,
+					NO_OFFSET,
+				);
 			expect(before.count).toEqual(0);
 			expect(baseFieldLocalizations.entries[0]).toMatchObject({
 				baseFieldId: 1,
@@ -601,7 +604,7 @@ describe('/baseFields', () => {
 		});
 
 		it('updates only the specified base field if it does exist', async () => {
-			await createTestBaseField();
+			const testBaseField = await createTestBaseField();
 			await createOrUpdateBaseFieldLocalization({
 				baseFieldId: 1,
 				language: 'fr',
@@ -625,9 +628,12 @@ describe('/baseFields', () => {
 				})
 				.expect(200);
 			const after = await loadTableMetrics('base_field_localizations');
-			const baseFieldLocalizations = await loadBaseFieldLocalizationsBundle({
-				baseFieldId: 1,
-			});
+			const baseFieldLocalizations =
+				await loadBaseFieldLocalizationsBundleByBaseFieldId(
+					testBaseField.id,
+					NO_LIMIT,
+					NO_OFFSET,
+				);
 			expect(before.count).toEqual(2);
 			expect(baseFieldLocalizations.entries[0]).toMatchObject({
 				baseFieldId: 1,

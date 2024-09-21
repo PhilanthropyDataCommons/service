@@ -1,3 +1,4 @@
+import { UnauthorizedError as JwtUnauthorizedError } from 'express-jwt';
 import {
 	DatabaseError,
 	InternalValidationError,
@@ -60,6 +61,9 @@ const getHttpStatusCodeForError = (error: unknown): number => {
 		return 409;
 	}
 	if (error instanceof UnauthorizedError) {
+		return 401;
+	}
+	if (error instanceof JwtUnauthorizedError) {
 		return 401;
 	}
 	if (error instanceof NotFoundError) {

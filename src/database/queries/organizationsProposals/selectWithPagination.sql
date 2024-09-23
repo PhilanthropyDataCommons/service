@@ -2,16 +2,16 @@ SELECT organization_proposal_to_json(organizations_proposals.*) as "object"
 FROM organizations_proposals
 WHERE
   CASE
-    WHEN :organizationId != 0 THEN
-      organization_id = :organizationId
-    ELSE
+    WHEN :organizationId::integer IS NULL THEN
       true
+    ELSE
+      organization_id = :organizationId
     END
   AND CASE
-    WHEN :proposalId != 0 THEN
-      proposal_id = :proposalId
-    ELSE
+    WHEN :proposalId::integer IS NULL THEN
       true
+    ELSE
+      proposal_id = :proposalId
     END
 ORDER BY id DESC
 OFFSET :offset FETCH NEXT :limit ROWS ONLY;

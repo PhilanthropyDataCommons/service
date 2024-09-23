@@ -44,8 +44,7 @@
 			},
 			"searchParam": {
 				"schema": {
-					"type": "string",
-					"default": ""
+					"type": "string"
 				},
 				"in": "query",
 				"name": "_content",

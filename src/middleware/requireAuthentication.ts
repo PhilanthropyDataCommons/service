@@ -1,22 +1,27 @@
 import { Response, NextFunction } from 'express';
 import { UnauthorizedError } from '../errors';
-import type { AuthenticatedRequest } from '../types';
+import { hasMeaningfulAuthSub, isAuthContext } from '../types';
+import type { Request } from 'express';
 
 const requireAuthentication = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ) => {
-	if (req.auth === undefined) {
+	if (!('auth' in req)) {
 		next(new UnauthorizedError('No authorization token was found.'));
 		return;
 	}
-	if (req.auth?.sub === undefined || req.auth.sub === '') {
-		next(new UnauthorizedError('The authentication token lacks `auth.sub`.'));
+	if (!hasMeaningfulAuthSub(req)) {
+		next(
+			new UnauthorizedError(
+				'The authentication token must have a non-empty value for `auth.sub`.',
+			),
+		);
 		return;
 	}
-	if (req.user === undefined) {
-		next(new UnauthorizedError('The request lacks a user context.'));
+	if (!isAuthContext(req)) {
+		next(new UnauthorizedError('The request lacks an AuthContext.'));
 		return;
 	}
 	next();

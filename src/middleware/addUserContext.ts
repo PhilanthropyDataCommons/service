@@ -1,5 +1,6 @@
 import { createUser, loadUserByAuthenticationId } from '../database';
-import type { NextFunction, Response } from 'express';
+import { getAuthSubFromRequest } from '../types';
+import type { Request, NextFunction, Response } from 'express';
 import type { AuthenticatedRequest } from '../types';
 
 const selectOrCreateUser = async (authenticationId: string) => {
@@ -12,18 +13,18 @@ const selectOrCreateUser = async (authenticationId: string) => {
 };
 
 const addUserContext = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
-	const authenticationId = req.auth?.sub;
+	const authenticationId = getAuthSubFromRequest(req);
 	if (authenticationId === undefined || authenticationId === '') {
 		next();
 		return;
 	}
 	selectOrCreateUser(authenticationId)
 		.then((user) => {
-			req.user = user;
+			(req as AuthenticatedRequest).user = user;
 			next();
 		})
 		.catch((error: unknown) => {

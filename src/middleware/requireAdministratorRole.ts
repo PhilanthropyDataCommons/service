@@ -1,13 +1,14 @@
 import { Response, NextFunction } from 'express';
 import { UnauthorizedError } from '../errors';
-import type { AuthenticatedRequest } from '../types';
+import { isAuthContext } from '../types';
+import type { Request } from 'express';
 
 const requireAdministratorRole = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ) => {
-	if (req.role?.isAdministrator !== true) {
+	if (!isAuthContext(req) || req.role?.isAdministrator !== true) {
 		next(
 			new UnauthorizedError('Your account must have the administrator role.'),
 		);

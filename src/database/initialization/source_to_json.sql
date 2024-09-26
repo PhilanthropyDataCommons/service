@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION source_to_json(source sources)
+SELECT drop_function('source_to_json');
+
+CREATE FUNCTION source_to_json(source sources)
 RETURNS JSONB AS $$
 DECLARE
   data_provider_json JSONB := NULL::JSONB;

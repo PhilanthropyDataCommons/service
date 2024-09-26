@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION user_to_json("user" users)
+SELECT drop_function('user_to_json');
+
+CREATE FUNCTION user_to_json("user" users)
 RETURNS JSONB AS $$
 BEGIN
   RETURN jsonb_build_object(

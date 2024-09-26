@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION data_provider_to_json(data_provider data_providers)
+SELECT drop_function('data_provider_to_json');
+
+CREATE FUNCTION data_provider_to_json(data_provider data_providers)
 RETURNS JSONB AS $$
 BEGIN
   RETURN jsonb_build_object(

@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION bulk_upload_to_json(bulk_upload bulk_uploads)
+SELECT drop_function('bulk_upload_to_json');
+
+CREATE FUNCTION bulk_upload_to_json(bulk_upload bulk_uploads)
 RETURNS JSONB AS $$
 DECLARE
   source_json JSONB;

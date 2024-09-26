@@ -3,7 +3,7 @@ import type { JsonResultSet, Bundle, User, AuthContext } from '../../../types';
 
 export const loadUserBundle = async (
 	authContext: AuthContext | undefined,
-	authenticationId: string | undefined,
+	keycloakUserId: string | undefined,
 	limit: number | undefined,
 	offset: number,
 ): Promise<Bundle<User>> => {
@@ -13,7 +13,7 @@ export const loadUserBundle = async (
 	const bundle = await loadBundle<JsonResultSet<User>>(
 		'users.selectWithPagination',
 		{
-			authenticationId,
+			keycloakUserId,
 			isAdministrator,
 			limit,
 			offset,

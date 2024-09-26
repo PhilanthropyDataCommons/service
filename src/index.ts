@@ -2,6 +2,7 @@ import { initializeDatabase } from './database';
 import { app } from './app';
 import { startJobQueue } from './jobQueue';
 import { getLogger } from './logger';
+import { loadConfig } from './config';
 
 const logger = getLogger(__filename);
 
@@ -19,6 +20,12 @@ const start = async () => {
 		await startJobQueue();
 	} catch (err) {
 		logger.error(err, 'Job queue failed to start');
+		throw err;
+	}
+	try {
+		await loadConfig();
+	} catch (err) {
+		logger.error(err, 'Configuration failed to load');
 		throw err;
 	}
 	app.listen(port, host, () => {

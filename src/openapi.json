@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.12.4",
+		"version": "0.13.0",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -11,13 +11,14 @@
 	},
 	"components": {
 		"parameters": {
-			"authenticationIdParam": {
-				"name": "authenticationId",
-				"description": "The authentication ID associated with the desired user.",
+			"keycloakUserIdParam": {
+				"name": "keycloakUserId",
+				"description": "The Keycloak userId associated with the desired user.",
 				"in": "query",
 				"required": false,
 				"schema": {
-					"type": "string"
+					"type": "string",
+					"format": "uuid"
 				}
 			},
 			"pageParam": {
@@ -951,9 +952,9 @@
 						"readOnly": true,
 						"example": 3407
 					},
-					"authenticationId": {
+					"keycloakUserId": {
 						"type": "string",
-						"example": "foo@example.com"
+						"example": "550e8400-e29b-41d4-a716-446655440000"
 					},
 					"createdAt": {
 						"type": "string",
@@ -961,7 +962,7 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "authenticationId", "createdAt"]
+				"required": ["id", "keycloakUserId", "createdAt"]
 			},
 			"UserBundle": {
 				"allOf": [
@@ -2462,7 +2463,7 @@
 				"parameters": [
 					{ "$ref": "#/components/parameters/pageParam" },
 					{ "$ref": "#/components/parameters/countParam" },
-					{ "$ref": "#/components/parameters/authenticationIdParam" }
+					{ "$ref": "#/components/parameters/keycloakUserIdParam" }
 				],
 				"responses": {
 					"200": {

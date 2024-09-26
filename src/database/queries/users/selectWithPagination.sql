@@ -2,10 +2,10 @@ SELECT user_to_json(users.*) as "object"
 FROM users
 WHERE
   CASE
-    WHEN :authenticationId::text IS NULL THEN
+    WHEN :keycloakUserId::uuid IS NULL THEN
       true
     ELSE
-      (authentication_id = :authenticationId)
+      keycloak_user_id = :keycloakUserId
     END
   AND CASE
     WHEN :userId::integer IS NULL THEN

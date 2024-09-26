@@ -5,7 +5,7 @@ RETURNS JSONB AS $$
 BEGIN
   RETURN jsonb_build_object(
     'id', "user".id,
-    'authenticationId', "user".authentication_id,
+    'keycloakUserId', "user".keycloak_user_id,
     'createdAt', "user".created_at
   );
 END;

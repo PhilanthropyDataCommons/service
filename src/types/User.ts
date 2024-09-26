@@ -1,9 +1,11 @@
+import { keycloakUserIdSchema } from './KeycloakUserId';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
+import type { KeycloakUserId } from './KeycloakUserId';
 
 interface User {
 	readonly id: number;
-	authenticationId: string;
+	keycloakUserId: KeycloakUserId;
 	readonly createdAt: string;
 }
 
@@ -13,14 +15,12 @@ const userSchema: JSONSchemaType<User> = {
 		id: {
 			type: 'number',
 		},
-		authenticationId: {
-			type: 'string',
-		},
+		keycloakUserId: keycloakUserIdSchema,
 		createdAt: {
 			type: 'string',
 		},
 	},
-	required: ['id', 'authenticationId', 'createdAt'],
+	required: ['id', 'keycloakUserId', 'createdAt'],
 };
 
 type WritableUser = Writable<User>;

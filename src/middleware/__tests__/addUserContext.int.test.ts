@@ -1,5 +1,5 @@
 import { addUserContext } from '../addUserContext';
-import { loadUserByAuthenticationId, loadTableMetrics } from '../../database';
+import { loadUserByKeycloakUserId, loadTableMetrics } from '../../database';
 import { generateNextWithAssertions } from '../../test/utils';
 import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../../types';
@@ -26,10 +26,10 @@ describe('addUserContext', () => {
 			});
 	});
 
-	it('creates and assigns a user when an authenticationId is provided', (done) => {
+	it('creates and assigns a user when an keycloakUserId is provided', (done) => {
 		const mockRequest = {
 			auth: {
-				sub: 'notYourStandardTestUser@example.com',
+				sub: '123e4567-e89b-12d3-a456-426614174000',
 			},
 		} as unknown as AuthenticatedRequest;
 		const mockResponse = {} as unknown as Response;
@@ -39,8 +39,8 @@ describe('addUserContext', () => {
 				const runAssertions = async (err: unknown) => {
 					expect(err).toBe(undefined);
 					const { count: userCount } = await loadTableMetrics('users');
-					const user = await loadUserByAuthenticationId(
-						'notYourStandardTestUser@example.com',
+					const user = await loadUserByKeycloakUserId(
+						'123e4567-e89b-12d3-a456-426614174000',
 					);
 					expect(mockRequest.user).toEqual(user);
 					expect(userCount).toEqual(baselineUserCount + 1);
@@ -54,10 +54,10 @@ describe('addUserContext', () => {
 			});
 	});
 
-	it('does not creates or assign a user when a blank authenticationId is provided', (done) => {
+	it('does not creates or assign a user when an invalid keycloakUserId is provided', (done) => {
 		const mockRequest = {
 			auth: {
-				sub: '',
+				sub: 'this is not a UUID',
 			},
 		} as unknown as AuthenticatedRequest;
 		const mockResponse = {} as unknown as Response;
@@ -78,7 +78,7 @@ describe('addUserContext', () => {
 			});
 	});
 
-	it('does not creates or assign a user when no authenticationId is provided', (done) => {
+	it('does not creates or assign a user when no keycloakUserId is provided', (done) => {
 		const mockRequest = {
 			auth: {},
 		} as unknown as AuthenticatedRequest;

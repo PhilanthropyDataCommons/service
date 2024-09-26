@@ -1,13 +1,14 @@
-import { createUser, loadUserByAuthenticationId } from '../database';
+import { createUser, loadUserByKeycloakUserId } from '../database';
 import { getAuthSubFromRequest } from '../types';
+import { getSystemUser } from '../config';
 import type { Request, NextFunction, Response } from 'express';
 import type { AuthenticatedRequest } from '../types';
 
-const selectOrCreateUser = async (authenticationId: string) => {
+const selectOrCreateUser = async (keycloakUserId: string) => {
 	try {
-		return await loadUserByAuthenticationId(authenticationId);
+		return await loadUserByKeycloakUserId(keycloakUserId);
 	} catch {
-		const user = await createUser({ authenticationId });
+		const user = await createUser({ keycloakUserId });
 		return user;
 	}
 };
@@ -17,12 +18,16 @@ const addUserContext = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	const authenticationId = getAuthSubFromRequest(req);
-	if (authenticationId === undefined || authenticationId === '') {
+	const keycloakUserId = getAuthSubFromRequest(req);
+	const systemUser = getSystemUser();
+	if (
+		keycloakUserId === undefined ||
+		keycloakUserId === systemUser.keycloakUserId
+	) {
 		next();
 		return;
 	}
-	selectOrCreateUser(authenticationId)
+	selectOrCreateUser(keycloakUserId)
 		.then((user) => {
 			(req as AuthenticatedRequest).user = user;
 			next();

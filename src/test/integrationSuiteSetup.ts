@@ -4,6 +4,7 @@ import nock from 'nock';
  * via `setupFilesAfterEnv`.
  */
 import { db } from '../database';
+import { loadConfig } from '../config';
 import {
 	prepareDatabaseForCurrentWorker,
 	cleanupDatabaseForCurrentWorker,
@@ -29,6 +30,7 @@ afterAll(async () => {
 beforeEach(async () => {
 	mockJwks.start();
 	await prepareDatabaseForCurrentWorker();
+	await loadConfig();
 	await createTestUser();
 });
 

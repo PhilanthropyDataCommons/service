@@ -12,6 +12,7 @@ export * from './Funder';
 export * from './Id';
 export * from './JsonObject';
 export * from './JsonResultSet';
+export * from './KeycloakUserId';
 export * from './Language';
 export * from './Opportunity';
 export * from './Organization';

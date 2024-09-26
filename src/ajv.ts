@@ -15,4 +15,4 @@ ajv.addKeyword({
 });
 
 ajvKeywords(ajv, 'instanceof');
-addFormats(ajv, ['email', 'uri']);
+addFormats(ajv, ['email', 'uri', 'uuid']);

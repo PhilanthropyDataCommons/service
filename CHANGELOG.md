@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgraded to use OpenAPI Specification 3.1.
 
+## 0.13.0 2024-09-26
+
+### Changed
+
+- `authenticationId` is now `keycloakUserId` (a UUID) in the `User` entity, as well as for any endpoints that allowed filtering by `authenticationId`.
+
 ## 0.12.4 2024-09-19
 
 ### Added

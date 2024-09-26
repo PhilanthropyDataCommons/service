@@ -1,5 +1,5 @@
 import { loadBundle } from '../generic/loadBundle';
-import { getAuthenticationIdFromAuthContext } from '../../../types';
+import { getKeycloakUserIdFromAuthContext } from '../../../types';
 import type {
 	AuthContext,
 	Bundle,
@@ -13,11 +13,11 @@ export const loadOrganizationBundle = async (
 	limit: number | undefined,
 	offset: number,
 ): Promise<Bundle<Organization>> => {
-	const authenticationId = getAuthenticationIdFromAuthContext(authContext);
+	const keycloakUserId = getKeycloakUserIdFromAuthContext(authContext);
 	const jsonResultSetBundle = await loadBundle<JsonResultSet<Organization>>(
 		'organizations.selectWithPagination',
 		{
-			authenticationId,
+			keycloakUserId,
 			limit,
 			offset,
 			proposalId,

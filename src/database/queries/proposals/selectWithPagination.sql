@@ -5,31 +5,32 @@ FROM proposals p
   LEFT JOIN organizations_proposals op on op.proposal_id = p.id
 WHERE
   CASE
-    WHEN :createdBy != 0 THEN
+    WHEN :createdBy::integer IS NULL THEN
+      true
+    ELSE
       p.created_by = :createdBy
-    ELSE
-      true
     END
   AND CASE
-    WHEN :search::text != '' THEN
+    WHEN (:search::text IS NULL
+      OR :search = '') THEN
+      true
+    ELSE
       pfv.value_search @@ websearch_to_tsquery('english', :search::text)
-    ELSE
-      true
     END
   AND CASE
-    WHEN :organizationId != 0 THEN
+    WHEN :organizationId::integer IS NULL THEN
+      true
+    ELSE
       op.organization_id = :organizationId
-    ELSE
-      true
     END
   AND CASE
-    WHEN :userId != 0 THEN
+    WHEN :userId::integer IS NULL THEN
+      true
+    ELSE
       (
         p.created_by = :userId
-        OR :isAdministrator
+        OR :isAdministrator::boolean
       )
-    ELSE
-      true
     END
 GROUP BY p.id
 ORDER BY p.id DESC

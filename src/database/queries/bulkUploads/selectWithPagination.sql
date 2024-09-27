@@ -2,25 +2,20 @@ SELECT bulk_upload_to_json(bulk_uploads.*) as "object"
 FROM bulk_uploads
 WHERE
   CASE
-    WHEN :createdBy != 0 THEN
-      bulk_uploads.created_by = :createdBy
-    ELSE
+    WHEN :createdBy::integer IS NULL THEN
       true
+    ELSE
+      bulk_uploads.created_by = :createdBy
     END
   AND CASE
-    WHEN :userId != 0 THEN
+    WHEN :userId::integer IS NULL THEN
+      true
+    ELSE
       (
         bulk_uploads.created_by = :userId
-        OR :isAdministrator
+        OR :isAdministrator::boolean
       )
-    ELSE
-      true
     END
 ORDER BY id DESC
-LIMIT
-  CASE WHEN :limit != 0 THEN
-    :limit
-  ELSE
-    NULL
-  END
+LIMIT :limit
 OFFSET :offset

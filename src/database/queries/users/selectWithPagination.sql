@@ -2,19 +2,19 @@ SELECT user_to_json(users.*) as "object"
 FROM users
 WHERE
   CASE
-    WHEN :authenticationId != '' THEN
-      authentication_id = :authenticationId
-    ELSE
+    WHEN :authenticationId::text IS NULL THEN
       true
+    ELSE
+      (authentication_id = :authenticationId)
     END
   AND CASE
-    WHEN :userId != 0 THEN
+    WHEN :userId::integer IS NULL THEN
+      true
+    ELSE
       (
         id = :userId
-        OR :isAdministrator
+        OR :isAdministrator::boolean
       )
-    ELSE
-      true
     END
 GROUP BY id
 ORDER BY id DESC

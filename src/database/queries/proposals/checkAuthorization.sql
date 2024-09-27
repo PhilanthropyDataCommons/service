@@ -4,12 +4,12 @@ SELECT EXISTS (
     WHERE id = :id
       AND
         CASE
-          WHEN :userId != 0 THEN
+          WHEN :userId::integer IS NULL THEN
+            true
+          ELSE
           (
             created_by = :userId
-            OR :isAdministrator
+            OR :isAdministrator::boolean
           )
-          ELSE
-            true
           END
 ) AS result

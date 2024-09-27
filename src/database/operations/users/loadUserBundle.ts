@@ -1,9 +1,15 @@
 import { loadBundle } from '../generic/loadBundle';
-import type { JsonResultSet, Bundle, User, AuthContext } from '../../../types';
+import type {
+	JsonResultSet,
+	Bundle,
+	User,
+	AuthContext,
+	KeycloakUserId,
+} from '../../../types';
 
 export const loadUserBundle = async (
 	authContext: AuthContext | undefined,
-	keycloakUserId: string | undefined,
+	keycloakUserId: KeycloakUserId | undefined,
 	limit: number | undefined,
 	offset: number,
 ): Promise<Bundle<User>> => {

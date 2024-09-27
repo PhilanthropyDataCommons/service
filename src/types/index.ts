@@ -31,3 +31,4 @@ export * from './Source';
 export * from './TableMetrics';
 export * from './TinyPgErrorWithQueryContext';
 export * from './User';
+export * from './Uuid';

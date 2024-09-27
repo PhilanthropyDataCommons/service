@@ -7,6 +7,14 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
+import { keycloakUserIdToString, stringToKeycloakUserId } from '../types';
+
+const createAdditionalTestUser = async () =>
+	createUser({
+		keycloakUserId: stringToKeycloakUserId(
+			'123e4567-e89b-12d3-a456-426614174000',
+		),
+	});
 
 describe('/users', () => {
 	describe('GET /', () => {
@@ -16,9 +24,7 @@ describe('/users', () => {
 
 		it('returns the user associated with the requesting user', async () => {
 			const testUser = await loadTestUser();
-			await createUser({
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			});
+			await createAdditionalTestUser();
 			const { count: userCount } = await loadTableMetrics('users');
 
 			const response = await request(app)
@@ -34,9 +40,7 @@ describe('/users', () => {
 		it('returns all users when the user is an administrator', async () => {
 			const systemUser = await loadSystemUser();
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser({
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			});
+			const anotherUser = await createAdditionalTestUser();
 			const { count: userCount } = await loadTableMetrics('users');
 
 			const response = await request(app)
@@ -50,13 +54,13 @@ describe('/users', () => {
 		});
 
 		it('returns a specific user when a keycloakUserId is provided', async () => {
-			const anotherUser = await createUser({
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			});
+			const anotherUser = await createAdditionalTestUser();
 			const { count: userCount } = await loadTableMetrics('users');
 
 			const response = await request(app)
-				.get(`/users?keycloakUserId=${anotherUser.keycloakUserId}`)
+				.get(
+					`/users?keycloakUserId=${keycloakUserIdToString(anotherUser.keycloakUserId)}`,
+				)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({

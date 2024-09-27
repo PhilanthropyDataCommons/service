@@ -1,5 +1,6 @@
 import createJWKSMock from 'mock-jwks';
 import { issuer } from '../auth/jwtOptions';
+import { keycloakUserIdToString } from '../types';
 import { getTestUserKeycloakUserId } from './utils';
 import type { JWKSMock } from 'mock-jwks';
 import type { JwtPayload } from 'jsonwebtoken';
@@ -35,13 +36,13 @@ const getMockJwt = (
 };
 
 const mockJwt = getMockJwt({
-	sub: getTestUserKeycloakUserId(),
+	sub: keycloakUserIdToString(getTestUserKeycloakUserId()),
 });
 
 const mockJwtWithoutSub = getMockJwt();
 
 const mockJwtWithAdminRole = getMockJwt({
-	sub: getTestUserKeycloakUserId(),
+	sub: keycloakUserIdToString(getTestUserKeycloakUserId()),
 	roles: ['pdc-admin'],
 });
 

@@ -1,7 +1,7 @@
 import { keycloakUserIdSchema } from './KeycloakUserId';
+import type { KeycloakUserId } from './KeycloakUserId';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
-import type { KeycloakUserId } from './KeycloakUserId';
 
 interface User {
 	readonly id: number;

@@ -1,5 +1,6 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
+import { keycloakUserIdToString } from '../../../types';
 import type { JsonResultSet, KeycloakUserId, User } from '../../../types';
 
 export const loadUserByKeycloakUserId = async (
@@ -15,7 +16,7 @@ export const loadUserByKeycloakUserId = async (
 	if (object === undefined) {
 		throw new NotFoundError(`Entity not found`, {
 			entityType: 'User',
-			lookupValues: { keycloakUserId },
+			lookupValues: { keycloakUserId: keycloakUserIdToString(keycloakUserId) },
 		});
 	}
 	return object;

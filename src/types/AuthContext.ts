@@ -32,7 +32,10 @@ const isAuthContext = ajv.compile(authContextSchema);
 
 const getKeycloakUserIdFromAuthContext = (
 	req: AuthContext | undefined,
-): KeycloakUserId | undefined => req?.user?.keycloakUserId;
+): KeycloakUserId | undefined => {
+	const keycloakUserId = req?.user?.keycloakUserId;
+	return keycloakUserId;
+};
 
 export {
 	AuthContext,

@@ -29,4 +29,13 @@ const authContextSchema: JSONSchemaType<AuthContext> = {
 
 const isAuthContext = ajv.compile(authContextSchema);
 
-export { AuthContext, authContextSchema, isAuthContext };
+const getAuthenticationIdFromAuthContext = (
+	req: AuthContext | undefined,
+): string | undefined => req?.user?.authenticationId;
+
+export {
+	AuthContext,
+	authContextSchema,
+	isAuthContext,
+	getAuthenticationIdFromAuthContext,
+};

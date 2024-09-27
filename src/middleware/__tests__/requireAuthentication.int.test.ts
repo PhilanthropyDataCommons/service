@@ -38,7 +38,7 @@ describe('requireAuthentication', () => {
 		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
-			'The authentication token lacks `auth.sub`.',
+			'The authentication token must have a non-empty value for `auth.sub`.',
 		);
 		/* eslint-enable @typescript-eslint/no-unsafe-member-access */
 	});
@@ -61,7 +61,7 @@ describe('requireAuthentication', () => {
 		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
-			'The authentication token lacks `auth.sub`.',
+			'The authentication token must have a non-empty value for `auth.sub`.',
 		);
 		/* eslint-enable @typescript-eslint/no-unsafe-member-access */
 	});
@@ -82,7 +82,7 @@ describe('requireAuthentication', () => {
 		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
-			'The request lacks a user context.',
+			'The request lacks an AuthContext.',
 		);
 		/* eslint-enable @typescript-eslint/no-unsafe-member-access */
 	});
@@ -92,6 +92,9 @@ describe('requireAuthentication', () => {
 		const mockRequest = {
 			auth: {
 				sub: 'test@example.com',
+			},
+			role: {
+				isAdministrator: false,
 			},
 			user: testUser,
 		} as unknown as JWTRequest;

@@ -5,7 +5,6 @@ import {
 	loadFunder,
 } from '../database';
 import {
-	AuthenticatedRequest,
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableFunder,
@@ -17,13 +16,9 @@ import {
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { isShortCode } from '../types/ShortCode';
-import type { Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
-const getFunders = (
-	req: AuthenticatedRequest,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getFunders = (req: Request, res: Response, next: NextFunction): void => {
 	if (!isAuthContext(req)) {
 		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
@@ -43,11 +38,7 @@ const getFunders = (
 	});
 };
 
-const getFunder = (
-	req: AuthenticatedRequest,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getFunder = (req: Request, res: Response, next: NextFunction): void => {
 	const { funderShortCode } = req.params;
 	if (!isShortCode(funderShortCode)) {
 		next(
@@ -68,11 +59,7 @@ const getFunder = (
 		});
 };
 
-const putFunder = (
-	req: AuthenticatedRequest,
-	res: Response,
-	next: NextFunction,
-): void => {
+const putFunder = (req: Request, res: Response, next: NextFunction): void => {
 	if (!isAuthContext(req)) {
 		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;

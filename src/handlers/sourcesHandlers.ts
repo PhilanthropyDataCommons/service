@@ -5,7 +5,6 @@ import {
 	loadSourceBundle,
 } from '../database';
 import {
-	AuthenticatedRequest,
 	isAuthContext,
 	isId,
 	isTinyPgErrorWithQueryContext,
@@ -17,13 +16,9 @@ import {
 	InputValidationError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
-import type { Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
-const postSource = (
-	req: AuthenticatedRequest,
-	res: Response,
-	next: NextFunction,
-): void => {
+const postSource = (req: Request, res: Response, next: NextFunction): void => {
 	if (!isAuthContext(req)) {
 		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
@@ -54,11 +49,7 @@ const postSource = (
 		});
 };
 
-const getSources = (
-	req: AuthenticatedRequest,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getSources = (req: Request, res: Response, next: NextFunction): void => {
 	if (!isAuthContext(req)) {
 		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
@@ -78,11 +69,7 @@ const getSources = (
 	});
 };
 
-const getSource = (
-	req: AuthenticatedRequest,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getSource = (req: Request, res: Response, next: NextFunction): void => {
 	const { sourceId } = req.params;
 	if (!isId(sourceId)) {
 		next(new InputValidationError('Invalid request body.', isId.errors ?? []));

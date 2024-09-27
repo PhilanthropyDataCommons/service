@@ -8,7 +8,6 @@ import {
 	isId,
 	isWritableOrganization,
 	isTinyPgErrorWithQueryContext,
-	AuthenticatedRequest,
 	isAuthContext,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
@@ -46,7 +45,7 @@ const postOrganization = (
 };
 
 const getOrganizations = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
@@ -68,7 +67,7 @@ const getOrganizations = (
 };
 
 const getOrganization = (
-	req: AuthenticatedRequest,
+	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {

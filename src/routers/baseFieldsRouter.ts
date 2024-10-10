@@ -24,5 +24,9 @@ baseFieldsRouter.put(
 	requireAdministratorRole,
 	baseFieldsHandlers.putBaseFieldLocalization,
 );
+baseFieldsRouter.post(
+	'/syncBaseFields/sync',
+	baseFieldsHandlers.postSyncBaseFields,
+);
 
 export { baseFieldsRouter };

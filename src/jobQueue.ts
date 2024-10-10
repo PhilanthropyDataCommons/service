@@ -2,7 +2,10 @@ import { Logger, quickAddJob, run, runMigrations } from 'graphile-worker';
 import { getLogger } from './logger';
 import { db } from './database/db';
 import { processBulkUpload } from './tasks';
-import type { ProcessBulkUploadJobPayload } from './types';
+import type {
+	ProcessBulkUploadJobPayload,
+	SyncBaseFieldsJobPayload,
+} from './types';
 
 const logger = getLogger(__filename);
 
@@ -66,5 +69,5 @@ export const addProcessBulkUploadJob = async (
 	payload: ProcessBulkUploadJobPayload,
 ) => addJob(JobType.PROCESS_BULK_UPLOAD, payload);
 
-export const addSyncBaseFieldsJob = async () =>
-	addJob(JobType.SYNC_BASE_FIELDS, {});
+export const addSyncBaseFieldsJob = async (payload: SyncBaseFieldsJobPayload) =>
+	addJob(JobType.SYNC_BASE_FIELDS, payload);

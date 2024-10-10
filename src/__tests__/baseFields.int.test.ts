@@ -738,4 +738,7 @@ describe('/baseFields', () => {
 			});
 		});
 	});
+
+	describe('POST /syncBaseFields/sync', () => {
+	});
 });

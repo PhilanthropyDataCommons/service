@@ -16,6 +16,8 @@ import {
 	isWritableBaseFieldLocalization,
 	isId,
 } from '../types';
+import { addSyncBaseFieldsJob } from '../jobQueue';
+import { fetchBaseFieldsFromRemote } from '../tasks';
 import type { Request, Response, NextFunction } from 'express';
 
 const assertBaseFieldExists = async (baseFieldId: number): Promise<void> => {
@@ -217,10 +219,30 @@ const putBaseFieldLocalization = (
 		});
 };
 
+const postSyncBaseFields = (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) => {
+	fetchBaseFieldsFromRemote()
+		.then(async (baseFields) => {
+			await addSyncBaseFieldsJob(baseFields);
+
+			res.status(201).contentType('application/json').send(baseFields);
+		})
+		.catch((error: unknown) => {
+			next(error);
+		})
+		.catch((error: Error) => {
+			next(error);
+		});
+};
+
 export const baseFieldsHandlers = {
 	getBaseFields,
 	postBaseField,
 	putBaseField,
 	getBaseFieldLocalizationsByBaseFieldId,
 	putBaseFieldLocalization,
+	postSyncBaseFields,
 };

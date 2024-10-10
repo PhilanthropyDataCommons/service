@@ -1,5 +1,8 @@
 import { requireEnv } from 'require-env-variable';
-import { isSyncBaseFieldsJobPayload, type BaseField } from '../types';
+import {
+	isSyncBaseFieldsJobPayload,
+	SyncBaseFieldsJobPayload,
+} from '../types';
 import {
 	createOrUpdateBaseField,
 	createOrUpdateBaseFieldLocalization,
@@ -8,18 +11,19 @@ import type { JobHelpers } from 'graphile-worker';
 
 const { SYNCHRONIZATION_URL } = requireEnv('SYNCHRONIZATION_URL');
 
-export const fetchBaseFieldsFromRemote = async (): Promise<BaseField[]> => {
-	let baseFields: BaseField[];
-	try {
-		baseFields = (await fetch(`${SYNCHRONIZATION_URL}/baseFields`).then(
-			(response) => response.json(),
-		)) as BaseField[];
-	} catch (err) {
-		throw new Error('Unable to connect to remote pdc instance');
-	}
+export const fetchBaseFieldsFromRemote =
+	async (): Promise<SyncBaseFieldsJobPayload> => {
+		let baseFields: SyncBaseFieldsJobPayload;
+		try {
+			baseFields = (await fetch(`${SYNCHRONIZATION_URL}/baseFields`).then(
+				(response) => response.json(),
+			)) as SyncBaseFieldsJobPayload;
+		} catch (err) {
+			throw new Error('Unable to connect to remote pdc instance');
+		}
 
-	return baseFields;
-};
+		return baseFields;
+	};
 
 export const syncBaseFields = async (
 	payload: unknown,
@@ -31,6 +35,9 @@ export const syncBaseFields = async (
 		});
 		return;
 	}
+
+	helpers.logger.debug(`Started syncBaseFields Job at ${Date.now()}`);
+
 	await Promise.all(
 		payload.baseFields.map<Promise<void>>(async (baseField) => {
 			const { scope, dataType, shortCode, label, description } = baseField;

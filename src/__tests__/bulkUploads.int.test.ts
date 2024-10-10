@@ -40,7 +40,7 @@ describe('/bulkUploads', () => {
 			const systemSource = await loadSystemSource();
 			const testUser = await loadTestUser();
 			const thirdUser = await createUser({
-				authenticationId: 'totallyDifferentUser@example.com',
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,
@@ -110,7 +110,7 @@ describe('/bulkUploads', () => {
 			const systemSource = await loadSystemSource();
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
-				authenticationId: 'totallyDifferentUser@example.com',
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,
@@ -166,7 +166,7 @@ describe('/bulkUploads', () => {
 			const systemSource = await loadSystemSource();
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
-				authenticationId: 'totallyDifferentUser@example.com',
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,
@@ -211,7 +211,7 @@ describe('/bulkUploads', () => {
 			const systemSource = await loadSystemSource();
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
-				authenticationId: 'totallyDifferentUser@example.com',
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,

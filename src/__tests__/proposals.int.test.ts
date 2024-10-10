@@ -64,7 +64,7 @@ describe('/proposals', () => {
 			});
 			const testUser = await loadTestUser();
 			const secondUser = await createUser({
-				authenticationId: 'totallyDifferentUser@example.com',
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			const systemSource = await loadSystemSource();
 			await createTestBaseFields();
@@ -358,7 +358,7 @@ describe('/proposals', () => {
 
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
-				authenticationId: 'anotherUser',
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createTestBaseFields();
 			await createProposal({
@@ -405,7 +405,7 @@ describe('/proposals', () => {
 
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
-				authenticationId: 'anotherUser',
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createTestBaseFields();
 			await createProposal({
@@ -444,7 +444,7 @@ describe('/proposals', () => {
 
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
-				authenticationId: 'anotherUser',
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createTestBaseFields();
 			await createProposal({
@@ -690,7 +690,7 @@ describe('/proposals', () => {
 				title: '⛰️',
 			});
 			const anotherUser = await createUser({
-				authenticationId: 'totallySeparateUser',
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createProposal({
 				externalId: `proposal-1`,

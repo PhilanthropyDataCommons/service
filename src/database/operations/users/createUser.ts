@@ -2,9 +2,9 @@ import { db } from '../../db';
 import type { User, JsonResultSet, WritableUser } from '../../../types';
 
 export const createUser = async (createValues: WritableUser): Promise<User> => {
-	const { authenticationId } = createValues;
+	const { keycloakUserId } = createValues;
 	const result = await db.sql<JsonResultSet<User>>('users.insertOne', {
-		authenticationId,
+		keycloakUserId,
 	});
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {

@@ -1,5 +1,5 @@
 SELECT DISTINCT o.id,
-  organization_to_json(o.*, :authenticationId) AS "object"
+  organization_to_json(o.*, :keycloakUserId) AS "object"
 FROM organizations o
   LEFT JOIN organizations_proposals op on op.organization_id = o.id
 WHERE

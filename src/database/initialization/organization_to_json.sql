@@ -1,6 +1,6 @@
 SELECT drop_function('organization_to_json');
 
-CREATE FUNCTION organization_to_json(organization organizations, authenticationId VARCHAR DEFAULT NULL)
+CREATE FUNCTION organization_to_json(organization organizations, keycloakUserId UUID DEFAULT NULL)
 RETURNS JSONB AS $$
 DECLARE
   proposal_field_values_json JSONB;
@@ -14,7 +14,7 @@ BEGIN
     FROM proposal_field_values pfv
     -- Remove field values for unauthenticated users while also (re)validating the user ID:
     INNER JOIN users u
-      ON u.authentication_id = authenticationId
+      ON u.keycloak_user_id = keycloakUserId
     INNER JOIN application_form_fields aff
       ON pfv.application_form_field_id = aff.id
     INNER JOIN base_fields bf
@@ -27,9 +27,9 @@ BEGIN
       AND bf.scope = 'organization'
       AND pfv.is_valid
       -- Guard against possible removal of NON NULL constraint on users table:
-      AND u.authentication_id IS NOT NULL
+      AND u.keycloak_user_id IS NOT NULL
       -- Guard against the valid-but-not-really-valid-here system user:
-      AND u.authentication_id != ''
+      AND u.keycloak_user_id != system_keycloak_user_id()
       ORDER BY bf.id,
         pfv.created_at DESC
   ) AS pfv_inner;

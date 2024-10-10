@@ -2,7 +2,7 @@ import { getLimitValues, loadUserBundle } from '../database';
 import { isAuthContext, isTinyPgErrorWithQueryContext } from '../types';
 import { DatabaseError, FailedMiddlewareError } from '../errors';
 import {
-	extractAuthenticationIdParameters,
+	extractKeycloakUserIdParameters,
 	extractPaginationParameters,
 } from '../queryParameters';
 import type { Request, Response, NextFunction } from 'express';
@@ -14,15 +14,10 @@ const getUsers = (req: Request, res: Response, next: NextFunction): void => {
 	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	const { authenticationId } = extractAuthenticationIdParameters(req);
+	const { keycloakUserId } = extractKeycloakUserIdParameters(req);
 
 	(async () => {
-		const userBundle = await loadUserBundle(
-			req,
-			authenticationId,
-			limit,
-			offset,
-		);
+		const userBundle = await loadUserBundle(req, keycloakUserId, limit, offset);
 
 		res.status(200).contentType('application/json').send(userBundle);
 	})().catch((error: unknown) => {

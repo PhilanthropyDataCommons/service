@@ -1,5 +1,5 @@
-export * from './extractAuthenticationIdParameters';
 export * from './extractCreatedByParameters';
+export * from './extractKeycloakUserIdParameters';
 export * from './extractOrganizationParameters';
 export * from './extractPaginationParameters';
 export * from './extractProposalParameters';

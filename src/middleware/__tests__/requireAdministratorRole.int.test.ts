@@ -1,12 +1,13 @@
 import { requireAdministratorRole } from '../requireAdministratorRole';
 import { UnauthorizedError } from '../../errors';
+import { getTestUserKeycloakUserId } from '../../test/utils';
 import type { Response } from 'express';
 import type { Request as JWTRequest } from 'express-jwt';
 import type { User } from '../../types';
 
 const getMockedUser = (): User => ({
 	id: 1,
-	authenticationId: 'foo@example.com',
+	keycloakUserId: getTestUserKeycloakUserId(),
 	createdAt: '',
 });
 

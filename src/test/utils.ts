@@ -1,4 +1,5 @@
-import { createUser, loadUserByAuthenticationId } from '../database';
+import { createUser, loadUserByKeycloakUserId } from '../database';
+import { stringToKeycloakUserId } from '../types';
 
 export const isoTimestampPattern =
 	/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|(\+|-)\d{2}:\d{2})$/;
@@ -21,15 +22,16 @@ export const generateNextWithAssertions = (
 		runAssertions(err).then(done).catch(done);
 	});
 
-export const getTestUserAuthenticationId = () => 'foo@example.com';
+export const getTestUserKeycloakUserId = () =>
+	stringToKeycloakUserId('11111111-1111-1111-1111-111111111111'); // This value is not a reference, it's just a static GUID
 
 export const createTestUser = async () =>
 	createUser({
-		authenticationId: getTestUserAuthenticationId(),
+		keycloakUserId: getTestUserKeycloakUserId(),
 	});
 
 export const loadTestUser = async () =>
-	loadUserByAuthenticationId(getTestUserAuthenticationId());
+	loadUserByKeycloakUserId(getTestUserKeycloakUserId());
 
 export const NO_OFFSET = 0;
 

@@ -36,12 +36,12 @@ describe('/organizationProposals', () => {
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				opportunityId: 1,
 				externalId: '2',
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createOrganizationProposal({
 				organizationId: 1,
@@ -74,7 +74,7 @@ describe('/organizationProposals', () => {
 							externalId: '2',
 							versions: [],
 							createdAt: expectTimestamp,
-							createdBy: testUser.id,
+							createdBy: testUser.keycloakUserId,
 						},
 						createdAt: expectTimestamp,
 					},
@@ -95,7 +95,7 @@ describe('/organizationProposals', () => {
 							externalId: '1',
 							versions: [],
 							createdAt: expectTimestamp,
-							createdBy: testUser.id,
+							createdBy: testUser.keycloakUserId,
 						},
 						createdAt: expectTimestamp,
 					},
@@ -113,12 +113,12 @@ describe('/organizationProposals', () => {
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				opportunityId: 1,
 				externalId: '2',
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createOrganizationProposal({
 				organizationId: 1,
@@ -151,7 +151,7 @@ describe('/organizationProposals', () => {
 							externalId: '1',
 							versions: [],
 							createdAt: expectTimestamp,
-							createdBy: testUser.id,
+							createdBy: testUser.keycloakUserId,
 						},
 						createdAt: expectTimestamp,
 					},
@@ -183,7 +183,7 @@ describe('/organizationProposals', () => {
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			const before = await loadTableMetrics('organizations_proposals');
 			const result = await request(app)
@@ -214,7 +214,7 @@ describe('/organizationProposals', () => {
 					externalId: '1',
 					versions: [],
 					createdAt: expectTimestamp,
-					createdBy: testUser.id,
+					createdBy: testUser.keycloakUserId,
 				},
 				createdAt: expectTimestamp,
 			});
@@ -230,7 +230,7 @@ describe('/organizationProposals', () => {
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			const result = await request(app)
 				.post('/organizationProposals')
@@ -255,7 +255,7 @@ describe('/organizationProposals', () => {
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			const result = await request(app)
 				.post('/organizationProposals')
@@ -298,7 +298,7 @@ describe('/organizationProposals', () => {
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			const result = await request(app)
 				.post('/organizationProposals')
@@ -323,7 +323,7 @@ describe('/organizationProposals', () => {
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createOrganizationProposal({
 				organizationId: 1,

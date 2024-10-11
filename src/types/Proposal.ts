@@ -2,6 +2,7 @@ import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { ProposalVersion } from './ProposalVersion';
 import type { Writable } from './Writable';
+import type { KeycloakUserId } from './KeycloakUserId';
 
 interface Proposal {
 	readonly id: number;
@@ -9,7 +10,7 @@ interface Proposal {
 	externalId: string;
 	readonly versions: ProposalVersion[];
 	readonly createdAt: string;
-	readonly createdBy: number;
+	readonly createdBy: KeycloakUserId;
 }
 
 type WritableProposal = Writable<Proposal>;

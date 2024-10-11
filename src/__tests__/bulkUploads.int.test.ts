@@ -13,7 +13,7 @@ import {
 	mockJwtWithoutSub as authHeaderWithNoSub,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { BulkUploadStatus } from '../types';
+import { BulkUploadStatus, keycloakUserIdToString } from '../types';
 
 describe('/bulkUploads', () => {
 	describe('GET /', () => {
@@ -47,28 +47,28 @@ describe('/bulkUploads', () => {
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: BulkUploadStatus.PENDING,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: BulkUploadStatus.COMPLETED,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,
 				fileName: 'baz.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-baz',
 				status: BulkUploadStatus.COMPLETED,
-				createdBy: systemUser.id,
+				createdBy: systemUser.keycloakUserId,
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,
 				fileName: 'boop.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-boop',
 				status: BulkUploadStatus.COMPLETED,
-				createdBy: thirdUser.id,
+				createdBy: thirdUser.keycloakUserId,
 			});
 
 			await request(app)
@@ -88,7 +88,7 @@ describe('/bulkUploads', () => {
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: BulkUploadStatus.COMPLETED,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 							},
 							{
 								id: 1,
@@ -99,7 +99,7 @@ describe('/bulkUploads', () => {
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 								status: BulkUploadStatus.PENDING,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 							},
 						],
 					}),
@@ -117,14 +117,14 @@ describe('/bulkUploads', () => {
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: BulkUploadStatus.PENDING,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: BulkUploadStatus.COMPLETED,
-				createdBy: anotherUser.id,
+				createdBy: anotherUser.keycloakUserId,
 			});
 
 			await request(app)
@@ -144,7 +144,7 @@ describe('/bulkUploads', () => {
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: BulkUploadStatus.COMPLETED,
 								createdAt: expectTimestamp,
-								createdBy: anotherUser.id,
+								createdBy: anotherUser.keycloakUserId,
 							},
 							{
 								id: 1,
@@ -155,7 +155,7 @@ describe('/bulkUploads', () => {
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 								status: BulkUploadStatus.PENDING,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 							},
 						],
 					}),
@@ -173,18 +173,20 @@ describe('/bulkUploads', () => {
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: BulkUploadStatus.PENDING,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: BulkUploadStatus.COMPLETED,
-				createdBy: anotherUser.id,
+				createdBy: anotherUser.keycloakUserId,
 			});
 
 			await request(app)
-				.get(`/bulkUploads?createdBy=${anotherUser.id}`)
+				.get(
+					`/bulkUploads?createdBy=${keycloakUserIdToString(anotherUser.keycloakUserId)}`,
+				)
 				.set(authHeaderWithAdminRole)
 				.expect(200)
 				.expect((res) =>
@@ -200,7 +202,7 @@ describe('/bulkUploads', () => {
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: BulkUploadStatus.COMPLETED,
 								createdAt: expectTimestamp,
-								createdBy: anotherUser.id,
+								createdBy: anotherUser.keycloakUserId,
 							},
 						],
 					}),
@@ -218,14 +220,14 @@ describe('/bulkUploads', () => {
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: BulkUploadStatus.PENDING,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createBulkUpload({
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: BulkUploadStatus.COMPLETED,
-				createdBy: anotherUser.id,
+				createdBy: anotherUser.keycloakUserId,
 			});
 
 			await request(app)
@@ -245,7 +247,7 @@ describe('/bulkUploads', () => {
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 								status: BulkUploadStatus.PENDING,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 							},
 						],
 					}),
@@ -262,7 +264,7 @@ describe('/bulkUploads', () => {
 					fileName: `bar-${i + 1}.csv`,
 					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 					status: BulkUploadStatus.COMPLETED,
-					createdBy: testUser.id,
+					createdBy: testUser.keycloakUserId,
 				});
 			}, Promise.resolve());
 
@@ -288,7 +290,7 @@ describe('/bulkUploads', () => {
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: BulkUploadStatus.COMPLETED,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 							},
 							{
 								id: 14,
@@ -300,7 +302,7 @@ describe('/bulkUploads', () => {
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: BulkUploadStatus.COMPLETED,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 							},
 							{
 								id: 13,
@@ -312,7 +314,7 @@ describe('/bulkUploads', () => {
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: BulkUploadStatus.COMPLETED,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 							},
 							{
 								id: 12,
@@ -324,7 +326,7 @@ describe('/bulkUploads', () => {
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: BulkUploadStatus.COMPLETED,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 							},
 							{
 								id: 11,
@@ -336,7 +338,7 @@ describe('/bulkUploads', () => {
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: BulkUploadStatus.COMPLETED,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 							},
 						],
 					}),
@@ -382,7 +384,7 @@ describe('/bulkUploads', () => {
 				sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: 'pending',
 				createdAt: expectTimestamp,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(1);
 		});

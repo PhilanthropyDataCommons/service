@@ -7,7 +7,7 @@ export const assertProposalAuthorization = async (
 	authContext: AuthContext,
 ): Promise<void> => {
 	const {
-		user: { id: userId },
+		user: { keycloakUserId: userId },
 	} = authContext;
 	const {
 		role: { isAdministrator },

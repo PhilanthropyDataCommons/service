@@ -77,7 +77,6 @@ describe('/users', () => {
 		});
 
 		it('returns according to pagination parameters', async () => {
-			const { count: baseUserCount } = await loadTableMetrics('users');
 			const uuids = Array.from(Array(20)).map(() => uuidv4());
 			await uuids.reduce(async (p, uuid) => {
 				await p;
@@ -99,27 +98,22 @@ describe('/users', () => {
 				total: userCount,
 				entries: [
 					{
-						id: 15 + baseUserCount,
 						keycloakUserId: uuids[14],
 						createdAt: expectTimestamp,
 					},
 					{
-						id: 14 + baseUserCount,
 						keycloakUserId: uuids[13],
 						createdAt: expectTimestamp,
 					},
 					{
-						id: 13 + baseUserCount,
 						keycloakUserId: uuids[12],
 						createdAt: expectTimestamp,
 					},
 					{
-						id: 12 + baseUserCount,
 						keycloakUserId: uuids[11],
 						createdAt: expectTimestamp,
 					},
 					{
-						id: 11 + baseUserCount,
 						keycloakUserId: uuids[10],
 						createdAt: expectTimestamp,
 					},

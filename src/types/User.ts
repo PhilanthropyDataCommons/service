@@ -4,7 +4,6 @@ import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 
 interface User {
-	readonly id: number;
 	keycloakUserId: KeycloakUserId;
 	readonly createdAt: string;
 }
@@ -12,15 +11,12 @@ interface User {
 const userSchema: JSONSchemaType<User> = {
 	type: 'object',
 	properties: {
-		id: {
-			type: 'number',
-		},
 		keycloakUserId: keycloakUserIdSchema,
 		createdAt: {
 			type: 'string',
 		},
 	},
-	required: ['id', 'keycloakUserId', 'createdAt'],
+	required: ['keycloakUserId', 'createdAt'],
 };
 
 type WritableUser = Writable<User>;

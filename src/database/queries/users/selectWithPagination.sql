@@ -8,14 +8,14 @@ WHERE
       keycloak_user_id = :keycloakUserId
     END
   AND CASE
-    WHEN :userId::integer IS NULL THEN
+    WHEN :userId::UUID IS NULL THEN
       true
     ELSE
       (
-        id = :userId
+        keycloak_user_id = :userId
         OR :isAdministrator::boolean
       )
     END
-GROUP BY id
-ORDER BY id DESC
+GROUP BY keycloak_user_id
+ORDER BY created_at DESC
 OFFSET :offset FETCH NEXT :limit ROWS ONLY;

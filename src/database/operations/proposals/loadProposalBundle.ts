@@ -4,17 +4,18 @@ import type {
 	Bundle,
 	Proposal,
 	AuthContext,
+	KeycloakUserId,
 } from '../../../types';
 
 export const loadProposalBundle = async (
 	authContext: AuthContext | undefined,
-	createdBy: number | undefined,
+	createdBy: KeycloakUserId | undefined,
 	organizationId: number | undefined,
 	search: string | undefined,
 	limit: number | undefined,
 	offset: number,
 ): Promise<Bundle<Proposal>> => {
-	const userId = authContext?.user.id;
+	const userId = authContext?.user.keycloakUserId;
 	const isAdministrator = authContext?.role.isAdministrator;
 
 	const bundle = await loadBundle<JsonResultSet<Proposal>>(

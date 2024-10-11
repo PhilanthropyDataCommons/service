@@ -4,7 +4,7 @@ SELECT EXISTS (
     WHERE id = :id
       AND
         CASE
-          WHEN :userId::integer IS NULL THEN
+          WHEN :userId::UUID IS NULL THEN
             true
           ELSE
           (

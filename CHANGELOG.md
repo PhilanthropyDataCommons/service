@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgraded to use OpenAPI Specification 3.1.
 
+## 0.14.0 2024-10-11
+
+### Changed
+
+- `Users.id` no longer exists; `keycloakUserId` is now the primary identifier of any given `User`.
+- `Proposal.createdBy` is now a UUID reference to the creator's `keycloakUserId`.
+- `ProposalVersion.createdBy` is now a UUID reference to the creator's `keycloakUserId`.
+- `BulkUpload.createdBy` is now a UUID reference to the creator's `keycloakUserId`.
+
 ## 0.13.0 2024-09-26
 
 ### Changed

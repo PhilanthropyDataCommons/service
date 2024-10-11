@@ -12,14 +12,14 @@ describe('extractCreatedByParameters', () => {
 		});
 	});
 
-	it('should pass along the numeric value when one is provided', () => {
+	it('should pass along the uuid value when one is provided', () => {
 		const paginationParameters = extractCreatedByParameters({
 			query: {
-				createdBy: '42',
+				createdBy: '12345678-1234-1234-1234-123456789012',
 			},
 		});
 		expect(paginationParameters).toEqual({
-			createdBy: 42,
+			createdBy: '12345678-1234-1234-1234-123456789012',
 		});
 	});
 
@@ -39,35 +39,15 @@ describe('extractCreatedByParameters', () => {
 			user: testUser,
 		});
 		expect(createdByParameters).toEqual({
-			createdBy: testUser.id,
+			createdBy: testUser.keycloakUserId,
 		});
 	});
 
-	it('should throw an error when strings that parse to NaN are provided', () => {
+	it('should throw an error when a non-uuid is provided', () => {
 		expect(() =>
 			extractCreatedByParameters({
 				query: {
-					createdBy: 'forty two',
-				},
-			}),
-		).toThrow(InputValidationError);
-	});
-
-	it('should throw an error when strings that parse to floats are provided', () => {
-		expect(() =>
-			extractCreatedByParameters({
-				query: {
-					createdBy: '42.6',
-				},
-			}),
-		).toThrow(InputValidationError);
-	});
-
-	it('should throw an error when strings that parse to numbers less than 1 are provided', () => {
-		expect(() =>
-			extractCreatedByParameters({
-				query: {
-					createdBy: '0',
+					createdBy: 'this is not a UUID',
 				},
 			}),
 		).toThrow(InputValidationError);

@@ -1,15 +1,16 @@
 import { ajv } from '../ajv';
 import { InputValidationError } from '../errors';
+import { keycloakUserIdSchema } from '../types';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
-import type { AuthContext } from '../types';
+import type { KeycloakUserId, AuthContext } from '../types';
 
 interface CreatedByQueryParameters {
-	createdBy: number | 'me' | undefined;
+	createdBy: KeycloakUserId | 'me' | undefined;
 }
 
 interface CreatedByParameters {
-	createdBy: number | undefined;
+	createdBy: KeycloakUserId | undefined;
 }
 
 const createdByQueryParametersSchema: JSONSchemaType<CreatedByQueryParameters> =
@@ -19,8 +20,7 @@ const createdByQueryParametersSchema: JSONSchemaType<CreatedByQueryParameters> =
 				type: 'object',
 				properties: {
 					createdBy: {
-						type: 'integer',
-						minimum: 1,
+						...keycloakUserIdSchema,
 						nullable: true,
 					},
 				},
@@ -54,7 +54,7 @@ const extractCreatedByParameters = (
 	}
 
 	const createdBy =
-		query.createdBy === 'me' ? request.user?.id : query.createdBy;
+		query.createdBy === 'me' ? request.user?.keycloakUserId : query.createdBy;
 
 	return {
 		createdBy,

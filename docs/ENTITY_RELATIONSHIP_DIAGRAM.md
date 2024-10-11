@@ -21,6 +21,7 @@ erDiagram
     int id
     int opportunityId
     string externalId
+		string createdBy
     datetime createdAt
   }
   Outcome {
@@ -62,6 +63,7 @@ erDiagram
     int proposalId
     int sourceId
     int version
+		string createdBy
     datetime createdAt
   }
   ProposalFieldValue {
@@ -94,8 +96,22 @@ erDiagram
     string funder_short_code
     int organization_id
     string data_provider_short_code
-    datetime createdAt
+    datetime created_at
   }
+	BulkUpload {
+		integer id
+		string file_name
+		string source_key
+		bulk_upload_status status
+		integer file_size
+		integer source_id
+		string created_by
+		timestamp created_at
+	}
+	User {
+		string keycloak_user_id
+    datetime created_at
+	}
 
   Organization ||--o{ Proposal : submits
   Proposal }|--|| Opportunity : "responds to"
@@ -113,6 +129,9 @@ erDiagram
   Source }|--o| DataProvider : "represents"
   ProposalVersion }o--|| Source : "comes from"
   ExternalFieldValue }o--|| Source : "comes from"
+	Proposal }o--|| User : "is created by"
+	ProposalVersion }o--|| User : "is created by"
+	BulkUpload }o--|| User : "is created by"
 ```
 
 ## Narrative

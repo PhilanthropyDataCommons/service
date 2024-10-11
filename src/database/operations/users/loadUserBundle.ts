@@ -13,17 +13,17 @@ export const loadUserBundle = async (
 	limit: number | undefined,
 	offset: number,
 ): Promise<Bundle<User>> => {
-	const userId = authContext?.user.keycloakUserId;
-	const isAdministrator = authContext?.role.isAdministrator;
+	const authContextKeycloakUserId = authContext?.user.keycloakUserId;
+	const authContextIsAdministrator = authContext?.role.isAdministrator;
 
 	const bundle = await loadBundle<JsonResultSet<User>>(
 		'users.selectWithPagination',
 		{
+			authContextIsAdministrator,
+			authContextKeycloakUserId,
 			keycloakUserId,
-			isAdministrator,
 			limit,
 			offset,
-			userId,
 		},
 		'users',
 	);

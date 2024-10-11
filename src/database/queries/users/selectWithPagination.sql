@@ -8,12 +8,12 @@ WHERE
       keycloak_user_id = :keycloakUserId
     END
   AND CASE
-    WHEN :userId::UUID IS NULL THEN
+    WHEN :authContextKeycloakUserId::UUID IS NULL THEN
       true
     ELSE
       (
-        keycloak_user_id = :userId
-        OR :isAdministrator::boolean
+        keycloak_user_id = :authContextKeycloakUserId
+        OR :authContextIsAdministrator::boolean
       )
     END
 GROUP BY keycloak_user_id

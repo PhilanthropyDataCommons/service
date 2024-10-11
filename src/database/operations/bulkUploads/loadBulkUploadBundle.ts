@@ -13,17 +13,17 @@ export const loadBulkUploadBundle = async (
 	limit: number | undefined,
 	offset: number,
 ): Promise<Bundle<BulkUpload>> => {
-	const userId = authContext?.user.keycloakUserId;
-	const isAdministrator = authContext?.role.isAdministrator;
+	const authContextKeycloakUserId = authContext?.user.keycloakUserId;
+	const authContextIsAdministrator = authContext?.role.isAdministrator;
 
 	const bundle = await loadBundle<JsonResultSet<BulkUpload>>(
 		'bulkUploads.selectWithPagination',
 		{
+			authContextIsAdministrator,
+			authContextKeycloakUserId,
 			createdBy,
-			isAdministrator,
 			limit,
 			offset,
-			userId,
 		},
 		'bulk_uploads',
 	);

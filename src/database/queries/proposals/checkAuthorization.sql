@@ -4,12 +4,12 @@ SELECT EXISTS (
     WHERE id = :id
       AND
         CASE
-          WHEN :userId::UUID IS NULL THEN
+          WHEN :authContextKeycloakUserId::UUID IS NULL THEN
             true
           ELSE
           (
-            created_by = :userId
-            OR :isAdministrator::boolean
+            created_by = :authContextKeycloakUserId
+            OR :authContextIsAdministrator::boolean
           )
           END
 ) AS result

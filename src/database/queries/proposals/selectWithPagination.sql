@@ -24,12 +24,12 @@ WHERE
       op.organization_id = :organizationId
     END
   AND CASE
-    WHEN :userId::UUID IS NULL THEN
+    WHEN :authContextKeycloakUserId::UUID IS NULL THEN
       true
     ELSE
       (
-        p.created_by = :userId
-        OR :isAdministrator::boolean
+        p.created_by = :authContextKeycloakUserId
+        OR :authContextIsAdministrator::boolean
       )
     END
 GROUP BY p.id

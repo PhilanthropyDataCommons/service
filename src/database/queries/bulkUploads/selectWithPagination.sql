@@ -8,12 +8,12 @@ WHERE
       bulk_uploads.created_by = :createdBy
     END
   AND CASE
-    WHEN :userId::UUID IS NULL THEN
+    WHEN :authContextKeycloakUserId::UUID IS NULL THEN
       true
     ELSE
       (
-        bulk_uploads.created_by = :userId
-        OR :isAdministrator::boolean
+        bulk_uploads.created_by = :authContextKeycloakUserId
+        OR :authContextIsAdministrator::boolean
       )
     END
 ORDER BY id DESC

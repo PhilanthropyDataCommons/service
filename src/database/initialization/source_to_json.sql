@@ -5,7 +5,7 @@ RETURNS JSONB AS $$
 DECLARE
   data_provider_json JSONB := NULL::JSONB;
   funder_json JSONB := NULL::JSONB;
-  organization_json JSONB := NULL::JSONB;
+  changemaker_json JSONB := NULL::JSONB;
 BEGIN
   SELECT data_provider_to_json(data_providers.*)
   INTO data_provider_json
@@ -17,10 +17,10 @@ BEGIN
   FROM funders
   WHERE funders.short_code = source.funder_short_code;
 
-  SELECT organization_to_json(organizations.*)
-  INTO organization_json
-  FROM organizations
-  WHERE organizations.id = source.organization_id;
+  SELECT changemaker_to_json(changemakers.*)
+  INTO changemaker_json
+  FROM changemakers
+  WHERE changemakers.id = source.changemaker_id;
 
   RETURN jsonb_strip_nulls(jsonb_build_object(
     'id', source.id,
@@ -29,8 +29,8 @@ BEGIN
     'dataProvider', data_provider_json,
     'funderShortCode', source.funder_short_code,
     'funder', funder_json,
-    'organizationId', source.organization_id,
-    'organization', organization_json,
+    'changemakerId', source.changemaker_id,
+    'changemaker', changemaker_json,
     'createdAt', source.created_at
   ));
 END;

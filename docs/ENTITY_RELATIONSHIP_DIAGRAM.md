@@ -11,7 +11,7 @@ erDiagram
     string dataType
     datetime createdAt
   }
-  Organization {
+  Changemaker {
     int id
     string taxId
     string name
@@ -94,7 +94,7 @@ erDiagram
     int id
     string name
     string funder_short_code
-    int organization_id
+    int changemaker_id
     string data_provider_short_code
     datetime created_at
   }
@@ -113,7 +113,7 @@ erDiagram
     datetime created_at
 	}
 
-  Organization ||--o{ Proposal : submits
+  Changemaker ||--o{ Proposal : submits
   Proposal }|--|| Opportunity : "responds to"
   Opportunity ||--|{ ApplicationForm : establishes
   Proposal ||--o{ Outcome : "has"
@@ -122,10 +122,10 @@ erDiagram
   Proposal ||--|{ ProposalVersion : has
   ProposalVersion ||--|{ ProposalFieldValue : contains
   ProposalFieldValue }o--|| ApplicationFormField : populates
-  Organization ||--o{ ExternalFieldValue : "is described by"
+  Changemaker ||--o{ ExternalFieldValue : "is described by"
   ExternalFieldValue }o--|| BaseField : "contains potential defaults for"
   Source }|--o| Funder : "represents"
-  Source }|--o| Organization : "represents"
+  Source }|--o| Changemaker : "represents"
   Source }|--o| DataProvider : "represents"
   ProposalVersion }o--|| Source : "comes from"
   ExternalFieldValue }o--|| Source : "comes from"
@@ -148,7 +148,7 @@ Meanwhile...
 7. A `Proposal Version` contains a set of `Proposal Field Values`. These are the responses that were provided by the `Applicant`.
 8. A `Proposal Field Value` contains a response to a given `Application Form Field`. Some fields might allow multiple responses, which is why we provide a `position`.
 
-The thinking is that when a new proposal is being written, a Grant Management System could ask the PDC "is there any pre-populated data we should use for this organization?"
+The thinking is that when a new proposal is being written, a Grant Management System could ask the PDC "is there any pre-populated data we should use for this changemaker?"
 
 PDC would then:
 

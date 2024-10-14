@@ -4,25 +4,25 @@ import type {
 	AuthContext,
 	Bundle,
 	JsonResultSet,
-	Organization,
+	Changemaker,
 } from '../../../types';
 
-export const loadOrganizationBundle = async (
+export const loadChangemakerBundle = async (
 	authContext: AuthContext | undefined,
 	proposalId: number | undefined,
 	limit: number | undefined,
 	offset: number,
-): Promise<Bundle<Organization>> => {
+): Promise<Bundle<Changemaker>> => {
 	const keycloakUserId = getKeycloakUserIdFromAuthContext(authContext);
-	const jsonResultSetBundle = await loadBundle<JsonResultSet<Organization>>(
-		'organizations.selectWithPagination',
+	const jsonResultSetBundle = await loadBundle<JsonResultSet<Changemaker>>(
+		'changemakers.selectWithPagination',
 		{
 			keycloakUserId,
 			limit,
 			offset,
 			proposalId,
 		},
-		'organizations',
+		'changemakers',
 	);
 	const entries = jsonResultSetBundle.entries.map((entry) => entry.object);
 	return {

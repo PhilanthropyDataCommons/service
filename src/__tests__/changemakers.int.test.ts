@@ -5,8 +5,8 @@ import {
 	createApplicationFormField,
 	createBaseField,
 	createOpportunity,
-	createOrganization,
-	createOrganizationProposal,
+	createChangemaker,
+	createChangemakerProposal,
 	createOrUpdateFunder,
 	createProposal,
 	createProposalFieldValue,
@@ -20,34 +20,34 @@ import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import { BaseFieldDataType, BaseFieldScope, PostgresErrorCode } from '../types';
 
-const insertTestOrganizations = async () => {
-	await createOrganization({
+const insertTestChangemakers = async () => {
+	await createChangemaker({
 		taxId: '11-1111111',
 		name: 'Example Inc.',
 	});
-	await createOrganization({
+	await createChangemaker({
 		taxId: '22-2222222',
 		name: 'Another Inc.',
 	});
 };
 
-describe('/organizations', () => {
+describe('/changemakers', () => {
 	describe('GET /', () => {
 		it('does not require authentication', async () => {
-			await request(app).get('/organizations').expect(200);
+			await request(app).get('/changemakers').expect(200);
 		});
 
 		it('returns an empty Bundle when no data is present', async () => {
-			await request(app).get('/organizations').set(authHeader).expect(200, {
+			await request(app).get('/changemakers').set(authHeader).expect(200, {
 				total: 0,
 				entries: [],
 			});
 		});
 
-		it('returns organizations present in the database', async () => {
-			await insertTestOrganizations();
+		it('returns changemakers present in the database', async () => {
+			await insertTestChangemakers();
 			await request(app)
-				.get('/organizations')
+				.get('/changemakers')
 				.set(authHeader)
 				.expect(200)
 				.expect((res) =>
@@ -76,13 +76,13 @@ describe('/organizations', () => {
 		it('returns according to pagination parameters', async () => {
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
-				await createOrganization({
+				await createChangemaker({
 					taxId: '11-1111111',
-					name: `Organization ${i + 1}`,
+					name: `Changemaker ${i + 1}`,
 				});
 			}, Promise.resolve());
 			await request(app)
-				.get('/organizations')
+				.get('/changemakers')
 				.query({
 					_page: 2,
 					_count: 5,
@@ -96,35 +96,35 @@ describe('/organizations', () => {
 							{
 								id: 15,
 								taxId: '11-1111111',
-								name: 'Organization 15',
+								name: 'Changemaker 15',
 								createdAt: expectTimestamp,
 								fields: [],
 							},
 							{
 								id: 14,
 								taxId: '11-1111111',
-								name: 'Organization 14',
+								name: 'Changemaker 14',
 								createdAt: expectTimestamp,
 								fields: [],
 							},
 							{
 								id: 13,
 								taxId: '11-1111111',
-								name: 'Organization 13',
+								name: 'Changemaker 13',
 								createdAt: expectTimestamp,
 								fields: [],
 							},
 							{
 								id: 12,
 								taxId: '11-1111111',
-								name: 'Organization 12',
+								name: 'Changemaker 12',
 								createdAt: expectTimestamp,
 								fields: [],
 							},
 							{
 								id: 11,
 								taxId: '11-1111111',
-								name: 'Organization 11',
+								name: 'Changemaker 11',
 								createdAt: expectTimestamp,
 								fields: [],
 							},
@@ -133,7 +133,7 @@ describe('/organizations', () => {
 				);
 		});
 
-		it('returns a subset of organizations present in the database when a proposal filter is provided', async () => {
+		it('returns a subset of changemakers present in the database when a proposal filter is provided', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
@@ -143,20 +143,20 @@ describe('/organizations', () => {
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createOrganization({
+			await createChangemaker({
 				taxId: '123-123-123',
 				name: 'Canadian Company',
 			});
-			await createOrganization({
+			await createChangemaker({
 				taxId: '123-123-123',
 				name: 'Another Canadian Company',
 			});
-			await createOrganizationProposal({
-				organizationId: 1,
+			await createChangemakerProposal({
+				changemakerId: 1,
 				proposalId: 1,
 			});
 			const response = await request(app)
-				.get(`/organizations?proposal=1`)
+				.get(`/changemakers?proposal=1`)
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
@@ -173,7 +173,7 @@ describe('/organizations', () => {
 			});
 		});
 
-		it('does not return duplicate organizations when an organization has multiple proposals', async () => {
+		it('does not return duplicate changemakers when a changemaker has multiple proposals', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
@@ -188,20 +188,20 @@ describe('/organizations', () => {
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createOrganization({
+			await createChangemaker({
 				taxId: '123-123-123',
 				name: 'Canadian Company',
 			});
-			await createOrganizationProposal({
-				organizationId: 1,
+			await createChangemakerProposal({
+				changemakerId: 1,
 				proposalId: 1,
 			});
-			await createOrganizationProposal({
-				organizationId: 1,
+			await createChangemakerProposal({
+				changemakerId: 1,
 				proposalId: 2,
 			});
 			const response = await request(app)
-				.get(`/organizations`)
+				.get(`/changemakers`)
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
@@ -218,9 +218,9 @@ describe('/organizations', () => {
 			});
 		});
 
-		it('returns a 400 error if an invalid organization filter is provided', async () => {
+		it('returns a 400 error if an invalid changemaker filter is provided', async () => {
 			const response = await request(app)
-				.get(`/proposals?organization=foo`)
+				.get(`/proposals?changemaker=foo`)
 				.set(authHeader)
 				.expect(400);
 			expect(response.body).toMatchObject({
@@ -232,18 +232,18 @@ describe('/organizations', () => {
 
 	describe('GET /:id', () => {
 		it('does not require authentication', async () => {
-			await insertTestOrganizations();
-			await request(app).get('/organizations/1').expect(200);
+			await insertTestChangemakers();
+			await request(app).get('/changemakers/1').expect(200);
 		});
 
 		it('returns 404 when given id is not present', async () => {
-			await request(app).get('/organizations/9001').set(authHeader).expect(404);
+			await request(app).get('/changemakers/9001').set(authHeader).expect(404);
 		});
 
-		it('returns the specified organization', async () => {
-			await insertTestOrganizations();
+		it('returns the specified changemaker', async () => {
+			await insertTestChangemakers();
 			await request(app)
-				.get('/organizations/2')
+				.get('/changemakers/2')
 				.set(authHeader)
 				.expect(200)
 				.expect((res) =>
@@ -258,7 +258,7 @@ describe('/organizations', () => {
 		});
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
-			await request(app).get('/organizations/foo').set(authHeader).expect(400);
+			await request(app).get('/changemakers/foo').set(authHeader).expect(400);
 		});
 
 		it('returns the latest valid value for a base field when auth id is sent', async () => {
@@ -275,11 +275,11 @@ describe('/organizations', () => {
 					scope: BaseFieldScope.ORGANIZATION,
 				})
 			).id;
-			// To advance test organization IDs beyond 1-2.
-			await insertTestOrganizations();
+			// To advance test changemaker IDs beyond 1-2.
+			await insertTestChangemakers();
 			// This should be ID 3, although unfortunately implicitly, and only when tests run in serial.
-			const organizationId = (
-				await createOrganization({
+			const changemakerId = (
+				await createChangemaker({
 					name: 'Five thousand one hundred forty seven reasons',
 					taxId: '05119',
 				})
@@ -296,8 +296,8 @@ describe('/organizations', () => {
 					createdBy: systemUser.keycloakUserId,
 				})
 			).id;
-			await createOrganizationProposal({
-				organizationId,
+			await createChangemakerProposal({
+				changemakerId,
 				proposalId,
 			});
 			// I need 3 application form fields here. May as well make them use distinct forms too.
@@ -382,12 +382,12 @@ describe('/organizations', () => {
 				isValid: false,
 			});
 			await request(app)
-				.get(`/organizations/${organizationId}`)
+				.get(`/changemakers/${changemakerId}`)
 				.set(authHeader)
 				.expect(200)
 				.expect((res) =>
 					expect(res.body).toEqual({
-						id: organizationId,
+						id: changemakerId,
 						name: 'Five thousand one hundred forty seven reasons',
 						taxId: '05119',
 						createdAt: expectTimestamp,
@@ -398,13 +398,13 @@ describe('/organizations', () => {
 
 		it('returns older changemaker data when newer funder data is present', async () => {
 			// Set up changemaker and funder sources.
-			const changemaker = await createOrganization({
+			const changemaker = await createChangemaker({
 				taxId: '5387',
 				name: 'Changemaker 5387',
 			});
 			const changemakerSourceId = (
 				await createSource({
-					organizationId: changemaker.id,
+					changemakerId: changemaker.id,
 					label: `${changemaker.name} source`,
 				})
 			).id;
@@ -439,8 +439,8 @@ describe('/organizations', () => {
 					createdBy: systemUser.keycloakUserId,
 				})
 			).id;
-			await createOrganizationProposal({
-				organizationId: changemaker.id,
+			await createChangemakerProposal({
+				changemakerId: changemaker.id,
 				proposalId,
 			});
 			const applicationFormIdChangemakerEarliest = (
@@ -498,7 +498,7 @@ describe('/organizations', () => {
 				isValid: true,
 			});
 			await request(app)
-				.get(`/organizations/${changemaker.id}`)
+				.get(`/changemakers/${changemaker.id}`)
 				.set(authHeader)
 				.expect(200)
 				.expect((res) =>
@@ -513,13 +513,13 @@ describe('/organizations', () => {
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await request(app).post('/organizations').expect(401);
+			await request(app).post('/changemakers').expect(401);
 		});
 
-		it('creates exactly one organization', async () => {
-			const before = await loadTableMetrics('organizations');
+		it('creates exactly one changemaker', async () => {
+			const before = await loadTableMetrics('changemakers');
 			const result = await request(app)
-				.post('/organizations')
+				.post('/changemakers')
 				.type('application/json')
 				.set(authHeader)
 				.send({
@@ -527,7 +527,7 @@ describe('/organizations', () => {
 					name: 'Example Inc.',
 				})
 				.expect(201);
-			const after = await loadTableMetrics('organizations');
+			const after = await loadTableMetrics('changemakers');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: 1,
@@ -541,7 +541,7 @@ describe('/organizations', () => {
 
 		it('returns 400 bad request when no taxId is sent', async () => {
 			const result = await request(app)
-				.post('/organizations')
+				.post('/changemakers')
 				.type('application/json')
 				.set(authHeader)
 				.send({
@@ -556,7 +556,7 @@ describe('/organizations', () => {
 
 		it('returns 400 bad request when no name is sent', async () => {
 			const result = await request(app)
-				.post('/organizations')
+				.post('/changemakers')
 				.type('application/json')
 				.set(authHeader)
 				.send({
@@ -570,12 +570,12 @@ describe('/organizations', () => {
 		});
 
 		it('returns 409 conflict when an existing EIN + name combination is submitted', async () => {
-			await createOrganization({
+			await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 			});
 			const result = await request(app)
-				.post('/organizations')
+				.post('/changemakers')
 				.type('application/json')
 				.set(authHeader)
 				.send({

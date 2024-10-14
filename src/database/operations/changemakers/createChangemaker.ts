@@ -1,16 +1,16 @@
 import { db } from '../../db';
 import type {
 	JsonResultSet,
-	Organization,
-	WritableOrganization,
+	Changemaker,
+	WritableChangemaker,
 } from '../../../types';
 
-export const createOrganization = async (
-	createValues: WritableOrganization,
-): Promise<Organization> => {
+export const createChangemaker = async (
+	createValues: WritableChangemaker,
+): Promise<Changemaker> => {
 	const { taxId, name } = createValues;
-	const result = await db.sql<JsonResultSet<Organization>>(
-		'organizations.insertOne',
+	const result = await db.sql<JsonResultSet<Changemaker>>(
+		'changemakers.insertOne',
 		{
 			taxId,
 			name,

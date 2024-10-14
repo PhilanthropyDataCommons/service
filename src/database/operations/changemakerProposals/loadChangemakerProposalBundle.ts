@@ -2,24 +2,24 @@ import { loadBundle } from '../generic/loadBundle';
 import type {
 	JsonResultSet,
 	Bundle,
-	OrganizationProposal,
+	ChangemakerProposal,
 } from '../../../types';
 
-export const loadOrganizationProposalBundle = async (
-	organizationId: number | undefined,
+export const loadChangemakerProposalBundle = async (
+	changemakerId: number | undefined,
 	proposalId: number | undefined,
 	limit: number | undefined,
 	offset: number,
-): Promise<Bundle<OrganizationProposal>> => {
-	const bundle = await loadBundle<JsonResultSet<OrganizationProposal>>(
-		'organizationsProposals.selectWithPagination',
+): Promise<Bundle<ChangemakerProposal>> => {
+	const bundle = await loadBundle<JsonResultSet<ChangemakerProposal>>(
+		'changemakersProposals.selectWithPagination',
 		{
-			organizationId,
+			changemakerId,
 			proposalId,
 			offset,
 			limit,
 		},
-		'organizations_proposals',
+		'changemakers_proposals',
 	);
 	const entries = bundle.entries.map((entry) => entry.object);
 	return {

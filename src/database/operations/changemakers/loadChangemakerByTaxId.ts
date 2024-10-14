@@ -1,12 +1,12 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
-import type { JsonResultSet, Organization } from '../../../types';
+import type { JsonResultSet, Changemaker } from '../../../types';
 
-export const loadOrganizationByTaxId = async (
+export const loadChangemakerByTaxId = async (
 	taxId: string,
-): Promise<Organization> => {
-	const result = await db.sql<JsonResultSet<Organization>>(
-		'organizations.selectByTaxId',
+): Promise<Changemaker> => {
+	const result = await db.sql<JsonResultSet<Changemaker>>(
+		'changemakers.selectByTaxId',
 		{
 			taxId,
 		},
@@ -14,7 +14,7 @@ export const loadOrganizationByTaxId = async (
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
 		throw new NotFoundError(`Entity not found`, {
-			entityType: 'Organization',
+			entityType: 'Changemaker',
 			lookupValues: {
 				taxId,
 			},

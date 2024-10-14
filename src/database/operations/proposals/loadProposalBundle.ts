@@ -10,7 +10,7 @@ import type {
 export const loadProposalBundle = async (
 	authContext: AuthContext | undefined,
 	createdBy: KeycloakUserId | undefined,
-	organizationId: number | undefined,
+	changemakerId: number | undefined,
 	search: string | undefined,
 	limit: number | undefined,
 	offset: number,
@@ -26,7 +26,7 @@ export const loadProposalBundle = async (
 			createdBy,
 			limit,
 			offset,
-			organizationId,
+			changemakerId,
 			search,
 		},
 		'proposals',

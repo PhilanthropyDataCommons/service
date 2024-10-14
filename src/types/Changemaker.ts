@@ -3,7 +3,7 @@ import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { ProposalFieldValue } from './ProposalFieldValue';
 
-interface Organization {
+interface Changemaker {
 	readonly id: number;
 	taxId: string;
 	name: string;
@@ -11,9 +11,9 @@ interface Organization {
 	readonly createdAt: string;
 }
 
-type WritableOrganization = Writable<Organization>;
+type WritableChangemaker = Writable<Changemaker>;
 
-const writableOrganizationSchema: JSONSchemaType<WritableOrganization> = {
+const writableChangemakerSchema: JSONSchemaType<WritableChangemaker> = {
 	type: 'object',
 	properties: {
 		taxId: {
@@ -26,11 +26,11 @@ const writableOrganizationSchema: JSONSchemaType<WritableOrganization> = {
 	required: ['taxId', 'name'],
 };
 
-const isWritableOrganization = ajv.compile(writableOrganizationSchema);
+const isWritableChangemaker = ajv.compile(writableChangemakerSchema);
 
 export {
-	isWritableOrganization,
-	Organization,
-	WritableOrganization,
-	writableOrganizationSchema,
+	isWritableChangemaker,
+	Changemaker,
+	WritableChangemaker,
+	writableChangemakerSchema,
 };

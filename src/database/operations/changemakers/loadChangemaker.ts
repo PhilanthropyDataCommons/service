@@ -5,16 +5,16 @@ import type {
 	AuthContext,
 	Id,
 	JsonResultSet,
-	Organization,
+	Changemaker,
 } from '../../../types';
 
-export const loadOrganization = async (
+export const loadChangemaker = async (
 	authContext: AuthContext | undefined,
 	id: Id,
-): Promise<Organization> => {
+): Promise<Changemaker> => {
 	const keycloakUserId = getKeycloakUserIdFromAuthContext(authContext);
-	const result = await db.sql<JsonResultSet<Organization>>(
-		'organizations.selectById',
+	const result = await db.sql<JsonResultSet<Changemaker>>(
+		'changemakers.selectById',
 		{
 			id,
 			keycloakUserId,
@@ -23,7 +23,7 @@ export const loadOrganization = async (
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
 		throw new NotFoundError(`Entity not found`, {
-			entityType: 'Organization',
+			entityType: 'Changemaker',
 			entityId: id,
 		});
 	}

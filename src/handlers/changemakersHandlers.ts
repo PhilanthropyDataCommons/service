@@ -1,12 +1,12 @@
 import {
 	getLimitValues,
-	loadOrganizationBundle,
-	loadOrganization,
-	createOrganization,
+	loadChangemakerBundle,
+	loadChangemaker,
+	createChangemaker,
 } from '../database';
 import {
 	isId,
-	isWritableOrganization,
+	isWritableChangemaker,
 	isTinyPgErrorWithQueryContext,
 	isAuthContext,
 } from '../types';
@@ -17,23 +17,23 @@ import {
 } from '../queryParameters';
 import type { Request, Response, NextFunction } from 'express';
 
-const postOrganization = (
+const postChangemaker = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (!isWritableOrganization(req.body)) {
+	if (!isWritableChangemaker(req.body)) {
 		next(
 			new InputValidationError(
 				'Invalid request body.',
-				isWritableOrganization.errors ?? [],
+				isWritableChangemaker.errors ?? [],
 			),
 		);
 		return;
 	}
-	createOrganization(req.body)
-		.then((organization) => {
-			res.status(201).contentType('application/json').send(organization);
+	createChangemaker(req.body)
+		.then((changemaker) => {
+			res.status(201).contentType('application/json').send(changemaker);
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
@@ -44,7 +44,7 @@ const postOrganization = (
 		});
 };
 
-const getOrganizations = (
+const getChangemakers = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
@@ -53,45 +53,45 @@ const getOrganizations = (
 	const { limit, offset } = getLimitValues(paginationParameters);
 	const { proposalId } = extractProposalParameters(req);
 	const authContext = isAuthContext(req) ? req : undefined;
-	loadOrganizationBundle(authContext, proposalId, limit, offset)
-		.then((organizationBundle) => {
-			res.status(200).contentType('application/json').send(organizationBundle);
+	loadChangemakerBundle(authContext, proposalId, limit, offset)
+		.then((changemakerBundle) => {
+			res.status(200).contentType('application/json').send(changemakerBundle);
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving organizations.', error));
+				next(new DatabaseError('Error retrieving changemakers.', error));
 				return;
 			}
 			next(error);
 		});
 };
 
-const getOrganization = (
+const getChangemaker = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
-	const { organizationId } = req.params;
-	if (!isId(organizationId)) {
+	const { changemakerId } = req.params;
+	if (!isId(changemakerId)) {
 		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
 		return;
 	}
 	const authContext = isAuthContext(req) ? req : undefined;
-	loadOrganization(authContext, organizationId)
-		.then((organization) => {
-			res.status(200).contentType('application/json').send(organization);
+	loadChangemaker(authContext, changemakerId)
+		.then((changemaker) => {
+			res.status(200).contentType('application/json').send(changemaker);
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving organization.', error));
+				next(new DatabaseError('Error retrieving changemaker.', error));
 				return;
 			}
 			next(error);
 		});
 };
 
-export const organizationsHandlers = {
-	postOrganization,
-	getOrganizations,
-	getOrganization,
+export const changemakersHandlers = {
+	postChangemaker,
+	getChangemakers,
+	getChangemaker,
 };

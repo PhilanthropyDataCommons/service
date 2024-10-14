@@ -131,7 +131,7 @@ const postProposalVersion = (
 	}
 
 	const { sourceId, fieldValues, proposalId, applicationFormId } = req.body;
-	const createdBy = req.user.id;
+	const createdBy = req.user.keycloakUserId;
 
 	Promise.all([
 		assertApplicationFormExistsForProposal(

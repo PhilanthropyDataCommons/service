@@ -6,7 +6,6 @@ import type { Request as JWTRequest } from 'express-jwt';
 import type { User } from '../../types';
 
 const getMockedUser = (): User => ({
-	id: 1,
 	keycloakUserId: getTestUserKeycloakUserId(),
 	createdAt: '',
 });

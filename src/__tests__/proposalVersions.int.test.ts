@@ -46,7 +46,7 @@ describe('/proposalVersions', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -82,7 +82,7 @@ describe('/proposalVersions', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -212,7 +212,7 @@ describe('/proposalVersions', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -246,7 +246,7 @@ describe('/proposalVersions', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -280,7 +280,7 @@ describe('/proposalVersions', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -321,7 +321,7 @@ describe('/proposalVersions', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -366,7 +366,7 @@ describe('/proposalVersions', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -413,7 +413,7 @@ describe('/proposalVersions', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,

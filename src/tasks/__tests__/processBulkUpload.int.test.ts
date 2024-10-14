@@ -58,7 +58,7 @@ const createTestBulkUpload = async (
 		sourceId: systemSource.id,
 		sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
 		status: BulkUploadStatus.PENDING,
-		createdBy: systemUser.id,
+		createdBy: systemUser.keycloakUserId,
 	};
 	return createBulkUpload({
 		...defaultValues,
@@ -337,7 +337,7 @@ describe('processBulkUpload', () => {
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUpload = await createTestBulkUpload({
 			sourceKey,
-			createdBy: systemUser.id,
+			createdBy: systemUser.keycloakUserId,
 		});
 		const requests = await mockS3ResponsesForBulkUploadProcessing(
 			bulkUpload,
@@ -383,7 +383,7 @@ describe('processBulkUpload', () => {
 			entries: [
 				{
 					createdAt: expectTimestamp,
-					createdBy: 1,
+					createdBy: systemUser.keycloakUserId,
 					externalId: '2',
 					id: 2,
 					opportunityId: 1,
@@ -391,7 +391,7 @@ describe('processBulkUpload', () => {
 						{
 							applicationFormId: 1,
 							createdAt: expectTimestamp,
-							createdBy: systemUser.id,
+							createdBy: systemUser.keycloakUserId,
 							fieldValues: [
 								{
 									applicationFormField: {
@@ -459,7 +459,7 @@ describe('processBulkUpload', () => {
 				},
 				{
 					createdAt: expectTimestamp,
-					createdBy: 1,
+					createdBy: systemUser.keycloakUserId,
 					externalId: '1',
 					id: 1,
 					opportunityId: 1,
@@ -467,7 +467,7 @@ describe('processBulkUpload', () => {
 						{
 							applicationFormId: 1,
 							createdAt: expectTimestamp,
-							createdBy: systemUser.id,
+							createdBy: systemUser.keycloakUserId,
 							fieldValues: [
 								{
 									applicationFormField: {

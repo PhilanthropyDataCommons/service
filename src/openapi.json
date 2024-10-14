@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.13.0",
+		"version": "0.14.0",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -74,8 +74,8 @@
 				"schema": {
 					"oneOf": [
 						{
-							"type": "integer",
-							"minimum": 1,
+							"type": "string",
+							"format": "uuid",
 							"nullable": true
 						},
 						{
@@ -86,7 +86,7 @@
 				"in": "query",
 				"name": "createdBy",
 				"required": false,
-				"description": "A reference (ID) to a user entity, or 'me'."
+				"description": "A reference to a user entity, or 'me'."
 			}
 		},
 		"securitySchemes": {
@@ -153,8 +153,9 @@
 						]
 					},
 					"createdBy": {
-						"description": "The id of the PDC user that created this bulk upload",
-						"type": "integer",
+						"description": "The keycloak user id of the PDC user that created this bulk upload",
+						"type": "string",
+						"format": "uuid",
 						"readOnly": true
 					},
 					"createdAt": {
@@ -357,8 +358,9 @@
 						"readOnly": true
 					},
 					"createdBy": {
-						"description": "The id of the PDC user that created this proposal",
-						"type": "integer",
+						"description": "The keycloak user id of the PDC user that created this proposal",
+						"type": "string",
+						"format": "uuid",
 						"readOnly": true
 					}
 				},
@@ -411,8 +413,9 @@
 						"readOnly": true
 					},
 					"createdBy": {
-						"description": "The id of the PDC user that created this bulk upload",
-						"type": "integer",
+						"description": "The keycloak user id of the PDC user that created this bulk upload",
+						"type": "string",
+						"format": "uuid",
 						"readOnly": true
 					}
 				},
@@ -947,11 +950,6 @@
 			"User": {
 				"type": "object",
 				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3407
-					},
 					"keycloakUserId": {
 						"type": "string",
 						"example": "550e8400-e29b-41d4-a716-446655440000"
@@ -962,7 +960,7 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "keycloakUserId", "createdAt"]
+				"required": ["keycloakUserId", "createdAt"]
 			},
 			"UserBundle": {
 				"allOf": [

@@ -139,7 +139,7 @@ describe('/organizations', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createOrganization({
 				taxId: '123-123-123',
@@ -179,12 +179,12 @@ describe('/organizations', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createOrganization({
 				taxId: '123-123-123',
@@ -291,7 +291,7 @@ describe('/organizations', () => {
 				await createProposal({
 					opportunityId,
 					externalId: 'Proposal',
-					createdBy: systemUser.id,
+					createdBy: systemUser.keycloakUserId,
 				})
 			).id;
 			await createOrganizationProposal({
@@ -311,7 +311,7 @@ describe('/organizations', () => {
 						proposalId,
 						applicationFormId: applicationFormIdEarliest,
 						sourceId: systemSource.id,
-						createdBy: systemUser.id,
+						createdBy: systemUser.keycloakUserId,
 					})
 				).id,
 				applicationFormFieldId: (
@@ -337,7 +337,7 @@ describe('/organizations', () => {
 						proposalId,
 						applicationFormId: applicationFormIdLatestValid,
 						sourceId: systemSource.id,
-						createdBy: systemUser.id,
+						createdBy: systemUser.keycloakUserId,
 					})
 				).id,
 				applicationFormFieldId: (
@@ -364,7 +364,7 @@ describe('/organizations', () => {
 						proposalId,
 						applicationFormId: applicationFormIdLatest,
 						sourceId: systemSource.id,
-						createdBy: systemUser.id,
+						createdBy: systemUser.keycloakUserId,
 					})
 				).id,
 				applicationFormFieldId: (

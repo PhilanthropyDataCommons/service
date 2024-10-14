@@ -6,17 +6,13 @@ export const assertProposalAuthorization = async (
 	id: number,
 	authContext: AuthContext,
 ): Promise<void> => {
-	const {
-		user: { id: userId },
-	} = authContext;
-	const {
-		role: { isAdministrator },
-	} = authContext;
+	const authContextKeycloakUserId = authContext.user.keycloakUserId;
+	const authContextIsAdministrator = authContext.role.isAdministrator;
 
 	const result = await db.sql<CheckResult>('proposals.checkAuthorization', {
+		authContextIsAdministrator,
+		authContextKeycloakUserId,
 		id,
-		userId,
-		isAdministrator,
 	});
 
 	if (result.rows[0]?.result !== true) {

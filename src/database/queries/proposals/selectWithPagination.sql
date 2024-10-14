@@ -5,7 +5,7 @@ FROM proposals p
   LEFT JOIN organizations_proposals op on op.proposal_id = p.id
 WHERE
   CASE
-    WHEN :createdBy::integer IS NULL THEN
+    WHEN :createdBy::UUID IS NULL THEN
       true
     ELSE
       p.created_by = :createdBy
@@ -24,12 +24,12 @@ WHERE
       op.organization_id = :organizationId
     END
   AND CASE
-    WHEN :userId::integer IS NULL THEN
+    WHEN :authContextKeycloakUserId::UUID IS NULL THEN
       true
     ELSE
       (
-        p.created_by = :userId
-        OR :isAdministrator::boolean
+        p.created_by = :authContextKeycloakUserId
+        OR :authContextIsAdministrator::boolean
       )
     END
 GROUP BY p.id

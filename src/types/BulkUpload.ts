@@ -2,6 +2,7 @@ import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { Source } from './Source';
+import type { KeycloakUserId } from './KeycloakUserId';
 
 enum BulkUploadStatus {
 	PENDING = 'pending',
@@ -20,7 +21,7 @@ interface BulkUpload {
 	readonly status: BulkUploadStatus;
 	readonly fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
 	readonly createdAt: string;
-	readonly createdBy: number;
+	readonly createdBy: KeycloakUserId;
 }
 
 type WritableBulkUpload = Writable<BulkUpload>;

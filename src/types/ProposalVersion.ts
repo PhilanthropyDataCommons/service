@@ -7,6 +7,7 @@ import type {
 } from './ProposalFieldValue';
 import type { Writable } from './Writable';
 import type { Source } from './Source';
+import type { KeycloakUserId } from './KeycloakUserId';
 
 interface ProposalVersion {
 	readonly id: number;
@@ -17,7 +18,7 @@ interface ProposalVersion {
 	applicationFormId: number;
 	readonly fieldValues: ProposalFieldValue[];
 	readonly createdAt: string;
-	readonly createdBy: number;
+	readonly createdBy: KeycloakUserId;
 }
 
 type WritableProposalVersion = Writable<ProposalVersion>;

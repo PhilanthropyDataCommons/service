@@ -45,7 +45,7 @@ const postBulkUpload = (
 	}
 
 	const { sourceId, fileName, sourceKey } = req.body;
-	const createdBy = req.user.id;
+	const createdBy = req.user.keycloakUserId;
 
 	if (!sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
 		throw new InputValidationError(

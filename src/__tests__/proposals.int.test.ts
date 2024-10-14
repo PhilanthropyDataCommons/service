@@ -22,7 +22,11 @@ import {
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
 import { PostgresErrorCode } from '../types/PostgresErrorCode';
-import { BaseFieldDataType, BaseFieldScope } from '../types';
+import {
+	BaseFieldDataType,
+	BaseFieldScope,
+	keycloakUserIdToString,
+} from '../types';
 
 const createTestBaseFields = async () => {
 	await createBaseField({
@@ -71,17 +75,17 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: 'proposal-3',
 				opportunityId: 1,
-				createdBy: secondUser.id,
+				createdBy: secondUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -90,7 +94,7 @@ describe('/proposals', () => {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationFormField({
 				applicationFormId: 1,
@@ -118,7 +122,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-2',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						versions: [],
 					},
 					{
@@ -126,7 +130,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-1',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						versions: [
 							{
 								id: 1,
@@ -136,7 +140,7 @@ describe('/proposals', () => {
 								source: systemSource,
 								applicationFormId: 1,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 								fieldValues: [
 									{
 										id: 1,
@@ -183,12 +187,12 @@ describe('/proposals', () => {
 			const proposal = await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			const organization = await createOrganization({
 				taxId: '123-123-123',
@@ -210,7 +214,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-1',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						versions: [],
 					},
 				],
@@ -250,12 +254,12 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -264,13 +268,13 @@ describe('/proposals', () => {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalVersion({
 				proposalId: 2,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationFormField({
 				applicationFormId: 1,
@@ -304,7 +308,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-1',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						versions: [
 							{
 								id: 1,
@@ -314,7 +318,7 @@ describe('/proposals', () => {
 								version: 1,
 								applicationFormId: 1,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 								fieldValues: [
 									{
 										id: 1,
@@ -364,12 +368,12 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: anotherUser.id,
+				createdBy: anotherUser.keycloakUserId,
 			});
 			const response = await request(app)
 				.get('/proposals')
@@ -383,7 +387,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-2',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
-						createdBy: anotherUser.id,
+						createdBy: anotherUser.keycloakUserId,
 						versions: [],
 					},
 					{
@@ -391,7 +395,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-1',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						versions: [],
 					},
 				],
@@ -411,15 +415,17 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: anotherUser.id,
+				createdBy: anotherUser.keycloakUserId,
 			});
 			const response = await request(app)
-				.get(`/proposals?createdBy=${testUser.id}`)
+				.get(
+					`/proposals?createdBy=${keycloakUserIdToString(testUser.keycloakUserId)}`,
+				)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
@@ -430,7 +436,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-1',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						versions: [],
 					},
 				],
@@ -450,12 +456,12 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: anotherUser.id,
+				createdBy: anotherUser.keycloakUserId,
 			});
 			const response = await request(app)
 				.get(`/proposals?createdBy=me`)
@@ -469,7 +475,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-1',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						versions: [],
 					},
 				],
@@ -489,12 +495,12 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: 'proposal-4999',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: 'proposal-5003',
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm({
 				opportunityId: 1,
@@ -503,13 +509,13 @@ describe('/proposals', () => {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalVersion({
 				proposalId: 2,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationFormField({
 				applicationFormId: 1,
@@ -543,7 +549,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-4999',
 						opportunityId: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						versions: [
 							{
 								id: 1,
@@ -553,7 +559,7 @@ describe('/proposals', () => {
 								version: 1,
 								applicationFormId: 1,
 								createdAt: expectTimestamp,
-								createdBy: testUser.id,
+								createdBy: testUser.keycloakUserId,
 								fieldValues: [
 									{
 										id: 1,
@@ -601,7 +607,7 @@ describe('/proposals', () => {
 				await createProposal({
 					externalId: `proposal-${i + 1}`,
 					opportunityId: 1,
-					createdBy: testUser.id,
+					createdBy: testUser.keycloakUserId,
 				});
 			}, Promise.resolve());
 			const response = await request(app)
@@ -621,7 +627,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 					},
 					{
 						id: 14,
@@ -629,7 +635,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 					},
 					{
 						id: 13,
@@ -637,7 +643,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 					},
 					{
 						id: 12,
@@ -645,7 +651,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 					},
 					{
 						id: 11,
@@ -653,7 +659,7 @@ describe('/proposals', () => {
 						opportunityId: 1,
 						versions: [],
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 					},
 				],
 			});
@@ -695,7 +701,7 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: `proposal-1`,
 				opportunityId: 1,
-				createdBy: anotherUser.id,
+				createdBy: anotherUser.keycloakUserId,
 			});
 
 			const response = await request(app)
@@ -738,12 +744,12 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: `proposal-1`,
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposal({
 				externalId: `proposal-2`,
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 
 			const response = await request(app)
@@ -756,7 +762,7 @@ describe('/proposals', () => {
 				versions: [],
 				opportunityId: 1,
 				createdAt: expectTimestamp,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 		});
 
@@ -785,19 +791,19 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalFieldValue({
 				proposalVersionId: 1,
@@ -836,7 +842,7 @@ describe('/proposals', () => {
 				opportunityId: 1,
 				externalId: 'proposal-2525-01-04T00Z',
 				createdAt: expectTimestamp,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 				versions: [
 					{
 						id: 2,
@@ -846,7 +852,7 @@ describe('/proposals', () => {
 						applicationFormId: 1,
 						version: 2,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						fieldValues: [
 							{
 								id: 3,
@@ -912,7 +918,7 @@ describe('/proposals', () => {
 						applicationFormId: 1,
 						version: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						fieldValues: [
 							{
 								id: 1,
@@ -999,19 +1005,19 @@ describe('/proposals', () => {
 			await createProposal({
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: 1,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalVersion({
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalFieldValue({
 				proposalVersionId: 1,
@@ -1050,7 +1056,7 @@ describe('/proposals', () => {
 				opportunityId: 1,
 				externalId: 'proposal-2525-01-04T00Z',
 				createdAt: expectTimestamp,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 				versions: [
 					{
 						id: 2,
@@ -1060,7 +1066,7 @@ describe('/proposals', () => {
 						applicationFormId: 1,
 						version: 2,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						fieldValues: [
 							{
 								id: 3,
@@ -1126,7 +1132,7 @@ describe('/proposals', () => {
 						applicationFormId: 1,
 						version: 1,
 						createdAt: expectTimestamp,
-						createdBy: testUser.id,
+						createdBy: testUser.keycloakUserId,
 						fieldValues: [
 							{
 								id: 1,
@@ -1223,7 +1229,7 @@ describe('/proposals', () => {
 				externalId: 'proposal123',
 				opportunityId: 1,
 				createdAt: expectTimestamp,
-				createdBy: testUser.id,
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(1);
 		});

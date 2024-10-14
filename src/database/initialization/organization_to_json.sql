@@ -23,6 +23,8 @@ BEGIN
       ON pfv.proposal_version_id = pv.id
     INNER JOIN organizations_proposals op
       ON pv.proposal_id = op.proposal_id
+    INNER JOIN sources s
+      ON pv.source_id = s.id
     WHERE op.organization_id = organization.id
       AND bf.scope = 'organization'
       AND pfv.is_valid
@@ -31,6 +33,16 @@ BEGIN
       -- Guard against the valid-but-not-really-valid-here system user:
       AND u.keycloak_user_id != system_keycloak_user_id()
       ORDER BY bf.id,
+        -- The three "Source" sorts are as a class, not on an individual column within the class.
+        -- In other words, if there are many funders that sourced data, they are treated equally
+        -- until further sorted by the remaining (non-Source) sort clauses.
+        -- Organization sourced data takes priority over funders and data platform providers.
+        s.organization_id IS NOT NULL DESC,
+        -- Funder sourced data takes priority over data platform providers.
+        s.funder_short_code IS NOT NULL DESC,
+        -- Data platform provider sourced data takes priority over old, default-pdc-sourced data.
+        s.data_provider_short_code IS NOT NULL
+          AND s.id != system_source_id() DESC,
         pfv.created_at DESC
   ) AS pfv_inner;
   RETURN jsonb_build_object(

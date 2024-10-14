@@ -7,9 +7,11 @@ import {
 	createOpportunity,
 	createOrganization,
 	createOrganizationProposal,
+	createOrUpdateFunder,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
+	createSource,
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
@@ -390,6 +392,120 @@ describe('/organizations', () => {
 						taxId: '05119',
 						createdAt: expectTimestamp,
 						fields: [latestValidValue],
+					}),
+				);
+		});
+
+		it('returns older changemaker data when newer funder data is present', async () => {
+			// Set up changemaker and funder sources.
+			const changemaker = await createOrganization({
+				taxId: '5387',
+				name: 'Changemaker 5387',
+			});
+			const changemakerSourceId = (
+				await createSource({
+					organizationId: changemaker.id,
+					label: `${changemaker.name} source`,
+				})
+			).id;
+			const funder = await createOrUpdateFunder({
+				shortCode: 'funder_5393',
+				name: 'Funder 5393',
+			});
+			const funderSourceId = (
+				await createSource({
+					funderShortCode: funder.shortCode,
+					label: `${funder.name} source`,
+				})
+			).id;
+			// Set up a base field associated with one opportunity, one changemaker, and two responses.
+			const baseFieldId = (
+				await createBaseField({
+					label: 'Fifty three ninety nine',
+					shortCode: 'fifty_three_ninety_nine',
+					description: 'Five thousand three hundred ninety nine.',
+					dataType: BaseFieldDataType.PHONE_NUMBER,
+					scope: BaseFieldScope.ORGANIZATION,
+				})
+			).id;
+			const systemUser = await loadSystemUser();
+			const opportunity = await createOpportunity({
+				title: `${funder.name} opportunity`,
+			});
+			const proposalId = (
+				await createProposal({
+					opportunityId: opportunity.id,
+					externalId: `Proposal to ${opportunity.title}`,
+					createdBy: systemUser.keycloakUserId,
+				})
+			).id;
+			await createOrganizationProposal({
+				organizationId: changemaker.id,
+				proposalId,
+			});
+			const applicationFormIdChangemakerEarliest = (
+				await createApplicationForm({
+					opportunityId: opportunity.id,
+				})
+			).id;
+			// Set up older field value that is from the changemaker. We'll expect this to be returned.
+			const changemakerEarliestValue = await createProposalFieldValue({
+				proposalVersionId: (
+					await createProposalVersion({
+						proposalId,
+						applicationFormId: applicationFormIdChangemakerEarliest,
+						sourceId: changemakerSourceId,
+						createdBy: systemUser.keycloakUserId,
+					})
+				).id,
+				applicationFormFieldId: (
+					await createApplicationFormField({
+						label: 'Org phone',
+						applicationFormId: applicationFormIdChangemakerEarliest,
+						baseFieldId,
+						position: 5407,
+					})
+				).id,
+				position: 5413,
+				value: '+15555555555',
+				isValid: true,
+			});
+			const applicationFormIdFunderLatest = (
+				await createApplicationForm({
+					opportunityId: opportunity.id,
+				})
+			).id;
+			// Set up newer field value that is from the funder.
+			await createProposalFieldValue({
+				proposalVersionId: (
+					await createProposalVersion({
+						proposalId,
+						applicationFormId: applicationFormIdFunderLatest,
+						sourceId: funderSourceId,
+						createdBy: systemUser.keycloakUserId,
+					})
+				).id,
+				applicationFormFieldId: (
+					await createApplicationFormField({
+						label: 'Phone contact',
+						applicationFormId: applicationFormIdFunderLatest,
+						baseFieldId,
+						position: 5417,
+					})
+				).id,
+				position: 5419,
+				value: '+16666666666',
+				isValid: true,
+			});
+			await request(app)
+				.get(`/organizations/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) =>
+					expect(res.body).toEqual({
+						...changemaker,
+						createdAt: expectTimestamp,
+						fields: [changemakerEarliestValue],
 					}),
 				);
 		});

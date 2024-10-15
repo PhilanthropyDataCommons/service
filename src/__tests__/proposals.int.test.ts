@@ -5,8 +5,8 @@ import {
 	createApplicationFormField,
 	createBaseField,
 	createOpportunity,
-	createOrganization,
-	createOrganizationProposal,
+	createChangemaker,
+	createChangemakerProposal,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
@@ -177,7 +177,7 @@ describe('/proposals', () => {
 			});
 		});
 
-		it('returns a subset of proposals present in the database when an organization filter is provided', async () => {
+		it('returns a subset of proposals present in the database when a changemaker filter is provided', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
@@ -194,16 +194,16 @@ describe('/proposals', () => {
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			const organization = await createOrganization({
+			const changemaker = await createChangemaker({
 				taxId: '123-123-123',
 				name: 'Canadian Company',
 			});
-			await createOrganizationProposal({
-				organizationId: organization.id,
+			await createChangemakerProposal({
+				changemakerId: changemaker.id,
 				proposalId: proposal.id,
 			});
 			const response = await request(app)
-				.get(`/proposals?organization=${organization.id}`)
+				.get(`/proposals?changemaker=${changemaker.id}`)
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
@@ -221,9 +221,9 @@ describe('/proposals', () => {
 			});
 		});
 
-		it('returns a 400 error if an invalid organization filter is provided', async () => {
+		it('returns a 400 error if an invalid changemaker filter is provided', async () => {
 			const response = await request(app)
-				.get(`/proposals?organization=foo`)
+				.get(`/proposals?changemaker=foo`)
 				.set(authHeader)
 				.expect(400);
 			expect(response.body).toMatchObject({

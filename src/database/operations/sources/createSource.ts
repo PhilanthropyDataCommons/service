@@ -13,14 +13,14 @@ export const createSource = async (
 		'funderShortCode' in createValues
 			? createValues.funderShortCode
 			: undefined;
-	const organizationId =
-		'organizationId' in createValues ? createValues.organizationId : undefined;
+	const changemakerId =
+		'changemakerId' in createValues ? createValues.changemakerId : undefined;
 
 	const result = await db.sql<JsonResultSet<Source>>('sources.insertOne', {
 		label,
 		dataProviderShortCode,
 		funderShortCode,
-		organizationId,
+		changemakerId,
 	});
 
 	const { object } = result.rows[0] ?? {};

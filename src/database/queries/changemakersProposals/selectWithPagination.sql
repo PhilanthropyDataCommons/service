@@ -1,11 +1,11 @@
-SELECT organization_proposal_to_json(organizations_proposals.*) as "object"
-FROM organizations_proposals
+SELECT changemaker_proposal_to_json(changemakers_proposals.*) as "object"
+FROM changemakers_proposals
 WHERE
   CASE
-    WHEN :organizationId::integer IS NULL THEN
+    WHEN :changemakerId::integer IS NULL THEN
       true
     ELSE
-      organization_id = :organizationId
+      changemaker_id = :changemakerId
     END
   AND CASE
     WHEN :proposalId::integer IS NULL THEN

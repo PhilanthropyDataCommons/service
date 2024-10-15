@@ -2,8 +2,8 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Philanthropy Data Commons API",
-		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for organizations seeking grants.",
-		"version": "0.14.0",
+		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for changemakers seeking grants.",
+		"version": "0.15.0",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -52,14 +52,14 @@
 				"required": false,
 				"description": "A web-search formatted string to select specific entities returned."
 			},
-			"organizationParam": {
+			"changemakerParam": {
 				"schema": {
 					"type": "integer"
 				},
 				"in": "query",
-				"name": "organization",
+				"name": "changemaker",
 				"required": false,
-				"description": "A reference (ID) to an existing organization entity."
+				"description": "A reference (ID) to an existing changemaker entity."
 			},
 			"proposalParam": {
 				"schema": {
@@ -231,7 +231,7 @@
 				},
 				"required": ["id", "name", "createdAt"]
 			},
-			"Organization": {
+			"Changemaker": {
 				"type": "object",
 				"properties": {
 					"id": {
@@ -255,18 +255,18 @@
 				},
 				"required": ["id", "taxId", "name", "createdAt"]
 			},
-			"OrganizationProposal": {
+			"ChangemakerProposal": {
 				"type": "object",
 				"properties": {
 					"id": {
 						"type": "integer",
 						"readOnly": true
 					},
-					"organizationId": {
+					"changemakerId": {
 						"type": "integer"
 					},
-					"organization": {
-						"$ref": "#/components/schemas/Organization",
+					"changemaker": {
+						"$ref": "#/components/schemas/Changemaker",
 						"readOnly": true
 					},
 					"proposalId": {
@@ -284,8 +284,8 @@
 				},
 				"required": [
 					"id",
-					"organizationId",
-					"organization",
+					"changemakerId",
+					"changemaker",
 					"proposalId",
 					"proposal",
 					"createdAt"
@@ -605,7 +605,7 @@
 					},
 					"scope": {
 						"type": "string",
-						"enum": ["proposal", "organization"]
+						"enum": ["proposal", "changemaker"]
 					},
 					"createdAt": {
 						"type": "string",
@@ -821,7 +821,7 @@
 					}
 				]
 			},
-			"OrganizationBundle": {
+			"ChangemakerBundle": {
 				"allOf": [
 					{
 						"$ref": "#/components/schemas/Bundle"
@@ -832,7 +832,7 @@
 							"entries": {
 								"type": "array",
 								"items": {
-									"$ref": "#/components/schemas/Organization"
+									"$ref": "#/components/schemas/Changemaker"
 								}
 							}
 						},
@@ -840,7 +840,7 @@
 					}
 				]
 			},
-			"OrganizationProposalBundle": {
+			"ChangemakerProposalBundle": {
 				"allOf": [
 					{
 						"$ref": "#/components/schemas/Bundle"
@@ -851,7 +851,7 @@
 							"entries": {
 								"type": "array",
 								"items": {
-									"$ref": "#/components/schemas/OrganizationProposal"
+									"$ref": "#/components/schemas/ChangemakerProposal"
 								}
 							}
 						},
@@ -933,15 +933,15 @@
 							{
 								"type": "object",
 								"properties": {
-									"organizationId": {
+									"changemakerId": {
 										"type": "number"
 									},
-									"organization": {
-										"$ref": "#/components/schemas/Organization",
+									"changemaker": {
+										"$ref": "#/components/schemas/Changemaker",
 										"readOnly": true
 									}
 								},
-								"required": ["organizationId", "organization"]
+								"required": ["changemakerId", "changemaker"]
 							}
 						]
 					}
@@ -1186,11 +1186,11 @@
 				}
 			}
 		},
-		"/organizationProposals": {
+		"/changemakerProposals": {
 			"get": {
-				"operationId": "getOrganizationProposals",
-				"summary": "Gets a list of OrganizationProposals.",
-				"tags": ["Organization Proposals"],
+				"operationId": "getChangemakerProposals",
+				"summary": "Gets a list of ChangemakerProposals.",
+				"tags": ["Changemaker Proposals"],
 				"security": [
 					{
 						"auth": []
@@ -1199,16 +1199,16 @@
 				"parameters": [
 					{ "$ref": "#/components/parameters/pageParam" },
 					{ "$ref": "#/components/parameters/countParam" },
-					{ "$ref": "#/components/parameters/organizationParam" },
+					{ "$ref": "#/components/parameters/changemakerParam" },
 					{ "$ref": "#/components/parameters/proposalParam" }
 				],
 				"responses": {
 					"200": {
-						"description": "The requested OrganizationProposals.",
+						"description": "The requested ChangemakerProposals.",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/OrganizationProposalBundle"
+									"$ref": "#/components/schemas/ChangemakerProposalBundle"
 								}
 							}
 						}
@@ -1226,9 +1226,9 @@
 				}
 			},
 			"post": {
-				"operationId": "addOrganizationProposal",
-				"summary": "Adds a new OrganizationProposal associated with a specific organization.",
-				"tags": ["Organization Proposals"],
+				"operationId": "addChangemakerProposal",
+				"summary": "Adds a new ChangemakerProposal associated with a specific changemaker.",
+				"tags": ["Changemaker Proposals"],
 				"security": [
 					{
 						"auth": []
@@ -1239,18 +1239,18 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/OrganizationProposal"
+								"$ref": "#/components/schemas/ChangemakerProposal"
 							}
 						}
 					}
 				},
 				"responses": {
 					"201": {
-						"description": "The new OrganizationProposal",
+						"description": "The new ChangemakerProposal",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/OrganizationProposal"
+									"$ref": "#/components/schemas/ChangemakerProposal"
 								}
 							}
 						}
@@ -1268,11 +1268,11 @@
 				}
 			}
 		},
-		"/organizations": {
+		"/changemakers": {
 			"get": {
-				"operationId": "getOrganizations",
-				"summary": "Gets a list of organizations.",
-				"tags": ["Organizations"],
+				"operationId": "getChangemakers",
+				"summary": "Gets a list of changemakers.",
+				"tags": ["Changemakers"],
 				"security": [
 					{
 						"auth": []
@@ -1285,11 +1285,11 @@
 				],
 				"responses": {
 					"200": {
-						"description": "Organizations currently registered in the PDC.",
+						"description": "Changemakers currently registered in the PDC.",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/OrganizationBundle"
+									"$ref": "#/components/schemas/ChangemakerBundle"
 								}
 							}
 						}
@@ -1307,9 +1307,9 @@
 				}
 			},
 			"post": {
-				"operationId": "addOrganization",
-				"summary": "Adds a new organization.",
-				"tags": ["Organizations"],
+				"operationId": "addChangemaker",
+				"summary": "Adds a new changemaker.",
+				"tags": ["Changemakers"],
 				"security": [
 					{
 						"auth": []
@@ -1320,18 +1320,18 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/Organization"
+								"$ref": "#/components/schemas/Changemaker"
 							}
 						}
 					}
 				},
 				"responses": {
 					"201": {
-						"description": "The new organization that was created",
+						"description": "The new changemaker that was created",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Organization"
+									"$ref": "#/components/schemas/Changemaker"
 								}
 							}
 						}
@@ -1349,11 +1349,11 @@
 				}
 			}
 		},
-		"/organizations/{organizationId}": {
+		"/changemakers/{changemakerId}": {
 			"get": {
-				"operationId": "getOrganizationById",
-				"summary": "Gets a specific organization.",
-				"tags": ["Organizations"],
+				"operationId": "getChangemakerById",
+				"summary": "Gets a specific changemaker.",
+				"tags": ["Changemakers"],
 				"security": [
 					{
 						"auth": []
@@ -1361,8 +1361,8 @@
 				],
 				"parameters": [
 					{
-						"name": "organizationId",
-						"description": "The PDC-generated ID of an organization.",
+						"name": "changemakerId",
+						"description": "The PDC-generated ID of a changemaker.",
 						"in": "path",
 						"required": true,
 						"schema": {
@@ -1372,11 +1372,11 @@
 				],
 				"responses": {
 					"200": {
-						"description": "The requested organization.",
+						"description": "The requested changemaker.",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Organization"
+									"$ref": "#/components/schemas/Changemaker"
 								}
 							}
 						}
@@ -1452,7 +1452,7 @@
 					{ "$ref": "#/components/parameters/pageParam" },
 					{ "$ref": "#/components/parameters/countParam" },
 					{ "$ref": "#/components/parameters/searchParam" },
-					{ "$ref": "#/components/parameters/organizationParam" },
+					{ "$ref": "#/components/parameters/changemakerParam" },
 					{ "$ref": "#/components/parameters/createdByParam" }
 				],
 				"responses": {

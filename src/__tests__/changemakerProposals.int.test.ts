@@ -2,37 +2,37 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	createOpportunity,
-	createOrganization,
-	createOrganizationProposal,
+	createChangemaker,
+	createChangemakerProposal,
 	createProposal,
 	loadTableMetrics,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
-const insertTestOrganizations = async () => {
-	await createOrganization({
+const insertTestChangemakers = async () => {
+	await createChangemaker({
 		taxId: '11-1111111',
 		name: 'Example Inc.',
 	});
-	await createOrganization({
+	await createChangemaker({
 		taxId: '22-2222222',
 		name: 'Another Inc.',
 	});
 };
 
-describe('/organizationProposals', () => {
+describe('/changemakerProposals', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
-			await request(app).get('/organizationProposals').expect(401);
+			await request(app).get('/changemakerProposals').expect(401);
 		});
 
-		it('returns the OrganizationProposals for the specified organization', async () => {
+		it('returns the ChangemakerProposals for the specified changemaker', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
-			await insertTestOrganizations();
+			await insertTestChangemakers();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
@@ -43,24 +43,24 @@ describe('/organizationProposals', () => {
 				externalId: '2',
 				createdBy: testUser.keycloakUserId,
 			});
-			await createOrganizationProposal({
-				organizationId: 1,
+			await createChangemakerProposal({
+				changemakerId: 1,
 				proposalId: 1,
 			});
-			await createOrganizationProposal({
-				organizationId: 1,
+			await createChangemakerProposal({
+				changemakerId: 1,
 				proposalId: 2,
 			});
 			const result = await request(app)
-				.get(`/organizationProposals?organization=1`)
+				.get(`/changemakerProposals?changemaker=1`)
 				.set(authHeader)
 				.expect(200);
 			expect(result.body).toEqual({
 				entries: [
 					{
 						id: 2,
-						organizationId: 1,
-						organization: {
+						changemakerId: 1,
+						changemaker: {
 							id: 1,
 							name: 'Example Inc.',
 							taxId: '11-1111111',
@@ -80,8 +80,8 @@ describe('/organizationProposals', () => {
 					},
 					{
 						id: 1,
-						organizationId: 1,
-						organization: {
+						changemakerId: 1,
+						changemaker: {
 							id: 1,
 							name: 'Example Inc.',
 							taxId: '11-1111111',
@@ -104,12 +104,12 @@ describe('/organizationProposals', () => {
 			});
 		});
 
-		it('returns the ProposalOrganizations for the specified proposal', async () => {
+		it('returns the ProposalChangemakers for the specified proposal', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
-			await insertTestOrganizations();
+			await insertTestChangemakers();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
@@ -120,24 +120,24 @@ describe('/organizationProposals', () => {
 				externalId: '2',
 				createdBy: testUser.keycloakUserId,
 			});
-			await createOrganizationProposal({
-				organizationId: 1,
+			await createChangemakerProposal({
+				changemakerId: 1,
 				proposalId: 1,
 			});
-			await createOrganizationProposal({
-				organizationId: 2,
+			await createChangemakerProposal({
+				changemakerId: 2,
 				proposalId: 2,
 			});
 			const result = await request(app)
-				.get(`/organizationProposals?proposal=1`)
+				.get(`/changemakerProposals?proposal=1`)
 				.set(authHeader)
 				.expect(200);
 			expect(result.body).toEqual({
 				entries: [
 					{
 						id: 1,
-						organizationId: 1,
-						organization: {
+						changemakerId: 1,
+						changemaker: {
 							id: 1,
 							name: 'Example Inc.',
 							taxId: '11-1111111',
@@ -161,9 +161,9 @@ describe('/organizationProposals', () => {
 		});
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
-			await insertTestOrganizations();
+			await insertTestChangemakers();
 			await request(app)
-				.get('/organizationProposals?organization=foo')
+				.get('/changemakerProposals?changemaker=foo')
 				.set(authHeader)
 				.expect(400);
 		});
@@ -171,36 +171,36 @@ describe('/organizationProposals', () => {
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
-			await request(app).post('/organizationProposals').expect(401);
+			await request(app).post('/changemakerProposals').expect(401);
 		});
 
-		it('creates exactly one OrganizationProposal', async () => {
+		it('creates exactly one ChangemakerProposal', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
-			await insertTestOrganizations();
+			await insertTestChangemakers();
 			const testUser = await loadTestUser();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
 			});
-			const before = await loadTableMetrics('organizations_proposals');
+			const before = await loadTableMetrics('changemakers_proposals');
 			const result = await request(app)
-				.post('/organizationProposals')
+				.post('/changemakerProposals')
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					organizationId: 1,
+					changemakerId: 1,
 					proposalId: 1,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('organizations_proposals');
+			const after = await loadTableMetrics('changemakers_proposals');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: 1,
-				organizationId: 1,
-				organization: {
+				changemakerId: 1,
+				changemaker: {
 					id: 1,
 					name: 'Example Inc.',
 					taxId: '11-1111111',
@@ -226,18 +226,18 @@ describe('/organizationProposals', () => {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
-			await insertTestOrganizations();
+			await insertTestChangemakers();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
 			});
 			const result = await request(app)
-				.post('/organizationProposals')
+				.post('/changemakerProposals')
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					organizationId: 1,
+					changemakerId: 1,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -246,19 +246,19 @@ describe('/organizationProposals', () => {
 			});
 		});
 
-		it('returns 400 bad request when no organizationId is sent', async () => {
+		it('returns 400 bad request when no changemakerId is sent', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
-			await insertTestOrganizations();
+			await insertTestChangemakers();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
 			});
 			const result = await request(app)
-				.post('/organizationProposals')
+				.post('/changemakerProposals')
 				.type('application/json')
 				.set(authHeader)
 				.send({
@@ -275,13 +275,13 @@ describe('/organizationProposals', () => {
 			await createOpportunity({
 				title: '🔥',
 			});
-			await insertTestOrganizations();
+			await insertTestChangemakers();
 			const result = await request(app)
-				.post('/organizationProposals')
+				.post('/changemakerProposals')
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					organizationId: 1,
+					changemakerId: 1,
 					proposalId: 42,
 				})
 				.expect(422);
@@ -290,7 +290,7 @@ describe('/organizationProposals', () => {
 			});
 		});
 
-		it('returns 422 Conflict when a non-existent organization is sent', async () => {
+		it('returns 422 Conflict when a non-existent changemaker is sent', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
@@ -301,11 +301,11 @@ describe('/organizationProposals', () => {
 				createdBy: testUser.keycloakUserId,
 			});
 			const result = await request(app)
-				.post('/organizationProposals')
+				.post('/changemakerProposals')
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					organizationId: 42,
+					changemakerId: 42,
 					proposalId: 1,
 				})
 				.expect(422);
@@ -314,27 +314,27 @@ describe('/organizationProposals', () => {
 			});
 		});
 
-		it('returns 409 Conflict when attempting to create a duplicate OrganizationProposal', async () => {
+		it('returns 409 Conflict when attempting to create a duplicate ChangemakerProposal', async () => {
 			await createOpportunity({
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
-			await insertTestOrganizations();
+			await insertTestChangemakers();
 			await createProposal({
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
 			});
-			await createOrganizationProposal({
-				organizationId: 1,
+			await createChangemakerProposal({
+				changemakerId: 1,
 				proposalId: 1,
 			});
 			const result = await request(app)
-				.post('/organizationProposals')
+				.post('/changemakerProposals')
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					organizationId: 1,
+					changemakerId: 1,
 					proposalId: 1,
 				})
 				.expect(409);

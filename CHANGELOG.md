@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgraded to use OpenAPI Specification 3.1.
 
+## 0.15.0 2024-10-14
+
+### Changed
+
+- `Organization` is now `Changemaker`.
+- `OrganizationProposal` is now `ChangemakerProposal`.
+
 ## 0.14.0 2024-10-11
 
 ### Changed

@@ -1,6 +1,6 @@
 import { ajv } from '../ajv';
 import { Funder } from './Funder';
-import { Organization } from './Organization';
+import { Changemaker } from './Changemaker';
 import { DataProvider } from './DataProvider';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
@@ -21,12 +21,12 @@ interface FunderSource extends SourceBase {
 	readonly funder: Funder;
 }
 
-interface OrganizationSource extends SourceBase {
-	organizationId: number;
-	readonly organization: Organization;
+interface ChangemakerSource extends SourceBase {
+	changemakerId: number;
+	readonly changemaker: Changemaker;
 }
 
-type Source = DataProviderSource | FunderSource | OrganizationSource;
+type Source = DataProviderSource | FunderSource | ChangemakerSource;
 
 type WritableSource = Writable<Source>;
 
@@ -61,9 +61,9 @@ const writableSourceSchema: JSONSchemaType<WritableSource> = {
 				{
 					type: 'object',
 					properties: {
-						organizationId: { type: 'number' },
+						changemakerId: { type: 'number' },
 					},
-					required: ['organizationId'],
+					required: ['changemakerId'],
 				},
 			],
 		},

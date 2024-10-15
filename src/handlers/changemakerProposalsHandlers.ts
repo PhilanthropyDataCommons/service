@@ -1,33 +1,33 @@
 import {
-	createOrganizationProposal,
+	createChangemakerProposal,
 	getLimitValues,
-	loadOrganizationProposalBundle,
+	loadChangemakerProposalBundle,
 } from '../database';
 import {
 	isTinyPgErrorWithQueryContext,
-	isWritableOrganizationProposal,
+	isWritableChangemakerProposal,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import {
-	extractOrganizationParameters,
+	extractChangemakerParameters,
 	extractProposalParameters,
 	extractPaginationParameters,
 } from '../queryParameters';
 import type { Request, Response, NextFunction } from 'express';
 
-const getOrganizationProposals = (
+const getChangemakerProposals = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	const { organizationId } = extractOrganizationParameters(req);
+	const { changemakerId } = extractChangemakerParameters(req);
 	const { proposalId } = extractProposalParameters(req);
 
 	(async () => {
-		const organizationProposalBundle = await loadOrganizationProposalBundle(
-			organizationId,
+		const changemakerProposalBundle = await loadChangemakerProposalBundle(
+			changemakerId,
 			proposalId,
 			limit,
 			offset,
@@ -35,50 +35,45 @@ const getOrganizationProposals = (
 		res
 			.status(200)
 			.contentType('application/json')
-			.send(organizationProposalBundle);
+			.send(changemakerProposalBundle);
 	})().catch((error: unknown) => {
 		if (isTinyPgErrorWithQueryContext(error)) {
-			next(
-				new DatabaseError('Error retrieving organization proposals.', error),
-			);
+			next(new DatabaseError('Error retrieving changemaker proposals.', error));
 			return;
 		}
 		next(error);
 	});
 };
 
-const postOrganizationProposal = (
+const postChangemakerProposal = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
 ): void => {
-	if (!isWritableOrganizationProposal(req.body)) {
+	if (!isWritableChangemakerProposal(req.body)) {
 		next(
 			new InputValidationError(
 				'Invalid request body.',
-				isWritableOrganizationProposal.errors ?? [],
+				isWritableChangemakerProposal.errors ?? [],
 			),
 		);
 		return;
 	}
 
-	createOrganizationProposal(req.body)
-		.then((organizationProposal) => {
-			res
-				.status(201)
-				.contentType('application/json')
-				.send(organizationProposal);
+	createChangemakerProposal(req.body)
+		.then((changemakerProposal) => {
+			res.status(201).contentType('application/json').send(changemakerProposal);
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating organization proposal.', error));
+				next(new DatabaseError('Error creating changemaker proposal.', error));
 				return;
 			}
 			next(error);
 		});
 };
 
-export const organizationProposalsHandlers = {
-	getOrganizationProposals,
-	postOrganizationProposal,
+export const changemakerProposalsHandlers = {
+	getChangemakerProposals,
+	postChangemakerProposal,
 };

@@ -12,14 +12,14 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	createOpportunity,
-	createOrganization,
-	createOrganizationProposal,
+	createChangemaker,
+	createChangemakerProposal,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
 	loadBaseFields,
 	loadBulkUpload,
-	loadOrganizationByTaxId,
+	loadChangemakerByTaxId,
 	updateBulkUpload,
 } from '../database/operations';
 import { BulkUploadStatus, isProcessBulkUploadJobPayload } from '../types';
@@ -32,14 +32,14 @@ import type {
 	ApplicationFormField,
 	BulkUpload,
 	Opportunity,
-	Organization,
+	Changemaker,
 	ProposalFieldValue,
-	WritableOrganization,
+	WritableChangemaker,
 } from '../types';
 
 const { S3_BUCKET } = requireEnv('S3_BUCKET');
-const ORGANIZATION_TAX_ID_SHORT_CODE = 'organization_tax_id';
-const ORGANIZATION_NAME_SHORT_CODE = 'organization_name';
+const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
+const CHANGEMAKER_NAME_SHORT_CODE = 'organization_name';
 
 const downloadS3ObjectToTemporaryStorage = async (
 	key: string,
@@ -189,20 +189,20 @@ const createApplicationFormFieldsForBulkUpload = async (
 const getProcessedKey = (bulkUpload: BulkUpload): string =>
 	`${S3_BULK_UPLOADS_KEY_PREFIX}/${bulkUpload.id}`;
 
-const getOrganizationTaxIdIndex = (columns: string[]): number =>
-	columns.indexOf(ORGANIZATION_TAX_ID_SHORT_CODE);
+const getChangemakerTaxIdIndex = (columns: string[]): number =>
+	columns.indexOf(CHANGEMAKER_TAX_ID_SHORT_CODE);
 
-const getOrganizationNameIndex = (columns: string[]): number =>
-	columns.indexOf(ORGANIZATION_NAME_SHORT_CODE);
+const getChangemakerNameIndex = (columns: string[]): number =>
+	columns.indexOf(CHANGEMAKER_NAME_SHORT_CODE);
 
-const createOrLoadOrganization = async (
-	writeValues: Omit<WritableOrganization, 'name'> & { name?: string },
-): Promise<Organization | undefined> => {
+const createOrLoadChangemaker = async (
+	writeValues: Omit<WritableChangemaker, 'name'> & { name?: string },
+): Promise<Changemaker | undefined> => {
 	try {
-		return await loadOrganizationByTaxId(writeValues.taxId);
+		return await loadChangemakerByTaxId(writeValues.taxId);
 	} catch {
 		if (writeValues.name !== undefined) {
-			return createOrganization({
+			return createChangemaker({
 				...writeValues,
 				name: writeValues.name, // This looks silly, but TypeScript isn't guarding `writeValues`, just `writeValues.name`.
 			});
@@ -258,8 +258,8 @@ export const processBulkUpload = async (
 	}
 
 	const shortCodes = await loadShortCodesFromBulkUploadCsv(bulkUploadFile.path);
-	const organizationNameIndex = getOrganizationNameIndex(shortCodes);
-	const organizationTaxIdIndex = getOrganizationTaxIdIndex(shortCodes);
+	const changemakerNameIndex = getChangemakerNameIndex(shortCodes);
+	const changemakerTaxIdIndex = getChangemakerTaxIdIndex(shortCodes);
 
 	try {
 		await assertBulkUploadCsvIsValid(bulkUploadFile.path);
@@ -293,17 +293,17 @@ export const processBulkUpload = async (
 				createdBy: bulkUpload.createdBy,
 			});
 
-			const organizationName = record[organizationNameIndex];
-			const organizationTaxId = record[organizationTaxIdIndex];
-			if (organizationTaxId !== undefined) {
-				const organization = await createOrLoadOrganization({
-					name: organizationName,
-					taxId: organizationTaxId,
+			const changemakerName = record[changemakerNameIndex];
+			const changemakerTaxId = record[changemakerTaxIdIndex];
+			if (changemakerTaxId !== undefined) {
+				const changemaker = await createOrLoadChangemaker({
+					name: changemakerName,
+					taxId: changemakerTaxId,
 				});
 
-				if (organization !== undefined) {
-					await createOrganizationProposal({
-						organizationId: organization.id,
+				if (changemaker !== undefined) {
+					await createChangemakerProposal({
+						changemakerId: changemaker.id,
 						proposalId: proposal.id,
 					});
 				}

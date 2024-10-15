@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	createOrganization,
+	createChangemaker,
 	createOrUpdateDataProvider,
 	createOrUpdateFunder,
 	createSource,
@@ -35,13 +35,13 @@ describe('/sources', () => {
 
 		it('returns all sources present in the database', async () => {
 			const systemSource = await loadSystemSource();
-			const organization = await createOrganization({
+			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 			});
 			const source = await createSource({
 				label: 'Example Inc.',
-				organizationId: organization.id,
+				changemakerId: changemaker.id,
 			});
 			const response = await agent.get('/sources').set(authHeader).expect(200);
 			expect(response.body).toEqual({
@@ -57,13 +57,13 @@ describe('/sources', () => {
 		});
 
 		it('returns exactly one source selected by id', async () => {
-			const organization = await createOrganization({
+			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 			});
 			const source = await createSource({
 				label: 'Example Inc.',
-				organizationId: organization.id,
+				changemakerId: changemaker.id,
 			});
 
 			const response = await agent
@@ -93,13 +93,13 @@ describe('/sources', () => {
 		});
 
 		it('returns 404 when id is not found', async () => {
-			const organization = await createOrganization({
+			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 			});
 			await createSource({
 				label: 'not to be returned',
-				organizationId: organization.id,
+				changemakerId: changemaker.id,
 			});
 			await agent.get('/sources/9001').set(authHeader).expect(404);
 		});
@@ -114,8 +114,8 @@ describe('/sources', () => {
 			await agent.post('/sources').set(authHeader).expect(401);
 		});
 
-		it('creates and returns exactly one organization source', async () => {
-			const organization = await createOrganization({
+		it('creates and returns exactly one changemaker source', async () => {
+			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 			});
@@ -126,7 +126,7 @@ describe('/sources', () => {
 				.set(adminUserAuthHeader)
 				.send({
 					label: 'Example Corp',
-					organizationId: organization.id,
+					changemakerId: changemaker.id,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('sources');
@@ -134,8 +134,8 @@ describe('/sources', () => {
 			expect(result.body).toMatchObject({
 				id: 2,
 				label: 'Example Corp',
-				organizationId: organization.id,
-				organization,
+				changemakerId: changemaker.id,
+				changemaker,
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(2);
@@ -196,7 +196,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 400 bad request when no label sent', async () => {
-			const organization = await createOrganization({
+			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 			});
@@ -205,7 +205,7 @@ describe('/sources', () => {
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
-					organizationId: organization.id,
+					changemakerId: changemaker.id,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({

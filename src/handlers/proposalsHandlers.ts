@@ -18,7 +18,7 @@ import {
 } from '../errors';
 import {
 	extractCreatedByParameters,
-	extractOrganizationParameters,
+	extractChangemakerParameters,
 	extractPaginationParameters,
 	extractSearchParameters,
 } from '../queryParameters';
@@ -36,14 +36,14 @@ const getProposals = (
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { search } = extractSearchParameters(req);
-	const { organizationId } = extractOrganizationParameters(req);
+	const { changemakerId } = extractChangemakerParameters(req);
 	const { createdBy } = extractCreatedByParameters(req);
 
 	(async () => {
 		const proposalBundle = await loadProposalBundle(
 			req,
 			createdBy,
-			organizationId,
+			changemakerId,
 			search,
 			limit,
 			offset,

@@ -7,8 +7,8 @@ import {
 	loadApplicationFormBundle,
 	createBulkUpload,
 	loadSystemUser,
-	loadOrganizationBundle,
-	loadOrganizationProposalBundle,
+	loadChangemakerBundle,
+	loadChangemakerProposalBundle,
 	loadOpportunityBundle,
 	loadSystemSource,
 } from '../../database';
@@ -25,7 +25,7 @@ import { expectTimestamp, NO_LIMIT, NO_OFFSET } from '../../test/utils';
 import type {
 	BulkUpload,
 	InternallyWritableBulkUpload,
-	Organization,
+	Changemaker,
 } from '../../types';
 
 const { S3_BUCKET, S3_PATH_STYLE } = requireEnv('S3_BUCKET', 'S3_PATH_STYLE');
@@ -537,24 +537,24 @@ describe('processBulkUpload', () => {
 			total: 2,
 		});
 
-		const organizationBundle = await loadOrganizationBundle(
+		const changemakerBundle = await loadChangemakerBundle(
 			undefined,
 			undefined,
 			NO_LIMIT,
 			NO_OFFSET,
 		);
-		expect(organizationBundle).toEqual({
+		expect(changemakerBundle).toEqual({
 			entries: [],
 			total: 0,
 		});
 
-		const organizationProposalBundle = await loadOrganizationProposalBundle(
+		const changemakerProposalBundle = await loadChangemakerProposalBundle(
 			undefined,
 			undefined,
 			NO_LIMIT,
 			NO_OFFSET,
 		);
-		expect(organizationProposalBundle).toEqual({
+		expect(changemakerProposalBundle).toEqual({
 			entries: [],
 			total: 0,
 		});
@@ -565,13 +565,13 @@ describe('processBulkUpload', () => {
 		expect(requests.deleteRequest.isDone()).toEqual(true);
 	});
 
-	it('should create organizations and organization-proposal relationships', async () => {
+	it('should create changemakers and changemaker-proposal relationships', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUpload = await createTestBulkUpload({ sourceKey });
 		await mockS3ResponsesForBulkUploadProcessing(
 			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/validCsvTemplateWithOrganizations.csv`,
+			`${__dirname}/fixtures/processBulkUpload/validCsvTemplateWithChangemakers.csv`,
 		);
 
 		await processBulkUpload(
@@ -581,21 +581,21 @@ describe('processBulkUpload', () => {
 			getMockJobHelpers(),
 		);
 
-		const organizationBundle = await loadOrganizationBundle(
+		const changemakerBundle = await loadChangemakerBundle(
 			undefined,
 			undefined,
 			NO_LIMIT,
 			NO_OFFSET,
 		);
 
-		const organizationProposalBundle = await loadOrganizationProposalBundle(
+		const changemakerProposalBundle = await loadChangemakerProposalBundle(
 			undefined,
 			undefined,
 			NO_LIMIT,
 			NO_OFFSET,
 		);
 
-		expect(organizationBundle).toEqual({
+		expect(changemakerBundle).toEqual({
 			entries: [
 				{
 					createdAt: expectTimestamp,
@@ -607,22 +607,22 @@ describe('processBulkUpload', () => {
 			],
 			total: 1,
 		});
-		expect(organizationProposalBundle).toEqual({
+		expect(changemakerProposalBundle).toEqual({
 			entries: [
 				{
 					createdAt: expectTimestamp,
 					id: 2,
-					organizationId: 1,
+					changemakerId: 1,
 					proposalId: 2,
-					organization: expect.any(Object) as Organization,
+					changemaker: expect.any(Object) as Changemaker,
 					proposal: expect.any(Object) as Proposal,
 				},
 				{
 					createdAt: expectTimestamp,
 					id: 1,
-					organizationId: 1,
+					changemakerId: 1,
 					proposalId: 1,
-					organization: expect.any(Object) as Organization,
+					changemaker: expect.any(Object) as Changemaker,
 					proposal: expect.any(Object) as Proposal,
 				},
 			],

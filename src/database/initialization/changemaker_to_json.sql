@@ -1,6 +1,6 @@
-SELECT drop_function('organization_to_json');
+SELECT drop_function('changemaker_to_json');
 
-CREATE FUNCTION organization_to_json(organization organizations, keycloakUserId UUID DEFAULT NULL)
+CREATE FUNCTION changemaker_to_json(changemaker changemakers, keycloakUserId UUID DEFAULT NULL)
 RETURNS JSONB AS $$
 DECLARE
   proposal_field_values_json JSONB;
@@ -21,11 +21,11 @@ BEGIN
       ON aff.base_field_id = bf.id
     INNER JOIN proposal_versions pv
       ON pfv.proposal_version_id = pv.id
-    INNER JOIN organizations_proposals op
+    INNER JOIN changemakers_proposals op
       ON pv.proposal_id = op.proposal_id
     INNER JOIN sources s
       ON pv.source_id = s.id
-    WHERE op.organization_id = organization.id
+    WHERE op.changemaker_id = changemaker.id
       AND bf.scope = 'organization'
       AND pfv.is_valid
       -- Guard against possible removal of NON NULL constraint on users table:
@@ -36,8 +36,8 @@ BEGIN
         -- The three "Source" sorts are as a class, not on an individual column within the class.
         -- In other words, if there are many funders that sourced data, they are treated equally
         -- until further sorted by the remaining (non-Source) sort clauses.
-        -- Organization sourced data takes priority over funders and data platform providers.
-        s.organization_id IS NOT NULL DESC,
+        -- Changemaker sourced data takes priority over funders and data platform providers.
+        s.changemaker_id IS NOT NULL DESC,
         -- Funder sourced data takes priority over data platform providers.
         s.funder_short_code IS NOT NULL DESC,
         -- Data platform provider sourced data takes priority over old, default-pdc-sourced data.
@@ -46,10 +46,10 @@ BEGIN
         pfv.created_at DESC
   ) AS pfv_inner;
   RETURN jsonb_build_object(
-    'id', organization.id,
-    'taxId', organization.tax_id,
-    'name', organization.name,
-    'createdAt', organization.created_at,
+    'id', changemaker.id,
+    'taxId', changemaker.tax_id,
+    'name', changemaker.name,
+    'createdAt', changemaker.created_at,
     'fields', COALESCE(proposal_field_values_json, '[]'::JSONB)
   );
 END;

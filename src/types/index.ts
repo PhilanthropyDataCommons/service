@@ -29,6 +29,7 @@ export * from './ProposalVersion';
 export * from './ShortCode';
 export * from './Source';
 export * from './SyncBasefield';
+export * from './SyncBaseFieldsJobPayload';
 export * from './TableMetrics';
 export * from './TinyPgErrorWithQueryContext';
 export * from './User';

@@ -1,5 +1,8 @@
 import { ajv } from '../ajv';
-import type { BaseFieldLocalization } from './BaseFieldLocalization';
+import {
+	baseFieldLocalizationSchema,
+	BaseFieldLocalization,
+} from './BaseFieldLocalization';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 
@@ -27,6 +30,53 @@ interface BaseField {
 	readonly localizations: Record<string, BaseFieldLocalization>;
 	readonly createdAt: string;
 }
+
+const baseFieldSchema: JSONSchemaType<BaseField> = {
+	type: 'object',
+	properties: {
+		id: {
+			type: 'number',
+		},
+		label: {
+			type: 'string',
+		},
+		description: {
+			type: 'string',
+		},
+		shortCode: {
+			type: 'string',
+		},
+		dataType: {
+			type: 'string',
+			enum: Object.values(BaseFieldDataType),
+		},
+		scope: {
+			type: 'string',
+			enum: Object.values(BaseFieldScope),
+		},
+		localizations: {
+			type: 'object',
+			additionalProperties: baseFieldLocalizationSchema,
+			required: [],
+		},
+		createdAt: {
+			type: 'string',
+		},
+	},
+	required: [
+		'id',
+		'label',
+		'description',
+		'shortCode',
+		'dataType',
+		'scope',
+		'localizations',
+		'createdAt',
+	],
+	additionalProperties: true,
+};
+
+const isBaseField = ajv.compile(baseFieldSchema);
 
 type WritableBaseField = Writable<BaseField>;
 
@@ -58,7 +108,9 @@ const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 
 export {
 	BaseField,
-	isWritableBaseField,
+	baseFieldSchema,
+	isBaseField,
 	WritableBaseField,
+	isWritableBaseField,
 	writableBaseFieldSchema,
 };

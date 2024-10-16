@@ -10,6 +10,29 @@ interface BaseFieldLocalization {
 	readonly createdAt: string;
 }
 
+const baseFieldLocalizationSchema: JSONSchemaType<BaseFieldLocalization> = {
+	type: 'object',
+	properties: {
+		language: {
+			type: 'string',
+		},
+		baseFieldId: {
+			type: 'number',
+		},
+		label: {
+			type: 'string',
+		},
+		description: {
+			type: 'string',
+		},
+		createdAt: {
+			type: 'string',
+		},
+	},
+	required: ['description', 'language', 'label', 'baseFieldId', 'createdAt'],
+	additionalProperties: true,
+};
+
 type WritableBaseFieldLocalization = Writable<BaseFieldLocalization>;
 
 const writableBaseFieldLocalizationSchema: JSONSchemaType<WritableBaseFieldLocalization> =
@@ -47,13 +70,16 @@ const internallyWritableBaseFieldLocalizationSchema: JSONSchemaType<InternallyWr
 			},
 		},
 		required: ['description', 'language', 'label', 'baseFieldId'],
+		additionalProperties: true,
 	};
+
 const isWritableBaseFieldLocalization = ajv.compile(
 	writableBaseFieldLocalizationSchema,
 );
 
 export {
 	BaseFieldLocalization,
+	baseFieldLocalizationSchema,
 	WritableBaseFieldLocalization,
 	InternallyWritableBaseFieldLocalization,
 	writableBaseFieldLocalizationSchema,

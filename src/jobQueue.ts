@@ -1,13 +1,17 @@
 import { Logger, quickAddJob, run, runMigrations } from 'graphile-worker';
+import { copyBaseFields, processBulkUploadTask } from './tasks';
 import { getLogger } from './logger';
 import { db } from './database/db';
-import { processBulkUploadTask } from './tasks';
-import type { ProcessBulkUploadJobPayload } from './types';
+import type {
+	CopyBaseFieldsJobPayload,
+	ProcessBulkUploadJobPayload,
+} from './types';
 
 const logger = getLogger(__filename);
 
 enum JobType {
 	PROCESS_BULK_UPLOAD = 'processBulkUploadTask',
+	COPY_BASE_FIELDS = 'copyBaseFields',
 }
 
 export const jobQueueLogger = new Logger((scope) => (level, message, meta) => {
@@ -38,6 +42,7 @@ export const startJobQueue = async () => {
 		pollInterval: 1000,
 		taskList: {
 			processBulkUploadTask,
+			copyBaseFields,
 		},
 	});
 	runner.promise.catch((err) => {
@@ -64,3 +69,6 @@ export const addJob = async (jobType: JobType, payload: unknown) =>
 export const addProcessBulkUploadJob = async (
 	payload: ProcessBulkUploadJobPayload,
 ) => addJob(JobType.PROCESS_BULK_UPLOAD, payload);
+
+export const addCopyBaseFieldsJob = async (payload: CopyBaseFieldsJobPayload) =>
+	addJob(JobType.COPY_BASE_FIELDS, payload);

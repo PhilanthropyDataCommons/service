@@ -13,4 +13,5 @@ export * from './proposalFieldValues';
 export * from './proposals';
 export * from './proposalVersions';
 export * from './sources';
+export * from './syncBaseFields';
 export * from './users';

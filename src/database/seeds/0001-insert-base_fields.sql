@@ -298,3 +298,4 @@ INSERT INTO base_fields (label, description, short_code, data_type, scope) VALUE
 ('Overall Score' , '', 'overall_score', 'number', 'proposal' ),
 ('Overall Rating' , '', 'overall_rating', 'number', 'proposal' ),
 ('Yes/No indicator: This rating is a Donor Advisory' , '', 'yes_no_indicator_this_rating_is_a_donor_advisory', 'boolean', 'proposal' );
+

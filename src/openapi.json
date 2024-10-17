@@ -218,7 +218,7 @@
 							"canceled"
 						]
 					},
-					"synchronizationUrl": {
+					"pdcApiUrl": {
 						"type": "string"
 					},
 					"statusUpdatedAt": {
@@ -227,7 +227,7 @@
 						"readOnly": true
 					},
 					"createdBy": {
-						"description": "The keycloak user id of the PDC user that created this sync basefield",
+						"description": "The keycloak user id of the PDC user that created this BaseFieldCopyTask",
 						"type": "string",
 						"format": "uuid",
 						"readOnly": true
@@ -240,7 +240,7 @@
 				},
 				"required": [
 					"id",
-					"synchronizationUrl",
+					"pdcApiUrl",
 					"status",
 					"statusUpdatedAt",
 					"createdBy",
@@ -1535,7 +1535,7 @@
 		"/tasks/baseFieldsCopy": {
 			"get": {
 				"operationId": "getBaseFieldsCopyTasks",
-				"summary": "Gets a list of sync basefield jobs.",
+				"summary": "Gets a list of basefieldcopytasks.",
 				"tags": ["Tasks"],
 				"security": [
 					{
@@ -1549,7 +1549,7 @@
 				],
 				"responses": {
 					"200": {
-						"description": "Requested sync basefields registered in the PDC.",
+						"description": "Requested BaseFieldCopyTasks registered in the PDC.",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1573,7 +1573,7 @@
 			"post": {
 				"operationId": "addBaseFieldsCopyTask",
 				"summary": "Creates a BaseFieldsCopyTask entity, which is then used to enqueue a basefield copying job to the job queue. This pulls basefields from a remote PDC instance and upserts them into the local database",
-				"tags": ["Sync BaseFields"],
+				"tags": ["Tasks"],
 				"security": [
 					{
 						"auth": []

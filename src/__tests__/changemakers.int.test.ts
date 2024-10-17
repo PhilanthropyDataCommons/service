@@ -261,253 +261,255 @@ describe('/changemakers', () => {
 			await request(app).get('/changemakers/foo').set(authHeader).expect(400);
 		});
 
-		it('returns the latest valid value for a base field when auth id is sent', async () => {
-			const systemSource = await loadSystemSource();
-			const systemUser = await loadSystemUser();
+		describe('tests that find gold data among proposals and share a common db', () => {
+			it('returns the latest valid value for a base field when auth id is sent', async () => {
+				const systemSource = await loadSystemSource();
+				const systemUser = await loadSystemUser();
 
-			// Make a base field associated with one opportunity/org, and we'll make three responses.
-			const baseFieldId = (
-				await createBaseField({
-					label: 'Fifty one fifty three',
-					shortCode: 'fifty_one_fifty_three',
-					description: 'Five thousand one hundred fifty three.',
-					dataType: BaseFieldDataType.EMAIL,
-					scope: BaseFieldScope.ORGANIZATION,
-				})
-			).id;
-			// To advance test changemaker IDs beyond 1-2.
-			await insertTestChangemakers();
-			// This should be ID 3, although unfortunately implicitly, and only when tests run in serial.
-			const changemakerId = (
-				await createChangemaker({
-					name: 'Five thousand one hundred forty seven reasons',
-					taxId: '05119',
-				})
-			).id;
-			const opportunityId = (
-				await createOpportunity({
-					title: 'Fifty one thirteen',
-				})
-			).id;
-			const proposalId = (
-				await createProposal({
-					opportunityId,
-					externalId: 'Proposal',
-					createdBy: systemUser.keycloakUserId,
-				})
-			).id;
-			await createChangemakerProposal({
-				changemakerId,
-				proposalId,
-			});
-			// I need 3 application form fields here. May as well make them use distinct forms too.
-			const applicationFormIdEarliest = (
-				await createApplicationForm({
-					opportunityId,
-				})
-			).id;
-			// Older field that is valid
-			await createProposalFieldValue({
-				proposalVersionId: (
-					await createProposalVersion({
-						proposalId,
-						applicationFormId: applicationFormIdEarliest,
-						sourceId: systemSource.id,
-						createdBy: systemUser.keycloakUserId,
+				// Make a base field associated with one opportunity/org, and we'll make three responses.
+				const baseFieldId = (
+					await createBaseField({
+						label: 'Fifty one fifty three',
+						shortCode: 'fifty_one_fifty_three',
+						description: 'Five thousand one hundred fifty three.',
+						dataType: BaseFieldDataType.EMAIL,
+						scope: BaseFieldScope.ORGANIZATION,
 					})
-				).id,
-				applicationFormFieldId: (
-					await createApplicationFormField({
-						label: 'Org email',
-						applicationFormId: applicationFormIdEarliest,
-						baseFieldId,
-						position: 5279,
-					})
-				).id,
-				position: 5297,
-				value: 'validbutold@emailaddress.com',
-				isValid: true,
-			});
-			const applicationFormIdLatestValid = (
-				await createApplicationForm({
-					opportunityId,
-				})
-			).id;
-			const latestValidValue = await createProposalFieldValue({
-				proposalVersionId: (
-					await createProposalVersion({
-						proposalId,
-						applicationFormId: applicationFormIdLatestValid,
-						sourceId: systemSource.id,
-						createdBy: systemUser.keycloakUserId,
-					})
-				).id,
-				applicationFormFieldId: (
-					await createApplicationFormField({
-						label: 'Email contact',
-						applicationFormId: applicationFormIdLatestValid,
-						baseFieldId,
-						position: 5347,
-					})
-				).id,
-				position: 5381,
-				value: 'valid@emailaddress.com',
-				isValid: true,
-			});
-			const applicationFormIdLatest = (
-				await createApplicationForm({
-					opportunityId,
-				})
-			).id;
-			// Latest value but invalid
-			await createProposalFieldValue({
-				proposalVersionId: (
-					await createProposalVersion({
-						proposalId,
-						applicationFormId: applicationFormIdLatest,
-						sourceId: systemSource.id,
-						createdBy: systemUser.keycloakUserId,
-					})
-				).id,
-				applicationFormFieldId: (
-					await createApplicationFormField({
-						label: 'Contact email address',
-						applicationFormId: applicationFormIdLatest,
-						baseFieldId,
-						position: 5209,
-					})
-				).id,
-				position: 5231,
-				value: 'invalid-email-address.com',
-				isValid: false,
-			});
-			await request(app)
-				.get(`/changemakers/${changemakerId}`)
-				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						id: changemakerId,
+				).id;
+				// To advance test changemaker IDs beyond 1-2.
+				await insertTestChangemakers();
+				// This should be ID 3, although unfortunately implicitly, and only when tests run in serial.
+				const changemakerId = (
+					await createChangemaker({
 						name: 'Five thousand one hundred forty seven reasons',
 						taxId: '05119',
-						createdAt: expectTimestamp,
-						fields: [latestValidValue],
-					}),
-				);
-		});
+					})
+				).id;
+				const opportunityId = (
+					await createOpportunity({
+						title: 'Fifty one thirteen',
+					})
+				).id;
+				const proposalId = (
+					await createProposal({
+						opportunityId,
+						externalId: 'Proposal',
+						createdBy: systemUser.keycloakUserId,
+					})
+				).id;
+				await createChangemakerProposal({
+					changemakerId,
+					proposalId,
+				});
+				// I need 3 application form fields here. May as well make them use distinct forms too.
+				const applicationFormIdEarliest = (
+					await createApplicationForm({
+						opportunityId,
+					})
+				).id;
+				// Older field that is valid
+				await createProposalFieldValue({
+					proposalVersionId: (
+						await createProposalVersion({
+							proposalId,
+							applicationFormId: applicationFormIdEarliest,
+							sourceId: systemSource.id,
+							createdBy: systemUser.keycloakUserId,
+						})
+					).id,
+					applicationFormFieldId: (
+						await createApplicationFormField({
+							label: 'Org email',
+							applicationFormId: applicationFormIdEarliest,
+							baseFieldId,
+							position: 5279,
+						})
+					).id,
+					position: 5297,
+					value: 'validbutold@emailaddress.com',
+					isValid: true,
+				});
+				const applicationFormIdLatestValid = (
+					await createApplicationForm({
+						opportunityId,
+					})
+				).id;
+				const latestValidValue = await createProposalFieldValue({
+					proposalVersionId: (
+						await createProposalVersion({
+							proposalId,
+							applicationFormId: applicationFormIdLatestValid,
+							sourceId: systemSource.id,
+							createdBy: systemUser.keycloakUserId,
+						})
+					).id,
+					applicationFormFieldId: (
+						await createApplicationFormField({
+							label: 'Email contact',
+							applicationFormId: applicationFormIdLatestValid,
+							baseFieldId,
+							position: 5347,
+						})
+					).id,
+					position: 5381,
+					value: 'valid@emailaddress.com',
+					isValid: true,
+				});
+				const applicationFormIdLatest = (
+					await createApplicationForm({
+						opportunityId,
+					})
+				).id;
+				// Latest value but invalid
+				await createProposalFieldValue({
+					proposalVersionId: (
+						await createProposalVersion({
+							proposalId,
+							applicationFormId: applicationFormIdLatest,
+							sourceId: systemSource.id,
+							createdBy: systemUser.keycloakUserId,
+						})
+					).id,
+					applicationFormFieldId: (
+						await createApplicationFormField({
+							label: 'Contact email address',
+							applicationFormId: applicationFormIdLatest,
+							baseFieldId,
+							position: 5209,
+						})
+					).id,
+					position: 5231,
+					value: 'invalid-email-address.com',
+					isValid: false,
+				});
+				await request(app)
+					.get(`/changemakers/${changemakerId}`)
+					.set(authHeader)
+					.expect(200)
+					.expect((res) =>
+						expect(res.body).toEqual({
+							id: changemakerId,
+							name: 'Five thousand one hundred forty seven reasons',
+							taxId: '05119',
+							createdAt: expectTimestamp,
+							fields: [latestValidValue],
+						}),
+					);
+			});
 
-		it('returns older changemaker data when newer funder data is present', async () => {
-			// Set up changemaker and funder sources.
-			const changemaker = await createChangemaker({
-				taxId: '5387',
-				name: 'Changemaker 5387',
-			});
-			const changemakerSourceId = (
-				await createSource({
+			it('returns older changemaker data when newer funder data is present', async () => {
+				// Set up changemaker and funder sources.
+				const changemaker = await createChangemaker({
+					taxId: '5387',
+					name: 'Changemaker 5387',
+				});
+				const changemakerSourceId = (
+					await createSource({
+						changemakerId: changemaker.id,
+						label: `${changemaker.name} source`,
+					})
+				).id;
+				const funder = await createOrUpdateFunder({
+					shortCode: 'funder_5393',
+					name: 'Funder 5393',
+				});
+				const funderSourceId = (
+					await createSource({
+						funderShortCode: funder.shortCode,
+						label: `${funder.name} source`,
+					})
+				).id;
+				// Set up a base field associated with one opportunity, one changemaker, and two responses.
+				const baseFieldId = (
+					await createBaseField({
+						label: 'Fifty three ninety nine',
+						shortCode: 'fifty_three_ninety_nine',
+						description: 'Five thousand three hundred ninety nine.',
+						dataType: BaseFieldDataType.PHONE_NUMBER,
+						scope: BaseFieldScope.ORGANIZATION,
+					})
+				).id;
+				const systemUser = await loadSystemUser();
+				const opportunity = await createOpportunity({
+					title: `${funder.name} opportunity`,
+				});
+				const proposalId = (
+					await createProposal({
+						opportunityId: opportunity.id,
+						externalId: `Proposal to ${opportunity.title}`,
+						createdBy: systemUser.keycloakUserId,
+					})
+				).id;
+				await createChangemakerProposal({
 					changemakerId: changemaker.id,
-					label: `${changemaker.name} source`,
-				})
-			).id;
-			const funder = await createOrUpdateFunder({
-				shortCode: 'funder_5393',
-				name: 'Funder 5393',
-			});
-			const funderSourceId = (
-				await createSource({
-					funderShortCode: funder.shortCode,
-					label: `${funder.name} source`,
-				})
-			).id;
-			// Set up a base field associated with one opportunity, one changemaker, and two responses.
-			const baseFieldId = (
-				await createBaseField({
-					label: 'Fifty three ninety nine',
-					shortCode: 'fifty_three_ninety_nine',
-					description: 'Five thousand three hundred ninety nine.',
-					dataType: BaseFieldDataType.PHONE_NUMBER,
-					scope: BaseFieldScope.ORGANIZATION,
-				})
-			).id;
-			const systemUser = await loadSystemUser();
-			const opportunity = await createOpportunity({
-				title: `${funder.name} opportunity`,
-			});
-			const proposalId = (
-				await createProposal({
-					opportunityId: opportunity.id,
-					externalId: `Proposal to ${opportunity.title}`,
-					createdBy: systemUser.keycloakUserId,
-				})
-			).id;
-			await createChangemakerProposal({
-				changemakerId: changemaker.id,
-				proposalId,
-			});
-			const applicationFormIdChangemakerEarliest = (
-				await createApplicationForm({
-					opportunityId: opportunity.id,
-				})
-			).id;
-			// Set up older field value that is from the changemaker. We'll expect this to be returned.
-			const changemakerEarliestValue = await createProposalFieldValue({
-				proposalVersionId: (
-					await createProposalVersion({
-						proposalId,
-						applicationFormId: applicationFormIdChangemakerEarliest,
-						sourceId: changemakerSourceId,
-						createdBy: systemUser.keycloakUserId,
+					proposalId,
+				});
+				const applicationFormIdChangemakerEarliest = (
+					await createApplicationForm({
+						opportunityId: opportunity.id,
 					})
-				).id,
-				applicationFormFieldId: (
-					await createApplicationFormField({
-						label: 'Org phone',
-						applicationFormId: applicationFormIdChangemakerEarliest,
-						baseFieldId,
-						position: 5407,
+				).id;
+				// Set up older field value that is from the changemaker. We'll expect this to be returned.
+				const changemakerEarliestValue = await createProposalFieldValue({
+					proposalVersionId: (
+						await createProposalVersion({
+							proposalId,
+							applicationFormId: applicationFormIdChangemakerEarliest,
+							sourceId: changemakerSourceId,
+							createdBy: systemUser.keycloakUserId,
+						})
+					).id,
+					applicationFormFieldId: (
+						await createApplicationFormField({
+							label: 'Org phone',
+							applicationFormId: applicationFormIdChangemakerEarliest,
+							baseFieldId,
+							position: 5407,
+						})
+					).id,
+					position: 5413,
+					value: '+15555555555',
+					isValid: true,
+				});
+				const applicationFormIdFunderLatest = (
+					await createApplicationForm({
+						opportunityId: opportunity.id,
 					})
-				).id,
-				position: 5413,
-				value: '+15555555555',
-				isValid: true,
+				).id;
+				// Set up newer field value that is from the funder.
+				await createProposalFieldValue({
+					proposalVersionId: (
+						await createProposalVersion({
+							proposalId,
+							applicationFormId: applicationFormIdFunderLatest,
+							sourceId: funderSourceId,
+							createdBy: systemUser.keycloakUserId,
+						})
+					).id,
+					applicationFormFieldId: (
+						await createApplicationFormField({
+							label: 'Phone contact',
+							applicationFormId: applicationFormIdFunderLatest,
+							baseFieldId,
+							position: 5417,
+						})
+					).id,
+					position: 5419,
+					value: '+16666666666',
+					isValid: true,
+				});
+				await request(app)
+					.get(`/changemakers/${changemaker.id}`)
+					.set(authHeader)
+					.expect(200)
+					.expect((res) =>
+						expect(res.body).toEqual({
+							...changemaker,
+							createdAt: expectTimestamp,
+							fields: [changemakerEarliestValue],
+						}),
+					);
 			});
-			const applicationFormIdFunderLatest = (
-				await createApplicationForm({
-					opportunityId: opportunity.id,
-				})
-			).id;
-			// Set up newer field value that is from the funder.
-			await createProposalFieldValue({
-				proposalVersionId: (
-					await createProposalVersion({
-						proposalId,
-						applicationFormId: applicationFormIdFunderLatest,
-						sourceId: funderSourceId,
-						createdBy: systemUser.keycloakUserId,
-					})
-				).id,
-				applicationFormFieldId: (
-					await createApplicationFormField({
-						label: 'Phone contact',
-						applicationFormId: applicationFormIdFunderLatest,
-						baseFieldId,
-						position: 5417,
-					})
-				).id,
-				position: 5419,
-				value: '+16666666666',
-				isValid: true,
-			});
-			await request(app)
-				.get(`/changemakers/${changemaker.id}`)
-				.set(authHeader)
-				.expect(200)
-				.expect((res) =>
-					expect(res.body).toEqual({
-						...changemaker,
-						createdAt: expectTimestamp,
-						fields: [changemakerEarliestValue],
-					}),
-				);
 		});
 	});
 

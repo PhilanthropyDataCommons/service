@@ -12,6 +12,7 @@ import { presignedPostRequestsRouter } from './presignedPostRequestsRouter';
 import { proposalsRouter } from './proposalsRouter';
 import { proposalVersionsRouter } from './proposalVersionsRouter';
 import { sourcesRouter } from './sourcesRouter';
+import { syncBaseFieldsRouter } from './syncBaseFieldsRouter';
 import { usersRouter } from './usersRouter';
 import { documentationRouter } from './documentationRouter';
 
@@ -30,6 +31,7 @@ rootRouter.use('/presignedPostRequests', presignedPostRequestsRouter);
 rootRouter.use('/proposals', proposalsRouter);
 rootRouter.use('/proposalVersions', proposalVersionsRouter);
 rootRouter.use('/sources', sourcesRouter);
+rootRouter.use('/syncBaseFields', syncBaseFieldsRouter);
 rootRouter.use('/users', usersRouter);
 rootRouter.use('/', documentationRouter);
 

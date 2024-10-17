@@ -1,13 +1,17 @@
 import { Logger, quickAddJob, run, runMigrations } from 'graphile-worker';
 import { getLogger } from './logger';
 import { db } from './database/db';
-import { processBulkUpload } from './tasks';
-import type { ProcessBulkUploadJobPayload } from './types';
+import { processBulkUpload, processSyncBaseFields } from './tasks';
+import type {
+	ProcessBulkUploadJobPayload,
+	SyncBaseFieldJobPayload,
+} from './types';
 
 const logger = getLogger(__filename);
 
 enum JobType {
 	PROCESS_BULK_UPLOAD = 'processBulkUpload',
+	SYNC_BASE_FIELDS = 'processSyncBaseFields',
 }
 
 export const jobQueueLogger = new Logger((scope) => (level, message, meta) => {
@@ -38,6 +42,7 @@ export const startJobQueue = async () => {
 		pollInterval: 1000,
 		taskList: {
 			processBulkUpload,
+			processSyncBaseFields,
 		},
 	});
 	runner.promise.catch((err) => {
@@ -64,3 +69,6 @@ export const addJob = async (jobType: JobType, payload: unknown) =>
 export const addProcessBulkUploadJob = async (
 	payload: ProcessBulkUploadJobPayload,
 ) => addJob(JobType.PROCESS_BULK_UPLOAD, payload);
+
+export const addSyncBaseFieldJob = async (payload: SyncBaseFieldJobPayload) =>
+	addJob(JobType.SYNC_BASE_FIELDS, payload);

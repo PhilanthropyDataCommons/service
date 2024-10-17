@@ -47,7 +47,9 @@ const internallyWritableBaseFieldLocalizationSchema: JSONSchemaType<InternallyWr
 			},
 		},
 		required: ['description', 'language', 'label', 'baseFieldId'],
+		additionalProperties: true,
 	};
+
 const isWritableBaseFieldLocalization = ajv.compile(
 	writableBaseFieldLocalizationSchema,
 );

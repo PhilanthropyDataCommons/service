@@ -186,7 +186,11 @@ Migrations should be named according to the following pattern: `####-{action}-{t
 
 For example: `0001-create-users` or `0001-modify-users`
 
-In `/src/databases/seeds` there is seed or starter data. The contents can be run manually to help developers get data in their databases. The scripts are not referenced by the software and are included for convenience. The migrations must run prior to using seed scripts.
+The `syncBaseFields` worker is designed to synchronize basefields from a remote to a local instance of the pdc service. An administrative user looking to seed their database can make a POST request to the `/syncBaseFields` route, specifying the remote url in the body of the form:
+
+```json
+{ "synchronizationUrl": "https://remote.pdc.instance" }
+```
 
 #### Node version
 

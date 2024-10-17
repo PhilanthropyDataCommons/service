@@ -18,7 +18,17 @@ import {
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
-import { BaseFieldDataType, BaseFieldScope, PostgresErrorCode } from '../types';
+import {
+	BaseField,
+	BaseFieldDataType,
+	BaseFieldScope,
+	Changemaker,
+	Funder,
+	Opportunity,
+	PostgresErrorCode,
+	Source,
+	User,
+} from '../types';
 
 const insertTestChangemakers = async () => {
 	await createChangemaker({
@@ -262,29 +272,53 @@ describe('/changemakers', () => {
 		});
 
 		describe('tests that find gold data among proposals and share a common db', () => {
-			it('returns the latest valid value for a base field when auth id is sent', async () => {
-				const systemSource = await loadSystemSource();
-				const systemUser = await loadSystemUser();
+			let systemSource: Source;
+			let systemUser: User;
+			let baseFieldEmail: BaseField;
+			let baseFieldPhone: BaseField;
+			let firstChangemaker: Changemaker;
+			let secondChangemaker: Changemaker;
+			let firstFunder: Funder;
+			let firstFunderOpportunity: Opportunity;
 
-				// Make a base field associated with one opportunity/org, and we'll make three responses.
-				const baseFieldId = (
-					await createBaseField({
-						label: 'Fifty one fifty three',
-						shortCode: 'fifty_one_fifty_three',
-						description: 'Five thousand one hundred fifty three.',
-						dataType: BaseFieldDataType.EMAIL,
-						scope: BaseFieldScope.ORGANIZATION,
-					})
-				).id;
-				// To advance test changemaker IDs beyond 1-2.
-				await insertTestChangemakers();
-				// This should be ID 3, although unfortunately implicitly, and only when tests run in serial.
-				const changemakerId = (
-					await createChangemaker({
-						name: 'Five thousand one hundred forty seven reasons',
-						taxId: '05119',
-					})
-				).id;
+			beforeEach(async () => {
+				systemSource = await loadSystemSource();
+				systemUser = await loadSystemUser();
+				baseFieldEmail = await createBaseField({
+					label: 'Fifty one fifty three',
+					shortCode: 'fifty_one_fifty_three',
+					description: 'Five thousand one hundred fifty three.',
+					dataType: BaseFieldDataType.EMAIL,
+					scope: BaseFieldScope.ORGANIZATION,
+				});
+				baseFieldPhone = await createBaseField({
+					label: 'Fifty three ninety nine',
+					shortCode: 'fifty_three_ninety_nine',
+					description: 'Five thousand three hundred ninety nine.',
+					dataType: BaseFieldDataType.PHONE_NUMBER,
+					scope: BaseFieldScope.ORGANIZATION,
+				});
+				firstChangemaker = await createChangemaker({
+					name: 'Five thousand one hundred forty seven reasons',
+					taxId: '05119',
+				});
+				secondChangemaker = await createChangemaker({
+					taxId: '5387',
+					name: 'Changemaker 5387',
+				});
+				firstFunder = await createOrUpdateFunder({
+					shortCode: 'funder_5393',
+					name: 'Funder 5393',
+				});
+				firstFunderOpportunity = await createOpportunity({
+					title: `${firstFunder.name} opportunity`,
+				});
+			});
+
+			it('returns the latest valid value for a base field when auth id is sent', async () => {
+				// Associate a base field associated with one opportunity/org, and add three responses.
+				const baseFieldId = baseFieldEmail.id;
+				const changemakerId = firstChangemaker.id;
 				const opportunityId = (
 					await createOpportunity({
 						title: 'Fifty one thirteen',
@@ -399,40 +433,23 @@ describe('/changemakers', () => {
 
 			it('returns older changemaker data when newer funder data is present', async () => {
 				// Set up changemaker and funder sources.
-				const changemaker = await createChangemaker({
-					taxId: '5387',
-					name: 'Changemaker 5387',
-				});
+				const changemaker = secondChangemaker;
 				const changemakerSourceId = (
 					await createSource({
 						changemakerId: changemaker.id,
 						label: `${changemaker.name} source`,
 					})
 				).id;
-				const funder = await createOrUpdateFunder({
-					shortCode: 'funder_5393',
-					name: 'Funder 5393',
-				});
+				const funder = firstFunder;
 				const funderSourceId = (
 					await createSource({
 						funderShortCode: funder.shortCode,
 						label: `${funder.name} source`,
 					})
 				).id;
-				// Set up a base field associated with one opportunity, one changemaker, and two responses.
-				const baseFieldId = (
-					await createBaseField({
-						label: 'Fifty three ninety nine',
-						shortCode: 'fifty_three_ninety_nine',
-						description: 'Five thousand three hundred ninety nine.',
-						dataType: BaseFieldDataType.PHONE_NUMBER,
-						scope: BaseFieldScope.ORGANIZATION,
-					})
-				).id;
-				const systemUser = await loadSystemUser();
-				const opportunity = await createOpportunity({
-					title: `${funder.name} opportunity`,
-				});
+				// Associate one opportunity, one changemaker, and two responses with a base field.
+				const baseFieldId = baseFieldPhone.id;
+				const opportunity = firstFunderOpportunity;
 				const proposalId = (
 					await createProposal({
 						opportunityId: opportunity.id,

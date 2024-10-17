@@ -15,6 +15,7 @@ import {
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
+	createOrUpdateDataProvider,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
@@ -23,6 +24,7 @@ import {
 	BaseFieldDataType,
 	BaseFieldScope,
 	Changemaker,
+	DataProvider,
 	Funder,
 	Opportunity,
 	PostgresErrorCode,
@@ -280,6 +282,7 @@ describe('/changemakers', () => {
 			let secondChangemaker: Changemaker;
 			let firstFunder: Funder;
 			let firstFunderOpportunity: Opportunity;
+			let firstDataProvider: DataProvider;
 
 			beforeEach(async () => {
 				systemSource = await loadSystemSource();
@@ -312,6 +315,10 @@ describe('/changemakers', () => {
 				});
 				firstFunderOpportunity = await createOpportunity({
 					title: `${firstFunder.name} opportunity`,
+				});
+				firstDataProvider = await createOrUpdateDataProvider({
+					shortCode: 'data_provider_5431',
+					name: 'Data Platform Provider 5431',
 				});
 			});
 
@@ -524,6 +531,104 @@ describe('/changemakers', () => {
 							...changemaker,
 							createdAt: expectTimestamp,
 							fields: [changemakerEarliestValue],
+						}),
+					);
+			});
+
+			it('returns older funder data when newer data platform provider data is present', async () => {
+				// Set up funder and data platform provider sources.
+				const changemaker = secondChangemaker;
+				const funder = firstFunder;
+				const funderSourceId = (
+					await createSource({
+						funderShortCode: funder.shortCode,
+						label: `${funder.name} source`,
+					})
+				).id;
+				const dataProvider = firstDataProvider;
+				const dataProviderSourceId = (
+					await createSource({
+						dataProviderShortCode: dataProvider.shortCode,
+						label: `${dataProvider.name} source`,
+					})
+				).id;
+				// Associate one opportunity, one changemaker, and two responses with a base field.
+				const baseFieldId = baseFieldPhone.id;
+				const opportunity = firstFunderOpportunity;
+				const proposalId = (
+					await createProposal({
+						opportunityId: opportunity.id,
+						externalId: `Another proposal to ${opportunity.title}`,
+						createdBy: systemUser.keycloakUserId,
+					})
+				).id;
+				await createChangemakerProposal({
+					changemakerId: changemaker.id,
+					proposalId,
+				});
+				const applicationFormIdFunderEarliest = (
+					await createApplicationForm({
+						opportunityId: opportunity.id,
+					})
+				).id;
+				// Set up older field value that is from the funder. We'll expect this to be returned.
+				const funderEarliestValue = await createProposalFieldValue({
+					proposalVersionId: (
+						await createProposalVersion({
+							proposalId,
+							applicationFormId: applicationFormIdFunderEarliest,
+							sourceId: funderSourceId,
+							createdBy: systemUser.keycloakUserId,
+						})
+					).id,
+					applicationFormFieldId: (
+						await createApplicationFormField({
+							label: 'Organization phone 5437',
+							applicationFormId: applicationFormIdFunderEarliest,
+							baseFieldId,
+							position: 5437,
+						})
+					).id,
+					position: 5441,
+					value: '+15555555441',
+					isValid: true,
+				});
+				const applicationFormIdDataProviderLatest = (
+					await createApplicationForm({
+						opportunityId: opportunity.id,
+					})
+				).id;
+				// Set up newer field value that is from the data platform provider.
+				await createProposalFieldValue({
+					proposalVersionId: (
+						await createProposalVersion({
+							proposalId,
+							applicationFormId: applicationFormIdDataProviderLatest,
+							sourceId: dataProviderSourceId,
+							createdBy: systemUser.keycloakUserId,
+						})
+					).id,
+					applicationFormFieldId: (
+						await createApplicationFormField({
+							label: 'Phone contact',
+							applicationFormId: applicationFormIdDataProviderLatest,
+							baseFieldId,
+							position: 5443,
+						})
+					).id,
+					position: 5449,
+					value: '+16666665449',
+					isValid: true,
+				});
+				await request(app)
+					.get(`/changemakers/${changemaker.id}`)
+					.set(authHeader)
+					.expect(200)
+					.expect((res) =>
+						expect(res.body).toEqual({
+							...changemaker,
+							createdAt: expectTimestamp,
+							fields: [funderEarliestValue],
 						}),
 					);
 			});

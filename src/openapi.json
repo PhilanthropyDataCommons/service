@@ -199,6 +199,73 @@
 				"format": "uuid",
 				"nullable": true
 			},
+			"BaseFieldsCopyTask": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"readOnly": true,
+						"example": 3407
+					},
+					"status": {
+						"type": "string",
+						"readOnly": true,
+						"enum": [
+							"pending",
+							"in_progress",
+							"completed",
+							"failed",
+							"canceled"
+						]
+					},
+					"synchronizationUrl": {
+						"type": "string"
+					},
+					"statusUpdatedAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					},
+					"createdBy": {
+						"description": "The keycloak user id of the PDC user that created this sync basefield",
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": [
+					"id",
+					"synchronizationUrl",
+					"status",
+					"statusUpdatedAt",
+					"createdBy",
+					"createdAt"
+				]
+			},
+			"BaseFieldsCopyTaskBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/BaseFieldsCopyTask"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
 			"DataProvider": {
 				"type": "object",
 				"properties": {
@@ -1448,6 +1515,87 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/BulkUploadTask"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/tasks/baseFieldsCopy": {
+			"get": {
+				"operationId": "getBaseFieldsCopyTasks",
+				"summary": "Gets a list of sync basefield jobs.",
+				"tags": ["Tasks"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{ "$ref": "#/components/parameters/pageParam" },
+					{ "$ref": "#/components/parameters/countParam" },
+					{ "$ref": "#/components/parameters/createdByParam" }
+				],
+				"responses": {
+					"200": {
+						"description": "Requested sync basefields registered in the PDC.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BaseFieldsCopyTaskBundle"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"operationId": "addBaseFieldsCopyTask",
+				"summary": "Creates a BaseFieldsCopyTask entity, which is then used to enqueue a basefield copying job to the job queue. This pulls basefields from a remote PDC instance and upserts them into the local database",
+				"tags": ["Sync BaseFields"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BaseFieldsCopyTask"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "The Sync BaseField",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BaseFieldsCopyTask"
 								}
 							}
 						}

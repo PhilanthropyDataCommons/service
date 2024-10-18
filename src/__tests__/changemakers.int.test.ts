@@ -26,6 +26,7 @@ import {
 	Changemaker,
 	DataProvider,
 	Funder,
+	Id,
 	Opportunity,
 	PostgresErrorCode,
 	Source,
@@ -278,11 +279,15 @@ describe('/changemakers', () => {
 			let systemUser: User;
 			let baseFieldEmail: BaseField;
 			let baseFieldPhone: BaseField;
+			let baseFieldWebsite: BaseField;
 			let firstChangemaker: Changemaker;
 			let secondChangemaker: Changemaker;
 			let firstFunder: Funder;
 			let firstFunderOpportunity: Opportunity;
 			let firstDataProvider: DataProvider;
+			let secondDataProvider: DataProvider;
+			let firstDataProviderSourceId: Id;
+			let secondDataProviderSourceId: Id;
 
 			beforeEach(async () => {
 				systemSource = await loadSystemSource();
@@ -299,6 +304,13 @@ describe('/changemakers', () => {
 					shortCode: 'fifty_three_ninety_nine',
 					description: 'Five thousand three hundred ninety nine.',
 					dataType: BaseFieldDataType.PHONE_NUMBER,
+					scope: BaseFieldScope.ORGANIZATION,
+				});
+				baseFieldWebsite = await createBaseField({
+					label: 'Fifty four seventy one 5471',
+					shortCode: 'fifty_four_seventy_one',
+					description: 'Five thousand four hundred seventy one.',
+					dataType: BaseFieldDataType.URL,
 					scope: BaseFieldScope.ORGANIZATION,
 				});
 				firstChangemaker = await createChangemaker({
@@ -320,6 +332,22 @@ describe('/changemakers', () => {
 					shortCode: 'data_provider_5431',
 					name: 'Data Platform Provider 5431',
 				});
+				secondDataProvider = await createOrUpdateDataProvider({
+					shortCode: 'data_provider_5477',
+					name: 'Data Platform Provider 5477',
+				});
+				firstDataProviderSourceId = (
+					await createSource({
+						dataProviderShortCode: firstDataProvider.shortCode,
+						label: `${firstDataProvider.name} source`,
+					})
+				).id;
+				secondDataProviderSourceId = (
+					await createSource({
+						dataProviderShortCode: secondDataProvider.shortCode,
+						label: `${secondDataProvider.name} source`,
+					})
+				).id;
 			});
 
 			it('returns the latest valid value for a base field when auth id is sent', async () => {
@@ -545,13 +573,7 @@ describe('/changemakers', () => {
 						label: `${funder.name} source`,
 					})
 				).id;
-				const dataProvider = firstDataProvider;
-				const dataProviderSourceId = (
-					await createSource({
-						dataProviderShortCode: dataProvider.shortCode,
-						label: `${dataProvider.name} source`,
-					})
-				).id;
+				const dataProviderSourceId = firstDataProviderSourceId;
 				// Associate one opportunity, one changemaker, and two responses with a base field.
 				const baseFieldId = baseFieldPhone.id;
 				const opportunity = firstFunderOpportunity;
@@ -629,6 +651,88 @@ describe('/changemakers', () => {
 							...changemaker,
 							createdAt: expectTimestamp,
 							fields: [funderEarliestValue],
+						}),
+					);
+			});
+
+			it('returns newer data when only data platform provider data is present', async () => {
+				const changemaker = secondChangemaker;
+				// Set up data platform provider sources.
+				// Associate one opportunity, one changemaker, and two responses with a base field.
+				const proposalId = (
+					await createProposal({
+						opportunityId: firstFunderOpportunity.id,
+						externalId: `Yet another proposal to ${firstFunderOpportunity.title}`,
+						createdBy: systemUser.keycloakUserId,
+					})
+				).id;
+				await createChangemakerProposal({
+					changemakerId: changemaker.id,
+					proposalId,
+				});
+				const applicationFormIdDataProviderEarliest = (
+					await createApplicationForm({
+						opportunityId: firstFunderOpportunity.id,
+					})
+				).id;
+				// Set up older field value.
+				await createProposalFieldValue({
+					proposalVersionId: (
+						await createProposalVersion({
+							proposalId,
+							applicationFormId: applicationFormIdDataProviderEarliest,
+							sourceId: firstDataProviderSourceId,
+							createdBy: systemUser.keycloakUserId,
+						})
+					).id,
+					applicationFormFieldId: (
+						await createApplicationFormField({
+							label: 'Organization website 5479',
+							applicationFormId: applicationFormIdDataProviderEarliest,
+							baseFieldId: baseFieldWebsite.id,
+							position: 5479,
+						})
+					).id,
+					position: 5483,
+					value: '+15555555483',
+					isValid: true,
+				});
+				const applicationFormIdDataProviderLatest = (
+					await createApplicationForm({
+						opportunityId: firstFunderOpportunity.id,
+					})
+				).id;
+				// Set up newer field value.
+				const dataProviderNewestValue = await createProposalFieldValue({
+					proposalVersionId: (
+						await createProposalVersion({
+							proposalId,
+							applicationFormId: applicationFormIdDataProviderLatest,
+							sourceId: secondDataProviderSourceId,
+							createdBy: systemUser.keycloakUserId,
+						})
+					).id,
+					applicationFormFieldId: (
+						await createApplicationFormField({
+							label: 'Phone contact',
+							applicationFormId: applicationFormIdDataProviderLatest,
+							baseFieldId: baseFieldWebsite.id,
+							position: 5501,
+						})
+					).id,
+					position: 5503,
+					value: '+16666665503',
+					isValid: true,
+				});
+				await request(app)
+					.get(`/changemakers/${changemaker.id}`)
+					.set(authHeader)
+					.expect(200)
+					.expect((res) =>
+						expect(res.body).toEqual({
+							...changemaker,
+							createdAt: expectTimestamp,
+							fields: [dataProviderNewestValue],
 						}),
 					);
 			});

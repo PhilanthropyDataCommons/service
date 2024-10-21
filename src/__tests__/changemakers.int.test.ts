@@ -282,11 +282,13 @@ describe('/changemakers', () => {
 			let baseFieldWebsite: BaseField;
 			let firstChangemaker: Changemaker;
 			let secondChangemaker: Changemaker;
+			let secondChangemakerSourceId: Id;
 			let firstFunder: Funder;
 			let firstFunderOpportunity: Opportunity;
+			let firstFunderSourceId: Id;
 			let firstDataProvider: DataProvider;
-			let secondDataProvider: DataProvider;
 			let firstDataProviderSourceId: Id;
+			let secondDataProvider: DataProvider;
 			let secondDataProviderSourceId: Id;
 
 			beforeEach(async () => {
@@ -321,6 +323,12 @@ describe('/changemakers', () => {
 					taxId: '5387',
 					name: 'Changemaker 5387',
 				});
+				secondChangemakerSourceId = (
+					await createSource({
+						changemakerId: secondChangemaker.id,
+						label: `${secondChangemaker.name} source`,
+					})
+				).id;
 				firstFunder = await createOrUpdateFunder({
 					shortCode: 'funder_5393',
 					name: 'Funder 5393',
@@ -328,6 +336,12 @@ describe('/changemakers', () => {
 				firstFunderOpportunity = await createOpportunity({
 					title: `${firstFunder.name} opportunity`,
 				});
+				firstFunderSourceId = (
+					await createSource({
+						funderShortCode: firstFunder.shortCode,
+						label: `${firstFunder.name} source`,
+					})
+				).id;
 				firstDataProvider = await createOrUpdateDataProvider({
 					shortCode: 'data_provider_5431',
 					name: 'Data Platform Provider 5431',
@@ -354,11 +368,7 @@ describe('/changemakers', () => {
 				// Associate a base field associated with one opportunity/org, and add three responses.
 				const baseFieldId = baseFieldEmail.id;
 				const changemakerId = firstChangemaker.id;
-				const opportunityId = (
-					await createOpportunity({
-						title: 'Fifty one thirteen',
-					})
-				).id;
+				const opportunityId = firstFunderOpportunity.id;
 				const proposalId = (
 					await createProposal({
 						opportunityId,
@@ -469,19 +479,8 @@ describe('/changemakers', () => {
 			it('returns older changemaker data when newer funder data is present', async () => {
 				// Set up changemaker and funder sources.
 				const changemaker = secondChangemaker;
-				const changemakerSourceId = (
-					await createSource({
-						changemakerId: changemaker.id,
-						label: `${changemaker.name} source`,
-					})
-				).id;
-				const funder = firstFunder;
-				const funderSourceId = (
-					await createSource({
-						funderShortCode: funder.shortCode,
-						label: `${funder.name} source`,
-					})
-				).id;
+				const changemakerSourceId = secondChangemakerSourceId;
+				const funderSourceId = firstFunderSourceId;
 				// Associate one opportunity, one changemaker, and two responses with a base field.
 				const baseFieldId = baseFieldPhone.id;
 				const opportunity = firstFunderOpportunity;
@@ -566,13 +565,7 @@ describe('/changemakers', () => {
 			it('returns older funder data when newer data platform provider data is present', async () => {
 				// Set up funder and data platform provider sources.
 				const changemaker = secondChangemaker;
-				const funder = firstFunder;
-				const funderSourceId = (
-					await createSource({
-						funderShortCode: funder.shortCode,
-						label: `${funder.name} source`,
-					})
-				).id;
+				const funderSourceId = firstFunderSourceId;
 				const dataProviderSourceId = firstDataProviderSourceId;
 				// Associate one opportunity, one changemaker, and two responses with a base field.
 				const baseFieldId = baseFieldPhone.id;

@@ -90,12 +90,6 @@ To build a docker image:
 docker build .
 ```
 
-To use a development docker image from GitHub Container Registry:
-
-```bash
-docker pull ghcr.io/philanthropydatacommons/service:latest
-```
-
 To run migrations:
 
 ```bash

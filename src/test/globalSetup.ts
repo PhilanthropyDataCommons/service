@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 // Jest expects a single default function to be exported from this file.
 /* eslint-disable import/no-default-export */
 import type { Config } from 'jest';

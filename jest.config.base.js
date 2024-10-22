@@ -11,4 +11,5 @@ module.exports = {
 	testPathIgnorePatterns: ['<rootDir>/dist/'],
 	silent: true,
 	passWithNoTests: true,
+	collectCoverage: true,
 };

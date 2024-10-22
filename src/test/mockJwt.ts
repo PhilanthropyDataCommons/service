@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import createJWKSMock from 'mock-jwks';
 import { issuer } from '../auth/jwtOptions';
 import { keycloakUserIdToString } from '../types';

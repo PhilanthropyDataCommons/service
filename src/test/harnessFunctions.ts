@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { db, migrate, initializeDatabase } from '../database';
 
 const generateSchemaName = (workerId: string): string => `test_${workerId}`;

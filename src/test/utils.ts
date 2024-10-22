@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { createUser, loadUserByKeycloakUserId } from '../database';
 import { stringToKeycloakUserId } from '../types';
 

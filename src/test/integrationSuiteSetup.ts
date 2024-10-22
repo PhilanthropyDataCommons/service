@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import nock from 'nock';
 /**
  * This file is loaded by jest, as specified by the integration test jest configuration file

@@ -1,5 +1,9 @@
 import { ajv } from '../ajv';
-import type { BaseFieldLocalization } from './BaseFieldLocalization';
+import {
+	InternallyWritableBaseFieldLocalization,
+	internallyWritableBaseFieldLocalizationSchema,
+	BaseFieldLocalization,
+} from './BaseFieldLocalization';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 
@@ -56,9 +60,68 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 
+type WritableBaseFieldWithLocalizationsContext = Writable<BaseField> & {
+	localizations: Record<string, InternallyWritableBaseFieldLocalization>;
+};
+
+const writableBaseFieldWithLocalizationsContextSchema: JSONSchemaType<WritableBaseFieldWithLocalizationsContext> =
+	{
+		type: 'object',
+		properties: {
+			label: {
+				type: 'string',
+			},
+			description: {
+				type: 'string',
+			},
+			shortCode: {
+				type: 'string',
+			},
+			dataType: {
+				type: 'string',
+				enum: Object.values(BaseFieldDataType),
+			},
+			scope: {
+				type: 'string',
+				enum: Object.values(BaseFieldScope),
+			},
+			localizations: {
+				type: 'object',
+				additionalProperties: internallyWritableBaseFieldLocalizationSchema,
+				required: [],
+			},
+		},
+		required: [
+			'label',
+			'description',
+			'shortCode',
+			'dataType',
+			'scope',
+			'localizations',
+		],
+		additionalProperties: true,
+	};
+
+type WritableBaseFieldWithLocalizationsContextArray =
+	Array<WritableBaseFieldWithLocalizationsContext>;
+
+const writableBaseFieldWithLocalizationsContextArraySchema: JSONSchemaType<WritableBaseFieldWithLocalizationsContextArray> =
+	{
+		type: 'array',
+		items: writableBaseFieldWithLocalizationsContextSchema,
+	};
+
+const isWritableBaseFieldWithLocalizationsContextArray = ajv.compile(
+	writableBaseFieldWithLocalizationsContextArraySchema,
+);
+
 export {
 	BaseField,
 	isWritableBaseField,
 	WritableBaseField,
 	writableBaseFieldSchema,
+	WritableBaseFieldWithLocalizationsContext,
+	writableBaseFieldWithLocalizationsContextSchema,
+	WritableBaseFieldWithLocalizationsContextArray,
+	isWritableBaseFieldWithLocalizationsContextArray,
 };

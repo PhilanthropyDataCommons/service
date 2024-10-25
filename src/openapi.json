@@ -878,6 +878,25 @@
 					}
 				]
 			},
+			"SourceBundle": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Bundle"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"entries": {
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/Source"
+								}
+							}
+						},
+						"required": ["entries"]
+					}
+				]
+			},
 			"Source": {
 				"allOf": [
 					{

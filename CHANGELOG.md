@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgraded to use OpenAPI Specification 3.1.
 
+## 0.15.1 2024-10-28
+
+### Fixed
+
+- `SourceBundle` is now present in the swagger spec.
+- `GET /sources` is now correctly documented as returning a `SourceBundle`.
+
 ## 0.15.0 2024-10-14
 
 ### Changed

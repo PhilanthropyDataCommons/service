@@ -1,4 +1,4 @@
-INSERT INTO bulk_uploads (
+INSERT INTO bulk_upload_tasks (
   source_id,
   file_name,
   source_key,
@@ -12,4 +12,4 @@ VALUES (
   :status,
   :createdBy
 )
-RETURNING bulk_upload_to_json(bulk_uploads) AS "object";
+RETURNING bulk_upload_task_to_json(bulk_upload_tasks) AS "object";

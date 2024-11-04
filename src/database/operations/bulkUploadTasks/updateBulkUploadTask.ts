@@ -2,22 +2,22 @@ import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
 import type {
 	JsonResultSet,
-	BulkUpload,
-	InternallyWritableBulkUpload,
+	BulkUploadTask,
+	InternallyWritableBulkUploadTask,
 } from '../../../types';
 
-export const updateBulkUpload = async (
+export const updateBulkUploadTask = async (
 	id: number,
-	updateValues: Partial<InternallyWritableBulkUpload>,
-): Promise<BulkUpload> => {
+	updateValues: Partial<InternallyWritableBulkUploadTask>,
+): Promise<BulkUploadTask> => {
 	const { fileSize, sourceKey, status } = updateValues;
 	const defaultValues = {
 		fileSize: -1,
 		sourceKey: '',
 		status: '',
 	};
-	const result = await db.sql<JsonResultSet<BulkUpload>>(
-		'bulkUploads.updateById',
+	const result = await db.sql<JsonResultSet<BulkUploadTask>>(
+		'bulkUploadTasks.updateById',
 		{
 			...defaultValues,
 			id,
@@ -29,7 +29,7 @@ export const updateBulkUpload = async (
 	const { object } = result.rows[0] ?? {};
 	if (object === undefined) {
 		throw new NotFoundError(`Entity not found`, {
-			entityType: 'BulkUpload',
+			entityType: 'BulkUploadTask',
 			entityId: id,
 		});
 	}

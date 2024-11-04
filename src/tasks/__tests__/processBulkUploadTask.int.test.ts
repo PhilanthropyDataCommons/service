@@ -2,10 +2,10 @@ import nock from 'nock';
 import { requireEnv } from 'require-env-variable';
 import {
 	createBaseField,
-	loadBulkUpload,
+	loadBulkUploadTask,
 	loadProposalBundle,
 	loadApplicationFormBundle,
-	createBulkUpload,
+	createBulkUploadTask,
 	loadSystemUser,
 	loadChangemakerBundle,
 	loadChangemakerProposalBundle,
@@ -14,17 +14,17 @@ import {
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
-import { processBulkUpload } from '../processBulkUpload';
+import { processBulkUploadTask } from '../processBulkUploadTask';
 import {
 	BaseFieldDataType,
 	BaseFieldScope,
-	BulkUploadStatus,
+	TaskStatus,
 	Proposal,
 } from '../../types';
 import { expectTimestamp, NO_LIMIT, NO_OFFSET } from '../../test/utils';
 import type {
-	BulkUpload,
-	InternallyWritableBulkUpload,
+	BulkUploadTask,
+	InternallyWritableBulkUploadTask,
 	Changemaker,
 } from '../../types';
 
@@ -48,19 +48,19 @@ const getS3Path = () => (S3_PATH_STYLE === 'true' ? `/${S3_BUCKET}` : '');
 
 const getS3KeyPath = (key: string) => `${getS3Path()}/${key}`;
 
-const createTestBulkUpload = async (
-	overrideValues?: Partial<InternallyWritableBulkUpload>,
-): Promise<BulkUpload> => {
+const createTestBulkUploadTask = async (
+	overrideValues?: Partial<InternallyWritableBulkUploadTask>,
+): Promise<BulkUploadTask> => {
 	const systemUser = await loadSystemUser();
 	const systemSource = await loadSystemSource();
 	const defaultValues = {
 		fileName: 'bar.csv',
 		sourceId: systemSource.id,
 		sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
-		status: BulkUploadStatus.PENDING,
+		status: TaskStatus.PENDING,
 		createdBy: systemUser.keycloakUserId,
 	};
-	return createBulkUpload({
+	return createBulkUploadTask({
 		...defaultValues,
 		...overrideValues,
 	});
@@ -114,18 +114,18 @@ const mockS3DeleteObjectReply = async (sourceKey: string) =>
 		.query({ 'x-id': 'DeleteObject' })
 		.reply(204);
 
-const mockS3ResponsesForBulkUploadProcessing = async (
-	bulkUpload: BulkUpload,
+const mockS3ResponsesForBulkUploadTaskProcessing = async (
+	bulkUploadTask: BulkUploadTask,
 	bulkUploadFilePath: string,
 ) => {
 	const getRequest = await mockS3GetObjectReplyWithFile(
-		bulkUpload.sourceKey,
+		bulkUploadTask.sourceKey,
 		bulkUploadFilePath,
 	);
 	const copyRequest = await mockS3CopyObjectReply(
-		`bulk-uploads/${bulkUpload.id}`,
+		`bulk-uploads/${bulkUploadTask.id}`,
 	);
-	const deleteRequest = await mockS3DeleteObjectReply(bulkUpload.sourceKey);
+	const deleteRequest = await mockS3DeleteObjectReply(bulkUploadTask.sourceKey);
 	return {
 		getRequest,
 		copyRequest,
@@ -133,17 +133,17 @@ const mockS3ResponsesForBulkUploadProcessing = async (
 	};
 };
 
-describe('processBulkUpload', () => {
+describe('processBulkUploadTask', () => {
 	it('should attempt to access the contents of the sourceKey associated with the specified bulk upload', async () => {
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		const requests = await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
 		);
-		await processBulkUpload(
+		await processBulkUploadTask(
 			{
-				bulkUploadId: bulkUpload.id,
+				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);
@@ -153,14 +153,14 @@ describe('processBulkUpload', () => {
 	it('should attempt to copy the contents of the sourceKey associated with the specified bulk upload to a processed location', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		const requests = await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
 		);
-		await processBulkUpload(
+		await processBulkUploadTask(
 			{
-				bulkUploadId: bulkUpload.id,
+				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);
@@ -170,14 +170,14 @@ describe('processBulkUpload', () => {
 	it('should attempt to delete the unprocessed file of the sourceKey associated with the specified bulk upload', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		const requests = await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
 		);
-		await processBulkUpload(
+		await processBulkUploadTask(
 			{
-				bulkUploadId: bulkUpload.id,
+				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);
@@ -186,20 +186,20 @@ describe('processBulkUpload', () => {
 
 	it('should fail if the sourceKey is not accessible', async () => {
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
 		const sourceRequest = nock(await getS3Endpoint())
 			.get(getS3KeyPath(sourceKey))
 			.query({ 'x-id': 'GetObject' })
 			.reply(404);
 
-		await processBulkUpload(
-			{ bulkUploadId: bulkUpload.id },
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
 			getMockJobHelpers(),
 		);
 
-		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
-		expect(updatedBulkUpload).toMatchObject({
-			status: BulkUploadStatus.FAILED,
+		const updatedBulkUploadTask = await loadBulkUploadTask(bulkUploadTask.id);
+		expect(updatedBulkUploadTask).toMatchObject({
+			status: TaskStatus.FAILED,
 			fileSize: null,
 		});
 		expect(sourceRequest.isDone()).toEqual(true);
@@ -207,20 +207,20 @@ describe('processBulkUpload', () => {
 
 	it('should not process, and fail, if the sourceKey is not in the unprocessed namespace', async () => {
 		const sourceKey = TEST_BULK_UPLOAD_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		const requests = await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
 		);
 
-		await processBulkUpload(
-			{ bulkUploadId: bulkUpload.id },
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
 			getMockJobHelpers(),
 		);
 
-		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
+		const updatedBulkUpload = await loadBulkUploadTask(bulkUploadTask.id);
 		expect(updatedBulkUpload).toMatchObject({
-			status: BulkUploadStatus.FAILED,
+			status: TaskStatus.FAILED,
 			fileSize: null,
 		});
 		expect(requests.getRequest.isDone()).toEqual(false);
@@ -228,42 +228,42 @@ describe('processBulkUpload', () => {
 
 	it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({
+		const bulkUploadTask = await createTestBulkUploadTask({
 			sourceKey,
-			status: BulkUploadStatus.IN_PROGRESS,
+			status: TaskStatus.IN_PROGRESS,
 		});
-		const requests = await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
 		);
 
-		await processBulkUpload(
-			{ bulkUploadId: bulkUpload.id },
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
 			getMockJobHelpers(),
 		);
 
-		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
-		expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.IN_PROGRESS);
+		const updatedBulkUpload = await loadBulkUploadTask(bulkUploadTask.id);
+		expect(updatedBulkUpload.status).toEqual(TaskStatus.IN_PROGRESS);
 		expect(requests.getRequest.isDone()).toEqual(false);
 	});
 
 	it('should fail if the csv contains an invalid short code', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/invalidShortCode.csv`,
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/invalidShortCode.csv`,
 		);
-		await processBulkUpload(
+		await processBulkUploadTask(
 			{
-				bulkUploadId: bulkUpload.id,
+				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);
-		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
-		expect(updatedBulkUpload).toMatchObject({
-			status: BulkUploadStatus.FAILED,
+		const updatedBulkUploadTask = await loadBulkUploadTask(bulkUploadTask.id);
+		expect(updatedBulkUploadTask).toMatchObject({
+			status: TaskStatus.FAILED,
 			fileSize: 97,
 		});
 	});
@@ -271,14 +271,14 @@ describe('processBulkUpload', () => {
 	it('should move the csv file to processed location if the csv contains an invalid short code', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		const requests = await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/invalidShortCode.csv`,
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/invalidShortCode.csv`,
 		);
-		await processBulkUpload(
+		await processBulkUploadTask(
 			{
-				bulkUploadId: bulkUpload.id,
+				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);
@@ -289,21 +289,21 @@ describe('processBulkUpload', () => {
 	it('should have a proper failed state if the csv is empty', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/empty.csv`,
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/empty.csv`,
 		);
 
-		await processBulkUpload(
+		await processBulkUploadTask(
 			{
-				bulkUploadId: bulkUpload.id,
+				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);
-		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
+		const updatedBulkUpload = await loadBulkUploadTask(bulkUploadTask.id);
 		expect(updatedBulkUpload).toMatchObject({
-			status: BulkUploadStatus.FAILED,
+			status: TaskStatus.FAILED,
 			fileSize: 0,
 		});
 	});
@@ -311,21 +311,21 @@ describe('processBulkUpload', () => {
 	it('should update the file size for the bulk upload if the sourceKey is accessible and contains a valid CSV', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
 		);
-		expect(bulkUpload.fileSize).toBe(null);
+		expect(bulkUploadTask.fileSize).toBe(null);
 
-		await processBulkUpload(
+		await processBulkUploadTask(
 			{
-				bulkUploadId: bulkUpload.id,
+				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);
-		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
-		expect(updatedBulkUpload).toMatchObject({
+		const updatedBulkUploadTask = await loadBulkUploadTask(bulkUploadTask.id);
+		expect(updatedBulkUploadTask).toMatchObject({
 			fileSize: 93,
 		});
 	});
@@ -335,22 +335,22 @@ describe('processBulkUpload', () => {
 		const systemSource = await loadSystemSource();
 		const systemUser = await loadSystemUser();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({
+		const bulkUploadTask = await createTestBulkUploadTask({
 			sourceKey,
 			createdBy: systemUser.keycloakUserId,
 		});
-		const requests = await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/validCsvTemplate.csv`,
+		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
 		);
 
-		await processBulkUpload(
+		await processBulkUploadTask(
 			{
-				bulkUploadId: bulkUpload.id,
+				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);
-		const updatedBulkUpload = await loadBulkUpload(bulkUpload.id);
+		const updatedBulkUploadTask = await loadBulkUploadTask(bulkUploadTask.id);
 
 		const {
 			entries: [opportunity],
@@ -559,7 +559,7 @@ describe('processBulkUpload', () => {
 			total: 0,
 		});
 
-		expect(updatedBulkUpload.status).toEqual(BulkUploadStatus.COMPLETED);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
 		expect(requests.getRequest.isDone()).toEqual(true);
 		expect(requests.copyRequest.isDone()).toEqual(true);
 		expect(requests.deleteRequest.isDone()).toEqual(true);
@@ -568,15 +568,15 @@ describe('processBulkUpload', () => {
 	it('should create changemakers and changemaker-proposal relationships', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUpload = await createTestBulkUpload({ sourceKey });
-		await mockS3ResponsesForBulkUploadProcessing(
-			bulkUpload,
-			`${__dirname}/fixtures/processBulkUpload/validCsvTemplateWithChangemakers.csv`,
+		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		await mockS3ResponsesForBulkUploadTaskProcessing(
+			bulkUploadTask,
+			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplateWithChangemakers.csv`,
 		);
 
-		await processBulkUpload(
+		await processBulkUploadTask(
 			{
-				bulkUploadId: bulkUpload.id,
+				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);

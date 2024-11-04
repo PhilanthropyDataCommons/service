@@ -1,35 +1,28 @@
 import { ajv } from '../ajv';
+import { TaskStatus } from './TaskStatus';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { Source } from './Source';
 import type { KeycloakUserId } from './KeycloakUserId';
 
-enum BulkUploadStatus {
-	PENDING = 'pending',
-	IN_PROGRESS = 'in_progress',
-	COMPLETED = 'completed',
-	FAILED = 'failed',
-	CANCELED = 'canceled',
-}
-
-interface BulkUpload {
+interface BulkUploadTask {
 	readonly id: number;
 	sourceId: number;
 	readonly source: Source;
 	fileName: string;
 	sourceKey: string;
-	readonly status: BulkUploadStatus;
+	readonly status: TaskStatus;
 	readonly fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
 	readonly createdAt: string;
 	readonly createdBy: KeycloakUserId;
 }
 
-type WritableBulkUpload = Writable<BulkUpload>;
+type WritableBulkUploadTask = Writable<BulkUploadTask>;
 
-type InternallyWritableBulkUpload = WritableBulkUpload &
-	Pick<BulkUpload, 'status' | 'fileSize' | 'createdBy'>;
+type InternallyWritableBulkUploadTask = WritableBulkUploadTask &
+	Pick<BulkUploadTask, 'status' | 'fileSize' | 'createdBy'>;
 
-const writableBulkUploadSchema: JSONSchemaType<WritableBulkUpload> = {
+const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 	type: 'object',
 	properties: {
 		sourceId: {
@@ -47,13 +40,12 @@ const writableBulkUploadSchema: JSONSchemaType<WritableBulkUpload> = {
 	required: ['sourceId', 'fileName', 'sourceKey'],
 };
 
-const isWritableBulkUpload = ajv.compile(writableBulkUploadSchema);
+const isWritableBulkUploadTask = ajv.compile(writableBulkUploadTaskSchema);
 
 export {
-	BulkUpload,
-	BulkUploadStatus,
-	InternallyWritableBulkUpload,
-	WritableBulkUpload,
-	isWritableBulkUpload,
-	writableBulkUploadSchema,
+	BulkUploadTask,
+	InternallyWritableBulkUploadTask,
+	WritableBulkUploadTask,
+	isWritableBulkUploadTask,
+	writableBulkUploadTaskSchema,
 };

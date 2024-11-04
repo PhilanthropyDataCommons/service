@@ -108,7 +108,7 @@
 			}
 		},
 		"schemas": {
-			"BulkUpload": {
+			"BulkUploadTask": {
 				"type": "object",
 				"properties": {
 					"id": {
@@ -174,7 +174,7 @@
 					"createdAt"
 				]
 			},
-			"BulkUploadBundle": {
+			"BulkUploadTaskBundle": {
 				"allOf": [
 					{
 						"$ref": "#/components/schemas/Bundle"
@@ -185,7 +185,7 @@
 							"entries": {
 								"type": "array",
 								"items": {
-									"$ref": "#/components/schemas/BulkUpload"
+									"$ref": "#/components/schemas/BulkUploadTask"
 								}
 							}
 						},
@@ -1253,11 +1253,11 @@
 				}
 			}
 		},
-		"/bulkUploads": {
+		"/tasks/bulkUploads": {
 			"get": {
-				"operationId": "getBulkUploads",
-				"summary": "Gets a list of bulk uploads.",
-				"tags": ["Bulk Uploads"],
+				"operationId": "getBulkUploadTasks",
+				"summary": "Gets a list of bulk upload tasks.",
+				"tags": ["Tasks"],
 				"security": [
 					{
 						"auth": []
@@ -1274,7 +1274,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/BulkUploadBundle"
+									"$ref": "#/components/schemas/BulkUploadTaskBundle"
 								}
 							}
 						}
@@ -1292,9 +1292,9 @@
 				}
 			},
 			"post": {
-				"operationId": "addBulkUpload",
-				"summary": "Registers a bulk upload. This lets PDC ingest data previously uploaded via a POST to the /presignedPostRequests endpoint.",
-				"tags": ["Bulk Uploads"],
+				"operationId": "addBulkUploadTask",
+				"summary": "Registers a bulk upload task. This lets PDC ingest data previously uploaded via a POST to the /presignedPostRequests endpoint.",
+				"tags": ["Tasks"],
 				"security": [
 					{
 						"auth": []
@@ -1305,7 +1305,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/BulkUpload"
+								"$ref": "#/components/schemas/BulkUploadTask"
 							}
 						}
 					}
@@ -1316,7 +1316,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/BulkUpload"
+									"$ref": "#/components/schemas/BulkUploadTask"
 								}
 							}
 						}
@@ -1564,7 +1564,7 @@
 				},
 				"responses": {
 					"201": {
-						"description": "The presigned post request. Use the contents of this JSON to POST form data to S3. After posting data to S3, use the /bulkUploads endpoint to let PDC ingest the data.",
+						"description": "The presigned post request. Use the contents of this JSON to POST form data to S3. After posting data to S3, use the /bulkUploadTasks endpoint to let PDC ingest the data.",
 						"content": {
 							"application/json": {
 								"schema": {

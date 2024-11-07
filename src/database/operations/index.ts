@@ -13,4 +13,7 @@ export * from './proposalFieldValues';
 export * from './proposals';
 export * from './proposalVersions';
 export * from './sources';
+export * from './userChangemakerPermissions';
+export * from './userDataProviderPermissions';
+export * from './userFunderPermissions';
 export * from './users';

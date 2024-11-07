@@ -132,6 +132,9 @@ erDiagram
 	Proposal }o--|| User : "is created by"
 	ProposalVersion }o--|| User : "is created by"
 	BulkUpload }o--|| User : "is created by"
+	User }o--o{ Changemaker : "is granted permissions for"
+	User }o--o{ Funder : "is granted permissions for"
+	User }o--o{ DataProvider : "is granted permissions for"
 ```
 
 ## Narrative

@@ -1,17 +1,17 @@
 import { db } from '../../db';
 import type {
 	JsonResultSet,
-	BulkUpload,
-	InternallyWritableBulkUpload,
+	BulkUploadTask,
+	InternallyWritableBulkUploadTask,
 } from '../../../types';
 
-export const createBulkUpload = async (
-	createValues: InternallyWritableBulkUpload,
-): Promise<BulkUpload> => {
+export const createBulkUploadTask = async (
+	createValues: InternallyWritableBulkUploadTask,
+): Promise<BulkUploadTask> => {
 	const { sourceId, fileName, sourceKey, status, createdBy } = createValues;
 
-	const result = await db.sql<JsonResultSet<BulkUpload>>(
-		'bulkUploads.insertOne',
+	const result = await db.sql<JsonResultSet<BulkUploadTask>>(
+		'bulkUploadTasks.insertOne',
 		{
 			sourceId,
 			fileName,

@@ -1,1 +1,1 @@
-export * from './processBulkUpload';
+export * from './processBulkUploadTask';

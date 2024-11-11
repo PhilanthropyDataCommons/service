@@ -2,7 +2,7 @@ export * from './applicationFormFields';
 export * from './applicationForms';
 export * from './baseFieldLocalization';
 export * from './baseFields';
-export * from './bulkUploads';
+export * from './bulkUploadTasks';
 export * from './changemakerProposals';
 export * from './changemakers';
 export * from './dataProviders';

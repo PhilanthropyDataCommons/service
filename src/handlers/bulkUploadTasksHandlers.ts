@@ -1,14 +1,14 @@
 import {
 	assertSourceExists,
-	createBulkUpload,
+	createBulkUploadTask,
 	getLimitValues,
-	loadBulkUploadBundle,
+	loadBulkUploadTaskBundle,
 } from '../database';
 import {
-	BulkUploadStatus,
+	TaskStatus,
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
-	isWritableBulkUpload,
+	isWritableBulkUploadTask,
 } from '../types';
 import {
 	DatabaseError,
@@ -21,11 +21,11 @@ import {
 	extractCreatedByParameters,
 	extractPaginationParameters,
 } from '../queryParameters';
-import { addProcessBulkUploadJob } from '../jobQueue';
+import { addProcessBulkUploadTaskJob } from '../jobQueue';
 import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
 import type { Request, Response, NextFunction } from 'express';
 
-const postBulkUpload = (
+const postBulkUploadTask = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
@@ -34,11 +34,11 @@ const postBulkUpload = (
 		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
 		return;
 	}
-	if (!isWritableBulkUpload(req.body)) {
+	if (!isWritableBulkUploadTask(req.body)) {
 		next(
 			new InputValidationError(
 				'Invalid request body.',
-				isWritableBulkUpload.errors ?? [],
+				isWritableBulkUploadTask.errors ?? [],
 			),
 		);
 		return;
@@ -56,21 +56,21 @@ const postBulkUpload = (
 
 	assertSourceExists(sourceId)
 		.then(async () => {
-			const bulkUpload = await createBulkUpload({
+			const bulkUploadTask = await createBulkUploadTask({
 				sourceId,
 				fileName,
 				sourceKey,
-				status: BulkUploadStatus.PENDING,
+				status: TaskStatus.PENDING,
 				createdBy,
 			});
-			await addProcessBulkUploadJob({
-				bulkUploadId: bulkUpload.id,
+			await addProcessBulkUploadTaskJob({
+				bulkUploadId: bulkUploadTask.id,
 			});
-			res.status(201).contentType('application/json').send(bulkUpload);
+			res.status(201).contentType('application/json').send(bulkUploadTask);
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating bulk upload.', error));
+				next(new DatabaseError('Error creating bulk upload task.', error));
 				return;
 			}
 			if (error instanceof NotFoundError) {
@@ -88,7 +88,7 @@ const postBulkUpload = (
 		});
 };
 
-const getBulkUploads = (
+const getBulkUploadTasks = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
@@ -101,24 +101,24 @@ const getBulkUploads = (
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { createdBy } = extractCreatedByParameters(req);
 	(async () => {
-		const bulkUploadBundle = await loadBulkUploadBundle(
+		const bulkUploadTaskBundle = await loadBulkUploadTaskBundle(
 			req,
 			createdBy,
 			limit,
 			offset,
 		);
 
-		res.status(200).contentType('application/json').send(bulkUploadBundle);
+		res.status(200).contentType('application/json').send(bulkUploadTaskBundle);
 	})().catch((error: unknown) => {
 		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error retrieving bulk uploads.', error));
+			next(new DatabaseError('Error retrieving bulk upload tasks.', error));
 			return;
 		}
 		next(error);
 	});
 };
 
-export const bulkUploadsHandlers = {
-	postBulkUpload,
-	getBulkUploads,
+export const bulkUploadTasksHandlers = {
+	postBulkUploadTask,
+	getBulkUploadTasks,
 };

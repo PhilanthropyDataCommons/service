@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgraded to use OpenAPI Specification 3.1.
 
+## 0.17.0 2024-11-07
+
+### Changed
+
+- `BulkUpload` is now `BulkUploadTask`.
+- `GET /bulkUpload` and `POST /bulkUpload` are now `GET /tasks/bulkUpload` and `POST /tasks/bulkUpload`.
+  Future jobs for the graphile-worker will be routed under `tasks` as well.
+
 ## 0.16.0 2024-11-7
 
 ### Added

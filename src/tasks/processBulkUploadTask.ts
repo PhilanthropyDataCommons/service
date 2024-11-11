@@ -18,11 +18,11 @@ import {
 	createProposalFieldValue,
 	createProposalVersion,
 	loadBaseFields,
-	loadBulkUpload,
+	loadBulkUploadTask,
 	loadChangemakerByTaxId,
-	updateBulkUpload,
+	updateBulkUploadTask,
 } from '../database/operations';
-import { BulkUploadStatus, isProcessBulkUploadJobPayload } from '../types';
+import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import type { Readable } from 'stream';
 import type { GetObjectCommandOutput } from '@aws-sdk/client-s3';
@@ -30,7 +30,7 @@ import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
 	ApplicationFormField,
-	BulkUpload,
+	BulkUploadTask,
 	Opportunity,
 	Changemaker,
 	ProposalFieldValue,
@@ -81,7 +81,7 @@ const downloadS3ObjectToTemporaryStorage = async (
 	return temporaryFile;
 };
 
-const loadShortCodesFromBulkUploadCsv = async (
+const loadShortCodesFromBulkUploadTaskCsv = async (
 	csvPath: string,
 ): Promise<string[]> => {
 	let shortCodes: string[] = [];
@@ -123,7 +123,7 @@ const assertShortCodesAreValid = async (
 const assertCsvContainsValidShortCodes = async (
 	csvPath: string,
 ): Promise<void> => {
-	const shortCodes = await loadShortCodesFromBulkUploadCsv(csvPath);
+	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
 	if (shortCodes.length === 0) {
 		throw new Error('No short codes detected in the first row of the CSV');
 	}
@@ -146,23 +146,25 @@ const assertCsvContainsRowsOfEqualLength = async (
 	await finished(parser);
 };
 
-const assertBulkUploadCsvIsValid = async (csvPath: string): Promise<void> => {
+const assertBulkUploadTaskCsvIsValid = async (
+	csvPath: string,
+): Promise<void> => {
 	await assertCsvContainsValidShortCodes(csvPath);
 	await assertCsvContainsRowsOfEqualLength(csvPath);
 };
 
-const createOpportunityForBulkUpload = async (
-	bulkUpload: BulkUpload,
+const createOpportunityForBulkUploadTask = async (
+	bulkUploadTask: BulkUploadTask,
 ): Promise<Opportunity> =>
 	createOpportunity({
-		title: `Bulk Upload (${bulkUpload.createdAt})`,
+		title: `Bulk Upload (${bulkUploadTask.createdAt})`,
 	});
 
-const createApplicationFormFieldsForBulkUpload = async (
+const createApplicationFormFieldsForBulkUploadTask = async (
 	csvPath: string,
 	applicationFormId: number,
 ): Promise<ApplicationFormField[]> => {
-	const shortCodes = await loadShortCodesFromBulkUploadCsv(csvPath);
+	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
 	const baseFields = await loadBaseFields();
 	const applicationFormFields = await Promise.all(
 		shortCodes.map(async (shortCode, index) => {
@@ -186,8 +188,8 @@ const createApplicationFormFieldsForBulkUpload = async (
 	return applicationFormFields;
 };
 
-const getProcessedKey = (bulkUpload: BulkUpload): string =>
-	`${S3_BULK_UPLOADS_KEY_PREFIX}/${bulkUpload.id}`;
+const getProcessedKey = (bulkUploadTask: BulkUploadTask): string =>
+	`${S3_BULK_UPLOADS_KEY_PREFIX}/${bulkUploadTask.id}`;
 
 const getChangemakerTaxIdIndex = (columns: string[]): number =>
 	columns.indexOf(CHANGEMAKER_TAX_ID_SHORT_CODE);
@@ -211,7 +213,7 @@ const createOrLoadChangemaker = async (
 	return undefined;
 };
 
-export const processBulkUpload = async (
+export const processBulkUploadTask = async (
 	payload: unknown,
 	helpers: JobHelpers,
 ): Promise<void> => {
@@ -224,52 +226,59 @@ export const processBulkUpload = async (
 	helpers.logger.debug(
 		`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
 	);
-	const bulkUpload = await loadBulkUpload(payload.bulkUploadId);
-	if (bulkUpload.status !== BulkUploadStatus.PENDING) {
+	const bulkUploadTask = await loadBulkUploadTask(payload.bulkUploadId);
+	if (bulkUploadTask.status !== TaskStatus.PENDING) {
 		helpers.logger.warn(
 			'Bulk upload cannot be processed because it is not in a PENDING state',
-			{ bulkUpload },
+			{ bulkUploadTask },
 		);
 		return;
 	}
-	if (!bulkUpload.sourceKey.startsWith(S3_UNPROCESSED_KEY_PREFIX)) {
+	if (!bulkUploadTask.sourceKey.startsWith(S3_UNPROCESSED_KEY_PREFIX)) {
 		helpers.logger.info(
-			`Bulk upload cannot be processed because the associated sourceKey does not begin with ${S3_UNPROCESSED_KEY_PREFIX}`,
-			{ bulkUpload },
+			`Bulk upload task cannot be processed because the associated sourceKey does not begin with ${S3_UNPROCESSED_KEY_PREFIX}`,
+			{ bulkUploadTask },
 		);
-		await updateBulkUpload(bulkUpload.id, { status: BulkUploadStatus.FAILED });
+		await updateBulkUploadTask(bulkUploadTask.id, {
+			status: TaskStatus.FAILED,
+		});
 		return;
 	}
 
 	let bulkUploadFile: FileResult;
 	let bulkUploadHasFailed = false;
 	try {
-		await updateBulkUpload(bulkUpload.id, {
-			status: BulkUploadStatus.IN_PROGRESS,
+		await updateBulkUploadTask(bulkUploadTask.id, {
+			status: TaskStatus.IN_PROGRESS,
 		});
 		bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
-			bulkUpload.sourceKey,
+			bulkUploadTask.sourceKey,
 			helpers.logger,
 		);
 	} catch (err) {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
-		await updateBulkUpload(bulkUpload.id, { status: BulkUploadStatus.FAILED });
+		await updateBulkUploadTask(bulkUploadTask.id, {
+			status: TaskStatus.FAILED,
+		});
 		return;
 	}
 
-	const shortCodes = await loadShortCodesFromBulkUploadCsv(bulkUploadFile.path);
+	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(
+		bulkUploadFile.path,
+	);
 	const changemakerNameIndex = getChangemakerNameIndex(shortCodes);
 	const changemakerTaxIdIndex = getChangemakerTaxIdIndex(shortCodes);
 
 	try {
-		await assertBulkUploadCsvIsValid(bulkUploadFile.path);
-		const opportunity = await createOpportunityForBulkUpload(bulkUpload);
+		await assertBulkUploadTaskCsvIsValid(bulkUploadFile.path);
+		const opportunity =
+			await createOpportunityForBulkUploadTask(bulkUploadTask);
 		const applicationForm = await createApplicationForm({
 			opportunityId: opportunity.id,
 		});
 
 		const applicationFormFields =
-			await createApplicationFormFieldsForBulkUpload(
+			await createApplicationFormFieldsForBulkUploadTask(
 				bulkUploadFile.path,
 				applicationForm.id,
 			);
@@ -284,13 +293,13 @@ export const processBulkUpload = async (
 			const proposal = await createProposal({
 				opportunityId: opportunity.id,
 				externalId: `${recordNumber}`,
-				createdBy: bulkUpload.createdBy,
+				createdBy: bulkUploadTask.createdBy,
 			});
 			const proposalVersion = await createProposalVersion({
 				proposalId: proposal.id,
 				applicationFormId: applicationForm.id,
-				sourceId: bulkUpload.sourceId,
-				createdBy: bulkUpload.createdBy,
+				sourceId: bulkUploadTask.sourceId,
+				createdBy: bulkUploadTask.createdBy,
 			});
 
 			const changemakerName = record[changemakerNameIndex];
@@ -339,10 +348,10 @@ export const processBulkUpload = async (
 	try {
 		const fileStats = await fs.promises.stat(bulkUploadFile.path);
 		const fileSize = fileStats.size;
-		await updateBulkUpload(bulkUpload.id, { fileSize });
+		await updateBulkUploadTask(bulkUploadTask.id, { fileSize });
 	} catch (err) {
 		helpers.logger.warn(
-			`Unable to update the fileSize for bulkUpload ${bulkUpload.id}`,
+			`Unable to update the fileSize for bulkUploadTask ${bulkUploadTask.id}`,
 			{ err },
 		);
 	}
@@ -357,8 +366,8 @@ export const processBulkUpload = async (
 	}
 
 	try {
-		const copySource = `${S3_BUCKET}/${bulkUpload.sourceKey}`;
-		const copyDestination = getProcessedKey(bulkUpload);
+		const copySource = `${S3_BUCKET}/${bulkUploadTask.sourceKey}`;
+		const copyDestination = getProcessedKey(bulkUploadTask);
 		await s3Client.copyObject({
 			Bucket: S3_BUCKET,
 			CopySource: copySource,
@@ -366,21 +375,25 @@ export const processBulkUpload = async (
 		});
 		await s3Client.deleteObject({
 			Bucket: S3_BUCKET,
-			Key: bulkUpload.sourceKey,
+			Key: bulkUploadTask.sourceKey,
 		});
-		await updateBulkUpload(bulkUpload.id, { sourceKey: copyDestination });
+		await updateBulkUploadTask(bulkUploadTask.id, {
+			sourceKey: copyDestination,
+		});
 	} catch (err) {
 		helpers.logger.warn(
-			`Moving the bulk upload file to final processed destination failed (${bulkUploadFile.path})`,
+			`Moving the bulk upload task file to final processed destination failed (${bulkUploadFile.path})`,
 			{ err },
 		);
 	}
 
 	if (bulkUploadHasFailed) {
-		await updateBulkUpload(bulkUpload.id, { status: BulkUploadStatus.FAILED });
+		await updateBulkUploadTask(bulkUploadTask.id, {
+			status: TaskStatus.FAILED,
+		});
 	} else {
-		await updateBulkUpload(bulkUpload.id, {
-			status: BulkUploadStatus.COMPLETED,
+		await updateBulkUploadTask(bulkUploadTask.id, {
+			status: TaskStatus.COMPLETED,
 		});
 	}
 };

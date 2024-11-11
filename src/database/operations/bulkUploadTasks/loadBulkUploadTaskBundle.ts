@@ -2,22 +2,22 @@ import { loadBundle } from '../generic/loadBundle';
 import type {
 	JsonResultSet,
 	Bundle,
-	BulkUpload,
+	BulkUploadTask,
 	AuthContext,
 	KeycloakUserId,
 } from '../../../types';
 
-export const loadBulkUploadBundle = async (
+export const loadBulkUploadTaskBundle = async (
 	authContext: AuthContext | undefined,
 	createdBy: KeycloakUserId | undefined,
 	limit: number | undefined,
 	offset: number,
-): Promise<Bundle<BulkUpload>> => {
+): Promise<Bundle<BulkUploadTask>> => {
 	const authContextKeycloakUserId = authContext?.user.keycloakUserId;
 	const authContextIsAdministrator = authContext?.role.isAdministrator;
 
-	const bundle = await loadBundle<JsonResultSet<BulkUpload>>(
-		'bulkUploads.selectWithPagination',
+	const bundle = await loadBundle<JsonResultSet<BulkUploadTask>>(
+		'bulkUploadTasks.selectWithPagination',
 		{
 			authContextIsAdministrator,
 			authContextKeycloakUserId,
@@ -25,7 +25,7 @@ export const loadBulkUploadBundle = async (
 			limit,
 			offset,
 		},
-		'bulk_uploads',
+		'bulk_upload_tasks',
 	);
 	const entries = bundle.entries.map((entry) => entry.object);
 	return {

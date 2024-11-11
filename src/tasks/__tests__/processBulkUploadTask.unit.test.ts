@@ -1,10 +1,10 @@
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
-import { processBulkUpload } from '../processBulkUpload';
+import { processBulkUploadTask } from '../processBulkUploadTask';
 
-describe('processBulkUpload', () => {
+describe('processBulkUploadTask', () => {
 	it('should not error when passed an invalid payload', async () => {
 		await expect(
-			processBulkUpload({}, getMockJobHelpers()),
+			processBulkUploadTask({}, getMockJobHelpers()),
 		).resolves.not.toThrow();
 	});
 });

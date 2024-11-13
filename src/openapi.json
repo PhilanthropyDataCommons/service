@@ -1163,6 +1163,12 @@
 						"type": "string",
 						"format": "date-time",
 						"readOnly": true
+					},
+					"notAfter": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true,
+						"nullable": true
 					}
 				},
 				"required": ["id", "", "createdAt"]
@@ -2711,6 +2717,52 @@
 								}
 							}
 						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "deleteUserChangemakerPermission",
+				"summary": "Deletes a user-changemaker permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "userKeycloakUserId",
+						"description": "The keycloak user id of a user.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "changemakerId",
+						"description": "The id of a changemaker.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be deleted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Confirmation of successful deletion."
 					}
 				}
 			}

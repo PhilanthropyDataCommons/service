@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for changemakers seeking grants.",
-		"version": "0.16.1",
+		"version": "0.16.2",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -1077,26 +1077,35 @@
 						"type": "string",
 						"example": "550e8400-e29b-41d4-a716-446655440000"
 					},
-					"roles": {
+					"permissions": {
 						"type": "object",
 						"readOnly": true,
 						"properties": {
 							"changemaker": {
 								"type": "object",
 								"additionalProperties": {
-									"$ref": "#/components/schemas/RoleMap"
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Permission"
+									}
 								}
 							},
 							"dataProvider": {
 								"type": "object",
 								"additionalProperties": {
-									"$ref": "#/components/schemas/RoleMap"
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Permission"
+									}
 								}
 							},
 							"funder": {
 								"type": "object",
 								"additionalProperties": {
-									"$ref": "#/components/schemas/RoleMap"
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Permission"
+									}
 								}
 							}
 						},
@@ -1128,6 +1137,35 @@
 						"required": ["entries"]
 					}
 				]
+			},
+			"UserChangemakerPermission": {
+				"type": "object",
+				"properties": {
+					"permission": {
+						"$ref": "#/components/schemas/Permission",
+						"readOnly": true
+					},
+					"changemakerId": {
+						"type": "integer",
+						"readOnly": true
+					},
+					"userKeycloakUserId": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdBy": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "", "createdAt"]
 			}
 		}
 	},
@@ -2615,6 +2653,61 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/UserBundle"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/users/{userKeycloakUserId}/changemakers/{changemakerId}/permissions/{permission}": {
+			"put": {
+				"operationId": "createOrUpdateUserChangemakerPermission",
+				"summary": "Creates or updates a user-changemaker permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "userKeycloakUserId",
+						"description": "The keycloak user id of a user.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "changemakerId",
+						"description": "The id of a changemaker.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be granted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "The resulting permission.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserChangemakerPermission"
 								}
 							}
 						}

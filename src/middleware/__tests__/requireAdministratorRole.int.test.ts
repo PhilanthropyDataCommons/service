@@ -8,6 +8,11 @@ import type { User } from '../../types';
 const getMockedUser = (): User => ({
 	keycloakUserId: getTestUserKeycloakUserId(),
 	createdAt: '',
+	permissions: {
+		changemaker: {},
+		dataProvider: {},
+		funder: {},
+	},
 });
 
 describe('requireAuthentication', () => {

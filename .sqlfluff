@@ -9,7 +9,6 @@ exclude_rules =
   capitalisation.literals,
   capitalisation.types,
   convention.terminator,
-  layout.end_of_file,
   layout.functions,
   layout.indent,
   layout.long_lines,

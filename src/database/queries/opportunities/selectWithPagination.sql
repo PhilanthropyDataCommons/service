@@ -3,4 +3,3 @@ FROM opportunities
 ORDER BY id
 LIMIT :limit
 OFFSET :offset
-

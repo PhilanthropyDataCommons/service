@@ -7,4 +7,4 @@ INSERT INTO proposals (
   :opportunityId,
   :createdBy
 )
-RETURNING proposal_to_json(proposals) AS "object";
+RETURNING proposal_to_json(proposals) AS object;

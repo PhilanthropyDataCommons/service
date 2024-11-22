@@ -4,4 +4,4 @@ INSERT INTO users (
 VALUES (
   :keycloakUserId
 )
-RETURNING user_to_json(users) AS "object";
+RETURNING user_to_json(users) AS object;

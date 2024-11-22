@@ -1,5 +1,5 @@
 SELECT DISTINCT o.id,
-  changemaker_to_json(o.*, :keycloakUserId) AS "object"
+  changemaker_to_json(o.*, :keycloakUserId) AS object
 FROM changemakers o
   LEFT JOIN changemakers_proposals op on op.changemaker_id = o.id
 WHERE

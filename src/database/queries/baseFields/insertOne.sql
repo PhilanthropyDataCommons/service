@@ -12,4 +12,4 @@ VALUES (
   :dataType,
   :scope
 )
-RETURNING base_field_to_json(base_fields) AS "object";
+RETURNING base_field_to_json(base_fields) AS object;

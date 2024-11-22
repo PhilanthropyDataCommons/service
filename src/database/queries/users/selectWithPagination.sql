@@ -1,4 +1,4 @@
-SELECT user_to_json(users.*) as "object"
+SELECT user_to_json(users.*) as object
 FROM users
 WHERE
   CASE

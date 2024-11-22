@@ -1,4 +1,4 @@
-SELECT changemaker_proposal_to_json(changemakers_proposals.*) as "object"
+SELECT changemaker_proposal_to_json(changemakers_proposals.*) as object
 FROM changemakers_proposals
 WHERE
   CASE

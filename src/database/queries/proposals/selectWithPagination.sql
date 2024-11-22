@@ -1,4 +1,4 @@
-SELECT proposal_to_json(p.*) as "object"
+SELECT proposal_to_json(p.*) as object
 FROM proposals p
   LEFT JOIN proposal_versions pv ON pv.proposal_id = p.id
   LEFT JOIN proposal_field_values pfv on pfv.proposal_version_id = pv.id

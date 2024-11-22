@@ -5,4 +5,4 @@ INSERT INTO changemakers_proposals (
   :changemakerId,
   :proposalId
 )
-RETURNING changemaker_proposal_to_json(changemakers_proposals) AS "object";
+RETURNING changemaker_proposal_to_json(changemakers_proposals) AS object;

@@ -13,4 +13,4 @@ ON CONFLICT (base_field_id, language)
 DO UPDATE SET
   label = EXCLUDED.label,
   description = EXCLUDED.description
-RETURNING base_field_localization_to_json(base_field_localizations) AS "object";
+RETURNING base_field_localization_to_json(base_field_localizations) AS object;

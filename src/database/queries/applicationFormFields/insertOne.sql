@@ -9,4 +9,4 @@ INSERT INTO application_form_fields (
   :position,
   :label
 )
-RETURNING application_form_field_to_json(application_form_fields) AS "object";
+RETURNING application_form_field_to_json(application_form_fields) AS object;

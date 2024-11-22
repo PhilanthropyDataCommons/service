@@ -11,4 +11,4 @@ INSERT INTO user_funder_permissions (
 )
 ON CONFLICT (user_keycloak_user_id, permission, funder_short_code)
 DO NOTHING
-RETURNING user_funder_permission_to_json(user_funder_permissions) AS "object";
+RETURNING user_funder_permission_to_json(user_funder_permissions) AS object;

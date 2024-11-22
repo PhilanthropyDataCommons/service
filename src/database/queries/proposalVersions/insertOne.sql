@@ -18,4 +18,4 @@ INSERT INTO proposal_versions (
     1
   )
 )
-RETURNING proposal_version_to_json(proposal_versions) AS "object";
+RETURNING proposal_version_to_json(proposal_versions) AS object;

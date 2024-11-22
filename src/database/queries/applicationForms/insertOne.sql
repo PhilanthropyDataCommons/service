@@ -12,4 +12,4 @@ INSERT INTO application_forms (
     1
   )
 )
-RETURNING application_form_to_json(application_forms) AS "object";
+RETURNING application_form_to_json(application_forms) AS object;

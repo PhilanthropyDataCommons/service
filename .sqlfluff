@@ -15,7 +15,8 @@ exclude_rules =
   layout.long_lines,
   layout.spacing,
   references.consistent,
-  references.quoting,
+  # allow use of keywords as identifiers when unambiguous
+  references.keywords,
   structure.join_condition_order,
 
 [sqlfluff:indentation]

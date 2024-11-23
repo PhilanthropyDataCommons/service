@@ -7,7 +7,6 @@ exclude_rules =
   layout.indent,
   layout.long_lines,
   layout.spacing,
-  references.consistent,
   # allow use of keywords as identifiers when unambiguous
   references.keywords,
   structure.join_condition_order,

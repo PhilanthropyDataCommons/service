@@ -5,14 +5,14 @@ WHERE
     WHEN :createdBy::UUID IS NULL THEN
       TRUE
     ELSE
-      bulk_upload_tasks.created_by = :createdBy
+      created_by = :createdBy
     END
   AND CASE
     WHEN :authContextKeycloakUserId::UUID IS NULL THEN
       TRUE
     ELSE
       (
-        bulk_upload_tasks.created_by = :authContextKeycloakUserId
+        created_by = :authContextKeycloakUserId
         OR :authContextIsAdministrator::BOOLEAN
       )
     END

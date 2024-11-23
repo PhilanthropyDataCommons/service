@@ -18,4 +18,4 @@ WHERE
     END
 GROUP BY keycloak_user_id
 ORDER BY created_at DESC
-OFFSET :offset FETCH NEXT :limit ROWS ONLY;
+LIMIT :limit OFFSET :offset;

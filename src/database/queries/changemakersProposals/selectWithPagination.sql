@@ -14,4 +14,4 @@ WHERE
       proposal_id = :proposalId
     END
 ORDER BY id DESC
-OFFSET :offset FETCH NEXT :limit ROWS ONLY;
+LIMIT :limit OFFSET :offset;

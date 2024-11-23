@@ -10,4 +10,4 @@ WHERE
       op.proposal_id = :proposalId
     END
 ORDER BY o.id DESC
-OFFSET :offset FETCH NEXT :limit ROWS ONLY
+LIMIT :limit OFFSET :offset

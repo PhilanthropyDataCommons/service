@@ -34,4 +34,4 @@ WHERE
     END
 GROUP BY p.id
 ORDER BY p.id DESC
-OFFSET :offset FETCH NEXT :limit ROWS ONLY;
+LIMIT :limit OFFSET :offset;

@@ -1,7 +1,7 @@
 SELECT drop_function('base_field_localization_to_json');
 
 CREATE FUNCTION base_field_localization_to_json(base_field_localization base_field_localizations)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 BEGIN
   RETURN jsonb_build_object(
     'baseFieldId', base_field_localization.base_field_id,

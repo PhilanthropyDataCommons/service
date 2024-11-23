@@ -1,7 +1,7 @@
 SELECT drop_function('user_funder_permission_to_json');
 
 CREATE FUNCTION user_funder_permission_to_json(user_funder_permission user_funder_permissions)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 BEGIN
   RETURN jsonb_build_object(
     'userKeycloakUserId', user_funder_permission.user_keycloak_user_id,

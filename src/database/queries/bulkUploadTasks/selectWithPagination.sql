@@ -13,7 +13,7 @@ WHERE
     ELSE
       (
         bulk_upload_tasks.created_by = :authContextKeycloakUserId
-        OR :authContextIsAdministrator::boolean
+        OR :authContextIsAdministrator::BOOLEAN
       )
     END
 ORDER BY id DESC

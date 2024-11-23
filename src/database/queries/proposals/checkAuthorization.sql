@@ -9,7 +9,7 @@ SELECT EXISTS (
           ELSE
           (
             created_by = :authContextKeycloakUserId
-            OR :authContextIsAdministrator::boolean
+            OR :authContextIsAdministrator::BOOLEAN
           )
           END
 ) AS result;

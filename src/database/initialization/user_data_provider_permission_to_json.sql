@@ -1,7 +1,7 @@
 SELECT drop_function('user_data_provider_permission_to_json');
 
 CREATE FUNCTION user_data_provider_permission_to_json(user_data_provider_permission user_data_provider_permissions)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 BEGIN
   RETURN jsonb_build_object(
     'userKeycloakUserId', user_data_provider_permission.user_keycloak_user_id,

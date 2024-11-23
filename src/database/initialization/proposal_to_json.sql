@@ -1,7 +1,7 @@
 SELECT drop_function('proposal_to_json');
 
 CREATE FUNCTION proposal_to_json(proposal proposals)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 DECLARE
   proposal_versions_json JSONB;
 BEGIN

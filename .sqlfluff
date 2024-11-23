@@ -4,7 +4,6 @@ templater = placeholder
 exclude_rules =
   aliasing.table,
   capitalisation.functions,
-  capitalisation.types,
   layout.functions,
   layout.indent,
   layout.long_lines,

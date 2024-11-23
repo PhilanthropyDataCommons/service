@@ -8,7 +8,7 @@ WHERE
       keycloak_user_id = :keycloakUserId
     END
   AND CASE
-    WHEN :authContextKeycloakUserId::UUID IS NULL THEN
+    WHEN :authContextKeycloakUserId::uuid IS NULL THEN
       TRUE
     ELSE
       (

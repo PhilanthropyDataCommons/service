@@ -11,14 +11,14 @@ WHERE
       p.created_by = :createdBy
     END
   AND CASE
-    WHEN (:search::text IS NULL
+    WHEN (:search::TEXT IS NULL
       OR :search = '') THEN
       TRUE
     ELSE
-      pfv.value_search @@ websearch_to_tsquery('english', :search::text)
+      pfv.value_search @@ websearch_to_tsquery('english', :search::TEXT)
     END
   AND CASE
-    WHEN :changemakerId::integer IS NULL THEN
+    WHEN :changemakerId::INTEGER IS NULL THEN
       TRUE
     ELSE
       op.changemaker_id = :changemakerId
@@ -29,7 +29,7 @@ WHERE
     ELSE
       (
         p.created_by = :authContextKeycloakUserId
-        OR :authContextIsAdministrator::boolean
+        OR :authContextIsAdministrator::BOOLEAN
       )
     END
 GROUP BY p.id

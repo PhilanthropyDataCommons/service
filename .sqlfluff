@@ -5,7 +5,6 @@ exclude_rules =
   aliasing.table,
   capitalisation.functions,
   capitalisation.identifiers,
-  capitalisation.keywords,
   capitalisation.literals,
   capitalisation.types,
   layout.functions,

@@ -6,7 +6,7 @@ INSERT INTO application_forms (
   COALESCE(
     (
       SELECT MAX(af.version) + 1
-      FROM application_forms as af
+      FROM application_forms AS af
       WHERE af.opportunity_id = :opportunityId
     ),
     1

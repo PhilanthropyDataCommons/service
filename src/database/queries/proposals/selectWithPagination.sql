@@ -1,8 +1,8 @@
-SELECT proposal_to_json(p.*) as object
+SELECT proposal_to_json(p.*) AS object
 FROM proposals p
   LEFT JOIN proposal_versions pv ON pv.proposal_id = p.id
-  LEFT JOIN proposal_field_values pfv on pfv.proposal_version_id = pv.id
-  LEFT JOIN changemakers_proposals op on op.proposal_id = p.id
+  LEFT JOIN proposal_field_values pfv ON pfv.proposal_version_id = pv.id
+  LEFT JOIN changemakers_proposals op ON op.proposal_id = p.id
 WHERE
   CASE
     WHEN :createdBy::UUID IS NULL THEN

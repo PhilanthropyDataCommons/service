@@ -12,7 +12,7 @@ INSERT INTO proposal_versions (
   COALESCE(
     (
       SELECT MAX(pv.version) + 1
-      FROM proposal_versions as pv
+      FROM proposal_versions AS pv
       WHERE pv.proposal_id = :proposalId
     ),
     1

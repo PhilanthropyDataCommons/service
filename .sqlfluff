@@ -8,7 +8,6 @@ exclude_rules =
   capitalisation.keywords,
   capitalisation.literals,
   capitalisation.types,
-  convention.terminator,
   layout.functions,
   layout.indent,
   layout.long_lines,
@@ -21,6 +20,10 @@ exclude_rules =
 [sqlfluff:indentation]
 indent_unit = space
 tab_space_size = 2
+
+[sqlfluff:rules:convention.terminator]
+multiline_newline = False
+require_final_semicolon = True
 
 [sqlfluff:templater:placeholder]
 param_style = colon

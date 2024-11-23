@@ -9,4 +9,4 @@ WHERE
     END
 ORDER BY created_at
 LIMIT :limit
-OFFSET :offset
+OFFSET :offset;

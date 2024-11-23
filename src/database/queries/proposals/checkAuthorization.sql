@@ -12,4 +12,4 @@ SELECT EXISTS (
             OR :authContextIsAdministrator::boolean
           )
           END
-) AS result
+) AS result;

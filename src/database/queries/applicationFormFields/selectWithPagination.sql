@@ -9,4 +9,4 @@ WHERE
     END
 ORDER BY position, id
 LIMIT :limit
-OFFSET :offset
+OFFSET :offset;

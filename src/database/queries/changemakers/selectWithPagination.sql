@@ -10,4 +10,4 @@ WHERE
       op.proposal_id = :proposalId
     END
 ORDER BY o.id DESC
-LIMIT :limit OFFSET :offset
+LIMIT :limit OFFSET :offset;

@@ -18,4 +18,4 @@ WHERE
     END
 ORDER BY id DESC
 LIMIT :limit
-OFFSET :offset
+OFFSET :offset;

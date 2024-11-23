@@ -9,9 +9,9 @@ INSERT INTO proposal_versions (
   :applicationFormId,
   :sourceId,
   :createdBy,
-  COALESCE(
+  coalesce(
     (
-      SELECT MAX(pv.version) + 1
+      SELECT max(pv.version) + 1
       FROM proposal_versions AS pv
       WHERE pv.proposal_id = :proposalId
     ),

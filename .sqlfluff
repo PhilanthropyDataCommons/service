@@ -2,7 +2,6 @@
 dialect = postgres
 templater = placeholder
 exclude_rules =
-  capitalisation.functions,
   layout.functions,
   layout.indent,
   layout.long_lines,

@@ -3,9 +3,9 @@ INSERT INTO application_forms (
   version
 ) VALUES (
   :opportunityId,
-  COALESCE(
+  coalesce(
     (
-      SELECT MAX(af.version) + 1
+      SELECT max(af.version) + 1
       FROM application_forms AS af
       WHERE af.opportunity_id = :opportunityId
     ),

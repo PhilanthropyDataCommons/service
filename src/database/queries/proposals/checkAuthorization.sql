@@ -5,7 +5,7 @@ SELECT EXISTS (
       AND
         CASE
           WHEN :authContextKeycloakUserId::UUID IS NULL THEN
-            true
+            TRUE
           ELSE
           (
             created_by = :authContextKeycloakUserId

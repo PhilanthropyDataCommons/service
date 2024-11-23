@@ -5,7 +5,7 @@ FROM changemakers o
 WHERE
   CASE
     WHEN :proposalId::integer IS NULL THEN
-      true
+      TRUE
     ELSE
       op.proposal_id = :proposalId
     END

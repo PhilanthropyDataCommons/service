@@ -3,13 +3,13 @@ FROM bulk_upload_tasks
 WHERE
   CASE
     WHEN :createdBy::UUID IS NULL THEN
-      true
+      TRUE
     ELSE
       bulk_upload_tasks.created_by = :createdBy
     END
   AND CASE
     WHEN :authContextKeycloakUserId::UUID IS NULL THEN
-      true
+      TRUE
     ELSE
       (
         bulk_upload_tasks.created_by = :authContextKeycloakUserId

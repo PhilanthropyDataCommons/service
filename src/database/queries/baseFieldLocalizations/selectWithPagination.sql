@@ -3,7 +3,7 @@ FROM base_field_localizations
 WHERE
   CASE
     WHEN :baseFieldId::integer IS NULL THEN
-      true
+      TRUE
     ELSE
       base_field_id = :baseFieldId
     END

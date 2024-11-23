@@ -3,13 +3,13 @@ FROM users
 WHERE
   CASE
     WHEN :keycloakUserId::uuid IS NULL THEN
-      true
+      TRUE
     ELSE
       keycloak_user_id = :keycloakUserId
     END
   AND CASE
     WHEN :authContextKeycloakUserId::UUID IS NULL THEN
-      true
+      TRUE
     ELSE
       (
         keycloak_user_id = :authContextKeycloakUserId

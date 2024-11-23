@@ -6,26 +6,26 @@ FROM proposals p
 WHERE
   CASE
     WHEN :createdBy::UUID IS NULL THEN
-      true
+      TRUE
     ELSE
       p.created_by = :createdBy
     END
   AND CASE
     WHEN (:search::text IS NULL
       OR :search = '') THEN
-      true
+      TRUE
     ELSE
       pfv.value_search @@ websearch_to_tsquery('english', :search::text)
     END
   AND CASE
     WHEN :changemakerId::integer IS NULL THEN
-      true
+      TRUE
     ELSE
       op.changemaker_id = :changemakerId
     END
   AND CASE
     WHEN :authContextKeycloakUserId::UUID IS NULL THEN
-      true
+      TRUE
     ELSE
       (
         p.created_by = :authContextKeycloakUserId

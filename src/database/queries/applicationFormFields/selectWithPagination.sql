@@ -3,7 +3,7 @@ FROM application_form_fields
 WHERE
   CASE
     WHEN :applicationFormId::integer IS NULL THEN
-      true
+      TRUE
     ELSE
       application_form_id = :applicationFormId
     END

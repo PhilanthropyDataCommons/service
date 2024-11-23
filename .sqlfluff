@@ -4,7 +4,6 @@ templater = placeholder
 exclude_rules =
   layout.functions,
   layout.indent,
-  layout.long_lines,
   layout.spacing,
   # allow use of keywords as identifiers when unambiguous
   references.keywords,

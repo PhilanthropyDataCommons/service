@@ -1,6 +1,9 @@
 SELECT drop_function('changemaker_to_json');
 
-CREATE FUNCTION changemaker_to_json(changemaker changemakers, keycloakUserId uuid DEFAULT NULL)
+CREATE FUNCTION changemaker_to_json(
+  changemaker changemakers,
+  keycloakUserId uuid DEFAULT NULL
+)
 RETURNS jsonb AS $$
 DECLARE
   proposal_field_values_json JSONB;

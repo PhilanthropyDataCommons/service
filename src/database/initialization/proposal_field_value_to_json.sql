@@ -1,6 +1,8 @@
 SELECT drop_function('proposal_field_value_to_json');
 
-CREATE FUNCTION proposal_field_value_to_json(proposal_field_value proposal_field_values)
+CREATE FUNCTION proposal_field_value_to_json(
+  proposal_field_value proposal_field_values
+)
 RETURNS jsonb AS $$
 DECLARE
   application_form_field_json JSONB;

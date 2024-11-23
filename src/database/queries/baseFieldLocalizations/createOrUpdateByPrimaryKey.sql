@@ -11,6 +11,6 @@ INSERT INTO base_field_localizations (
 )
 ON CONFLICT (base_field_id, language)
 DO UPDATE SET
-  label = EXCLUDED.label,
-  description = EXCLUDED.description
+  label = excluded.label,
+  description = excluded.description
 RETURNING base_field_localization_to_json(base_field_localizations) AS object;

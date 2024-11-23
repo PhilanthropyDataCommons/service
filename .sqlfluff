@@ -2,7 +2,6 @@
 dialect = postgres
 templater = placeholder
 exclude_rules =
-  layout.functions,
   layout.indent,
   layout.spacing,
   # allow use of keywords as identifiers when unambiguous

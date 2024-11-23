@@ -1,4 +1,4 @@
-SELECT EXISTS (
+SELECT EXISTS(
   SELECT 1
     FROM proposals
     WHERE id = :id

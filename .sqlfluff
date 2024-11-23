@@ -9,7 +9,6 @@ exclude_rules =
   layout.spacing,
   # allow use of keywords as identifiers when unambiguous
   references.keywords,
-  structure.join_condition_order,
 
 [sqlfluff:indentation]
 indent_unit = space

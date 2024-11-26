@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  eslint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,4 +14,31 @@ jobs:
         with:
           node-version: 20.17.0
       - run: npm ci
-      - run: npm run lint
+      - run: npm run lint:eslint
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.17.0
+      - run: npm ci
+      - run: npm run lint:prettier
+  swagger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.17.0
+      - run: npm ci
+      - run: npm run lint:swagger
+  tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.17.0
+      - run: npm ci
+      - run: npm run lint:tsc

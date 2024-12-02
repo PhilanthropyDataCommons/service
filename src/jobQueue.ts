@@ -61,6 +61,6 @@ export const addJob = async (jobType: JobType, payload: unknown) =>
 		payload,
 	);
 
-export const addProcessBulkUploadTaskJob = async (
+export const addProcessBulkUploadJob = async (
 	payload: ProcessBulkUploadJobPayload,
 ) => addJob(JobType.PROCESS_BULK_UPLOAD, payload);

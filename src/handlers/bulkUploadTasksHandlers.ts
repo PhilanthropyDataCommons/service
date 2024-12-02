@@ -21,7 +21,7 @@ import {
 	extractCreatedByParameters,
 	extractPaginationParameters,
 } from '../queryParameters';
-import { addProcessBulkUploadTaskJob } from '../jobQueue';
+import { addProcessBulkUploadJob } from '../jobQueue';
 import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -63,7 +63,7 @@ const postBulkUploadTask = (
 				status: TaskStatus.PENDING,
 				createdBy,
 			});
-			await addProcessBulkUploadTaskJob({
+			await addProcessBulkUploadJob({
 				bulkUploadId: bulkUploadTask.id,
 			});
 			res.status(201).contentType('application/json').send(bulkUploadTask);

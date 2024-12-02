@@ -1,0 +1,3 @@
+ALTER TABLE user_changemaker_permissions ADD COLUMN not_after TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+ALTER TABLE user_funder_permissions ADD COLUMN not_after TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+ALTER TABLE user_data_provider_permissions ADD COLUMN not_after TIMESTAMP WITH TIME ZONE DEFAULT NULL;

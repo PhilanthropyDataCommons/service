@@ -3,12 +3,13 @@ SELECT drop_function('user_changemaker_permission_to_json');
 CREATE FUNCTION user_changemaker_permission_to_json(user_changemaker_permission user_changemaker_permissions)
 RETURNS JSONB AS $$
 BEGIN
-  RETURN jsonb_build_object(
+  RETURN jsonb_strip_nulls(jsonb_build_object(
     'userKeycloakUserId', user_changemaker_permission.user_keycloak_user_id,
     'permission', user_changemaker_permission.permission,
     'changemakerId', user_changemaker_permission.changemaker_id,
     'createdBy', user_changemaker_permission.created_by,
-    'createdAt', user_changemaker_permission.created_at
-  );
+    'createdAt', user_changemaker_permission.created_at,
+    'notAfter', user_changemaker_permission.not_after
+  ));
 END;
 $$ LANGUAGE plpgsql;

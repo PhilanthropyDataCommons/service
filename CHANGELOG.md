@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgraded to use OpenAPI Specification 3.1.
 
+## 0.16.3 2024-12-02
+
+### Fixed
+
+- `Changemaker` type was missing the fields property.
+
 ## 0.16.2 2024-11-12
 
 ### Fixed

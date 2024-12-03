@@ -10,6 +10,7 @@ interface UserChangemakerPermission {
 	readonly changemakerId: number;
 	readonly createdBy: KeycloakUserId;
 	readonly createdAt: string;
+	readonly notAfter?: string;
 }
 
 type WritableUserChangemakerPermission = Writable<UserChangemakerPermission>;

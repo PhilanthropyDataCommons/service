@@ -15,6 +15,12 @@ type WritableKeys<T> = {
 	[P in keyof T]: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P>;
 }[keyof T];
 
+type OptionalKeys<T> = {
+	[P in keyof T]: {} extends Pick<T, P> ? P : never;
+}[keyof T];
+
+type RequiredKeys<T> = Exclude<keyof T, OptionalKeys<T>>;
+
 type WritablePrimitive =
 	| undefined
 	| null
@@ -32,5 +38,20 @@ export type Writable<T> = T extends WritablePrimitive
 			: T extends Set<infer X>
 				? Set<Writable<X>>
 				: T extends Object
-					? { [K in WritableKeys<T>]: Writable<T[K]> }
+					? {
+							// Capture required keys
+							[K in keyof T & RequiredKeys<T> & WritableKeys<T>]: Writable<
+								T[K]
+							>;
+						} & {
+							// Capture optional keys
+							[K in keyof T & OptionalKeys<T> & WritableKeys<T>]?: Writable<
+								T[K]
+							>;
+						} extends infer O
+						? {
+								// Flatten the two types (required and optional) into a single combined type
+								[K in keyof O]: O[K];
+							}
+						: never
 					: T;

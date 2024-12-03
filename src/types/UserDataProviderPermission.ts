@@ -11,6 +11,7 @@ interface UserDataProviderPermission {
 	readonly dataProviderShortCode: ShortCode;
 	readonly createdBy: KeycloakUserId;
 	readonly createdAt: string;
+	readonly notAfter?: string;
 }
 
 type WritableUserDataProviderPermission = Writable<UserDataProviderPermission>;

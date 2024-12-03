@@ -16,6 +16,9 @@ BEGIN
       SELECT user_changemaker_permissions.changemaker_id, jsonb_agg(user_changemaker_permissions.permission) AS permissions
       FROM user_changemaker_permissions
       WHERE user_changemaker_permissions.user_keycloak_user_id = "user".keycloak_user_id
+        AND (user_changemaker_permissions.not_after IS NULL
+          OR user_changemaker_permissions.not_after > now()
+        )
       GROUP BY user_changemaker_permissions.changemaker_id
     ) AS aggregated_user_changemaker_permissions
   );
@@ -28,6 +31,8 @@ BEGIN
       SELECT user_data_provider_permissions.data_provider_short_code, jsonb_agg(user_data_provider_permissions.permission) AS permissions
       FROM user_data_provider_permissions
       WHERE user_data_provider_permissions.user_keycloak_user_id = "user".keycloak_user_id
+        AND (user_data_provider_permissions.not_after IS NULL
+          OR user_data_provider_permissions.not_after > now())
       GROUP BY user_data_provider_permissions.data_provider_short_code
     ) AS aggregated_user_data_provider_permissions );
 
@@ -39,6 +44,8 @@ BEGIN
       SELECT user_funder_permissions.funder_short_code, jsonb_agg(user_funder_permissions.permission) AS permissions
       FROM user_funder_permissions
       WHERE user_funder_permissions.user_keycloak_user_id = "user".keycloak_user_id
+        AND (user_funder_permissions.not_after IS NULL
+          OR user_funder_permissions.not_after > now())
       GROUP BY user_funder_permissions.funder_short_code
     ) AS aggregated_user_funder_permissions
   );

@@ -11,6 +11,7 @@ interface UserFunderPermission {
 	readonly funderShortCode: ShortCode;
 	readonly createdBy: KeycloakUserId;
 	readonly createdAt: string;
+	readonly notAfter?: string;
 }
 
 type WritableUserFunderPermission = Writable<UserFunderPermission>;

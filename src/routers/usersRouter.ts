@@ -15,5 +15,10 @@ usersRouter.put(
 	requireChangemakerPermission(Permission.MANAGE),
 	userChangemakerPermissionsHandlers.putUserChangemakerPermission,
 );
+usersRouter.delete(
+	'/:userKeycloakUserId/changemakers/:changemakerId/permissions/:permission',
+	requireChangemakerPermission(Permission.MANAGE),
+	userChangemakerPermissionsHandlers.deleteUserChangemakerPermission,
+);
 
 export { usersRouter };

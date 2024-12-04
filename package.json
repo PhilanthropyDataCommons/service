@@ -41,7 +41,8 @@
 	},
 	"homepage": "https://github.com/PhilanthropyDataCommons/pdc#readme",
 	"engines": {
-		"node": "20"
+		"node": ">=20",
+		"npm": ">=10.8"
 	},
 	"type": "commonjs",
 	"devDependencies": {

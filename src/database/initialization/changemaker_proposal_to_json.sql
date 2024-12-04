@@ -1,7 +1,9 @@
 SELECT drop_function('changemaker_proposal_to_json');
 
-CREATE FUNCTION changemaker_proposal_to_json(changemaker_proposal changemakers_proposals)
-RETURNS JSONB AS $$
+CREATE FUNCTION changemaker_proposal_to_json(
+  changemaker_proposal changemakers_proposals
+)
+RETURNS jsonb AS $$
 DECLARE
   proposal_json JSONB;
   changemaker_json JSONB;

@@ -9,13 +9,13 @@ INSERT INTO proposal_versions (
   :applicationFormId,
   :sourceId,
   :createdBy,
-  COALESCE(
+  coalesce(
     (
-      SELECT MAX(pv.version) + 1
-      FROM proposal_versions as pv
+      SELECT max(pv.version) + 1
+      FROM proposal_versions AS pv
       WHERE pv.proposal_id = :proposalId
     ),
     1
   )
 )
-RETURNING proposal_version_to_json(proposal_versions) AS "object";
+RETURNING proposal_version_to_json(proposal_versions) AS object;

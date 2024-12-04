@@ -5,4 +5,4 @@ INSERT INTO changemakers (
   :taxId,
   :name
 )
-RETURNING changemaker_to_json(changemakers) AS "object";
+RETURNING changemaker_to_json(changemakers) AS object;

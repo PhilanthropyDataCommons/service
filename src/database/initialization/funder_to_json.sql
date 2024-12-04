@@ -1,7 +1,7 @@
 SELECT drop_function('funder_to_json');
 
 CREATE FUNCTION funder_to_json(funder funders)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 BEGIN
   RETURN jsonb_build_object(
     'shortCode', funder.short_code,

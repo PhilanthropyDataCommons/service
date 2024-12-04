@@ -1,7 +1,7 @@
 SELECT drop_function('bulk_upload_task_to_json');
 
 CREATE FUNCTION bulk_upload_task_to_json(bulk_upload_task bulk_upload_tasks)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 DECLARE
   source_json JSONB;
 BEGIN

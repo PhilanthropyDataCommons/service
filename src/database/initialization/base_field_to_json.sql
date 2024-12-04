@@ -1,7 +1,7 @@
 SELECT drop_function('base_field_to_json');
 
 CREATE FUNCTION base_field_to_json(base_field base_fields)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 DECLARE
   localizations JSONB;
 BEGIN

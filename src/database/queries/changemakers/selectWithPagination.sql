@@ -1,13 +1,13 @@
 SELECT DISTINCT o.id,
-  changemaker_to_json(o.*, :keycloakUserId) AS "object"
-FROM changemakers o
-  LEFT JOIN changemakers_proposals op on op.changemaker_id = o.id
+  changemaker_to_json(o.*, :keycloakUserId) AS object
+FROM changemakers AS o
+  LEFT JOIN changemakers_proposals AS op ON o.id = op.changemaker_id
 WHERE
   CASE
     WHEN :proposalId::integer IS NULL THEN
-      true
+      TRUE
     ELSE
       op.proposal_id = :proposalId
     END
 ORDER BY o.id DESC
-OFFSET :offset FETCH NEXT :limit ROWS ONLY
+LIMIT :limit OFFSET :offset;

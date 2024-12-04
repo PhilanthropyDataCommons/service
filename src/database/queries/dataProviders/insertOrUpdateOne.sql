@@ -7,5 +7,5 @@ INSERT INTO data_providers (
 )
 ON CONFLICT (short_code)
 DO UPDATE SET
-  name = EXCLUDED.name
-RETURNING data_provider_to_json(data_providers) AS "object";
+  name = excluded.name
+RETURNING data_provider_to_json(data_providers) AS object;

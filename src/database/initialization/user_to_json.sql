@@ -1,7 +1,7 @@
 SELECT drop_function('user_to_json');
 
 CREATE FUNCTION user_to_json("user" users)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 DECLARE
   permissions_json JSONB := NULL::JSONB;
   user_changemaker_permissions_json JSONB := NULL::JSONB;

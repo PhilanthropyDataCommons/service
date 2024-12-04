@@ -3,13 +3,13 @@ INSERT INTO application_forms (
   version
 ) VALUES (
   :opportunityId,
-  COALESCE(
+  coalesce(
     (
-      SELECT MAX(af.version) + 1
-      FROM application_forms as af
+      SELECT max(af.version) + 1
+      FROM application_forms AS af
       WHERE af.opportunity_id = :opportunityId
     ),
     1
   )
 )
-RETURNING application_form_to_json(application_forms) AS "object";
+RETURNING application_form_to_json(application_forms) AS object;

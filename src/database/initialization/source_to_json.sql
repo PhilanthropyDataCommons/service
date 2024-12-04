@@ -1,7 +1,7 @@
 SELECT drop_function('source_to_json');
 
 CREATE FUNCTION source_to_json(source sources)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 DECLARE
   data_provider_json JSONB := NULL::JSONB;
   funder_json JSONB := NULL::JSONB;

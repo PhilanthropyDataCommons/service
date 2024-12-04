@@ -1,3 +1,3 @@
-SELECT proposal_to_json(proposals.*) as "object"
+SELECT proposal_to_json(proposals.*) AS object
   FROM proposals
-  WHERE id = :id
+  WHERE id = :id;

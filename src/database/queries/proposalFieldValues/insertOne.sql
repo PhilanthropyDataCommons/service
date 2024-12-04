@@ -11,4 +11,4 @@ INSERT INTO proposal_field_values (
   :position,
   :isValid
 )
-RETURNING proposal_field_value_to_json(proposal_field_values) AS "object";
+RETURNING proposal_field_value_to_json(proposal_field_values) AS object;

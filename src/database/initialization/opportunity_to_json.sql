@@ -1,7 +1,7 @@
 SELECT drop_function('opportunity_to_json');
 
 CREATE FUNCTION opportunity_to_json(opportunity opportunities)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 BEGIN
   RETURN jsonb_build_object(
     'id', opportunity.id,

@@ -10,8 +10,8 @@ VALUES (
 )
 ON CONFLICT (external_id, platform_provider) DO UPDATE
 SET
-  data = EXCLUDED.data,
-  created_at = EXCLUDED.created_at
+  data = excluded.data,
+  created_at = excluded.created_at
 RETURNING external_id AS "externalId",
   platform_provider AS "platformProvider",
   data,

@@ -1,15 +1,15 @@
-SELECT EXISTS (
+SELECT EXISTS(
   SELECT 1
     FROM proposals
     WHERE id = :id
       AND
         CASE
           WHEN :authContextKeycloakUserId::UUID IS NULL THEN
-            true
+            TRUE
           ELSE
           (
             created_by = :authContextKeycloakUserId
-            OR :authContextIsAdministrator::boolean
+            OR :authContextIsAdministrator::BOOLEAN
           )
           END
-) AS result
+) AS result;

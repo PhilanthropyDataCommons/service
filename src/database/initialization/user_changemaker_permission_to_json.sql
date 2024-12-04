@@ -1,7 +1,9 @@
 SELECT drop_function('user_changemaker_permission_to_json');
 
-CREATE FUNCTION user_changemaker_permission_to_json(user_changemaker_permission user_changemaker_permissions)
-RETURNS JSONB AS $$
+CREATE FUNCTION user_changemaker_permission_to_json(
+  user_changemaker_permission user_changemaker_permissions
+)
+RETURNS jsonb AS $$
 BEGIN
   RETURN jsonb_build_object(
     'userKeycloakUserId', user_changemaker_permission.user_keycloak_user_id,

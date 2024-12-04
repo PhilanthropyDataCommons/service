@@ -1,7 +1,7 @@
 SELECT drop_function('application_form_to_json');
 
 CREATE FUNCTION application_form_to_json(application_form application_forms)
-RETURNS JSONB AS $$
+RETURNS jsonb AS $$
 DECLARE
   application_form_fields_json JSONB;
 BEGIN

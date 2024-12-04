@@ -30,3 +30,8 @@ updates:
     directory: '.github/workflows'
     schedule:
       interval: 'daily'
+
+  - package-ecosystem: 'pip'
+    directory: 'sqlfluff/'
+    schedule:
+      interval: 'weekly'

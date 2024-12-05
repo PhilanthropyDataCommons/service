@@ -1823,6 +1823,51 @@
 				}
 			}
 		},
+		"/proposalVersions/{proposalVersionId}": {
+			"get": {
+				"operationId": "getProposalVersionById",
+				"summary": "Gets a specific proposalVersion.",
+				"tags": ["Proposals"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "proposalVersionId",
+						"description": "The PDC-generated ID of a proposalVersion.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The requested proposalVersion.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProposalVersion"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/baseFields": {
 			"get": {
 				"operationId": "getBaseFields",

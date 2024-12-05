@@ -6,11 +6,13 @@ import {
 	loadApplicationForm,
 	loadApplicationFormField,
 	loadProposal,
+	loadProposalVersion,
 } from '../database';
 import {
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableProposalVersionWithFieldValues,
+	isId,
 } from '../types';
 import {
 	DatabaseError,
@@ -212,6 +214,32 @@ const postProposalVersion = (
 		});
 };
 
+const getProposalVersion = (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): void => {
+	const { proposalVersionId } = req.params;
+	if (!isId(proposalVersionId)) {
+		next(
+			new InputValidationError('Invalid query parameter.', isId.errors ?? []),
+		);
+		return;
+	}
+	loadProposalVersion(proposalVersionId)
+		.then((item) => {
+			res.status(200).contentType('application/json').send(item);
+		})
+		.catch((error: unknown) => {
+			if (isTinyPgErrorWithQueryContext(error)) {
+				next(new DatabaseError('Error retrieving item.', error));
+				return;
+			}
+			next(error);
+		});
+};
+
 export const proposalVersionsHandlers = {
 	postProposalVersion,
+	getProposalVersion,
 };

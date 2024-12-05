@@ -10,4 +10,10 @@ proposalVersionsRouter.post(
 	proposalVersionsHandlers.postProposalVersion,
 );
 
+proposalVersionsRouter.get(
+	'/:proposalVersionId',
+	requireAuthentication,
+	proposalVersionsHandlers.getProposalVersion,
+);
+
 export { proposalVersionsRouter };

@@ -6,6 +6,7 @@ import {
 	createBaseField,
 	createOpportunity,
 	createProposal,
+	createProposalVersion,
 	loadSystemSource,
 	loadTableMetrics,
 } from '../database';
@@ -34,6 +35,67 @@ const createTestBaseFields = async () => {
 };
 
 describe('/proposalVersions', () => {
+	describe('GET /:proposalVersionId', () => {
+		it('requires authentication', async () => {
+			await request(app).get('/proposalVersions/1').expect(401);
+		});
+
+		it('returns exactly one proposal version selected by id', async () => {
+			const systemSource = await loadSystemSource();
+			const opportunity = await createOpportunity({ title: '🔥' });
+			const testUser = await loadTestUser();
+			const proposal = await createProposal({
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+				createdBy: testUser.keycloakUserId,
+			});
+			const applicationForm = await createApplicationForm({
+				opportunityId: opportunity.id,
+			});
+			const proposalVersion = await createProposalVersion({
+				proposalId: proposal.id,
+				applicationFormId: applicationForm.id,
+				sourceId: systemSource.id,
+				createdBy: testUser.keycloakUserId,
+			});
+
+			const response = await request(app)
+				.get(`/proposalVersions/${proposalVersion.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(proposalVersion);
+		});
+
+		it('returns 400 bad request when id is a letter', async () => {
+			const result = await request(app)
+				.get('/proposalVersions/a')
+				.set(authHeader)
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 400 bad request when id is a number greater than 2^32-1', async () => {
+			const result = await request(app)
+				.get('/proposalVersions/555555555555555555555555555555')
+				.set(authHeader)
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 404 when id is not found', async () => {
+			await request(app)
+				.get('/proposalVersions/900000')
+				.set(authHeader)
+				.expect(404);
+		});
+	});
+
 	describe('POST /', () => {
 		it('requires authentication', async () => {
 			await request(app).post('/proposalVersions').expect(401);

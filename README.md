@@ -188,7 +188,7 @@ Once you have SQLFluff installed, you can run it with `npm run lint:sqlfluff`, a
 
 #### Node version
 
-We aim to use the "Active LTS" version of node. An exact version of node is specified in automated workflows and Dockerfile while a major version is specified in the .node-version. You should be able to use any minor version within the Active LTS version and might be able to use other major versions.
+We aim to use the "Active LTS" version of node. An major version of node is specified in automated workflows and Dockerfile, and the .node-version file. You should be able to use any minor version within the Active LTS version and might be able to use other major versions.
 
 ### EditorConfig
 

@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.17.0
+          node-version-file: .node-version
       - run: npm ci
       - run: npm run lint:eslint
   prettier:
@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.17.0
+          node-version-file: .node-version
       - run: npm ci
       - run: npm run lint:prettier
   sqlfluff:
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.17.0
+          node-version-file: .node-version
       - run: npm ci
       - run: npm run lint:swagger
   tsc:
@@ -50,6 +50,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.17.0
+          node-version-file: .node-version
       - run: npm ci
       - run: npm run lint:tsc

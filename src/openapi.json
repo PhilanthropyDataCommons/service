@@ -254,6 +254,7 @@
 					},
 					"fields": {
 						"type": "array",
+						"description": "For each base field, the best available value related to this changemaker. Empty when unauthenticated.",
 						"items": {
 							"$ref": "#/components/schemas/ProposalFieldValue"
 						},

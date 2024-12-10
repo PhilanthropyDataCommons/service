@@ -12,7 +12,7 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { keycloakUserIdToString, Permission } from '../types';
+import { keycloakIdToString, Permission } from '../types';
 import { NotFoundError } from '../errors';
 
 describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
@@ -25,7 +25,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			});
 			await request(app)
 				.put(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 				)
 				.send({})
 				.expect(401);
@@ -39,7 +39,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			});
 			await request(app)
 				.put(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -58,7 +58,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			const user = await loadTestUser();
 			await request(app)
 				.put(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/notanId/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/notanId/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send({})
@@ -69,7 +69,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			const user = await loadTestUser();
 			await request(app)
 				.put(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/1/permissions/notAPermission`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/1/permissions/notAPermission`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send({})
@@ -85,7 +85,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 			const response = await request(app)
 				.put(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send({})
@@ -113,7 +113,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			});
 			const response = await request(app)
 				.put(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -142,7 +142,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			});
 			const response = await request(app)
 				.put(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -166,7 +166,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 				)
 				.send()
 				.expect(401);
@@ -180,7 +180,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
 				.send()
@@ -201,7 +201,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			const user = await loadTestUser();
 			await request(app)
 				.delete(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/notanId/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/notanId/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -212,7 +212,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			const user = await loadTestUser();
 			await request(app)
 				.delete(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/1/permissions/notAPermission`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/1/permissions/notAPermission`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -227,7 +227,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -253,7 +253,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			);
 			await request(app)
 				.delete(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -286,7 +286,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -332,7 +332,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakUserIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeader)
 				.send()

@@ -1,16 +1,16 @@
 import { createUser, loadUserByKeycloakUserId } from '../database';
 import {
 	getAuthSubFromRequest,
-	isKeycloakUserId,
-	keycloakUserIdToString,
-	stringToKeycloakUserId,
+	isKeycloakId,
+	keycloakIdToString,
+	stringToKeycloakId,
 } from '../types';
 import { getSystemUser } from '../config';
 import { InputValidationError } from '../errors';
 import type { Request, NextFunction, Response } from 'express';
-import type { AuthenticatedRequest, KeycloakUserId } from '../types';
+import type { AuthenticatedRequest, KeycloakId } from '../types';
 
-const selectOrCreateUser = async (keycloakUserId: KeycloakUserId) => {
+const selectOrCreateUser = async (keycloakUserId: KeycloakId) => {
 	try {
 		return await loadUserByKeycloakUserId(keycloakUserId);
 	} catch {
@@ -28,23 +28,23 @@ const addUserContext = (
 	const systemUser = getSystemUser();
 	if (
 		keycloakUserId === undefined ||
-		keycloakUserId === keycloakUserIdToString(systemUser.keycloakUserId)
+		keycloakUserId === keycloakIdToString(systemUser.keycloakUserId)
 	) {
 		next();
 		return;
 	}
 
-	if (!isKeycloakUserId(keycloakUserId)) {
+	if (!isKeycloakId(keycloakUserId)) {
 		next(
 			new InputValidationError(
 				'auth subject must be a valid keycloak user id',
-				isKeycloakUserId.errors ?? [],
+				isKeycloakId.errors ?? [],
 			),
 		);
 		return;
 	}
 
-	selectOrCreateUser(stringToKeycloakUserId(keycloakUserId))
+	selectOrCreateUser(stringToKeycloakId(keycloakUserId))
 		.then((user) => {
 			(req as AuthenticatedRequest).user = user;
 			next();

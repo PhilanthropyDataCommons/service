@@ -8,12 +8,13 @@ import type {
 const createOrUpdateDataProvider = async (
 	createValues: InternallyWritableDataProvider,
 ): Promise<DataProvider> => {
-	const { shortCode, name } = createValues;
+	const { shortCode, name, keycloakOrganizationId } = createValues;
 	const result = await db.sql<JsonResultSet<DataProvider>>(
 		'dataProviders.insertOrUpdateOne',
 		{
 			shortCode,
 			name,
+			keycloakOrganizationId,
 		},
 	);
 	const { object } = result.rows[0] ?? {};

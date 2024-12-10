@@ -5,32 +5,32 @@ import { isUuid, uuidSchema } from './Uuid';
 import type { Uuid } from './Uuid';
 import type { JSONSchemaType } from 'ajv';
 
-interface KeycloakUserId
-	extends Newtype<{ readonly KeycloakUserId: unique symbol }, Uuid> {}
+interface KeycloakId
+	extends Newtype<{ readonly KeycloakId: unique symbol }, Uuid> {}
 
-const keycloakUserIdIsomorphism = createNewtypeIsomorphism<KeycloakUserId>();
+const keycloakIdIsomorphism = createNewtypeIsomorphism<KeycloakId>();
 
-const keycloakUserIdSchema = uuidSchema as JSONSchemaType<KeycloakUserId>;
+const keycloakIdSchema = uuidSchema as JSONSchemaType<KeycloakId>;
 
-const isKeycloakUserId = ajv.compile(keycloakUserIdSchema);
+const isKeycloakId = ajv.compile(keycloakIdSchema);
 
-const stringToKeycloakUserId = (s: string): KeycloakUserId => {
+const stringToKeycloakId = (s: string): KeycloakId => {
 	if (!isUuid(s)) {
 		throw new InternalValidationError(
-			'KeycloakUserId must be a uuid',
+			'KeycloakId must be a uuid',
 			isUuid.errors ?? [],
 		);
 	}
-	return keycloakUserIdIsomorphism.wrap(s);
+	return keycloakIdIsomorphism.wrap(s);
 };
 
-const keycloakUserIdToString = (keycloakUserId: KeycloakUserId): string =>
-	keycloakUserIdIsomorphism.unwrap(keycloakUserId);
+const keycloakIdToString = (keycloakId: KeycloakId): string =>
+	keycloakIdIsomorphism.unwrap(keycloakId);
 
 export {
-	isKeycloakUserId,
-	KeycloakUserId,
-	keycloakUserIdSchema,
-	stringToKeycloakUserId,
-	keycloakUserIdToString,
+	isKeycloakId,
+	KeycloakId,
+	keycloakIdSchema,
+	stringToKeycloakId,
+	keycloakIdToString,
 };

@@ -13,7 +13,7 @@ import {
 	mockJwtWithoutSub as authHeaderWithNoSub,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { TaskStatus, keycloakUserIdToString } from '../types';
+import { TaskStatus, keycloakIdToString } from '../types';
 
 describe('/tasks/bulkUploads', () => {
 	describe('GET /', () => {
@@ -185,7 +185,7 @@ describe('/tasks/bulkUploads', () => {
 
 			await request(app)
 				.get(
-					`/tasks/bulkUploads?createdBy=${keycloakUserIdToString(anotherUser.keycloakUserId)}`,
+					`/tasks/bulkUploads?createdBy=${keycloakIdToString(anotherUser.keycloakUserId)}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.expect(200)

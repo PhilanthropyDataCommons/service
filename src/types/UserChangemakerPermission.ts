@@ -2,13 +2,13 @@ import { ajv } from '../ajv';
 import { Permission } from './Permission';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
-import type { KeycloakUserId } from './KeycloakUserId';
+import type { KeycloakId } from './KeycloakId';
 
 interface UserChangemakerPermission {
-	readonly userKeycloakUserId: KeycloakUserId;
+	readonly userKeycloakUserId: KeycloakId;
 	readonly permission: Permission;
 	readonly changemakerId: number;
-	readonly createdBy: KeycloakUserId;
+	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
 }
 

@@ -2,7 +2,7 @@ import { ajv } from '../ajv';
 import { userSchema } from './User';
 import type { JSONSchemaType } from 'ajv';
 import type { User } from './User';
-import type { KeycloakUserId } from './KeycloakUserId';
+import type { KeycloakId } from './KeycloakId';
 
 interface AuthContext {
 	user: User;
@@ -32,7 +32,7 @@ const isAuthContext = ajv.compile(authContextSchema);
 
 const getKeycloakUserIdFromAuthContext = (
 	req: AuthContext | undefined,
-): KeycloakUserId | undefined => {
+): KeycloakId | undefined => {
 	const keycloakUserId = req?.user?.keycloakUserId;
 	return keycloakUserId;
 };

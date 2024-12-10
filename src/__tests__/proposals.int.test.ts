@@ -25,7 +25,7 @@ import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import {
 	BaseFieldDataType,
 	BaseFieldScope,
-	keycloakUserIdToString,
+	keycloakIdToString,
 } from '../types';
 
 const createTestBaseFields = async () => {
@@ -424,7 +424,7 @@ describe('/proposals', () => {
 			});
 			const response = await request(app)
 				.get(
-					`/proposals?createdBy=${keycloakUserIdToString(testUser.keycloakUserId)}`,
+					`/proposals?createdBy=${keycloakIdToString(testUser.keycloakUserId)}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.expect(200);

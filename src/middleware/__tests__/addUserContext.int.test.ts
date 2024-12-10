@@ -1,7 +1,7 @@
 import { addUserContext } from '../addUserContext';
 import { loadUserByKeycloakUserId, loadTableMetrics } from '../../database';
 import { generateNextWithAssertions } from '../../test/utils';
-import { stringToKeycloakUserId } from '../../types';
+import { stringToKeycloakId } from '../../types';
 import { InputValidationError } from '../../errors';
 import type { AuthenticatedRequest } from '../../types';
 import type { Response } from 'express';
@@ -42,7 +42,7 @@ describe('addUserContext', () => {
 					expect(err).toBe(undefined);
 					const { count: userCount } = await loadTableMetrics('users');
 					const user = await loadUserByKeycloakUserId(
-						stringToKeycloakUserId('123e4567-e89b-12d3-a456-426614174000'),
+						stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
 					);
 					expect(mockRequest.user).toEqual(user);
 					expect(userCount).toEqual(baselineUserCount + 1);

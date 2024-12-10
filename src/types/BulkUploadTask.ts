@@ -3,7 +3,7 @@ import { TaskStatus } from './TaskStatus';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { Source } from './Source';
-import type { KeycloakUserId } from './KeycloakUserId';
+import type { KeycloakId } from './KeycloakId';
 
 interface BulkUploadTask {
 	readonly id: number;
@@ -14,7 +14,7 @@ interface BulkUploadTask {
 	readonly status: TaskStatus;
 	readonly fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
 	readonly createdAt: string;
-	readonly createdBy: KeycloakUserId;
+	readonly createdBy: KeycloakId;
 }
 
 type WritableBulkUploadTask = Writable<BulkUploadTask>;

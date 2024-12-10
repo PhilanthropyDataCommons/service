@@ -6,7 +6,7 @@ import {
 import {
 	isAuthContext,
 	isId,
-	isKeycloakUserId,
+	isKeycloakId,
 	isPermission,
 	isTinyPgErrorWithQueryContext,
 	isWritableUserChangemakerPermission,
@@ -24,11 +24,11 @@ const deleteUserChangemakerPermission = (
 	next: NextFunction,
 ): void => {
 	const { userKeycloakUserId, changemakerId, permission } = req.params;
-	if (!isKeycloakUserId(userKeycloakUserId)) {
+	if (!isKeycloakId(userKeycloakUserId)) {
 		next(
 			new InputValidationError(
 				'Invalid userKeycloakUserId parameter.',
-				isKeycloakUserId.errors ?? [],
+				isKeycloakId.errors ?? [],
 			),
 		);
 		return;
@@ -86,11 +86,11 @@ const putUserChangemakerPermission = (
 	const { userKeycloakUserId, changemakerId, permission } = req.params;
 	const createdBy = req.user.keycloakUserId;
 
-	if (!isKeycloakUserId(userKeycloakUserId)) {
+	if (!isKeycloakId(userKeycloakUserId)) {
 		next(
 			new InputValidationError(
 				'Invalid userKeycloakUserId parameter.',
-				isKeycloakUserId.errors ?? [],
+				isKeycloakId.errors ?? [],
 			),
 		);
 		return;

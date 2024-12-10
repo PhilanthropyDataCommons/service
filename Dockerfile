@@ -1,4 +1,4 @@
-FROM bitnami/node:20.17.0-debian-12-r5
+FROM bitnami/node:22-debian-12
 
 RUN adduser --home /opt/philanthropy-data-commons --uid 902 \
     --disabled-login web

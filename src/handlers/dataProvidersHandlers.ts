@@ -6,6 +6,7 @@ import {
 } from '../database';
 import {
 	isAuthContext,
+	isKeycloakId,
 	isTinyPgErrorWithQueryContext,
 	isWritableDataProvider,
 } from '../types';
@@ -83,6 +84,20 @@ const putDataProvider = (
 		);
 		return;
 	}
+	const { keycloakOrganizationId } = req.params;
+	if (
+		keycloakOrganizationId !== undefined &&
+		keycloakOrganizationId !== null &&
+		!isKeycloakId(keycloakOrganizationId)
+	) {
+		next(
+			new InputValidationError(
+				'Invalid Keycloak organization id.',
+				isKeycloakId.errors ?? [],
+			),
+		);
+		return;
+	}
 	if (!isWritableDataProvider(req.body)) {
 		next(
 			new InputValidationError(
@@ -98,6 +113,7 @@ const putDataProvider = (
 		const dataProvider = await createOrUpdateDataProvider({
 			shortCode,
 			name,
+			keycloakOrganizationId,
 		});
 		res.status(201).contentType('application/json').send(dataProvider);
 	})().catch((error: unknown) => {

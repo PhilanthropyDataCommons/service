@@ -1,10 +1,10 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
-import { keycloakUserIdToString } from '../../../types';
-import type { JsonResultSet, KeycloakUserId, User } from '../../../types';
+import { keycloakIdToString } from '../../../types';
+import type { JsonResultSet, KeycloakId, User } from '../../../types';
 
 export const loadUserByKeycloakUserId = async (
-	keycloakUserId: KeycloakUserId,
+	keycloakUserId: KeycloakId,
 ): Promise<User> => {
 	const userQueryResult = await db.sql<JsonResultSet<User>>(
 		'users.selectByKeycloakUserId',
@@ -16,7 +16,7 @@ export const loadUserByKeycloakUserId = async (
 	if (object === undefined) {
 		throw new NotFoundError(`Entity not found`, {
 			entityType: 'User',
-			lookupValues: { keycloakUserId: keycloakUserIdToString(keycloakUserId) },
+			lookupValues: { keycloakUserId: keycloakIdToString(keycloakUserId) },
 		});
 	}
 	return object;

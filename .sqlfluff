@@ -10,6 +10,9 @@ exclude_rules =
 indent_unit = space
 tab_space_size = 2
 
+[sqlfluff:rules:capitalisation.functions]
+extended_capitalisation_policy = lower
+
 [sqlfluff:rules:capitalisation.types]
 extended_capitalisation_policy = lower
 

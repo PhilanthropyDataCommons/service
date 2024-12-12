@@ -6,6 +6,15 @@ on:
   pull_request:
 
 jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - name: Lint GitHub Action workflows
+        uses: raven-actions/actionlint@v2
   eslint:
     runs-on: ubuntu-latest
     steps:

@@ -5,31 +5,31 @@ FROM proposals AS p
   LEFT JOIN changemakers_proposals AS op ON p.id = op.proposal_id
 WHERE
   CASE
-    WHEN :createdBy::UUID IS NULL THEN
+    WHEN :createdBy::uuid IS NULL THEN
       TRUE
     ELSE
       p.created_by = :createdBy
     END
   AND CASE
-    WHEN (:search::TEXT IS NULL
+    WHEN (:search::text IS NULL
       OR :search = '') THEN
       TRUE
     ELSE
-      pfv.value_search @@ websearch_to_tsquery('english', :search::TEXT)
+      pfv.value_search @@ websearch_to_tsquery('english', :search::text)
     END
   AND CASE
-    WHEN :changemakerId::INTEGER IS NULL THEN
+    WHEN :changemakerId::integer IS NULL THEN
       TRUE
     ELSE
       op.changemaker_id = :changemakerId
     END
   AND CASE
-    WHEN :authContextKeycloakUserId::UUID IS NULL THEN
+    WHEN :authContextKeycloakUserId::uuid IS NULL THEN
       TRUE
     ELSE
       (
         p.created_by = :authContextKeycloakUserId
-        OR :authContextIsAdministrator::BOOLEAN
+        OR :authContextIsAdministrator::boolean
       )
     END
 GROUP BY p.id

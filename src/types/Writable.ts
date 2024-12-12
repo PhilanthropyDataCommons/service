@@ -15,6 +15,21 @@ type WritableKeys<T> = {
 	[P in keyof T]: IfEquals<{ [Q in P]: T[P] }, { -readonly [Q in P]: T[P] }, P>;
 }[keyof T];
 
+type OptionalKeys<T> = {
+	// map each attribute to either itself or never, depending on if it is optional
+	[P in keyof T]: {} extends Pick<T, P>
+		? P /* If an empty Object type extends a type that
+		       only contains attribute P then we know attribute P is optional,
+		       since {} extends { a?: string } but not { a: string } */
+		: never; // otherwise don't keep it
+}[keyof T]; /* Pull out the mapped attributes, which are now
+               exclusively either "never" or the attributes with optional types) */
+
+// By definition if a key is not optional then it is required.
+// This means we can get the list of required keys by getting
+// all keys and then removing any optional keys
+type RequiredKeys<T> = Exclude<keyof T, OptionalKeys<T>>;
+
 type WritablePrimitive =
 	| undefined
 	| null
@@ -22,6 +37,19 @@ type WritablePrimitive =
 	| string
 	| number
 	| Function;
+
+type WritableObject<T> = {
+	// Capture required keys
+	[K in keyof T & RequiredKeys<T> & WritableKeys<T>]: Writable<T[K]>;
+} & {
+	// Capture optional keys
+	[K in keyof T & OptionalKeys<T> & WritableKeys<T>]?: Writable<T[K]>;
+} extends infer O
+	? {
+			// Flatten the two types (required and optional) into a single combined type
+			[K in keyof O]: O[K];
+		}
+	: never;
 
 export type Writable<T> = T extends WritablePrimitive
 	? T
@@ -32,5 +60,5 @@ export type Writable<T> = T extends WritablePrimitive
 			: T extends Set<infer X>
 				? Set<Writable<X>>
 				: T extends Object
-					? { [K in WritableKeys<T>]: Writable<T[K]> }
+					? WritableObject<T>
 					: T;

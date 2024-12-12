@@ -64,6 +64,7 @@
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-import": "^2.31.0",
 		"eslint-plugin-sort-exports": "^0.9.1",
+		"expect-type": "^1.1.0",
 		"jest": "^28.1.1",
 		"jsonwebtoken": "^9.0.2",
 		"mock-jwks": "^1.0.10",

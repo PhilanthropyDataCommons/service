@@ -182,9 +182,13 @@ For example: `0001-create-users` or `0001-modify-users`
 
 In `/src/databases/seeds` there is seed or starter data. The contents can be run manually to help developers get data in their databases. The scripts are not referenced by the software and are included for convenience. The migrations must run prior to using seed scripts.
 
+#### Linting
+
 We use [SQLFluff](https://docs.sqlfluff.com/en/stable/index.html) to lint our SQL files. See [Getting Started with SQLFluff](https://docs.sqlfluff.com/en/stable/gettingstarted.html) for instructions on setting it up.
 
 Once you have SQLFluff installed, you can run it with `npm run lint:sqlfluff`, and use `npm run format:sqlfluff` to automatically fix any linter errors it can.
+
+[actionlint](https://github.com/rhysd/actionlint) checks our GitHub Actions workflow files for syntax, security, and more. It is run in CI via the [actionlint action](https://github.com/marketplace/actions/actionlint), and you can run it locally by either compiling the tool locally using Go, or downloading a [release binary](https://github.com/rhysd/actionlint/releases): `actionlint`. We are using the defaults, so it requires no arguments.
 
 #### Node version
 

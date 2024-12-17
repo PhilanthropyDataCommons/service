@@ -54,7 +54,6 @@
 		"@types/pg": "^8.11.10",
 		"@types/supertest": "^6.0.2",
 		"@types/swagger-ui-express": "^4.1.7",
-		"@types/uuid": "^10.0.0",
 		"@typescript-eslint/eslint-plugin": "^7.18.0",
 		"@typescript-eslint/parser": "^7.18.0",
 		"copyfiles": "^2.4.1",

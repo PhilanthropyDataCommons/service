@@ -345,10 +345,12 @@ describe('/changemakers', () => {
 				firstDataProvider = await createOrUpdateDataProvider({
 					shortCode: 'data_provider_5431',
 					name: 'Data Platform Provider 5431',
+					keycloakOrganizationId: null,
 				});
 				secondDataProvider = await createOrUpdateDataProvider({
 					shortCode: 'data_provider_5477',
 					name: 'Data Platform Provider 5477',
+					keycloakOrganizationId: null,
 				});
 				firstDataProviderSourceId = (
 					await createSource({

@@ -25,10 +25,12 @@ describe('/dataProviders', () => {
 			await createOrUpdateDataProvider({
 				shortCode: 'dataRUs',
 				name: 'Data R Us',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateDataProvider({
 				shortCode: 'nonProfitWarehouse',
 				name: 'Nonprofit Warehouse',
+				keycloakOrganizationId: null,
 			});
 
 			const response = await agent
@@ -41,11 +43,13 @@ describe('/dataProviders', () => {
 						shortCode: 'nonProfitWarehouse',
 						createdAt: expectTimestamp,
 						name: 'Nonprofit Warehouse',
+						keycloakOrganizationId: null,
 					},
 					{
 						shortCode: 'dataRUs',
 						createdAt: expectTimestamp,
 						name: 'Data R Us',
+						keycloakOrganizationId: null,
 					},
 					systemDataProvider,
 				],
@@ -63,10 +67,12 @@ describe('/dataProviders', () => {
 			await createOrUpdateDataProvider({
 				shortCode: 'dataRUs',
 				name: 'Data R Us',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateDataProvider({
 				shortCode: 'nonProfitWarehouse',
 				name: 'Nonprofit Warehouse',
+				keycloakOrganizationId: null,
 			});
 
 			const response = await agent
@@ -77,6 +83,7 @@ describe('/dataProviders', () => {
 				shortCode: 'nonProfitWarehouse',
 				createdAt: expectTimestamp,
 				name: 'Nonprofit Warehouse',
+				keycloakOrganizationId: null,
 			});
 		});
 
@@ -84,6 +91,7 @@ describe('/dataProviders', () => {
 			await createOrUpdateDataProvider({
 				shortCode: 'dataRUs',
 				name: 'Data R Us',
+				keycloakOrganizationId: null,
 			});
 			await agent.get('/dataProviders/foo').set(authHeader).expect(404);
 		});
@@ -128,10 +136,12 @@ describe('/dataProviders', () => {
 			await createOrUpdateDataProvider({
 				shortCode: 'firework',
 				name: 'boring text base firework',
+				keycloakOrganizationId: null,
 			});
 			const anotherDataProviderBefore = await createOrUpdateDataProvider({
 				shortCode: 'anotherFirework',
 				name: 'another boring text base firework',
+				keycloakOrganizationId: null,
 			});
 			const before = await loadTableMetrics('data_providers');
 			const result = await agent

@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Added
-
-- Manage user changemaker permissions using `GET`, `PUT`, and `DELETE` on `/user/{keycloakUserId}/changemakers/{changemakerId}/permissions/{permission}`.
+## 0.16.4 2024-12-19
 
 ### Changed
 
 - Upgraded to use OpenAPI Specification 3.1.
+- `DataProvider` type now has `keycloakOrganizationId`, the UUID in Keycloak for the related Organization.
+
+### Added
+
+- Manage user changemaker permissions using `GET`, `PUT`, and `DELETE` on `/user/{keycloakUserId}/changemakers/{changemakerId}/permissions/{permission}`.
 
 ## 0.16.3 2024-12-02
 

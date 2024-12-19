@@ -25,27 +25,31 @@ describe('/dataProviders', () => {
 			await createOrUpdateDataProvider({
 				shortCode: 'dataRUs',
 				name: 'Data R Us',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateDataProvider({
 				shortCode: 'nonProfitWarehouse',
 				name: 'Nonprofit Warehouse',
+				keycloakOrganizationId: null,
 			});
 
 			const response = await agent
 				.get('/dataProviders')
 				.set(authHeader)
 				.expect(200);
-			expect(response.body).toEqual({
+			expect(response.body).toStrictEqual({
 				entries: [
 					{
 						shortCode: 'nonProfitWarehouse',
 						createdAt: expectTimestamp,
 						name: 'Nonprofit Warehouse',
+						keycloakOrganizationId: null,
 					},
 					{
 						shortCode: 'dataRUs',
 						createdAt: expectTimestamp,
 						name: 'Data R Us',
+						keycloakOrganizationId: null,
 					},
 					systemDataProvider,
 				],
@@ -63,20 +67,23 @@ describe('/dataProviders', () => {
 			await createOrUpdateDataProvider({
 				shortCode: 'dataRUs',
 				name: 'Data R Us',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateDataProvider({
 				shortCode: 'nonProfitWarehouse',
 				name: 'Nonprofit Warehouse',
+				keycloakOrganizationId: null,
 			});
 
 			const response = await agent
 				.get(`/dataProviders/nonProfitWarehouse`)
 				.set(authHeader)
 				.expect(200);
-			expect(response.body).toEqual({
+			expect(response.body).toStrictEqual({
 				shortCode: 'nonProfitWarehouse',
 				createdAt: expectTimestamp,
 				name: 'Nonprofit Warehouse',
+				keycloakOrganizationId: null,
 			});
 		});
 
@@ -84,6 +91,7 @@ describe('/dataProviders', () => {
 			await createOrUpdateDataProvider({
 				shortCode: 'dataRUs',
 				name: 'Data R Us',
+				keycloakOrganizationId: null,
 			});
 			await agent.get('/dataProviders/foo').set(authHeader).expect(404);
 		});
@@ -107,10 +115,11 @@ describe('/dataProviders', () => {
 				.send({ name: '🎆' })
 				.expect(201);
 			const after = await loadTableMetrics('data_providers');
-			expect(result.body).toMatchObject({
+			expect(result.body).toStrictEqual({
 				shortCode: 'firework',
 				name: '🎆',
 				createdAt: expectTimestamp,
+				keycloakOrganizationId: null,
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -128,24 +137,30 @@ describe('/dataProviders', () => {
 			await createOrUpdateDataProvider({
 				shortCode: 'firework',
 				name: 'boring text base firework',
+				keycloakOrganizationId: null,
 			});
 			const anotherDataProviderBefore = await createOrUpdateDataProvider({
 				shortCode: 'anotherFirework',
 				name: 'another boring text base firework',
+				keycloakOrganizationId: null,
 			});
 			const before = await loadTableMetrics('data_providers');
 			const result = await agent
 				.put('/dataProviders/firework')
 				.type('application/json')
 				.set(adminUserAuthHeader)
-				.send({ name: '🎆' })
+				.send({
+					name: '🎆',
+					keycloakOrganizationId: '8b0163ac-bd91-11ef-8579-9fa8ab9f4b7d',
+				})
 				.expect(201);
 			const anotherDataProviderAfter =
 				await loadDataProvider('anotherFirework');
 			const after = await loadTableMetrics('data_providers');
-			expect(result.body).toMatchObject({
+			expect(result.body).toStrictEqual({
 				shortCode: 'firework',
 				name: '🎆',
+				keycloakOrganizationId: '8b0163ac-bd91-11ef-8579-9fa8ab9f4b7d',
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(before.count);

@@ -1,12 +1,12 @@
-import { keycloakUserIdSchema } from './KeycloakUserId';
+import { keycloakIdSchema } from './KeycloakUserId';
 import { permissionSchema } from './Permission';
-import type { KeycloakUserId } from './KeycloakUserId';
+import type { KeycloakId } from './KeycloakUserId';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { Permission } from './Permission';
 
 interface User {
-	keycloakUserId: KeycloakUserId;
+	keycloakUserId: KeycloakId;
 	readonly permissions: {
 		changemaker: Record<string, Permission[]>;
 		dataProvider: Record<string, Permission[]>;
@@ -18,7 +18,7 @@ interface User {
 const userSchema: JSONSchemaType<User> = {
 	type: 'object',
 	properties: {
-		keycloakUserId: keycloakUserIdSchema,
+		keycloakUserId: keycloakIdSchema,
 		permissions: {
 			type: 'object',
 			properties: {

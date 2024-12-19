@@ -8,12 +8,13 @@ import type {
 export const createChangemaker = async (
 	createValues: WritableChangemaker,
 ): Promise<Changemaker> => {
-	const { taxId, name } = createValues;
+	const { taxId, name, keycloakOrganizationId } = createValues;
 	const result = await db.sql<JsonResultSet<Changemaker>>(
 		'changemakers.insertOne',
 		{
 			taxId,
 			name,
+			keycloakOrganizationId,
 		},
 	);
 	const { object } = result.rows[0] ?? {};

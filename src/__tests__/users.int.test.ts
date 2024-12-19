@@ -72,6 +72,7 @@ describe('/users', () => {
 			const changemaker = await createChangemaker({
 				name: 'Test Changemaker',
 				taxId: '12-3456789',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateUserDataProviderPermission({
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -125,6 +126,7 @@ describe('/users', () => {
 			const changemaker = await createChangemaker({
 				name: 'Test Changemaker',
 				taxId: '12-3456789',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateUserChangemakerPermission({
 				userKeycloakUserId: testUser.keycloakUserId,

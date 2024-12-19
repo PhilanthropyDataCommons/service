@@ -172,6 +172,7 @@ describe('/sources', () => {
 			const dataProvider = await createOrUpdateDataProvider({
 				shortCode: 'foo',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent

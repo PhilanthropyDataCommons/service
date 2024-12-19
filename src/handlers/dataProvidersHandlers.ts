@@ -92,12 +92,12 @@ const putDataProvider = (
 		);
 		return;
 	}
-	const { name } = req.body;
-
+	const { name, keycloakOrganizationId } = req.body;
 	(async () => {
 		const dataProvider = await createOrUpdateDataProvider({
 			shortCode,
 			name,
+			keycloakOrganizationId,
 		});
 		res.status(201).contentType('application/json').send(dataProvider);
 	})().catch((error: unknown) => {

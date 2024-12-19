@@ -62,6 +62,7 @@ describe('/users', () => {
 			const dataProvider = await createOrUpdateDataProvider({
 				name: 'Test Provider',
 				shortCode: 'testProvider',
+				keycloakOrganizationId: null,
 			});
 			const funder = await createOrUpdateFunder({
 				name: 'Test Funder',

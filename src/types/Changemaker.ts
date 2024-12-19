@@ -1,12 +1,17 @@
 import { ajv } from '../ajv';
+import { KeycloakId, keycloakIdSchema } from './KeycloakId';
+import { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
-import type { Writable } from './Writable';
 import type { ProposalFieldValue } from './ProposalFieldValue';
 
 interface Changemaker {
 	readonly id: number;
 	taxId: string;
 	name: string;
+	// We do not really want "undefined" here, only null. See
+	// https://github.com/ajv-validator/ajv/issues/2283 and/or
+	// https://github.com/ajv-validator/ajv/issues/2163.
+	keycloakOrganizationId: KeycloakId | null | undefined;
 	readonly fields: ProposalFieldValue[];
 	readonly createdAt: string;
 }
@@ -21,6 +26,10 @@ const writableChangemakerSchema: JSONSchemaType<WritableChangemaker> = {
 		},
 		name: {
 			type: 'string',
+		},
+		keycloakOrganizationId: {
+			...keycloakIdSchema,
+			nullable: true,
 		},
 	},
 	required: ['taxId', 'name'],

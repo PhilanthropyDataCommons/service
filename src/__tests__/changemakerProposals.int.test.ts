@@ -14,10 +14,12 @@ const insertTestChangemakers = async () => {
 	await createChangemaker({
 		taxId: '11-1111111',
 		name: 'Example Inc.',
+		keycloakOrganizationId: null,
 	});
 	await createChangemaker({
 		taxId: '22-2222222',
 		name: 'Another Inc.',
+		keycloakOrganizationId: '402b1208-be48-11ef-8af9-b767e5e8e4ee',
 	});
 };
 
@@ -64,6 +66,7 @@ describe('/changemakerProposals', () => {
 							id: 1,
 							name: 'Example Inc.',
 							taxId: '11-1111111',
+							keycloakOrganizationId: null,
 							createdAt: expectTimestamp,
 							fields: [],
 						},
@@ -85,6 +88,7 @@ describe('/changemakerProposals', () => {
 							id: 1,
 							name: 'Example Inc.',
 							taxId: '11-1111111',
+							keycloakOrganizationId: null,
 							createdAt: expectTimestamp,
 							fields: [],
 						},
@@ -141,6 +145,7 @@ describe('/changemakerProposals', () => {
 							id: 1,
 							name: 'Example Inc.',
 							taxId: '11-1111111',
+							keycloakOrganizationId: null,
 							createdAt: expectTimestamp,
 							fields: [],
 						},
@@ -197,13 +202,14 @@ describe('/changemakerProposals', () => {
 				.expect(201);
 			const after = await loadTableMetrics('changemakers_proposals');
 			expect(before.count).toEqual(0);
-			expect(result.body).toMatchObject({
+			expect(result.body).toStrictEqual({
 				id: 1,
 				changemakerId: 1,
 				changemaker: {
 					id: 1,
 					name: 'Example Inc.',
 					taxId: '11-1111111',
+					keycloakOrganizationId: null,
 					createdAt: expectTimestamp,
 					fields: [],
 				},

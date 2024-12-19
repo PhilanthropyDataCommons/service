@@ -52,6 +52,7 @@ BEGIN
     'id', changemaker.id,
     'taxId', changemaker.tax_id,
     'name', changemaker.name,
+    'keycloakOrganizationId', changemaker.keycloak_organization_id,
     'createdAt', changemaker.created_at,
     'fields', COALESCE(proposal_field_values_json, '[]'::JSONB)
   );

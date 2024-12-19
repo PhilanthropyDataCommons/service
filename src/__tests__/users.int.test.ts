@@ -11,6 +11,7 @@ import {
 	createUser,
 	loadSystemUser,
 	loadTableMetrics,
+	removeUserChangemakerPermission,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
@@ -115,6 +116,46 @@ describe('/users', () => {
 							funder: {
 								testFunder: [Permission.EDIT],
 							},
+						},
+						createdAt: expectTimestamp,
+					},
+				],
+			});
+		});
+
+		it('does not return deleted permissions associated with a user', async () => {
+			const systemUser = await loadSystemUser();
+			const testUser = await loadTestUser();
+			const changemaker = await createChangemaker({
+				name: 'Test Changemaker',
+				taxId: '12-3456789',
+			});
+			await createOrUpdateUserChangemakerPermission({
+				userKeycloakUserId: testUser.keycloakUserId,
+				permission: Permission.VIEW,
+				changemakerId: changemaker.id,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await removeUserChangemakerPermission(
+				testUser.keycloakUserId,
+				changemaker.id,
+				Permission.VIEW,
+			);
+			const { count: userCount } = await loadTableMetrics('users');
+
+			const response = await request(app)
+				.get('/users')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: userCount,
+				entries: [
+					{
+						keycloakUserId: testUser.keycloakUserId,
+						permissions: {
+							changemaker: {},
+							dataProvider: {},
+							funder: {},
 						},
 						createdAt: expectTimestamp,
 					},

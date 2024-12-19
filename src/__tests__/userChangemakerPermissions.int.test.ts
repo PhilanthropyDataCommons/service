@@ -19,6 +19,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			await request(app)
 				.put(
@@ -33,6 +34,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			await request(app)
 				.put(
@@ -78,6 +80,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 
 			const response = await request(app)
@@ -101,6 +104,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateUserChangemakerPermission({
 				userKeycloakUserId: user.keycloakUserId,
@@ -130,6 +134,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateUserChangemakerPermission({
 				userKeycloakUserId: user.keycloakUserId,

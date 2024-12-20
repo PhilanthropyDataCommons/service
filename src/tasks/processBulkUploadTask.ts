@@ -308,6 +308,7 @@ export const processBulkUploadTask = async (
 				const changemaker = await createOrLoadChangemaker({
 					name: changemakerName,
 					taxId: changemakerTaxId,
+					keycloakOrganizationId: null,
 				});
 
 				if (changemaker !== undefined) {

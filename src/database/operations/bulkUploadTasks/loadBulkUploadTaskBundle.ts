@@ -4,12 +4,12 @@ import type {
 	Bundle,
 	BulkUploadTask,
 	AuthContext,
-	KeycloakUserId,
+	KeycloakId,
 } from '../../../types';
 
 export const loadBulkUploadTaskBundle = async (
 	authContext: AuthContext | undefined,
-	createdBy: KeycloakUserId | undefined,
+	createdBy: KeycloakId | undefined,
 	limit: number | undefined,
 	offset: number,
 ): Promise<Bundle<BulkUploadTask>> => {

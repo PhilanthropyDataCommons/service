@@ -80,12 +80,13 @@ const putFunder = (req: Request, res: Response, next: NextFunction): void => {
 		);
 		return;
 	}
-	const { name } = req.body;
+	const { name, keycloakOrganizationId } = req.body;
 
 	(async () => {
 		const funder = await createOrUpdateFunder({
 			shortCode,
 			name,
+			keycloakOrganizationId,
 		});
 		res.status(201).contentType('application/json').send(funder);
 	})().catch((error: unknown) => {

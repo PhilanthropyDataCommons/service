@@ -1,10 +1,10 @@
 import { NotFoundError } from '../../../errors';
-import { keycloakUserIdToString } from '../../../types';
+import { keycloakIdToString } from '../../../types';
 import { db } from '../../db';
-import type { KeycloakUserId, Permission } from '../../../types';
+import type { KeycloakId, Permission } from '../../../types';
 
 const removeUserChangemakerPermission = async (
-	userKeycloakUserId: KeycloakUserId,
+	userKeycloakUserId: KeycloakId,
 	changemakerId: number,
 	permission: Permission,
 ): Promise<void> => {
@@ -20,7 +20,7 @@ const removeUserChangemakerPermission = async (
 			{
 				entityType: 'UserChangemakerPermission',
 				entityPrimaryKey: {
-					userKeycloakUserId: keycloakUserIdToString(userKeycloakUserId),
+					userKeycloakUserId: keycloakIdToString(userKeycloakUserId),
 					permission,
 					changemakerId,
 				},

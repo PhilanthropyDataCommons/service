@@ -1,15 +1,10 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
-import { keycloakUserIdToString } from '../../../types';
-import type {
-	CheckResult,
-	Id,
-	KeycloakUserId,
-	Permission,
-} from '../../../types';
+import { keycloakIdToString } from '../../../types';
+import type { CheckResult, Id, KeycloakId, Permission } from '../../../types';
 
 const assertUserChangemakerPermissionExists = async (
-	userKeycloakUserId: KeycloakUserId,
+	userKeycloakUserId: KeycloakId,
 	changemakerId: Id,
 	permission: Permission,
 ): Promise<void> => {
@@ -26,7 +21,7 @@ const assertUserChangemakerPermissionExists = async (
 		throw new NotFoundError(`Entity not found`, {
 			entityType: 'UserChangemakerPermission',
 			entityPrimaryKey: {
-				userKeycloakUserId: keycloakUserIdToString(userKeycloakUserId),
+				userKeycloakUserId: keycloakIdToString(userKeycloakUserId),
 				changemakerId,
 				permission,
 			},

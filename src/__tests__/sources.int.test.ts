@@ -38,6 +38,7 @@ describe('/sources', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			const source = await createSource({
 				label: 'Example Inc.',
@@ -60,6 +61,7 @@ describe('/sources', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			const source = await createSource({
 				label: 'Example Inc.',
@@ -96,6 +98,7 @@ describe('/sources', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			await createSource({
 				label: 'not to be returned',
@@ -118,6 +121,7 @@ describe('/sources', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -145,6 +149,7 @@ describe('/sources', () => {
 			const funder = await createOrUpdateFunder({
 				shortCode: 'foo',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -172,6 +177,7 @@ describe('/sources', () => {
 			const dataProvider = await createOrUpdateDataProvider({
 				shortCode: 'foo',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -199,6 +205,7 @@ describe('/sources', () => {
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			const result = await agent
 				.post('/sources')

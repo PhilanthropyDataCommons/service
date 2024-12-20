@@ -18,17 +18,11 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import {
-	keycloakUserIdToString,
-	stringToKeycloakUserId,
-	Permission,
-} from '../types';
+import { keycloakIdToString, stringToKeycloakId, Permission } from '../types';
 
 const createAdditionalTestUser = async () =>
 	createUser({
-		keycloakUserId: stringToKeycloakUserId(
-			'123e4567-e89b-12d3-a456-426614174000',
-		),
+		keycloakUserId: stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
 	});
 
 describe('/users', () => {
@@ -68,14 +62,17 @@ describe('/users', () => {
 			const dataProvider = await createOrUpdateDataProvider({
 				name: 'Test Provider',
 				shortCode: 'testProvider',
+				keycloakOrganizationId: null,
 			});
 			const funder = await createOrUpdateFunder({
 				name: 'Test Funder',
 				shortCode: 'testFunder',
+				keycloakOrganizationId: null,
 			});
 			const changemaker = await createChangemaker({
 				name: 'Test Changemaker',
 				taxId: '12-3456789',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateUserDataProviderPermission({
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -129,6 +126,7 @@ describe('/users', () => {
 			const changemaker = await createChangemaker({
 				name: 'Test Changemaker',
 				taxId: '12-3456789',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateUserChangemakerPermission({
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -185,7 +183,7 @@ describe('/users', () => {
 
 			const response = await request(app)
 				.get(
-					`/users?keycloakUserId=${keycloakUserIdToString(anotherUser.keycloakUserId)}`,
+					`/users?keycloakUserId=${keycloakIdToString(anotherUser.keycloakUserId)}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.expect(200);

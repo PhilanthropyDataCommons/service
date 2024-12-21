@@ -1,2 +1,5 @@
 # Invoking prettier for the first time
 b16d4388c0457cd6fe02fc09947712d6f3afed7c
+
+# Re-indenting SQL with SQLFluff
+b555be039a94a139f31a1f0d1a8ccf9fcaa89c88

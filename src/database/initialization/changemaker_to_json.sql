@@ -1,8 +1,8 @@
 SELECT drop_function('changemaker_to_json');
 
 CREATE FUNCTION changemaker_to_json(
-  changemaker changemakers,
-  keycloakUserId uuid DEFAULT NULL
+	changemaker changemakers,
+	keycloakUserId uuid DEFAULT NULL
 )
 RETURNS jsonb AS $$
 DECLARE

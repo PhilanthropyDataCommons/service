@@ -1,7 +1,7 @@
 SELECT drop_function('user_funder_permission_to_json');
 
 CREATE FUNCTION user_funder_permission_to_json(
-  user_funder_permission user_funder_permissions
+	user_funder_permission user_funder_permissions
 )
 RETURNS jsonb AS $$
 BEGIN

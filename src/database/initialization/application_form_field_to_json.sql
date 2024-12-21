@@ -1,7 +1,7 @@
 SELECT drop_function('application_form_field_to_json');
 
 CREATE FUNCTION application_form_field_to_json(
-  application_form_field application_form_fields
+	application_form_field application_form_fields
 )
 RETURNS jsonb AS $$
 DECLARE

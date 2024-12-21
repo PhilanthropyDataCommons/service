@@ -1,8 +1,8 @@
 INSERT INTO changemakers (
-  tax_id,
-  name
+	tax_id,
+	name
 ) VALUES (
-  :taxId,
-  :name
+	:taxId,
+	:name
 )
 RETURNING changemaker_to_json(changemakers) AS object;

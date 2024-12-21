@@ -17,5 +17,4 @@ WHERE
       )
     END
 ORDER BY id DESC
-LIMIT :limit
-OFFSET :offset;
+LIMIT :limit OFFSET :offset;

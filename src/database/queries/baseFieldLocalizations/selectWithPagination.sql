@@ -8,5 +8,4 @@ WHERE
       base_field_id = :baseFieldId
     END
 ORDER BY created_at
-LIMIT :limit
-OFFSET :offset;
+LIMIT :limit OFFSET :offset;

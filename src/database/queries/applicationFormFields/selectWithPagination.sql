@@ -8,5 +8,4 @@ WHERE
       application_form_id = :applicationFormId
     END
 ORDER BY position, id
-LIMIT :limit
-OFFSET :offset;
+LIMIT :limit OFFSET :offset;

@@ -2,13 +2,14 @@
 dialect = postgres
 templater = placeholder
 exclude_rules =
-  layout.indent,
   # allow use of keywords as identifiers when unambiguous
   references.keywords,
 
 [sqlfluff:indentation]
-indent_unit = space
-tab_space_size = 2
+indent_unit = tab
+indented_ctes = True
+indented_joins = True
+indented_then = False
 
 [sqlfluff:rules:capitalisation.functions]
 extended_capitalisation_policy = lower

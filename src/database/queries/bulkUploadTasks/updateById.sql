@@ -1,7 +1,7 @@
 UPDATE bulk_upload_tasks
 SET
-  file_size = coalesce(:fileSize, file_size),
-  source_key = coalesce(:sourceKey, source_key),
-  status = coalesce(:status, status)
+	file_size = coalesce(:fileSize, file_size),
+	source_key = coalesce(:sourceKey, source_key),
+	status = coalesce(:status, status)
 WHERE id = :id
 RETURNING bulk_upload_task_to_json(bulk_upload_tasks) AS object;

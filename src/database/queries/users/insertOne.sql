@@ -1,7 +1,7 @@
 INSERT INTO users (
-  keycloak_user_id
+	keycloak_user_id
 )
 VALUES (
-  :keycloakUserId
+	:keycloakUserId
 )
 RETURNING user_to_json(users) AS object;

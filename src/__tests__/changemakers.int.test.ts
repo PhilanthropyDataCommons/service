@@ -332,6 +332,7 @@ describe('/changemakers', () => {
 				firstFunder = await createOrUpdateFunder({
 					shortCode: 'funder_5393',
 					name: 'Funder 5393',
+					keycloakOrganizationId: null,
 				});
 				firstFunderOpportunity = await createOpportunity({
 					title: `${firstFunder.name} opportunity`,

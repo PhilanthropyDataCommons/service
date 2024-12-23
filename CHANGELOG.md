@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## 0.16.4 2024-12-19
+## 0.16.5 2024-12-23
+
+### Changed
+
+- `Funder` now has `keycloakOrganizationId`, the UUID in Keycloak for the related Organization.
+
+## 0.16.4 2024-12-23
 
 ### Changed
 

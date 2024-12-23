@@ -67,6 +67,7 @@ describe('/users', () => {
 			const funder = await createOrUpdateFunder({
 				name: 'Test Funder',
 				shortCode: 'testFunder',
+				keycloakOrganizationId: null,
 			});
 			const changemaker = await createChangemaker({
 				name: 'Test Changemaker',

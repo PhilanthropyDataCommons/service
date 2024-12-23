@@ -145,6 +145,7 @@ describe('/sources', () => {
 			const funder = await createOrUpdateFunder({
 				shortCode: 'foo',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent

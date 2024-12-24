@@ -94,7 +94,7 @@
 		"monocle-ts": "^2.3.13",
 		"newtype-ts": "^0.3.5",
 		"phone": "^3.1.56",
-		"pino": "^9.5.0",
+		"pino": "^9.6.0",
 		"pino-http": "^10.3.0",
 		"postgres-schema-migrations": "^6.1.0",
 		"require-env-variable": "^4.0.2",

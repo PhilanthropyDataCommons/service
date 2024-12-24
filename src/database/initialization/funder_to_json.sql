@@ -6,6 +6,7 @@ BEGIN
   RETURN jsonb_build_object(
     'shortCode', funder.short_code,
     'name', funder.name,
+    'keycloakOrganizationId', funder.keycloak_organization_id,
     'createdAt', funder.created_at
   );
 END;

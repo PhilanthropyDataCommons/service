@@ -4,12 +4,12 @@ import type {
 	Bundle,
 	User,
 	AuthContext,
-	KeycloakUserId,
+	KeycloakId,
 } from '../../../types';
 
 export const loadUserBundle = async (
 	authContext: AuthContext | undefined,
-	keycloakUserId: KeycloakUserId | undefined,
+	keycloakUserId: KeycloakId | undefined,
 	limit: number | undefined,
 	offset: number,
 ): Promise<Bundle<User>> => {

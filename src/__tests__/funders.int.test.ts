@@ -30,10 +30,12 @@ describe('/funders', () => {
 			await createOrUpdateFunder({
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateFunder({
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
+				keycloakOrganizationId: null,
 			});
 
 			const response = await agent.get('/funders').set(authHeader).expect(200);
@@ -43,11 +45,13 @@ describe('/funders', () => {
 						shortCode: 'theFoundationFoundation',
 						createdAt: expectTimestamp,
 						name: 'The Foundation Foundation',
+						keycloakOrganizationId: null,
 					},
 					{
 						shortCode: 'theFundFund',
 						createdAt: expectTimestamp,
 						name: 'The Fund Fund',
+						keycloakOrganizationId: null,
 					},
 				],
 				total: 2,
@@ -64,20 +68,23 @@ describe('/funders', () => {
 			await createOrUpdateFunder({
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
+				keycloakOrganizationId: null,
 			});
 			await createOrUpdateFunder({
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
+				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
 			});
 
 			const response = await agent
 				.get(`/funders/theFoundationFoundation`)
 				.set(authHeader)
 				.expect(200);
-			expect(response.body).toEqual({
+			expect(response.body).toStrictEqual({
 				shortCode: 'theFoundationFoundation',
 				createdAt: expectTimestamp,
 				name: 'The Foundation Foundation',
+				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
 			});
 		});
 
@@ -85,6 +92,7 @@ describe('/funders', () => {
 			await createOrUpdateFunder({
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
+				keycloakOrganizationId: null,
 			});
 			await agent.get('/funders/foo').set(authHeader).expect(404);
 		});
@@ -129,10 +137,12 @@ describe('/funders', () => {
 			await createOrUpdateFunder({
 				shortCode: 'firework',
 				name: 'boring text-based firework',
+				keycloakOrganizationId: null,
 			});
 			const anotherFunderBefore = await createOrUpdateFunder({
 				shortCode: 'anotherFirework',
 				name: 'another boring text based firework',
+				keycloakOrganizationId: null,
 			});
 			const before = await loadTableMetrics('data_providers');
 			const result = await agent
@@ -143,9 +153,10 @@ describe('/funders', () => {
 				.expect(201);
 			const after = await loadTableMetrics('data_providers');
 			const anotherFunderAfter = await loadFunder('anotherFirework');
-			expect(result.body).toMatchObject({
+			expect(result.body).toStrictEqual({
 				shortCode: 'firework',
 				name: '🎆',
+				keycloakOrganizationId: null,
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(before.count);

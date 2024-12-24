@@ -25,7 +25,7 @@ import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import {
 	BaseFieldDataType,
 	BaseFieldScope,
-	keycloakUserIdToString,
+	keycloakIdToString,
 } from '../types';
 
 const createTestBaseFields = async () => {
@@ -197,6 +197,7 @@ describe('/proposals', () => {
 			const changemaker = await createChangemaker({
 				taxId: '123-123-123',
 				name: 'Canadian Company',
+				keycloakOrganizationId: null,
 			});
 			await createChangemakerProposal({
 				changemakerId: changemaker.id,
@@ -206,7 +207,7 @@ describe('/proposals', () => {
 				.get(`/proposals?changemaker=${changemaker.id}`)
 				.set(authHeader)
 				.expect(200);
-			expect(response.body).toEqual({
+			expect(response.body).toStrictEqual({
 				total: 2,
 				entries: [
 					{
@@ -424,7 +425,7 @@ describe('/proposals', () => {
 			});
 			const response = await request(app)
 				.get(
-					`/proposals?createdBy=${keycloakUserIdToString(testUser.keycloakUserId)}`,
+					`/proposals?createdBy=${keycloakIdToString(testUser.keycloakUserId)}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.expect(200);

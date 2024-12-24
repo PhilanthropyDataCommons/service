@@ -37,10 +37,12 @@ const insertTestChangemakers = async () => {
 	await createChangemaker({
 		taxId: '11-1111111',
 		name: 'Example Inc.',
+		keycloakOrganizationId: null,
 	});
 	await createChangemaker({
 		taxId: '22-2222222',
 		name: 'Another Inc.',
+		keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
 	});
 };
 
@@ -71,6 +73,7 @@ describe('/changemakers', () => {
 								id: 2,
 								taxId: '22-2222222',
 								name: 'Another Inc.',
+								keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
 								createdAt: expectTimestamp,
 								fields: [],
 							},
@@ -78,6 +81,7 @@ describe('/changemakers', () => {
 								id: 1,
 								taxId: '11-1111111',
 								name: 'Example Inc.',
+								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
 								fields: [],
 							},
@@ -92,6 +96,7 @@ describe('/changemakers', () => {
 				await createChangemaker({
 					taxId: '11-1111111',
 					name: `Changemaker ${i + 1}`,
+					keycloakOrganizationId: null,
 				});
 			}, Promise.resolve());
 			await request(app)
@@ -110,6 +115,7 @@ describe('/changemakers', () => {
 								id: 15,
 								taxId: '11-1111111',
 								name: 'Changemaker 15',
+								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
 								fields: [],
 							},
@@ -117,6 +123,7 @@ describe('/changemakers', () => {
 								id: 14,
 								taxId: '11-1111111',
 								name: 'Changemaker 14',
+								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
 								fields: [],
 							},
@@ -124,6 +131,7 @@ describe('/changemakers', () => {
 								id: 13,
 								taxId: '11-1111111',
 								name: 'Changemaker 13',
+								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
 								fields: [],
 							},
@@ -131,6 +139,7 @@ describe('/changemakers', () => {
 								id: 12,
 								taxId: '11-1111111',
 								name: 'Changemaker 12',
+								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
 								fields: [],
 							},
@@ -138,6 +147,7 @@ describe('/changemakers', () => {
 								id: 11,
 								taxId: '11-1111111',
 								name: 'Changemaker 11',
+								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
 								fields: [],
 							},
@@ -159,10 +169,12 @@ describe('/changemakers', () => {
 			await createChangemaker({
 				taxId: '123-123-123',
 				name: 'Canadian Company',
+				keycloakOrganizationId: null,
 			});
 			await createChangemaker({
 				taxId: '123-123-123',
 				name: 'Another Canadian Company',
+				keycloakOrganizationId: null,
 			});
 			await createChangemakerProposal({
 				changemakerId: 1,
@@ -179,6 +191,7 @@ describe('/changemakers', () => {
 						id: 1,
 						taxId: '123-123-123',
 						name: 'Canadian Company',
+						keycloakOrganizationId: null,
 						createdAt: expectTimestamp,
 						fields: [],
 					},
@@ -204,6 +217,7 @@ describe('/changemakers', () => {
 			await createChangemaker({
 				taxId: '123-123-123',
 				name: 'Canadian Company',
+				keycloakOrganizationId: null,
 			});
 			await createChangemakerProposal({
 				changemakerId: 1,
@@ -224,6 +238,7 @@ describe('/changemakers', () => {
 						id: 1,
 						taxId: '123-123-123',
 						name: 'Canadian Company',
+						keycloakOrganizationId: null,
 						createdAt: expectTimestamp,
 						fields: [],
 					},
@@ -264,6 +279,7 @@ describe('/changemakers', () => {
 						id: 2,
 						taxId: '22-2222222',
 						name: 'Another Inc.',
+						keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
 						createdAt: expectTimestamp,
 						fields: [],
 					}),
@@ -318,10 +334,12 @@ describe('/changemakers', () => {
 				firstChangemaker = await createChangemaker({
 					name: 'Five thousand one hundred forty seven reasons',
 					taxId: '05119',
+					keycloakOrganizationId: null,
 				});
 				secondChangemaker = await createChangemaker({
 					taxId: '5387',
 					name: 'Changemaker 5387',
+					keycloakOrganizationId: '8b15d276-be48-11ef-a061-5b4a50e82d50',
 				});
 				secondChangemakerSourceId = (
 					await createSource({
@@ -332,6 +350,7 @@ describe('/changemakers', () => {
 				firstFunder = await createOrUpdateFunder({
 					shortCode: 'funder_5393',
 					name: 'Funder 5393',
+					keycloakOrganizationId: null,
 				});
 				firstFunderOpportunity = await createOpportunity({
 					title: `${firstFunder.name} opportunity`,
@@ -345,10 +364,12 @@ describe('/changemakers', () => {
 				firstDataProvider = await createOrUpdateDataProvider({
 					shortCode: 'data_provider_5431',
 					name: 'Data Platform Provider 5431',
+					keycloakOrganizationId: null,
 				});
 				secondDataProvider = await createOrUpdateDataProvider({
 					shortCode: 'data_provider_5477',
 					name: 'Data Platform Provider 5477',
+					keycloakOrganizationId: null,
 				});
 				firstDataProviderSourceId = (
 					await createSource({
@@ -470,6 +491,7 @@ describe('/changemakers', () => {
 							id: changemakerId,
 							name: 'Five thousand one hundred forty seven reasons',
 							taxId: '05119',
+							keycloakOrganizationId: null,
 							createdAt: expectTimestamp,
 							fields: [latestValidValue],
 						}),
@@ -746,14 +768,16 @@ describe('/changemakers', () => {
 				.send({
 					taxId: '11-1111111',
 					name: 'Example Inc.',
+					keycloakOrganizationId: null,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('changemakers');
 			expect(before.count).toEqual(0);
-			expect(result.body).toMatchObject({
+			expect(result.body).toStrictEqual({
 				id: 1,
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 				createdAt: expectTimestamp,
 				fields: [],
 			});
@@ -794,6 +818,7 @@ describe('/changemakers', () => {
 			await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
+				keycloakOrganizationId: null,
 			});
 			const result = await request(app)
 				.post('/changemakers')
@@ -802,6 +827,7 @@ describe('/changemakers', () => {
 				.send({
 					taxId: '11-1111111',
 					name: 'Example Inc.',
+					keycloakOrganizationId: null,
 				})
 				.expect(409);
 			expect(result.body).toMatchObject({

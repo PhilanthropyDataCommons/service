@@ -602,6 +602,7 @@ describe('processBulkUploadTask', () => {
 					taxId: '51-2144346',
 					id: 1,
 					name: 'Foo LLC.',
+					keycloakOrganizationId: null,
 					fields: [],
 				},
 			],

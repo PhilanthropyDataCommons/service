@@ -1,12 +1,12 @@
 import { ajv } from '../ajv';
 import { InputValidationError } from '../errors';
-import { keycloakUserIdSchema } from '../types';
+import { keycloakIdSchema } from '../types';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
-import type { KeycloakUserId } from '../types';
+import type { KeycloakId } from '../types';
 
 interface KeycloakUserIdParameters {
-	keycloakUserId: KeycloakUserId | undefined;
+	keycloakUserId: KeycloakId | undefined;
 }
 
 const keycloakUserIdParametersSchema: JSONSchemaType<KeycloakUserIdParameters> =
@@ -14,7 +14,7 @@ const keycloakUserIdParametersSchema: JSONSchemaType<KeycloakUserIdParameters> =
 		type: 'object',
 		properties: {
 			keycloakUserId: {
-				...keycloakUserIdSchema,
+				...keycloakIdSchema,
 				nullable: true,
 			},
 		},

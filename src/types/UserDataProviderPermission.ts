@@ -3,13 +3,13 @@ import { Permission } from './Permission';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { ShortCode } from './ShortCode';
-import type { KeycloakUserId } from './KeycloakUserId';
+import type { KeycloakId } from './KeycloakId';
 
 interface UserDataProviderPermission {
-	readonly userKeycloakUserId: KeycloakUserId;
+	readonly userKeycloakUserId: KeycloakId;
 	readonly permission: Permission;
 	readonly dataProviderShortCode: ShortCode;
-	readonly createdBy: KeycloakUserId;
+	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
 }
 

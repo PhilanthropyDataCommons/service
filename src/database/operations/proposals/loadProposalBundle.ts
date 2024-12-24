@@ -4,12 +4,12 @@ import type {
 	Bundle,
 	Proposal,
 	AuthContext,
-	KeycloakUserId,
+	KeycloakId,
 } from '../../../types';
 
 export const loadProposalBundle = async (
 	authContext: AuthContext | undefined,
-	createdBy: KeycloakUserId | undefined,
+	createdBy: KeycloakId | undefined,
 	changemakerId: number | undefined,
 	search: string | undefined,
 	limit: number | undefined,

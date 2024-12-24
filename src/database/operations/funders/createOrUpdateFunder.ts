@@ -8,12 +8,13 @@ import type {
 const createOrUpdateFunder = async (
 	createValues: InternallyWritableFunder,
 ): Promise<Funder> => {
-	const { shortCode, name } = createValues;
+	const { shortCode, name, keycloakOrganizationId } = createValues;
 	const result = await db.sql<JsonResultSet<Funder>>(
 		'funders.insertOrUpdateOne',
 		{
 			shortCode,
 			name,
+			keycloakOrganizationId,
 		},
 	);
 	const { object } = result.rows[0] ?? {};

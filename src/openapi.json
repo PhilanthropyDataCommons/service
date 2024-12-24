@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for changemakers seeking grants.",
-		"version": "0.16.3",
+		"version": "0.16.6",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -193,6 +193,12 @@
 					}
 				]
 			},
+			"keycloakOrganizationId": {
+				"description": "If available, the PDC Keycloak Organization ID for this entity.",
+				"type": "string",
+				"format": "uuid",
+				"nullable": true
+			},
 			"DataProvider": {
 				"type": "object",
 				"properties": {
@@ -203,6 +209,9 @@
 					"name": {
 						"type": "string",
 						"example": "Philanthropy Data Warehouse"
+					},
+					"keycloakOrganizationId": {
+						"$ref": "#/components/schemas/keycloakOrganizationId"
 					},
 					"createdAt": {
 						"type": "string",
@@ -222,6 +231,9 @@
 					"name": {
 						"type": "string",
 						"example": "Example Foundation"
+					},
+					"keycloakOrganizationId": {
+						"$ref": "#/components/schemas/keycloakOrganizationId"
 					},
 					"createdAt": {
 						"type": "string",
@@ -246,6 +258,9 @@
 					"name": {
 						"type": "string",
 						"example": "Example Inc."
+					},
+					"keycloakOrganizationId": {
+						"$ref": "#/components/schemas/keycloakOrganizationId"
 					},
 					"createdAt": {
 						"type": "string",

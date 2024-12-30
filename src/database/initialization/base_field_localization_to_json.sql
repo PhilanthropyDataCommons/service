@@ -1,7 +1,7 @@
 SELECT drop_function('base_field_localization_to_json');
 
 CREATE FUNCTION base_field_localization_to_json(
-  base_field_localization base_field_localizations
+	base_field_localization base_field_localizations
 )
 RETURNS jsonb AS $$
 BEGIN

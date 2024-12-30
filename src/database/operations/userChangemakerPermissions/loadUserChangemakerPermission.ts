@@ -1,12 +1,12 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
-import {
-	keycloakIdToString,
-	type Id,
-	type JsonResultSet,
-	type KeycloakId,
-	type Permission,
-	type UserChangemakerPermission,
+import { keycloakIdToString } from '../../../types';
+import type {
+	Id,
+	JsonResultSet,
+	KeycloakId,
+	Permission,
+	UserChangemakerPermission,
 } from '../../../types';
 
 export const loadUserChangemakerPermission = async (
@@ -25,7 +25,7 @@ export const loadUserChangemakerPermission = async (
 	const object = result.rows[0]?.object;
 	if (object === undefined) {
 		throw new NotFoundError(`Entity not found`, {
-			entityType: 'UserchangemakerPermission',
+			entityType: 'UserChangemakerPermission',
 			entityPrimaryKey: {
 				userKeycloakUserId: keycloakIdToString(userKeycloakUserId),
 				changemakerId,

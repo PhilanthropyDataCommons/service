@@ -1189,6 +1189,41 @@
 					}
 				},
 				"required": ["id", "", "createdAt"]
+			},
+			"UserFunderPermission": {
+				"type": "object",
+				"properties": {
+					"permission": {
+						"$ref": "#/components/schemas/Permission",
+						"readOnly": true
+					},
+					"funderShortcode": {
+						"$ref": "#/components/schemas/shortCode",
+						"readOnly": true
+					},
+					"userKeycloakUserId": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdBy": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": [
+					"permission",
+					"funderShortcode",
+					"userKeycloakUserId",
+					"createdBy",
+					"createdAt"
+				]
 			}
 		}
 	},
@@ -2825,6 +2860,61 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					}
+				}
+			}
+		},
+		"/users/{userKeycloakUserId}/funders/{funderShortCode}/permissions/{permission}": {
+			"put": {
+				"operationId": "createOrUpdateUserFunderPermission",
+				"summary": "Creates or updates a user funder permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "userKeycloakUserId",
+						"description": "The keycloak user id of a user.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "funderShortCode",
+						"description": "The shortCode of a funder.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/shortCode"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be granted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "The resulting permission.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserFunderPermission"
+								}
+							}
+						}
 					}
 				}
 			}

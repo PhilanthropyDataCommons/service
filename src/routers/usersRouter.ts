@@ -27,5 +27,10 @@ usersRouter.put(
 	requireFunderPermission(Permission.MANAGE),
 	userFunderPermissionsHandlers.putUserFunderPermission,
 );
+usersRouter.delete(
+	'/:userKeycloakUserId/funders/:funderShortCode/permissions/:permission',
+	requireFunderPermission(Permission.MANAGE),
+	userFunderPermissionsHandlers.deleteUserFunderPermission,
+);
 
 export { usersRouter };

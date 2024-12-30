@@ -1,4 +1,8 @@
-import { createOrUpdateUserFunderPermission } from '../database';
+import {
+	assertUserFunderPermissionExists,
+	createOrUpdateUserFunderPermission,
+	removeUserFunderPermission,
+} from '../database';
 import {
 	isAuthContext,
 	isId,
@@ -14,6 +18,61 @@ import {
 	InputValidationError,
 } from '../errors';
 import type { Request, Response, NextFunction } from 'express';
+
+const deleteUserFunderPermission = (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): void => {
+	const { userKeycloakUserId, funderShortCode, permission } = req.params;
+	if (!isKeycloakId(userKeycloakUserId)) {
+		next(
+			new InputValidationError(
+				'Invalid userKeycloakUserId parameter.',
+				isKeycloakId.errors ?? [],
+			),
+		);
+		return;
+	}
+	if (!isShortCode(funderShortCode)) {
+		next(
+			new InputValidationError(
+				'Invalid shortCode parameter.',
+				isId.errors ?? [],
+			),
+		);
+		return;
+	}
+	if (!isPermission(permission)) {
+		next(
+			new InputValidationError(
+				'Invalid permission parameter.',
+				isPermission.errors ?? [],
+			),
+		);
+		return;
+	}
+
+	(async () => {
+		await assertUserFunderPermissionExists(
+			userKeycloakUserId,
+			funderShortCode,
+			permission,
+		);
+		await removeUserFunderPermission(
+			userKeycloakUserId,
+			funderShortCode,
+			permission,
+		);
+		res.status(204).contentType('application/json').send();
+	})().catch((error: unknown) => {
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(new DatabaseError('Error deleting item.', error));
+			return;
+		}
+		next(error);
+	});
+};
 
 const putUserFunderPermission = (
 	req: Request,
@@ -83,6 +142,7 @@ const putUserFunderPermission = (
 };
 
 const userFunderPermissionsHandlers = {
+	deleteUserFunderPermission,
 	putUserFunderPermission,
 };
 

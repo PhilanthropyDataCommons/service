@@ -2917,6 +2917,52 @@
 						}
 					}
 				}
+			},
+			"delete": {
+				"operationId": "deleteUserFunderPermission",
+				"summary": "Deletes a user-funder permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "userKeycloakUserId",
+						"description": "The keycloak user id of a user.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "funderShortCode",
+						"description": "The shortCode of a funder.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/shortCode"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be deleted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Confirmation of successful deletion."
+					}
+				}
 			}
 		}
 	}

@@ -29,6 +29,11 @@ usersRouter.put(
 	requireDataProviderPermission(Permission.MANAGE),
 	userDataProviderPermissionsHandlers.putUserDataProviderPermission,
 );
+usersRouter.delete(
+	'/:userKeycloakUserId/dataProviders/:dataProviderShortCode/permissions/:permission',
+	requireDataProviderPermission(Permission.MANAGE),
+	userDataProviderPermissionsHandlers.deleteUserDataProviderPermission,
+);
 usersRouter.put(
 	'/:userKeycloakUserId/funders/:funderShortCode/permissions/:permission',
 	requireFunderPermission(Permission.MANAGE),

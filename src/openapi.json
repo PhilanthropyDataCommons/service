@@ -1224,6 +1224,41 @@
 					"createdBy",
 					"createdAt"
 				]
+			},
+			"UserDataProviderPermission": {
+				"type": "object",
+				"properties": {
+					"permission": {
+						"$ref": "#/components/schemas/Permission",
+						"readOnly": true
+					},
+					"dataProviderShortcode": {
+						"$ref": "#/components/schemas/shortCode",
+						"readOnly": true
+					},
+					"userKeycloakUserId": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdBy": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": [
+					"id",
+					"dataProviderShortcode",
+					"userKeycloakUserId",
+					"createdBy",
+					"createdAt"
+				]
 			}
 		}
 	},
@@ -2961,6 +2996,61 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					}
+				}
+			}
+		},
+		"/users/{userKeycloakUserId}/dataProviders/{dataProviderShortCode}/permissions/{permission}": {
+			"put": {
+				"operationId": "createOrUpdateUserDataProviderPermission",
+				"summary": "Creates or updates a user data provider permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "userKeycloakUserId",
+						"description": "The keycloak user id of a user.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "dataProviderShortCode",
+						"description": "The shortCode of a funder.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/shortCode"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be granted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "The resulting permission.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserDataProviderPermission"
+								}
+							}
+						}
 					}
 				}
 			}

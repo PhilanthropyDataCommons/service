@@ -31,7 +31,7 @@ For notes on how to set up a production instance, see the [hosting documentation
 
 ## Development
 
-In order to run this software you need to set up a [Postgres 14](https://www.postgresql.org/) database.
+In order to run this software you need to set up a [Postgres 14](https://www.postgresql.org/) database. You will also need a working copy of `python3`
 
 ### Setup
 
@@ -184,9 +184,7 @@ In `/src/databases/seeds` there is seed or starter data. The contents can be run
 
 #### Linting
 
-We use [SQLFluff](https://docs.sqlfluff.com/en/stable/index.html) to lint our SQL files. See [Getting Started with SQLFluff](https://docs.sqlfluff.com/en/stable/gettingstarted.html) for instructions on setting it up.
-
-Once you have SQLFluff installed, you can run it with `npm run lint:sqlfluff`, and use `npm run format:sqlfluff` to automatically fix any linter errors it can.
+We use [SQLFluff](https://docs.sqlfluff.com/en/stable/index.html) to lint our SQL files. Our project automatically installs and runs it appropriately using `python3`'s virtualization tooling.
 
 [actionlint](https://github.com/rhysd/actionlint) checks our GitHub Actions workflow files for syntax, security, and more. It is run in CI via the [actionlint action](https://github.com/marketplace/actions/actionlint), and you can run it locally by either compiling the tool locally using Go, or downloading a [release binary](https://github.com/rhysd/actionlint/releases): `actionlint`. We are using the defaults, so it requires no arguments.
 

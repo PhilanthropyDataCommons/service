@@ -1,29 +1,12 @@
-import { loadBundle } from '../generic/loadBundle';
-import type {
-	JsonResultSet,
-	Bundle,
-	ChangemakerProposal,
-} from '../../../types';
+import { generateLoadBundleOperation } from '../generators';
+import type { ChangemakerProposal } from '../../../types';
 
-export const loadChangemakerProposalBundle = async (
-	changemakerId: number | undefined,
-	proposalId: number | undefined,
-	limit: number | undefined,
-	offset: number,
-): Promise<Bundle<ChangemakerProposal>> => {
-	const bundle = await loadBundle<JsonResultSet<ChangemakerProposal>>(
-		'changemakersProposals.selectWithPagination',
-		{
-			changemakerId,
-			proposalId,
-			offset,
-			limit,
-		},
-		'changemakers_proposals',
-	);
-	const entries = bundle.entries.map((entry) => entry.object);
-	return {
-		...bundle,
-		entries,
-	};
-};
+const loadChangemakerProposalBundle = generateLoadBundleOperation<
+	ChangemakerProposal,
+	[changemakerId: number | undefined, proposalId: number | undefined]
+>('changemakersProposals.selectWithPagination', 'changemakers_proposals', [
+	'changemakerId',
+	'proposalId',
+]);
+
+export { loadChangemakerProposalBundle };

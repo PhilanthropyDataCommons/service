@@ -1,35 +1,17 @@
-import { loadBundle } from '../generic/loadBundle';
-import type {
-	JsonResultSet,
-	Bundle,
+import { generateLoadBundleOperation } from '../generators';
+import type { BulkUploadTask, KeycloakId } from '../../../types';
+
+const loadBulkUploadTaskBundle = generateLoadBundleOperation<
 	BulkUploadTask,
-	AuthContext,
-	KeycloakId,
-} from '../../../types';
+	[
+		authContextKeycloakUserId: KeycloakId | undefined,
+		authContextIsAdministrator: boolean | undefined,
+		createdBy: KeycloakId | undefined,
+	]
+>('bulkUploadTasks.selectWithPagination', 'bulk_upload_tasks', [
+	'authContextKeycloakUserId',
+	'authContextIsAdministrator',
+	'createdBy',
+]);
 
-export const loadBulkUploadTaskBundle = async (
-	authContext: AuthContext | undefined,
-	createdBy: KeycloakId | undefined,
-	limit: number | undefined,
-	offset: number,
-): Promise<Bundle<BulkUploadTask>> => {
-	const authContextKeycloakUserId = authContext?.user.keycloakUserId;
-	const authContextIsAdministrator = authContext?.role.isAdministrator;
-
-	const bundle = await loadBundle<JsonResultSet<BulkUploadTask>>(
-		'bulkUploadTasks.selectWithPagination',
-		{
-			authContextIsAdministrator,
-			authContextKeycloakUserId,
-			createdBy,
-			limit,
-			offset,
-		},
-		'bulk_upload_tasks',
-	);
-	const entries = bundle.entries.map((entry) => entry.object);
-	return {
-		...bundle,
-		entries,
-	};
-};
+export { loadBulkUploadTaskBundle };

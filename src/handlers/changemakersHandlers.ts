@@ -9,6 +9,7 @@ import {
 	isWritableChangemaker,
 	isTinyPgErrorWithQueryContext,
 	isAuthContext,
+	getKeycloakUserIdFromAuthContext,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import {
@@ -53,7 +54,12 @@ const getChangemakers = (
 	const { limit, offset } = getLimitValues(paginationParameters);
 	const { proposalId } = extractProposalParameters(req);
 	const authContext = isAuthContext(req) ? req : undefined;
-	loadChangemakerBundle(authContext, proposalId, limit, offset)
+	loadChangemakerBundle(
+		getKeycloakUserIdFromAuthContext(authContext),
+		proposalId,
+		limit,
+		offset,
+	)
 		.then((changemakerBundle) => {
 			res.status(200).contentType('application/json').send(changemakerBundle);
 		})

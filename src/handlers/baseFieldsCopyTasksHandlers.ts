@@ -5,6 +5,8 @@ import {
 } from '../database';
 import {
 	TaskStatus,
+	getIsAdministratorFromAuthContext,
+	getKeycloakUserIdFromAuthContext,
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableBaseFieldsCopyTask,
@@ -76,7 +78,8 @@ const getBaseFieldsCopyTasks = (
 	const { createdBy } = extractCreatedByParameters(req);
 	(async () => {
 		const baseFieldsCopyTaskBundle = await loadBaseFieldsCopyTaskBundle(
-			req,
+			getKeycloakUserIdFromAuthContext(req),
+			getIsAdministratorFromAuthContext(req),
 			createdBy,
 			limit,
 			offset,

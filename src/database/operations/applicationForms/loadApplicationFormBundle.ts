@@ -1,21 +1,7 @@
-import { loadBundle } from '../generic/loadBundle';
-import type { JsonResultSet, Bundle, ApplicationForm } from '../../../types';
+import { generateLoadBundleOperation } from '../generators';
+import type { ApplicationForm } from '../../../types';
 
-export const loadApplicationFormBundle = async (
-	limit: number | undefined,
-	offset: number,
-): Promise<Bundle<ApplicationForm>> => {
-	const bundle = await loadBundle<JsonResultSet<ApplicationForm>>(
-		'applicationForms.selectWithPagination',
-		{
-			limit,
-			offset,
-		},
-		'application_forms',
-	);
-	const entries = bundle.entries.map((entry) => entry.object);
-	return {
-		...bundle,
-		entries,
-	};
-};
+export const loadApplicationFormBundle = generateLoadBundleOperation<
+	ApplicationForm,
+	[]
+>('applicationForms.selectWithPagination', 'application_forms', []);

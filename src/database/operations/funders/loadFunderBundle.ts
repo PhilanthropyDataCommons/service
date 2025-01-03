@@ -1,23 +1,10 @@
-import { loadBundle } from '../generic/loadBundle';
-import type { Bundle, JsonResultSet, Funder } from '../../../types';
+import { generateLoadBundleOperation } from '../generators';
+import type { Funder } from '../../../types';
 
-const loadFunderBundle = async (
-	limit: number | undefined,
-	offset: number,
-): Promise<Bundle<Funder>> => {
-	const bundle = await loadBundle<JsonResultSet<Funder>>(
-		'funders.selectWithPagination',
-		{
-			limit,
-			offset,
-		},
-		'funders',
-	);
-	const entries = bundle.entries.map((entry) => entry.object);
-	return {
-		...bundle,
-		entries,
-	};
-};
+const loadFunderBundle = generateLoadBundleOperation<Funder, []>(
+	'funders.selectWithPagination',
+	'funders',
+	[],
+);
 
 export { loadFunderBundle };

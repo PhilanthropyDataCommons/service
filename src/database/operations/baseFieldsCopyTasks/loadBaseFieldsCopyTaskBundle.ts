@@ -1,35 +1,17 @@
-import { loadBundle } from '../generic/loadBundle';
-import type {
-	JsonResultSet,
-	Bundle,
+import { generateLoadBundleOperation } from '../generators';
+import type { BaseFieldsCopyTask, KeycloakId } from '../../../types';
+
+const loadBaseFieldsCopyTaskBundle = generateLoadBundleOperation<
 	BaseFieldsCopyTask,
-	AuthContext,
-	KeycloakId,
-} from '../../../types';
+	[
+		authContextKeycloakUserId: KeycloakId | undefined,
+		authContextIsAdministrator: boolean | undefined,
+		createdBy: KeycloakId | undefined,
+	]
+>('baseFieldsCopyTasks.selectWithPagination', 'base_fields_copy_tasks', [
+	'authContextKeycloakUserId',
+	'authContextIsAdministrator',
+	'createdBy',
+]);
 
-export const loadBaseFieldsCopyTaskBundle = async (
-	authContext: AuthContext | undefined,
-	createdBy: KeycloakId | undefined,
-	limit: number | undefined,
-	offset: number,
-): Promise<Bundle<BaseFieldsCopyTask>> => {
-	const authContextKeycloakUserId = authContext?.user.keycloakUserId;
-	const authContextIsAdministrator = authContext?.role.isAdministrator;
-
-	const bundle = await loadBundle<JsonResultSet<BaseFieldsCopyTask>>(
-		'baseFieldsCopyTasks.selectWithPagination',
-		{
-			authContextIsAdministrator,
-			authContextKeycloakUserId,
-			createdBy,
-			limit,
-			offset,
-		},
-		'base_fields_copy_tasks',
-	);
-	const entries = bundle.entries.map((entry) => entry.object);
-	return {
-		...bundle,
-		entries,
-	};
-};
+export { loadBaseFieldsCopyTaskBundle };

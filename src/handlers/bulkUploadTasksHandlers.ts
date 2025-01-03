@@ -102,7 +102,8 @@ const getBulkUploadTasks = (
 	const { createdBy } = extractCreatedByParameters(req);
 	(async () => {
 		const bulkUploadTaskBundle = await loadBulkUploadTaskBundle(
-			req,
+			req.user.keycloakUserId,
+			req.role.isAdministrator,
 			createdBy,
 			limit,
 			offset,

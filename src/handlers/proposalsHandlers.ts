@@ -10,6 +10,8 @@ import {
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableProposal,
+	getKeycloakUserIdFromAuthContext,
+	getIsAdministratorFromAuthContext,
 } from '../types';
 import {
 	DatabaseError,
@@ -41,7 +43,8 @@ const getProposals = (
 
 	(async () => {
 		const proposalBundle = await loadProposalBundle(
-			req,
+			getIsAdministratorFromAuthContext(req),
+			getKeycloakUserIdFromAuthContext(req),
 			createdBy,
 			changemakerId,
 			search,

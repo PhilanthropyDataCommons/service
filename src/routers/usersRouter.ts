@@ -4,8 +4,10 @@ import { usersHandlers } from '../handlers/usersHandlers';
 import {
 	requireAuthentication,
 	requireChangemakerPermission,
+	requireFunderPermission,
 } from '../middleware';
 import { Permission } from '../types';
+import { userFunderPermissionsHandlers } from '../handlers/userFunderPermissionsHandlers';
 
 const usersRouter = express.Router();
 
@@ -19,6 +21,16 @@ usersRouter.delete(
 	'/:userKeycloakUserId/changemakers/:changemakerId/permissions/:permission',
 	requireChangemakerPermission(Permission.MANAGE),
 	userChangemakerPermissionsHandlers.deleteUserChangemakerPermission,
+);
+usersRouter.put(
+	'/:userKeycloakUserId/funders/:funderShortCode/permissions/:permission',
+	requireFunderPermission(Permission.MANAGE),
+	userFunderPermissionsHandlers.putUserFunderPermission,
+);
+usersRouter.delete(
+	'/:userKeycloakUserId/funders/:funderShortCode/permissions/:permission',
+	requireFunderPermission(Permission.MANAGE),
+	userFunderPermissionsHandlers.deleteUserFunderPermission,
 );
 
 export { usersRouter };

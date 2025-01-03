@@ -2,36 +2,36 @@ import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
 import { keycloakIdToString } from '../../../types';
 import type {
-	Id,
-	JsonResultSet,
+	CheckResult,
 	KeycloakId,
 	Permission,
-	UserChangemakerPermission,
+	ShortCode,
 } from '../../../types';
 
-export const loadUserChangemakerPermission = async (
+const assertUserFunderPermissionExists = async (
 	userKeycloakUserId: KeycloakId,
-	changemakerId: Id,
+	funderShortCode: ShortCode,
 	permission: Permission,
-): Promise<UserChangemakerPermission> => {
-	const result = await db.sql<JsonResultSet<UserChangemakerPermission>>(
-		'userChangemakerPermissions.selectByPrimaryKey',
+): Promise<void> => {
+	const result = await db.sql<CheckResult>(
+		'userFunderPermissions.checkExistsByPrimaryKey',
 		{
 			userKeycloakUserId,
-			changemakerId,
+			funderShortCode,
 			permission,
 		},
 	);
-	const object = result.rows[0]?.object;
-	if (object === undefined) {
+
+	if (result.rows[0]?.result !== true) {
 		throw new NotFoundError(`Entity not found`, {
-			entityType: 'UserChangemakerPermission',
+			entityType: 'UserFunderPermission',
 			entityPrimaryKey: {
 				userKeycloakUserId: keycloakIdToString(userKeycloakUserId),
-				changemakerId,
+				funderShortCode,
 				permission,
 			},
 		});
 	}
-	return object;
 };
+
+export { assertUserFunderPermissionExists };

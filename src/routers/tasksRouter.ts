@@ -1,6 +1,7 @@
 import express from 'express';
 import { bulkUploadTasksHandlers } from '../handlers/bulkUploadTasksHandlers';
-import { requireAuthentication } from '../middleware';
+import { baseFieldsCopyTasksHandlers } from '../handlers/baseFieldsCopyTasksHandlers';
+import { requireAdministratorRole, requireAuthentication } from '../middleware';
 
 const tasksRouter = express.Router();
 
@@ -14,6 +15,18 @@ tasksRouter.get(
 	'/bulkUploads',
 	requireAuthentication,
 	bulkUploadTasksHandlers.getBulkUploadTasks,
+);
+
+tasksRouter.post(
+	'/baseFieldsCopy',
+	requireAdministratorRole,
+	baseFieldsCopyTasksHandlers.postBaseFieldsCopyTask,
+);
+
+tasksRouter.get(
+	'/baseFieldsCopy',
+	requireAdministratorRole,
+	baseFieldsCopyTasksHandlers.getBaseFieldsCopyTasks,
 );
 
 export { tasksRouter };

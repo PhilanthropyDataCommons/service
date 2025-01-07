@@ -13,7 +13,11 @@
 
 import { db } from '../../db';
 import { loadTableMetrics } from '../generic/loadTableMetrics';
-import type { Bundle, JsonResultSet } from '../../../types';
+import {
+	getIsAdministratorFromAuthContext,
+	getKeycloakUserIdFromAuthContext,
+} from '../../../types';
+import type { AuthContext, Bundle, JsonResultSet } from '../../../types';
 
 const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 	queryName: string,
@@ -22,6 +26,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 ) => {
 	const generatedParameterNames = [...parameterNames, 'limit', 'offset'];
 	return async (
+		authContext: AuthContext | undefined,
 		...args: [...P, limit: number | undefined, offset: number | undefined]
 	): Promise<Bundle<T>> => {
 		const queryParameters = generatedParameterNames.reduce(
@@ -29,7 +34,12 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 				...acc,
 				[parameterName]: args[index],
 			}),
-			{},
+			{
+				authContextKeycloakUserId:
+					getKeycloakUserIdFromAuthContext(authContext),
+				authContextIsAdministrator:
+					getIsAdministratorFromAuthContext(authContext),
+			},
 		);
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
 		const entries = result.rows.map((row) => row.object);

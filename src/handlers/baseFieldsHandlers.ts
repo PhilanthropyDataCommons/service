@@ -116,7 +116,12 @@ const getBaseFieldLocalizationsByBaseFieldId = (
 	const { offset, limit } = getLimitValues(paginationParameters);
 	assertBaseFieldExists(baseFieldId)
 		.then(() => {
-			loadBaseFieldLocalizationsBundleByBaseFieldId(baseFieldId, limit, offset)
+			loadBaseFieldLocalizationsBundleByBaseFieldId(
+				undefined,
+				baseFieldId,
+				limit,
+				offset,
+			)
 				.then((baseFieldLocalizations) => {
 					res
 						.status(200)

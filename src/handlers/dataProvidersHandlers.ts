@@ -30,7 +30,7 @@ const getDataProviders = (
 	const paginationParameters = extractPaginationParameters(req);
 	(async () => {
 		const { offset, limit } = getLimitValues(paginationParameters);
-		const bundle = await loadDataProviderBundle(limit, offset);
+		const bundle = await loadDataProviderBundle(req, limit, offset);
 
 		res.status(200).contentType('application/json').send(bundle);
 	})().catch((error: unknown) => {

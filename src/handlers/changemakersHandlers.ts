@@ -9,6 +9,7 @@ import {
 	isWritableChangemaker,
 	isTinyPgErrorWithQueryContext,
 	isAuthContext,
+	getKeycloakUserIdFromAuthContext,
 } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import {
@@ -77,7 +78,7 @@ const getChangemaker = (
 		return;
 	}
 	const authContext = isAuthContext(req) ? req : undefined;
-	loadChangemaker(authContext, changemakerId)
+	loadChangemaker(getKeycloakUserIdFromAuthContext(authContext), changemakerId)
 		.then((changemaker) => {
 			res.status(200).contentType('application/json').send(changemaker);
 		})

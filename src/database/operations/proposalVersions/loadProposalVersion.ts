@@ -1,22 +1,9 @@
-import { db } from '../../db';
-import { NotFoundError } from '../../../errors';
-import type { JsonResultSet, ProposalVersion } from '../../../types';
+import { generateLoadItemOperation } from '../generators';
+import type { Id, ProposalVersion } from '../../../types';
 
-export const loadProposalVersion = async (
-	id: number,
-): Promise<ProposalVersion> => {
-	const result = await db.sql<JsonResultSet<ProposalVersion>>(
-		'proposalVersions.selectById',
-		{
-			id,
-		},
-	);
-	const proposalVersion = result.rows[0]?.object;
-	if (proposalVersion === undefined) {
-		throw new NotFoundError(`Entity not found`, {
-			entityType: 'ProposalVersion',
-			entityId: id,
-		});
-	}
-	return proposalVersion;
-};
+const loadProposalVersion = generateLoadItemOperation<
+	ProposalVersion,
+	[proposalVersionId: Id]
+>('proposalVersions.selectById', 'ProposalVersion', ['proposalVersionId']);
+
+export { loadProposalVersion };

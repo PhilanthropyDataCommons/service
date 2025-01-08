@@ -37,9 +37,14 @@ const getKeycloakUserIdFromAuthContext = (
 	return keycloakUserId;
 };
 
+const getIsAdministratorFromAuthContext = (
+	req: AuthContext | undefined,
+): boolean | undefined => req?.role?.isAdministrator;
+
 export {
 	AuthContext,
 	authContextSchema,
 	isAuthContext,
 	getKeycloakUserIdFromAuthContext,
+	getIsAdministratorFromAuthContext,
 };

@@ -2,7 +2,7 @@ SELECT drop_function('changemaker_to_json');
 
 CREATE FUNCTION changemaker_to_json(
 	changemaker changemakers,
-	keycloakUserId uuid DEFAULT NULL
+	auth_context_keycloak_user_id uuid DEFAULT NULL
 )
 RETURNS jsonb AS $$
 DECLARE
@@ -17,7 +17,7 @@ BEGIN
     FROM proposal_field_values pfv
     -- Remove field values for unauthenticated users while also (re)validating the user ID:
     INNER JOIN users u
-      ON u.keycloak_user_id = keycloakUserId
+      ON u.keycloak_user_id = auth_context_keycloak_user_id
     INNER JOIN application_form_fields aff
       ON pfv.application_form_field_id = aff.id
     INNER JOIN base_fields bf

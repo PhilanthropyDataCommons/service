@@ -27,6 +27,7 @@ const getChangemakerProposals = (
 
 	(async () => {
 		const changemakerProposalBundle = await loadChangemakerProposalBundle(
+			undefined,
 			changemakerId,
 			proposalId,
 			limit,

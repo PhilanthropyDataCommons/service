@@ -21,7 +21,7 @@ const getApplicationForms = (
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	loadApplicationFormBundle(limit, offset)
+	loadApplicationFormBundle(undefined, limit, offset)
 		.then((applicationForms) => {
 			res.status(200).contentType('application/json').send(applicationForms);
 		})

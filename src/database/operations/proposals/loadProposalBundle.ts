@@ -1,39 +1,17 @@
-import { loadBundle } from '../generic/loadBundle';
-import type {
-	JsonResultSet,
-	Bundle,
+import { generateLoadBundleOperation } from '../generators';
+import type { Proposal, KeycloakId } from '../../../types';
+
+const loadProposalBundle = generateLoadBundleOperation<
 	Proposal,
-	AuthContext,
-	KeycloakId,
-} from '../../../types';
+	[
+		createdBy: KeycloakId | undefined,
+		changemakerId: number | undefined,
+		search: string | undefined,
+	]
+>('proposals.selectWithPagination', 'proposals', [
+	'createdBy',
+	'changemakerId',
+	'search',
+]);
 
-export const loadProposalBundle = async (
-	authContext: AuthContext | undefined,
-	createdBy: KeycloakId | undefined,
-	changemakerId: number | undefined,
-	search: string | undefined,
-	limit: number | undefined,
-	offset: number,
-): Promise<Bundle<Proposal>> => {
-	const authContextKeycloakUserId = authContext?.user.keycloakUserId;
-	const authContextIsAdministrator = authContext?.role.isAdministrator;
-
-	const bundle = await loadBundle<JsonResultSet<Proposal>>(
-		'proposals.selectWithPagination',
-		{
-			authContextIsAdministrator,
-			authContextKeycloakUserId,
-			createdBy,
-			limit,
-			offset,
-			changemakerId,
-			search,
-		},
-		'proposals',
-	);
-	const entries = bundle.entries.map((entry) => entry.object);
-	return {
-		...bundle,
-		entries,
-	};
-};
+export { loadProposalBundle };

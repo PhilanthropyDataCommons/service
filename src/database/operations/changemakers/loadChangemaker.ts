@@ -12,12 +12,13 @@ export const loadChangemaker = async (
 	authContext: AuthContext | undefined,
 	id: Id,
 ): Promise<Changemaker> => {
-	const keycloakUserId = getKeycloakUserIdFromAuthContext(authContext);
+	const authContextKeycloakUserId =
+		getKeycloakUserIdFromAuthContext(authContext);
 	const result = await db.sql<JsonResultSet<Changemaker>>(
 		'changemakers.selectById',
 		{
 			id,
-			keycloakUserId,
+			authContextKeycloakUserId,
 		},
 	);
 	const { object } = result.rows[0] ?? {};

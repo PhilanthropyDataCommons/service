@@ -1,33 +1,17 @@
-import { db } from '../../db';
-import { NotFoundError } from '../../../errors';
+import { generateCreateOrUpdateItemOperation } from '../generators';
 import type {
 	BaseFieldLocalization,
 	InternallyWritableBaseFieldLocalization,
-	JsonResultSet,
 } from '../../../types';
 
-export const createOrUpdateBaseFieldLocalization = async (
-	updateValues: InternallyWritableBaseFieldLocalization,
-): Promise<BaseFieldLocalization> => {
-	const { baseFieldId, language, label, description } = updateValues;
-	const result = await db.sql<JsonResultSet<BaseFieldLocalization>>(
-		'baseFieldLocalizations.createOrUpdateByPrimaryKey',
-		{
-			baseFieldId,
-			language,
-			label,
-			description,
-		},
-	);
-	const baseFieldLocalization = result.rows[0]?.object;
-	if (baseFieldLocalization === undefined) {
-		throw new NotFoundError(`Entity not found`, {
-			entityType: 'BaseFieldLocalization',
-			entityPrimaryKey: {
-				baseFieldId,
-				language,
-			},
-		});
-	}
-	return baseFieldLocalization;
-};
+const createOrUpdateBaseFieldLocalization = generateCreateOrUpdateItemOperation<
+	BaseFieldLocalization,
+	InternallyWritableBaseFieldLocalization
+>('baseFieldLocalizations.createOrUpdateByPrimaryKey', [
+	'baseFieldId',
+	'language',
+	'label',
+	'description',
+]);
+
+export { createOrUpdateBaseFieldLocalization };

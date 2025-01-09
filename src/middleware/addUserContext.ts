@@ -12,7 +12,7 @@ import type { AuthenticatedRequest, KeycloakId } from '../types';
 
 const selectOrCreateUser = async (keycloakUserId: KeycloakId) => {
 	try {
-		return await loadUserByKeycloakUserId(keycloakUserId);
+		return await loadUserByKeycloakUserId(null, keycloakUserId);
 	} catch {
 		const user = await createUser({ keycloakUserId });
 		return user;

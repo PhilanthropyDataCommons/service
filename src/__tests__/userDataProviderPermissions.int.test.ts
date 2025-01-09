@@ -137,7 +137,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 
 		it('does not update `createdBy`, but returns the user data provider permission when user has permission to manage the data provider', async () => {
 			const user = await loadTestUser();
-			const systemUser = await loadSystemUser();
+			const systemUser = await loadSystemUser(null);
 			const dataProvider = await createOrUpdateDataProvider({
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
@@ -288,6 +288,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserDataProviderPermission(
+				null,
 				user.keycloakUserId,
 				dataProvider.shortCode,
 				Permission.EDIT,
@@ -308,6 +309,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				.expect(204);
 			await expect(
 				loadUserDataProviderPermission(
+					null,
 					user.keycloakUserId,
 					dataProvider.shortCode,
 					Permission.EDIT,
@@ -335,6 +337,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserDataProviderPermission(
+				null,
 				user.keycloakUserId,
 				dataProvider.shortCode,
 				Permission.EDIT,
@@ -355,6 +358,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				.expect(204);
 			await expect(
 				loadUserDataProviderPermission(
+					null,
 					user.keycloakUserId,
 					dataProvider.shortCode,
 					Permission.EDIT,

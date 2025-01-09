@@ -57,7 +57,7 @@ describe('/users', () => {
 		});
 
 		it('returns the permissions associated with a user', async () => {
-			const systemUser = await loadSystemUser();
+			const systemUser = await loadSystemUser(null);
 			const testUser = await loadTestUser();
 			const dataProvider = await createOrUpdateDataProvider({
 				name: 'Test Provider',
@@ -121,7 +121,7 @@ describe('/users', () => {
 		});
 
 		it('does not return deleted permissions associated with a user', async () => {
-			const systemUser = await loadSystemUser();
+			const systemUser = await loadSystemUser(null);
 			const testUser = await loadTestUser();
 			const changemaker = await createChangemaker({
 				name: 'Test Changemaker',
@@ -162,7 +162,7 @@ describe('/users', () => {
 		});
 
 		it('returns all users when the user is an administrator', async () => {
-			const systemUser = await loadSystemUser();
+			const systemUser = await loadSystemUser(null);
 			const testUser = await loadTestUser();
 			const anotherUser = await createAdditionalTestUser();
 			const { count: userCount } = await loadTableMetrics('users');

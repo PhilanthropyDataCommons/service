@@ -154,8 +154,10 @@ describe('/dataProviders', () => {
 					keycloakOrganizationId: '8b0163ac-bd91-11ef-8579-9fa8ab9f4b7d',
 				})
 				.expect(201);
-			const anotherDataProviderAfter =
-				await loadDataProvider('anotherFirework');
+			const anotherDataProviderAfter = await loadDataProvider(
+				null,
+				'anotherFirework',
+			);
 			const after = await loadTableMetrics('data_providers');
 			expect(result.body).toStrictEqual({
 				shortCode: 'firework',

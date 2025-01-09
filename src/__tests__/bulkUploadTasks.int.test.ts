@@ -36,8 +36,8 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns bulk upload tasks associated with the requesting user', async () => {
-			const systemUser = await loadSystemUser();
-			const systemSource = await loadSystemSource();
+			const systemUser = await loadSystemUser(null);
+			const systemSource = await loadSystemSource(null);
 			const testUser = await loadTestUser();
 			const thirdUser = await createUser({
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -107,7 +107,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns all bulk uploads for administrative users', async () => {
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -163,7 +163,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns upload tasks for specified createdBy user', async () => {
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -210,7 +210,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns upload tasks for the admin user when createdBy is set to me as an admin', async () => {
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			const testUser = await loadTestUser();
 			const anotherUser = await createUser({
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -255,7 +255,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('supports pagination', async () => {
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			const testUser = await loadTestUser();
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
@@ -359,7 +359,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('creates exactly one bulk upload task', async () => {
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
 				.post('/tasks/bulkUploads/')
@@ -390,7 +390,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when no file name is provided', async () => {
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')
@@ -407,7 +407,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when an invalid file name is provided', async () => {
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')

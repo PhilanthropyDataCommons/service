@@ -1,20 +1,10 @@
-import { db } from '../../db';
-import { NotFoundError } from '../../../errors';
-import type { JsonResultSet, BaseField } from '../../../types';
+import { generateLoadItemOperation } from '../generators';
+import type { BaseField, Id } from '../../../types';
 
-export const loadBaseField = async (id: number): Promise<BaseField> => {
-	const result = await db.sql<JsonResultSet<BaseField>>(
-		'baseFields.selectById',
-		{
-			id,
-		},
-	);
-	const baseField = result.rows[0]?.object;
-	if (baseField === undefined) {
-		throw new NotFoundError(`Entity not found`, {
-			entityType: 'BaseField',
-			entityId: id,
-		});
-	}
-	return baseField;
-};
+const loadBaseField = generateLoadItemOperation<BaseField, [baseFieldId: Id]>(
+	'baseFields.selectById',
+	'BaseField',
+	['baseFieldId'],
+);
+
+export { loadBaseField };

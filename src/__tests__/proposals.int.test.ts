@@ -70,7 +70,7 @@ describe('/proposals', () => {
 			const secondUser = await createUser({
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-1',
@@ -250,7 +250,7 @@ describe('/proposals', () => {
 			});
 
 			const testUser = await loadTestUser();
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-1',
@@ -491,7 +491,7 @@ describe('/proposals', () => {
 				title: 'Grand opportunity',
 			});
 			const testUser = await loadTestUser();
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			await createTestBaseFields();
 			await createProposal({
 				externalId: 'proposal-4999',
@@ -788,7 +788,7 @@ describe('/proposals', () => {
 				label: 'Long summary or abstract',
 			});
 			const testUser = await loadTestUser();
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			await createProposal({
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: 1,
@@ -983,7 +983,7 @@ describe('/proposals', () => {
 
 		it('returns the proposal if an administrator requests a proposal they do not own', async () => {
 			const testUser = await loadTestUser();
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			await createTestBaseFields();
 			await createOpportunity({
 				title: '🌎',

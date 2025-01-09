@@ -5,7 +5,7 @@ import type { User } from './types';
 let systemUser: User | null = null;
 
 export const loadConfig = async () => {
-	systemUser = await loadSystemUser();
+	systemUser = await loadSystemUser(null);
 };
 
 export const getSystemUser = (): User => {

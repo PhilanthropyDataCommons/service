@@ -75,7 +75,7 @@ const getSource = (req: Request, res: Response, next: NextFunction): void => {
 		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
 		return;
 	}
-	loadSource(sourceId)
+	loadSource(null, sourceId)
 		.then((item) => {
 			res.status(200).contentType('application/json').send(item);
 		})

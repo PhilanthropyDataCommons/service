@@ -20,7 +20,7 @@ const getOpportunities = (
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	loadOpportunityBundle(undefined, limit, offset)
+	loadOpportunityBundle(null, limit, offset)
 		.then((opportunityBundle) => {
 			res.status(200).contentType('application/json').send(opportunityBundle);
 		})
@@ -43,7 +43,7 @@ const getOpportunity = (
 		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
 		return;
 	}
-	loadOpportunity(opportunityId)
+	loadOpportunity(null, opportunityId)
 		.then((opportunity) => {
 			res.status(200).contentType('application/json').send(opportunity);
 		})

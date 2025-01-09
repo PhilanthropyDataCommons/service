@@ -152,7 +152,7 @@ describe('/funders', () => {
 				.send({ name: '🎆' })
 				.expect(201);
 			const after = await loadTableMetrics('data_providers');
-			const anotherFunderAfter = await loadFunder('anotherFirework');
+			const anotherFunderAfter = await loadFunder(null, 'anotherFirework');
 			expect(result.body).toStrictEqual({
 				shortCode: 'firework',
 				name: '🎆',

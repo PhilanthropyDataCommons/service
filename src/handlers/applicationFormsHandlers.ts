@@ -21,7 +21,7 @@ const getApplicationForms = (
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	loadApplicationFormBundle(undefined, limit, offset)
+	loadApplicationFormBundle(null, limit, offset)
 		.then((applicationForms) => {
 			res.status(200).contentType('application/json').send(applicationForms);
 		})
@@ -44,7 +44,7 @@ const getApplicationForm = (
 		next(new InputValidationError('Invalid request.', isId.errors ?? []));
 		return;
 	}
-	loadApplicationForm(applicationFormId)
+	loadApplicationForm(null, applicationFormId)
 		.then((applicationForm) => {
 			res.status(200).contentType('application/json').send(applicationForm);
 		})

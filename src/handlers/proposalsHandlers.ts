@@ -71,7 +71,7 @@ const getProposal = (req: Request, res: Response, next: NextFunction): void => {
 	}
 	(async () => {
 		await assertProposalAuthorization(proposalId, req);
-		const proposal = await loadProposal(proposalId);
+		const proposal = await loadProposal(null, proposalId);
 		res.status(200).contentType('application/json').send(proposal);
 	})().catch((error: unknown) => {
 		if (isTinyPgErrorWithQueryContext(error)) {

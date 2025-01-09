@@ -23,7 +23,7 @@ describe('/sources', () => {
 		});
 
 		it('returns the system source when no data has been added', async () => {
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			await agent
 				.get('/sources')
 				.set(authHeader)
@@ -34,7 +34,7 @@ describe('/sources', () => {
 		});
 
 		it('returns all sources present in the database', async () => {
-			const systemSource = await loadSystemSource();
+			const systemSource = await loadSystemSource(null);
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',

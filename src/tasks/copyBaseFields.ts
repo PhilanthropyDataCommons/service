@@ -90,6 +90,7 @@ export const copyBaseFields = async (
 		`Started BasefieldsCopy Job for BaseFieldsCopyTask ID ${payload.baseFieldsCopyTaskId}`,
 	);
 	const baseFieldsCopyTask = await loadBaseFieldsCopyTask(
+		null,
 		payload.baseFieldsCopyTaskId,
 	);
 

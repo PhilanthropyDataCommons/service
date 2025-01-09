@@ -1,3 +1,11 @@
+import { db } from '../../db';
+import { loadTableMetrics } from '../generic/loadTableMetrics';
+import {
+	getIsAdministratorFromAuthContext,
+	getKeycloakUserIdFromAuthContext,
+} from '../../../types';
+import type { AuthContext, Bundle, JsonResultSet } from '../../../types';
+
 /**
  * Generates a bundle loader function for a specific query and table.
  *
@@ -10,15 +18,6 @@
  *
  * @returns {Function} A function that takes query parameters, limit, and offset, and returns a promise that resolves to a bundle of entries and total count.
  */
-
-import { db } from '../../db';
-import { loadTableMetrics } from '../generic/loadTableMetrics';
-import {
-	getIsAdministratorFromAuthContext,
-	getKeycloakUserIdFromAuthContext,
-} from '../../../types';
-import type { AuthContext, Bundle, JsonResultSet } from '../../../types';
-
 const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 	queryName: string,
 	tableName: string,
@@ -26,7 +25,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 ) => {
 	const generatedParameterNames = [...parameterNames, 'limit', 'offset'];
 	return async (
-		authContext: AuthContext | undefined,
+		authContext: AuthContext | null,
 		...args: [...P, limit: number | undefined, offset: number | undefined]
 	): Promise<Bundle<T>> => {
 		const queryParameters = generatedParameterNames.reduce(

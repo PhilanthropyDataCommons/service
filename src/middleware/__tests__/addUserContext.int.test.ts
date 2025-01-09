@@ -42,6 +42,7 @@ describe('addUserContext', () => {
 					expect(err).toBe(undefined);
 					const { count: userCount } = await loadTableMetrics('users');
 					const user = await loadUserByKeycloakUserId(
+						null,
 						stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
 					);
 					expect(mockRequest.user).toEqual(user);

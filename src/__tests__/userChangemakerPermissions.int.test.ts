@@ -133,7 +133,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 		it('does not update `createdBy`, but returns the user changemaker permission when user has permission to manage the changemaker', async () => {
 			const user = await loadTestUser();
-			const systemUser = await loadSystemUser();
+			const systemUser = await loadSystemUser(null);
 			const changemaker = await createChangemaker({
 				taxId: '11-1111111',
 				name: 'Example Inc.',
@@ -283,6 +283,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserChangemakerPermission(
+				null,
 				user.keycloakUserId,
 				changemaker.id,
 				Permission.EDIT,
@@ -303,6 +304,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 				.expect(204);
 			await expect(
 				loadUserChangemakerPermission(
+					null,
 					user.keycloakUserId,
 					changemaker.id,
 					Permission.EDIT,
@@ -330,6 +332,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserChangemakerPermission(
+				null,
 				user.keycloakUserId,
 				changemaker.id,
 				Permission.EDIT,
@@ -350,6 +353,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 				.expect(204);
 			await expect(
 				loadUserChangemakerPermission(
+					null,
 					user.keycloakUserId,
 					changemaker.id,
 					Permission.EDIT,

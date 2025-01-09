@@ -226,7 +226,7 @@ export const processBulkUploadTask = async (
 	helpers.logger.debug(
 		`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
 	);
-	const bulkUploadTask = await loadBulkUploadTask(payload.bulkUploadId);
+	const bulkUploadTask = await loadBulkUploadTask(null, payload.bulkUploadId);
 	if (bulkUploadTask.status !== TaskStatus.PENDING) {
 		helpers.logger.warn(
 			'Bulk upload cannot be processed because it is not in a PENDING state',

@@ -35,7 +35,7 @@ const assertApplicationFormExistsForProposal = async (
 ): Promise<void> => {
 	let applicationForm: ApplicationForm;
 	try {
-		applicationForm = await loadApplicationForm(applicationFormId);
+		applicationForm = await loadApplicationForm(null, applicationFormId);
 	} catch {
 		throw new InputConflictError('The Application Form does not exist.', {
 			entityType: 'ApplicationForm',
@@ -45,7 +45,7 @@ const assertApplicationFormExistsForProposal = async (
 
 	let proposal: Proposal;
 	try {
-		proposal = await loadProposal(proposalId);
+		proposal = await loadProposal(null, proposalId);
 	} catch (err) {
 		if (err instanceof NotFoundError) {
 			throw new InputConflictError(
@@ -83,6 +83,7 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 			const { applicationFormFieldId } = proposalFieldValue;
 			try {
 				const applicationFormField = await loadApplicationFormField(
+					null,
 					proposalFieldValue.applicationFormFieldId,
 				);
 				if (applicationFormField.applicationFormId !== applicationFormId) {
@@ -156,6 +157,7 @@ const postProposalVersion = (
 					fieldValues.map(async (fieldValue) => {
 						const { value, applicationFormFieldId } = fieldValue;
 						const applicationFormField = await loadApplicationFormField(
+							null,
 							applicationFormFieldId,
 						);
 						const isValid = fieldValueIsValid(
@@ -226,7 +228,7 @@ const getProposalVersion = (
 		);
 		return;
 	}
-	loadProposalVersion(proposalVersionId)
+	loadProposalVersion(null, proposalVersionId)
 		.then((item) => {
 			res.status(200).contentType('application/json').send(item);
 		})

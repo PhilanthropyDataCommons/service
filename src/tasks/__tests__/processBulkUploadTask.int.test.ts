@@ -366,14 +366,14 @@ describe('processBulkUploadTask', () => {
 
 		const {
 			entries: [opportunity],
-		} = await loadOpportunityBundle(undefined, NO_LIMIT, NO_OFFSET);
+		} = await loadOpportunityBundle(null, NO_LIMIT, NO_OFFSET);
 		if (opportunity === undefined) {
 			throw new Error('The opportunity was not created');
 		}
 
 		const {
 			entries: [applicationForm],
-		} = await loadApplicationFormBundle(undefined, NO_LIMIT, NO_OFFSET);
+		} = await loadApplicationFormBundle(null, NO_LIMIT, NO_OFFSET);
 		if (applicationForm === undefined) {
 			fail('The application form was not created');
 		}
@@ -384,7 +384,7 @@ describe('processBulkUploadTask', () => {
 		});
 
 		const proposalBundle = await loadProposalBundle(
-			undefined,
+			null,
 			undefined,
 			undefined,
 			undefined,
@@ -550,7 +550,7 @@ describe('processBulkUploadTask', () => {
 		});
 
 		const changemakerBundle = await loadChangemakerBundle(
-			undefined,
+			null,
 			undefined,
 			NO_LIMIT,
 			NO_OFFSET,
@@ -561,7 +561,7 @@ describe('processBulkUploadTask', () => {
 		});
 
 		const changemakerProposalBundle = await loadChangemakerProposalBundle(
-			undefined,
+			null,
 			undefined,
 			undefined,
 			NO_LIMIT,
@@ -595,14 +595,14 @@ describe('processBulkUploadTask', () => {
 		);
 
 		const changemakerBundle = await loadChangemakerBundle(
-			undefined,
+			null,
 			undefined,
 			NO_LIMIT,
 			NO_OFFSET,
 		);
 
 		const changemakerProposalBundle = await loadChangemakerProposalBundle(
-			undefined,
+			null,
 			undefined,
 			undefined,
 			NO_LIMIT,

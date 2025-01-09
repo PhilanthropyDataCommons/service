@@ -589,7 +589,7 @@ describe('/baseFields', () => {
 			const after = await loadTableMetrics('base_field_localizations');
 			const baseFieldLocalizations =
 				await loadBaseFieldLocalizationsBundleByBaseFieldId(
-					undefined,
+					null,
 					testBaseField.id,
 					NO_LIMIT,
 					NO_OFFSET,
@@ -631,7 +631,7 @@ describe('/baseFields', () => {
 			const after = await loadTableMetrics('base_field_localizations');
 			const baseFieldLocalizations =
 				await loadBaseFieldLocalizationsBundleByBaseFieldId(
-					undefined,
+					null,
 					testBaseField.id,
 					NO_LIMIT,
 					NO_OFFSET,

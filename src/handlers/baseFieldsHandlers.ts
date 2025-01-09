@@ -117,7 +117,7 @@ const getBaseFieldLocalizationsByBaseFieldId = (
 	assertBaseFieldExists(baseFieldId)
 		.then(() => {
 			loadBaseFieldLocalizationsBundleByBaseFieldId(
-				undefined,
+				null,
 				baseFieldId,
 				limit,
 				offset,

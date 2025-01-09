@@ -25,7 +25,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 ) => {
 	const generatedParameterNames = [...parameterNames, 'limit', 'offset'];
 	return async (
-		authContext: AuthContext | undefined,
+		authContext: AuthContext | null,
 		...args: [...P, limit: number | undefined, offset: number | undefined]
 	): Promise<Bundle<T>> => {
 		const queryParameters = generatedParameterNames.reduce(

@@ -20,7 +20,7 @@ const getOpportunities = (
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	loadOpportunityBundle(undefined, limit, offset)
+	loadOpportunityBundle(null, limit, offset)
 		.then((opportunityBundle) => {
 			res.status(200).contentType('application/json').send(opportunityBundle);
 		})

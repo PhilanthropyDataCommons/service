@@ -1,5 +1,9 @@
 import { db as defaultDb } from '../../db';
-import type { JsonResultSet } from '../../../types';
+import {
+	getIsAdministratorFromAuthContext,
+	getKeycloakUserIdFromAuthContext,
+} from '../../../types';
+import type { AuthContext, JsonResultSet } from '../../../types';
 
 // This may seem silly but it is necessary to get all keys of all
 // possible types in the event the type is a Union (e.g. A | B | C)
@@ -16,18 +20,29 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
  *
  * @returns {Function} A function that takes query parameters, limit, and offset, and returns a promise that resolves to a bundle of entries and total count.
  */
- const generateCreateOrUpdateItemOperation =
+const generateCreateOrUpdateItemOperation =
 	<T, P extends Record<string, unknown>>(
 		queryName: string,
 		savedAttributes: KeysOfUnion<P>[],
 	) =>
-	async (createValues: P, db = defaultDb): Promise<T> => {
+	async (
+		authContext: AuthContext | null,
+		createValues: P,
+		db = defaultDb,
+	): Promise<T> => {
+		const authContextKeycloakUserId =
+			getKeycloakUserIdFromAuthContext(authContext);
+		const authContextIsAdministrator =
+			getIsAdministratorFromAuthContext(authContext);
 		const queryParameters = savedAttributes.reduce(
 			(acc, attribute) => ({
 				...acc,
 				[attribute]: createValues[attribute],
 			}),
-			{},
+			{
+				authContextKeycloakUserId,
+				authContextIsAdministrator,
+			},
 		);
 
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);

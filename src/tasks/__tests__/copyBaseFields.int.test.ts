@@ -31,7 +31,7 @@ const createTestBaseFieldsCopyTask = async (
 		statusUpdatedAt: new Date(Date.now()).toISOString(),
 		createdBy: systemUser.keycloakUserId,
 	};
-	return createBaseFieldsCopyTask({
+	return createBaseFieldsCopyTask(null, {
 		...defaultValues,
 		...overrideValues,
 	});
@@ -324,7 +324,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should insert all remote basefields, without updating any local basefields, assuming there is no overlap on shortcode', async () => {
-		const localBaseField = await createOrUpdateBaseField({
+		const localBaseField = await createOrUpdateBaseField(null, {
 			label: 'Local BaseField',
 			description: 'This basefield should not be updated on basefield copy',
 			shortCode: 'local',
@@ -367,7 +367,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should update local basefields when they match on remote basefield shortcodes, even if the basefields have identical data', async () => {
-		const localBaseField = await createOrUpdateBaseField({
+		const localBaseField = await createOrUpdateBaseField(null, {
 			label: 'Local Data',
 			description: 'This is local data',
 			shortCode: 'ld',
@@ -428,7 +428,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should update local basefields when they match on remote basefield shortcodes, and insert all other remote basefields', async () => {
-		const localBaseField = await createOrUpdateBaseField({
+		const localBaseField = await createOrUpdateBaseField(null, {
 			label: 'Local Data',
 			description: 'This is local data',
 			shortCode: 'ld',
@@ -517,7 +517,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should preserve localizations for a local basefield with localizations, when there is a remote basefield with no localizations that matches on shortcode', async () => {
-		const localBaseField = await createOrUpdateBaseField({
+		const localBaseField = await createOrUpdateBaseField(null, {
 			label: 'Update me',
 			description: 'This is a field to be updated',
 			shortCode: mockFirstNameBaseField.shortCode,
@@ -525,7 +525,7 @@ describe('copyBaseFields', () => {
 			scope: BaseFieldScope.PROPOSAL,
 		});
 
-		await createOrUpdateBaseFieldLocalization({
+		await createOrUpdateBaseFieldLocalization(null, {
 			baseFieldId: localBaseField.id,
 			label: 'Le Prenom',
 			description: 'Le Prenom de la Applicant',
@@ -576,7 +576,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should add localizations to a local basefield from a remote basefield with matching shortcode', async () => {
-		const localBaseField = await createOrUpdateBaseField({
+		const localBaseField = await createOrUpdateBaseField(null, {
 			label: 'Update me',
 			description: 'This is a field to be updated',
 			shortCode: mockFirstNameBaseField.shortCode,
@@ -584,7 +584,7 @@ describe('copyBaseFields', () => {
 			scope: BaseFieldScope.PROPOSAL,
 		});
 
-		await createOrUpdateBaseFieldLocalization({
+		await createOrUpdateBaseFieldLocalization(null, {
 			baseFieldId: localBaseField.id,
 			label: 'Nombre de Pila',
 			description: 'Nombre de Pila',
@@ -677,7 +677,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should update any existing local basefields that match on shortcode, and have status set as completed', async () => {
-		const baseField = await createOrUpdateBaseField({
+		const baseField = await createOrUpdateBaseField(null, {
 			label: 'Old First Name',
 			description: 'This should be replaced',
 			shortCode: mockFirstNameBaseField.shortCode,

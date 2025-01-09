@@ -19,7 +19,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 	describe('PUT /', () => {
 		it('returns 401 if the request lacks authentication', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -34,7 +34,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 		it('returns 401 if the authenticated user lacks permission', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -80,7 +80,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 		it('creates and returns the new user changemaker permission when user has administrative credentials', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -104,12 +104,12 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 		it('creates and returns the new user changemaker permission when user has permission to manage the changemaker', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission({
+			await createOrUpdateUserChangemakerPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.MANAGE,
@@ -134,12 +134,12 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 		it('does not update `createdBy`, but returns the user changemaker permission when user has permission to manage the changemaker', async () => {
 			const user = await loadTestUser();
 			const systemUser = await loadSystemUser(null);
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission({
+			await createOrUpdateUserChangemakerPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.MANAGE,
@@ -165,7 +165,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 	describe('DELETE /', () => {
 		it('returns 401 if the request lacks authentication', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -180,7 +180,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 		it('returns 401 if the authenticated user lacks permission', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -228,7 +228,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 		it('returns 404 if the permission does not exist', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -244,12 +244,12 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 		it('returns 404 if the permission had existed and previously been deleted', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission({
+			await createOrUpdateUserChangemakerPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.EDIT,
@@ -271,12 +271,12 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 		it('deletes the user changemaker permission when the user has administrative credentials', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission({
+			await createOrUpdateUserChangemakerPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.EDIT,
@@ -314,18 +314,18 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 
 		it('deletes the user changemaker permission when the user has permission to manage the changemaker', async () => {
 			const user = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission({
+			await createOrUpdateUserChangemakerPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.MANAGE,
 				createdBy: user.keycloakUserId,
 			});
-			await createOrUpdateUserChangemakerPermission({
+			await createOrUpdateUserChangemakerPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.EDIT,

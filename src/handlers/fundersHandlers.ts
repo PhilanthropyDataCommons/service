@@ -83,7 +83,7 @@ const putFunder = (req: Request, res: Response, next: NextFunction): void => {
 	const { name, keycloakOrganizationId } = req.body;
 
 	(async () => {
-		const funder = await createOrUpdateFunder({
+		const funder = await createOrUpdateFunder(null, {
 			shortCode,
 			name,
 			keycloakOrganizationId,

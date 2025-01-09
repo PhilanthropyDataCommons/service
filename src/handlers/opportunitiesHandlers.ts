@@ -70,7 +70,7 @@ const postOpportunity = (
 		);
 		return;
 	}
-	createOpportunity(req.body)
+	createOpportunity(null, req.body)
 		.then((opportunity) => {
 			res.status(201).contentType('application/json').send(opportunity);
 		})

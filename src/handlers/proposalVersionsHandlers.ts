@@ -150,6 +150,7 @@ const postProposalVersion = (
 		.then(() => {
 			db.transaction(async (transactionDb) => {
 				const proposalVersion = await createProposalVersion(
+					null,
 					{ proposalId, applicationFormId, sourceId, createdBy },
 					transactionDb,
 				);
@@ -165,6 +166,7 @@ const postProposalVersion = (
 							applicationFormField.baseField.dataType,
 						);
 						const proposalFieldValue = await createProposalFieldValue(
+							null,
 							{
 								...fieldValue,
 								proposalVersionId: proposalVersion.id,

@@ -11,12 +11,12 @@ import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
 const insertTestChangemakers = async () => {
-	await createChangemaker({
+	await createChangemaker(null, {
 		taxId: '11-1111111',
 		name: 'Example Inc.',
 		keycloakOrganizationId: null,
 	});
-	await createChangemaker({
+	await createChangemaker(null, {
 		taxId: '22-2222222',
 		name: 'Another Inc.',
 		keycloakOrganizationId: '402b1208-be48-11ef-8af9-b767e5e8e4ee',
@@ -30,26 +30,26 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns the ChangemakerProposals for the specified changemaker', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();
-			await createProposal({
+			await createProposal(null, {
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal({
+			await createProposal(null, {
 				opportunityId: 1,
 				externalId: '2',
 				createdBy: testUser.keycloakUserId,
 			});
-			await createChangemakerProposal({
+			await createChangemakerProposal(null, {
 				changemakerId: 1,
 				proposalId: 1,
 			});
-			await createChangemakerProposal({
+			await createChangemakerProposal(null, {
 				changemakerId: 1,
 				proposalId: 2,
 			});
@@ -109,26 +109,26 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns the ProposalChangemakers for the specified proposal', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();
-			await createProposal({
+			await createProposal(null, {
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal({
+			await createProposal(null, {
 				opportunityId: 1,
 				externalId: '2',
 				createdBy: testUser.keycloakUserId,
 			});
-			await createChangemakerProposal({
+			await createChangemakerProposal(null, {
 				changemakerId: 1,
 				proposalId: 1,
 			});
-			await createChangemakerProposal({
+			await createChangemakerProposal(null, {
 				changemakerId: 2,
 				proposalId: 2,
 			});
@@ -180,12 +180,12 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('creates exactly one ChangemakerProposal', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: '🔥',
 			});
 			await insertTestChangemakers();
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
@@ -228,12 +228,12 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 400 bad request when no proposalId is sent', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();
-			await createProposal({
+			await createProposal(null, {
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
@@ -253,12 +253,12 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 400 bad request when no changemakerId is sent', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();
-			await createProposal({
+			await createProposal(null, {
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
@@ -278,7 +278,7 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 422 Conflict when a non-existent proposal is sent', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: '🔥',
 			});
 			await insertTestChangemakers();
@@ -297,11 +297,11 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 422 Conflict when a non-existent changemaker is sent', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
@@ -321,17 +321,17 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 409 Conflict when attempting to create a duplicate ChangemakerProposal', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();
-			await createProposal({
+			await createProposal(null, {
 				opportunityId: 1,
 				externalId: '1',
 				createdBy: testUser.keycloakUserId,
 			});
-			await createChangemakerProposal({
+			await createChangemakerProposal(null, {
 				changemakerId: 1,
 				proposalId: 1,
 			});

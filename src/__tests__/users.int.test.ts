@@ -21,7 +21,7 @@ import {
 import { keycloakIdToString, stringToKeycloakId, Permission } from '../types';
 
 const createAdditionalTestUser = async () =>
-	createUser({
+	createUser(null, {
 		keycloakUserId: stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
 	});
 
@@ -59,34 +59,34 @@ describe('/users', () => {
 		it('returns the permissions associated with a user', async () => {
 			const systemUser = await loadSystemUser(null);
 			const testUser = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				name: 'Test Provider',
 				shortCode: 'testProvider',
 				keycloakOrganizationId: null,
 			});
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				name: 'Test Funder',
 				shortCode: 'testFunder',
 				keycloakOrganizationId: null,
 			});
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				name: 'Test Changemaker',
 				taxId: '12-3456789',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission({
+			await createOrUpdateUserDataProviderPermission(null, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				permission: Permission.MANAGE,
 				dataProviderShortCode: dataProvider.shortCode,
 				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission({
+			await createOrUpdateUserFunderPermission(null, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				permission: Permission.EDIT,
 				funderShortCode: funder.shortCode,
 				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserChangemakerPermission({
+			await createOrUpdateUserChangemakerPermission(null, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				permission: Permission.VIEW,
 				changemakerId: changemaker.id,
@@ -123,12 +123,12 @@ describe('/users', () => {
 		it('does not return deleted permissions associated with a user', async () => {
 			const systemUser = await loadSystemUser(null);
 			const testUser = await loadTestUser();
-			const changemaker = await createChangemaker({
+			const changemaker = await createChangemaker(null, {
 				name: 'Test Changemaker',
 				taxId: '12-3456789',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission({
+			await createOrUpdateUserChangemakerPermission(null, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				permission: Permission.VIEW,
 				changemakerId: changemaker.id,
@@ -204,7 +204,7 @@ describe('/users', () => {
 			const uuids = Array.from(Array(20)).map(() => uuidv4());
 			await uuids.reduce(async (p, uuid) => {
 				await p;
-				await createUser({
+				await createUser(null, {
 					keycloakUserId: uuid,
 				});
 			}, Promise.resolve());

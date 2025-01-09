@@ -61,7 +61,7 @@ const postChangemakerProposal = (
 		return;
 	}
 
-	createChangemakerProposal(req.body)
+	createChangemakerProposal(null, req.body)
 		.then((changemakerProposal) => {
 			res.status(201).contentType('application/json').send(changemakerProposal);
 		})

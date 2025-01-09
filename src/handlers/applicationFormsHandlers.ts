@@ -73,10 +73,10 @@ const postApplicationForms = (
 	}
 	const { fields } = req.body;
 
-	createApplicationForm(req.body)
+	createApplicationForm(null, req.body)
 		.then((applicationForm) => {
 			const queries = fields.map(async (field) =>
-				createApplicationFormField({
+				createApplicationFormField(null, {
 					...field,
 					applicationFormId: applicationForm.id,
 				}),

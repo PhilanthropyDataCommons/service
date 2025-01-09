@@ -104,7 +104,7 @@ const postProposal = (
 	const { externalId, opportunityId } = req.body;
 	const createdBy = req.user.keycloakUserId;
 
-	createProposal({
+	createProposal(null, {
 		opportunityId,
 		externalId,
 		createdBy,

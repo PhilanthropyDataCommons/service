@@ -18,14 +18,14 @@ import { mockJwt as authHeader } from '../test/mockJwt';
 const logger = getLogger(__filename);
 
 const createTestBaseFields = async () => {
-	await createBaseField({
+	await createBaseField(null, {
 		label: 'First Name',
 		description: 'The first name of the applicant',
 		shortCode: 'firstName',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 	});
-	await createBaseField({
+	await createBaseField(null, {
 		label: 'Last Name',
 		description: 'The last name of the applicant',
 		shortCode: 'lastName',
@@ -42,17 +42,17 @@ describe('/proposalVersions', () => {
 
 		it('returns exactly one proposal version selected by id', async () => {
 			const systemSource = await loadSystemSource(null);
-			const opportunity = await createOpportunity({ title: '🔥' });
+			const opportunity = await createOpportunity(null, { title: '🔥' });
 			const testUser = await loadTestUser();
-			const proposal = await createProposal({
+			const proposal = await createProposal(null, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			const applicationForm = await createApplicationForm({
+			const applicationForm = await createApplicationForm(null, {
 				opportunityId: opportunity.id,
 			});
-			const proposalVersion = await createProposalVersion({
+			const proposalVersion = await createProposalVersion(null, {
 				proposalId: proposal.id,
 				applicationFormId: applicationForm.id,
 				sourceId: systemSource.id,
@@ -103,14 +103,14 @@ describe('/proposalVersions', () => {
 
 		it('creates exactly one proposal version', async () => {
 			const systemSource = await loadSystemSource(null);
-			await createOpportunity({ title: '🔥' });
+			await createOpportunity(null, { title: '🔥' });
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 1,
 			});
 			const before = await loadTableMetrics('proposal_versions');
@@ -139,24 +139,24 @@ describe('/proposalVersions', () => {
 
 		it('creates exactly the number of provided field values', async () => {
 			const systemSource = await loadSystemSource(null);
-			await createOpportunity({ title: '🔥' });
+			await createOpportunity(null, { title: '🔥' });
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 1,
 			});
 			await createTestBaseFields();
-			await createApplicationFormField({
+			await createApplicationFormField(null, {
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 1,
 				label: 'First Name',
 			});
-			await createApplicationFormField({
+			await createApplicationFormField(null, {
 				applicationFormId: 1,
 				baseFieldId: 2,
 				position: 2,
@@ -269,14 +269,14 @@ describe('/proposalVersions', () => {
 
 		it('returns 409 Conflict when the provided proposal does not exist', async () => {
 			const systemSource = await loadSystemSource(null);
-			await createOpportunity({ title: '🔥' });
+			await createOpportunity(null, { title: '🔥' });
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 1,
 			});
 			const result = await request(app)
@@ -303,14 +303,14 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 409 conflict when the provided source does not exist', async () => {
-			await createOpportunity({ title: '🔥' });
+			await createOpportunity(null, { title: '🔥' });
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 1,
 			});
 			const result = await request(app)
@@ -337,14 +337,14 @@ describe('/proposalVersions', () => {
 
 		it('Returns 409 Conflict if the provided application form does not exist', async () => {
 			const systemSource = await loadSystemSource(null);
-			await createOpportunity({ title: '🔥' });
+			await createOpportunity(null, { title: '🔥' });
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 1,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
@@ -377,18 +377,18 @@ describe('/proposalVersions', () => {
 
 		it('Returns 409 Conflict if the provided application form ID is not associated with the proposal opportunity', async () => {
 			const systemSource = await loadSystemSource(null);
-			await createOpportunity({ title: '🔥' });
-			await createOpportunity({ title: '💧' });
+			await createOpportunity(null, { title: '🔥' });
+			await createOpportunity(null, { title: '💧' });
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 1,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 2,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
@@ -423,14 +423,14 @@ describe('/proposalVersions', () => {
 
 		it('Returns 409 Conflict if a provided application form field ID does not exist', async () => {
 			const systemSource = await loadSystemSource(null);
-			await createOpportunity({ title: '🔥' });
+			await createOpportunity(null, { title: '🔥' });
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 1,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
@@ -470,27 +470,27 @@ describe('/proposalVersions', () => {
 
 		it('Returns 409 Conflict if a provided application form field ID is not associated with the supplied application form ID', async () => {
 			const systemSource = await loadSystemSource(null);
-			await createOpportunity({ title: '🔥' });
+			await createOpportunity(null, { title: '🔥' });
 			const testUser = await loadTestUser();
-			await createProposal({
+			await createProposal(null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 1,
 			});
-			await createApplicationForm({
+			await createApplicationForm(null, {
 				opportunityId: 1,
 			});
 			await createTestBaseFields();
-			await createApplicationFormField({
+			await createApplicationFormField(null, {
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 1,
 				label: 'First Name',
 			});
-			await createApplicationFormField({
+			await createApplicationFormField(null, {
 				applicationFormId: 1,
 				baseFieldId: 2,
 				position: 2,

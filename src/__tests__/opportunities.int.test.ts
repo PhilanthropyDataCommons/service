@@ -18,10 +18,10 @@ describe('/opportunities', () => {
 		});
 
 		it('returns all opportunities present in the database', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: 'Tremendous opportunity 👌',
 			});
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: 'Terrific opportunity 👐',
 			});
 			const response = await request(app)
@@ -52,9 +52,9 @@ describe('/opportunities', () => {
 		});
 
 		it('returns exactly one opportunity selected by id', async () => {
-			await createOpportunity({ title: '🔥' });
-			await createOpportunity({ title: '✨' });
-			await createOpportunity({ title: '🚀' });
+			await createOpportunity(null, { title: '🔥' });
+			await createOpportunity(null, { title: '✨' });
+			await createOpportunity(null, { title: '🚀' });
 
 			const response = await request(app)
 				.get(`/opportunities/2`)
@@ -90,7 +90,7 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 404 when id is not found', async () => {
-			await createOpportunity({
+			await createOpportunity(null, {
 				title: 'This definitely should not be returned',
 			});
 			await request(app).get('/opportunities/9001').set(authHeader).expect(404);

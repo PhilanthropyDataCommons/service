@@ -55,7 +55,7 @@ const postBaseField = (
 		return;
 	}
 
-	createBaseField(req.body)
+	createBaseField(null, req.body)
 		.then((baseField) => {
 			res.status(201).contentType('application/json').send(baseField);
 		})
@@ -183,7 +183,7 @@ const putBaseFieldLocalization = (
 	const { label, description } = req.body;
 	assertBaseFieldExists(baseFieldId)
 		.then(() => {
-			createOrUpdateBaseFieldLocalization({
+			createOrUpdateBaseFieldLocalization(null, {
 				label,
 				description,
 				baseFieldId,

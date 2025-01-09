@@ -21,4 +21,4 @@ jobs:
         with:
           timeout: 1440000
       - run: |
-          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${secrets.DIGITAL_OCEAN_TOKEN}" "https://api.digitalocean.com/v2/apps/${secrets.DIGITAL_OCEAN_APP_ID}/deployments" -d '{ "force_build": true }' | jq -e .deployment.id
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ secrets.DIGITAL_OCEAN_TOKEN }}" "https://api.digitalocean.com/v2/apps/${{ secrets.DIGITAL_OCEAN_APP_ID }}/deployments" -d '{ "force_build": true }' | jq -e .deployment.id

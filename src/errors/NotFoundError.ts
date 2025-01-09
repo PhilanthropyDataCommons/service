@@ -15,7 +15,7 @@ interface NotFoundErrorDetailsWithComplexPrimaryKey {
 
 interface NotFoundErrorDetailsWithLookupValues {
 	entityType: string;
-	lookupValues: Record<string, number | string>;
+	lookupValues: Record<string, unknown>;
 }
 
 type NotFoundErrorDetails =

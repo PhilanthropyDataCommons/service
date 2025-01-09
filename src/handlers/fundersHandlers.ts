@@ -46,7 +46,7 @@ const getFunder = (req: Request, res: Response, next: NextFunction): void => {
 		);
 		return;
 	}
-	loadFunder(funderShortCode)
+	loadFunder(null, funderShortCode)
 		.then((funder) => {
 			res.status(200).contentType('application/json').send(funder);
 		})

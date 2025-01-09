@@ -31,7 +31,7 @@ export const createTestUser = async () =>
 	});
 
 export const loadTestUser = async () =>
-	loadUserByKeycloakUserId(getTestUserKeycloakUserId());
+	loadUserByKeycloakUserId(null, getTestUserKeycloakUserId());
 
 export const NO_OFFSET = 0;
 

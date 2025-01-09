@@ -44,7 +44,7 @@ const getApplicationForm = (
 		next(new InputValidationError('Invalid request.', isId.errors ?? []));
 		return;
 	}
-	loadApplicationForm(applicationFormId)
+	loadApplicationForm(null, applicationFormId)
 		.then((applicationForm) => {
 			res.status(200).contentType('application/json').send(applicationForm);
 		})

@@ -54,7 +54,7 @@ const getDataProvider = (
 		);
 		return;
 	}
-	loadDataProvider(dataProviderShortCode)
+	loadDataProvider(null, dataProviderShortCode)
 		.then((item) => {
 			res.status(200).contentType('application/json').send(item);
 		})

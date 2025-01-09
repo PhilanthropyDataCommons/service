@@ -19,7 +19,7 @@ import {
 import type { Request, Response, NextFunction } from 'express';
 
 const assertBaseFieldExists = async (baseFieldId: number): Promise<void> => {
-	await loadBaseField(baseFieldId);
+	await loadBaseField(null, baseFieldId);
 };
 
 const getBaseFields = (

@@ -14,6 +14,6 @@ describe('loadSystemUser', () => {
 				}) as Result<object>,
 		);
 
-		await expect(loadSystemUser()).rejects.toThrow(NotFoundError);
+		await expect(loadSystemUser(null)).rejects.toThrow(NotFoundError);
 	});
 });

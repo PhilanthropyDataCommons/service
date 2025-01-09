@@ -24,7 +24,7 @@ const MOCK_API_URL = 'https://example.com';
 const createTestBaseFieldsCopyTask = async (
 	overrideValues?: Partial<InternallyWritableBaseFieldsCopyTask>,
 ): Promise<BaseFieldsCopyTask> => {
-	const systemUser = await loadSystemUser();
+	const systemUser = await loadSystemUser(null);
 	const defaultValues = {
 		pdcApiUrl: MOCK_API_URL,
 		status: TaskStatus.PENDING,
@@ -182,6 +182,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 
@@ -203,6 +204,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 
@@ -231,6 +233,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 
@@ -252,6 +255,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 		const after = await loadTableMetrics('base_fields');
@@ -279,6 +283,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 		const after = await loadTableMetrics('base_fields');
@@ -286,7 +291,7 @@ describe('copyBaseFields', () => {
 		expect(before.count).toEqual(0);
 		expect(after.count).toEqual(1);
 
-		const insertedRemoteBaseField = await loadBaseField(1);
+		const insertedRemoteBaseField = await loadBaseField(null, 1);
 
 		expect(insertedRemoteBaseField).toEqual({
 			id: 1,
@@ -342,6 +347,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 		const after = await loadTableMetrics('base_fields');
@@ -349,7 +355,10 @@ describe('copyBaseFields', () => {
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(3);
 
-		const localBaseFieldAfterInsertion = await loadBaseField(localBaseField.id);
+		const localBaseFieldAfterInsertion = await loadBaseField(
+			null,
+			localBaseField.id,
+		);
 
 		expect(localBaseFieldAfterInsertion).toEqual(localBaseField);
 
@@ -392,12 +401,13 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 
 		const after = await loadTableMetrics('base_fields');
 
-		const updatedBaseField = await loadBaseField(localBaseField.id);
+		const updatedBaseField = await loadBaseField(null, localBaseField.id);
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(1);
@@ -452,12 +462,13 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 
 		const after = await loadTableMetrics('base_fields');
 
-		const updatedBaseField = await loadBaseField(localBaseField.id);
+		const updatedBaseField = await loadBaseField(null, localBaseField.id);
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(2);
@@ -473,7 +484,7 @@ describe('copyBaseFields', () => {
 			localizations: {},
 		});
 
-		const insertedRemoteBaseField = await loadBaseField(3);
+		const insertedRemoteBaseField = await loadBaseField(null, 3);
 
 		expect(insertedRemoteBaseField).toEqual({
 			id: 3,
@@ -535,10 +546,11 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 
-		const updatedBaseField = await loadBaseField(localBaseField.id);
+		const updatedBaseField = await loadBaseField(null, localBaseField.id);
 
 		expect(updatedBaseField).toEqual({
 			id: localBaseField.id,
@@ -593,10 +605,11 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 
-		const updatedBaseField = await loadBaseField(localBaseField.id);
+		const updatedBaseField = await loadBaseField(null, localBaseField.id);
 
 		expect(updatedBaseField).toEqual({
 			id: localBaseField.id,
@@ -651,6 +664,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 		const after = await loadTableMetrics('base_fields');
@@ -686,12 +700,13 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			null,
 			baseFieldsCopyTask.id,
 		);
 
 		const after = await loadTableMetrics('base_fields');
 
-		const updatedBaseField = await loadBaseField(baseField.id);
+		const updatedBaseField = await loadBaseField(null, baseField.id);
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(1);

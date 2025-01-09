@@ -31,14 +31,14 @@ const authContextSchema: JSONSchemaType<AuthContext> = {
 const isAuthContext = ajv.compile(authContextSchema);
 
 const getKeycloakUserIdFromAuthContext = (
-	req: AuthContext | undefined,
+	req: AuthContext | undefined | null,
 ): KeycloakId | undefined => {
 	const keycloakUserId = req?.user?.keycloakUserId;
 	return keycloakUserId;
 };
 
 const getIsAdministratorFromAuthContext = (
-	req: AuthContext | undefined,
+	req: AuthContext | undefined | null,
 ): boolean | undefined => req?.role?.isAdministrator;
 
 export {

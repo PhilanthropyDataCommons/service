@@ -1,6 +1,10 @@
 import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
-import type { JsonResultSet } from '../../../types';
+import {
+	getIsAdministratorFromAuthContext,
+	getKeycloakUserIdFromAuthContext,
+} from '../../../types';
+import type { AuthContext, JsonResultSet } from '../../../types';
 
 /**
  * Generates an item loader function for a specific query and table.
@@ -14,18 +18,26 @@ import type { JsonResultSet } from '../../../types';
  *
  * @returns {Function} A function that takes query parameters, limit, and offset, and returns a promise that resolves to a bundle of entries and total count.
  */
- const generateLoadItemOperation = <T, P extends [...args: unknown[]]>(
-	queryName: string,
-	entityType: string,
-	parameterNames: { [K in keyof P]: string },
-) => {
-	return async (...args: [...P]): Promise<T> => {
+const generateLoadItemOperation =
+	<T, P extends [...args: unknown[]]>(
+		queryName: string,
+		entityType: string,
+		parameterNames: { [K in keyof P]: string },
+	) =>
+	async (authContext: AuthContext | null, ...args: [...P]): Promise<T> => {
+		const authContextKeycloakUserId =
+			getKeycloakUserIdFromAuthContext(authContext);
+		const authContextIsAdministrator =
+			getIsAdministratorFromAuthContext(authContext);
 		const queryParameters = parameterNames.reduce(
 			(acc, parameterName, index) => ({
 				...acc,
 				[parameterName]: args[index],
 			}),
-			{},
+			{
+				authContextKeycloakUserId,
+				authContextIsAdministrator,
+			},
 		);
 
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
@@ -38,6 +50,5 @@ import type { JsonResultSet } from '../../../types';
 		}
 		return object;
 	};
-};
 
 export { generateLoadItemOperation };

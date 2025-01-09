@@ -78,7 +78,11 @@ const getChangemaker = (
 		return;
 	}
 	const authContext = isAuthContext(req) ? req : undefined;
-	loadChangemaker(getKeycloakUserIdFromAuthContext(authContext), changemakerId)
+	loadChangemaker(
+		null,
+		getKeycloakUserIdFromAuthContext(authContext),
+		changemakerId,
+	)
 		.then((changemaker) => {
 			res.status(200).contentType('application/json').send(changemaker);
 		})

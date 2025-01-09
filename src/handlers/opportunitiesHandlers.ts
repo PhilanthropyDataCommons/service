@@ -43,7 +43,7 @@ const getOpportunity = (
 		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
 		return;
 	}
-	loadOpportunity(opportunityId)
+	loadOpportunity(null, opportunityId)
 		.then((opportunity) => {
 			res.status(200).contentType('application/json').send(opportunity);
 		})

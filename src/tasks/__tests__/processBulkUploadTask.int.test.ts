@@ -51,8 +51,8 @@ const getS3KeyPath = (key: string) => `${getS3Path()}/${key}`;
 const createTestBulkUploadTask = async (
 	overrideValues?: Partial<InternallyWritableBulkUploadTask>,
 ): Promise<BulkUploadTask> => {
-	const systemUser = await loadSystemUser();
-	const systemSource = await loadSystemSource();
+	const systemUser = await loadSystemUser(null);
+	const systemSource = await loadSystemSource(null);
 	const defaultValues = {
 		fileName: 'bar.csv',
 		sourceId: systemSource.id,
@@ -197,7 +197,10 @@ describe('processBulkUploadTask', () => {
 			getMockJobHelpers(),
 		);
 
-		const updatedBulkUploadTask = await loadBulkUploadTask(bulkUploadTask.id);
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			null,
+			bulkUploadTask.id,
+		);
 		expect(updatedBulkUploadTask).toMatchObject({
 			status: TaskStatus.FAILED,
 			fileSize: null,
@@ -218,7 +221,7 @@ describe('processBulkUploadTask', () => {
 			getMockJobHelpers(),
 		);
 
-		const updatedBulkUpload = await loadBulkUploadTask(bulkUploadTask.id);
+		const updatedBulkUpload = await loadBulkUploadTask(null, bulkUploadTask.id);
 		expect(updatedBulkUpload).toMatchObject({
 			status: TaskStatus.FAILED,
 			fileSize: null,
@@ -242,7 +245,7 @@ describe('processBulkUploadTask', () => {
 			getMockJobHelpers(),
 		);
 
-		const updatedBulkUpload = await loadBulkUploadTask(bulkUploadTask.id);
+		const updatedBulkUpload = await loadBulkUploadTask(null, bulkUploadTask.id);
 		expect(updatedBulkUpload.status).toEqual(TaskStatus.IN_PROGRESS);
 		expect(requests.getRequest.isDone()).toEqual(false);
 	});
@@ -261,7 +264,10 @@ describe('processBulkUploadTask', () => {
 			},
 			getMockJobHelpers(),
 		);
-		const updatedBulkUploadTask = await loadBulkUploadTask(bulkUploadTask.id);
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			null,
+			bulkUploadTask.id,
+		);
 		expect(updatedBulkUploadTask).toMatchObject({
 			status: TaskStatus.FAILED,
 			fileSize: 97,
@@ -301,7 +307,7 @@ describe('processBulkUploadTask', () => {
 			},
 			getMockJobHelpers(),
 		);
-		const updatedBulkUpload = await loadBulkUploadTask(bulkUploadTask.id);
+		const updatedBulkUpload = await loadBulkUploadTask(null, bulkUploadTask.id);
 		expect(updatedBulkUpload).toMatchObject({
 			status: TaskStatus.FAILED,
 			fileSize: 0,
@@ -324,7 +330,10 @@ describe('processBulkUploadTask', () => {
 			},
 			getMockJobHelpers(),
 		);
-		const updatedBulkUploadTask = await loadBulkUploadTask(bulkUploadTask.id);
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			null,
+			bulkUploadTask.id,
+		);
 		expect(updatedBulkUploadTask).toMatchObject({
 			fileSize: 93,
 		});
@@ -332,8 +341,8 @@ describe('processBulkUploadTask', () => {
 
 	it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
 		await createTestBaseFields();
-		const systemSource = await loadSystemSource();
-		const systemUser = await loadSystemUser();
+		const systemSource = await loadSystemSource(null);
+		const systemUser = await loadSystemUser(null);
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUploadTask = await createTestBulkUploadTask({
 			sourceKey,
@@ -350,7 +359,10 @@ describe('processBulkUploadTask', () => {
 			},
 			getMockJobHelpers(),
 		);
-		const updatedBulkUploadTask = await loadBulkUploadTask(bulkUploadTask.id);
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			null,
+			bulkUploadTask.id,
+		);
 
 		const {
 			entries: [opportunity],

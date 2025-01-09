@@ -137,7 +137,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('does not update `createdBy`, but returns the user funder permission when user has permission to manage the funder', async () => {
 			const user = await loadTestUser();
-			const systemUser = await loadSystemUser();
+			const systemUser = await loadSystemUser(null);
 			const funder = await createOrUpdateFunder({
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
@@ -286,6 +286,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserFunderPermission(
+				null,
 				user.keycloakUserId,
 				funder.shortCode,
 				Permission.EDIT,
@@ -306,6 +307,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				.expect(204);
 			await expect(
 				loadUserFunderPermission(
+					null,
 					user.keycloakUserId,
 					funder.shortCode,
 					Permission.EDIT,
@@ -333,6 +335,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserFunderPermission(
+				null,
 				user.keycloakUserId,
 				funder.shortCode,
 				Permission.EDIT,
@@ -353,6 +356,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				.expect(204);
 			await expect(
 				loadUserFunderPermission(
+					null,
 					user.keycloakUserId,
 					funder.shortCode,
 					Permission.EDIT,

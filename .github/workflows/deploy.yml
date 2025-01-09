@@ -15,7 +15,7 @@ jobs:
       - uses: kachick/wait-other-jobs@v3.6.0
         timeout-minutes: 24
         with:
-          waitlist: |
+          wait-list: |
             [
               {
                 "workflowFile": "lint.yml"

@@ -5,7 +5,6 @@ on:
     workflows:
       - 'Lint'
       - 'Test'
-      - 'Test on current Node.js'
       - 'Build (sdk)'
       - 'Build and push docker image'
     types:
@@ -19,5 +18,7 @@ jobs:
     name: deploy-to-test
     steps:
       - uses: ahmadnassri/action-workflow-run-wait@v1.4.4
+        with:
+          timeout: 1440000
       - run: |
-          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${secrets.DIGITAL_OCEAN_TOKEN}" "https://api.digitalocean.com/v2/apps/${secrets.DIGITAL_OCEAN_APP_ID}/deployments" -d '{ "force_build": true }' | jq -e .deployment.id
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ secrets.DIGITAL_OCEAN_TOKEN }}" "https://api.digitalocean.com/v2/apps/${{ secrets.DIGITAL_OCEAN_APP_ID }}/deployments" -d '{ "force_build": true }' | jq -e .deployment.id

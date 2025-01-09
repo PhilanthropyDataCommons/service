@@ -1,0 +1,24 @@
+on:
+  workflow_run:
+    workflows: [lint, test, test-current-node, sdk, build]
+    types:
+      - completed
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.wait.outputs.result }}
+    steps:
+      - id: wait
+        uses: uplift-ltd/wait-for-workflow-run-action@v2
+
+  deploy-to-test-env:
+    runs-on: ubuntu-latest
+    environment:
+      name: test
+    needs: checks
+    if: ${{ needs.checks.outputs.result == 'success' }}
+    steps:
+      - run: |
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${secrets.DIGITAL_OCEAN_TOKEN}" "https://api.digitalocean.com/v2/apps/${secrets.DIGITAL_OCEAN_APP_ID}/deployments" -d '{ "force_build": true }' | jq -e .deployment.id

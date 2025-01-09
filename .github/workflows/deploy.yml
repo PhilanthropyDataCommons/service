@@ -1,14 +1,9 @@
 name: Deploy
 
 on:
-  workflow_run:
-    workflows:
-      - 'Lint'
-      - 'Test'
-      - 'Build (sdk)'
-      - 'Build and push docker image'
-    types:
-      - completed
+  push:
+    branches:
+      - 'main'
 
 jobs:
   deploy-to-test-env:
@@ -17,8 +12,23 @@ jobs:
       name: test
     name: deploy-to-test
     steps:
-      - uses: ahmadnassri/action-workflow-run-wait@v1.4.4
+      - uses: kachick/wait-other-jobs@v3.6.0
+        timeout-minutes: 24
         with:
-          timeout: 1440000
+          waitlist: |
+            [
+              {
+                "workflowFile": "lint.yml"
+              },
+              {
+                "workflowFile": "test.yml"
+              },
+              {
+                "workflowFile": "sdk.yml"
+              },
+              {
+                "workflowFile": "build.yml"
+              }
+            ]
       - run: |
           curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ secrets.DIGITAL_OCEAN_TOKEN }}" "https://api.digitalocean.com/v2/apps/${{ secrets.DIGITAL_OCEAN_APP_ID }}/deployments" -d '{ "force_build": true }' | jq -e .deployment.id

@@ -34,4 +34,4 @@ jobs:
             ]
       - run: |
           set -eo pipefail
-          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" --url "$URL" -d '{ "force_build": true }' | jq -e .deployment.id
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ env.TOKEN }}" --url "${{ env.URL }}" -d '{ "force_build": true }' | jq -e .deployment.id

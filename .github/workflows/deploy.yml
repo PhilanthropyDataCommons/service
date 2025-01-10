@@ -15,7 +15,7 @@ jobs:
         timeout-minutes: 24
         env:
           TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
-          APP_ID: ${{ secrets.DIGITAL_OCEAN_APP_ID }}
+          URL: ${{ vars.DEPLOYMENT_URL }}
         with:
           wait-list: |
             [
@@ -33,4 +33,5 @@ jobs:
               }
             ]
       - run: |
-          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" --url "https://api.digitalocean.com/v2/apps/$APP_ID/deployments" -d '{ "force_build": true }' | jq -e .deployment.id
+          set -eo pipefail
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" --url "$URL" -d '{ "force_build": true }' | jq -e .deployment.id

@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: Test
     name: deploy-to-test
+    env:
+      TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      URL: ${{ vars.DEPLOYMENT_URL }}
     steps:
       - uses: kachick/wait-other-jobs@v3.6.0
         timeout-minutes: 24
-        env:
-          TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
-          URL: ${{ vars.DEPLOYMENT_URL }}
         with:
           wait-list: |
             [

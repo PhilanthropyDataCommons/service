@@ -16,6 +16,8 @@ updates:
         update-types: ['version-update:semver-major']
       - dependency-name: '@typescript-eslint/parser'
         update-types: ['version-update:semver-major']
+      - dependency-name: 'node-fetch'
+        update-types: ['version-update:semver-major']
     groups:
       aws-sdk:
         patterns:

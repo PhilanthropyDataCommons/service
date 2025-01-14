@@ -9,12 +9,13 @@ jobs:
   deploy-to-test-env:
     runs-on: ubuntu-latest
     environment: Test
-    name: deploy-to-test
+    name: Deploy to Test environment
     env:
       TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
       URL: ${{ vars.DEPLOYMENT_URL }}
     steps:
-      - uses: kachick/wait-other-jobs@v3.6.0
+      - name: Wait for lint, test, build, and other workflows to succeed
+        uses: kachick/wait-other-jobs@v3
         timeout-minutes: 24
         with:
           wait-list: |
@@ -32,6 +33,20 @@ jobs:
                 "workflowFile": "build.yml"
               }
             ]
-      - run: |
+      - name: Deploy to Digital Ocean Test environment
+        run: |
+          set -eo pipefail
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ env.TOKEN }}" --url "${{ env.URL }}" -d '{ "force_build": true }' | jq -e .deployment.id
+  deploy-to-production-env:
+    runs-on: ubuntu-latest
+    environment: Production
+    name: Deploy to Production environment
+    env:
+      TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      URL: ${{ vars.DEPLOYMENT_URL }}
+    needs: deploy-to-test-env
+    steps:
+      - name: Deploy to Digital Ocean Production environment
+        run: |
           set -eo pipefail
           curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ env.TOKEN }}" --url "${{ env.URL }}" -d '{ "force_build": true }' | jq -e .deployment.id

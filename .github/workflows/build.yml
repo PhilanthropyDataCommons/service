@@ -48,7 +48,7 @@ jobs:
               },
               {
                 "workflowFile": "sdk.yml"
-              },
+              }
             ]
       - name: Build and push
         uses: docker/build-push-action@v6

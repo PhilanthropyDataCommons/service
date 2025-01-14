@@ -36,7 +36,7 @@ const postSource = (req: Request, res: Response, next: NextFunction): void => {
 	// Normally we try to avoid passing the body directly vs extracting the values and passing them.
 	// Because because writableSource is a union type it is hard to extract the values directly without
 	// losing type context that the union provided.
-	createSource(req.body)
+	createSource(null, req.body)
 		.then((item) => {
 			res.status(201).contentType('application/json').send(item);
 		})

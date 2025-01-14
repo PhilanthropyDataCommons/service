@@ -56,7 +56,7 @@ const postBulkUploadTask = (
 
 	assertSourceExists(sourceId)
 		.then(async () => {
-			const bulkUploadTask = await createBulkUploadTask({
+			const bulkUploadTask = await createBulkUploadTask(null, {
 				sourceId,
 				fileName,
 				sourceKey,

@@ -1,33 +1,14 @@
-import { db } from '../../db';
-import type { Source, JsonResultSet, WritableSource } from '../../../types';
+import { generateCreateOrUpdateItemOperation } from '../generators';
+import type { Source, WritableSource } from '../../../types';
 
-export const createSource = async (
-	createValues: WritableSource,
-): Promise<Source> => {
-	const { label } = createValues;
-	const dataProviderShortCode =
-		'dataProviderShortCode' in createValues
-			? createValues.dataProviderShortCode
-			: undefined;
-	const funderShortCode =
-		'funderShortCode' in createValues
-			? createValues.funderShortCode
-			: undefined;
-	const changemakerId =
-		'changemakerId' in createValues ? createValues.changemakerId : undefined;
+const createSource = generateCreateOrUpdateItemOperation<
+	Source,
+	WritableSource
+>('sources.insertOne', [
+	'label',
+	'dataProviderShortCode',
+	'funderShortCode',
+	'changemakerId',
+]);
 
-	const result = await db.sql<JsonResultSet<Source>>('sources.insertOne', {
-		label,
-		dataProviderShortCode,
-		funderShortCode,
-		changemakerId,
-	});
-
-	const { object } = result.rows[0] ?? {};
-	if (object === undefined) {
-		throw new Error(
-			'The entity creation did not appear to fail, but no data was returned by the operation.',
-		);
-	}
-	return object;
-};
+export { createSource };

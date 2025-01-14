@@ -19,7 +19,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 	describe('PUT /', () => {
 		it('returns 401 if the request lacks authentication', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -34,7 +34,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('returns 401 if the authenticated user lacks permission', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -83,7 +83,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('creates and returns the new user funder permission when user has administrative credentials', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -107,12 +107,12 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('creates and returns the new user funder permission when user has permission to manage the funder', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission({
+			await createOrUpdateUserFunderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
@@ -138,12 +138,12 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 		it('does not update `createdBy`, but returns the user funder permission when user has permission to manage the funder', async () => {
 			const user = await loadTestUser();
 			const systemUser = await loadSystemUser(null);
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission({
+			await createOrUpdateUserFunderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
@@ -170,7 +170,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 	describe('DELETE /', () => {
 		it('returns 401 if the request lacks authentication', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -185,7 +185,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('returns 401 if the authenticated user lacks permission', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -231,7 +231,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('returns 404 if the permission does not exist', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -247,12 +247,12 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('returns 404 if the permission had existed and previously been deleted', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission({
+			await createOrUpdateUserFunderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
@@ -274,12 +274,12 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('deletes the user funder permission when the user has administrative credentials', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission({
+			await createOrUpdateUserFunderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
@@ -317,18 +317,18 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('deletes the user funder permission when the user has permission to manage the funder', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder({
+			const funder = await createOrUpdateFunder(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission({
+			await createOrUpdateUserFunderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
 				createdBy: user.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission({
+			await createOrUpdateUserFunderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,

@@ -27,12 +27,12 @@ describe('/funders', () => {
 		});
 
 		it('returns all funders present in the database', async () => {
-			await createOrUpdateFunder({
+			await createOrUpdateFunder(null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateFunder({
+			await createOrUpdateFunder(null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: null,
@@ -65,12 +65,12 @@ describe('/funders', () => {
 		});
 
 		it('returns exactly one funder selected by short code', async () => {
-			await createOrUpdateFunder({
+			await createOrUpdateFunder(null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateFunder({
+			await createOrUpdateFunder(null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
@@ -89,7 +89,7 @@ describe('/funders', () => {
 		});
 
 		it('returns 404 when short code is not found', async () => {
-			await createOrUpdateFunder({
+			await createOrUpdateFunder(null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: null,
@@ -134,12 +134,12 @@ describe('/funders', () => {
 		});
 
 		it('updates an existing funder and no others', async () => {
-			await createOrUpdateFunder({
+			await createOrUpdateFunder(null, {
 				shortCode: 'firework',
 				name: 'boring text-based firework',
 				keycloakOrganizationId: null,
 			});
-			const anotherFunderBefore = await createOrUpdateFunder({
+			const anotherFunderBefore = await createOrUpdateFunder(null, {
 				shortCode: 'anotherFirework',
 				name: 'another boring text based firework',
 				keycloakOrganizationId: null,

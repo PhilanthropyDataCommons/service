@@ -37,17 +37,17 @@ describe('/tasks/baseFieldsCopy', () => {
 
 		it('returns all BaseFieldsCopy Tasks for administrative users', async () => {
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser({
+			const anotherUser = await createUser(null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 
-			await createBaseFieldsCopyTask({
+			await createBaseFieldsCopyTask(null, {
 				pdcApiUrl: MOCK_API_URL,
 				status: TaskStatus.PENDING,
 				createdBy: testUser.keycloakUserId,
 			});
 
-			await createBaseFieldsCopyTask({
+			await createBaseFieldsCopyTask(null, {
 				pdcApiUrl: MOCK_API_URL,
 				status: TaskStatus.COMPLETED,
 				createdBy: anotherUser.keycloakUserId,
@@ -86,7 +86,7 @@ describe('/tasks/baseFieldsCopy', () => {
 			const testUser = await loadTestUser();
 			await Array.from(Array(20)).reduce(async (p) => {
 				await p;
-				await createBaseFieldsCopyTask({
+				await createBaseFieldsCopyTask(null, {
 					pdcApiUrl: MOCK_API_URL,
 					status: TaskStatus.COMPLETED,
 					createdBy: testUser.keycloakUserId,

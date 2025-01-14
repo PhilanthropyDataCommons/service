@@ -126,6 +126,7 @@ const putUserDataProviderPermission = (
 
 	(async () => {
 		const userFunderPermission = await createOrUpdateUserDataProviderPermission(
+			null,
 			{
 				userKeycloakUserId,
 				dataProviderShortCode,

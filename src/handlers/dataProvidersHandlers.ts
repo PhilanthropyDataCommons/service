@@ -94,7 +94,7 @@ const putDataProvider = (
 	}
 	const { name, keycloakOrganizationId } = req.body;
 	(async () => {
-		const dataProvider = await createOrUpdateDataProvider({
+		const dataProvider = await createOrUpdateDataProvider(null, {
 			shortCode,
 			name,
 			keycloakOrganizationId,

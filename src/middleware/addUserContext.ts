@@ -14,7 +14,7 @@ const selectOrCreateUser = async (keycloakUserId: KeycloakId) => {
 	try {
 		return await loadUserByKeycloakUserId(null, keycloakUserId);
 	} catch {
-		const user = await createUser({ keycloakUserId });
+		const user = await createUser(null, { keycloakUserId });
 		return user;
 	}
 };

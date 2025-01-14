@@ -41,7 +41,7 @@ const postBaseFieldsCopyTask = (
 	const { pdcApiUrl } = req.body;
 	const createdBy = req.user.keycloakUserId;
 	(async () => {
-		const baseFieldsCopyTask = await createBaseFieldsCopyTask({
+		const baseFieldsCopyTask = await createBaseFieldsCopyTask(null, {
 			pdcApiUrl,
 			status: TaskStatus.PENDING,
 			createdBy,

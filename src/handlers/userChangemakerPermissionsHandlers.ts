@@ -125,7 +125,7 @@ const putUserChangemakerPermission = (
 
 	(async () => {
 		const userChangemakerPermission =
-			await createOrUpdateUserChangemakerPermission({
+			await createOrUpdateUserChangemakerPermission(null, {
 				userKeycloakUserId,
 				changemakerId,
 				permission,

@@ -15,7 +15,7 @@ import {
 } from '../test/mockJwt';
 
 const createTestBaseField = async () =>
-	createBaseField({
+	createBaseField(null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
@@ -24,14 +24,14 @@ const createTestBaseField = async () =>
 	});
 
 const createTestBaseFieldWithLocalization = async () => {
-	const baseField = await createBaseField({
+	const baseField = await createBaseField(null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 	});
-	await createOrUpdateBaseFieldLocalization({
+	await createOrUpdateBaseFieldLocalization(null, {
 		baseFieldId: baseField.id,
 		label: 'Le Resume',
 		description: 'Le Resume de la Applicant',
@@ -50,14 +50,14 @@ describe('/baseFields', () => {
 		});
 
 		it('returns all base fields present in the database', async () => {
-			const baseFieldOne = await createBaseField({
+			const baseFieldOne = await createBaseField(null, {
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 			});
-			const baseFieldTwo = await createBaseField({
+			const baseFieldTwo = await createBaseField(null, {
 				label: 'Last Name',
 				description: 'The last name of the applicant',
 				shortCode: 'lastName',
@@ -65,14 +65,14 @@ describe('/baseFields', () => {
 				scope: BaseFieldScope.PROPOSAL,
 			});
 
-			await createOrUpdateBaseFieldLocalization({
+			await createOrUpdateBaseFieldLocalization(null, {
 				baseFieldId: baseFieldOne.id,
 				language: 'fr',
 				label: 'prenom',
 				description: 'le prenom',
 			});
 
-			await createOrUpdateBaseFieldLocalization({
+			await createOrUpdateBaseFieldLocalization(null, {
 				baseFieldId: baseFieldTwo.id,
 				language: 'fr',
 				label: 'postnom',
@@ -288,7 +288,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 409 conflict when a duplicate short name is submitted', async () => {
-			await createBaseField({
+			await createBaseField(null, {
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
@@ -331,7 +331,7 @@ describe('/baseFields', () => {
 			// Not using the helper here because observing a change in values is explicitly
 			// the point of the test, so having full explicit control of the original value
 			// seems important.  Some day when we add better test tooling we can have it all.
-			await createBaseField({
+			await createBaseField(null, {
 				label: 'Summary',
 				description: 'A summary of the proposal',
 				shortCode: 'summary',
@@ -502,7 +502,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns all base field localizations related to the given baseFieldId', async () => {
-			await createBaseField({
+			await createBaseField(null, {
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
@@ -510,14 +510,14 @@ describe('/baseFields', () => {
 				scope: BaseFieldScope.PROPOSAL,
 			});
 
-			await createOrUpdateBaseFieldLocalization({
+			await createOrUpdateBaseFieldLocalization(null, {
 				baseFieldId: 1,
 				language: 'fr',
 				label: 'prenom',
 				description: 'le prenom',
 			});
 
-			await createOrUpdateBaseFieldLocalization({
+			await createOrUpdateBaseFieldLocalization(null, {
 				baseFieldId: 1,
 				language: 'en',
 				label: 'First Name',
@@ -606,13 +606,13 @@ describe('/baseFields', () => {
 
 		it('updates only the specified base field if it does exist', async () => {
 			const testBaseField = await createTestBaseField();
-			await createOrUpdateBaseFieldLocalization({
+			await createOrUpdateBaseFieldLocalization(null, {
 				baseFieldId: 1,
 				language: 'fr',
 				label: 'Résume',
 				description: 'Le Résume de proposal',
 			});
-			await createOrUpdateBaseFieldLocalization({
+			await createOrUpdateBaseFieldLocalization(null, {
 				baseFieldId: 1,
 				language: 'en',
 				label: 'Summary',

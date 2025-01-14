@@ -19,7 +19,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 	describe('PUT /', () => {
 		it('returns 401 if the request lacks authentication', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -34,7 +34,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 
 		it('returns 401 if the authenticated user lacks permission', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -83,7 +83,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 
 		it('creates and returns the new user data provider permission when user has administrative credentials', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -107,12 +107,12 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 
 		it('creates and returns the new user data provider permission when user has permission to manage the data provider', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission({
+			await createOrUpdateUserDataProviderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.MANAGE,
@@ -138,12 +138,12 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 		it('does not update `createdBy`, but returns the user data provider permission when user has permission to manage the data provider', async () => {
 			const user = await loadTestUser();
 			const systemUser = await loadSystemUser(null);
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission({
+			await createOrUpdateUserDataProviderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.MANAGE,
@@ -170,7 +170,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 	describe('DELETE /', () => {
 		it('returns 401 if the request lacks authentication', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -185,7 +185,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 
 		it('returns 401 if the authenticated user lacks permission', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -233,7 +233,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 
 		it('returns 404 if the permission does not exist', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -249,12 +249,12 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 
 		it('returns 404 if the permission had existed and previously been deleted', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission({
+			await createOrUpdateUserDataProviderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.EDIT,
@@ -276,12 +276,12 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 
 		it('deletes the user data provider permission when the user has administrative credentials', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission({
+			await createOrUpdateUserDataProviderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.EDIT,
@@ -319,18 +319,18 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 
 		it('deletes the user data provider permission when the user has permission to manage the data provider', async () => {
 			const user = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider({
+			const dataProvider = await createOrUpdateDataProvider(null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission({
+			await createOrUpdateUserDataProviderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.MANAGE,
 				createdBy: user.keycloakUserId,
 			});
-			await createOrUpdateUserDataProviderPermission({
+			await createOrUpdateUserDataProviderPermission(null, {
 				userKeycloakUserId: user.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.EDIT,

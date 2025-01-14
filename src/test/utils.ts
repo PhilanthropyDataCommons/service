@@ -26,7 +26,7 @@ export const getTestUserKeycloakUserId = () =>
 	stringToKeycloakId('11111111-1111-1111-1111-111111111111'); // This value is not a reference, it's just a static GUID
 
 export const createTestUser = async () =>
-	createUser({
+	createUser(null, {
 		keycloakUserId: getTestUserKeycloakUserId(),
 	});
 

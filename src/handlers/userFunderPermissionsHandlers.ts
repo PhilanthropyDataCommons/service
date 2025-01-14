@@ -125,12 +125,15 @@ const putUserFunderPermission = (
 	}
 
 	(async () => {
-		const userFunderPermission = await createOrUpdateUserFunderPermission({
-			userKeycloakUserId,
-			funderShortCode,
-			permission,
-			createdBy,
-		});
+		const userFunderPermission = await createOrUpdateUserFunderPermission(
+			null,
+			{
+				userKeycloakUserId,
+				funderShortCode,
+				permission,
+				createdBy,
+			},
+		);
 		res.status(201).contentType('application/json').send(userFunderPermission);
 	})().catch((error: unknown) => {
 		if (isTinyPgErrorWithQueryContext(error)) {

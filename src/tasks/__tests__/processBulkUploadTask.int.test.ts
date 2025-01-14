@@ -60,28 +60,28 @@ const createTestBulkUploadTask = async (
 		status: TaskStatus.PENDING,
 		createdBy: systemUser.keycloakUserId,
 	};
-	return createBulkUploadTask({
+	return createBulkUploadTask(null, {
 		...defaultValues,
 		...overrideValues,
 	});
 };
 
 const createTestBaseFields = async (): Promise<void> => {
-	await createBaseField({
+	await createBaseField(null, {
 		label: 'Proposal Submitter Email',
 		description: 'The email address of the person who submitted the proposal.',
 		shortCode: 'proposal_submitter_email',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 	});
-	await createBaseField({
+	await createBaseField(null, {
 		label: 'Organization Name',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_name',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 	});
-	await createBaseField({
+	await createBaseField(null, {
 		label: 'Organization EIN',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_tax_id',

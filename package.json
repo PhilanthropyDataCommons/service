@@ -99,7 +99,7 @@
 		"node-fetch": "^2.7.0",
 		"phone": "^3.1.57",
 		"pino": "^9.6.0",
-		"pino-http": "^10.3.0",
+		"pino-http": "^10.4.0",
 		"postgres-schema-migrations": "^6.1.0",
 		"require-env-variable": "^4.0.2",
 		"swagger-ui-dist": "^5.18.2",

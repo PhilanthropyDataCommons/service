@@ -1,4 +1,5 @@
 import {
+	db,
 	createApplicationForm,
 	createApplicationFormField,
 	getLimitValues,
@@ -21,7 +22,7 @@ const getApplicationForms = (
 ): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	loadApplicationFormBundle(null, limit, offset)
+	loadApplicationFormBundle(db, null, limit, offset)
 		.then((applicationForms) => {
 			res.status(200).contentType('application/json').send(applicationForms);
 		})
@@ -44,7 +45,7 @@ const getApplicationForm = (
 		next(new InputValidationError('Invalid request.', isId.errors ?? []));
 		return;
 	}
-	loadApplicationForm(null, applicationFormId)
+	loadApplicationForm(db, null, applicationFormId)
 		.then((applicationForm) => {
 			res.status(200).contentType('application/json').send(applicationForm);
 		})
@@ -73,10 +74,10 @@ const postApplicationForms = (
 	}
 	const { fields } = req.body;
 
-	createApplicationForm(null, req.body)
+	createApplicationForm(db, null, req.body)
 		.then((applicationForm) => {
 			const queries = fields.map(async (field) =>
-				createApplicationFormField(null, {
+				createApplicationFormField(db, null, {
 					...field,
 					applicationFormId: applicationForm.id,
 				}),

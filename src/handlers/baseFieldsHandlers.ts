@@ -1,5 +1,6 @@
 import { DatabaseError, InputValidationError } from '../errors';
 import {
+	db,
 	createBaseField,
 	loadBaseFields,
 	updateBaseField,
@@ -19,7 +20,7 @@ import {
 import type { Request, Response, NextFunction } from 'express';
 
 const assertBaseFieldExists = async (baseFieldId: number): Promise<void> => {
-	await loadBaseField(null, baseFieldId);
+	await loadBaseField(db, null, baseFieldId);
 };
 
 const getBaseFields = (
@@ -55,7 +56,7 @@ const postBaseField = (
 		return;
 	}
 
-	createBaseField(null, req.body)
+	createBaseField(db, null, req.body)
 		.then((baseField) => {
 			res.status(201).contentType('application/json').send(baseField);
 		})
@@ -117,6 +118,7 @@ const getBaseFieldLocalizationsByBaseFieldId = (
 	assertBaseFieldExists(baseFieldId)
 		.then(() => {
 			loadBaseFieldLocalizationsBundleByBaseFieldId(
+				db,
 				null,
 				baseFieldId,
 				limit,
@@ -183,7 +185,7 @@ const putBaseFieldLocalization = (
 	const { label, description } = req.body;
 	assertBaseFieldExists(baseFieldId)
 		.then(() => {
-			createOrUpdateBaseFieldLocalization(null, {
+			createOrUpdateBaseFieldLocalization(db, null, {
 				label,
 				description,
 				baseFieldId,

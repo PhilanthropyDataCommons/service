@@ -1,10 +1,10 @@
-import { db } from '../../db';
 import { NotFoundError } from '../../../errors';
 import {
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type { AuthContext, JsonResultSet } from '../../../types';
+import type TinyPg from 'tinypg';
 
 /**
  * Generates an item loader function for a specific query and table.
@@ -24,7 +24,11 @@ const generateLoadItemOperation =
 		entityType: string,
 		parameterNames: { [K in keyof P]: string },
 	) =>
-	async (authContext: AuthContext | null, ...args: [...P]): Promise<T> => {
+	async (
+		db: TinyPg,
+		authContext: AuthContext | null,
+		...args: [...P]
+	): Promise<T> => {
 		const authContextKeycloakUserId =
 			getKeycloakUserIdFromAuthContext(authContext);
 		const authContextIsAdministrator =

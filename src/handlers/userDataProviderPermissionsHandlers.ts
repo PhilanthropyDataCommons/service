@@ -1,4 +1,5 @@
 import {
+	db,
 	assertUserDataProviderPermissionExists,
 	createOrUpdateUserDataProviderPermission,
 	removeUserDataProviderPermission,
@@ -126,6 +127,7 @@ const putUserDataProviderPermission = (
 
 	(async () => {
 		const userFunderPermission = await createOrUpdateUserDataProviderPermission(
+			db,
 			null,
 			{
 				userKeycloakUserId,

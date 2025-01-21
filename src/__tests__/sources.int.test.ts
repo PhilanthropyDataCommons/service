@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	db,
 	createChangemaker,
 	createOrUpdateDataProvider,
 	createOrUpdateFunder,
@@ -23,7 +24,7 @@ describe('/sources', () => {
 		});
 
 		it('returns the system source when no data has been added', async () => {
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			await agent
 				.get('/sources')
 				.set(authHeader)
@@ -34,13 +35,13 @@ describe('/sources', () => {
 		});
 
 		it('returns all sources present in the database', async () => {
-			const systemSource = await loadSystemSource(null);
-			const changemaker = await createChangemaker(null, {
+			const systemSource = await loadSystemSource(db, null);
+			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			const source = await createSource(null, {
+			const source = await createSource(db, null, {
 				label: 'Example Inc.',
 				changemakerId: changemaker.id,
 			});
@@ -58,12 +59,12 @@ describe('/sources', () => {
 		});
 
 		it('returns exactly one source selected by id', async () => {
-			const changemaker = await createChangemaker(null, {
+			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			const source = await createSource(null, {
+			const source = await createSource(db, null, {
 				label: 'Example Inc.',
 				changemakerId: changemaker.id,
 			});
@@ -95,12 +96,12 @@ describe('/sources', () => {
 		});
 
 		it('returns 404 when id is not found', async () => {
-			const changemaker = await createChangemaker(null, {
+			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createSource(null, {
+			await createSource(db, null, {
 				label: 'not to be returned',
 				changemakerId: changemaker.id,
 			});
@@ -118,7 +119,7 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one changemaker source', async () => {
-			const changemaker = await createChangemaker(null, {
+			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -146,7 +147,7 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one funder source', async () => {
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'foo',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -174,7 +175,7 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one data provider source', async () => {
-			const dataProvider = await createOrUpdateDataProvider(null, {
+			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'foo',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -202,7 +203,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 400 bad request when no label sent', async () => {
-			const changemaker = await createChangemaker(null, {
+			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,

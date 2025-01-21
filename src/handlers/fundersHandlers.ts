@@ -1,4 +1,5 @@
 import {
+	db,
 	createOrUpdateFunder,
 	getLimitValues,
 	loadFunderBundle,
@@ -26,7 +27,7 @@ const getFunders = (req: Request, res: Response, next: NextFunction): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	(async () => {
 		const { offset, limit } = getLimitValues(paginationParameters);
-		const funderBundle = await loadFunderBundle(req, limit, offset);
+		const funderBundle = await loadFunderBundle(db, req, limit, offset);
 
 		res.status(200).contentType('application/json').send(funderBundle);
 	})().catch((error: unknown) => {
@@ -46,7 +47,7 @@ const getFunder = (req: Request, res: Response, next: NextFunction): void => {
 		);
 		return;
 	}
-	loadFunder(null, funderShortCode)
+	loadFunder(db, null, funderShortCode)
 		.then((funder) => {
 			res.status(200).contentType('application/json').send(funder);
 		})
@@ -83,7 +84,7 @@ const putFunder = (req: Request, res: Response, next: NextFunction): void => {
 	const { name, keycloakOrganizationId } = req.body;
 
 	(async () => {
-		const funder = await createOrUpdateFunder(null, {
+		const funder = await createOrUpdateFunder(db, null, {
 			shortCode,
 			name,
 			keycloakOrganizationId,

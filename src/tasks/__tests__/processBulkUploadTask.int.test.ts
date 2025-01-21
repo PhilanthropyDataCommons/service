@@ -1,6 +1,7 @@
 import nock from 'nock';
 import { requireEnv } from 'require-env-variable';
 import {
+	db,
 	createBaseField,
 	loadBulkUploadTask,
 	loadProposalBundle,
@@ -51,8 +52,8 @@ const getS3KeyPath = (key: string) => `${getS3Path()}/${key}`;
 const createTestBulkUploadTask = async (
 	overrideValues?: Partial<InternallyWritableBulkUploadTask>,
 ): Promise<BulkUploadTask> => {
-	const systemUser = await loadSystemUser(null);
-	const systemSource = await loadSystemSource(null);
+	const systemUser = await loadSystemUser(db, null);
+	const systemSource = await loadSystemSource(db, null);
 	const defaultValues = {
 		fileName: 'bar.csv',
 		sourceId: systemSource.id,
@@ -60,28 +61,28 @@ const createTestBulkUploadTask = async (
 		status: TaskStatus.PENDING,
 		createdBy: systemUser.keycloakUserId,
 	};
-	return createBulkUploadTask(null, {
+	return createBulkUploadTask(db, null, {
 		...defaultValues,
 		...overrideValues,
 	});
 };
 
 const createTestBaseFields = async (): Promise<void> => {
-	await createBaseField(null, {
+	await createBaseField(db, null, {
 		label: 'Proposal Submitter Email',
 		description: 'The email address of the person who submitted the proposal.',
 		shortCode: 'proposal_submitter_email',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 	});
-	await createBaseField(null, {
+	await createBaseField(db, null, {
 		label: 'Organization Name',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_name',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 	});
-	await createBaseField(null, {
+	await createBaseField(db, null, {
 		label: 'Organization EIN',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_tax_id',
@@ -198,6 +199,7 @@ describe('processBulkUploadTask', () => {
 		);
 
 		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
 			null,
 			bulkUploadTask.id,
 		);
@@ -221,7 +223,11 @@ describe('processBulkUploadTask', () => {
 			getMockJobHelpers(),
 		);
 
-		const updatedBulkUpload = await loadBulkUploadTask(null, bulkUploadTask.id);
+		const updatedBulkUpload = await loadBulkUploadTask(
+			db,
+			null,
+			bulkUploadTask.id,
+		);
 		expect(updatedBulkUpload).toMatchObject({
 			status: TaskStatus.FAILED,
 			fileSize: null,
@@ -245,7 +251,11 @@ describe('processBulkUploadTask', () => {
 			getMockJobHelpers(),
 		);
 
-		const updatedBulkUpload = await loadBulkUploadTask(null, bulkUploadTask.id);
+		const updatedBulkUpload = await loadBulkUploadTask(
+			db,
+			null,
+			bulkUploadTask.id,
+		);
 		expect(updatedBulkUpload.status).toEqual(TaskStatus.IN_PROGRESS);
 		expect(requests.getRequest.isDone()).toEqual(false);
 	});
@@ -265,6 +275,7 @@ describe('processBulkUploadTask', () => {
 			getMockJobHelpers(),
 		);
 		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
 			null,
 			bulkUploadTask.id,
 		);
@@ -307,7 +318,11 @@ describe('processBulkUploadTask', () => {
 			},
 			getMockJobHelpers(),
 		);
-		const updatedBulkUpload = await loadBulkUploadTask(null, bulkUploadTask.id);
+		const updatedBulkUpload = await loadBulkUploadTask(
+			db,
+			null,
+			bulkUploadTask.id,
+		);
 		expect(updatedBulkUpload).toMatchObject({
 			status: TaskStatus.FAILED,
 			fileSize: 0,
@@ -331,6 +346,7 @@ describe('processBulkUploadTask', () => {
 			getMockJobHelpers(),
 		);
 		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
 			null,
 			bulkUploadTask.id,
 		);
@@ -341,8 +357,8 @@ describe('processBulkUploadTask', () => {
 
 	it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
 		await createTestBaseFields();
-		const systemSource = await loadSystemSource(null);
-		const systemUser = await loadSystemUser(null);
+		const systemSource = await loadSystemSource(db, null);
+		const systemUser = await loadSystemUser(db, null);
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUploadTask = await createTestBulkUploadTask({
 			sourceKey,
@@ -360,20 +376,21 @@ describe('processBulkUploadTask', () => {
 			getMockJobHelpers(),
 		);
 		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
 			null,
 			bulkUploadTask.id,
 		);
 
 		const {
 			entries: [opportunity],
-		} = await loadOpportunityBundle(null, NO_LIMIT, NO_OFFSET);
+		} = await loadOpportunityBundle(db, null, NO_LIMIT, NO_OFFSET);
 		if (opportunity === undefined) {
 			throw new Error('The opportunity was not created');
 		}
 
 		const {
 			entries: [applicationForm],
-		} = await loadApplicationFormBundle(null, NO_LIMIT, NO_OFFSET);
+		} = await loadApplicationFormBundle(db, null, NO_LIMIT, NO_OFFSET);
 		if (applicationForm === undefined) {
 			fail('The application form was not created');
 		}
@@ -384,6 +401,7 @@ describe('processBulkUploadTask', () => {
 		});
 
 		const proposalBundle = await loadProposalBundle(
+			db,
 			null,
 			undefined,
 			undefined,
@@ -550,6 +568,7 @@ describe('processBulkUploadTask', () => {
 		});
 
 		const changemakerBundle = await loadChangemakerBundle(
+			db,
 			null,
 			undefined,
 			NO_LIMIT,
@@ -561,6 +580,7 @@ describe('processBulkUploadTask', () => {
 		});
 
 		const changemakerProposalBundle = await loadChangemakerProposalBundle(
+			db,
 			null,
 			undefined,
 			undefined,
@@ -595,6 +615,7 @@ describe('processBulkUploadTask', () => {
 		);
 
 		const changemakerBundle = await loadChangemakerBundle(
+			db,
 			null,
 			undefined,
 			NO_LIMIT,
@@ -602,6 +623,7 @@ describe('processBulkUploadTask', () => {
 		);
 
 		const changemakerProposalBundle = await loadChangemakerProposalBundle(
+			db,
 			null,
 			undefined,
 			undefined,

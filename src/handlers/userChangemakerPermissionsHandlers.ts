@@ -1,4 +1,5 @@
 import {
+	db,
 	assertUserChangemakerPermissionExists,
 	createOrUpdateUserChangemakerPermission,
 	removeUserChangemakerPermission,
@@ -125,7 +126,7 @@ const putUserChangemakerPermission = (
 
 	(async () => {
 		const userChangemakerPermission =
-			await createOrUpdateUserChangemakerPermission(null, {
+			await createOrUpdateUserChangemakerPermission(db, null, {
 				userKeycloakUserId,
 				changemakerId,
 				permission,

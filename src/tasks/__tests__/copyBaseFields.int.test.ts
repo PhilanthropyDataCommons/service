@@ -2,6 +2,7 @@ import nock from 'nock';
 import { fetchBaseFieldsFromRemote, copyBaseFields } from '../index';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import {
+	db,
 	loadBaseFieldsCopyTask,
 	createBaseFieldsCopyTask,
 	loadSystemUser,
@@ -9,7 +10,7 @@ import {
 	createOrUpdateBaseField,
 	loadBaseField,
 	createOrUpdateBaseFieldLocalization,
-} from '../../database/operations';
+} from '../../database';
 import {
 	InternallyWritableBaseFieldsCopyTask,
 	BaseFieldsCopyTask,
@@ -24,14 +25,14 @@ const MOCK_API_URL = 'https://example.com';
 const createTestBaseFieldsCopyTask = async (
 	overrideValues?: Partial<InternallyWritableBaseFieldsCopyTask>,
 ): Promise<BaseFieldsCopyTask> => {
-	const systemUser = await loadSystemUser(null);
+	const systemUser = await loadSystemUser(db, null);
 	const defaultValues = {
 		pdcApiUrl: MOCK_API_URL,
 		status: TaskStatus.PENDING,
 		statusUpdatedAt: new Date(Date.now()).toISOString(),
 		createdBy: systemUser.keycloakUserId,
 	};
-	return createBaseFieldsCopyTask(null, {
+	return createBaseFieldsCopyTask(db, null, {
 		...defaultValues,
 		...overrideValues,
 	});
@@ -182,6 +183,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
@@ -204,6 +206,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
@@ -233,6 +236,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
@@ -255,6 +259,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
@@ -283,6 +288,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
@@ -291,7 +297,7 @@ describe('copyBaseFields', () => {
 		expect(before.count).toEqual(0);
 		expect(after.count).toEqual(1);
 
-		const insertedRemoteBaseField = await loadBaseField(null, 1);
+		const insertedRemoteBaseField = await loadBaseField(db, null, 1);
 
 		expect(insertedRemoteBaseField).toEqual({
 			id: 1,
@@ -324,7 +330,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should insert all remote basefields, without updating any local basefields, assuming there is no overlap on shortcode', async () => {
-		const localBaseField = await createOrUpdateBaseField(null, {
+		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Local BaseField',
 			description: 'This basefield should not be updated on basefield copy',
 			shortCode: 'local',
@@ -347,6 +353,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
@@ -356,6 +363,7 @@ describe('copyBaseFields', () => {
 		expect(after.count).toEqual(3);
 
 		const localBaseFieldAfterInsertion = await loadBaseField(
+			db,
 			null,
 			localBaseField.id,
 		);
@@ -367,7 +375,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should update local basefields when they match on remote basefield shortcodes, even if the basefields have identical data', async () => {
-		const localBaseField = await createOrUpdateBaseField(null, {
+		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Local Data',
 			description: 'This is local data',
 			shortCode: 'ld',
@@ -401,13 +409,14 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
 
 		const after = await loadTableMetrics('base_fields');
 
-		const updatedBaseField = await loadBaseField(null, localBaseField.id);
+		const updatedBaseField = await loadBaseField(db, null, localBaseField.id);
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(1);
@@ -428,7 +437,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should update local basefields when they match on remote basefield shortcodes, and insert all other remote basefields', async () => {
-		const localBaseField = await createOrUpdateBaseField(null, {
+		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Local Data',
 			description: 'This is local data',
 			shortCode: 'ld',
@@ -462,13 +471,14 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
 
 		const after = await loadTableMetrics('base_fields');
 
-		const updatedBaseField = await loadBaseField(null, localBaseField.id);
+		const updatedBaseField = await loadBaseField(db, null, localBaseField.id);
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(2);
@@ -484,7 +494,7 @@ describe('copyBaseFields', () => {
 			localizations: {},
 		});
 
-		const insertedRemoteBaseField = await loadBaseField(null, 3);
+		const insertedRemoteBaseField = await loadBaseField(db, null, 3);
 
 		expect(insertedRemoteBaseField).toEqual({
 			id: 3,
@@ -517,7 +527,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should preserve localizations for a local basefield with localizations, when there is a remote basefield with no localizations that matches on shortcode', async () => {
-		const localBaseField = await createOrUpdateBaseField(null, {
+		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Update me',
 			description: 'This is a field to be updated',
 			shortCode: mockFirstNameBaseField.shortCode,
@@ -525,7 +535,7 @@ describe('copyBaseFields', () => {
 			scope: BaseFieldScope.PROPOSAL,
 		});
 
-		await createOrUpdateBaseFieldLocalization(null, {
+		await createOrUpdateBaseFieldLocalization(db, null, {
 			baseFieldId: localBaseField.id,
 			label: 'Le Prenom',
 			description: 'Le Prenom de la Applicant',
@@ -546,11 +556,12 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
 
-		const updatedBaseField = await loadBaseField(null, localBaseField.id);
+		const updatedBaseField = await loadBaseField(db, null, localBaseField.id);
 
 		expect(updatedBaseField).toEqual({
 			id: localBaseField.id,
@@ -576,7 +587,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should add localizations to a local basefield from a remote basefield with matching shortcode', async () => {
-		const localBaseField = await createOrUpdateBaseField(null, {
+		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Update me',
 			description: 'This is a field to be updated',
 			shortCode: mockFirstNameBaseField.shortCode,
@@ -584,7 +595,7 @@ describe('copyBaseFields', () => {
 			scope: BaseFieldScope.PROPOSAL,
 		});
 
-		await createOrUpdateBaseFieldLocalization(null, {
+		await createOrUpdateBaseFieldLocalization(db, null, {
 			baseFieldId: localBaseField.id,
 			label: 'Nombre de Pila',
 			description: 'Nombre de Pila',
@@ -605,11 +616,12 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
 
-		const updatedBaseField = await loadBaseField(null, localBaseField.id);
+		const updatedBaseField = await loadBaseField(db, null, localBaseField.id);
 
 		expect(updatedBaseField).toEqual({
 			id: localBaseField.id,
@@ -664,6 +676,7 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
@@ -677,7 +690,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should update any existing local basefields that match on shortcode, and have status set as completed', async () => {
-		const baseField = await createOrUpdateBaseField(null, {
+		const baseField = await createOrUpdateBaseField(db, null, {
 			label: 'Old First Name',
 			description: 'This should be replaced',
 			shortCode: mockFirstNameBaseField.shortCode,
@@ -700,13 +713,14 @@ describe('copyBaseFields', () => {
 		);
 
 		const updatedBaseFieldsCopyTask = await loadBaseFieldsCopyTask(
+			db,
 			null,
 			baseFieldsCopyTask.id,
 		);
 
 		const after = await loadTableMetrics('base_fields');
 
-		const updatedBaseField = await loadBaseField(null, baseField.id);
+		const updatedBaseField = await loadBaseField(db, null, baseField.id);
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(1);

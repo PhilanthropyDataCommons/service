@@ -1,4 +1,5 @@
 import {
+	db,
 	createChangemakerProposal,
 	getLimitValues,
 	loadChangemakerProposalBundle,
@@ -27,6 +28,7 @@ const getChangemakerProposals = (
 
 	(async () => {
 		const changemakerProposalBundle = await loadChangemakerProposalBundle(
+			db,
 			null,
 			changemakerId,
 			proposalId,
@@ -61,7 +63,7 @@ const postChangemakerProposal = (
 		return;
 	}
 
-	createChangemakerProposal(null, req.body)
+	createChangemakerProposal(db, null, req.body)
 		.then((changemakerProposal) => {
 			res.status(201).contentType('application/json').send(changemakerProposal);
 		})

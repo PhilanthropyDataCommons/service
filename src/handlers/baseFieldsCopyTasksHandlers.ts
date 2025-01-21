@@ -1,4 +1,5 @@
 import {
+	db,
 	createBaseFieldsCopyTask,
 	loadBaseFieldsCopyTaskBundle,
 	getLimitValues,
@@ -41,7 +42,7 @@ const postBaseFieldsCopyTask = (
 	const { pdcApiUrl } = req.body;
 	const createdBy = req.user.keycloakUserId;
 	(async () => {
-		const baseFieldsCopyTask = await createBaseFieldsCopyTask(null, {
+		const baseFieldsCopyTask = await createBaseFieldsCopyTask(db, null, {
 			pdcApiUrl,
 			status: TaskStatus.PENDING,
 			createdBy,
@@ -76,6 +77,7 @@ const getBaseFieldsCopyTasks = (
 	const { createdBy } = extractCreatedByParameters(req);
 	(async () => {
 		const baseFieldsCopyTaskBundle = await loadBaseFieldsCopyTaskBundle(
+			db,
 			req,
 			createdBy,
 			limit,

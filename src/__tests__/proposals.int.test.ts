@@ -29,14 +29,14 @@ import {
 } from '../types';
 
 const createTestBaseFields = async () => {
-	await createBaseField(null, {
+	await createBaseField(db, null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 	});
-	await createBaseField(null, {
+	await createBaseField(db, null, {
 		label: 'Title',
 		description: 'The title of the proposal',
 		shortCode: 'title',
@@ -63,46 +63,46 @@ describe('/proposals', () => {
 		});
 
 		it('returns proposals associated with the requesting user', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
-			const secondUser = await createUser(null, {
+			const secondUser = await createUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			await createTestBaseFields();
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-3',
 				opportunityId: 1,
 				createdBy: secondUser.keycloakUserId,
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createProposalVersion(null, {
+			await createProposalVersion(db, null, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 1,
 				label: 'Short summary',
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
 				applicationFormFieldId: 1,
 				position: 1,
@@ -178,28 +178,28 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when a changemaker filter is provided', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🔥',
 			});
 
 			const testUser = await loadTestUser();
 			await createTestBaseFields();
-			const proposal = await createProposal(null, {
+			const proposal = await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			const changemaker = await createChangemaker(null, {
+			const changemaker = await createChangemaker(db, null, {
 				taxId: '123-123-123',
 				name: 'Canadian Company',
 				keycloakOrganizationId: null,
 			});
-			await createChangemakerProposal(null, {
+			await createChangemakerProposal(db, null, {
 				changemakerId: changemaker.id,
 				proposalId: proposal.id,
 			});
@@ -245,52 +245,52 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when search is provided', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🔥',
 			});
 
 			const testUser = await loadTestUser();
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			await createTestBaseFields();
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createProposalVersion(null, {
+			await createProposalVersion(db, null, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(null, {
+			await createProposalVersion(db, null, {
 				proposalId: 2,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 1,
 				label: 'Short summary',
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'This is a summary',
 				isValid: true,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
 				applicationFormFieldId: 1,
 				position: 1,
@@ -357,21 +357,21 @@ describe('/proposals', () => {
 		});
 
 		it('returns all proposals present in the database regardless of createdBy value when loading as an administrator', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🔥',
 			});
 
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(null, {
+			const anotherUser = await createUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createTestBaseFields();
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
 				createdBy: anotherUser.keycloakUserId,
@@ -404,21 +404,21 @@ describe('/proposals', () => {
 		});
 
 		it('returns a correct subset of proposals when createdBy is provided as an administrator', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🔥',
 			});
 
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(null, {
+			const anotherUser = await createUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createTestBaseFields();
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
 				createdBy: anotherUser.keycloakUserId,
@@ -445,21 +445,21 @@ describe('/proposals', () => {
 		});
 
 		it("returns just the administrator's proposals when createdBy is set to `me` as an administrator", async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🔥',
 			});
 
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(null, {
+			const anotherUser = await createUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createTestBaseFields();
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
 				createdBy: anotherUser.keycloakUserId,
@@ -487,51 +487,51 @@ describe('/proposals', () => {
 			// This should pass even if the default text search config is 'simple'.
 			// See https://github.com/PhilanthropyDataCommons/service/issues/336
 			await db.query("set default_text_search_config = 'simple';");
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: 'Grand opportunity',
 			});
 			const testUser = await loadTestUser();
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			await createTestBaseFields();
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-4999',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: 'proposal-5003',
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createProposalVersion(null, {
+			await createProposalVersion(db, null, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(null, {
+			await createProposalVersion(db, null, {
 				proposalId: 2,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 1,
 				label: 'Concise summary',
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'This is a summary',
 				isValid: true,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
 				applicationFormFieldId: 1,
 				position: 1,
@@ -598,14 +598,14 @@ describe('/proposals', () => {
 		});
 
 		it('returns according to pagination parameters', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🔥',
 			});
 
 			const testUser = await loadTestUser();
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
-				await createProposal(null, {
+				await createProposal(db, null, {
 					externalId: `proposal-${i + 1}`,
 					opportunityId: 1,
 					createdBy: testUser.keycloakUserId,
@@ -693,13 +693,13 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when given id is not owned by the current user', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '⛰️',
 			});
-			const anotherUser = await createUser(null, {
+			const anotherUser = await createUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: `proposal-1`,
 				opportunityId: 1,
 				createdBy: anotherUser.keycloakUserId,
@@ -737,17 +737,17 @@ describe('/proposals', () => {
 		});
 
 		it('returns the one proposal asked for', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '⛰️',
 			});
 
 			const testUser = await loadTestUser();
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: `proposal-1`,
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: `proposal-2`,
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
@@ -768,66 +768,66 @@ describe('/proposals', () => {
 		});
 
 		it('returns one proposal with deep fields', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🌎',
 			});
 			await createTestBaseFields();
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldId: 2,
 				position: 1,
 				label: 'Short summary or title',
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 2,
 				label: 'Long summary or abstract',
 			});
 			const testUser = await loadTestUser();
-			const systemSource = await loadSystemSource(null);
-			await createProposal(null, {
+			const systemSource = await loadSystemSource(db, null);
+			await createProposal(db, null, {
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(null, {
+			await createProposalVersion(db, null, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(null, {
+			await createProposalVersion(db, null, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'Title for version 1 from 2525-01-04',
 				isValid: true,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
 				applicationFormFieldId: 2,
 				position: 2,
 				value: 'Abstract for version 1 from 2525-01-04',
 				isValid: true,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'Title for version 2 from 2525-01-04',
 				isValid: true,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
 				applicationFormFieldId: 2,
 				position: 2,
@@ -983,65 +983,65 @@ describe('/proposals', () => {
 
 		it('returns the proposal if an administrator requests a proposal they do not own', async () => {
 			const testUser = await loadTestUser();
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			await createTestBaseFields();
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🌎',
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldId: 2,
 				position: 1,
 				label: 'Short summary or title',
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldId: 1,
 				position: 2,
 				label: 'Long summary or abstract',
 			});
-			await createProposal(null, {
+			await createProposal(db, null, {
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: 1,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(null, {
+			await createProposalVersion(db, null, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(null, {
+			await createProposalVersion(db, null, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'Title for version 1 from 2525-01-04',
 				isValid: true,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
 				applicationFormFieldId: 2,
 				position: 2,
 				value: 'Abstract for version 1 from 2525-01-04',
 				isValid: true,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
 				applicationFormFieldId: 1,
 				position: 1,
 				value: 'Title for version 2 from 2525-01-04',
 				isValid: true,
 			});
-			await createProposalFieldValue(null, {
+			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
 				applicationFormFieldId: 2,
 				position: 2,
@@ -1209,7 +1209,7 @@ describe('/proposals', () => {
 		});
 
 		it('creates exactly one proposal', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: '🔥',
 			});
 			const before = await loadTableMetrics('proposals');

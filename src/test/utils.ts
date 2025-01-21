@@ -1,4 +1,4 @@
-import { createUser, loadUserByKeycloakUserId } from '../database';
+import { db, createUser, loadUserByKeycloakUserId } from '../database';
 import { stringToKeycloakId } from '../types';
 
 export const isoTimestampPattern =
@@ -26,12 +26,12 @@ export const getTestUserKeycloakUserId = () =>
 	stringToKeycloakId('11111111-1111-1111-1111-111111111111'); // This value is not a reference, it's just a static GUID
 
 export const createTestUser = async () =>
-	createUser(null, {
+	createUser(db, null, {
 		keycloakUserId: getTestUserKeycloakUserId(),
 	});
 
 export const loadTestUser = async () =>
-	loadUserByKeycloakUserId(null, getTestUserKeycloakUserId());
+	loadUserByKeycloakUserId(db, null, getTestUserKeycloakUserId());
 
 export const NO_OFFSET = 0;
 

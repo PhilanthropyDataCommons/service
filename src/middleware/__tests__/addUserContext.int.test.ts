@@ -1,5 +1,5 @@
 import { addUserContext } from '../addUserContext';
-import { loadUserByKeycloakUserId, loadTableMetrics } from '../../database';
+import { db, loadUserByKeycloakUserId, loadTableMetrics } from '../../database';
 import { generateNextWithAssertions } from '../../test/utils';
 import { stringToKeycloakId } from '../../types';
 import { InputValidationError } from '../../errors';
@@ -42,6 +42,7 @@ describe('addUserContext', () => {
 					expect(err).toBe(undefined);
 					const { count: userCount } = await loadTableMetrics('users');
 					const user = await loadUserByKeycloakUserId(
+						db,
 						null,
 						stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
 					);

@@ -5,6 +5,7 @@ import {
 	isBaseField,
 	BaseField,
 } from '../types';
+import { db } from '../database/db';
 import {
 	createOrUpdateBaseField,
 	createOrUpdateBaseFieldLocalization,
@@ -55,7 +56,7 @@ export const fetchBaseFieldsFromRemote = async (
 
 const copyBaseField = async (targetBaseField: BaseField) => {
 	const { scope, dataType, shortCode, label, description } = targetBaseField;
-	const copiedBaseField = await createOrUpdateBaseField(null, {
+	const copiedBaseField = await createOrUpdateBaseField(db, null, {
 		scope,
 		dataType,
 		shortCode,
@@ -65,7 +66,7 @@ const copyBaseField = async (targetBaseField: BaseField) => {
 	await Promise.all(
 		Object.entries(targetBaseField.localizations).map(
 			async ([language, baseFieldLocalization]) => {
-				await createOrUpdateBaseFieldLocalization(null, {
+				await createOrUpdateBaseFieldLocalization(db, null, {
 					baseFieldId: copiedBaseField.id,
 					language,
 					label: baseFieldLocalization.label,
@@ -90,6 +91,7 @@ export const copyBaseFields = async (
 		`Started BasefieldsCopy Job for BaseFieldsCopyTask ID ${payload.baseFieldsCopyTaskId}`,
 	);
 	const baseFieldsCopyTask = await loadBaseFieldsCopyTask(
+		db,
 		null,
 		payload.baseFieldsCopyTaskId,
 	);

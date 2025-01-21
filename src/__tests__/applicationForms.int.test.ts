@@ -16,14 +16,14 @@ import { mockJwt as authHeader } from '../test/mockJwt';
 const logger = getLogger(__filename);
 
 const createTestBaseFields = async () => {
-	await createBaseField(null, {
+	await createBaseField(db, null, {
 		label: 'Organization Name',
 		description: 'The organizational name of the applicant',
 		shortCode: 'organizationName',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 	});
-	await createBaseField(null, {
+	await createBaseField(db, null, {
 		label: 'Years of work',
 		description: 'The number of years the project will take to complete',
 		shortCode: 'yearsOfWork',
@@ -50,19 +50,19 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns all application forms present in the database', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 			});
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: 'Good opportunity',
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 2,
 			});
 			const response = await request(app)
@@ -95,41 +95,41 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns an application form with its fields', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: 'Holiday opportunity 🎄',
 			});
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: 'Another holiday opportunity 🕎',
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 2,
 			});
 			await createTestBaseFields();
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 3,
 				baseFieldId: 2,
 				position: 1,
 				label: 'Anni Worki',
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 3,
 				baseFieldId: 1,
 				position: 2,
 				label: 'Org Nomen',
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 2,
 				baseFieldId: 1,
 				position: 2,
 				label: 'Name of Organization',
 			});
-			await createApplicationFormField(null, {
+			await createApplicationFormField(db, null, {
 				applicationFormId: 2,
 				baseFieldId: 2,
 				position: 1,
@@ -213,7 +213,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly one application form', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 			});
 			const before = await loadTableMetrics('application_forms');
@@ -239,7 +239,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly the number of provided fields', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 			});
 			await createTestBaseFields();
@@ -282,13 +282,13 @@ describe('/applicationForms', () => {
 		});
 
 		it('increments version when creating a second form for an opportunity', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createApplicationForm(null, {
+			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
 			const result = await request(app)
@@ -371,7 +371,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 500 UnknownError if a generic Error is thrown when inserting the field', async () => {
-			await createOpportunity(null, {
+			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 			});
 			await createTestBaseFields();

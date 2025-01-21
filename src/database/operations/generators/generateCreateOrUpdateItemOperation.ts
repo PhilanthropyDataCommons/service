@@ -1,9 +1,9 @@
-import { db as defaultDb } from '../../db';
 import {
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type { AuthContext, JsonResultSet } from '../../../types';
+import type TinyPg from 'tinypg';
 
 // This may seem silly but it is necessary to get all keys of all
 // possible types in the event the type is a Union (e.g. A | B | C)
@@ -26,9 +26,9 @@ const generateCreateOrUpdateItemOperation =
 		savedAttributes: KeysOfUnion<P>[],
 	) =>
 	async (
+		db: TinyPg,
 		authContext: AuthContext | null,
 		createValues: P,
-		db = defaultDb,
 	): Promise<T> => {
 		const authContextKeycloakUserId =
 			getKeycloakUserIdFromAuthContext(authContext);

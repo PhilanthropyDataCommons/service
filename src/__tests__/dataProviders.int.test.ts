@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	db,
 	createOrUpdateDataProvider,
 	loadDataProvider,
 	loadSystemDataProvider,
@@ -22,12 +23,12 @@ describe('/dataProviders', () => {
 
 		it('returns all data providers present in the database', async () => {
 			const systemDataProvider = await loadSystemDataProvider();
-			await createOrUpdateDataProvider(null, {
+			await createOrUpdateDataProvider(db, null, {
 				shortCode: 'dataRUs',
 				name: 'Data R Us',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateDataProvider(null, {
+			await createOrUpdateDataProvider(db, null, {
 				shortCode: 'nonProfitWarehouse',
 				name: 'Nonprofit Warehouse',
 				keycloakOrganizationId: null,
@@ -64,12 +65,12 @@ describe('/dataProviders', () => {
 		});
 
 		it('returns exactly one data provider selected by short code', async () => {
-			await createOrUpdateDataProvider(null, {
+			await createOrUpdateDataProvider(db, null, {
 				shortCode: 'dataRUs',
 				name: 'Data R Us',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateDataProvider(null, {
+			await createOrUpdateDataProvider(db, null, {
 				shortCode: 'nonProfitWarehouse',
 				name: 'Nonprofit Warehouse',
 				keycloakOrganizationId: null,
@@ -88,7 +89,7 @@ describe('/dataProviders', () => {
 		});
 
 		it('returns 404 when short code is not found', async () => {
-			await createOrUpdateDataProvider(null, {
+			await createOrUpdateDataProvider(db, null, {
 				shortCode: 'dataRUs',
 				name: 'Data R Us',
 				keycloakOrganizationId: null,
@@ -134,16 +135,20 @@ describe('/dataProviders', () => {
 		});
 
 		it('updates an existing data provider and no others', async () => {
-			await createOrUpdateDataProvider(null, {
+			await createOrUpdateDataProvider(db, null, {
 				shortCode: 'firework',
 				name: 'boring text base firework',
 				keycloakOrganizationId: null,
 			});
-			const anotherDataProviderBefore = await createOrUpdateDataProvider(null, {
-				shortCode: 'anotherFirework',
-				name: 'another boring text base firework',
-				keycloakOrganizationId: null,
-			});
+			const anotherDataProviderBefore = await createOrUpdateDataProvider(
+				db,
+				null,
+				{
+					shortCode: 'anotherFirework',
+					name: 'another boring text base firework',
+					keycloakOrganizationId: null,
+				},
+			);
 			const before = await loadTableMetrics('data_providers');
 			const result = await agent
 				.put('/dataProviders/firework')
@@ -155,6 +160,7 @@ describe('/dataProviders', () => {
 				})
 				.expect(201);
 			const anotherDataProviderAfter = await loadDataProvider(
+				db,
 				null,
 				'anotherFirework',
 			);

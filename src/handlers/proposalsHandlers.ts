@@ -1,4 +1,5 @@
 import {
+	db,
 	assertProposalAuthorization,
 	createProposal,
 	getLimitValues,
@@ -41,6 +42,7 @@ const getProposals = (
 
 	(async () => {
 		const proposalBundle = await loadProposalBundle(
+			db,
 			req,
 			createdBy,
 			changemakerId,
@@ -71,7 +73,7 @@ const getProposal = (req: Request, res: Response, next: NextFunction): void => {
 	}
 	(async () => {
 		await assertProposalAuthorization(proposalId, req);
-		const proposal = await loadProposal(null, proposalId);
+		const proposal = await loadProposal(db, null, proposalId);
 		res.status(200).contentType('application/json').send(proposal);
 	})().catch((error: unknown) => {
 		if (isTinyPgErrorWithQueryContext(error)) {
@@ -104,7 +106,7 @@ const postProposal = (
 	const { externalId, opportunityId } = req.body;
 	const createdBy = req.user.keycloakUserId;
 
-	createProposal(null, {
+	createProposal(db, null, {
 		opportunityId,
 		externalId,
 		createdBy,

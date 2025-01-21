@@ -8,6 +8,7 @@ import {
 	S3_BULK_UPLOADS_KEY_PREFIX,
 	S3_UNPROCESSED_KEY_PREFIX,
 } from '../s3Client';
+import { db } from '../database/db';
 import {
 	createApplicationForm,
 	createApplicationFormField,
@@ -156,7 +157,7 @@ const assertBulkUploadTaskCsvIsValid = async (
 const createOpportunityForBulkUploadTask = async (
 	bulkUploadTask: BulkUploadTask,
 ): Promise<Opportunity> =>
-	createOpportunity(null, {
+	createOpportunity(db, null, {
 		title: `Bulk Upload (${bulkUploadTask.createdAt})`,
 	});
 
@@ -176,7 +177,7 @@ const createApplicationFormFieldsForBulkUploadTask = async (
 					`No base field could be found with shortCode "${shortCode}"`,
 				);
 			}
-			const applicationFormField = await createApplicationFormField(null, {
+			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId,
 				baseFieldId: baseField.id,
 				position: index,
@@ -204,7 +205,7 @@ const createOrLoadChangemaker = async (
 		return await loadChangemakerByTaxId(writeValues.taxId);
 	} catch {
 		if (writeValues.name !== undefined) {
-			return createChangemaker(null, {
+			return createChangemaker(db, null, {
 				...writeValues,
 				name: writeValues.name, // This looks silly, but TypeScript isn't guarding `writeValues`, just `writeValues.name`.
 			});
@@ -226,7 +227,11 @@ export const processBulkUploadTask = async (
 	helpers.logger.debug(
 		`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
 	);
-	const bulkUploadTask = await loadBulkUploadTask(null, payload.bulkUploadId);
+	const bulkUploadTask = await loadBulkUploadTask(
+		db,
+		null,
+		payload.bulkUploadId,
+	);
 	if (bulkUploadTask.status !== TaskStatus.PENDING) {
 		helpers.logger.warn(
 			'Bulk upload cannot be processed because it is not in a PENDING state',
@@ -273,7 +278,7 @@ export const processBulkUploadTask = async (
 		await assertBulkUploadTaskCsvIsValid(bulkUploadFile.path);
 		const opportunity =
 			await createOpportunityForBulkUploadTask(bulkUploadTask);
-		const applicationForm = await createApplicationForm(null, {
+		const applicationForm = await createApplicationForm(db, null, {
 			opportunityId: opportunity.id,
 		});
 
@@ -290,12 +295,12 @@ export const processBulkUploadTask = async (
 		let recordNumber = 0;
 		await parser.forEach(async (record: string[]) => {
 			recordNumber += 1;
-			const proposal = await createProposal(null, {
+			const proposal = await createProposal(db, null, {
 				opportunityId: opportunity.id,
 				externalId: `${recordNumber}`,
 				createdBy: bulkUploadTask.createdBy,
 			});
-			const proposalVersion = await createProposalVersion(null, {
+			const proposalVersion = await createProposalVersion(db, null, {
 				proposalId: proposal.id,
 				applicationFormId: applicationForm.id,
 				sourceId: bulkUploadTask.sourceId,
@@ -312,7 +317,7 @@ export const processBulkUploadTask = async (
 				});
 
 				if (changemaker !== undefined) {
-					await createChangemakerProposal(null, {
+					await createChangemakerProposal(db, null, {
 						changemakerId: changemaker.id,
 						proposalId: proposal.id,
 					});
@@ -331,7 +336,7 @@ export const processBulkUploadTask = async (
 						fieldValue,
 						applicationFormField.baseField.dataType,
 					);
-					return createProposalFieldValue(null, {
+					return createProposalFieldValue(db, null, {
 						proposalVersionId: proposalVersion.id,
 						applicationFormFieldId: applicationFormField.id,
 						value: fieldValue,

@@ -1,11 +1,11 @@
-import { loadSystemUser } from './database';
+import { db, loadSystemUser } from './database';
 import { InternalValidationError } from './errors';
 import type { User } from './types';
 
 let systemUser: User | null = null;
 
 export const loadConfig = async () => {
-	systemUser = await loadSystemUser(null);
+	systemUser = await loadSystemUser(db, null);
 };
 
 export const getSystemUser = (): User => {

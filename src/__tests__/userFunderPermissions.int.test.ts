@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	db,
 	createOrUpdateFunder,
 	createOrUpdateUserFunderPermission,
 	loadSystemUser,
@@ -19,7 +20,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 	describe('PUT /', () => {
 		it('returns 401 if the request lacks authentication', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -34,7 +35,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('returns 401 if the authenticated user lacks permission', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -83,7 +84,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('creates and returns the new user funder permission when user has administrative credentials', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -107,12 +108,12 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('creates and returns the new user funder permission when user has permission to manage the funder', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(null, {
+			await createOrUpdateUserFunderPermission(db, null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
@@ -137,13 +138,13 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('does not update `createdBy`, but returns the user funder permission when user has permission to manage the funder', async () => {
 			const user = await loadTestUser();
-			const systemUser = await loadSystemUser(null);
-			const funder = await createOrUpdateFunder(null, {
+			const systemUser = await loadSystemUser(db, null);
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(null, {
+			await createOrUpdateUserFunderPermission(db, null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
@@ -170,7 +171,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 	describe('DELETE /', () => {
 		it('returns 401 if the request lacks authentication', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -185,7 +186,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('returns 401 if the authenticated user lacks permission', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -231,7 +232,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('returns 404 if the permission does not exist', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
@@ -247,12 +248,12 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('returns 404 if the permission had existed and previously been deleted', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(null, {
+			await createOrUpdateUserFunderPermission(db, null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
@@ -274,18 +275,19 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('deletes the user funder permission when the user has administrative credentials', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(null, {
+			await createOrUpdateUserFunderPermission(db, null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
 				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserFunderPermission(
+				db,
 				null,
 				user.keycloakUserId,
 				funder.shortCode,
@@ -307,6 +309,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				.expect(204);
 			await expect(
 				loadUserFunderPermission(
+					db,
 					null,
 					user.keycloakUserId,
 					funder.shortCode,
@@ -317,24 +320,25 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 
 		it('deletes the user funder permission when the user has permission to manage the funder', async () => {
 			const user = await loadTestUser();
-			const funder = await createOrUpdateFunder(null, {
+			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(null, {
+			await createOrUpdateUserFunderPermission(db, null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
 				createdBy: user.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission(null, {
+			await createOrUpdateUserFunderPermission(db, null, {
 				userKeycloakUserId: user.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
 				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserFunderPermission(
+				db,
 				null,
 				user.keycloakUserId,
 				funder.shortCode,
@@ -356,6 +360,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				.expect(204);
 			await expect(
 				loadUserFunderPermission(
+					db,
 					null,
 					user.keycloakUserId,
 					funder.shortCode,

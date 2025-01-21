@@ -1,4 +1,5 @@
 import {
+	db,
 	getLimitValues,
 	createOrUpdateDataProvider,
 	loadDataProviderBundle,
@@ -30,7 +31,7 @@ const getDataProviders = (
 	const paginationParameters = extractPaginationParameters(req);
 	(async () => {
 		const { offset, limit } = getLimitValues(paginationParameters);
-		const bundle = await loadDataProviderBundle(req, limit, offset);
+		const bundle = await loadDataProviderBundle(db, req, limit, offset);
 
 		res.status(200).contentType('application/json').send(bundle);
 	})().catch((error: unknown) => {
@@ -54,7 +55,7 @@ const getDataProvider = (
 		);
 		return;
 	}
-	loadDataProvider(null, dataProviderShortCode)
+	loadDataProvider(db, null, dataProviderShortCode)
 		.then((item) => {
 			res.status(200).contentType('application/json').send(item);
 		})
@@ -94,7 +95,7 @@ const putDataProvider = (
 	}
 	const { name, keycloakOrganizationId } = req.body;
 	(async () => {
-		const dataProvider = await createOrUpdateDataProvider(null, {
+		const dataProvider = await createOrUpdateDataProvider(db, null, {
 			shortCode,
 			name,
 			keycloakOrganizationId,

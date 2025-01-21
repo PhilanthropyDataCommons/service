@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	db,
 	createBulkUploadTask,
 	createUser,
 	loadSystemSource,
@@ -36,34 +37,34 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns bulk upload tasks associated with the requesting user', async () => {
-			const systemUser = await loadSystemUser(null);
-			const systemSource = await loadSystemSource(null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemSource = await loadSystemSource(db, null);
 			const testUser = await loadTestUser();
-			const thirdUser = await createUser(null, {
+			const thirdUser = await createUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'baz.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-baz',
 				status: TaskStatus.COMPLETED,
 				createdBy: systemUser.keycloakUserId,
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'boop.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-boop',
@@ -107,19 +108,19 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns all bulk uploads for administrative users', async () => {
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(null, {
+			const anotherUser = await createUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -163,19 +164,19 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns upload tasks for specified createdBy user', async () => {
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(null, {
+			const anotherUser = await createUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -210,19 +211,19 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns upload tasks for the admin user when createdBy is set to me as an admin', async () => {
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(null, {
+			const anotherUser = await createUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createBulkUploadTask(null, {
+			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -255,11 +256,11 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('supports pagination', async () => {
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			const testUser = await loadTestUser();
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
-				await createBulkUploadTask(null, {
+				await createBulkUploadTask(db, null, {
 					sourceId: systemSource.id,
 					fileName: `bar-${i + 1}.csv`,
 					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -359,7 +360,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('creates exactly one bulk upload task', async () => {
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
 				.post('/tasks/bulkUploads/')
@@ -390,7 +391,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when no file name is provided', async () => {
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')
@@ -407,7 +408,7 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when an invalid file name is provided', async () => {
-			const systemSource = await loadSystemSource(null);
+			const systemSource = await loadSystemSource(db, null);
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')

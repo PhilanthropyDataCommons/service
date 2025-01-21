@@ -1,4 +1,5 @@
 import {
+	db,
 	assertSourceExists,
 	createBulkUploadTask,
 	getLimitValues,
@@ -56,7 +57,7 @@ const postBulkUploadTask = (
 
 	assertSourceExists(sourceId)
 		.then(async () => {
-			const bulkUploadTask = await createBulkUploadTask(null, {
+			const bulkUploadTask = await createBulkUploadTask(db, null, {
 				sourceId,
 				fileName,
 				sourceKey,
@@ -102,6 +103,7 @@ const getBulkUploadTasks = (
 	const { createdBy } = extractCreatedByParameters(req);
 	(async () => {
 		const bulkUploadTaskBundle = await loadBulkUploadTaskBundle(
+			db,
 			req,
 			createdBy,
 			limit,

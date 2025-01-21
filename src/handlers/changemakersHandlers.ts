@@ -1,4 +1,5 @@
 import {
+	db,
 	getLimitValues,
 	loadChangemakerBundle,
 	loadChangemaker,
@@ -32,7 +33,7 @@ const postChangemaker = (
 		);
 		return;
 	}
-	createChangemaker(null, req.body)
+	createChangemaker(db, null, req.body)
 		.then((changemaker) => {
 			res.status(201).contentType('application/json').send(changemaker);
 		})
@@ -54,7 +55,7 @@ const getChangemakers = (
 	const { limit, offset } = getLimitValues(paginationParameters);
 	const { proposalId } = extractProposalParameters(req);
 	const authContext = isAuthContext(req) ? req : null;
-	loadChangemakerBundle(authContext, proposalId, limit, offset)
+	loadChangemakerBundle(db, authContext, proposalId, limit, offset)
 		.then((changemakerBundle) => {
 			res.status(200).contentType('application/json').send(changemakerBundle);
 		})
@@ -79,6 +80,7 @@ const getChangemaker = (
 	}
 	const authContext = isAuthContext(req) ? req : undefined;
 	loadChangemaker(
+		db,
 		null,
 		getKeycloakUserIdFromAuthContext(authContext),
 		changemakerId,

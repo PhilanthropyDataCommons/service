@@ -1,4 +1,4 @@
-import { createUser, loadUserByKeycloakUserId } from '../database';
+import { db, createUser, loadUserByKeycloakUserId } from '../database';
 import {
 	getAuthSubFromRequest,
 	isKeycloakId,
@@ -12,9 +12,9 @@ import type { AuthenticatedRequest, KeycloakId } from '../types';
 
 const selectOrCreateUser = async (keycloakUserId: KeycloakId) => {
 	try {
-		return await loadUserByKeycloakUserId(null, keycloakUserId);
+		return await loadUserByKeycloakUserId(db, null, keycloakUserId);
 	} catch {
-		const user = await createUser(null, { keycloakUserId });
+		const user = await createUser(db, null, { keycloakUserId });
 		return user;
 	}
 };

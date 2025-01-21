@@ -35,7 +35,7 @@ const assertApplicationFormExistsForProposal = async (
 ): Promise<void> => {
 	let applicationForm: ApplicationForm;
 	try {
-		applicationForm = await loadApplicationForm(null, applicationFormId);
+		applicationForm = await loadApplicationForm(db, null, applicationFormId);
 	} catch {
 		throw new InputConflictError('The Application Form does not exist.', {
 			entityType: 'ApplicationForm',
@@ -45,7 +45,7 @@ const assertApplicationFormExistsForProposal = async (
 
 	let proposal: Proposal;
 	try {
-		proposal = await loadProposal(null, proposalId);
+		proposal = await loadProposal(db, null, proposalId);
 	} catch (err) {
 		if (err instanceof NotFoundError) {
 			throw new InputConflictError(
@@ -83,6 +83,7 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 			const { applicationFormFieldId } = proposalFieldValue;
 			try {
 				const applicationFormField = await loadApplicationFormField(
+					db,
 					null,
 					proposalFieldValue.applicationFormFieldId,
 				);
@@ -150,14 +151,15 @@ const postProposalVersion = (
 		.then(() => {
 			db.transaction(async (transactionDb) => {
 				const proposalVersion = await createProposalVersion(
+					transactionDb,
 					null,
 					{ proposalId, applicationFormId, sourceId, createdBy },
-					transactionDb,
 				);
 				const proposalFieldValues = await Promise.all(
 					fieldValues.map(async (fieldValue) => {
 						const { value, applicationFormFieldId } = fieldValue;
 						const applicationFormField = await loadApplicationFormField(
+							db,
 							null,
 							applicationFormFieldId,
 						);
@@ -166,13 +168,13 @@ const postProposalVersion = (
 							applicationFormField.baseField.dataType,
 						);
 						const proposalFieldValue = await createProposalFieldValue(
+							transactionDb,
 							null,
 							{
 								...fieldValue,
 								proposalVersionId: proposalVersion.id,
 								isValid,
 							},
-							transactionDb,
 						);
 						return proposalFieldValue;
 					}),
@@ -230,7 +232,7 @@ const getProposalVersion = (
 		);
 		return;
 	}
-	loadProposalVersion(null, proposalVersionId)
+	loadProposalVersion(db, null, proposalVersionId)
 		.then((item) => {
 			res.status(200).contentType('application/json').send(item);
 		})

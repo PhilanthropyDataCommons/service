@@ -1,4 +1,5 @@
 import {
+	db,
 	createSource,
 	getLimitValues,
 	loadSource,
@@ -36,7 +37,7 @@ const postSource = (req: Request, res: Response, next: NextFunction): void => {
 	// Normally we try to avoid passing the body directly vs extracting the values and passing them.
 	// Because because writableSource is a union type it is hard to extract the values directly without
 	// losing type context that the union provided.
-	createSource(null, req.body)
+	createSource(db, null, req.body)
 		.then((item) => {
 			res.status(201).contentType('application/json').send(item);
 		})
@@ -57,7 +58,7 @@ const getSources = (req: Request, res: Response, next: NextFunction): void => {
 	const paginationParameters = extractPaginationParameters(req);
 	(async () => {
 		const { offset, limit } = getLimitValues(paginationParameters);
-		const bundle = await loadSourceBundle(req, limit, offset);
+		const bundle = await loadSourceBundle(db, req, limit, offset);
 
 		res.status(200).contentType('application/json').send(bundle);
 	})().catch((error: unknown) => {
@@ -75,7 +76,7 @@ const getSource = (req: Request, res: Response, next: NextFunction): void => {
 		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
 		return;
 	}
-	loadSource(null, sourceId)
+	loadSource(db, null, sourceId)
 		.then((item) => {
 			res.status(200).contentType('application/json').send(item);
 		})

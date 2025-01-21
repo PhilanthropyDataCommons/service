@@ -1,4 +1,5 @@
 import {
+	db,
 	assertUserFunderPermissionExists,
 	createOrUpdateUserFunderPermission,
 	removeUserFunderPermission,
@@ -126,6 +127,7 @@ const putUserFunderPermission = (
 
 	(async () => {
 		const userFunderPermission = await createOrUpdateUserFunderPermission(
+			db,
 			null,
 			{
 				userKeycloakUserId,

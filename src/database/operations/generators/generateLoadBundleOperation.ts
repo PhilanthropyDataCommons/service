@@ -1,10 +1,10 @@
-import { db } from '../../db';
 import { loadTableMetrics } from '../generic/loadTableMetrics';
 import {
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type { AuthContext, Bundle, JsonResultSet } from '../../../types';
+import type TinyPg from 'tinypg';
 
 /**
  * Generates a bundle loader function for a specific query and table.
@@ -25,6 +25,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 ) => {
 	const generatedParameterNames = [...parameterNames, 'limit', 'offset'];
 	return async (
+		db: TinyPg,
 		authContext: AuthContext | null,
 		...args: [...P, limit: number | undefined, offset: number | undefined]
 	): Promise<Bundle<T>> => {

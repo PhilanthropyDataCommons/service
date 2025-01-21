@@ -6,13 +6,12 @@ import type {
 
 const createBulkUploadTask = generateCreateOrUpdateItemOperation<
 	BulkUploadTask,
-	InternallyWritableBulkUploadTask
->('bulkUploadTasks.insertOne', [
-	'sourceId',
-	'fileName',
-	'sourceKey',
-	'status',
-	'createdBy',
-]);
+	InternallyWritableBulkUploadTask,
+	[]
+>(
+	'bulkUploadTasks.insertOne',
+	['sourceId', 'fileName', 'sourceKey', 'status', 'createdBy'],
+	[],
+);
 
 export { createBulkUploadTask };

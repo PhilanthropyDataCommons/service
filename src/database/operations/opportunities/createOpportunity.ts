@@ -3,7 +3,8 @@ import type { WritableOpportunity, Opportunity } from '../../../types';
 
 const createOpportunity = generateCreateOrUpdateItemOperation<
 	Opportunity,
-	WritableOpportunity
->('opportunities.insertOne', ['title']);
+	WritableOpportunity,
+	[]
+>('opportunities.insertOne', ['title'], []);
 
 export { createOpportunity };

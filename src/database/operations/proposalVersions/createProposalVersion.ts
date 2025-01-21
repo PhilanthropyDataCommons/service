@@ -6,12 +6,12 @@ import type {
 
 const createProposalVersion = generateCreateOrUpdateItemOperation<
 	ProposalVersion,
-	InternallyWritableProposalVersion
->('proposalVersions.insertOne', [
-	'proposalId',
-	'applicationFormId',
-	'sourceId',
-	'createdBy',
-]);
+	InternallyWritableProposalVersion,
+	[]
+>(
+	'proposalVersions.insertOne',
+	['proposalId', 'applicationFormId', 'sourceId', 'createdBy'],
+	[],
+);
 
 export { createProposalVersion };

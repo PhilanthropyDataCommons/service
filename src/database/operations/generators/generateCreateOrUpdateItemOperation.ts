@@ -56,7 +56,7 @@ const generateCreateOrUpdateItemOperation =
 		);
 		const queryParameters = {
 			...authenticationQueryParameters,
-			savedItemAttributeQueryParameters,
+			...savedItemAttributeQueryParameters,
 			...operationQueryParameters,
 		};
 

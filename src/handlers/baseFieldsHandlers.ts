@@ -90,13 +90,28 @@ const putBaseField = (
 		return;
 	}
 
-	updateBaseField(baseFieldId, body)
-		.then((baseField) => {
-			res.status(200).contentType('application/json').send(baseField);
+	assertBaseFieldExists(baseFieldId)
+		.then(() => {
+			updateBaseField(db, null, body, baseFieldId)
+				.then((baseField) => {
+					res.status(200).contentType('application/json').send(baseField);
+				})
+				.catch((error: unknown) => {
+					if (isTinyPgErrorWithQueryContext(error)) {
+						next(new DatabaseError('Error updating base field.', error));
+						return;
+					}
+					next(error);
+				});
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error updating base field.', error));
+				next(
+					new DatabaseError(
+						'Something went wrong when asserting the validity of the provided Base Field.',
+						error,
+					),
+				);
 				return;
 			}
 			next(error);

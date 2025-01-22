@@ -11,7 +11,7 @@ baseFieldsRouter.post(
 	baseFieldsHandlers.postBaseField,
 );
 baseFieldsRouter.put(
-	'/:id',
+	'/:baseFieldId',
 	requireAdministratorRole,
 	baseFieldsHandlers.putBaseField,
 );

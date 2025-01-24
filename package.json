@@ -54,7 +54,7 @@
 		"@types/language-tags": "^1.0.4",
 		"@types/node": "^22.10.9",
 		"@types/node-fetch": "^2.6.12",
-		"@types/pg": "^8.11.10",
+		"@types/pg": "^8.11.11",
 		"@types/supertest": "^6.0.2",
 		"@types/swagger-ui-express": "^4.1.7",
 		"@typescript-eslint/eslint-plugin": "^7.18.0",

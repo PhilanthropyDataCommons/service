@@ -12,6 +12,11 @@ import {
 	createOrUpdateUserChangemakerPermission,
 	createOrUpdateUserFunderPermission,
 	createOrUpdateUserDataProviderPermission,
+	createOpportunity,
+	createProposal,
+	createProposalVersion,
+	createApplicationForm,
+	loadSystemFunder,
 } from '../database';
 import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -557,6 +562,85 @@ describe('/sources', () => {
 				name: 'InputValidationError',
 				details: expect.any(Array) as unknown[],
 			});
+		});
+	});
+	describe('DELETE /:sourceId', () => {
+		it('requires authentication', async () => {
+			await agent.delete('/sources/:sourceId').expect(401);
+		});
+
+		it('requires administrator role', async () => {
+			await agent.delete('/sources/:sourceId').expect(401);
+		});
+
+		it('deletes exactly one source that has no proposals associated with it', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '11-1111111',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			const localSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: 'Example Inc.',
+			});
+			const before = await loadTableMetrics('sources');
+
+			await agent
+				.delete(`/sources/${localSource.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.expect(200);
+
+			const after = await loadTableMetrics('sources');
+
+			expect(before.count).toEqual(2);
+			expect(after.count).toEqual(1);
+		});
+
+		it('Returns 422 Unprocessable Content when it tries to delete a source that is associated with a proposal', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemFunder = await loadSystemFunder(db, null);
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '11-1111111',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			const localSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: 'Example Inc.',
+			});
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, systemUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: 1,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: 1,
+				},
+			);
+			await createProposalVersion(db, systemUserAuthContext, {
+				proposalId: proposal.id,
+				applicationFormId: applicationForm.id,
+				sourceId: localSource.id,
+			});
+			const before = await loadTableMetrics('sources');
+
+			await agent
+				.delete(`/sources/${localSource.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.expect(422);
+
+			const after = await loadTableMetrics('sources');
+
+			expect(before.count).toEqual(after.count);
 		});
 	});
 });

@@ -14,4 +14,12 @@ sourcesRouter.get(
 
 sourcesRouter.post('/', requireAdministratorRole, sourcesHandlers.postSource);
 
+sourcesRouter.post('/', requireAdministratorRole, sourcesHandlers.postSource);
+
+sourcesRouter.delete(
+	'/:sourceId',
+	requireAdministratorRole,
+	sourcesHandlers.removeSource,
+);
+
 export { sourcesRouter };

@@ -4,6 +4,7 @@ import {
 	getLimitValues,
 	loadSource,
 	loadSourceBundle,
+	deleteSource,
 } from '../database';
 import {
 	isAuthContext,
@@ -89,8 +90,32 @@ const getSource = (req: Request, res: Response, next: NextFunction): void => {
 		});
 };
 
+const removeSource = (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): void => {
+	const { sourceId } = req.params;
+	if (!isId(sourceId)) {
+		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
+		return;
+	}
+	deleteSource(sourceId)
+		.then((item) => {
+			res.status(200).contentType('application/json').send(item);
+		})
+		.catch((error: unknown) => {
+			if (isTinyPgErrorWithQueryContext(error)) {
+				next(new DatabaseError('Error deleting item.', error));
+				return;
+			}
+			next(error);
+		});
+};
+
 export const sourcesHandlers = {
 	postSource,
 	getSources,
 	getSource,
+	removeSource,
 };

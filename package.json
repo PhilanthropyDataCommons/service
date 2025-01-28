@@ -97,7 +97,7 @@
 		"monocle-ts": "^2.3.13",
 		"newtype-ts": "^0.3.5",
 		"node-fetch": "^2.7.0",
-		"phone": "^3.1.57",
+		"phone": "^3.1.58",
 		"pino": "^9.6.0",
 		"pino-http": "^10.4.0",
 		"postgres-schema-migrations": "^6.1.0",

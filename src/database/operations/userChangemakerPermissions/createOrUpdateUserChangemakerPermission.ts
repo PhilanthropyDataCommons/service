@@ -7,12 +7,12 @@ import type {
 const createOrUpdateUserChangemakerPermission =
 	generateCreateOrUpdateItemOperation<
 		UserChangemakerPermission,
-		InternallyWritableUserChangemakerPermission
-	>('userChangemakerPermissions.insertOrUpdateOne', [
-		'userKeycloakUserId',
-		'permission',
-		'changemakerId',
-		'createdBy',
-	]);
+		InternallyWritableUserChangemakerPermission,
+		[]
+	>(
+		'userChangemakerPermissions.insertOrUpdateOne',
+		['userKeycloakUserId', 'permission', 'changemakerId', 'createdBy'],
+		[],
+	);
 
 export { createOrUpdateUserChangemakerPermission };

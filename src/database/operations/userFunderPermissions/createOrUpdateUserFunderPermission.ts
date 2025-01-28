@@ -6,12 +6,12 @@ import type {
 
 const createOrUpdateUserFunderPermission = generateCreateOrUpdateItemOperation<
 	UserFunderPermission,
-	InternallyWritableUserFunderPermission
->('userFunderPermissions.insertOrUpdateOne', [
-	'userKeycloakUserId',
-	'permission',
-	'funderShortCode',
-	'createdBy',
-]);
+	InternallyWritableUserFunderPermission,
+	[]
+>(
+	'userFunderPermissions.insertOrUpdateOne',
+	['userKeycloakUserId', 'permission', 'funderShortCode', 'createdBy'],
+	[],
+);
 
 export { createOrUpdateUserFunderPermission };

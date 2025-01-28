@@ -6,7 +6,8 @@ import {
 
 const createChangemakerProposal = generateCreateOrUpdateItemOperation<
 	ChangemakerProposal,
-	WritableChangemakerProposal
->('changemakersProposals.insertOne', ['changemakerId', 'proposalId']);
+	WritableChangemakerProposal,
+	[]
+>('changemakersProposals.insertOne', ['changemakerId', 'proposalId'], []);
 
 export { createChangemakerProposal };

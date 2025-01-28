@@ -107,9 +107,14 @@ export const copyBaseFields = async (
 	let remoteBaseFields: BaseField[];
 	let taskFailed = false;
 
-	await updateBaseFieldsCopyTask(baseFieldsCopyTask.id, {
-		status: TaskStatus.IN_PROGRESS,
-	});
+	await updateBaseFieldsCopyTask(
+		db,
+		null,
+		{
+			status: TaskStatus.IN_PROGRESS,
+		},
+		baseFieldsCopyTask.id,
+	);
 
 	try {
 		remoteBaseFields = await fetchBaseFieldsFromRemote(
@@ -118,9 +123,14 @@ export const copyBaseFields = async (
 		);
 	} catch (err) {
 		helpers.logger.warn('Fetching data from remote instance failed', { err });
-		await updateBaseFieldsCopyTask(baseFieldsCopyTask.id, {
-			status: TaskStatus.FAILED,
-		});
+		await updateBaseFieldsCopyTask(
+			db,
+			null,
+			{
+				status: TaskStatus.FAILED,
+			},
+			baseFieldsCopyTask.id,
+		);
 		return;
 	}
 
@@ -136,12 +146,22 @@ export const copyBaseFields = async (
 	}
 
 	if (taskFailed) {
-		await updateBaseFieldsCopyTask(baseFieldsCopyTask.id, {
-			status: TaskStatus.FAILED,
-		});
+		await updateBaseFieldsCopyTask(
+			db,
+			null,
+			{
+				status: TaskStatus.FAILED,
+			},
+			baseFieldsCopyTask.id,
+		);
 	} else {
-		await updateBaseFieldsCopyTask(baseFieldsCopyTask.id, {
-			status: TaskStatus.COMPLETED,
-		});
+		await updateBaseFieldsCopyTask(
+			db,
+			null,
+			{
+				status: TaskStatus.COMPLETED,
+			},
+			baseFieldsCopyTask.id,
+		);
 	}
 };

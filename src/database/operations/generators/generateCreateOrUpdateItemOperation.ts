@@ -21,29 +21,44 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
  * @returns {Function} A function that takes query parameters, limit, and offset, and returns a promise that resolves to a bundle of entries and total count.
  */
 const generateCreateOrUpdateItemOperation =
-	<T, P extends Record<string, unknown>>(
+	<T, I extends Record<string, unknown>, P extends [...args: unknown[]]>(
 		queryName: string,
-		savedAttributes: KeysOfUnion<P>[],
+		saveItemAttributes: KeysOfUnion<I>[],
+		parameterNames: { [K in keyof P]: string },
 	) =>
 	async (
 		db: TinyPg,
 		authContext: AuthContext | null,
-		createValues: P,
+		createValues: I,
+		...args: [...P]
 	): Promise<T> => {
 		const authContextKeycloakUserId =
 			getKeycloakUserIdFromAuthContext(authContext);
 		const authContextIsAdministrator =
 			getIsAdministratorFromAuthContext(authContext);
-		const queryParameters = savedAttributes.reduce(
+		const authenticationQueryParameters = {
+			authContextKeycloakUserId,
+			authContextIsAdministrator,
+		};
+		const savedItemAttributeQueryParameters = saveItemAttributes.reduce(
 			(acc, attribute) => ({
 				...acc,
 				[attribute]: createValues[attribute],
 			}),
-			{
-				authContextKeycloakUserId,
-				authContextIsAdministrator,
-			},
+			{},
 		);
+		const operationQueryParameters = parameterNames.reduce(
+			(acc, parameterName, index) => ({
+				...acc,
+				[parameterName]: args[index],
+			}),
+			{},
+		);
+		const queryParameters = {
+			...authenticationQueryParameters,
+			...savedItemAttributeQueryParameters,
+			...operationQueryParameters,
+		};
 
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
 		const { object } = result.rows[0] ?? {};

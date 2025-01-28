@@ -6,12 +6,12 @@ import type {
 
 const createApplicationFormField = generateCreateOrUpdateItemOperation<
 	ApplicationFormField,
-	WritableApplicationFormField
->('applicationFormFields.insertOne', [
-	'applicationFormId',
-	'baseFieldId',
-	'position',
-	'label',
-]);
+	WritableApplicationFormField,
+	[]
+>(
+	'applicationFormFields.insertOne',
+	['applicationFormId', 'baseFieldId', 'position', 'label'],
+	[],
+);
 
 export { createApplicationFormField };

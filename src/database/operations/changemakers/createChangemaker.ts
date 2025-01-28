@@ -3,7 +3,8 @@ import type { Changemaker, WritableChangemaker } from '../../../types';
 
 const createChangemaker = generateCreateOrUpdateItemOperation<
 	Changemaker,
-	WritableChangemaker
->('changemakers.insertOne', ['taxId', 'name', 'keycloakOrganizationId']);
+	WritableChangemaker,
+	[]
+>('changemakers.insertOne', ['taxId', 'name', 'keycloakOrganizationId'], []);
 
 export { createChangemaker };

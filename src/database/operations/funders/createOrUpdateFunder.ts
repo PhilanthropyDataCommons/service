@@ -3,7 +3,12 @@ import type { Funder, InternallyWritableFunder } from '../../../types';
 
 const createOrUpdateFunder = generateCreateOrUpdateItemOperation<
 	Funder,
-	InternallyWritableFunder
->('funders.insertOrUpdateOne', ['shortCode', 'name', 'keycloakOrganizationId']);
+	InternallyWritableFunder,
+	[]
+>(
+	'funders.insertOrUpdateOne',
+	['shortCode', 'name', 'keycloakOrganizationId'],
+	[],
+);
 
 export { createOrUpdateFunder };

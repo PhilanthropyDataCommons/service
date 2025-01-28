@@ -6,7 +6,8 @@ import type {
 
 const createBaseFieldsCopyTask = generateCreateOrUpdateItemOperation<
 	BaseFieldsCopyTask,
-	InternallyWritableBaseFieldsCopyTask
->('baseFieldsCopyTasks.insertOne', ['status', 'pdcApiUrl', 'createdBy']);
+	InternallyWritableBaseFieldsCopyTask,
+	[]
+>('baseFieldsCopyTasks.insertOne', ['status', 'pdcApiUrl', 'createdBy'], []);
 
 export { createBaseFieldsCopyTask };

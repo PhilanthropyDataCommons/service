@@ -6,13 +6,18 @@ import type {
 
 const createProposalFieldValue = generateCreateOrUpdateItemOperation<
 	ProposalFieldValue,
-	InternallyWritableProposalFieldValue
->('proposalFieldValues.insertOne', [
-	'proposalVersionId',
-	'applicationFormFieldId',
-	'position',
-	'value',
-	'isValid',
-]);
+	InternallyWritableProposalFieldValue,
+	[]
+>(
+	'proposalFieldValues.insertOne',
+	[
+		'proposalVersionId',
+		'applicationFormFieldId',
+		'position',
+		'value',
+		'isValid',
+	],
+	[],
+);
 
 export { createProposalFieldValue };

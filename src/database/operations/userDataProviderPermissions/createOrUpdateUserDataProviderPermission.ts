@@ -7,12 +7,12 @@ import type {
 const createOrUpdateUserDataProviderPermission =
 	generateCreateOrUpdateItemOperation<
 		UserDataProviderPermission,
-		InternallyWritableUserDataProviderPermission
-	>('userDataProviderPermissions.insertOrUpdateOne', [
-		'userKeycloakUserId',
-		'permission',
-		'dataProviderShortCode',
-		'createdBy',
-	]);
+		InternallyWritableUserDataProviderPermission,
+		[]
+	>(
+		'userDataProviderPermissions.insertOrUpdateOne',
+		['userKeycloakUserId', 'permission', 'dataProviderShortCode', 'createdBy'],
+		[],
+	);
 
 export { createOrUpdateUserDataProviderPermission };

@@ -6,12 +6,12 @@ import type {
 
 const createOrUpdateBaseFieldLocalization = generateCreateOrUpdateItemOperation<
 	BaseFieldLocalization,
-	InternallyWritableBaseFieldLocalization
->('baseFieldLocalizations.createOrUpdateByPrimaryKey', [
-	'baseFieldId',
-	'language',
-	'label',
-	'description',
-]);
+	InternallyWritableBaseFieldLocalization,
+	[]
+>(
+	'baseFieldLocalizations.createOrUpdateByPrimaryKey',
+	['baseFieldId', 'language', 'label', 'description'],
+	[],
+);
 
 export { createOrUpdateBaseFieldLocalization };

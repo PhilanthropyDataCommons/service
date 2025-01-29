@@ -4,6 +4,7 @@ import {
 	loadChangemakerBundle,
 	loadChangemaker,
 	createChangemaker,
+	updateChangemaker,
 } from '../database';
 import {
 	isId,
@@ -11,8 +12,13 @@ import {
 	isTinyPgErrorWithQueryContext,
 	isAuthContext,
 	getKeycloakUserIdFromAuthContext,
+	isPartialWritableChangemaker,
 } from '../types';
-import { DatabaseError, InputValidationError } from '../errors';
+import {
+	DatabaseError,
+	FailedMiddlewareError,
+	InputValidationError,
+} from '../errors';
 import {
 	extractPaginationParameters,
 	extractProposalParameters,
@@ -97,8 +103,48 @@ const getChangemaker = (
 		});
 };
 
+const patchChangemaker = (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
+	const { changemakerId } = req.params;
+	if (!isId(changemakerId)) {
+		next(
+			new InputValidationError('Invalid request parameter.', isId.errors ?? []),
+		);
+		return;
+	}
+	if (!isPartialWritableChangemaker(req.body)) {
+		next(
+			new InputValidationError(
+				'Invalid request body.',
+				isPartialWritableChangemaker.errors ?? [],
+			),
+		);
+		return;
+	}
+
+	updateChangemaker(db, null, req.body, changemakerId)
+		.then((changemaker) => {
+			res.status(200).contentType('application/json').send(changemaker);
+		})
+		.catch((error: unknown) => {
+			if (isTinyPgErrorWithQueryContext(error)) {
+				next(new DatabaseError('Error updating changemaker.', error));
+				return;
+			}
+			next(error);
+		});
+};
+
 export const changemakersHandlers = {
 	postChangemaker,
 	getChangemakers,
 	getChangemaker,
+	patchChangemaker,
 };

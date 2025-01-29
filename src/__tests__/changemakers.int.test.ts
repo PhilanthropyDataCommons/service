@@ -19,7 +19,10 @@ import {
 	createOrUpdateDataProvider,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
-import { mockJwt as authHeader } from '../test/mockJwt';
+import {
+	mockJwt as authHeader,
+	mockJwtWithAdminRole as adminUserAuthHeader,
+} from '../test/mockJwt';
 import {
 	BaseField,
 	BaseFieldDataType,
@@ -31,6 +34,7 @@ import {
 	Opportunity,
 	PostgresErrorCode,
 	Source,
+	stringToKeycloakId,
 	User,
 } from '../types';
 
@@ -846,6 +850,85 @@ describe('/changemakers', () => {
 						code: PostgresErrorCode.UNIQUE_VIOLATION,
 					},
 				],
+			});
+		});
+	});
+
+	describe('PATCH /', () => {
+		it('Successfully sets a keycloakOrganizationId where previously null', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '0413938240766429660404877575834592091277',
+				name: 'Changemaker 0413938240766429660404877575834592091277',
+				keycloakOrganizationId: null,
+			});
+			const newOrganizationId = stringToKeycloakId(
+				'aa2e4ed0-3c67-4d29-9bd0-2fb13f95d420',
+			);
+			const result = await request(app)
+				.patch(`/changemakers/${changemaker.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					keycloakOrganizationId: newOrganizationId,
+				})
+				.expect(200);
+			expect(result.body).toStrictEqual({
+				...changemaker,
+				keycloakOrganizationId: newOrganizationId,
+				createdAt: expectTimestamp,
+				fields: [],
+			});
+		});
+
+		it('Successfully changes a taxId', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '9804410587598905789786443694633460095646',
+				name: 'Changemaker with changing tax ID',
+				keycloakOrganizationId: null,
+			});
+			const newTaxId = '7595152072656722360933945510658631139960';
+			const result = await request(app)
+				.patch(`/changemakers/${changemaker.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					taxId: newTaxId,
+				})
+				.expect(200);
+			expect(result.body).toStrictEqual({
+				...changemaker,
+				taxId: newTaxId,
+				createdAt: expectTimestamp,
+				fields: [],
+			});
+		});
+
+		it('Successfully changes a name and Keycloak organization ID', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '0589037839239992596491929160281098521279',
+				name: 'Whoops, a bad name here',
+				keycloakOrganizationId: stringToKeycloakId(
+					'd32693c1-d8de-40a3-8de9-a84f0737f015',
+				),
+			});
+			const newChangemakerFields = {
+				keycloakOrganizationId: stringToKeycloakId(
+					'bd2c3e40-74ee-4cdb-b025-44d897970fb6',
+				),
+				name: 'Changemaker 0589037839239992596491929160281098521279',
+			};
+			const result = await request(app)
+				.patch(`/changemakers/${changemaker.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send(newChangemakerFields)
+				.expect(200);
+			expect(result.body).toStrictEqual({
+				...newChangemakerFields,
+				id: changemaker.id,
+				taxId: changemaker.taxId,
+				createdAt: expectTimestamp,
+				fields: [],
 			});
 		});
 	});

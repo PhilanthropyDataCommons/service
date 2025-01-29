@@ -345,6 +345,23 @@
 				},
 				"required": ["id", "taxId", "name", "createdAt", "fields"]
 			},
+			"PartialChangemaker": {
+				"type": "object",
+				"properties": {
+					"taxId": {
+						"type": "string",
+						"example": "11-1111111"
+					},
+					"name": {
+						"type": "string",
+						"example": "Example Inc."
+					},
+					"keycloakOrganizationId": {
+						"$ref": "#/components/schemas/keycloakOrganizationId"
+					}
+				},
+				"required": []
+			},
 			"ChangemakerProposal": {
 				"type": "object",
 				"properties": {
@@ -1800,6 +1817,59 @@
 				"responses": {
 					"200": {
 						"description": "The requested changemaker.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Changemaker"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"operationId": "updateChangemakerById",
+				"summary": "Updates one or more fields of a specific changemaker.",
+				"tags": ["Changemakers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "changemakerId",
+						"description": "The PDC-generated ID of a changemaker.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PartialChangemaker"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "The updated changemaker.",
 						"content": {
 							"application/json": {
 								"schema": {

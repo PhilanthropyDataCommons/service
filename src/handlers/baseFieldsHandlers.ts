@@ -70,12 +70,12 @@ const postBaseField = (
 };
 
 const putBaseField = (
-	req: Request<{ id: string }>,
+	req: Request<{ baseFieldId: string }>,
 	res: Response,
 	next: NextFunction,
 ) => {
-	const id = Number.parseInt(req.params.id, 10);
-	if (Number.isNaN(id)) {
+	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
+	if (Number.isNaN(baseFieldId)) {
 		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
 		return;
 	}
@@ -90,13 +90,28 @@ const putBaseField = (
 		return;
 	}
 
-	updateBaseField(id, body)
-		.then((baseField) => {
-			res.status(200).contentType('application/json').send(baseField);
+	assertBaseFieldExists(baseFieldId)
+		.then(() => {
+			updateBaseField(db, null, body, baseFieldId)
+				.then((baseField) => {
+					res.status(200).contentType('application/json').send(baseField);
+				})
+				.catch((error: unknown) => {
+					if (isTinyPgErrorWithQueryContext(error)) {
+						next(new DatabaseError('Error updating base field.', error));
+						return;
+					}
+					next(error);
+				});
 		})
 		.catch((error: unknown) => {
 			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error updating base field.', error));
+				next(
+					new DatabaseError(
+						'Something went wrong when asserting the validity of the provided Base Field.',
+						error,
+					),
+				);
 				return;
 			}
 			next(error);

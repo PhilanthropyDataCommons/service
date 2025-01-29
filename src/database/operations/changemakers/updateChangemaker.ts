@@ -1,26 +1,10 @@
-import { Changemaker, Id, JsonResultSet, KeycloakId } from '../../../types';
-import { db } from '../../db';
-import { NotFoundError } from '../../../errors';
+import { generateCreateOrUpdateItemOperation } from '../generators';
+import type { Changemaker, Id, WritableChangemaker } from '../../../types';
 
-export const updateChangemaker = async (
-	changemakerId: Id,
-	keycloakOrganizationId: KeycloakId,
-): Promise<Changemaker> => {
-	const result = await db.sql<JsonResultSet<Changemaker>>(
-		'changemakers.updateById',
-		{
-			changemakerId,
-			keycloakOrganizationId,
-		},
-	);
-	const { object } = result.rows[0] ?? {};
-	if (object === undefined) {
-		throw new NotFoundError(`Entity not found`, {
-			entityType: 'Changemaker',
-			lookupValues: {
-				changemakerId,
-			},
-		});
-	}
-	return object;
-};
+const updateChangemaker = generateCreateOrUpdateItemOperation<
+	Changemaker,
+	Partial<WritableChangemaker>,
+	[changemakerId: Id]
+>('changemakers.updateById', ['keycloakOrganizationId'], ['changemakerId']);
+
+export { updateChangemaker };

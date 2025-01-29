@@ -244,27 +244,42 @@ export const processBulkUploadTask = async (
 			`Bulk upload task cannot be processed because the associated sourceKey does not begin with ${S3_UNPROCESSED_KEY_PREFIX}`,
 			{ bulkUploadTask },
 		);
-		await updateBulkUploadTask(bulkUploadTask.id, {
-			status: TaskStatus.FAILED,
-		});
+		await updateBulkUploadTask(
+			db,
+			null,
+			{
+				status: TaskStatus.FAILED,
+			},
+			bulkUploadTask.id,
+		);
 		return;
 	}
 
 	let bulkUploadFile: FileResult;
 	let bulkUploadHasFailed = false;
 	try {
-		await updateBulkUploadTask(bulkUploadTask.id, {
-			status: TaskStatus.IN_PROGRESS,
-		});
+		await updateBulkUploadTask(
+			db,
+			null,
+			{
+				status: TaskStatus.IN_PROGRESS,
+			},
+			bulkUploadTask.id,
+		);
 		bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
 			bulkUploadTask.sourceKey,
 			helpers.logger,
 		);
 	} catch (err) {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
-		await updateBulkUploadTask(bulkUploadTask.id, {
-			status: TaskStatus.FAILED,
-		});
+		await updateBulkUploadTask(
+			db,
+			null,
+			{
+				status: TaskStatus.FAILED,
+			},
+			bulkUploadTask.id,
+		);
 		return;
 	}
 
@@ -354,7 +369,7 @@ export const processBulkUploadTask = async (
 	try {
 		const fileStats = await fs.promises.stat(bulkUploadFile.path);
 		const fileSize = fileStats.size;
-		await updateBulkUploadTask(bulkUploadTask.id, { fileSize });
+		await updateBulkUploadTask(db, null, { fileSize }, bulkUploadTask.id);
 	} catch (err) {
 		helpers.logger.warn(
 			`Unable to update the fileSize for bulkUploadTask ${bulkUploadTask.id}`,
@@ -383,9 +398,14 @@ export const processBulkUploadTask = async (
 			Bucket: S3_BUCKET,
 			Key: bulkUploadTask.sourceKey,
 		});
-		await updateBulkUploadTask(bulkUploadTask.id, {
-			sourceKey: copyDestination,
-		});
+		await updateBulkUploadTask(
+			db,
+			null,
+			{
+				sourceKey: copyDestination,
+			},
+			bulkUploadTask.id,
+		);
 	} catch (err) {
 		helpers.logger.warn(
 			`Moving the bulk upload task file to final processed destination failed (${bulkUploadFile.path})`,
@@ -394,12 +414,22 @@ export const processBulkUploadTask = async (
 	}
 
 	if (bulkUploadHasFailed) {
-		await updateBulkUploadTask(bulkUploadTask.id, {
-			status: TaskStatus.FAILED,
-		});
+		await updateBulkUploadTask(
+			db,
+			null,
+			{
+				status: TaskStatus.FAILED,
+			},
+			bulkUploadTask.id,
+		);
 	} else {
-		await updateBulkUploadTask(bulkUploadTask.id, {
-			status: TaskStatus.COMPLETED,
-		});
+		await updateBulkUploadTask(
+			db,
+			null,
+			{
+				status: TaskStatus.COMPLETED,
+			},
+			bulkUploadTask.id,
+		);
 	}
 };

@@ -1,30 +1,13 @@
-import { db } from '../../db';
-import { NotFoundError } from '../../../errors';
+import { generateCreateOrUpdateItemOperation } from '../generators';
 import type {
-	JsonResultSet,
 	BaseFieldsCopyTask,
 	InternallyWritableBaseFieldsCopyTask,
 } from '../../../types';
 
-export const updateBaseFieldsCopyTask = async (
-	id: number,
-	updateValues: Partial<InternallyWritableBaseFieldsCopyTask>,
-): Promise<BaseFieldsCopyTask> => {
-	const { status } = updateValues;
+const updateBaseFieldsCopyTask = generateCreateOrUpdateItemOperation<
+	BaseFieldsCopyTask,
+	Partial<InternallyWritableBaseFieldsCopyTask>,
+	[baseFieldsCopyTaskId: number]
+>('baseFieldsCopyTasks.updateById', ['status'], ['baseFieldsCopyTaskId']);
 
-	const result = await db.sql<JsonResultSet<BaseFieldsCopyTask>>(
-		'baseFieldsCopyTasks.updateById',
-		{
-			id,
-			status,
-		},
-	);
-	const { object } = result.rows[0] ?? {};
-	if (object === undefined) {
-		throw new NotFoundError(`Entity not found`, {
-			entityType: 'BaseFieldsCopyTask',
-			entityId: id,
-		});
-	}
-	return object;
-};
+export { updateBaseFieldsCopyTask };

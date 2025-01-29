@@ -6,11 +6,12 @@ import type {
 
 const createOrUpdateDataProvider = generateCreateOrUpdateItemOperation<
 	DataProvider,
-	InternallyWritableDataProvider
->('dataProviders.insertOrUpdateOne', [
-	'shortCode',
-	'name',
-	'keycloakOrganizationId',
-]);
+	InternallyWritableDataProvider,
+	[]
+>(
+	'dataProviders.insertOrUpdateOne',
+	['shortCode', 'name', 'keycloakOrganizationId'],
+	[],
+);
 
 export { createOrUpdateDataProvider };

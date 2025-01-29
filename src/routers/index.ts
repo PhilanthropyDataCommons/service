@@ -14,6 +14,7 @@ import { sourcesRouter } from './sourcesRouter';
 import { tasksRouter } from './tasksRouter';
 import { usersRouter } from './usersRouter';
 import { documentationRouter } from './documentationRouter';
+import { organizationsRouter } from './organizationsRouter';
 
 const rootRouter = express.Router();
 
@@ -25,6 +26,7 @@ rootRouter.use('/changemakerProposals', changemakerProposalsRouter);
 rootRouter.use('/dataProviders', dataProvidersRouter);
 rootRouter.use('/funders', fundersRouter);
 rootRouter.use('/opportunities', opportunitiesRouter);
+rootRouter.use('/organizations', organizationsRouter);
 rootRouter.use('/platformProviderResponses', platformProviderResponsesRouter);
 rootRouter.use('/presignedPostRequests', presignedPostRequestsRouter);
 rootRouter.use('/proposals', proposalsRouter);

@@ -931,5 +931,20 @@ describe('/changemakers', () => {
 				fields: [],
 			});
 		});
+
+		it('Returns 404 when changemaker is not found', async () => {
+			const newChangemakerFields = {
+				keycloakOrganizationId: stringToKeycloakId(
+					'd064b254-ea77-4f12-9ab3-eda695480e93',
+				),
+				name: 'Changemaker 5121900900194636437083568517070852137161',
+			};
+			await request(app)
+				.patch(`/changemakers/58597992`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send(newChangemakerFields)
+				.expect(404);
+		});
 	});
 });

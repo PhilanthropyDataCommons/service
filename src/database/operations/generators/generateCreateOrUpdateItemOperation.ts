@@ -1,3 +1,4 @@
+import { NoDataReturnedError } from '../../../errors/NoDataReturnedError';
 import {
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
@@ -63,7 +64,9 @@ const generateCreateOrUpdateItemOperation =
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
 		const { object } = result.rows[0] ?? {};
 		if (object === undefined) {
-			throw new Error('The database did not return a query result.');
+			throw new NoDataReturnedError(
+				'The database did not return a query result.',
+			);
 		}
 		return object;
 	};

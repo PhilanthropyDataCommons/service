@@ -18,6 +18,7 @@ import {
 	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
+	NoDataReturnedError,
 } from '../errors';
 import {
 	extractPaginationParameters,
@@ -137,6 +138,13 @@ const patchChangemaker = (
 			if (isTinyPgErrorWithQueryContext(error)) {
 				next(new DatabaseError('Error updating changemaker.', error));
 				return;
+			}
+			if (error instanceof NoDataReturnedError) {
+				// In the case of `PATCH`, when the query succeeds but returns no data,
+				// it is more likely to be "ID not found" than a programming error. In
+				// the case of a `PUT`, on the other hand, leave it as a 500 because a
+				// `PUT` should succeed when all the inputs were valid.
+				res.status(404).send();
 			}
 			next(error);
 		});

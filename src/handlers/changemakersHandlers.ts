@@ -19,6 +19,7 @@ import {
 	FailedMiddlewareError,
 	InputValidationError,
 	NoDataReturnedError,
+	NotFoundError,
 } from '../errors';
 import {
 	extractPaginationParameters,
@@ -144,7 +145,18 @@ const patchChangemaker = (
 				// it is more likely to be "ID not found" than a programming error. In
 				// the case of a `PUT`, on the other hand, leave it as a 500 because a
 				// `PUT` should succeed when all the inputs were valid.
-				res.status(404).send();
+				next(
+					new NotFoundError(
+						'The given changemaker was not found.',
+						{
+							entityType: 'Changemaker',
+							entityPrimaryKey: {
+								changemakerId,
+							},
+						},
+						{ cause: error },
+					),
+				);
 			}
 			next(error);
 		});

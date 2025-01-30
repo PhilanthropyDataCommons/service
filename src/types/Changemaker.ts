@@ -56,6 +56,8 @@ const partialWritableChangemakerSchema: JSONSchemaType<PartialWritableChangemake
 				nullable: true,
 			},
 		},
+		additionalProperties: false,
+		minProperties: 1,
 	};
 
 const isPartialWritableChangemaker = ajv.compile(

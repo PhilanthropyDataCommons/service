@@ -854,7 +854,7 @@ describe('/changemakers', () => {
 		});
 	});
 
-	describe('PATCH /', () => {
+	describe('PATCH /:id', () => {
 		it('Successfully sets a keycloakOrganizationId where previously null', async () => {
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '0413938240766429660404877575834592091277',
@@ -939,12 +939,70 @@ describe('/changemakers', () => {
 				),
 				name: 'Changemaker 5121900900194636437083568517070852137161',
 			};
-			await request(app)
+			const result = await request(app)
 				.patch(`/changemakers/58597992`)
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send(newChangemakerFields)
 				.expect(404);
+			expect(result.body).toMatchObject({
+				name: 'NotFoundError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('Requires authentication', async () => {
+			await request(app)
+				.patch('/changemakers/36033573')
+				.type('application/json')
+				.send({ taxId: '5940750525594199732476921580223828135369' })
+				.expect(401);
+		});
+
+		it('Requires administrator role', async () => {
+			await request(app)
+				.patch('/changemakers/67349073')
+				.type('application/json')
+				.set(authHeader)
+				.send({ name: '7404171616851845629932178083729587457161' })
+				.expect(401);
+		});
+
+		it('Requires integer changemaker ID', async () => {
+			await request(app)
+				.patch('/changemakers/not_a_valid_id')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ taxId: '2257341433176036791749929003823780328760' })
+				.expect(400);
+		});
+
+		it('Returns user error on non-updatable fields on changemaker', async () => {
+			await request(app)
+				.patch('/changemakers/560580')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					id: 560580,
+					fields: [],
+				})
+				.expect(400);
+		});
+
+		it('Returns user error when no fields are sent', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '4200940637362024164716787854746203032491',
+				name: 'Changemaker 4200940637362024164716787854746203032491',
+				keycloakOrganizationId: stringToKeycloakId(
+					'5533ace6-d60d-4da0-9dfd-fbcec0a4fdf8',
+				),
+			});
+			await request(app)
+				.patch(`/changemakers/${changemaker.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({})
+				.expect(400);
 		});
 	});
 });

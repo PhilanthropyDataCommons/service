@@ -1843,7 +1843,7 @@
 				"tags": ["Changemakers"],
 				"security": [
 					{
-						"auth": []
+						"auth": ["realm_access:roles:administrator"]
 					}
 				],
 				"parameters": [
@@ -1878,8 +1878,28 @@
 							}
 						}
 					},
+					"400": {
+						"description": "At least one valid field was not provided or invalid fields were provided.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					},
 					"401": {
 						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "The given changemaker ID was not found.",
 						"content": {
 							"application/json": {
 								"schema": {

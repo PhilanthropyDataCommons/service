@@ -5,6 +5,10 @@ const updateChangemaker = generateCreateOrUpdateItemOperation<
 	Changemaker,
 	Partial<WritableChangemaker>,
 	[changemakerId: Id]
->('changemakers.updateById', ['keycloakOrganizationId'], ['changemakerId']);
+>(
+	'changemakers.updateById',
+	['taxId', 'name', 'keycloakOrganizationId'],
+	['changemakerId'],
+);
 
 export { updateChangemaker };

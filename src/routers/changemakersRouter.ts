@@ -1,6 +1,6 @@
 import express from 'express';
 import { changemakersHandlers } from '../handlers/changemakersHandlers';
-import { requireAuthentication } from '../middleware';
+import { requireAdministratorRole, requireAuthentication } from '../middleware';
 
 const changemakersRouter = express.Router();
 
@@ -12,6 +12,13 @@ changemakersRouter.post(
 	'/',
 	requireAuthentication,
 	changemakersHandlers.postChangemaker,
+);
+
+changemakersRouter.patch(
+	'/:changemakerId',
+	requireAuthentication,
+	requireAdministratorRole,
+	changemakersHandlers.patchChangemaker,
 );
 
 export { changemakersRouter };

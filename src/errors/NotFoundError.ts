@@ -27,8 +27,12 @@ type NotFoundErrorDetails =
 export class NotFoundError extends Error {
 	public details: NotFoundErrorDetails;
 
-	public constructor(message: string, details: NotFoundErrorDetails) {
-		super(message);
+	public constructor(
+		message: string,
+		details: NotFoundErrorDetails,
+		options?: object,
+	) {
+		super(message, options);
 		this.name = this.constructor.name;
 		this.details = details;
 	}

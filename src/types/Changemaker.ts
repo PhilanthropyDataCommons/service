@@ -37,9 +37,38 @@ const writableChangemakerSchema: JSONSchemaType<WritableChangemaker> = {
 
 const isWritableChangemaker = ajv.compile(writableChangemakerSchema);
 
+type PartialWritableChangemaker = Partial<WritableChangemaker>;
+
+const partialWritableChangemakerSchema: JSONSchemaType<PartialWritableChangemaker> =
+	{
+		type: 'object',
+		properties: {
+			taxId: {
+				type: 'string',
+				nullable: true,
+			},
+			name: {
+				type: 'string',
+				nullable: true,
+			},
+			keycloakOrganizationId: {
+				...keycloakIdSchema,
+				nullable: true,
+			},
+		},
+		additionalProperties: false,
+		minProperties: 1,
+	};
+
+const isPartialWritableChangemaker = ajv.compile(
+	partialWritableChangemakerSchema,
+);
 export {
 	isWritableChangemaker,
 	Changemaker,
 	WritableChangemaker,
 	writableChangemakerSchema,
+	PartialWritableChangemaker,
+	partialWritableChangemakerSchema,
+	isPartialWritableChangemaker,
 };

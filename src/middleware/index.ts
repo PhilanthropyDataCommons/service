@@ -7,3 +7,6 @@ export * from './requireAuthentication';
 export * from './requireChangemakerPermission';
 export * from './requireDataProviderPermission';
 export * from './requireFunderPermission';
+export * from './requireOrganizationChangemakerPermission';
+export * from './requireOrganizationFunderPermission';
+export * from './requireOrganizationDataProviderPermission';

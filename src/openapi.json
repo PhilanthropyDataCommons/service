@@ -1272,7 +1272,13 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "", "createdAt"]
+				"required": [
+					"permission",
+					"changemakerId",
+					"userKeycloakUserId",
+					"createdBy",
+					"createdAt"
+				]
 			},
 			"UserFunderPermission": {
 				"type": "object",

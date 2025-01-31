@@ -15,7 +15,7 @@ With the above overview in mind, we can now summarize what this service layer do
 
 - Store **opportunities** (analogous to RFPs / CFPs) and the **fields** (which hold applicants' responses) associated with those opportunities.
 - Store **proposals** -- the actual responses to opportunities, with long-term consistency provided via the above-described mapping.
-- **Authenticate** users and provide **access control**, so that a given organization's data is only shared with whom that organization has authorized.
+- **Authenticate** users and provide [**access control**](docs/PERMISSIONS.md), so that a given organization's data is only shared with whom that organization has authorized.
 - Provide a **programmatic interface** (an [API](https://en.wikipedia.org/wiki/API)) by which authorized users (both changemakers and funders) can **browse**, **search**, and, where appropriate, **update** opportunities and proposals, subject to the access controls defined by data owners.
 - Track the **provenance** and **update history** of all information, noticing and handling discrepancies. For example, if two different [GMS](https://en.wikipedia.org/wiki/Grant_management_software) tools connect to the PDC and provide conflicting information about an application or an applicant, the PDC may be able to pick the right answer automatically (based on a up-to-date date or on some other precedence rule), or it may flag the conflict and require a human to resolve it. See [more on Changemaker data](docs/CHANGEMAKER_DATA.md).
 

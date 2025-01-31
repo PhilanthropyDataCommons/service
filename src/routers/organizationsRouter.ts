@@ -3,9 +3,9 @@ import { organizationChangemakerPermissionsHandlers } from '../handlers/organiza
 import { organizationFunderPermissionsHandlers } from '../handlers/organizationFunderPermissionsHandlers';
 import { organizationDataProviderPermissionsHandlers } from '../handlers/organizationDataProviderPermissionsHandlers';
 import {
-	requireChangemakerPermission,
-	requireDataProviderPermission,
-	requireFunderPermission,
+	requireOrganizationChangemakerPermission,
+	requireOrganizationDataProviderPermission,
+	requireOrganizationFunderPermission,
 } from '../middleware';
 import { Permission } from '../types';
 
@@ -13,32 +13,32 @@ const organizationsRouter = express.Router();
 
 organizationsRouter.put(
 	'/:keycloakOrganizationId/changemakers/:changemakerId/permissions/:permission',
-	requireChangemakerPermission(Permission.MANAGE),
+	requireOrganizationChangemakerPermission(Permission.MANAGE),
 	organizationChangemakerPermissionsHandlers.putOrganizationChangemakerPermission,
 );
 organizationsRouter.delete(
 	'/:keycloakOrganizationId/changemakers/:changemakerId/permissions/:permission',
-	requireChangemakerPermission(Permission.MANAGE),
+	requireOrganizationChangemakerPermission(Permission.MANAGE),
 	organizationChangemakerPermissionsHandlers.deleteOrganizationChangemakerPermission,
 );
 organizationsRouter.put(
 	'/:keycloakOrganizationId/dataProviders/:dataProviderShortCode/permissions/:permission',
-	requireDataProviderPermission(Permission.MANAGE),
+	requireOrganizationDataProviderPermission(Permission.MANAGE),
 	organizationDataProviderPermissionsHandlers.putOrganizationDataProviderPermission,
 );
 organizationsRouter.delete(
 	'/:keycloakOrganizationId/dataProviders/:dataProviderShortCode/permissions/:permission',
-	requireDataProviderPermission(Permission.MANAGE),
+	requireOrganizationDataProviderPermission(Permission.MANAGE),
 	organizationDataProviderPermissionsHandlers.deleteOrganizationDataProviderPermission,
 );
 organizationsRouter.put(
 	'/:keycloakOrganizationId/funders/:funderShortCode/permissions/:permission',
-	requireFunderPermission(Permission.MANAGE),
+	requireOrganizationFunderPermission(Permission.MANAGE),
 	organizationFunderPermissionsHandlers.putOrganizationFunderPermission,
 );
 organizationsRouter.delete(
 	'/:keycloakOrganizationId/funders/:funderShortCode/permissions/:permission',
-	requireFunderPermission(Permission.MANAGE),
+	requireOrganizationFunderPermission(Permission.MANAGE),
 	organizationFunderPermissionsHandlers.deleteOrganizationFunderPermission,
 );
 

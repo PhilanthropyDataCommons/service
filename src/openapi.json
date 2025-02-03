@@ -3257,7 +3257,7 @@
 				"parameters": [
 					{
 						"name": "userKeycloakUserId",
-						"description": "The keycloak user id of a user.",
+						"description": "The keycloak user id of a user to whom to grant permission.",
 						"in": "path",
 						"required": true,
 						"schema": {
@@ -3267,7 +3267,7 @@
 					},
 					{
 						"name": "dataProviderShortCode",
-						"description": "The shortCode of a funder.",
+						"description": "The shortCode of a data provider on whose data to grant permission.",
 						"in": "path",
 						"required": true,
 						"schema": {
@@ -3320,7 +3320,7 @@
 					},
 					{
 						"name": "dataProviderShortCode",
-						"description": "The shortCode of a funder.",
+						"description": "The shortCode of a data provider.",
 						"in": "path",
 						"required": true,
 						"schema": {

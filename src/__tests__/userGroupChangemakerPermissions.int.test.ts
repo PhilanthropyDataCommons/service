@@ -291,7 +291,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 					createdAt: expectTimestamp,
 					createdBy: user.keycloakUserId,
 					permission: Permission.EDIT,
-					keycloakorganizationId:
+					keycloakOrganizationId:
 						organizationAsChangemaker.keycloakOrganizationId,
 				});
 				await request(app)

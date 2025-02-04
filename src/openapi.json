@@ -1349,6 +1349,35 @@
 					"createdBy",
 					"createdAt"
 				]
+			},
+			"UserGroupChangemakerPermission": {
+				"type": "object",
+				"properties": {
+					"permission": {
+						"$ref": "#/components/schemas/Permission",
+						"readOnly": true
+					},
+					"changemakerId": {
+						"type": "integer",
+						"readOnly": true
+					},
+					"keycloakOrganizationId": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdBy": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "", "createdAt"]
 			}
 		}
 	},
@@ -3344,6 +3373,108 @@
 					}
 				}
 			}
+		},
+		"/userGroups/{keycloakOrganizationId}/changemakers/{changemakerId}/permissions/{permission}": {
+			"put": {
+				"operationId": "createOrUpdateUserGroupChangemakerPermission",
+				"summary": "Creates or updates a userGroup-changemaker permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "changemakerId",
+						"description": "The id of a changemaker.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be granted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "The resulting permission.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserGroupChangemakerPermission"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "deleteUserGroupChangemakerPermission",
+				"summary": "Deletes a userGroup-changemaker permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "changemakerId",
+						"description": "The id of a changemaker.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be deleted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Confirmation of successful deletion."
+					}
+				}
+			}
+		},
 		}
 	}
 }

@@ -1,7 +1,9 @@
 import express from 'express';
 import { userGroupChangemakerPermissionsHandlers } from '../handlers/userGroupChangemakerPermissionsHandlers';
+import { userGroupDataProviderPermissionsHandlers } from '../handlers/userGroupDataProviderPermissionsHandlers';
 import {
 	requireChangemakerPermission,
+	requireDataProviderPermission,
 } from '../middleware';
 import { Permission } from '../types';
 
@@ -17,5 +19,14 @@ userGroupsRouter.delete(
 	requireChangemakerPermission(Permission.MANAGE),
 	userGroupChangemakerPermissionsHandlers.deleteUserGroupChangemakerPermission,
 );
-
+userGroupsRouter.put(
+	'/:keycloakOrganizationId/dataProviders/:dataProviderShortCode/permissions/:permission',
+	requireDataProviderPermission(Permission.MANAGE),
+	userGroupDataProviderPermissionsHandlers.putUserGroupDataProviderPermission,
+);
+userGroupsRouter.delete(
+	'/:keycloakOrganizationId/dataProviders/:dataProviderShortCode/permissions/:permission',
+	requireDataProviderPermission(Permission.MANAGE),
+	userGroupDataProviderPermissionsHandlers.deleteUserGroupDataProviderPermission,
+);
 export { userGroupsRouter };

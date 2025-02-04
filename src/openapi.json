@@ -1378,6 +1378,40 @@
 					}
 				},
 				"required": ["id", "", "createdAt"]
+			"UserGroupDataProviderPermission": {
+				"type": "object",
+				"properties": {
+					"permission": {
+						"$ref": "#/components/schemas/Permission",
+						"readOnly": true
+					},
+					"dataProviderShortcode": {
+						"$ref": "#/components/schemas/shortCode",
+						"readOnly": true
+					},
+					"keycloakOrganizationId": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdBy": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": [
+					"id",
+					"dataProviderShortcode",
+					"userKeycloakUserId",
+					"createdBy",
+					"createdAt"
+				]
 			}
 		}
 	},
@@ -3475,6 +3509,106 @@
 				}
 			}
 		},
+		"/userGroups/{keycloakOrganizationId}/dataProviders/{dataProviderShortCode}/permissions/{permission}": {
+			"put": {
+				"operationId": "createOrUpdateUserGroupDataProviderPermission",
+				"summary": "Creates or updates a userGroup data provider permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "dataProviderShortCode",
+						"description": "The shortCode of a data provider.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/shortCode"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be granted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "The resulting permission.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserGroupDataProviderPermission"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "deleteUserGroupDataProviderPermission",
+				"summary": "Deletes a userGroup-data-provider permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "dataProviderShortCode",
+						"description": "The shortCode of a data provider on whose data to grant permission.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/shortCode"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be deleted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Confirmation of successful deletion."
+					}
+				}
+			}
 		}
 	}
 }

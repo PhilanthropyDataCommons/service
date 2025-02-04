@@ -18,4 +18,5 @@ export * from './userChangemakerPermissions';
 export * from './userDataProviderPermissions';
 export * from './userFunderPermissions';
 export * from './userGroupChangemakerPermissions';
+export * from './userGroupDataProviderPermissions';
 export * from './users';

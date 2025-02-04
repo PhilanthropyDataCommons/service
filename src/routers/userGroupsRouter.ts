@@ -1,9 +1,11 @@
 import express from 'express';
 import { userGroupChangemakerPermissionsHandlers } from '../handlers/userGroupChangemakerPermissionsHandlers';
+import { userGroupFunderPermissionsHandlers } from '../handlers/userGroupFunderPermissionsHandlers';
 import { userGroupDataProviderPermissionsHandlers } from '../handlers/userGroupDataProviderPermissionsHandlers';
 import {
 	requireChangemakerPermission,
 	requireDataProviderPermission,
+	requireFunderPermission,
 } from '../middleware';
 import { Permission } from '../types';
 
@@ -29,4 +31,15 @@ userGroupsRouter.delete(
 	requireDataProviderPermission(Permission.MANAGE),
 	userGroupDataProviderPermissionsHandlers.deleteUserGroupDataProviderPermission,
 );
+userGroupsRouter.put(
+	'/:keycloakOrganizationId/funders/:funderShortCode/permissions/:permission',
+	requireFunderPermission(Permission.MANAGE),
+	userGroupFunderPermissionsHandlers.putUserGroupFunderPermission,
+);
+userGroupsRouter.delete(
+	'/:keycloakOrganizationId/funders/:funderShortCode/permissions/:permission',
+	requireFunderPermission(Permission.MANAGE),
+	userGroupFunderPermissionsHandlers.deleteUserGroupFunderPermission,
+);
+
 export { userGroupsRouter };

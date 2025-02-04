@@ -40,4 +40,5 @@ export * from './UserDataProviderPermission';
 export * from './UserFunderPermission';
 export * from './UserGroupChangemakerPermission';
 export * from './UserGroupDataProviderPermission';
+export * from './UserGroupFunderPermission';
 export * from './Uuid';

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Manage user-group-data-provider permissions using `PUT`, and `DELETE` on `/userGroups/{keycloakOrganizationId}/dataProvider/{dataProviderShortCode}/permissions/{permission}`
 - Manage user-group-funder permissions using `PUT`, and `DELETE` on `/userGroups/{keycloakOrganizationId}/funders/{funderShortCode}/permissions/{permission}`
 - Manage user-funder permissions using `PUT`, and `DELETE` on `/user/{keycloakUserId}/funders/{funderShortCode}/permissions/{permission}`.
+- Update changemaker attributes using `PATCH` on `/changemakers/{changemakerId}`. This was available in the API starting 2025-01-30 under the previous version number.
 
 ## 0.16.6 2024-12-23
 

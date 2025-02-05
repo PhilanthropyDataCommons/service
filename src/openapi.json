@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for changemakers seeking grants.",
-		"version": "0.16.6",
+		"version": "0.16.7",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -1327,6 +1327,105 @@
 						"readOnly": true
 					},
 					"userKeycloakUserId": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdBy": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": [
+					"id",
+					"dataProviderShortcode",
+					"userKeycloakUserId",
+					"createdBy",
+					"createdAt"
+				]
+			},
+			"UserGroupChangemakerPermission": {
+				"type": "object",
+				"properties": {
+					"permission": {
+						"$ref": "#/components/schemas/Permission",
+						"readOnly": true
+					},
+					"changemakerId": {
+						"type": "integer",
+						"readOnly": true
+					},
+					"keycloakOrganizationId": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdBy": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": ["id", "", "createdAt"]
+			},
+			"UserGroupFunderPermission": {
+				"type": "object",
+				"properties": {
+					"permission": {
+						"$ref": "#/components/schemas/Permission",
+						"readOnly": true
+					},
+					"funderShortcode": {
+						"$ref": "#/components/schemas/shortCode",
+						"readOnly": true
+					},
+					"keycloakOrganizationId": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdBy": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true
+					}
+				},
+				"required": [
+					"permission",
+					"funderShortcode",
+					"userKeycloakUserId",
+					"createdBy",
+					"createdAt"
+				]
+			},
+			"UserGroupDataProviderPermission": {
+				"type": "object",
+				"properties": {
+					"permission": {
+						"$ref": "#/components/schemas/Permission",
+						"readOnly": true
+					},
+					"dataProviderShortcode": {
+						"$ref": "#/components/schemas/shortCode",
+						"readOnly": true
+					},
+					"keycloakOrganizationId": {
 						"type": "string",
 						"format": "uuid",
 						"readOnly": true
@@ -3321,6 +3420,309 @@
 					{
 						"name": "dataProviderShortCode",
 						"description": "The shortCode of a data provider.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/shortCode"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be deleted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Confirmation of successful deletion."
+					}
+				}
+			}
+		},
+		"/userGroups/{keycloakOrganizationId}/changemakers/{changemakerId}/permissions/{permission}": {
+			"put": {
+				"operationId": "createOrUpdateUserGroupChangemakerPermission",
+				"summary": "Creates or updates a userGroup-changemaker permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "changemakerId",
+						"description": "The id of a changemaker.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be granted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "The resulting permission.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserGroupChangemakerPermission"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "deleteUserGroupChangemakerPermission",
+				"summary": "Deletes a userGroup-changemaker permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "changemakerId",
+						"description": "The id of a changemaker.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be deleted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Confirmation of successful deletion."
+					}
+				}
+			}
+		},
+		"/userGroups/{keycloakOrganizationId}/funders/{funderShortCode}/permissions/{permission}": {
+			"put": {
+				"operationId": "createOrUpdateUserGroupFunderPermission",
+				"summary": "Creates or updates a userGroup funder permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "funderShortCode",
+						"description": "The shortCode of a funder.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/shortCode"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be granted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "The resulting permission.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserGroupFunderPermission"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "deleteUserGroupFunderPermission",
+				"summary": "Deletes a userGroup-funder permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "funderShortCode",
+						"description": "The shortCode of a funder.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/shortCode"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be deleted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Confirmation of successful deletion."
+					}
+				}
+			}
+		},
+		"/userGroups/{keycloakOrganizationId}/dataProviders/{dataProviderShortCode}/permissions/{permission}": {
+			"put": {
+				"operationId": "createOrUpdateUserGroupDataProviderPermission",
+				"summary": "Creates or updates a userGroup data provider permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "dataProviderShortCode",
+						"description": "The shortCode of a data provider.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/shortCode"
+						}
+					},
+					{
+						"name": "permission",
+						"description": "The permission to be granted.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": ["manage", "edit", "view"]
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "The resulting permission.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserGroupDataProviderPermission"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "deleteUserGroupDataProviderPermission",
+				"summary": "Deletes a userGroup-data-provider permission.",
+				"tags": ["Permissions"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "keycloakOrganizationId",
+						"description": "The keycloak organization id of an organization.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "dataProviderShortCode",
+						"description": "The shortCode of a data provider on whose data to grant permission.",
 						"in": "path",
 						"required": true,
 						"schema": {

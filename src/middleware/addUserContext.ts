@@ -1,6 +1,7 @@
-import { db, createUser, loadUserByKeycloakUserId } from '../database';
+import { db, createOrUpdateUser } from '../database';
 import {
 	getAuthSubFromRequest,
+	getKeycloakOrganizationIdsFromRequest,
 	isKeycloakId,
 	keycloakIdToString,
 	stringToKeycloakId,
@@ -8,16 +9,7 @@ import {
 import { getSystemUser } from '../config';
 import { InputValidationError } from '../errors';
 import type { Request, NextFunction, Response } from 'express';
-import type { AuthenticatedRequest, KeycloakId } from '../types';
-
-const selectOrCreateUser = async (keycloakUserId: KeycloakId) => {
-	try {
-		return await loadUserByKeycloakUserId(db, null, keycloakUserId);
-	} catch {
-		const user = await createUser(db, null, { keycloakUserId });
-		return user;
-	}
-};
+import type { AuthenticatedRequest } from '../types';
 
 const addUserContext = (
 	req: Request,
@@ -25,6 +17,7 @@ const addUserContext = (
 	next: NextFunction,
 ): void => {
 	const keycloakUserId = getAuthSubFromRequest(req);
+	const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
 	const systemUser = getSystemUser();
 	if (
 		keycloakUserId === undefined ||
@@ -44,8 +37,9 @@ const addUserContext = (
 		return;
 	}
 
-	selectOrCreateUser(stringToKeycloakId(keycloakUserId))
+	createOrUpdateUser(db, null, { keycloakUserId: stringToKeycloakId(keycloakUserId) })
 		.then((user) => {
+			deleteEphemeralUserGroupAssociations(db, null, keycloakUserId);
 			(req as AuthenticatedRequest).user = user;
 			next();
 		})

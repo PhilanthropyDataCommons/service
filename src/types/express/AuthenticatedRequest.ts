@@ -3,6 +3,7 @@ import { ajv } from '../../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
 import type { AuthContext } from '../AuthContext';
+import { KeycloakId, keycloakIdSchema } from '../KeycloakId';
 
 type AuthenticatedRequest = JwtRequest & Partial<AuthContext>;
 
@@ -17,6 +18,12 @@ interface ObjectWithAuthWithRealmAccessRoles {
 		realm_access: {
 			roles: string[];
 		};
+	};
+}
+
+interface ObjectWithAuthWithOrganizations {
+	auth: {
+		organizations: Record<string, { id: KeycloakId }>;
 	};
 }
 
@@ -60,10 +67,39 @@ const objectWithAuthWithRealmAccessRolesSchema: JSONSchemaType<ObjectWithAuthWit
 		required: ['auth'],
 	};
 
+const objectWithAuthWithOrganizationsSchema: JSONSchemaType<ObjectWithAuthWithOrganizations> =
+	{
+		type: 'object',
+		properties: {
+			auth: {
+				type: 'object',
+				properties: {
+					organizations: {
+						type: 'object',
+						additionalProperties: {
+							type: 'object',
+							properties: {
+								id: keycloakIdSchema,
+							},
+							required: ['id'],
+						},
+						required: [],
+					},
+				},
+				required: ['organizations'],
+			},
+		},
+		required: ['auth'],
+	};
+
 const hasAuthWithSub = ajv.compile(objectWithAuthWithSubSchema);
 
 const hasAuthWithRealmAccessRoles = ajv.compile(
 	objectWithAuthWithRealmAccessRolesSchema,
+);
+
+const isObjectWithAuthWithOrganizations = ajv.compile(
+	objectWithAuthWithOrganizationsSchema,
 );
 
 const getAuthSubFromRequest = (req: Request): string | undefined =>
@@ -71,6 +107,13 @@ const getAuthSubFromRequest = (req: Request): string | undefined =>
 
 const getRealmAccessRolesFromRequest = (req: Request): string[] =>
 	hasAuthWithRealmAccessRoles(req) ? req.auth.realm_access.roles : [];
+
+const getKeycloakOrganizationIdsFromRequest = (req: Request): KeycloakId[] =>
+	isObjectWithAuthWithOrganizations(req)
+		? Object.values(req.auth.organizations).map(
+				(organization) => organization.id,
+			)
+		: [];
 
 const hasMeaningfulAuthSub = (req: Request): boolean => {
 	const authSub = getAuthSubFromRequest(req);
@@ -81,5 +124,6 @@ export {
 	AuthenticatedRequest,
 	getAuthSubFromRequest,
 	getRealmAccessRolesFromRequest,
+	getKeycloakOrganizationIdsFromRequest,
 	hasMeaningfulAuthSub,
 };

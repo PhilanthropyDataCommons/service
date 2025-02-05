@@ -1,0 +1,42 @@
+import { NotFoundError } from '../../../errors';
+import { keycloakIdToString } from '../../../types';
+import { db } from '../../db';
+import type { KeycloakId, Permission, ShortCode } from '../../../types';
+import { Id } from '../../../../dist/types/Id';
+
+const removeUserFunderPermission = async (
+	userKeycloakUserId: KeycloakId,
+	funderShortCode: ShortCode,
+	permission: Permission,
+): Promise<void> => {
+	const result = await db.sql('userFunderPermissions.deleteOne', {
+		userKeycloakUserId,
+		funderShortCode,
+		permission,
+	});
+
+	if (result.row_count === 0) {
+		throw new NotFoundError(
+			'The item did not exist and could not be deleted.',
+			{
+				entityType: 'UserFunderPermission',
+				entityPrimaryKey: {
+					userKeycloakUserId: keycloakIdToString(userKeycloakUserId),
+					funderShortCode,
+					permission,
+				},
+			},
+		);
+	}
+};
+
+export { removeUserFunderPermission };
+
+DAN TO DO NEXT:
+
+Implement the ability to remove ephemeral entries by keycloak user Id.
+Remove them in the user context middleware
+Implement the ability to create ephemeral entries.
+Update the context middleware to add them.
+Update the user json sql function to account for user group permissions.
+

@@ -9,7 +9,7 @@ import {
 	createOrUpdateUserChangemakerPermission,
 	createOrUpdateUserDataProviderPermission,
 	createOrUpdateUserFunderPermission,
-	createUser,
+	createOrUpdateUser,
 	loadSystemUser,
 	loadTableMetrics,
 	removeUserChangemakerPermission,
@@ -22,7 +22,7 @@ import {
 import { keycloakIdToString, stringToKeycloakId, Permission } from '../types';
 
 const createAdditionalTestUser = async () =>
-	createUser(db, null, {
+	createOrUpdateUser(db, null, {
 		keycloakUserId: stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
 	});
 
@@ -205,7 +205,7 @@ describe('/users', () => {
 			const uuids = Array.from(Array(20)).map(() => uuidv4());
 			await uuids.reduce(async (p, uuid) => {
 				await p;
-				await createUser(db, null, {
+				await createOrUpdateUser(db, null, {
 					keycloakUserId: uuid,
 				});
 			}, Promise.resolve());

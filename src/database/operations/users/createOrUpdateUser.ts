@@ -1,10 +1,10 @@
 import { generateCreateOrUpdateItemOperation } from '../generators';
 import type { User, WritableUser } from '../../../types';
 
-const createUser = generateCreateOrUpdateItemOperation<User, WritableUser, []>(
-	'users.insertOne',
+const createOrUpdateUser = generateCreateOrUpdateItemOperation<User, WritableUser, []>(
+	'users.insertOrUpdateOne',
 	['keycloakUserId'],
 	[],
 );
 
-export { createUser };
+export { createOrUpdateUser };

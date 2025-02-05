@@ -3,7 +3,7 @@ import { app } from '../app';
 import {
 	db,
 	createBulkUploadTask,
-	createUser,
+	createOrUpdateUser,
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
@@ -40,7 +40,7 @@ describe('/tasks/bulkUploads', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemSource = await loadSystemSource(db, null);
 			const testUser = await loadTestUser();
-			const thirdUser = await createUser(db, null, {
+			const thirdUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createBulkUploadTask(db, null, {
@@ -110,7 +110,7 @@ describe('/tasks/bulkUploads', () => {
 		it('returns all bulk uploads for administrative users', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(db, null, {
+			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createBulkUploadTask(db, null, {
@@ -166,7 +166,7 @@ describe('/tasks/bulkUploads', () => {
 		it('returns upload tasks for specified createdBy user', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(db, null, {
+			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createBulkUploadTask(db, null, {
@@ -213,7 +213,7 @@ describe('/tasks/bulkUploads', () => {
 		it('returns upload tasks for the admin user when createdBy is set to me as an admin', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(db, null, {
+			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createBulkUploadTask(db, null, {

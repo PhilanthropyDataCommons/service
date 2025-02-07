@@ -639,6 +639,7 @@ describe('processBulkUploadTask', () => {
 					id: 1,
 					name: 'Foo LLC.',
 					keycloakOrganizationId: null,
+					fiscalSponsors: [],
 					fields: [],
 				},
 			],

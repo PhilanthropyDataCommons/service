@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for changemakers seeking grants.",
-		"version": "0.16.7",
+		"version": "0.16.8",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -310,7 +310,7 @@
 				},
 				"required": ["id", "name", "createdAt"]
 			},
-			"Changemaker": {
+			"ShallowChangemaker": {
 				"type": "object",
 				"properties": {
 					"id": {
@@ -333,17 +333,56 @@
 						"type": "string",
 						"format": "date-time",
 						"readOnly": true
-					},
-					"fields": {
-						"type": "array",
-						"description": "For each base field, the best available value related to this changemaker. Empty when unauthenticated.",
-						"items": {
-							"$ref": "#/components/schemas/ProposalFieldValue"
-						},
-						"readOnly": true
 					}
 				},
-				"required": ["id", "taxId", "name", "createdAt", "fields"]
+				"required": ["id", "taxId", "name", "createdAt"]
+			},
+			"Changemaker": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/ShallowChangemaker"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"fiscalSponsors": {
+								"type": "array",
+								"description": "Fiscal sponsors (past and present) of this changemaker. Empty when unauthenticated. The response here will not include values for `fields` nor `fiscalSponsors` to avoid infinite recursion. Use the returned `id` to call $getChangemakerById for those details.",
+								"items": {
+									"$ref": "#/components/schemas/ShallowChangemaker"
+								},
+								"readOnly": true,
+								"example": [
+									{
+										"id": 74,
+										"name": "Community Development",
+										"taxId": "US123456789",
+										"fields": [],
+										"createdAt": "2025-02-07T13:16:16.191509-06:00",
+										"fiscalSponsors": [],
+										"keycloakOrganizationId": "f16a71f8-e67b-43ab-a258-31cd8a99a97a"
+									}
+								]
+							},
+							"fields": {
+								"type": "array",
+								"description": "For each base field, the best available value related to this changemaker. Empty when unauthenticated or when recursively querying changemakers, for example, within fiscal sponsors.",
+								"items": {
+									"$ref": "#/components/schemas/ProposalFieldValue"
+								},
+								"readOnly": true
+							}
+						},
+						"required": [
+							"id",
+							"taxId",
+							"name",
+							"createdAt",
+							"fields",
+							"fiscalSponsors"
+						]
+					}
+				]
 			},
 			"PartialChangemaker": {
 				"type": "object",
@@ -2012,6 +2051,131 @@
 								}
 							}
 						}
+					}
+				}
+			}
+		},
+		"/changemakers/{changemakerId}/fiscalSponsors/{fiscalSponsorChangemakerId}": {
+			"parameters": [
+				{
+					"name": "changemakerId",
+					"description": "The PDC-generated ID of a changemaker (fiscal sponsee).",
+					"in": "path",
+					"required": true,
+					"schema": {
+						"type": "integer"
+					}
+				},
+				{
+					"name": "fiscalSponsorChangemakerId",
+					"description": "The PDC-generated ID of a changemaker (fiscal sponsor).",
+					"in": "path",
+					"required": true,
+					"schema": {
+						"type": "integer"
+					}
+				}
+			],
+			"put": {
+				"operationId": "putFiscalSponsorshipByChangemakerIds",
+				"summary": "Adds a fiscal sponsorship between the given changemakers.",
+				"tags": ["Changemakers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The internal representation of the successfully created or updated fiscal sponsorship relation.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"fiscalSponseeChangemakerId": {
+											"type": "integer",
+											"example": "43"
+										},
+										"fiscalSponsorChangemakerId": {
+											"type": "integer",
+											"example": "42"
+										},
+										"createdAt": {
+											"type": "string",
+											"format": "date-time",
+											"readOnly": true
+										},
+										"createdBy": {
+											"description": "The keycloak user id of the PDC user that added this fiscal sponsorship record.",
+											"type": "string",
+											"format": "uuid",
+											"readOnly": true
+										},
+										"notAfter": {
+											"description": "For internal use. This always be null in a response from this endpoint.",
+											"type": "string",
+											"format": "date-time",
+											"readOnly": true,
+											"nullable": true,
+											"example": null
+										}
+									},
+									"required": [
+										"fiscalSponseeChangemakerId",
+										"fiscalSponsorChangemakerId",
+										"createdAt",
+										"createdBy",
+										"notAfter"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "The same ID was passed for sponsor and sponsee or the IDs were out of range.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Authentication was not provided or was invalid.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "The call passed one or more changemakerIds that do not exist in the database.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PdcError"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "deleteFiscalSponsorshipByChangemakerIds",
+				"summary": "Deletes a fiscal sponsorship between the given changemakers. This does not remove either changemaker.",
+				"tags": ["Changemakers"],
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Confirmation of successful deletion of the fiscal sponsorship."
 					}
 				}
 			}

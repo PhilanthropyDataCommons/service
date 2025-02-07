@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.16.8 2025-02-13
+
+### Added
+
+- Add and remove fiscal sponsors using `PUT` and `DELETE` on `/changemakers/{changemakerId}/fiscalSponsors/{fiscalSponsorChangemakerId}`.
+- There is now a type `ShallowChangemaker` available.
+- `Changemaker` now has a `fiscalSponsors` attribute, a list of `ShallowChangemaker`.
+
 ## 0.16.7 2025-02-05
 
 ### Added

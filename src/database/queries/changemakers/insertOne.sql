@@ -7,4 +7,8 @@ INSERT INTO changemakers (
 	:name,
 	:keycloakOrganizationId
 )
-RETURNING changemaker_to_json(changemakers) AS object;
+RETURNING changemaker_to_json(
+	changemakers,
+	:authContextKeycloakUserId,
+	FALSE
+) AS object;

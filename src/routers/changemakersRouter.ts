@@ -21,4 +21,18 @@ changemakersRouter.patch(
 	changemakersHandlers.patchChangemaker,
 );
 
+changemakersRouter.put(
+	'/:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId',
+	requireAuthentication,
+	requireAdministratorRole,
+	changemakersHandlers.putChangemakerFiscalSponsor,
+);
+
+changemakersRouter.delete(
+	'/:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId',
+	requireAuthentication,
+	requireAdministratorRole,
+	changemakersHandlers.deleteChangemakerFiscalSponsor,
+);
+
 export { changemakersRouter };

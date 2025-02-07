@@ -5,6 +5,8 @@ import {
 	loadChangemaker,
 	createChangemaker,
 	updateChangemaker,
+	createOrUpdateFiscalSponsorship,
+	removeFiscalSponsorship,
 } from '../database';
 import {
 	isId,
@@ -162,9 +164,92 @@ const patchChangemaker = (
 		});
 };
 
+const putChangemakerFiscalSponsor = (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
+	const { changemakerId, fiscalSponsorChangemakerId } = req.params;
+	if (!isId(changemakerId)) {
+		next(
+			new InputValidationError(
+				'Invalid changemakerId parameter.',
+				isId.errors ?? [],
+			),
+		);
+		return;
+	}
+	if (!isId(fiscalSponsorChangemakerId)) {
+		next(
+			new InputValidationError(
+				'Invalid fiscalSponsorChangemakerId parameter.',
+				isId.errors ?? [],
+			),
+		);
+		return;
+	}
+
+	(async () => {
+		const updatedChangemaker = await createOrUpdateFiscalSponsorship(db, req, {
+			fiscalSponseeChangemakerId: changemakerId,
+			fiscalSponsorChangemakerId,
+		});
+		res.status(200).contentType('application/json').send(updatedChangemaker);
+	})().catch((error: unknown) => {
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(new DatabaseError('Error creating item.', error));
+			return;
+		}
+		next(error);
+	});
+};
+
+const deleteChangemakerFiscalSponsor = (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): void => {
+	const { changemakerId, fiscalSponsorChangemakerId } = req.params;
+	if (!isId(changemakerId)) {
+		next(
+			new InputValidationError(
+				'Invalid changemakerId parameter.',
+				isId.errors ?? [],
+			),
+		);
+		return;
+	}
+	if (!isId(fiscalSponsorChangemakerId)) {
+		next(
+			new InputValidationError(
+				'Invalid fiscalSponsorChangemakerId parameter.',
+				isId.errors ?? [],
+			),
+		);
+		return;
+	}
+
+	(async () => {
+		await removeFiscalSponsorship(changemakerId, fiscalSponsorChangemakerId);
+		res.status(204).contentType('application/json').send();
+	})().catch((error: unknown) => {
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(new DatabaseError('Error deleting item.', error));
+			return;
+		}
+		next(error);
+	});
+};
+
 export const changemakersHandlers = {
 	postChangemaker,
 	getChangemakers,
 	getChangemaker,
 	patchChangemaker,
+	putChangemakerFiscalSponsor,
+	deleteChangemakerFiscalSponsor,
 };

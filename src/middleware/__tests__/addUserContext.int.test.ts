@@ -86,7 +86,7 @@ describe('addUserContext', () => {
 			});
 	});
 
-	it('does not creates or assign a user when no keycloakUserId is provided', (done) => {
+	it('does not create or assign a user when no keycloakUserId is provided', (done) => {
 		const mockRequest = {
 			auth: {},
 		} as unknown as AuthenticatedRequest;

@@ -3,7 +3,7 @@ import { app } from '../app';
 import {
 	db,
 	createBaseFieldsCopyTask,
-	createUser,
+	createOrUpdateUser,
 	loadTableMetrics,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
@@ -38,7 +38,7 @@ describe('/tasks/baseFieldsCopy', () => {
 
 		it('returns all BaseFieldsCopy Tasks for administrative users', async () => {
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(db, null, {
+			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 

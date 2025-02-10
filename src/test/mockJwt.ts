@@ -15,6 +15,7 @@ const getMockJwt = (
 		sub?: string;
 		roles?: string[];
 		iss?: string;
+		organizations?: Record<string, string>;
 	} = {},
 	getToken: (payload: JwtPayload) => string = mockJwks.token,
 ): { Authorization: string } => {
@@ -28,6 +29,9 @@ const getMockJwt = (
 		aud: 'account',
 		typ: 'Bearer',
 		azp: 'pdc-service',
+		organizations: settings.organizations ?? {
+			fooOrganization: { id: '47d406ad-5e50-42d4-88f1-f87947a3e314' },
+		},
 		realm_access: {
 			roles: settings.roles ?? ['default-roles-pdc'],
 		},

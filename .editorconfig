@@ -10,6 +10,3 @@ trim_trailing_whitespace = true
 
 [*.yml]
 indent_style = space
-
-[*.sql]
-indent_style = space

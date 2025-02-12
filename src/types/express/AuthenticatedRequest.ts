@@ -1,5 +1,6 @@
 import { Request as JwtRequest } from 'express-jwt';
 import { ajv } from '../../ajv';
+import { KeycloakId, keycloakIdSchema } from '../KeycloakId';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
 import type { AuthContext } from '../AuthContext';
@@ -12,11 +13,23 @@ interface ObjectWithAuthWithSub {
 	};
 }
 
+interface ObjectWithAuthWithExp {
+	auth: {
+		exp: number;
+	};
+}
+
 interface ObjectWithAuthWithRealmAccessRoles {
 	auth: {
 		realm_access: {
 			roles: string[];
 		};
+	};
+}
+
+interface ObjectWithAuthWithOrganizations {
+	auth: {
+		organizations: Record<string, { id: KeycloakId }>;
 	};
 }
 
@@ -31,6 +44,22 @@ const objectWithAuthWithSubSchema: JSONSchemaType<ObjectWithAuthWithSub> = {
 				},
 			},
 			required: ['sub'],
+		},
+	},
+	required: ['auth'],
+};
+
+const objectWithAuthWithExpSchema: JSONSchemaType<ObjectWithAuthWithExp> = {
+	type: 'object',
+	properties: {
+		auth: {
+			type: 'object',
+			properties: {
+				exp: {
+					type: 'number',
+				},
+			},
+			required: ['exp'],
 		},
 	},
 	required: ['auth'],
@@ -60,10 +89,41 @@ const objectWithAuthWithRealmAccessRolesSchema: JSONSchemaType<ObjectWithAuthWit
 		required: ['auth'],
 	};
 
+const objectWithAuthWithOrganizationsSchema: JSONSchemaType<ObjectWithAuthWithOrganizations> =
+	{
+		type: 'object',
+		properties: {
+			auth: {
+				type: 'object',
+				properties: {
+					organizations: {
+						type: 'object',
+						additionalProperties: {
+							type: 'object',
+							properties: {
+								id: keycloakIdSchema,
+							},
+							required: ['id'],
+						},
+						required: [],
+					},
+				},
+				required: ['organizations'],
+			},
+		},
+		required: ['auth'],
+	};
+
 const hasAuthWithSub = ajv.compile(objectWithAuthWithSubSchema);
+
+const isObjectWithAuthWithExp = ajv.compile(objectWithAuthWithExpSchema);
 
 const hasAuthWithRealmAccessRoles = ajv.compile(
 	objectWithAuthWithRealmAccessRolesSchema,
+);
+
+const isObjectWithAuthWithOrganizations = ajv.compile(
+	objectWithAuthWithOrganizationsSchema,
 );
 
 const getAuthSubFromRequest = (req: Request): string | undefined =>
@@ -71,6 +131,16 @@ const getAuthSubFromRequest = (req: Request): string | undefined =>
 
 const getRealmAccessRolesFromRequest = (req: Request): string[] =>
 	hasAuthWithRealmAccessRoles(req) ? req.auth.realm_access.roles : [];
+
+const getKeycloakOrganizationIdsFromRequest = (req: Request): KeycloakId[] =>
+	isObjectWithAuthWithOrganizations(req)
+		? Object.values(req.auth.organizations).map(
+				(organization) => organization.id,
+			)
+		: [];
+
+const getJwtExpFromRequest = (req: Request) =>
+	isObjectWithAuthWithExp(req) ? req.auth.exp : null;
 
 const hasMeaningfulAuthSub = (req: Request): boolean => {
 	const authSub = getAuthSubFromRequest(req);
@@ -81,5 +151,7 @@ export {
 	AuthenticatedRequest,
 	getAuthSubFromRequest,
 	getRealmAccessRolesFromRequest,
+	getKeycloakOrganizationIdsFromRequest,
+	getJwtExpFromRequest,
 	hasMeaningfulAuthSub,
 };

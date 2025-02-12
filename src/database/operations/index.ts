@@ -7,6 +7,7 @@ export * from './bulkUploadTasks';
 export * from './changemakerProposals';
 export * from './changemakers';
 export * from './dataProviders';
+export * from './ephemeralUserGroupAssociations';
 export * from './funders';
 export * from './generic';
 export * from './opportunities';

@@ -1,6 +1,13 @@
-import { db, createUser, loadUserByKeycloakUserId } from '../database';
+import {
+	db,
+	createOrUpdateUser,
+	loadUserByKeycloakUserId,
+	createEphemeralUserGroupAssociation,
+} from '../database';
 import {
 	getAuthSubFromRequest,
+	getKeycloakOrganizationIdsFromRequest,
+	getJwtExpFromRequest,
 	isKeycloakId,
 	keycloakIdToString,
 	stringToKeycloakId,
@@ -8,16 +15,9 @@ import {
 import { getSystemUser } from '../config';
 import { InputValidationError } from '../errors';
 import type { Request, NextFunction, Response } from 'express';
-import type { AuthenticatedRequest, KeycloakId } from '../types';
+import type { AuthenticatedRequest } from '../types';
 
-const selectOrCreateUser = async (keycloakUserId: KeycloakId) => {
-	try {
-		return await loadUserByKeycloakUserId(db, null, keycloakUserId);
-	} catch {
-		const user = await createUser(db, null, { keycloakUserId });
-		return user;
-	}
-};
+const MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS = 180;
 
 const addUserContext = (
 	req: Request,
@@ -25,6 +25,8 @@ const addUserContext = (
 	next: NextFunction,
 ): void => {
 	const keycloakUserId = getAuthSubFromRequest(req);
+	const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
+	const jwtExpiration = getJwtExpFromRequest(req) ?? 0;
 	const systemUser = getSystemUser();
 	if (
 		keycloakUserId === undefined ||
@@ -44,13 +46,40 @@ const addUserContext = (
 		return;
 	}
 
-	selectOrCreateUser(stringToKeycloakId(keycloakUserId))
-		.then((user) => {
-			(req as AuthenticatedRequest).user = user;
-			next();
+	createOrUpdateUser(db, null, {
+		keycloakUserId: stringToKeycloakId(keycloakUserId),
+	})
+		.then(() => {
+			const createEphemeralUserGroupAssociationPromises =
+				keycloakOrganizationIds.map((keycloakOrganizationId) =>
+					createEphemeralUserGroupAssociation(db, null, {
+						userKeycloakUserId: keycloakUserId,
+						userGroupKeycloakOrganizationId: keycloakOrganizationId,
+						notAfter: new Date(
+							Math.max(
+								jwtExpiration,
+								MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS,
+							) * 1000,
+						).toISOString(),
+					}),
+				);
+			Promise.all(createEphemeralUserGroupAssociationPromises)
+				.then(() => {
+					loadUserByKeycloakUserId(db, null, keycloakUserId)
+						.then((user) => {
+							(req as AuthenticatedRequest).user = user;
+							next();
+						})
+						.catch((err) => {
+							next(err);
+						});
+				})
+				.catch((err) => {
+					next(err);
+				});
 		})
-		.catch((error: unknown) => {
-			next(error);
+		.catch((err) => {
+			next(err);
 		});
 };
 

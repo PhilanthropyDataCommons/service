@@ -10,7 +10,7 @@ import {
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
-	createUser,
+	createOrUpdateUser,
 	db,
 	loadSystemSource,
 	loadTableMetrics,
@@ -67,7 +67,7 @@ describe('/proposals', () => {
 				title: '🔥',
 			});
 			const testUser = await loadTestUser();
-			const secondUser = await createUser(db, null, {
+			const secondUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			const systemSource = await loadSystemSource(db, null);
@@ -362,7 +362,7 @@ describe('/proposals', () => {
 			});
 
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(db, null, {
+			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createTestBaseFields();
@@ -409,7 +409,7 @@ describe('/proposals', () => {
 			});
 
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(db, null, {
+			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createTestBaseFields();
@@ -450,7 +450,7 @@ describe('/proposals', () => {
 			});
 
 			const testUser = await loadTestUser();
-			const anotherUser = await createUser(db, null, {
+			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createTestBaseFields();
@@ -696,7 +696,7 @@ describe('/proposals', () => {
 			await createOpportunity(db, null, {
 				title: '⛰️',
 			});
-			const anotherUser = await createUser(db, null, {
+			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			await createProposal(db, null, {

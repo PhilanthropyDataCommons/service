@@ -11,6 +11,7 @@ export * from './ChangemakerProposal';
 export * from './CheckResult';
 export * from './CopyBaseFieldsJobPayload';
 export * from './DataProvider';
+export * from './EphemeralUserGroupAssociation';
 export * from './express/AuthenticatedRequest';
 export * from './Funder';
 export * from './Id';

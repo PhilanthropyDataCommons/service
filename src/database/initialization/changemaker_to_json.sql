@@ -2,12 +2,27 @@ SELECT drop_function('changemaker_to_json');
 
 CREATE FUNCTION changemaker_to_json(
 	changemaker changemakers,
-	auth_context_keycloak_user_id uuid DEFAULT NULL
+	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	shallow boolean DEFAULT FALSE
 )
 RETURNS jsonb AS $$
 DECLARE
   proposal_field_values_json JSONB;
+  fiscal_sponsors_json JSONB;
+  changemaker_json JSONB;
 BEGIN
+  -- Terminate changemaker recursion by setting shallow here. This means no fields or sponsors in sponsors.
+  SELECT jsonb_agg(changemaker_to_json(fiscal_sponsors.*, auth_context_keycloak_user_id, TRUE))
+  INTO fiscal_sponsors_json
+  FROM changemakers AS fiscal_sponsors
+  INNER JOIN fiscal_sponsorships fs
+    ON fs.fiscal_sponsor_changemaker_id = fiscal_sponsors.id
+    AND fs.fiscal_sponsee_changemaker_id = changemaker.id
+    AND NOT is_expired(fs.not_after)
+  -- Remove values for unauthenticated calls while also (re)validating the user ID:
+  INNER JOIN users u
+    ON u.keycloak_user_id = auth_context_keycloak_user_id
+  WHERE NOT shallow;
   SELECT jsonb_agg(
     proposal_field_value_to_json(pfv_inner.*)
   )
@@ -47,14 +62,23 @@ BEGIN
         s.data_provider_short_code IS NOT NULL
           AND s.id != system_source_id() DESC,
         pfv.created_at DESC
-  ) AS pfv_inner;
-  RETURN jsonb_build_object(
+  ) AS pfv_inner
+  WHERE NOT shallow;
+  SELECT jsonb_build_object(
     'id', changemaker.id,
     'taxId', changemaker.tax_id,
     'name', changemaker.name,
     'keycloakOrganizationId', changemaker.keycloak_organization_id,
-    'createdAt', changemaker.created_at,
-    'fields', COALESCE(proposal_field_values_json, '[]'::JSONB)
-  );
+    'createdAt', changemaker.created_at
+  ) INTO changemaker_json;
+  RETURN
+    CASE WHEN shallow THEN
+      changemaker_json
+    ELSE
+      changemaker_json || jsonb_build_object(
+        'fiscalSponsors', COALESCE(fiscal_sponsors_json, '[]'::JSONB),
+        'fields', COALESCE(proposal_field_values_json, '[]'::JSONB)
+      )
+    END;
 END;
 $$ LANGUAGE plpgsql;

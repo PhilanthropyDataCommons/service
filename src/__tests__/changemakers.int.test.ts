@@ -18,7 +18,11 @@ import {
 	loadTableMetrics,
 	createOrUpdateDataProvider,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import {
+	expectTimestamp,
+	getTestUserKeycloakUserId,
+	loadTestUser,
+} from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -80,6 +84,7 @@ describe('/changemakers', () => {
 								name: 'Another Inc.',
 								keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
 								createdAt: expectTimestamp,
+								fiscalSponsors: [],
 								fields: [],
 							},
 							{
@@ -88,6 +93,7 @@ describe('/changemakers', () => {
 								name: 'Example Inc.',
 								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
+								fiscalSponsors: [],
 								fields: [],
 							},
 						],
@@ -122,6 +128,7 @@ describe('/changemakers', () => {
 								name: 'Changemaker 15',
 								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
+								fiscalSponsors: [],
 								fields: [],
 							},
 							{
@@ -130,6 +137,7 @@ describe('/changemakers', () => {
 								name: 'Changemaker 14',
 								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
+								fiscalSponsors: [],
 								fields: [],
 							},
 							{
@@ -138,6 +146,7 @@ describe('/changemakers', () => {
 								name: 'Changemaker 13',
 								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
+								fiscalSponsors: [],
 								fields: [],
 							},
 							{
@@ -146,6 +155,7 @@ describe('/changemakers', () => {
 								name: 'Changemaker 12',
 								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
+								fiscalSponsors: [],
 								fields: [],
 							},
 							{
@@ -154,6 +164,7 @@ describe('/changemakers', () => {
 								name: 'Changemaker 11',
 								keycloakOrganizationId: null,
 								createdAt: expectTimestamp,
+								fiscalSponsors: [],
 								fields: [],
 							},
 						],
@@ -198,6 +209,7 @@ describe('/changemakers', () => {
 						name: 'Canadian Company',
 						keycloakOrganizationId: null,
 						createdAt: expectTimestamp,
+						fiscalSponsors: [],
 						fields: [],
 					},
 				],
@@ -245,6 +257,7 @@ describe('/changemakers', () => {
 						name: 'Canadian Company',
 						keycloakOrganizationId: null,
 						createdAt: expectTimestamp,
+						fiscalSponsors: [],
 						fields: [],
 					},
 				],
@@ -286,6 +299,7 @@ describe('/changemakers', () => {
 						name: 'Another Inc.',
 						keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
 						createdAt: expectTimestamp,
+						fiscalSponsors: [],
 						fields: [],
 					}),
 				);
@@ -293,6 +307,13 @@ describe('/changemakers', () => {
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
 			await request(app).get('/changemakers/foo').set(authHeader).expect(400);
+		});
+
+		it('returns 400 bad request when an int between 2^31 to 2^32 is sent', async () => {
+			await request(app)
+				.get('/changemakers/3147483648')
+				.set(authHeader)
+				.expect(400);
 		});
 
 		describe('tests that find gold data among proposals and share a common db', () => {
@@ -498,6 +519,7 @@ describe('/changemakers', () => {
 							taxId: '05119',
 							keycloakOrganizationId: null,
 							createdAt: expectTimestamp,
+							fiscalSponsors: [],
 							fields: [latestValidValue],
 						}),
 					);
@@ -792,6 +814,7 @@ describe('/changemakers', () => {
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 				createdAt: expectTimestamp,
+				fiscalSponsors: [],
 				fields: [],
 			});
 			expect(after.count).toEqual(1);
@@ -928,6 +951,7 @@ describe('/changemakers', () => {
 				id: changemaker.id,
 				taxId: changemaker.taxId,
 				createdAt: expectTimestamp,
+				fiscalSponsors: [],
 				fields: [],
 			});
 		});
@@ -1003,6 +1027,280 @@ describe('/changemakers', () => {
 				.set(adminUserAuthHeader)
 				.send({})
 				.expect(400);
+		});
+	});
+
+	describe('PUT /:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId', () => {
+		it('Successfully adds and reflects two fiscal sponsorships', async () => {
+			const fiscalSponsee = await createChangemaker(db, null, {
+				taxId: '5081291550860062107766631030417388169256',
+				name: 'Sponsee 5081291550860062107766631030417388169256',
+				keycloakOrganizationId: null,
+			});
+			const fiscalSponsor = await createChangemaker(db, null, {
+				taxId: '0118304041375623758777905068103837593356',
+				name: 'Sponsor 0118304041375623758777905068103837593356',
+				keycloakOrganizationId: null,
+			});
+			const fiscalSponsorTwo = await createChangemaker(db, null, {
+				taxId: '8533165123659550499871910387521368428424',
+				name: 'Sponsor 8533165123659550499871910387521368428424',
+				keycloakOrganizationId: null,
+			});
+			const result = await request(app)
+				.put(
+					`/changemakers/${fiscalSponsee.id}/fiscalSponsors/${fiscalSponsor.id}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(200);
+			expect(result.body).toStrictEqual({
+				fiscalSponseeChangemakerId: fiscalSponsee.id,
+				fiscalSponsorChangemakerId: fiscalSponsor.id,
+				createdAt: expectTimestamp,
+				createdBy: getTestUserKeycloakUserId(),
+				notAfter: null,
+			});
+			const resultTwo = await request(app)
+				.put(
+					`/changemakers/${fiscalSponsee.id}/fiscalSponsors/${fiscalSponsorTwo.id}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(200);
+			expect(resultTwo.body).toStrictEqual({
+				fiscalSponseeChangemakerId: fiscalSponsee.id,
+				fiscalSponsorChangemakerId: fiscalSponsorTwo.id,
+				createdAt: expectTimestamp,
+				createdBy: getTestUserKeycloakUserId(),
+				notAfter: null,
+			});
+			const changemakerResult = await request(app)
+				.get(`/changemakers/${fiscalSponsee.id}`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(changemakerResult.body).toStrictEqual({
+				...fiscalSponsee,
+				createdAt: expectTimestamp,
+				fiscalSponsors: [
+					{
+						id: fiscalSponsor.id,
+						taxId: fiscalSponsor.taxId,
+						name: fiscalSponsor.name,
+						keycloakOrganizationId: fiscalSponsor.keycloakOrganizationId,
+						createdAt: fiscalSponsor.createdAt,
+					},
+					{
+						id: fiscalSponsorTwo.id,
+						taxId: fiscalSponsorTwo.taxId,
+						name: fiscalSponsorTwo.name,
+						keycloakOrganizationId: fiscalSponsorTwo.keycloakOrganizationId,
+						createdAt: fiscalSponsorTwo.createdAt,
+					},
+				],
+			});
+		});
+
+		it('Requires authentication', async () => {
+			const fiscalSponsee = await createChangemaker(db, null, {
+				taxId: '2931491497481164952498947862581097119543',
+				name: 'Sponsee 2931491497481164952498947862581097119543',
+				keycloakOrganizationId: null,
+			});
+			const fiscalSponsor = await createChangemaker(db, null, {
+				taxId: '1760370275937448424960420855817329405546',
+				name: 'Sponsor 1760370275937448424960420855817329405546',
+				keycloakOrganizationId: null,
+			});
+			await request(app)
+				.put(
+					`/changemakers/${fiscalSponsee.id}/fiscalSponsors/${fiscalSponsor.id}`,
+				)
+				.type('application/json')
+				.send()
+				.expect(401);
+		});
+
+		it('Requires sponsor to differ from sponsee', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '6662026305156335697506682975139641746440',
+				name: 'Changemaker 6662026305156335697506682975139641746440',
+				keycloakOrganizationId: null,
+			});
+			await request(app)
+				.put(`/changemakers/${changemaker.id}/fiscalSponsors/${changemaker.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(400);
+		});
+
+		it('Requires integer fiscal sponsee changemaker ID', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '9185467240703696384011509519069015034382',
+				name: 'Changemaker 9185467240703696384011509519069015034382',
+				keycloakOrganizationId: null,
+			});
+			const fiscalSponsor = await createChangemaker(db, null, {
+				taxId: '9543545368164071044940139233866036020587',
+				name: 'Changemaker 9543545368164071044940139233866036020587',
+				keycloakOrganizationId: null,
+			});
+			await request(app)
+				.put(
+					`/changemakers/${changemaker.name}/fiscalSponsors/${fiscalSponsor.id}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(400);
+		});
+
+		it('Requires integer fiscal sponsor changemaker ID', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '7298203414664558984610516511378791622113',
+				name: 'Changemaker 7298203414664558984610516511378791622113',
+				keycloakOrganizationId: null,
+			});
+			const fiscalSponsor = await createChangemaker(db, null, {
+				taxId: '8494764604446455156148141002214850975680',
+				name: 'Changemaker 8494764604446455156148141002214850975680',
+				keycloakOrganizationId: null,
+			});
+			await request(app)
+				.put(
+					`/changemakers/${changemaker.id}/fiscalSponsors/${fiscalSponsor.name}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(400);
+		});
+	});
+
+	describe('DELETE /:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId', () => {
+		it('Successfully deletes and reflects fiscal sponsorship deletion', async () => {
+			const fiscalSponsee = await createChangemaker(db, null, {
+				taxId: '1176348939800751264285731454220204166679',
+				name: 'Sponsee 1176348939800751264285731454220204166679',
+				keycloakOrganizationId: 'f1dccc27-7577-49ce-bf1a-be2e5857453e',
+			});
+			const fiscalSponsorToRemove = await createChangemaker(db, null, {
+				taxId: '4381635557716751790531984665685833874838',
+				name: 'Sponsor 4381635557716751790531984665685833874838',
+				keycloakOrganizationId: 'b40c474a-a800-4b38-9b1d-4fa5334891d4',
+			});
+			const fiscalSponsorToKeep = await createChangemaker(db, null, {
+				taxId: '4175749600938079345538870816774326771318',
+				name: 'Sponsor 4175749600938079345538870816774326771318',
+				keycloakOrganizationId: 'e87e0629-e0a5-40ed-8149-61853a41469b',
+			});
+			await request(app)
+				.put(
+					`/changemakers/${fiscalSponsee.id}/fiscalSponsors/${fiscalSponsorToRemove.id}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(200);
+			await request(app)
+				.put(
+					`/changemakers/${fiscalSponsee.id}/fiscalSponsors/${fiscalSponsorToKeep.id}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(200);
+			await request(app)
+				.delete(
+					`/changemakers/${fiscalSponsee.id}/fiscalSponsors/${fiscalSponsorToRemove.id}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(204);
+			const changemakerResult = await request(app)
+				.get(`/changemakers/${fiscalSponsee.id}`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(changemakerResult.body).toStrictEqual({
+				...fiscalSponsee,
+				createdAt: expectTimestamp,
+				fiscalSponsors: [
+					{
+						id: fiscalSponsorToKeep.id,
+						taxId: fiscalSponsorToKeep.taxId,
+						name: fiscalSponsorToKeep.name,
+						keycloakOrganizationId: fiscalSponsorToKeep.keycloakOrganizationId,
+						createdAt: fiscalSponsorToKeep.createdAt,
+					},
+				],
+			});
+		});
+
+		it('Requires integer fiscal sponsee changemaker ID', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '1242568879363886626420956259771401621899',
+				name: 'Changemaker 1242568879363886626420956259771401621899',
+				keycloakOrganizationId: null,
+			});
+			const fiscalSponsor = await createChangemaker(db, null, {
+				taxId: '9631835019383831266590218120243485803527',
+				name: 'Changemaker 9631835019383831266590218120243485803527',
+				keycloakOrganizationId: null,
+			});
+			await request(app)
+				.delete(
+					`/changemakers/${changemaker.name}/fiscalSponsors/${fiscalSponsor.id}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(400);
+		});
+
+		it('Requires integer fiscal sponsor changemaker ID', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '3909708258449105175781605552529587857130',
+				name: 'Changemaker 3909708258449105175781605552529587857130',
+				keycloakOrganizationId: null,
+			});
+			const fiscalSponsor = await createChangemaker(db, null, {
+				taxId: '0122135026985401334024359249372342493508',
+				name: 'Changemaker 0122135026985401334024359249372342493508',
+				keycloakOrganizationId: null,
+			});
+			await request(app)
+				.delete(
+					`/changemakers/${changemaker.id}/fiscalSponsors/${fiscalSponsor.name}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(400);
+		});
+
+		it('Returns 404 on non-existent row', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '0628076601768301607043597902351679068570',
+				name: 'Changemaker 0628076601768301607043597902351679068570',
+				keycloakOrganizationId: null,
+			});
+			const fiscalSponsor = await createChangemaker(db, null, {
+				taxId: '0450942762614979070967286505967259109014',
+				name: 'Changemaker 0450942762614979070967286505967259109014',
+				keycloakOrganizationId: null,
+			});
+			await request(app)
+				.delete(
+					`/changemakers/${changemaker.id * 5}/fiscalSponsors/${fiscalSponsor.id * 5 * 13}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(404);
 		});
 	});
 });

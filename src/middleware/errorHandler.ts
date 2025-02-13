@@ -19,6 +19,10 @@ const getHttpStatusCodeForDatabaseErrorCode = (errorCode: string): number => {
 			return 422;
 		case PostgresErrorCode.UNIQUE_VIOLATION.valueOf():
 			return 409;
+		case PostgresErrorCode.NUMBER_OUT_OF_RANGE.valueOf():
+			return 400;
+		case PostgresErrorCode.CHECK_CONSTRAINT_VIOLATION.valueOf():
+			return 400;
 		case PostgresErrorCode.INSUFFICIENT_RESOURCES.valueOf():
 			return 503;
 		default:
@@ -32,6 +36,10 @@ const getMessageForDatabaseErrorCode = (errorCode: string): string => {
 			return 'Foreign key constraint violation.';
 		case PostgresErrorCode.UNIQUE_VIOLATION.valueOf():
 			return 'Unique key constraint violation.';
+		case PostgresErrorCode.NUMBER_OUT_OF_RANGE.valueOf():
+			return 'One of the numeric arguments was out of range for its type.';
+		case PostgresErrorCode.CHECK_CONSTRAINT_VIOLATION.valueOf():
+			return 'A constraint was violated.';
 		case PostgresErrorCode.INSUFFICIENT_RESOURCES.valueOf():
 			return 'Insufficient resources.';
 		default:

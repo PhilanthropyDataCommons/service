@@ -4,7 +4,7 @@ import { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { ProposalFieldValue } from './ProposalFieldValue';
 
-interface Changemaker {
+interface ShallowChangemaker {
 	readonly id: number;
 	taxId: string;
 	name: string;
@@ -12,8 +12,12 @@ interface Changemaker {
 	// https://github.com/ajv-validator/ajv/issues/2283 and/or
 	// https://github.com/ajv-validator/ajv/issues/2163.
 	keycloakOrganizationId: KeycloakId | null | undefined;
-	readonly fields: ProposalFieldValue[];
 	readonly createdAt: string;
+}
+
+interface Changemaker extends ShallowChangemaker {
+	readonly fiscalSponsors: ShallowChangemaker[];
+	readonly fields: ProposalFieldValue[];
 }
 
 type WritableChangemaker = Writable<Changemaker>;
@@ -66,6 +70,7 @@ const isPartialWritableChangemaker = ajv.compile(
 export {
 	isWritableChangemaker,
 	Changemaker,
+	ShallowChangemaker,
 	WritableChangemaker,
 	writableChangemakerSchema,
 	PartialWritableChangemaker,

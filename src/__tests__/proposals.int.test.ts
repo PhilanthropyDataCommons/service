@@ -14,6 +14,7 @@ import {
 	db,
 	loadSystemSource,
 	loadTableMetrics,
+	loadSystemFunder,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
@@ -63,8 +64,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns proposals associated with the requesting user', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			const secondUser = await createOrUpdateUser(db, null, {
@@ -178,8 +181,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when a changemaker filter is provided', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			const testUser = await loadTestUser();
@@ -245,8 +250,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when search is provided', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			const testUser = await loadTestUser();
@@ -357,8 +364,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns all proposals present in the database regardless of createdBy value when loading as an administrator', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			const testUser = await loadTestUser();
@@ -404,8 +413,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns a correct subset of proposals when createdBy is provided as an administrator', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			const testUser = await loadTestUser();
@@ -445,8 +456,10 @@ describe('/proposals', () => {
 		});
 
 		it("returns just the administrator's proposals when createdBy is set to `me` as an administrator", async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			const testUser = await loadTestUser();
@@ -487,8 +500,10 @@ describe('/proposals', () => {
 			// This should pass even if the default text search config is 'simple'.
 			// See https://github.com/PhilanthropyDataCommons/service/issues/336
 			await db.query("set default_text_search_config = 'simple';");
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Grand opportunity',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			const systemSource = await loadSystemSource(db, null);
@@ -598,8 +613,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns according to pagination parameters', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			const testUser = await loadTestUser();
@@ -693,8 +710,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when given id is not owned by the current user', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '⛰️',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -737,8 +756,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns the one proposal asked for', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '⛰️',
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			const testUser = await loadTestUser();
@@ -768,8 +789,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns one proposal with deep fields', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🌎',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createTestBaseFields();
 			await createApplicationForm(db, null, {
@@ -984,9 +1007,11 @@ describe('/proposals', () => {
 		it('returns the proposal if an administrator requests a proposal they do not own', async () => {
 			const testUser = await loadTestUser();
 			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
 			await createTestBaseFields();
 			await createOpportunity(db, null, {
 				title: '🌎',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
@@ -1209,8 +1234,10 @@ describe('/proposals', () => {
 		});
 
 		it('creates exactly one proposal', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const before = await loadTableMetrics('proposals');
 			const testUser = await loadTestUser();

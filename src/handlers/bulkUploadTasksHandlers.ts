@@ -45,7 +45,7 @@ const postBulkUploadTask = (
 		return;
 	}
 
-	const { sourceId, fileName, sourceKey } = req.body;
+	const { sourceId, funderShortCode, fileName, sourceKey } = req.body;
 	const createdBy = req.user.keycloakUserId;
 
 	if (!sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
@@ -59,6 +59,7 @@ const postBulkUploadTask = (
 		.then(async () => {
 			const bulkUploadTask = await createBulkUploadTask(db, null, {
 				sourceId,
+				funderShortCode,
 				fileName,
 				sourceKey,
 				status: TaskStatus.PENDING,

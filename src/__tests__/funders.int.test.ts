@@ -5,6 +5,7 @@ import {
 	createOrUpdateFunder,
 	loadFunder,
 	loadTableMetrics,
+	loadSystemFunder,
 } from '../database';
 import { expectTimestamp } from '../test/utils';
 import {
@@ -20,14 +21,8 @@ describe('/funders', () => {
 			await agent.get('/funders').expect(401);
 		});
 
-		it('returns an empty bundle when no data is present', async () => {
-			await agent.get('/funders').set(authHeader).expect(200, {
-				entries: [],
-				total: 0,
-			});
-		});
-
 		it('returns all funders present in the database', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOrUpdateFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
@@ -54,8 +49,9 @@ describe('/funders', () => {
 						name: 'The Fund Fund',
 						keycloakOrganizationId: null,
 					},
+					systemFunder,
 				],
-				total: 2,
+				total: 3,
 			});
 		});
 	});

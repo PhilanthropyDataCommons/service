@@ -1,6 +1,11 @@
 import request from 'supertest';
 import { app } from '../app';
-import { db, createOpportunity, loadTableMetrics } from '../database';
+import {
+	db,
+	createOpportunity,
+	loadTableMetrics,
+	loadSystemFunder,
+} from '../database';
 import { expectTimestamp } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
@@ -18,11 +23,14 @@ describe('/opportunities', () => {
 		});
 
 		it('returns all opportunities present in the database', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createOpportunity(db, null, {
 				title: 'Terrific opportunity 👐',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const response = await request(app)
 				.get('/opportunities')
@@ -34,11 +42,15 @@ describe('/opportunities', () => {
 						id: 1,
 						createdAt: expectTimestamp,
 						title: 'Tremendous opportunity 👌',
+						funderShortCode: systemFunder.shortCode,
+						funder: systemFunder,
 					},
 					{
 						id: 2,
 						createdAt: expectTimestamp,
 						title: 'Terrific opportunity 👐',
+						funderShortCode: systemFunder.shortCode,
+						funder: systemFunder,
 					},
 				],
 				total: 2,
@@ -52,9 +64,19 @@ describe('/opportunities', () => {
 		});
 
 		it('returns exactly one opportunity selected by id', async () => {
-			await createOpportunity(db, null, { title: '🔥' });
-			await createOpportunity(db, null, { title: '✨' });
-			await createOpportunity(db, null, { title: '🚀' });
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			await createOpportunity(db, null, {
+				title: '✨',
+				funderShortCode: systemFunder.shortCode,
+			});
+			await createOpportunity(db, null, {
+				title: '🚀',
+				funderShortCode: systemFunder.shortCode,
+			});
 
 			const response = await request(app)
 				.get(`/opportunities/2`)
@@ -64,6 +86,8 @@ describe('/opportunities', () => {
 				id: 2,
 				createdAt: expectTimestamp,
 				title: '✨',
+				funderShortCode: systemFunder.shortCode,
+				funder: systemFunder,
 			});
 		});
 
@@ -90,8 +114,10 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 404 when id is not found', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'This definitely should not be returned',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await request(app).get('/opportunities/9001').set(authHeader).expect(404);
 		});
@@ -103,12 +129,16 @@ describe('/opportunities', () => {
 		});
 
 		it('creates and returns exactly one opportunity', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			const before = await loadTableMetrics('opportunities');
 			const result = await request(app)
 				.post('/opportunities')
 				.type('application/json')
 				.set(authHeader)
-				.send({ title: '🎆' })
+				.send({
+					title: '🎆',
+					funderShortCode: systemFunder.shortCode,
+				})
 				.expect(201);
 			const after = await loadTableMetrics('opportunities');
 			expect(before.count).toEqual(0);
@@ -121,11 +151,25 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 400 bad request when no title sent', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			const result = await request(app)
 				.post('/opportunities')
 				.type('application/json')
 				.set(authHeader)
-				.send({ noTitleHere: '👎' })
+				.send({ funderShortCode: systemFunder.shortCode })
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 400 bad request when no funderShortCode sent', async () => {
+			const result = await request(app)
+				.post('/opportunities')
+				.type('application/json')
+				.set(authHeader)
+				.send({ title: '👎' })
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',

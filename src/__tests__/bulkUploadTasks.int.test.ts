@@ -7,6 +7,7 @@ import {
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
+	loadSystemFunder,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
@@ -39,6 +40,7 @@ describe('/tasks/bulkUploads', () => {
 		it('returns bulk upload tasks associated with the requesting user', async () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
 			const thirdUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -49,6 +51,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
 				createdBy: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
@@ -56,6 +59,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
 				createdBy: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
@@ -63,6 +67,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-baz',
 				status: TaskStatus.COMPLETED,
 				createdBy: systemUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
@@ -70,6 +75,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-boop',
 				status: TaskStatus.COMPLETED,
 				createdBy: thirdUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			await request(app)
@@ -84,6 +90,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 2,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'bar.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -95,6 +103,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 1,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'foo.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
@@ -109,6 +119,7 @@ describe('/tasks/bulkUploads', () => {
 
 		it('returns all bulk uploads for administrative users', async () => {
 			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -119,6 +130,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
 				createdBy: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
@@ -126,6 +138,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
 				createdBy: anotherUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			await request(app)
@@ -140,6 +153,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 2,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'bar.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -151,6 +166,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 1,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'foo.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
@@ -165,6 +182,7 @@ describe('/tasks/bulkUploads', () => {
 
 		it('returns upload tasks for specified createdBy user', async () => {
 			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -175,6 +193,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
 				createdBy: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
@@ -182,6 +201,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
 				createdBy: anotherUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			await request(app)
@@ -198,6 +218,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 2,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'bar.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
@@ -212,6 +234,7 @@ describe('/tasks/bulkUploads', () => {
 
 		it('returns upload tasks for the admin user when createdBy is set to me as an admin', async () => {
 			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -222,6 +245,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
 				createdBy: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
@@ -229,6 +253,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
 				createdBy: anotherUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 			});
 
 			await request(app)
@@ -243,6 +268,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 1,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'foo.csv',
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
@@ -257,6 +284,7 @@ describe('/tasks/bulkUploads', () => {
 
 		it('supports pagination', async () => {
 			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
@@ -266,6 +294,7 @@ describe('/tasks/bulkUploads', () => {
 					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 					status: TaskStatus.COMPLETED,
 					createdBy: testUser.keycloakUserId,
+					funderShortCode: systemFunder.shortCode,
 				});
 			}, Promise.resolve());
 
@@ -285,6 +314,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 15,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'bar-15.csv',
 								fileSize: null,
 								sourceKey:
@@ -297,6 +328,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 14,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'bar-14.csv',
 								fileSize: null,
 								sourceKey:
@@ -309,6 +342,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 13,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'bar-13.csv',
 								fileSize: null,
 								sourceKey:
@@ -321,6 +356,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 12,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'bar-12.csv',
 								fileSize: null,
 								sourceKey:
@@ -333,6 +370,8 @@ describe('/tasks/bulkUploads', () => {
 								id: 11,
 								sourceId: systemSource.id,
 								source: systemSource,
+								funderShortCode: systemFunder.shortCode,
+								funder: systemFunder,
 								fileName: 'bar-11.csv',
 								fileSize: null,
 								sourceKey:
@@ -361,6 +400,7 @@ describe('/tasks/bulkUploads', () => {
 
 		it('creates exactly one bulk upload task', async () => {
 			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
 				.post('/tasks/bulkUploads/')
@@ -368,6 +408,7 @@ describe('/tasks/bulkUploads', () => {
 				.set(authHeader)
 				.send({
 					sourceId: systemSource.id,
+					funderShortCode: systemFunder.shortCode,
 					fileName: 'foo.csv',
 					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				})
@@ -382,6 +423,8 @@ describe('/tasks/bulkUploads', () => {
 				source: systemSource,
 				fileName: 'foo.csv',
 				fileSize: null,
+				funderShortCode: systemFunder.shortCode,
+				funder: systemFunder,
 				sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: 'pending',
 				createdAt: expectTimestamp,

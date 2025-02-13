@@ -12,6 +12,7 @@ import {
 	loadChangemakerProposalBundle,
 	loadOpportunityBundle,
 	loadSystemSource,
+	loadSystemFunder,
 } from '../../database';
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -54,9 +55,11 @@ const createTestBulkUploadTask = async (
 ): Promise<BulkUploadTask> => {
 	const systemUser = await loadSystemUser(db, null);
 	const systemSource = await loadSystemSource(db, null);
+	const systemFunder = await loadSystemFunder(db, null);
 	const defaultValues = {
 		fileName: 'bar.csv',
 		sourceId: systemSource.id,
+		funderShortCode: systemFunder.shortCode,
 		sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
 		status: TaskStatus.PENDING,
 		createdBy: systemUser.keycloakUserId,

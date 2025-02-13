@@ -7,6 +7,7 @@ import {
 	createChangemakerProposal,
 	createProposal,
 	loadTableMetrics,
+	loadSystemFunder,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
@@ -31,8 +32,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns the ChangemakerProposals for the specified changemaker', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();
@@ -112,8 +115,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns the ProposalChangemakers for the specified proposal', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();
@@ -184,8 +189,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('creates exactly one ChangemakerProposal', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await insertTestChangemakers();
 			const testUser = await loadTestUser();
@@ -233,8 +240,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 400 bad request when no proposalId is sent', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();
@@ -258,8 +267,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 400 bad request when no changemakerId is sent', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();
@@ -283,8 +294,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 422 Conflict when a non-existent proposal is sent', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await insertTestChangemakers();
 			const result = await request(app)
@@ -302,8 +315,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 422 Conflict when a non-existent changemaker is sent', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
@@ -326,8 +341,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 409 Conflict when attempting to create a duplicate ChangemakerProposal', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			await insertTestChangemakers();

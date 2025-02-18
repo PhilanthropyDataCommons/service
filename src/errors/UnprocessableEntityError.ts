@@ -1,1 +1,3 @@
-export class UnprocessableEntityError extends Error {}
+export class UnprocessableEntityError extends Error {
+	name = 'UnprocessableEntityError';
+}

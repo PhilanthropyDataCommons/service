@@ -74,39 +74,30 @@ const postApplicationForms = (
 	}
 	const { fields } = req.body;
 
-	createApplicationForm(db, null, req.body)
-		.then((applicationForm) => {
-			const queries = fields.map(async (field) =>
+	(async () => {
+		const applicationForm = await createApplicationForm(db, null, req.body);
+		const applicationFormFields = await Promise.all(
+			fields.map(async (field) =>
 				createApplicationFormField(db, null, {
 					...field,
 					applicationFormId: applicationForm.id,
 				}),
-			);
-			Promise.all(queries)
-				.then((applicationFormFields) => {
-					res
-						.status(201)
-						.contentType('application/json')
-						.send({
-							...applicationForm,
-							fields: applicationFormFields,
-						});
-				})
-				.catch((error: unknown) => {
-					if (isTinyPgErrorWithQueryContext(error)) {
-						next(new DatabaseError('Error creating application form.', error));
-						return;
-					}
-					next(error);
-				});
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating application form.', error));
-				return;
-			}
-			next(error);
-		});
+			),
+		);
+		res
+			.status(201)
+			.contentType('application/json')
+			.send({
+				...applicationForm,
+				fields: applicationFormFields,
+			});
+	})().catch((error: unknown) => {
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(new DatabaseError('Error creating application form.', error));
+			return;
+		}
+		next(error);
+	});
 };
 
 export const applicationFormsHandlers = {

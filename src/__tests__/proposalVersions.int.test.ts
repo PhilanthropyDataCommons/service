@@ -10,6 +10,7 @@ import {
 	createProposalVersion,
 	loadSystemSource,
 	loadTableMetrics,
+	loadSystemFunder,
 } from '../database';
 import { getLogger } from '../logger';
 import { BaseFieldDataType, BaseFieldScope } from '../types';
@@ -43,7 +44,11 @@ describe('/proposalVersions', () => {
 
 		it('returns exactly one proposal version selected by id', async () => {
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createOpportunity(db, null, { title: '🔥' });
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
 			const testUser = await loadTestUser();
 			const proposal = await createProposal(db, null, {
 				externalId: 'proposal-1',
@@ -104,7 +109,11 @@ describe('/proposalVersions', () => {
 
 		it('creates exactly one proposal version', async () => {
 			const systemSource = await loadSystemSource(db, null);
-			await createOpportunity(db, null, { title: '🔥' });
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
@@ -140,7 +149,11 @@ describe('/proposalVersions', () => {
 
 		it('creates exactly the number of provided field values', async () => {
 			const systemSource = await loadSystemSource(db, null);
-			await createOpportunity(db, null, { title: '🔥' });
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
@@ -270,7 +283,11 @@ describe('/proposalVersions', () => {
 
 		it('returns 409 Conflict when the provided proposal does not exist', async () => {
 			const systemSource = await loadSystemSource(db, null);
-			await createOpportunity(db, null, { title: '🔥' });
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
@@ -304,7 +321,11 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 409 conflict when the provided source does not exist', async () => {
-			await createOpportunity(db, null, { title: '🔥' });
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
@@ -338,7 +359,11 @@ describe('/proposalVersions', () => {
 
 		it('Returns 409 Conflict if the provided application form does not exist', async () => {
 			const systemSource = await loadSystemSource(db, null);
-			await createOpportunity(db, null, { title: '🔥' });
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
@@ -378,8 +403,15 @@ describe('/proposalVersions', () => {
 
 		it('Returns 409 Conflict if the provided application form ID is not associated with the proposal opportunity', async () => {
 			const systemSource = await loadSystemSource(db, null);
-			await createOpportunity(db, null, { title: '🔥' });
-			await createOpportunity(db, null, { title: '💧' });
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			await createOpportunity(db, null, {
+				title: '💧',
+				funderShortCode: systemFunder.shortCode,
+			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
@@ -424,7 +456,11 @@ describe('/proposalVersions', () => {
 
 		it('Returns 409 Conflict if a provided application form field ID does not exist', async () => {
 			const systemSource = await loadSystemSource(db, null);
-			await createOpportunity(db, null, { title: '🔥' });
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
@@ -471,7 +507,11 @@ describe('/proposalVersions', () => {
 
 		it('Returns 409 Conflict if a provided application form field ID is not associated with the supplied application form ID', async () => {
 			const systemSource = await loadSystemSource(db, null);
-			await createOpportunity(db, null, { title: '🔥' });
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',

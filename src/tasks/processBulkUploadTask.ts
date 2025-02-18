@@ -159,6 +159,7 @@ const createOpportunityForBulkUploadTask = async (
 ): Promise<Opportunity> =>
 	createOpportunity(db, null, {
 		title: `Bulk Upload (${bulkUploadTask.createdAt})`,
+		funderShortCode: bulkUploadTask.funderShortCode,
 	});
 
 const createApplicationFormFieldsForBulkUploadTask = async (

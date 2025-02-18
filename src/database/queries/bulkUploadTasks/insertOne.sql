@@ -1,5 +1,6 @@
 INSERT INTO bulk_upload_tasks (
 	source_id,
+	funder_short_code,
 	file_name,
 	source_key,
 	status,
@@ -7,6 +8,7 @@ INSERT INTO bulk_upload_tasks (
 )
 VALUES (
 	:sourceId,
+	:funderShortCode,
 	:fileName,
 	:sourceKey,
 	:status,

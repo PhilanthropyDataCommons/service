@@ -1,9 +1,12 @@
 import { ajv } from '../ajv';
 import { TaskStatus } from './TaskStatus';
+import { shortCodeSchema } from './ShortCode';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { Source } from './Source';
 import type { KeycloakId } from './KeycloakId';
+import type { ShortCode } from './ShortCode';
+import type { Funder } from './Funder';
 
 interface BulkUploadTask {
 	readonly id: number;
@@ -11,6 +14,8 @@ interface BulkUploadTask {
 	readonly source: Source;
 	fileName: string;
 	sourceKey: string;
+	funderShortCode: ShortCode;
+	readonly funder: Funder;
 	readonly status: TaskStatus;
 	readonly fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
 	readonly createdAt: string;
@@ -36,8 +41,11 @@ const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 			type: 'string',
 			minLength: 1,
 		},
+		funderShortCode: {
+			...shortCodeSchema,
+		},
 	},
-	required: ['sourceId', 'fileName', 'sourceKey'],
+	required: ['sourceId', 'fileName', 'sourceKey', 'funderShortCode'],
 };
 
 const isWritableBulkUploadTask = ajv.compile(writableBulkUploadTaskSchema);

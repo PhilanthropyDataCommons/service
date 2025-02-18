@@ -6,6 +6,7 @@ import {
 	createBaseField,
 	createOpportunity,
 	db,
+	loadSystemFunder,
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
@@ -50,11 +51,14 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns all application forms present in the database', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createOpportunity(db, null, {
 				title: 'Good opportunity',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
@@ -95,11 +99,14 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns an application form with its fields', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Holiday opportunity 🎄',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createOpportunity(db, null, {
 				title: 'Another holiday opportunity 🕎',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
@@ -213,8 +220,10 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly one application form', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const before = await loadTableMetrics('application_forms');
 			const result = await request(app)
@@ -239,8 +248,10 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly the number of provided fields', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createTestBaseFields();
 			const before = await loadTableMetrics('application_form_fields');
@@ -282,8 +293,10 @@ describe('/applicationForms', () => {
 		});
 
 		it('increments version when creating a second form for an opportunity', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
@@ -371,8 +384,10 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 500 UnknownError if a generic Error is thrown when inserting the field', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
 			});
 			await createTestBaseFields();
 			jest

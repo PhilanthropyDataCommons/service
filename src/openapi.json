@@ -123,6 +123,14 @@
 						"$ref": "#/components/schemas/Source",
 						"readOnly": true
 					},
+					"funderShortCode": {
+						"type": "string",
+						"example": "pdc"
+					},
+					"funder": {
+						"$ref": "#/components/schemas/Funder",
+						"readOnly": true
+					},
 					"fileName": {
 						"type": "string",
 						"example": "upload.csv",
@@ -844,6 +852,14 @@
 					"title": {
 						"type": "string",
 						"example": "The Open Source Foundation 2022 Challenge"
+					},
+					"funderShortCode": {
+						"type": "string",
+						"example": "pdc"
+					},
+					"funder": {
+						"$ref": "#/components/schemas/Funder",
+						"readOnly": true
 					},
 					"createdAt": {
 						"type": "string",

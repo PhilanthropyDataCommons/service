@@ -33,6 +33,7 @@ erDiagram
   Opportunity {
     int id
     string title
+		string funder_short_code
     datetime createdAt
   }
   ApplicationForm {
@@ -105,6 +106,7 @@ erDiagram
 		bulk_upload_status status
 		integer file_size
 		integer source_id
+		string funder_short_code
 		string created_by
 		timestamp created_at
 	}
@@ -116,6 +118,8 @@ erDiagram
   Changemaker ||--o{ Proposal : submits
   Proposal }|--|| Opportunity : "responds to"
   Opportunity ||--|{ ApplicationForm : establishes
+  Funder ||--|{ Opportunity : has
+  Funder ||--|{ BulkUpload : has
   Proposal ||--o{ Outcome : "has"
   ApplicationForm ||--|{ ApplicationFormField : has
   ApplicationFormField }o--|| BaseField : represents

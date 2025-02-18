@@ -17,6 +17,7 @@ import {
 	loadSystemUser,
 	loadTableMetrics,
 	createOrUpdateDataProvider,
+	loadSystemFunder,
 } from '../database';
 import {
 	expectTimestamp,
@@ -173,8 +174,10 @@ describe('/changemakers', () => {
 		});
 
 		it('returns a subset of changemakers present in the database when a proposal filter is provided', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
@@ -217,8 +220,10 @@ describe('/changemakers', () => {
 		});
 
 		it('does not return duplicate changemakers when a changemaker has multiple proposals', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
 			});
 			const testUser = await loadTestUser();
 			await createProposal(db, null, {
@@ -380,6 +385,7 @@ describe('/changemakers', () => {
 				});
 				firstFunderOpportunity = await createOpportunity(db, null, {
 					title: `${firstFunder.name} opportunity`,
+					funderShortCode: firstFunder.shortCode,
 				});
 				firstFunderSourceId = (
 					await createSource(db, null, {

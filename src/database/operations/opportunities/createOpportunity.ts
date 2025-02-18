@@ -5,6 +5,6 @@ const createOpportunity = generateCreateOrUpdateItemOperation<
 	Opportunity,
 	WritableOpportunity,
 	[]
->('opportunities.insertOne', ['title'], []);
+>('opportunities.insertOne', ['title', 'funderShortCode'], []);
 
 export { createOpportunity };

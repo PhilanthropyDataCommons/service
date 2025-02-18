@@ -6,12 +6,20 @@ import {
 	loadOpportunityBundle,
 } from '../database';
 import {
+	isAuthContext,
 	isId,
 	isTinyPgErrorWithQueryContext,
 	isWritableOpportunity,
+	Permission,
 } from '../types';
-import { DatabaseError, InputValidationError } from '../errors';
+import {
+	DatabaseError,
+	FailedMiddlewareError,
+	InputValidationError,
+	UnauthorizedError,
+} from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
+import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response, NextFunction } from 'express';
 
 const getOpportunities = (
@@ -62,6 +70,10 @@ const postOpportunity = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
 	if (!isWritableOpportunity(req.body)) {
 		next(
 			new InputValidationError(
@@ -69,6 +81,16 @@ const postOpportunity = (
 				isWritableOpportunity.errors ?? [],
 			),
 		);
+		return;
+	}
+	if (
+		!authContextHasFunderPermission(
+			req,
+			req.body.funderShortCode,
+			Permission.EDIT,
+		)
+	) {
+		next(new UnauthorizedError());
 		return;
 	}
 	createOpportunity(db, null, req.body)

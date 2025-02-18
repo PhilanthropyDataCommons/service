@@ -155,3 +155,23 @@ PDC interprets this as "Grant members of the group
 to changemaker `42`." It may not be the case that changemaker 42 is the group
 mentioned here, it may be that group `06e80ea0-32b7-4716-b031-95d701a88a2` is a
 funder, data provider, or other changemaker entirely.
+
+## Permission Descriptions
+
+### Changemaker
+
+#### Manage
+
+- Allows users to modify the permissions for the changemaker for other users and user groups.
+
+### Data Provider
+
+#### Manage
+
+- Allows users to modify the permissions for the data provider for other users and user groups.
+
+### Funder
+
+#### Manage
+
+- Allows users to modify the permissions for the funder for other users and user groups.

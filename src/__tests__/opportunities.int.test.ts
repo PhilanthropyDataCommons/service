@@ -5,9 +5,12 @@ import {
 	createOpportunity,
 	loadTableMetrics,
 	loadSystemFunder,
+	createOrUpdateUserFunderPermission,
+	loadSystemUser,
 } from '../database';
-import { expectTimestamp } from '../test/utils';
+import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
+import { Permission } from '../types';
 
 describe('/opportunities', () => {
 	describe('GET /', () => {
@@ -128,8 +131,16 @@ describe('/opportunities', () => {
 			await request(app).post('/opportunities').expect(401);
 		});
 
-		it('creates and returns exactly one opportunity', async () => {
+		it('creates and returns exactly one opportunity when edit funder permission is set', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			const before = await loadTableMetrics('opportunities');
 			const result = await request(app)
 				.post('/opportunities')
@@ -148,6 +159,37 @@ describe('/opportunities', () => {
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(1);
+		});
+
+		it('returns 401 unauthorized if the user does not have edit permission on the associated funder', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.MANAGE,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const before = await loadTableMetrics('opportunities');
+			await request(app)
+				.post('/opportunities')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					title: '🎆',
+					funderShortCode: systemFunder.shortCode,
+				})
+				.expect(401);
+			const after = await loadTableMetrics('opportunities');
+			expect(before.count).toEqual(0);
+			expect(after.count).toEqual(0);
 		});
 
 		it('returns 400 bad request when no title sent', async () => {

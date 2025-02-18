@@ -175,3 +175,7 @@ funder, data provider, or other changemaker entirely.
 #### Manage
 
 - Allows users to modify the permissions for the funder for other users and user groups.
+
+### Edit
+
+- Allows users to create new opportunities for the funder.

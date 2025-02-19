@@ -13,6 +13,14 @@ endpoints. Changemaker data cannot currently be directly written to the PDC,
 though that functionality is on the roadmap. Instead, changemaker data is
 aggregated from any proposals that have been submitted by the changemaker.
 
+## Registering fiscal sponsorship
+
+To register one changemaker as a fiscal sponsor of another changemaker
+explicitly (in addition to the proposal data reflecting fiscal sponsors), use
+`PUT /changemakers/:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId`
+where the `:changemakerId` is the sponsee. A changemaker may fiscally sponsor
+many other changemakers and vice versa.
+
 ## Viewing changemaker data
 
 To see changemaker data in the PDC, use `GET /changemakers`. This endpoint
@@ -24,6 +32,10 @@ for the given changemaker, PDC returns exactly one prioritized value. Each
 returned value may come from a separate data source, such as a proposal to a
 funder, a data platform provider (DataProvider in PDC), or the changemakers
 themselves. As of this writing values come solely from proposals.
+
+Rich field values ("gold" data) are returned in changemaker `fields`.
+
+Registered fiscal sponsors are returned in changemaker `fiscalSponsors`.
 
 ### Data prioritization or conflict resolution ("gold" data)
 

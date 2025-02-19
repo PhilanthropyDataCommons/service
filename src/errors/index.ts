@@ -6,3 +6,4 @@ export * from './InternalValidationError';
 export * from './NoDataReturnedError';
 export * from './NotFoundError';
 export * from './UnauthorizedError';
+export * from './UnprocessableEntityError';

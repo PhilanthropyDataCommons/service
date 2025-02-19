@@ -179,3 +179,4 @@ funder, data provider, or other changemaker entirely.
 ### Edit
 
 - Allows users to create new opportunities for the funder.
+- Allows users to create new application forms for the funder's opportunities.

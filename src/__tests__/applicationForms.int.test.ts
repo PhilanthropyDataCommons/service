@@ -5,13 +5,15 @@ import {
 	createApplicationFormField,
 	createBaseField,
 	createOpportunity,
+	createOrUpdateUserFunderPermission,
 	db,
 	loadSystemFunder,
+	loadSystemUser,
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { BaseFieldDataType, BaseFieldScope, PostgresErrorCode } from '../types';
-import { expectTimestamp } from '../test/utils';
+import { BaseFieldDataType, BaseFieldScope, Permission } from '../types';
+import { expectTimestamp, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
 const logger = getLogger(__filename);
@@ -221,6 +223,14 @@ describe('/applicationForms', () => {
 
 		it('creates exactly one application form', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
@@ -247,8 +257,51 @@ describe('/applicationForms', () => {
 			expect(after.count).toEqual(1);
 		});
 
+		it(`returns 401 unauthorized if the user does not have edit permission on the associated opportunity's funder`, async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.MANAGE,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOpportunity(db, null, {
+				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const before = await loadTableMetrics('application_forms');
+			await request(app)
+				.post('/applicationForms')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					opportunityId: '1',
+					fields: [],
+				})
+				.expect(401);
+			const after = await loadTableMetrics('application_forms');
+			expect(before.count).toEqual(0);
+			expect(after.count).toEqual(0);
+		});
+
 		it('creates exactly the number of provided fields', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
@@ -294,6 +347,14 @@ describe('/applicationForms', () => {
 
 		it('increments version when creating a second form for an opportunity', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
@@ -374,12 +435,8 @@ describe('/applicationForms', () => {
 				})
 				.expect(422);
 			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
-					{
-						code: PostgresErrorCode.FOREIGN_KEY_VIOLATION,
-					},
-				],
+				name: 'UnprocessableEntityError',
+				details: expect.any(Array) as unknown[],
 			});
 		});
 

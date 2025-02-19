@@ -6,6 +6,7 @@ import {
 	InputConflictError,
 	NotFoundError,
 	UnauthorizedError,
+	UnprocessableEntityError,
 } from '../errors';
 import { PostgresErrorCode } from '../types';
 import { getLogger } from '../logger';
@@ -76,6 +77,9 @@ const getHttpStatusCodeForError = (error: unknown): number => {
 	}
 	if (error instanceof NotFoundError) {
 		return 404;
+	}
+	if (error instanceof UnprocessableEntityError) {
+		return 422;
 	}
 	// In the `jwks-rsa` library, when a rate limit is exceeded a string error gets thrown.
 	if (

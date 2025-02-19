@@ -5,14 +5,25 @@ import {
 	getLimitValues,
 	loadApplicationForm,
 	loadApplicationFormBundle,
+	loadOpportunity,
 } from '../database';
 import {
 	isTinyPgErrorWithQueryContext,
 	isWritableApplicationFormWithFields,
 	isId,
+	isAuthContext,
+	Permission,
 } from '../types';
-import { DatabaseError, InputValidationError } from '../errors';
+import {
+	DatabaseError,
+	FailedMiddlewareError,
+	InputValidationError,
+	NotFoundError,
+	UnauthorizedError,
+	UnprocessableEntityError,
+} from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
+import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response, NextFunction } from 'express';
 
 const getApplicationForms = (
@@ -63,6 +74,11 @@ const postApplicationForms = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
+
 	if (!isWritableApplicationFormWithFields(req.body)) {
 		next(
 			new InputValidationError(
@@ -72,41 +88,47 @@ const postApplicationForms = (
 		);
 		return;
 	}
-	const { fields } = req.body;
-
-	createApplicationForm(db, null, req.body)
-		.then((applicationForm) => {
-			const queries = fields.map(async (field) =>
+	const { fields, opportunityId } = req.body;
+	(async () => {
+		const opportunity = await loadOpportunity(db, null, opportunityId);
+		if (
+			!authContextHasFunderPermission(
+				req,
+				opportunity.funderShortCode,
+				Permission.EDIT,
+			)
+		) {
+			throw new UnauthorizedError();
+		}
+		const applicationForm = await createApplicationForm(db, null, {
+			opportunityId,
+		});
+		const applicationFormFields = await Promise.all(
+			fields.map(async (field) =>
 				createApplicationFormField(db, null, {
 					...field,
 					applicationFormId: applicationForm.id,
 				}),
-			);
-			Promise.all(queries)
-				.then((applicationFormFields) => {
-					res
-						.status(201)
-						.contentType('application/json')
-						.send({
-							...applicationForm,
-							fields: applicationFormFields,
-						});
-				})
-				.catch((error: unknown) => {
-					if (isTinyPgErrorWithQueryContext(error)) {
-						next(new DatabaseError('Error creating application form.', error));
-						return;
-					}
-					next(error);
-				});
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating application form.', error));
-				return;
-			}
-			next(error);
-		});
+			),
+		);
+		res
+			.status(201)
+			.contentType('application/json')
+			.send({
+				...applicationForm,
+				fields: applicationFormFields,
+			});
+	})().catch((error: unknown) => {
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(new DatabaseError('Error creating application form.', error));
+			return;
+		}
+		if (error instanceof NotFoundError) {
+			next(new UnprocessableEntityError('A related entity was not found'));
+			return;
+		}
+		next(error);
+	});
 };
 
 export const applicationFormsHandlers = {

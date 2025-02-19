@@ -139,6 +139,7 @@ erDiagram
 	User }o--o{ Changemaker : "is granted permissions for"
 	User }o--o{ Funder : "is granted permissions for"
 	User }o--o{ DataProvider : "is granted permissions for"
+	Changemaker }o--o{ Changemaker : "may fiscally sponsor"
 ```
 
 ## Narrative

@@ -180,3 +180,4 @@ funder, data provider, or other changemaker entirely.
 
 - Allows users to create new opportunities for the funder.
 - Allows users to create new application forms for the funder's opportunities.
+- Allows users to create new bulk uploads for the funder.

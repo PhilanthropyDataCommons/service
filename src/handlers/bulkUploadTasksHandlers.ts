@@ -6,6 +6,7 @@ import {
 	loadBulkUploadTaskBundle,
 } from '../database';
 import {
+	Permission,
 	TaskStatus,
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
@@ -17,6 +18,7 @@ import {
 	InputConflictError,
 	InputValidationError,
 	NotFoundError,
+	UnprocessableEntityError,
 } from '../errors';
 import {
 	extractCreatedByParameters,
@@ -24,6 +26,7 @@ import {
 } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
 import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
+import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response, NextFunction } from 'express';
 
 const postBulkUploadTask = (
@@ -47,6 +50,15 @@ const postBulkUploadTask = (
 
 	const { sourceId, funderShortCode, fileName, sourceKey } = req.body;
 	const createdBy = req.user.keycloakUserId;
+
+	if (!authContextHasFunderPermission(req, funderShortCode, Permission.EDIT)) {
+		next(
+			new UnprocessableEntityError(
+				'You do not have write permissions on a funder with the specified short code.',
+			),
+		);
+		return;
+	}
 
 	if (!sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
 		throw new InputValidationError(

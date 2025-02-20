@@ -172,12 +172,12 @@ funder, data provider, or other changemaker entirely.
 
 ### Funder
 
-#### Manage
-
-- Allows users to modify the permissions for the funder for other users and user groups.
-
-### Edit
+#### Edit
 
 - Allows users to create new opportunities for the funder.
 - Allows users to create new application forms for the funder's opportunities.
 - Allows users to create new bulk uploads for the funder.
+
+#### Manage
+
+- Allows users to modify the permissions for the funder for other users and user groups.

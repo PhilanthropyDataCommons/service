@@ -8,6 +8,7 @@ import {
 	loadSystemUser,
 	loadTableMetrics,
 	loadSystemFunder,
+	createOrUpdateUserFunderPermission,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
@@ -15,7 +16,7 @@ import {
 	mockJwtWithoutSub as authHeaderWithNoSub,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { TaskStatus, keycloakIdToString } from '../types';
+import { Permission, TaskStatus, keycloakIdToString } from '../types';
 
 describe('/tasks/bulkUploads', () => {
 	describe('GET /', () => {
@@ -401,6 +402,15 @@ describe('/tasks/bulkUploads', () => {
 		it('creates exactly one bulk upload task', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
+
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
 				.post('/tasks/bulkUploads/')
@@ -414,7 +424,6 @@ describe('/tasks/bulkUploads', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics('bulk_upload_tasks');
-			const testUser = await loadTestUser();
 
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({
@@ -433,8 +442,59 @@ describe('/tasks/bulkUploads', () => {
 			expect(after.count).toEqual(1);
 		});
 
+		it('returns 422 unprocessable entity when the user does not have edit permission for the associated funder', async () => {
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.MANAGE,
+				createdBy: systemUser.keycloakUserId,
+			});
+
+			const before = await loadTableMetrics('bulk_upload_tasks');
+			const result = await request(app)
+				.post('/tasks/bulkUploads/')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					sourceId: systemSource.id,
+					funderShortCode: systemFunder.shortCode,
+					fileName: 'foo.csv',
+					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+				})
+				.expect(422);
+			const after = await loadTableMetrics('bulk_upload_tasks');
+
+			expect(before.count).toEqual(0);
+			expect(result.body).toEqual({
+				details: [{ name: 'UnprocessableEntityError' }],
+				message:
+					'You do not have write permissions on a funder with the specified short code.',
+				name: 'UnprocessableEntityError',
+			});
+			expect(after.count).toEqual(0);
+		});
+
 		it('returns 400 bad request when no file name is provided', async () => {
 			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')
@@ -452,6 +512,15 @@ describe('/tasks/bulkUploads', () => {
 
 		it('returns 400 bad request when an invalid file name is provided', async () => {
 			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')
@@ -469,11 +538,22 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when an invalid source key is provided', async () => {
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
 				.send({
+					sourceId: systemSource.id,
 					fileName: 'foo.csv',
 					sourceKey: 'notUnprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				})
@@ -485,11 +565,22 @@ describe('/tasks/bulkUploads', () => {
 		});
 
 		it('returns 400 bad request when no source key is provided', async () => {
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
 				.send({
+					sourceId: systemSource.id,
 					fileName: 'foo.csv',
 				})
 				.expect(400);

@@ -5,7 +5,8 @@ const authContextHasFunderPermission = (
 	funderShortCode: ShortCode,
 	permission: Permission,
 ): boolean =>
-	auth.user.permissions.funder[funderShortCode] !== undefined &&
-	auth.user.permissions.funder[funderShortCode].includes(permission);
+	auth.role.isAdministrator ||
+	(auth.user.permissions.funder[funderShortCode] !== undefined &&
+		auth.user.permissions.funder[funderShortCode].includes(permission));
 
 export { authContextHasFunderPermission };

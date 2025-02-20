@@ -1,6 +1,6 @@
 import express from 'express';
 import { sourcesHandlers } from '../handlers/sourcesHandlers';
-import { requireAdministratorRole, requireAuthentication } from '../middleware';
+import { requireAuthentication } from '../middleware';
 
 const sourcesRouter = express.Router();
 
@@ -12,6 +12,6 @@ sourcesRouter.get(
 	sourcesHandlers.getSource,
 );
 
-sourcesRouter.post('/', requireAdministratorRole, sourcesHandlers.postSource);
+sourcesRouter.post('/', requireAuthentication, sourcesHandlers.postSource);
 
 export { sourcesRouter };

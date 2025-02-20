@@ -8,12 +8,17 @@ import {
 	createSource,
 	loadSystemSource,
 	loadTableMetrics,
+	loadSystemUser,
+	createOrUpdateUserChangemakerPermission,
+	createOrUpdateUserFunderPermission,
+	createOrUpdateUserDataProviderPermission,
 } from '../database';
-import { expectTimestamp } from '../test/utils';
+import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
+import { Permission } from '../types';
 
 const agent = request.agent(app);
 
@@ -114,11 +119,7 @@ describe('/sources', () => {
 			await agent.post('/sources').expect(401);
 		});
 
-		it('requires administrator role', async () => {
-			await agent.post('/sources').set(authHeader).expect(401);
-		});
-
-		it('creates and returns exactly one changemaker source', async () => {
+		it('creates and returns exactly one changemaker source for an admin user', async () => {
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
@@ -146,7 +147,82 @@ describe('/sources', () => {
 			expect(after.count).toEqual(2);
 		});
 
-		it('creates and returns exactly one funder source', async () => {
+		it('creates and returns exactly one changemaker source for a user with edit permissions on that changemaker', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '11-1111111',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			await createOrUpdateUserChangemakerPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				changemakerId: changemaker.id,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const before = await loadTableMetrics('sources');
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Example Corp',
+					changemakerId: changemaker.id,
+				})
+				.expect(201);
+			const after = await loadTableMetrics('sources');
+			expect(result.body).toMatchObject({
+				id: 2,
+				label: 'Example Corp',
+				changemakerId: changemaker.id,
+				changemaker,
+				createdAt: expectTimestamp,
+			});
+			expect(after.count).toEqual(before.count + 1);
+		});
+
+		it('returns 422 if the user does not have edit permission on the changemaker', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '11-1111111',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			await createOrUpdateUserChangemakerPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				changemakerId: changemaker.id,
+				permission: Permission.MANAGE,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserChangemakerPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				changemakerId: changemaker.id,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const before = await loadTableMetrics('sources');
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Example Corp',
+					changemakerId: changemaker.id,
+				})
+				.expect(422);
+			const after = await loadTableMetrics('sources');
+			expect(result.body).toEqual({
+				details: [{ name: 'UnprocessableEntityError' }],
+				message:
+					'You do not have write permissions on a changemaker with the specified id.',
+				name: 'UnprocessableEntityError',
+			});
+			expect(after.count).toEqual(before.count);
+		});
+
+		it('creates and returns exactly one funder source for an admin user', async () => {
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'foo',
 				name: 'Example Inc.',
@@ -174,7 +250,82 @@ describe('/sources', () => {
 			expect(after.count).toEqual(2);
 		});
 
-		it('creates and returns exactly one data provider source', async () => {
+		it('creates and returns exactly one funder source for a user with edit permissions on that funder', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'foo',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: funder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const before = await loadTableMetrics('sources');
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Example Corp',
+					funderShortCode: 'foo',
+				})
+				.expect(201);
+			const after = await loadTableMetrics('sources');
+			expect(result.body).toMatchObject({
+				id: 2,
+				label: 'Example Corp',
+				funderShortCode: 'foo',
+				funder,
+				createdAt: expectTimestamp,
+			});
+			expect(after.count).toEqual(before.count + 1);
+		});
+
+		it('returns 422 if the user does not have edit permission on the funder', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'foo',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: funder.shortCode,
+				permission: Permission.MANAGE,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: funder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const before = await loadTableMetrics('sources');
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Example Corp',
+					funderShortCode: 'foo',
+				})
+				.expect(422);
+			const after = await loadTableMetrics('sources');
+			expect(result.body).toEqual({
+				details: [{ name: 'UnprocessableEntityError' }],
+				message:
+					'You do not have write permissions on a funder with the specified short code.',
+				name: 'UnprocessableEntityError',
+			});
+			expect(after.count).toEqual(before.count);
+		});
+
+		it('creates and returns exactly one data provider source for an admin user', async () => {
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'foo',
 				name: 'Example Inc.',
@@ -200,6 +351,81 @@ describe('/sources', () => {
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(2);
+		});
+
+		it('creates and returns exactly one data provider source for a user with edit permissions on the data provider', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			const dataProvider = await createOrUpdateDataProvider(db, null, {
+				shortCode: 'foo',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			await createOrUpdateUserDataProviderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				dataProviderShortCode: dataProvider.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const before = await loadTableMetrics('sources');
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Example Corp',
+					dataProviderShortCode: 'foo',
+				})
+				.expect(201);
+			const after = await loadTableMetrics('sources');
+			expect(result.body).toMatchObject({
+				id: 2,
+				label: 'Example Corp',
+				dataProviderShortCode: 'foo',
+				dataProvider,
+				createdAt: expectTimestamp,
+			});
+			expect(after.count).toEqual(before.count + 1);
+		});
+
+		it('returns 422 if the user does not have edit permission on the data provider', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			const dataProvider = await createOrUpdateDataProvider(db, null, {
+				shortCode: 'foo',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			await createOrUpdateUserDataProviderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				dataProviderShortCode: dataProvider.shortCode,
+				permission: Permission.MANAGE,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserDataProviderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				dataProviderShortCode: dataProvider.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const before = await loadTableMetrics('sources');
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Example Corp',
+					dataProviderShortCode: 'foo',
+				})
+				.expect(422);
+			const after = await loadTableMetrics('sources');
+			expect(result.body).toEqual({
+				details: [{ name: 'UnprocessableEntityError' }],
+				message:
+					'You do not have write permissions on a data provider with the specified short code.',
+				name: 'UnprocessableEntityError',
+			});
+			expect(after.count).toEqual(before.count);
 		});
 
 		it('returns 400 bad request when no label sent', async () => {

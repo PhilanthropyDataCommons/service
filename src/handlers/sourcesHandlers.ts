@@ -10,13 +10,20 @@ import {
 	isId,
 	isTinyPgErrorWithQueryContext,
 	isWritableSource,
+	Permission,
 } from '../types';
 import {
 	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
+	UnprocessableEntityError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
+import {
+	authContextHasChangemakerPermission,
+	authContextHasDataProviderPermission,
+	authContextHasFunderPermission,
+} from '../authorization';
 import type { Request, Response, NextFunction } from 'express';
 
 const postSource = (req: Request, res: Response, next: NextFunction): void => {
@@ -29,6 +36,51 @@ const postSource = (req: Request, res: Response, next: NextFunction): void => {
 			new InputValidationError(
 				'Invalid request body.',
 				isWritableSource.errors ?? [],
+			),
+		);
+		return;
+	}
+	if (
+		'funderShortCode' in req.body &&
+		!authContextHasFunderPermission(
+			req,
+			req.body.funderShortCode,
+			Permission.EDIT,
+		)
+	) {
+		next(
+			new UnprocessableEntityError(
+				'You do not have write permissions on a funder with the specified short code.',
+			),
+		);
+		return;
+	}
+	if (
+		'dataProviderShortCode' in req.body &&
+		!authContextHasDataProviderPermission(
+			req,
+			req.body.dataProviderShortCode,
+			Permission.EDIT,
+		)
+	) {
+		next(
+			new UnprocessableEntityError(
+				'You do not have write permissions on a data provider with the specified short code.',
+			),
+		);
+		return;
+	}
+	if (
+		'changemakerId' in req.body &&
+		!authContextHasChangemakerPermission(
+			req,
+			req.body.changemakerId,
+			Permission.EDIT,
+		)
+	) {
+		next(
+			new UnprocessableEntityError(
+				'You do not have write permissions on a changemaker with the specified id.',
 			),
 		);
 		return;

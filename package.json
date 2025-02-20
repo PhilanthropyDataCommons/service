@@ -106,7 +106,7 @@
 		"swagger-ui-express": "^5.0.1",
 		"tinypg": "^7.0.0",
 		"tmp-promise": "^3.0.3",
-		"uuid": "^11.0.5"
+		"uuid": "^11.1.0"
 	},
 	"overrides": {
 		"mock-jwks": {

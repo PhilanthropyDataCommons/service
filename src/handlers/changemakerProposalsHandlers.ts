@@ -63,17 +63,20 @@ const postChangemakerProposal = (
 		return;
 	}
 
-	createChangemakerProposal(db, null, req.body)
-		.then((changemakerProposal) => {
-			res.status(201).contentType('application/json').send(changemakerProposal);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating changemaker proposal.', error));
-				return;
-			}
-			next(error);
-		});
+	(async () => {
+		const changemakerProposal = await createChangemakerProposal(
+			db,
+			null,
+			req.body,
+		);
+		res.status(201).contentType('application/json').send(changemakerProposal);
+	})().catch((error: unknown) => {
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(new DatabaseError('Error creating changemaker proposal.', error));
+			return;
+		}
+		next(error);
+	});
 };
 
 export const changemakerProposalsHandlers = {

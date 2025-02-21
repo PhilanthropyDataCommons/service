@@ -187,6 +187,7 @@ funder, data provider, or other changemaker entirely.
 - Allows users to create new bulk uploads for the funder.
 - Allows users to create sources for the funder.
 - Allows users to create new proposals for the funder's opportunities.
+- Allows users to create new changemaker relationships with proposals for the funder's opportunities.
 
 #### Manage
 

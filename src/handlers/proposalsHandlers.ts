@@ -5,17 +5,21 @@ import {
 	getLimitValues,
 	loadProposal,
 	loadProposalBundle,
+	loadOpportunity,
 } from '../database';
 import {
 	isId,
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableProposal,
+	Permission,
 } from '../types';
 import {
 	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
+	NotFoundError,
+	UnprocessableEntityError,
 } from '../errors';
 import {
 	extractCreatedByParameters,
@@ -23,6 +27,7 @@ import {
 	extractPaginationParameters,
 	extractSearchParameters,
 } from '../queryParameters';
+import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response, NextFunction } from 'express';
 
 const getProposals = (
@@ -106,21 +111,40 @@ const postProposal = (
 	const { externalId, opportunityId } = req.body;
 	const createdBy = req.user.keycloakUserId;
 
-	createProposal(db, null, {
-		opportunityId,
-		externalId,
-		createdBy,
-	})
-		.then((proposal) => {
-			res.status(201).contentType('application/json').send(proposal);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating proposal.', error));
-				return;
-			}
-			next(error);
+	(async () => {
+		const opportunity = await loadOpportunity(db, null, opportunityId);
+		if (
+			!authContextHasFunderPermission(
+				req,
+				opportunity.funderShortCode,
+				Permission.EDIT,
+			)
+		) {
+			throw new UnprocessableEntityError(
+				'You do not have write permissions on the funder associated with this opportunity.',
+			);
+		}
+		const proposal = await createProposal(db, null, {
+			opportunityId,
+			externalId,
+			createdBy,
 		});
+		res.status(201).contentType('application/json').send(proposal);
+	})().catch((error: unknown) => {
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(new DatabaseError('Error creating proposal.', error));
+			return;
+		}
+		if (error instanceof NotFoundError) {
+			next(
+				new UnprocessableEntityError(
+					`The associated ${error.details.entityType} was not found.`,
+				),
+			);
+			return;
+		}
+		next(error);
+	});
 };
 
 export const proposalsHandlers = {

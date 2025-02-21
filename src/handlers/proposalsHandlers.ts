@@ -5,17 +5,21 @@ import {
 	getLimitValues,
 	loadProposal,
 	loadProposalBundle,
+	loadOpportunity,
 } from '../database';
 import {
 	isId,
 	isAuthContext,
 	isTinyPgErrorWithQueryContext,
 	isWritableProposal,
+	Permission,
 } from '../types';
 import {
 	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
+	NotFoundError,
+	UnprocessableEntityError,
 } from '../errors';
 import {
 	extractCreatedByParameters,
@@ -23,6 +27,7 @@ import {
 	extractPaginationParameters,
 	extractSearchParameters,
 } from '../queryParameters';
+import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response, NextFunction } from 'express';
 
 const getProposals = (
@@ -107,6 +112,18 @@ const postProposal = (
 	const createdBy = req.user.keycloakUserId;
 
 	(async () => {
+		const opportunity = await loadOpportunity(db, null, opportunityId);
+		if (
+			!authContextHasFunderPermission(
+				req,
+				opportunity.funderShortCode,
+				Permission.EDIT,
+			)
+		) {
+			throw new UnprocessableEntityError(
+				'You do not have write permissions on the funder associated with this opportunity.',
+			);
+		}
 		const proposal = await createProposal(db, null, {
 			opportunityId,
 			externalId,
@@ -116,6 +133,14 @@ const postProposal = (
 	})().catch((error: unknown) => {
 		if (isTinyPgErrorWithQueryContext(error)) {
 			next(new DatabaseError('Error creating proposal.', error));
+			return;
+		}
+		if (error instanceof NotFoundError) {
+			next(
+				new UnprocessableEntityError(
+					`The associated ${error.details.entityType} was not found.`,
+				),
+			);
 			return;
 		}
 		next(error);

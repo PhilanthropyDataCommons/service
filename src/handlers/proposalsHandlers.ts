@@ -106,21 +106,20 @@ const postProposal = (
 	const { externalId, opportunityId } = req.body;
 	const createdBy = req.user.keycloakUserId;
 
-	createProposal(db, null, {
-		opportunityId,
-		externalId,
-		createdBy,
-	})
-		.then((proposal) => {
-			res.status(201).contentType('application/json').send(proposal);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating proposal.', error));
-				return;
-			}
-			next(error);
+	(async () => {
+		const proposal = await createProposal(db, null, {
+			opportunityId,
+			externalId,
+			createdBy,
 		});
+		res.status(201).contentType('application/json').send(proposal);
+	})().catch((error: unknown) => {
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(new DatabaseError('Error creating proposal.', error));
+			return;
+		}
+		next(error);
+	});
 };
 
 export const proposalsHandlers = {

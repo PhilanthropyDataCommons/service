@@ -15,6 +15,8 @@ import {
 	loadSystemSource,
 	loadTableMetrics,
 	loadSystemFunder,
+	loadSystemUser,
+	createOrUpdateUserFunderPermission,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
@@ -22,11 +24,11 @@ import {
 	mockJwtWithoutSub as authHeaderWithNoSubj,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { PostgresErrorCode } from '../types/PostgresErrorCode';
 import {
 	BaseFieldDataType,
 	BaseFieldScope,
 	keycloakIdToString,
+	Permission,
 } from '../types';
 
 const createTestBaseFields = async () => {
@@ -1233,7 +1235,7 @@ describe('/proposals', () => {
 				.expect(401);
 		});
 
-		it('creates exactly one proposal', async () => {
+		it('creates exactly one proposal when the user is an administrator', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
@@ -1244,7 +1246,7 @@ describe('/proposals', () => {
 			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					externalId: 'proposal123',
 					opportunityId: 1,
@@ -1260,6 +1262,41 @@ describe('/proposals', () => {
 				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(1);
+		});
+
+		it('creates exactly one proposal when the user has write permissions on the opportunity funder', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const before = await loadTableMetrics('proposals');
+			const result = await request(app)
+				.post('/proposals')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					externalId: 'proposal123',
+					opportunityId: 1,
+				})
+				.expect(201);
+			const after = await loadTableMetrics('proposals');
+			expect(result.body).toMatchObject({
+				id: 1,
+				externalId: 'proposal123',
+				opportunityId: 1,
+				createdAt: expectTimestamp,
+				createdBy: testUser.keycloakUserId,
+			});
+			expect(after.count).toEqual(before.count + 1);
 		});
 
 		it('returns 400 bad request when no external ID is sent', async () => {
@@ -1302,14 +1339,14 @@ describe('/proposals', () => {
 					opportunityId: 1,
 				})
 				.expect(422);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
+			expect(result.body).toEqual({
 				details: [
 					{
-						code: PostgresErrorCode.FOREIGN_KEY_VIOLATION,
-						constraint: 'fk_opportunity',
+						name: 'UnprocessableEntityError',
 					},
 				],
+				message: 'The associated Opportunity was not found.',
+				name: 'UnprocessableEntityError',
 			});
 		});
 	});

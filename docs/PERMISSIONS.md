@@ -160,11 +160,19 @@ funder, data provider, or other changemaker entirely.
 
 ### Changemaker
 
+#### Edit
+
+- Allows users to create sources for the changemaker.
+
 #### Manage
 
 - Allows users to modify the permissions for the changemaker for other users and user groups.
 
 ### Data Provider
+
+#### Edit
+
+- Allows users to create sources for the data provider.
 
 #### Manage
 
@@ -172,12 +180,13 @@ funder, data provider, or other changemaker entirely.
 
 ### Funder
 
-#### Manage
-
-- Allows users to modify the permissions for the funder for other users and user groups.
-
-### Edit
+#### Edit
 
 - Allows users to create new opportunities for the funder.
 - Allows users to create new application forms for the funder's opportunities.
 - Allows users to create new bulk uploads for the funder.
+- Allows users to create sources for the funder.
+
+#### Manage
+
+- Allows users to modify the permissions for the funder for other users and user groups.

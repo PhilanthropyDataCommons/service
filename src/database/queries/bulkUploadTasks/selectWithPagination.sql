@@ -7,14 +7,11 @@ WHERE
 		ELSE
 			created_by = :createdBy
 	END
-	AND CASE
-		WHEN :authContextKeycloakUserId::uuid IS NULL THEN
-			TRUE
-		ELSE
-			(
-				created_by = :authContextKeycloakUserId
-				OR :authContextIsAdministrator::boolean
-			)
-	END
+	AND has_funder_permission(
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator,
+		funder_short_code,
+		'view'
+	)
 ORDER BY id DESC
 LIMIT :limit OFFSET :offset;

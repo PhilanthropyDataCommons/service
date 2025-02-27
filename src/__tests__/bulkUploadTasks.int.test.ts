@@ -9,6 +9,7 @@ import {
 	loadTableMetrics,
 	loadSystemFunder,
 	createOrUpdateUserFunderPermission,
+	createOrUpdateFunder,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
@@ -38,13 +39,21 @@ describe('/tasks/bulkUploads', () => {
 			});
 		});
 
-		it('returns bulk upload tasks associated with the requesting user', async () => {
+		it('returns all bulk upload tasks that the user is allowed to view', async () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const anotherFunder = await createOrUpdateFunder(db, null, {
+				shortCode: 'anotherFunder',
+				name: 'Another Funder',
+				keycloakOrganizationId: null,
+			});
 			const testUser = await loadTestUser();
-			const thirdUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
 			});
 			await createBulkUploadTask(db, null, {
 				sourceId: systemSource.id,
@@ -60,23 +69,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
 				createdBy: testUser.keycloakUserId,
-				funderShortCode: systemFunder.shortCode,
-			});
-			await createBulkUploadTask(db, null, {
-				sourceId: systemSource.id,
-				fileName: 'baz.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-baz',
-				status: TaskStatus.COMPLETED,
-				createdBy: systemUser.keycloakUserId,
-				funderShortCode: systemFunder.shortCode,
-			});
-			await createBulkUploadTask(db, null, {
-				sourceId: systemSource.id,
-				fileName: 'boop.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-boop',
-				status: TaskStatus.COMPLETED,
-				createdBy: thirdUser.keycloakUserId,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: anotherFunder.shortCode,
 			});
 
 			await request(app)
@@ -85,21 +78,8 @@ describe('/tasks/bulkUploads', () => {
 				.expect(200)
 				.expect((res) =>
 					expect(res.body).toEqual({
-						total: 4,
+						total: 2,
 						entries: [
-							{
-								id: 2,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'bar.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp,
-								createdBy: testUser.keycloakUserId,
-							},
 							{
 								id: 1,
 								sourceId: systemSource.id,
@@ -305,7 +285,7 @@ describe('/tasks/bulkUploads', () => {
 					_page: 2,
 					_count: 5,
 				})
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200)
 				.expect((res) =>
 					expect(res.body).toEqual({

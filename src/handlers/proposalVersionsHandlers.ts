@@ -5,6 +5,7 @@ import {
 	db,
 	loadApplicationForm,
 	loadApplicationFormField,
+	loadOpportunity,
 	loadProposal,
 	loadProposalVersion,
 } from '../database';
@@ -13,6 +14,7 @@ import {
 	isTinyPgErrorWithQueryContext,
 	isWritableProposalVersionWithFieldValues,
 	isId,
+	Permission,
 } from '../types';
 import {
 	DatabaseError,
@@ -20,8 +22,10 @@ import {
 	InputConflictError,
 	NotFoundError,
 	FailedMiddlewareError,
+	UnprocessableEntityError,
 } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
+import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response, NextFunction } from 'express';
 import type {
 	Proposal,
@@ -138,6 +142,19 @@ const postProposalVersion = (
 	const createdBy = req.user.keycloakUserId;
 
 	(async () => {
+		const proposal = await loadProposal(db, null, proposalId);
+		const opportunity = await loadOpportunity(db, null, proposal.opportunityId);
+		if (
+			!authContextHasFunderPermission(
+				req,
+				opportunity.funderShortCode,
+				Permission.EDIT,
+			)
+		) {
+			throw new UnprocessableEntityError(
+				'You do not have write permissions on this proposal.',
+			);
+		}
 		await Promise.all([
 			assertApplicationFormExistsForProposal(applicationFormId, proposalId),
 			assertProposalFieldValuesMapToApplicationForm(
@@ -192,6 +209,15 @@ const postProposalVersion = (
 					new InputConflictError(`The related entity does not exist`, {
 						entityType: 'Source',
 						entityId: sourceId,
+					}),
+				);
+				return;
+			}
+			if (error.details.entityType === 'Proposal') {
+				next(
+					new InputConflictError(`The related entity does not exist`, {
+						entityType: 'Proposal',
+						entityId: proposalId,
 					}),
 				);
 				return;

@@ -11,11 +11,16 @@ import {
 	loadSystemSource,
 	loadTableMetrics,
 	loadSystemFunder,
+	loadSystemUser,
+	createOrUpdateUserFunderPermission,
 } from '../database';
 import { getLogger } from '../logger';
-import { BaseFieldDataType, BaseFieldScope } from '../types';
+import { BaseFieldDataType, BaseFieldScope, Permission } from '../types';
 import { expectTimestamp, loadTestUser } from '../test/utils';
-import { mockJwt as authHeader } from '../test/mockJwt';
+import {
+	mockJwt as authHeader,
+	mockJwtWithAdminRole as authHeaderWithAdminRole,
+} from '../test/mockJwt';
 
 const logger = getLogger(__filename);
 
@@ -107,7 +112,7 @@ describe('/proposalVersions', () => {
 			await request(app).post('/proposalVersions').expect(401);
 		});
 
-		it('creates exactly one proposal version', async () => {
+		it('creates exactly one proposal version for an admin user', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
@@ -128,7 +133,7 @@ describe('/proposalVersions', () => {
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 1,
 					applicationFormId: 1,
@@ -147,14 +152,65 @@ describe('/proposalVersions', () => {
 			expect(after.count).toEqual(1);
 		});
 
-		it('creates exactly the number of provided field values', async () => {
+		it('creates exactly one proposal version for a user with write permissions on the funder', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
+			await createProposal(db, null, {
+				externalId: 'proposal-1',
+				opportunityId: 1,
+				createdBy: testUser.keycloakUserId,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 1,
+			});
+			const before = await loadTableMetrics('proposal_versions');
+			const result = await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					proposalId: 1,
+					applicationFormId: 1,
+					sourceId: systemSource.id,
+					fieldValues: [],
+				})
+				.expect(201);
+			const after = await loadTableMetrics('proposal_versions');
+			expect(result.body).toMatchObject({
+				id: 1,
+				proposalId: 1,
+				fieldValues: [],
+			});
+			expect(after.count).toEqual(before.count + 1);
+		});
+
+		it('creates exactly the number of provided field values', async () => {
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
 			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
@@ -284,11 +340,18 @@ describe('/proposalVersions', () => {
 		it('returns 409 Conflict when the provided proposal does not exist', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
@@ -322,11 +385,18 @@ describe('/proposalVersions', () => {
 
 		it('returns 409 conflict when the provided source does not exist', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
@@ -360,11 +430,18 @@ describe('/proposalVersions', () => {
 		it('Returns 409 Conflict if the provided application form does not exist', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
@@ -404,6 +481,14 @@ describe('/proposalVersions', () => {
 		it('Returns 409 Conflict if the provided application form ID is not associated with the proposal opportunity', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
@@ -412,7 +497,6 @@ describe('/proposalVersions', () => {
 				title: '💧',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
@@ -457,11 +541,18 @@ describe('/proposalVersions', () => {
 		it('Returns 409 Conflict if a provided application form field ID does not exist', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
@@ -508,11 +599,18 @@ describe('/proposalVersions', () => {
 		it('Returns 409 Conflict if a provided application form field ID is not associated with the supplied application form ID', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const testUser = await loadTestUser();
 			await createProposal(db, null, {
 				externalId: 'proposal-1',
 				opportunityId: 1,

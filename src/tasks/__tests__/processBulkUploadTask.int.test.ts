@@ -395,7 +395,7 @@ describe('processBulkUploadTask', () => {
 			entries: [applicationForm],
 		} = await loadApplicationFormBundle(db, null, NO_LIMIT, NO_OFFSET);
 		if (applicationForm === undefined) {
-			fail('The application form was not created');
+			throw new Error('The application form was not created');
 		}
 		expect(applicationForm).toMatchObject({
 			opportunityId: opportunity.id,

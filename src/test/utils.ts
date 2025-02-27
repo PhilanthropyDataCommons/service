@@ -33,6 +33,13 @@ export const createTestUser = async () =>
 export const loadTestUser = async () =>
 	loadUserByKeycloakUserId(db, null, getTestUserKeycloakUserId());
 
+export const getTestAuthContext = async () => ({
+	user: await loadTestUser(),
+	role: {
+		isAdministrator: true,
+	},
+});
+
 export const NO_OFFSET = 0;
 
 export const NO_LIMIT = undefined;

@@ -152,7 +152,7 @@ describe('/proposalVersions', () => {
 			expect(after.count).toEqual(1);
 		});
 
-		it('creates exactly one proposal version for a user with write permissions on the funder', async () => {
+		it('creates exactly one proposal version for a user with read and write permissions on the funder', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
@@ -161,6 +161,12 @@ describe('/proposalVersions', () => {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
 				createdBy: systemUser.keycloakUserId,
 			});
 			await createOpportunity(db, null, {

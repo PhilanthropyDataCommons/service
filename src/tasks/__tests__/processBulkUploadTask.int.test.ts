@@ -23,7 +23,12 @@ import {
 	TaskStatus,
 	Proposal,
 } from '../../types';
-import { expectTimestamp, NO_LIMIT, NO_OFFSET } from '../../test/utils';
+import {
+	expectTimestamp,
+	getTestAuthContext,
+	NO_LIMIT,
+	NO_OFFSET,
+} from '../../test/utils';
 import type {
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
@@ -360,6 +365,7 @@ describe('processBulkUploadTask', () => {
 
 	it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
 		await createTestBaseFields();
+		const testAuthContext = await getTestAuthContext();
 		const systemSource = await loadSystemSource(db, null);
 		const systemUser = await loadSystemUser(db, null);
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
@@ -393,7 +399,12 @@ describe('processBulkUploadTask', () => {
 
 		const {
 			entries: [applicationForm],
-		} = await loadApplicationFormBundle(db, null, NO_LIMIT, NO_OFFSET);
+		} = await loadApplicationFormBundle(
+			db,
+			testAuthContext,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
 		if (applicationForm === undefined) {
 			throw new Error('The application form was not created');
 		}

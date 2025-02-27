@@ -5,6 +5,7 @@ import {
 	createApplicationFormField,
 	createBaseField,
 	createOpportunity,
+	createOrUpdateFunder,
 	createOrUpdateUserFunderPermission,
 	db,
 	loadSystemFunder,
@@ -47,7 +48,7 @@ describe('/applicationForms', () => {
 		it('returns an empty array when no data is present', async () => {
 			const response = await request(app)
 				.get('/applicationForms')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toMatchObject({
 				entries: [],
@@ -55,7 +56,7 @@ describe('/applicationForms', () => {
 			});
 		});
 
-		it('returns all application forms present in the database', async () => {
+		it('returns all application forms present in the database when the user is an administrator', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
@@ -76,7 +77,7 @@ describe('/applicationForms', () => {
 			});
 			const response = await request(app)
 				.get('/applicationForms')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toMatchObject({
 				entries: [
@@ -97,6 +98,63 @@ describe('/applicationForms', () => {
 						id: 3,
 						opportunityId: 2,
 						version: 1,
+					},
+				],
+				total: 3,
+			});
+		});
+
+		it('returns only application forms that the user is allowed to view', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const otherFunder = await createOrUpdateFunder(db, null, {
+				shortCode: 'otherFunder',
+				name: 'Other Funder',
+				keycloakOrganizationId: null,
+			});
+			await createOpportunity(db, null, {
+				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
+			});
+			await createOpportunity(db, null, {
+				title: 'Good opportunity',
+				funderShortCode: otherFunder.shortCode,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 1,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 1,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 2,
+			});
+			const response = await request(app)
+				.get('/applicationForms')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				entries: [
+					{
+						createdAt: expectTimestamp,
+						id: 1,
+						opportunityId: 1,
+						fields: [],
+						version: 1,
+					},
+					{
+						createdAt: expectTimestamp,
+						id: 2,
+						opportunityId: 1,
+						fields: [],
+						version: 2,
 					},
 				],
 				total: 3,

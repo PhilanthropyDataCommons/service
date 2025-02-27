@@ -99,6 +99,12 @@ describe('/applicationForms', () => {
 				total: 3,
 			});
 		});
+	});
+
+	describe('GET /:applicationFormId', () => {
+		it('requires authentication', async () => {
+			await request(app).get('/applicationForms/6').expect(401);
+		});
 
 		it('returns an application form with its fields', async () => {
 			const systemFunder = await loadSystemFunder(db, null);

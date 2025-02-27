@@ -194,6 +194,7 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should fail if the sourceKey is not accessible', async () => {
+		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
 		const sourceRequest = nock(await getS3Endpoint())
@@ -208,7 +209,7 @@ describe('processBulkUploadTask', () => {
 
 		const updatedBulkUploadTask = await loadBulkUploadTask(
 			db,
-			null,
+			testAuthContext,
 			bulkUploadTask.id,
 		);
 		expect(updatedBulkUploadTask).toMatchObject({
@@ -219,6 +220,7 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should not process, and fail, if the sourceKey is not in the unprocessed namespace', async () => {
+		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_BULK_UPLOAD_SOURCE_KEY;
 		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
@@ -233,7 +235,7 @@ describe('processBulkUploadTask', () => {
 
 		const updatedBulkUpload = await loadBulkUploadTask(
 			db,
-			null,
+			testAuthContext,
 			bulkUploadTask.id,
 		);
 		expect(updatedBulkUpload).toMatchObject({
@@ -244,6 +246,7 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
+		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUploadTask = await createTestBulkUploadTask({
 			sourceKey,
@@ -261,7 +264,7 @@ describe('processBulkUploadTask', () => {
 
 		const updatedBulkUpload = await loadBulkUploadTask(
 			db,
-			null,
+			testAuthContext,
 			bulkUploadTask.id,
 		);
 		expect(updatedBulkUpload.status).toEqual(TaskStatus.IN_PROGRESS);
@@ -270,6 +273,7 @@ describe('processBulkUploadTask', () => {
 
 	it('should fail if the csv contains an invalid short code', async () => {
 		await createTestBaseFields();
+		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
 		await mockS3ResponsesForBulkUploadTaskProcessing(
@@ -284,7 +288,7 @@ describe('processBulkUploadTask', () => {
 		);
 		const updatedBulkUploadTask = await loadBulkUploadTask(
 			db,
-			null,
+			testAuthContext,
 			bulkUploadTask.id,
 		);
 		expect(updatedBulkUploadTask).toMatchObject({
@@ -313,6 +317,7 @@ describe('processBulkUploadTask', () => {
 
 	it('should have a proper failed state if the csv is empty', async () => {
 		await createTestBaseFields();
+		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
 		await mockS3ResponsesForBulkUploadTaskProcessing(
@@ -328,7 +333,7 @@ describe('processBulkUploadTask', () => {
 		);
 		const updatedBulkUpload = await loadBulkUploadTask(
 			db,
-			null,
+			testAuthContext,
 			bulkUploadTask.id,
 		);
 		expect(updatedBulkUpload).toMatchObject({
@@ -339,6 +344,7 @@ describe('processBulkUploadTask', () => {
 
 	it('should update the file size for the bulk upload if the sourceKey is accessible and contains a valid CSV', async () => {
 		await createTestBaseFields();
+		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
 		await mockS3ResponsesForBulkUploadTaskProcessing(
@@ -355,7 +361,7 @@ describe('processBulkUploadTask', () => {
 		);
 		const updatedBulkUploadTask = await loadBulkUploadTask(
 			db,
-			null,
+			testAuthContext,
 			bulkUploadTask.id,
 		);
 		expect(updatedBulkUploadTask).toMatchObject({
@@ -386,7 +392,7 @@ describe('processBulkUploadTask', () => {
 		);
 		const updatedBulkUploadTask = await loadBulkUploadTask(
 			db,
-			null,
+			testAuthContext,
 			bulkUploadTask.id,
 		);
 

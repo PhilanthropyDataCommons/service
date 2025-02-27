@@ -22,6 +22,7 @@ import {
 	loadBulkUploadTask,
 	loadChangemakerByTaxId,
 	updateBulkUploadTask,
+	loadSystemUser,
 } from '../database/operations';
 import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
@@ -36,6 +37,7 @@ import type {
 	Changemaker,
 	ProposalFieldValue,
 	WritableChangemaker,
+	AuthContext,
 } from '../types';
 
 const { S3_BUCKET } = requireEnv('S3_BUCKET');
@@ -200,10 +202,11 @@ const getChangemakerNameIndex = (columns: string[]): number =>
 	columns.indexOf(CHANGEMAKER_NAME_SHORT_CODE);
 
 const createOrLoadChangemaker = async (
+	authContext: AuthContext,
 	writeValues: Omit<WritableChangemaker, 'name'> & { name?: string },
 ): Promise<Changemaker | undefined> => {
 	try {
-		return await loadChangemakerByTaxId(writeValues.taxId);
+		return await loadChangemakerByTaxId(db, authContext, writeValues.taxId);
 	} catch {
 		if (writeValues.name !== undefined) {
 			return createChangemaker(db, null, {
@@ -215,6 +218,18 @@ const createOrLoadChangemaker = async (
 	return undefined;
 };
 
+// THIS FUNCTION IS A MONKEY PATCH
+// Really we should be passing the jwt of the calling user so that an auth context can be re-generated
+// for the task runner.  Currently this means the task runner is functioning as an administrative system user.
+// This creates risk where a task could behave in ways with escalated privileges, although currently
+// the implementation of the bulk upload processer should be safe.
+const loadTaskRunnerAuthContext = async (): Promise<AuthContext> => ({
+	user: await loadSystemUser(db, null),
+	role: {
+		isAdministrator: true,
+	},
+});
+
 export const processBulkUploadTask = async (
 	payload: unknown,
 	helpers: JobHelpers,
@@ -225,12 +240,13 @@ export const processBulkUploadTask = async (
 		});
 		return;
 	}
+	const taskRunnerAuthContext = await loadTaskRunnerAuthContext();
 	helpers.logger.debug(
 		`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
 	);
 	const bulkUploadTask = await loadBulkUploadTask(
 		db,
-		null,
+		taskRunnerAuthContext,
 		payload.bulkUploadId,
 	);
 	if (bulkUploadTask.status !== TaskStatus.PENDING) {
@@ -326,11 +342,14 @@ export const processBulkUploadTask = async (
 			const changemakerName = record[changemakerNameIndex];
 			const changemakerTaxId = record[changemakerTaxIdIndex];
 			if (changemakerTaxId !== undefined) {
-				const changemaker = await createOrLoadChangemaker({
-					name: changemakerName,
-					taxId: changemakerTaxId,
-					keycloakOrganizationId: null,
-				});
+				const changemaker = await createOrLoadChangemaker(
+					taskRunnerAuthContext,
+					{
+						name: changemakerName,
+						taxId: changemakerTaxId,
+						keycloakOrganizationId: null,
+					},
+				);
 
 				if (changemaker !== undefined) {
 					await createChangemakerProposal(db, null, {

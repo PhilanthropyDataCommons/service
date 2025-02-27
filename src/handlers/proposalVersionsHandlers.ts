@@ -137,87 +137,77 @@ const postProposalVersion = (
 	const { sourceId, fieldValues, proposalId, applicationFormId } = req.body;
 	const createdBy = req.user.keycloakUserId;
 
-	Promise.all([
-		assertApplicationFormExistsForProposal(
-			req.body.applicationFormId,
-			req.body.proposalId,
-		),
-		assertProposalFieldValuesMapToApplicationForm(
-			req.body.applicationFormId,
-			req.body.fieldValues,
-		),
-		assertSourceExists(sourceId),
-	])
-		.then(() => {
-			db.transaction(async (transactionDb) => {
-				const proposalVersion = await createProposalVersion(
-					transactionDb,
-					null,
-					{ proposalId, applicationFormId, sourceId, createdBy },
-				);
-				const proposalFieldValues = await Promise.all(
-					fieldValues.map(async (fieldValue) => {
-						const { value, applicationFormFieldId } = fieldValue;
-						const applicationFormField = await loadApplicationFormField(
-							db,
-							null,
-							applicationFormFieldId,
-						);
-						const isValid = fieldValueIsValid(
-							value,
-							applicationFormField.baseField.dataType,
-						);
-						const proposalFieldValue = await createProposalFieldValue(
-							transactionDb,
-							null,
-							{
-								...fieldValue,
-								proposalVersionId: proposalVersion.id,
-								isValid,
-							},
-						);
-						return proposalFieldValue;
-					}),
-				);
-				return {
+	(async () => {
+		await Promise.all([
+			assertApplicationFormExistsForProposal(applicationFormId, proposalId),
+			assertProposalFieldValuesMapToApplicationForm(
+				applicationFormId,
+				fieldValues,
+			),
+			assertSourceExists(sourceId),
+		]);
+		await db.transaction(async (transactionDb) => {
+			const proposalVersion = await createProposalVersion(transactionDb, null, {
+				proposalId,
+				applicationFormId,
+				sourceId,
+				createdBy,
+			});
+			const proposalFieldValues = await Promise.all(
+				fieldValues.map(async (fieldValue) => {
+					const { value, applicationFormFieldId } = fieldValue;
+					const applicationFormField = await loadApplicationFormField(
+						db,
+						null,
+						applicationFormFieldId,
+					);
+					const isValid = fieldValueIsValid(
+						value,
+						applicationFormField.baseField.dataType,
+					);
+					const proposalFieldValue = await createProposalFieldValue(
+						transactionDb,
+						null,
+						{
+							...fieldValue,
+							proposalVersionId: proposalVersion.id,
+							isValid,
+						},
+					);
+					return proposalFieldValue;
+				}),
+			);
+			res
+				.status(201)
+				.contentType('application/json')
+				.send({
 					...proposalVersion,
 					fieldValues: proposalFieldValues,
-				};
-			})
-				.then((proposalVersion) => {
-					res.status(201).contentType('application/json').send(proposalVersion);
-				})
-				.catch((error: unknown) => {
-					if (isTinyPgErrorWithQueryContext(error)) {
-						next(new DatabaseError('Error creating proposal version.', error));
-						return;
-					}
-					next(error);
 				});
-		})
-		.catch((error: unknown) => {
-			if (error instanceof NotFoundError) {
-				if (error.details.entityType === 'Source') {
-					next(
-						new InputConflictError(`The related entity does not exist`, {
-							entityType: 'Source',
-							entityId: sourceId,
-						}),
-					);
-					return;
-				}
-			}
-			if (isTinyPgErrorWithQueryContext(error)) {
+		});
+	})().catch((error: unknown) => {
+		if (error instanceof NotFoundError) {
+			if (error.details.entityType === 'Source') {
 				next(
-					new DatabaseError(
-						'Something went wrong when asserting the validity of the provided Proposal Version.',
-						error,
-					),
+					new InputConflictError(`The related entity does not exist`, {
+						entityType: 'Source',
+						entityId: sourceId,
+					}),
 				);
 				return;
 			}
-			next(error);
-		});
+		}
+		if (isTinyPgErrorWithQueryContext(error)) {
+			next(
+				new DatabaseError(
+					'Something went wrong when asserting the validity of the provided Proposal Version.',
+					error,
+				),
+			);
+			return;
+		}
+		next(error);
+	});
 };
 
 const getProposalVersion = (

@@ -51,7 +51,7 @@ const getApplicationForm = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	const { id: applicationFormId } = req.params;
+	const { applicationFormId } = req.params;
 	if (!isId(applicationFormId)) {
 		next(new InputValidationError('Invalid request.', isId.errors ?? []));
 		return;

@@ -51,12 +51,17 @@ const getApplicationForm = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
+
 	const { applicationFormId } = req.params;
 	if (!isId(applicationFormId)) {
 		next(new InputValidationError('Invalid request.', isId.errors ?? []));
 		return;
 	}
-	loadApplicationForm(db, null, applicationFormId)
+	loadApplicationForm(db, req, applicationFormId)
 		.then((applicationForm) => {
 			res.status(200).contentType('application/json').send(applicationForm);
 		})

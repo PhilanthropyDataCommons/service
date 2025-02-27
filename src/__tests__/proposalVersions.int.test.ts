@@ -229,7 +229,7 @@ describe('/proposalVersions', () => {
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 1,
 					applicationFormId: 1,
@@ -349,7 +349,7 @@ describe('/proposalVersions', () => {
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 2,
 					applicationFormId: 1,
@@ -387,7 +387,7 @@ describe('/proposalVersions', () => {
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 1,
 					applicationFormId: 1,
@@ -427,7 +427,7 @@ describe('/proposalVersions', () => {
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 1,
 					applicationFormId: 2,
@@ -478,7 +478,7 @@ describe('/proposalVersions', () => {
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 1,
 					applicationFormId: 2,
@@ -524,7 +524,7 @@ describe('/proposalVersions', () => {
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 1,
 					sourceId: systemSource.id,
@@ -591,7 +591,7 @@ describe('/proposalVersions', () => {
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 1,
 					sourceId: systemSource.id,

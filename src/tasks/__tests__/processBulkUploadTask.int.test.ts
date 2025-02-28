@@ -620,6 +620,7 @@ describe('processBulkUploadTask', () => {
 
 	it('should create changemakers and changemaker-proposal relationships', async () => {
 		await createTestBaseFields();
+		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
 		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
 		await mockS3ResponsesForBulkUploadTaskProcessing(
@@ -644,7 +645,7 @@ describe('processBulkUploadTask', () => {
 
 		const changemakerProposalBundle = await loadChangemakerProposalBundle(
 			db,
-			null,
+			testAuthContext,
 			undefined,
 			undefined,
 			NO_LIMIT,

@@ -10,6 +10,8 @@ import {
 	loadSystemFunder,
 	loadSystemUser,
 	createOrUpdateUserFunderPermission,
+	createOrUpdateFunder,
+	createOrUpdateUserChangemakerPermission,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
@@ -35,6 +37,92 @@ describe('/changemakerProposals', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
 			await request(app).get('/changemakerProposals').expect(401);
+		});
+
+		it('only returns the ChangemakerProposals that the user has rights to view', async () => {
+			const anotherFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			const visibleFunder = await createOrUpdateFunder(db, null, {
+				name: 'Visible Funder',
+				shortCode: 'visibleFunder',
+				keycloakOrganizationId: null,
+			});
+			const visibleChangemaker = await createChangemaker(db, null, {
+				taxId: '11-1111111',
+				name: 'Visible Changemaker',
+				keycloakOrganizationId: null,
+			});
+			const anotherChangemaker = await createChangemaker(db, null, {
+				taxId: '22-2222222',
+				name: 'Another Changemaker',
+				keycloakOrganizationId: '402b1208-be48-11ef-8af9-b767e5e8e4ee',
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: visibleFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserChangemakerPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				changemakerId: visibleChangemaker.id,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const visibleOpportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: visibleFunder.shortCode,
+			});
+			const anotherOpportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: anotherFunder.shortCode,
+			});
+			const funderVisibleProposal = await createProposal(db, null, {
+				opportunityId: visibleOpportunity.id,
+				externalId: 'visibleThroughFunder',
+				createdBy: testUser.keycloakUserId,
+			});
+			const changemakerVisibleProposal = await createProposal(db, null, {
+				opportunityId: anotherOpportunity.id,
+				externalId: 'visibleThroughChangemaker',
+				createdBy: testUser.keycloakUserId,
+			});
+			const anotherProposal = await createProposal(db, null, {
+				opportunityId: anotherOpportunity.id,
+				externalId: 'notVisible',
+				createdBy: testUser.keycloakUserId,
+			});
+			const changemakerVisibleChangemakerProposal =
+				await createChangemakerProposal(db, null, {
+					changemakerId: visibleChangemaker.id,
+					proposalId: changemakerVisibleProposal.id,
+				});
+			const funderVisibleChangemakerProposal = await createChangemakerProposal(
+				db,
+				null,
+				{
+					changemakerId: anotherChangemaker.id,
+					proposalId: funderVisibleProposal.id,
+				},
+			);
+			await createChangemakerProposal(db, null, {
+				changemakerId: anotherChangemaker.id,
+				proposalId: anotherProposal.id,
+			});
+
+			const result = await request(app)
+				.get(`/changemakerProposals`)
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.body).toEqual({
+				entries: [
+					funderVisibleChangemakerProposal,
+					changemakerVisibleChangemakerProposal,
+				],
+				total: 3,
+			});
 		});
 
 		it('returns the ChangemakerProposals for the specified changemaker', async () => {
@@ -65,7 +153,7 @@ describe('/changemakerProposals', () => {
 			});
 			const result = await request(app)
 				.get(`/changemakerProposals?changemaker=1`)
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(result.body).toEqual({
 				entries: [
@@ -148,7 +236,7 @@ describe('/changemakerProposals', () => {
 			});
 			const result = await request(app)
 				.get(`/changemakerProposals?proposal=1`)
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(result.body).toEqual({
 				entries: [

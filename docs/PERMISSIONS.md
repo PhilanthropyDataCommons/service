@@ -168,6 +168,10 @@ funder, data provider, or other changemaker entirely.
 
 - Allows users to modify the permissions for the changemaker for other users and user groups.
 
+#### View
+
+- Allows users to view the proposal associations with the changemaker.
+
 ### Data Provider
 
 #### Edit
@@ -198,3 +202,4 @@ funder, data provider, or other changemaker entirely.
 
 - Allows users to view the application forms associated with the funder's opportunities.
 - Allows users to view the bulk uploads associated with the funder.
+- Allows users to view the changemaker associations with any proposals associated with the funder's opportunities.

@@ -32,6 +32,10 @@ const getChangemakerProposals = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { changemakerId } = extractChangemakerParameters(req);
@@ -40,7 +44,7 @@ const getChangemakerProposals = (
 	(async () => {
 		const changemakerProposalBundle = await loadChangemakerProposalBundle(
 			db,
-			null,
+			req,
 			changemakerId,
 			proposalId,
 			limit,

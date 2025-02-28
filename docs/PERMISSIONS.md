@@ -207,3 +207,4 @@ funder, data provider, or other changemaker entirely.
 - Allows users to view the changemaker associations with any proposals associated with the funder's opportunities.
 - Allows users to view proposals associated with the funder's opportunities
 - Allows users to view proposal versions associated with the funder's opportunities
+- Allows users to view the funder's opportunities

@@ -393,7 +393,7 @@ describe('/applicationForms', () => {
 			await request(app).post('/applicationForms').expect(401);
 		});
 
-		it('creates exactly one application form', async () => {
+		it('creates exactly one application form as a user with proper permissions', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const testUser = await loadTestUser();
@@ -401,6 +401,12 @@ describe('/applicationForms', () => {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
 				createdBy: systemUser.keycloakUserId,
 			});
 			await createOpportunity(db, null, {
@@ -427,6 +433,33 @@ describe('/applicationForms', () => {
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(1);
+		});
+
+		it('creates exactly one application form as an administrator', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const before = await loadTableMetrics('application_forms');
+			const result = await request(app)
+				.post('/applicationForms')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					opportunityId: '1',
+					fields: [],
+				})
+				.expect(201);
+			const after = await loadTableMetrics('application_forms');
+			expect(result.body).toMatchObject({
+				id: 1,
+				opportunityId: 1,
+				version: 1,
+				fields: [],
+				createdAt: expectTimestamp,
+			});
+			expect(after.count).toEqual(before.count + 1);
 		});
 
 		it(`returns 401 unauthorized if the user does not have edit permission on the associated opportunity's funder`, async () => {
@@ -466,14 +499,6 @@ describe('/applicationForms', () => {
 
 		it('creates exactly the number of provided fields', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
-			const systemUser = await loadSystemUser(db, null);
-			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
-			});
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
@@ -483,7 +508,7 @@ describe('/applicationForms', () => {
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: '1',
 					fields: [
@@ -519,14 +544,6 @@ describe('/applicationForms', () => {
 
 		it('increments version when creating a second form for an opportunity', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
-			const systemUser = await loadSystemUser(db, null);
-			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
-			});
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
@@ -540,7 +557,7 @@ describe('/applicationForms', () => {
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: '1',
 					fields: [],
@@ -600,7 +617,7 @@ describe('/applicationForms', () => {
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: 1,
 					fields: [],
@@ -639,7 +656,7 @@ describe('/applicationForms', () => {
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: '1',
 					fields: [

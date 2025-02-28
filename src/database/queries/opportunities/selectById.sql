@@ -1,3 +1,10 @@
-SELECT opportunity_to_json(opportunities) AS object
+SELECT opportunity_to_json(opportunities.*) AS object
 FROM opportunities
-WHERE id = :opportunityId;
+WHERE
+	opportunities.id = :opportunityId
+	AND has_funder_permission(
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator,
+		opportunities.funder_short_code,
+		'view'
+	);

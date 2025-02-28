@@ -17,6 +17,8 @@ import {
 	loadSystemFunder,
 	loadSystemUser,
 	createOrUpdateUserFunderPermission,
+	createOrUpdateFunder,
+	createOrUpdateUserChangemakerPermission,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
@@ -57,7 +59,7 @@ describe('/proposals', () => {
 		it('returns an empty Bundle when no data is present', async () => {
 			const response = await request(app)
 				.get('/proposals')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 0,
@@ -65,120 +67,67 @@ describe('/proposals', () => {
 			});
 		});
 
-		it('returns proposals associated with the requesting user', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
+		it('returns proposals the user has permission to view', async () => {
+			const anotherFunder = await loadSystemFunder(db, null);
+			const visibleFunder = await createOrUpdateFunder(db, null, {
+				name: 'Visible Funder',
+				shortCode: 'visibleFunder',
+				keycloakOrganizationId: null,
 			});
+			const visibleChangemaker = await createChangemaker(db, null, {
+				name: 'Visible Changemaker',
+				taxId: '123-123-123',
+				keycloakOrganizationId: null,
+			});
+			const systemUser = await loadSystemUser(db, null);
 			const testUser = await loadTestUser();
-			const secondUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: visibleFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
 			});
-			const systemSource = await loadSystemSource(db, null);
+			await createOrUpdateUserChangemakerPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				changemakerId: visibleChangemaker.id,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const visibleOpportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: visibleFunder.shortCode,
+			});
+			const anotherOpportunity = await createOpportunity(db, null, {
+				title: 'another',
+				funderShortCode: anotherFunder.shortCode,
+			});
 			await createTestBaseFields();
-			await createProposal(db, null, {
+			const funderVisibleProposal = await createProposal(db, null, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: visibleOpportunity.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(db, null, {
+			const changemakerVisibleProposal = await createProposal(db, null, {
 				externalId: 'proposal-2',
-				opportunityId: 1,
+				opportunityId: anotherOpportunity.id,
 				createdBy: testUser.keycloakUserId,
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: visibleChangemaker.id,
+				proposalId: changemakerVisibleProposal.id,
 			});
 			await createProposal(db, null, {
 				externalId: 'proposal-3',
-				opportunityId: 1,
-				createdBy: secondUser.keycloakUserId,
-			});
-			await createApplicationForm(db, null, {
-				opportunityId: 1,
-			});
-			await createProposalVersion(db, null, {
-				proposalId: 1,
-				applicationFormId: 1,
-				sourceId: systemSource.id,
+				opportunityId: anotherOpportunity.id,
 				createdBy: testUser.keycloakUserId,
 			});
-			await createApplicationFormField(db, null, {
-				applicationFormId: 1,
-				baseFieldId: 1,
-				position: 1,
-				label: 'Short summary',
-			});
-			await createProposalFieldValue(db, null, {
-				proposalVersionId: 1,
-				applicationFormFieldId: 1,
-				position: 1,
-				value: 'This is a summary',
-				isValid: true,
-			});
-
 			const response = await request(app)
 				.get('/proposals')
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 3,
-				entries: [
-					{
-						id: 2,
-						externalId: 'proposal-2',
-						opportunityId: 1,
-						createdAt: expectTimestamp,
-						createdBy: testUser.keycloakUserId,
-						versions: [],
-					},
-					{
-						id: 1,
-						externalId: 'proposal-1',
-						opportunityId: 1,
-						createdAt: expectTimestamp,
-						createdBy: testUser.keycloakUserId,
-						versions: [
-							{
-								id: 1,
-								proposalId: 1,
-								version: 1,
-								sourceId: systemSource.id,
-								source: systemSource,
-								applicationFormId: 1,
-								createdAt: expectTimestamp,
-								createdBy: testUser.keycloakUserId,
-								fieldValues: [
-									{
-										id: 1,
-										applicationFormFieldId: 1,
-										proposalVersionId: 1,
-										position: 1,
-										value: 'This is a summary',
-										isValid: true,
-										createdAt: expectTimestamp,
-										applicationFormField: {
-											id: 1,
-											applicationFormId: 1,
-											baseFieldId: 1,
-											baseField: {
-												createdAt: expectTimestamp,
-												dataType: 'string',
-												description: 'A summary of the proposal',
-												id: 1,
-												label: 'Summary',
-												scope: 'proposal',
-												shortCode: 'summary',
-												localizations: {},
-											},
-											label: 'Short summary',
-											position: 1,
-											createdAt: expectTimestamp,
-										},
-									},
-								],
-							},
-						],
-					},
-				],
+				entries: [changemakerVisibleProposal, funderVisibleProposal],
 			});
 		});
 
@@ -212,7 +161,7 @@ describe('/proposals', () => {
 			});
 			const response = await request(app)
 				.get(`/proposals?changemaker=${changemaker.id}`)
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toStrictEqual({
 				total: 2,
@@ -308,7 +257,7 @@ describe('/proposals', () => {
 			});
 			const response = await request(app)
 				.get('/proposals?_content=summary')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 2,
@@ -557,7 +506,7 @@ describe('/proposals', () => {
 			});
 			const response = await request(app)
 				.get('/proposals?_content=summary')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 2,
@@ -636,7 +585,7 @@ describe('/proposals', () => {
 					_page: 2,
 					_count: 5,
 				})
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 20,
@@ -692,6 +641,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when given id is not present', async () => {
+			const testUser = await loadTestUser();
 			const response = await request(app)
 				.get('/proposals/9001')
 				.set(authHeader)
@@ -703,16 +653,21 @@ describe('/proposals', () => {
 					{
 						name: 'NotFoundError',
 						details: {
-							entityId: '9001',
 							entityType: 'Proposal',
+							lookupValues: {
+								authContextIsAdministrator: false,
+								authContextKeycloakUserId: testUser.keycloakUserId,
+								proposalId: '9001',
+							},
 						},
 					},
 				],
 			});
 		});
 
-		it('returns 404 when given id is not owned by the current user', async () => {
+		it('returns 404 when the current user does not have permission to view the provided id', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
+			const testUser = await loadTestUser();
 			await createOpportunity(db, null, {
 				title: '⛰️',
 				funderShortCode: systemFunder.shortCode,
@@ -737,8 +692,12 @@ describe('/proposals', () => {
 					{
 						name: 'NotFoundError',
 						details: {
-							entityId: '1',
 							entityType: 'Proposal',
+							lookupValues: {
+								authContextIsAdministrator: false,
+								authContextKeycloakUserId: testUser.keycloakUserId,
+								proposalId: '1',
+							},
 						},
 					},
 				],
@@ -778,7 +737,7 @@ describe('/proposals', () => {
 
 			const response = await request(app)
 				.get('/proposals/2')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				id: 2,
@@ -861,7 +820,7 @@ describe('/proposals', () => {
 			});
 			const response = await request(app)
 				.get('/proposals/1')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				id: 1,

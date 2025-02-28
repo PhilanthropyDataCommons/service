@@ -84,7 +84,7 @@ const postChangemakerProposal = (
 	const { proposalId, changemakerId } = req.body;
 
 	(async () => {
-		const proposal = await loadProposal(db, null, proposalId);
+		const proposal = await loadProposal(db, req, proposalId);
 		const opportunity = await loadOpportunity(db, null, proposal.opportunityId);
 		if (
 			!authContextHasFunderPermission(

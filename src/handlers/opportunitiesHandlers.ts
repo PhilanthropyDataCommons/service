@@ -27,9 +27,13 @@ const getOpportunities = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	loadOpportunityBundle(db, null, limit, offset)
+	loadOpportunityBundle(db, req, limit, offset)
 		.then((opportunityBundle) => {
 			res.status(200).contentType('application/json').send(opportunityBundle);
 		})

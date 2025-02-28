@@ -7,6 +7,7 @@ import {
 	loadSystemFunder,
 	createOrUpdateUserFunderPermission,
 	loadSystemUser,
+	createOrUpdateFunder,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
 import {
@@ -22,13 +23,16 @@ describe('/opportunities', () => {
 		});
 
 		it('returns an empty bundle when no data is present', async () => {
-			await request(app).get('/opportunities').set(authHeader).expect(200, {
-				entries: [],
-				total: 0,
-			});
+			await request(app)
+				.get('/opportunities')
+				.set(authHeaderWithAdminRole)
+				.expect(200, {
+					entries: [],
+					total: 0,
+				});
 		});
 
-		it('returns all opportunities present in the database', async () => {
+		it('returns all opportunities present in the database for an admin user', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
@@ -40,7 +44,7 @@ describe('/opportunities', () => {
 			});
 			const response = await request(app)
 				.get('/opportunities')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				entries: [
@@ -59,6 +63,39 @@ describe('/opportunities', () => {
 						funder: systemFunder,
 					},
 				],
+				total: 2,
+			});
+		});
+
+		it('returns only opportunities the user is allowed to view', async () => {
+			const visibleFunder = await loadSystemFunder(db, null);
+			const anotherFunder = await createOrUpdateFunder(db, null, {
+				name: 'another funder',
+				shortCode: 'anotherFunder',
+				keycloakOrganizationId: null,
+			});
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: visibleFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const visibleOpportunity = await createOpportunity(db, null, {
+				title: 'Tremendous opportunity 👌',
+				funderShortCode: visibleFunder.shortCode,
+			});
+			await createOpportunity(db, null, {
+				title: 'Terrific opportunity 👐',
+				funderShortCode: anotherFunder.shortCode,
+			});
+			const response = await request(app)
+				.get('/opportunities')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				entries: [visibleOpportunity],
 				total: 2,
 			});
 		});

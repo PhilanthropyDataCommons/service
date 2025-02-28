@@ -398,7 +398,7 @@ describe('processBulkUploadTask', () => {
 
 		const {
 			entries: [opportunity],
-		} = await loadOpportunityBundle(db, null, NO_LIMIT, NO_OFFSET);
+		} = await loadOpportunityBundle(db, testAuthContext, NO_LIMIT, NO_OFFSET);
 		if (opportunity === undefined) {
 			throw new Error('The opportunity was not created');
 		}

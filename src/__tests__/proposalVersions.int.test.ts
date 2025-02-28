@@ -13,6 +13,9 @@ import {
 	loadSystemFunder,
 	loadSystemUser,
 	createOrUpdateUserFunderPermission,
+	createChangemaker,
+	createOrUpdateUserChangemakerPermission,
+	createChangemakerProposal,
 } from '../database';
 import { getLogger } from '../logger';
 import { BaseFieldDataType, BaseFieldScope, Permission } from '../types';
@@ -72,6 +75,88 @@ describe('/proposalVersions', () => {
 
 			const response = await request(app)
 				.get(`/proposalVersions/${proposalVersion.id}`)
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toEqual(proposalVersion);
+		});
+
+		it('returns the proposal version if they have access via funder', async () => {
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, null, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+				createdBy: testUser.keycloakUserId,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const proposalVersion = await createProposalVersion(db, null, {
+				proposalId: proposal.id,
+				applicationFormId: applicationForm.id,
+				sourceId: systemSource.id,
+				createdBy: testUser.keycloakUserId,
+			});
+
+			const response = await request(app)
+				.get(`/proposalVersions/${proposalVersion.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(proposalVersion);
+		});
+
+		it('returns the proposal version if they have access via changemaker', async () => {
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			const visibleChangemaker = await createChangemaker(db, null, {
+				name: 'Visible Changemaker',
+				taxId: '123456789',
+				keycloakOrganizationId: null,
+			});
+			await createOrUpdateUserChangemakerPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				changemakerId: visibleChangemaker.id,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, null, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+				createdBy: testUser.keycloakUserId,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const proposalVersion = await createProposalVersion(db, null, {
+				proposalId: proposal.id,
+				applicationFormId: applicationForm.id,
+				sourceId: systemSource.id,
+				createdBy: testUser.keycloakUserId,
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: visibleChangemaker.id,
+				proposalId: proposal.id,
+			});
+			const response = await request(app)
+				.get(`/proposalVersions/${proposalVersion.id}`)
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual(proposalVersion);
@@ -102,6 +187,34 @@ describe('/proposalVersions', () => {
 		it('returns 404 when id is not found', async () => {
 			await request(app)
 				.get('/proposalVersions/900000')
+				.set(authHeaderWithAdminRole)
+				.expect(404);
+		});
+
+		it('returns 404 when the user has no access to the proposal version', async () => {
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const testUser = await loadTestUser();
+			const opportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, null, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+				createdBy: testUser.keycloakUserId,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const proposalVersion = await createProposalVersion(db, null, {
+				proposalId: proposal.id,
+				applicationFormId: applicationForm.id,
+				sourceId: systemSource.id,
+				createdBy: testUser.keycloakUserId,
+			});
+			await request(app)
+				.get(`/proposalVersions/${proposalVersion.id}`)
 				.set(authHeader)
 				.expect(404);
 		});

@@ -251,6 +251,10 @@ const getProposalVersion = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
 	const { proposalVersionId } = req.params;
 	if (!isId(proposalVersionId)) {
 		next(
@@ -258,7 +262,7 @@ const getProposalVersion = (
 		);
 		return;
 	}
-	loadProposalVersion(db, null, proposalVersionId)
+	loadProposalVersion(db, req, proposalVersionId)
 		.then((item) => {
 			res.status(200).contentType('application/json').send(item);
 		})

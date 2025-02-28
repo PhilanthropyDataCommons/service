@@ -172,6 +172,7 @@ funder, data provider, or other changemaker entirely.
 
 - Allows users to view the proposal associations with the changemaker.
 - Allows users to view proposals associated with the changemaker.
+- Allows users to view proposal versions associated with the changemaker.
 
 ### Data Provider
 
@@ -205,3 +206,4 @@ funder, data provider, or other changemaker entirely.
 - Allows users to view the bulk uploads associated with the funder.
 - Allows users to view the changemaker associations with any proposals associated with the funder's opportunities.
 - Allows users to view proposals associated with the funder's opportunities
+- Allows users to view proposal versions associated with the funder's opportunities

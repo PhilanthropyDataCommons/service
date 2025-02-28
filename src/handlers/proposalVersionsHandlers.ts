@@ -31,15 +31,21 @@ import type {
 	Proposal,
 	ApplicationForm,
 	WritableProposalFieldValueWithProposalVersionContext,
+	AuthContext,
 } from '../types';
 
 const assertApplicationFormExistsForProposal = async (
+	authContext: AuthContext,
 	applicationFormId: number,
 	proposalId: number,
 ): Promise<void> => {
 	let applicationForm: ApplicationForm;
 	try {
-		applicationForm = await loadApplicationForm(db, null, applicationFormId);
+		applicationForm = await loadApplicationForm(
+			db,
+			authContext,
+			applicationFormId,
+		);
 	} catch {
 		throw new InputConflictError('The Application Form does not exist.', {
 			entityType: 'ApplicationForm',
@@ -142,8 +148,8 @@ const postProposalVersion = (
 	const createdBy = req.user.keycloakUserId;
 
 	(async () => {
-		const proposal = await loadProposal(db, null, proposalId);
-		const opportunity = await loadOpportunity(db, null, proposal.opportunityId);
+		const proposal = await loadProposal(db, req, proposalId);
+		const opportunity = await loadOpportunity(db, req, proposal.opportunityId);
 		if (
 			!authContextHasFunderPermission(
 				req,
@@ -156,7 +162,11 @@ const postProposalVersion = (
 			);
 		}
 		await Promise.all([
-			assertApplicationFormExistsForProposal(applicationFormId, proposalId),
+			assertApplicationFormExistsForProposal(
+				req,
+				applicationFormId,
+				proposalId,
+			),
 			assertProposalFieldValuesMapToApplicationForm(
 				applicationFormId,
 				fieldValues,
@@ -164,7 +174,7 @@ const postProposalVersion = (
 			assertSourceExists(sourceId),
 		]);
 		await db.transaction(async (transactionDb) => {
-			const proposalVersion = await createProposalVersion(transactionDb, null, {
+			const proposalVersion = await createProposalVersion(transactionDb, req, {
 				proposalId,
 				applicationFormId,
 				sourceId,
@@ -175,7 +185,7 @@ const postProposalVersion = (
 					const { value, applicationFormFieldId } = fieldValue;
 					const applicationFormField = await loadApplicationFormField(
 						db,
-						null,
+						req,
 						applicationFormFieldId,
 					);
 					const isValid = fieldValueIsValid(
@@ -184,7 +194,7 @@ const postProposalVersion = (
 					);
 					const proposalFieldValue = await createProposalFieldValue(
 						transactionDb,
-						null,
+						req,
 						{
 							...fieldValue,
 							proposalVersionId: proposalVersion.id,

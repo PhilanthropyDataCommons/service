@@ -5,7 +5,7 @@ import { requireAuthentication } from '../middleware';
 const applicationFormsRouter = express.Router();
 
 applicationFormsRouter.get(
-	'/:id',
+	'/:applicationFormId',
 	requireAuthentication,
 	applicationFormsHandlers.getApplicationForm,
 );

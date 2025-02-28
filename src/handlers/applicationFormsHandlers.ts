@@ -31,9 +31,13 @@ const getApplicationForms = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	loadApplicationFormBundle(db, null, limit, offset)
+	loadApplicationFormBundle(db, req, limit, offset)
 		.then((applicationForms) => {
 			res.status(200).contentType('application/json').send(applicationForms);
 		})
@@ -51,12 +55,17 @@ const getApplicationForm = (
 	res: Response,
 	next: NextFunction,
 ): void => {
-	const { id: applicationFormId } = req.params;
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
+
+	const { applicationFormId } = req.params;
 	if (!isId(applicationFormId)) {
 		next(new InputValidationError('Invalid request.', isId.errors ?? []));
 		return;
 	}
-	loadApplicationForm(db, null, applicationFormId)
+	loadApplicationForm(db, req, applicationFormId)
 		.then((applicationForm) => {
 			res.status(200).contentType('application/json').send(applicationForm);
 		})

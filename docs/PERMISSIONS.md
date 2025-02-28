@@ -193,3 +193,7 @@ funder, data provider, or other changemaker entirely.
 #### Manage
 
 - Allows users to modify the permissions for the funder for other users and user groups.
+
+#### View
+
+- Allows users to view the application forms associated with the funder's opportunities.

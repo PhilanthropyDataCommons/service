@@ -692,6 +692,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when given id is not present', async () => {
+			const testUser = await loadTestUser();
 			const response = await request(app)
 				.get('/proposals/9001')
 				.set(authHeader)
@@ -703,16 +704,21 @@ describe('/proposals', () => {
 					{
 						name: 'NotFoundError',
 						details: {
-							entityId: '9001',
 							entityType: 'Proposal',
+							lookupValues: {
+								authContextIsAdministrator: false,
+								authContextKeycloakUserId: testUser.keycloakUserId,
+								proposalId: '9001',
+							},
 						},
 					},
 				],
 			});
 		});
 
-		it('returns 404 when given id is not owned by the current user', async () => {
+		it('returns 404 when the current user does not have permission to view the provided id', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
+			const testUser = await loadTestUser();
 			await createOpportunity(db, null, {
 				title: '⛰️',
 				funderShortCode: systemFunder.shortCode,
@@ -737,8 +743,12 @@ describe('/proposals', () => {
 					{
 						name: 'NotFoundError',
 						details: {
-							entityId: '1',
 							entityType: 'Proposal',
+							lookupValues: {
+								authContextIsAdministrator: false,
+								authContextKeycloakUserId: testUser.keycloakUserId,
+								proposalId: '1',
+							},
 						},
 					},
 				],
@@ -778,7 +788,7 @@ describe('/proposals', () => {
 
 			const response = await request(app)
 				.get('/proposals/2')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				id: 2,
@@ -861,7 +871,7 @@ describe('/proposals', () => {
 			});
 			const response = await request(app)
 				.get('/proposals/1')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				id: 1,

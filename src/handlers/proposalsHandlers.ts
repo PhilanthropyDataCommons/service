@@ -1,6 +1,5 @@
 import {
 	db,
-	assertProposalAuthorization,
 	createProposal,
 	getLimitValues,
 	loadProposal,
@@ -77,8 +76,7 @@ const getProposal = (req: Request, res: Response, next: NextFunction): void => {
 		return;
 	}
 	(async () => {
-		await assertProposalAuthorization(proposalId, req);
-		const proposal = await loadProposal(db, null, proposalId);
+		const proposal = await loadProposal(db, req, proposalId);
 		res.status(200).contentType('application/json').send(proposal);
 	})().catch((error: unknown) => {
 		if (isTinyPgErrorWithQueryContext(error)) {

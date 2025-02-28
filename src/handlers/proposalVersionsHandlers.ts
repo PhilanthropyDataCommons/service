@@ -55,7 +55,7 @@ const assertApplicationFormExistsForProposal = async (
 
 	let proposal: Proposal;
 	try {
-		proposal = await loadProposal(db, null, proposalId);
+		proposal = await loadProposal(db, authContext, proposalId);
 	} catch (err) {
 		if (err instanceof NotFoundError) {
 			throw new InputConflictError(

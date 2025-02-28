@@ -333,7 +333,7 @@ describe('/changemakerProposals', () => {
 			expect(after.count).toEqual(1);
 		});
 
-		it('creates exactly one ChangemakerProposal when the user has write permission on the funder associated with the proposal opportunity', async () => {
+		it('creates exactly one ChangemakerProposal when the user has write and view permission on the funder associated with the proposal opportunity', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const testUser = await loadTestUser();
@@ -341,6 +341,12 @@ describe('/changemakerProposals', () => {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
+				createdBy: systemUser.keycloakUserId,
+			});
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
 				createdBy: systemUser.keycloakUserId,
 			});
 			await createOpportunity(db, null, {
@@ -392,7 +398,14 @@ describe('/changemakerProposals', () => {
 
 		it('returns 422 Unprocessable Content if the user does not have edit permission on the funder associated with the proposal opportunity', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
 			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
@@ -491,7 +504,7 @@ describe('/changemakerProposals', () => {
 			const result = await request(app)
 				.post('/changemakerProposals')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					changemakerId: 1,
 					proposalId: 42,
@@ -530,7 +543,7 @@ describe('/changemakerProposals', () => {
 			const result = await request(app)
 				.post('/changemakerProposals')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					changemakerId: 42,
 					proposalId: 1,
@@ -568,7 +581,7 @@ describe('/changemakerProposals', () => {
 			const result = await request(app)
 				.post('/changemakerProposals')
 				.type('application/json')
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.send({
 					changemakerId: 1,
 					proposalId: 1,

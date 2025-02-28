@@ -99,7 +99,7 @@ const postApplicationForms = (
 	}
 	const { fields, opportunityId } = req.body;
 	(async () => {
-		const opportunity = await loadOpportunity(db, null, opportunityId);
+		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (
 			!authContextHasFunderPermission(
 				req,

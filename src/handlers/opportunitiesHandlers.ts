@@ -47,12 +47,16 @@ const getOpportunity = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	if (!isAuthContext(req)) {
+		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		return;
+	}
 	const { opportunityId } = req.params;
 	if (!isId(opportunityId)) {
 		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
 		return;
 	}
-	loadOpportunity(db, null, opportunityId)
+	loadOpportunity(db, req, opportunityId)
 		.then((opportunity) => {
 			res.status(200).contentType('application/json').send(opportunity);
 		})

@@ -9,7 +9,10 @@ import {
 	loadSystemUser,
 } from '../database';
 import { expectTimestamp, loadTestUser } from '../test/utils';
-import { mockJwt as authHeader } from '../test/mockJwt';
+import {
+	mockJwt as authHeader,
+	mockJwtWithAdminRole as authHeaderWithAdminRole,
+} from '../test/mockJwt';
 import { Permission } from '../types';
 
 describe('/opportunities', () => {
@@ -61,7 +64,7 @@ describe('/opportunities', () => {
 		});
 	});
 
-	describe('GET /:id', () => {
+	describe('GET /:opportunityId', () => {
 		it('requires authentication', async () => {
 			await request(app).get('/opportunities/1').expect(401);
 		});
@@ -83,7 +86,7 @@ describe('/opportunities', () => {
 
 			const response = await request(app)
 				.get(`/opportunities/2`)
-				.set(authHeader)
+				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				id: 2,
@@ -92,6 +95,27 @@ describe('/opportunities', () => {
 				funderShortCode: systemFunder.shortCode,
 				funder: systemFunder,
 			});
+		});
+
+		it('returns an opportunity when the user has funder permission', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+				createdBy: systemUser.keycloakUserId,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: '✨',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const response = await request(app)
+				.get(`/opportunities/${opportunity.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(opportunity);
 		});
 
 		it('returns 400 bad request when id is a letter', async () => {
@@ -122,7 +146,22 @@ describe('/opportunities', () => {
 				title: 'This definitely should not be returned',
 				funderShortCode: systemFunder.shortCode,
 			});
-			await request(app).get('/opportunities/9001').set(authHeader).expect(404);
+			await request(app)
+				.get('/opportunities/9001')
+				.set(authHeaderWithAdminRole)
+				.expect(404);
+		});
+
+		it('returns 404 when the user does not have view permission', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: 'This definitely should not be returned',
+				funderShortCode: systemFunder.shortCode,
+			});
+			await request(app)
+				.get(`/opportunities/${opportunity.id}`)
+				.set(authHeader)
+				.expect(404);
 		});
 	});
 

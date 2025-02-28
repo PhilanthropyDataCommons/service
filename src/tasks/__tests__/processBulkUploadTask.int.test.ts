@@ -422,7 +422,7 @@ describe('processBulkUploadTask', () => {
 
 		const proposalBundle = await loadProposalBundle(
 			db,
-			null,
+			testAuthContext,
 			undefined,
 			undefined,
 			undefined,

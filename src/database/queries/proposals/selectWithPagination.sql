@@ -1,14 +1,18 @@
-SELECT proposal_to_json(p.*) AS object
-FROM proposals AS p
-	LEFT JOIN proposal_versions AS pv ON p.id = pv.proposal_id
-	LEFT JOIN proposal_field_values AS pfv ON pv.id = pfv.proposal_version_id
-	LEFT JOIN changemakers_proposals AS op ON p.id = op.proposal_id
+SELECT proposal_to_json(proposals.*) AS object
+FROM proposals
+	LEFT JOIN proposal_versions ON proposals.id = proposal_versions.proposal_id
+	LEFT JOIN
+		proposal_field_values
+		ON proposal_versions.id = proposal_field_values.proposal_version_id
+	LEFT JOIN
+		changemakers_proposals
+		ON proposals.id = changemakers_proposals.proposal_id
 WHERE
 	CASE
 		WHEN :createdBy::uuid IS NULL THEN
 			TRUE
 		ELSE
-			p.created_by = :createdBy
+			proposals.created_by = :createdBy
 	END
 	AND CASE
 		WHEN (
@@ -17,23 +21,41 @@ WHERE
 		) THEN
 			TRUE
 		ELSE
-			pfv.value_search @@ websearch_to_tsquery('english', :search::text)
+			proposal_field_values.value_search
+			@@ websearch_to_tsquery('english', :search::text)
 	END
 	AND CASE
 		WHEN :changemakerId::integer IS NULL THEN
 			TRUE
 		ELSE
-			op.changemaker_id = :changemakerId
+			changemakers_proposals.changemaker_id = :changemakerId
 	END
-	AND CASE
-		WHEN :authContextKeycloakUserId::uuid IS NULL THEN
-			TRUE
-		ELSE
-			(
-				p.created_by = :authContextKeycloakUserId
-				OR :authContextIsAdministrator::boolean
-			)
-	END
-GROUP BY p.id
-ORDER BY p.id DESC
+	AND (
+		EXISTS (
+			SELECT 1
+			FROM opportunities
+			WHERE
+				opportunities.id = proposals.opportunity_id
+				AND has_funder_permission(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					opportunities.funder_short_code,
+					'view'
+				)
+		)
+		OR EXISTS (
+			SELECT 1
+			FROM changemakers_proposals AS permission_cp
+			WHERE
+				permission_cp.proposal_id = proposals.id
+				AND has_changemaker_permission(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					permission_cp.changemaker_id,
+					'view'
+				)
+		)
+	)
+GROUP BY proposals.id
+ORDER BY proposals.id DESC
 LIMIT :limit OFFSET :offset;

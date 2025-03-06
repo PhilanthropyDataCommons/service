@@ -18,7 +18,7 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
-import { Permission } from '../types';
+import { Permission, PostgresErrorCode } from '../types';
 
 const agent = request.agent(app);
 
@@ -145,6 +145,93 @@ describe('/sources', () => {
 				createdAt: expectTimestamp,
 			});
 			expect(after.count).toEqual(2);
+		});
+
+		it('returns 409 conflict when label is not unique on changemaker foreign key', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '11-1111111',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			await createSource(db, null, {
+				label: 'Example Corp',
+				changemakerId: changemaker.id,
+			});
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: 'Example Corp',
+					changemakerId: changemaker.id,
+				})
+				.expect(409);
+			expect(result.body).toMatchObject({
+				name: 'DatabaseError',
+				details: [
+					{
+						code: PostgresErrorCode.UNIQUE_VIOLATION,
+					},
+				],
+			});
+		});
+
+		it('returns 409 conflict when label is not unique on data provider foreign key', async () => {
+			const dataProvider = await createOrUpdateDataProvider(db, null, {
+				shortCode: 'ExampleInc',
+				name: 'Example Inc.',
+				keycloakOrganizationId: null,
+			});
+			await createSource(db, null, {
+				label: 'Example Corp',
+				dataProviderShortCode: dataProvider.shortCode,
+			});
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: 'Example Corp',
+					dataProviderShortCode: dataProvider.shortCode,
+				})
+				.expect(409);
+			expect(result.body).toMatchObject({
+				name: 'DatabaseError',
+				details: [
+					{
+						code: PostgresErrorCode.UNIQUE_VIOLATION,
+					},
+				],
+			});
+		});
+
+		it('returns 409 conflict when label is not unique on funder foreign key', async () => {
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'exampleFunder',
+				name: 'Example Funder',
+				keycloakOrganizationId: null,
+			});
+			await createSource(db, null, {
+				label: 'Example Corp',
+				funderShortCode: funder.shortCode,
+			});
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: 'Example Corp',
+					funderShortCode: funder.shortCode,
+				})
+				.expect(409);
+			expect(result.body).toMatchObject({
+				name: 'DatabaseError',
+				details: [
+					{
+						code: PostgresErrorCode.UNIQUE_VIOLATION,
+					},
+				],
+			});
 		});
 
 		it('creates and returns exactly one changemaker source for a user with edit permissions on that changemaker', async () => {

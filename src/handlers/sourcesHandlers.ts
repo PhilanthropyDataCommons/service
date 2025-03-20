@@ -5,15 +5,8 @@ import {
 	loadSource,
 	loadSourceBundle,
 } from '../database';
+import { isAuthContext, isId, isWritableSource, Permission } from '../types';
 import {
-	isAuthContext,
-	isId,
-	isTinyPgErrorWithQueryContext,
-	isWritableSource,
-	Permission,
-} from '../types';
-import {
-	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
 	UnprocessableEntityError,
@@ -24,21 +17,17 @@ import {
 	authContextHasDataProviderPermission,
 	authContextHasFunderPermission,
 } from '../authorization';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const postSource = (req: Request, res: Response, next: NextFunction): void => {
+const postSource = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	if (!isWritableSource(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableSource.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableSource.errors ?? [],
 		);
-		return;
 	}
 	if (
 		'funderShortCode' in req.body &&
@@ -48,12 +37,9 @@ const postSource = (req: Request, res: Response, next: NextFunction): void => {
 			Permission.EDIT,
 		)
 	) {
-		next(
-			new UnprocessableEntityError(
-				'You do not have write permissions on a funder with the specified short code.',
-			),
+		throw new UnprocessableEntityError(
+			'You do not have write permissions on a funder with the specified short code.',
 		);
-		return;
 	}
 	if (
 		'dataProviderShortCode' in req.body &&
@@ -63,12 +49,9 @@ const postSource = (req: Request, res: Response, next: NextFunction): void => {
 			Permission.EDIT,
 		)
 	) {
-		next(
-			new UnprocessableEntityError(
-				'You do not have write permissions on a data provider with the specified short code.',
-			),
+		throw new UnprocessableEntityError(
+			'You do not have write permissions on a data provider with the specified short code.',
 		);
-		return;
 	}
 	if (
 		'changemakerId' in req.body &&
@@ -78,67 +61,36 @@ const postSource = (req: Request, res: Response, next: NextFunction): void => {
 			Permission.EDIT,
 		)
 	) {
-		next(
-			new UnprocessableEntityError(
-				'You do not have write permissions on a changemaker with the specified id.',
-			),
+		throw new UnprocessableEntityError(
+			'You do not have write permissions on a changemaker with the specified id.',
 		);
-		return;
 	}
 
 	// Normally we try to avoid passing the body directly vs extracting the values and passing them.
 	// Because because writableSource is a union type it is hard to extract the values directly without
 	// losing type context that the union provided.
-	createSource(db, null, req.body)
-		.then((item) => {
-			res.status(201).contentType('application/json').send(item);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating item.', error));
-				return;
-			}
-			next(error);
-		});
+	const source = await createSource(db, null, req.body);
+	res.status(201).contentType('application/json').send(source);
 };
 
-const getSources = (req: Request, res: Response, next: NextFunction): void => {
+const getSources = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const paginationParameters = extractPaginationParameters(req);
-	(async () => {
-		const { offset, limit } = getLimitValues(paginationParameters);
-		const bundle = await loadSourceBundle(db, req, limit, offset);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	const bundle = await loadSourceBundle(db, req, limit, offset);
 
-		res.status(200).contentType('application/json').send(bundle);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error retrieving items.', error));
-			return;
-		}
-		next(error);
-	});
+	res.status(200).contentType('application/json').send(bundle);
 };
 
-const getSource = (req: Request, res: Response, next: NextFunction): void => {
+const getSource = async (req: Request, res: Response) => {
 	const { sourceId } = req.params;
 	if (!isId(sourceId)) {
-		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
-		return;
+		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
-	loadSource(db, null, sourceId)
-		.then((item) => {
-			res.status(200).contentType('application/json').send(item);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving item.', error));
-				return;
-			}
-			next(error);
-		});
+	const source = await loadSource(db, null, sourceId);
+	res.status(200).contentType('application/json').send(source);
 };
 
 export const sourcesHandlers = {

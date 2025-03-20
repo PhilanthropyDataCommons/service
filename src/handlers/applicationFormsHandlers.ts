@@ -8,14 +8,12 @@ import {
 	loadOpportunity,
 } from '../database';
 import {
-	isTinyPgErrorWithQueryContext,
 	isWritableApplicationFormWithFields,
 	isId,
 	isAuthContext,
 	Permission,
 } from '../types';
 import {
-	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
 	NotFoundError,
@@ -24,81 +22,51 @@ import {
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { authContextHasFunderPermission } from '../authorization';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const getApplicationForms = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getApplicationForms = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	loadApplicationFormBundle(db, req, limit, offset)
-		.then((applicationForms) => {
-			res.status(200).contentType('application/json').send(applicationForms);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving application forms.', error));
-				return;
-			}
-			next(error);
-		});
+	const applicationFormBundle = await loadApplicationFormBundle(
+		db,
+		req,
+		limit,
+		offset,
+	);
+	res.status(200).contentType('application/json').send(applicationFormBundle);
 };
 
-const getApplicationForm = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getApplicationForm = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
 	const { applicationFormId } = req.params;
 	if (!isId(applicationFormId)) {
-		next(new InputValidationError('Invalid request.', isId.errors ?? []));
-		return;
+		throw new InputValidationError('Invalid request.', isId.errors ?? []);
 	}
-	loadApplicationForm(db, req, applicationFormId)
-		.then((applicationForm) => {
-			res.status(200).contentType('application/json').send(applicationForm);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving application form.', error));
-				return;
-			}
-			next(error);
-		});
+
+	const applicationForm = await loadApplicationForm(db, req, applicationFormId);
+	res.status(200).contentType('application/json').send(applicationForm);
 };
 
-const postApplicationForms = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const postApplicationForms = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
 	if (!isWritableApplicationFormWithFields(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableApplicationFormWithFields.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableApplicationFormWithFields.errors ?? [],
 		);
-		return;
 	}
 	const { fields, opportunityId } = req.body;
-	(async () => {
+
+	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (
 			!authContextHasFunderPermission(
@@ -127,17 +95,12 @@ const postApplicationForms = (
 				...applicationForm,
 				fields: applicationFormFields,
 			});
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error creating application form.', error));
-			return;
-		}
+	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
-			next(new UnprocessableEntityError('A related entity was not found'));
-			return;
+			throw new UnprocessableEntityError('A related entity was not found');
 		}
-		next(error);
-	});
+		throw error;
+	}
 };
 
 export const applicationFormsHandlers = {

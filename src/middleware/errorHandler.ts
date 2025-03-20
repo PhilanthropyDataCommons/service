@@ -8,7 +8,7 @@ import {
 	UnauthorizedError,
 	UnprocessableEntityError,
 } from '../errors';
-import { PostgresErrorCode } from '../types';
+import { isTinyPgErrorWithQueryContext, PostgresErrorCode } from '../types';
 import { getLogger } from '../logger';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -128,18 +128,21 @@ export const errorHandler = (
 	next: NextFunction, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): void => {
 	logger.trace(req.body);
-	const statusCode = getHttpStatusCodeForError(err);
+	const wrappedError = isTinyPgErrorWithQueryContext(err)
+		? new DatabaseError('Error with a database operation.', err)
+		: err;
+	const statusCode = getHttpStatusCodeForError(wrappedError);
 	if (statusCode >= 500) {
-		logger.error({ err, statusCode });
+		logger.error({ wrappedError, statusCode });
 	} else {
-		logger.debug({ err, statusCode });
+		logger.debug({ wrappedError, statusCode });
 	}
 	res
 		.status(statusCode)
 		.contentType('application/json')
 		.send({
-			name: getNameForError(err),
-			message: getMessageForError(err),
-			details: getDetailsForError(err),
+			name: getNameForError(wrappedError),
+			message: getMessageForError(wrappedError),
+			details: getDetailsForError(wrappedError),
 		});
 };

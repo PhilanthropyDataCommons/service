@@ -10,80 +10,55 @@ import {
 	isKeycloakId,
 	isPermission,
 	isShortCode,
-	isTinyPgErrorWithQueryContext,
 	isWritableUserGroupFunderPermission,
 } from '../types';
-import {
-	DatabaseError,
-	FailedMiddlewareError,
-	InputValidationError,
-} from '../errors';
-import type { Request, Response, NextFunction } from 'express';
+import { FailedMiddlewareError, InputValidationError } from '../errors';
+import type { Request, Response } from 'express';
 
-const deleteUserGroupDataProviderPermission = (
+const deleteUserGroupDataProviderPermission = async (
 	req: Request,
 	res: Response,
-	next: NextFunction,
-): void => {
+) => {
 	const { keycloakOrganizationId, dataProviderShortCode, permission } =
 		req.params;
 	if (!isKeycloakId(keycloakOrganizationId)) {
-		next(
-			new InputValidationError(
-				'Invalid keycloakOrganizationId parameter.',
-				isKeycloakId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid keycloakOrganizationId parameter.',
+			isKeycloakId.errors ?? [],
 		);
-		return;
 	}
 	if (!isShortCode(dataProviderShortCode)) {
-		next(
-			new InputValidationError(
-				'Invalid dataProviderShortCode parameter.',
-				isId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid dataProviderShortCode parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
 	if (!isPermission(permission)) {
-		next(
-			new InputValidationError(
-				'Invalid permission parameter.',
-				isPermission.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid permission parameter.',
+			isPermission.errors ?? [],
 		);
-		return;
 	}
 
-	(async () => {
-		await assertUserGroupDataProviderPermissionExists(
-			keycloakOrganizationId,
-			dataProviderShortCode,
-			permission,
-		);
-		await removeUserGroupDataProviderPermission(
-			keycloakOrganizationId,
-			dataProviderShortCode,
-			permission,
-		);
-		res.status(204).contentType('application/json').send();
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error deleting item.', error));
-			return;
-		}
-		next(error);
-	});
+	await assertUserGroupDataProviderPermissionExists(
+		keycloakOrganizationId,
+		dataProviderShortCode,
+		permission,
+	);
+	await removeUserGroupDataProviderPermission(
+		keycloakOrganizationId,
+		dataProviderShortCode,
+		permission,
+	);
+	res.status(204).contentType('application/json').send();
 };
 
-const putUserGroupDataProviderPermission = (
+const putUserGroupDataProviderPermission = async (
 	req: Request,
 	res: Response,
-	next: NextFunction,
-): void => {
+) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
 	const { keycloakOrganizationId, dataProviderShortCode, permission } =
@@ -91,61 +66,41 @@ const putUserGroupDataProviderPermission = (
 	const createdBy = req.user.keycloakUserId;
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
-		next(
-			new InputValidationError(
-				'Invalid keycloakOrganizationId parameter.',
-				isKeycloakId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid keycloakOrganizationId parameter.',
+			isKeycloakId.errors ?? [],
 		);
-		return;
 	}
 	if (!isShortCode(dataProviderShortCode)) {
-		next(
-			new InputValidationError(
-				'Invalid dataProviderShortCode parameter.',
-				isId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid dataProviderShortCode parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
 	if (!isPermission(permission)) {
-		next(
-			new InputValidationError(
-				'Invalid permission parameter.',
-				isPermission.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid permission parameter.',
+			isPermission.errors ?? [],
 		);
-		return;
 	}
 	if (!isWritableUserGroupFunderPermission(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableUserGroupFunderPermission.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableUserGroupFunderPermission.errors ?? [],
 		);
-		return;
 	}
 
-	(async () => {
-		const userGroupFunderPermission =
-			await createOrUpdateUserGroupDataProviderPermission(db, null, {
-				keycloakOrganizationId,
-				dataProviderShortCode,
-				permission,
-				createdBy,
-			});
-		res
-			.status(201)
-			.contentType('application/json')
-			.send(userGroupFunderPermission);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error creating item.', error));
-			return;
-		}
-		next(error);
-	});
+	const userGroupFunderPermission =
+		await createOrUpdateUserGroupDataProviderPermission(db, null, {
+			keycloakOrganizationId,
+			dataProviderShortCode,
+			permission,
+			createdBy,
+		});
+	res
+		.status(201)
+		.contentType('application/json')
+		.send(userGroupFunderPermission);
 };
 
 const userGroupDataProviderPermissionsHandlers = {

@@ -8,88 +8,50 @@ import {
 import {
 	isAuthContext,
 	isId,
-	isTinyPgErrorWithQueryContext,
 	isWritableOpportunity,
 	Permission,
 } from '../types';
 import {
-	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
 	UnauthorizedError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { authContextHasFunderPermission } from '../authorization';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const getOpportunities = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getOpportunities = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	loadOpportunityBundle(db, req, limit, offset)
-		.then((opportunityBundle) => {
-			res.status(200).contentType('application/json').send(opportunityBundle);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving opportunities.', error));
-				return;
-			}
-			next(error);
-		});
+	const opportunityBundle = await loadOpportunityBundle(db, req, limit, offset);
+	res.status(200).contentType('application/json').send(opportunityBundle);
 };
 
-const getOpportunity = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getOpportunity = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
 	}
 	const { opportunityId } = req.params;
 	if (!isId(opportunityId)) {
-		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
-		return;
+		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}
-	loadOpportunity(db, req, opportunityId)
-		.then((opportunity) => {
-			res.status(200).contentType('application/json').send(opportunity);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving opportunity.', error));
-				return;
-			}
-			next(error);
-		});
+	const opportunity = await loadOpportunity(db, req, opportunityId);
+	res.status(200).contentType('application/json').send(opportunity);
 };
 
-const postOpportunity = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const postOpportunity = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	if (!isWritableOpportunity(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableOpportunity.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableOpportunity.errors ?? [],
 		);
-		return;
 	}
 	if (
 		!authContextHasFunderPermission(
@@ -98,20 +60,10 @@ const postOpportunity = (
 			Permission.EDIT,
 		)
 	) {
-		next(new UnauthorizedError());
-		return;
+		throw new UnauthorizedError();
 	}
-	createOpportunity(db, null, req.body)
-		.then((opportunity) => {
-			res.status(201).contentType('application/json').send(opportunity);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating opportunity.', error));
-				return;
-			}
-			next(error);
-		});
+	const opportunity = await createOpportunity(db, null, req.body);
+	res.status(201).contentType('application/json').send(opportunity);
 };
 
 export const opportunitiesHandlers = {

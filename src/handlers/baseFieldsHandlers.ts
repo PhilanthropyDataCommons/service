@@ -1,4 +1,4 @@
-import { DatabaseError, InputValidationError } from '../errors';
+import { InputValidationError } from '../errors';
 import {
 	db,
 	createBaseField,
@@ -11,232 +11,112 @@ import {
 } from '../database';
 import { extractPaginationParameters } from '../queryParameters';
 import {
-	isTinyPgErrorWithQueryContext,
 	isValidLanguageTag,
 	isWritableBaseField,
 	isWritableBaseFieldLocalization,
 	isId,
 } from '../types';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
 const assertBaseFieldExists = async (baseFieldId: number): Promise<void> => {
 	await loadBaseField(db, null, baseFieldId);
 };
 
-const getBaseFields = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
-	loadBaseFields()
-		.then((baseFields) => {
-			res.status(200).contentType('application/json').send(baseFields);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving base fields.', error));
-				return;
-			}
-			next(error);
-		});
+const getBaseFields = async (req: Request, res: Response) => {
+	const baseFields = await loadBaseFields();
+	res.status(200).contentType('application/json').send(baseFields);
 };
 
-const postBaseField = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const postBaseField = async (req: Request, res: Response) => {
 	if (!isWritableBaseField(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableBaseField.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableBaseField.errors ?? [],
 		);
-		return;
 	}
 
-	createBaseField(db, null, req.body)
-		.then((baseField) => {
-			res.status(201).contentType('application/json').send(baseField);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating base field.', error));
-				return;
-			}
-			next(error);
-		});
+	const baseField = await createBaseField(db, null, req.body);
+	res.status(201).contentType('application/json').send(baseField);
 };
 
-const putBaseField = (
+const putBaseField = async (
 	req: Request<{ baseFieldId: string }>,
 	res: Response,
-	next: NextFunction,
 ) => {
 	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
 	if (Number.isNaN(baseFieldId)) {
-		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
-		return;
+		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}
 	const body = req.body as unknown;
 	if (!isWritableBaseField(body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableBaseField.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableBaseField.errors ?? [],
 		);
-		return;
 	}
 
-	assertBaseFieldExists(baseFieldId)
-		.then(() => {
-			updateBaseField(db, null, body, baseFieldId)
-				.then((baseField) => {
-					res.status(200).contentType('application/json').send(baseField);
-				})
-				.catch((error: unknown) => {
-					if (isTinyPgErrorWithQueryContext(error)) {
-						next(new DatabaseError('Error updating base field.', error));
-						return;
-					}
-					next(error);
-				});
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(
-					new DatabaseError(
-						'Something went wrong when asserting the validity of the provided Base Field.',
-						error,
-					),
-				);
-				return;
-			}
-			next(error);
-		});
+	await assertBaseFieldExists(baseFieldId);
+	const baseField = await updateBaseField(db, null, body, baseFieldId);
+	res.status(200).contentType('application/json').send(baseField);
 };
 
-const getBaseFieldLocalizationsByBaseFieldId = (
+const getBaseFieldLocalizationsByBaseFieldId = async (
 	req: Request<{ baseFieldId: string }>,
 	res: Response,
-	next: NextFunction,
-): void => {
-	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
-	if (!isId(baseFieldId)) {
-		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
-		return;
-	}
-	const paginationParameters = extractPaginationParameters(req);
-	const { offset, limit } = getLimitValues(paginationParameters);
-	assertBaseFieldExists(baseFieldId)
-		.then(() => {
-			loadBaseFieldLocalizationsBundleByBaseFieldId(
-				db,
-				null,
-				baseFieldId,
-				limit,
-				offset,
-			)
-				.then((baseFieldLocalizations) => {
-					res
-						.status(200)
-						.contentType('application/json')
-						.send(baseFieldLocalizations);
-				})
-				.catch((error: unknown) => {
-					if (isTinyPgErrorWithQueryContext(error)) {
-						next(new DatabaseError('Error retrieving base fields.', error));
-						return;
-					}
-					next(error);
-				});
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(
-					new DatabaseError(
-						'Something went wrong when asserting the validity of the provided Base Field.',
-						error,
-					),
-				);
-				return;
-			}
-			next(error);
-		});
-};
-
-const putBaseFieldLocalization = (
-	req: Request<{ baseFieldId: string; language: string }>,
-	res: Response,
-	next: NextFunction,
 ) => {
 	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
 	if (!isId(baseFieldId)) {
-		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
-		return;
+		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
+	}
+	const paginationParameters = extractPaginationParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	await assertBaseFieldExists(baseFieldId);
+	const baseFieldLocalizations =
+		await loadBaseFieldLocalizationsBundleByBaseFieldId(
+			db,
+			null,
+			baseFieldId,
+			limit,
+			offset,
+		);
+	res.status(200).contentType('application/json').send(baseFieldLocalizations);
+};
+
+const putBaseFieldLocalization = async (
+	req: Request<{ baseFieldId: string; language: string }>,
+	res: Response,
+) => {
+	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
+	if (!isId(baseFieldId)) {
+		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}
 
 	if (!isValidLanguageTag(req.params.language)) {
-		next(
-			new InputValidationError(
-				'The entity language must be a valid IETF language tag',
-				isValidLanguageTag.errors ?? [],
-			),
+		throw new InputValidationError(
+			'The entity language must be a valid IETF language tag',
+			isValidLanguageTag.errors ?? [],
 		);
-		return;
 	}
 
 	if (!isWritableBaseFieldLocalization(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableBaseField.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableBaseField.errors ?? [],
 		);
-		return;
 	}
 	const { label, description } = req.body;
-	assertBaseFieldExists(baseFieldId)
-		.then(() => {
-			createOrUpdateBaseFieldLocalization(db, null, {
-				label,
-				description,
-				baseFieldId,
-				language: req.params.language,
-			})
-				.then((baseFieldLocalization) => {
-					res
-						.status(200)
-						.contentType('application/json')
-						.send(baseFieldLocalization);
-				})
-				.catch((error: unknown) => {
-					if (isTinyPgErrorWithQueryContext(error)) {
-						next(
-							new DatabaseError(
-								'Error updating base field localization.',
-								error,
-							),
-						);
-						return;
-					}
-					next(error);
-				});
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(
-					new DatabaseError(
-						'Something went wrong when asserting the validity of the provided Base Field.',
-						error,
-					),
-				);
-				return;
-			}
-			next(error);
-		});
+	await assertBaseFieldExists(baseFieldId);
+	const baseFieldLocalization = await createOrUpdateBaseFieldLocalization(
+		db,
+		null,
+		{
+			label,
+			description,
+			baseFieldId,
+			language: req.params.language,
+		},
+	);
+	res.status(200).contentType('application/json').send(baseFieldLocalization);
 };
 
 export const baseFieldsHandlers = {

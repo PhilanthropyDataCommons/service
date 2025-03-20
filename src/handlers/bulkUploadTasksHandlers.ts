@@ -9,11 +9,9 @@ import {
 	Permission,
 	TaskStatus,
 	isAuthContext,
-	isTinyPgErrorWithQueryContext,
 	isWritableBulkUploadTask,
 } from '../types';
 import {
-	DatabaseError,
 	FailedMiddlewareError,
 	InputConflictError,
 	InputValidationError,
@@ -27,37 +25,26 @@ import {
 import { addProcessBulkUploadJob } from '../jobQueue';
 import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
 import { authContextHasFunderPermission } from '../authorization';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const postBulkUploadTask = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const postBulkUploadTask = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	if (!isWritableBulkUploadTask(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableBulkUploadTask.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableBulkUploadTask.errors ?? [],
 		);
-		return;
 	}
 
 	const { sourceId, funderShortCode, fileName, sourceKey } = req.body;
 	const createdBy = req.user.keycloakUserId;
 
 	if (!authContextHasFunderPermission(req, funderShortCode, Permission.EDIT)) {
-		next(
-			new UnprocessableEntityError(
-				'You do not have write permissions on a funder with the specified short code.',
-			),
+		throw new UnprocessableEntityError(
+			'You do not have write permissions on a funder with the specified short code.',
 		);
-		return;
 	}
 
 	if (!sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
@@ -67,70 +54,49 @@ const postBulkUploadTask = (
 		);
 	}
 
-	assertSourceExists(sourceId)
-		.then(async () => {
-			const bulkUploadTask = await createBulkUploadTask(db, null, {
-				sourceId,
-				funderShortCode,
-				fileName,
-				sourceKey,
-				status: TaskStatus.PENDING,
-				createdBy,
-			});
-			await addProcessBulkUploadJob({
-				bulkUploadId: bulkUploadTask.id,
-			});
-			res.status(201).contentType('application/json').send(bulkUploadTask);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating bulk upload task.', error));
-				return;
-			}
-			if (error instanceof NotFoundError) {
-				if (error.details.entityType === 'Source') {
-					next(
-						new InputConflictError(`The related entity does not exist`, {
-							entityType: 'Source',
-							entityId: sourceId,
-						}),
-					);
-					return;
-				}
-			}
-			next(error);
+	await assertSourceExists(sourceId);
+	try {
+		const bulkUploadTask = await createBulkUploadTask(db, null, {
+			sourceId,
+			funderShortCode,
+			fileName,
+			sourceKey,
+			status: TaskStatus.PENDING,
+			createdBy,
 		});
+		await addProcessBulkUploadJob({
+			bulkUploadId: bulkUploadTask.id,
+		});
+		res.status(201).contentType('application/json').send(bulkUploadTask);
+	} catch (error: unknown) {
+		if (error instanceof NotFoundError) {
+			if (error.details.entityType === 'Source') {
+				throw new InputConflictError(`The related entity does not exist`, {
+					entityType: 'Source',
+					entityId: sourceId,
+				});
+			}
+		}
+		throw error;
+	}
 };
 
-const getBulkUploadTasks = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getBulkUploadTasks = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { createdBy } = extractCreatedByParameters(req);
-	(async () => {
-		const bulkUploadTaskBundle = await loadBulkUploadTaskBundle(
-			db,
-			req,
-			createdBy,
-			limit,
-			offset,
-		);
+	const bulkUploadTaskBundle = await loadBulkUploadTaskBundle(
+		db,
+		req,
+		createdBy,
+		limit,
+		offset,
+	);
 
-		res.status(200).contentType('application/json').send(bulkUploadTaskBundle);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error retrieving bulk upload tasks.', error));
-			return;
-		}
-		next(error);
-	});
+	res.status(200).contentType('application/json').send(bulkUploadTaskBundle);
 };
 
 export const bulkUploadTasksHandlers = {

@@ -6,15 +6,8 @@ import {
 	loadProposalBundle,
 	loadOpportunity,
 } from '../database';
+import { isId, isAuthContext, isWritableProposal, Permission } from '../types';
 import {
-	isId,
-	isAuthContext,
-	isTinyPgErrorWithQueryContext,
-	isWritableProposal,
-	Permission,
-} from '../types';
-import {
-	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
 	NotFoundError,
@@ -27,16 +20,11 @@ import {
 	extractSearchParameters,
 } from '../queryParameters';
 import { authContextHasFunderPermission } from '../authorization';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const getProposals = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getProposals = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
@@ -44,72 +32,46 @@ const getProposals = (
 	const { changemakerId } = extractChangemakerParameters(req);
 	const { createdBy } = extractCreatedByParameters(req);
 
-	(async () => {
-		const proposalBundle = await loadProposalBundle(
-			db,
-			req,
-			createdBy,
-			changemakerId,
-			search,
-			limit,
-			offset,
-		);
+	const proposalBundle = await loadProposalBundle(
+		db,
+		req,
+		createdBy,
+		changemakerId,
+		search,
+		limit,
+		offset,
+	);
 
-		res.status(200).contentType('application/json').send(proposalBundle);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error retrieving proposals.', error));
-			return;
-		}
-		next(error);
-	});
+	res.status(200).contentType('application/json').send(proposalBundle);
 };
 
-const getProposal = (req: Request, res: Response, next: NextFunction): void => {
+const getProposal = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const { proposalId } = req.params;
 	if (!isId(proposalId)) {
-		next(new InputValidationError('Invalid id parameter.', isId.errors ?? []));
-		return;
+		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}
-	(async () => {
-		const proposal = await loadProposal(db, req, proposalId);
-		res.status(200).contentType('application/json').send(proposal);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error loading the proposal.', error));
-			return;
-		}
-		next(error);
-	});
+	const proposal = await loadProposal(db, req, proposalId);
+	res.status(200).contentType('application/json').send(proposal);
 };
 
-const postProposal = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const postProposal = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	if (!isWritableProposal(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableProposal.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableProposal.errors ?? [],
 		);
-		return;
 	}
 
 	const { externalId, opportunityId } = req.body;
 	const createdBy = req.user.keycloakUserId;
 
-	(async () => {
+	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (
 			!authContextHasFunderPermission(
@@ -128,21 +90,14 @@ const postProposal = (
 			createdBy,
 		});
 		res.status(201).contentType('application/json').send(proposal);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error creating proposal.', error));
-			return;
-		}
+	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
-			next(
-				new UnprocessableEntityError(
-					`The associated ${error.details.entityType} was not found.`,
-				),
+			throw new UnprocessableEntityError(
+				`The associated ${error.details.entityType} was not found.`,
 			);
-			return;
 		}
-		next(error);
-	});
+		throw error;
+	}
 };
 
 export const proposalsHandlers = {

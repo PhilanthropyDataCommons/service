@@ -5,98 +5,61 @@ import {
 	loadFunderBundle,
 	loadFunder,
 } from '../database';
-import {
-	isAuthContext,
-	isTinyPgErrorWithQueryContext,
-	isWritableFunder,
-} from '../types';
-import {
-	DatabaseError,
-	FailedMiddlewareError,
-	InputValidationError,
-} from '../errors';
+import { isAuthContext, isWritableFunder } from '../types';
+import { FailedMiddlewareError, InputValidationError } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { isShortCode } from '../types/ShortCode';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const getFunders = (req: Request, res: Response, next: NextFunction): void => {
+const getFunders = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
 	}
 	const paginationParameters = extractPaginationParameters(req);
-	(async () => {
-		const { offset, limit } = getLimitValues(paginationParameters);
-		const funderBundle = await loadFunderBundle(db, req, limit, offset);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	const funderBundle = await loadFunderBundle(db, req, limit, offset);
 
-		res.status(200).contentType('application/json').send(funderBundle);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error retrieving funders.', error));
-			return;
-		}
-		next(error);
-	});
+	res.status(200).contentType('application/json').send(funderBundle);
 };
 
-const getFunder = (req: Request, res: Response, next: NextFunction): void => {
+const getFunder = async (req: Request, res: Response) => {
 	const { funderShortCode } = req.params;
 	if (!isShortCode(funderShortCode)) {
-		next(
-			new InputValidationError('Invalid short code.', isShortCode.errors ?? []),
+		throw new InputValidationError(
+			'Invalid short code.',
+			isShortCode.errors ?? [],
 		);
-		return;
 	}
-	loadFunder(db, null, funderShortCode)
-		.then((funder) => {
-			res.status(200).contentType('application/json').send(funder);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving funder.', error));
-				return;
-			}
-			next(error);
-		});
+	const funder = await loadFunder(db, null, funderShortCode);
+	res.status(200).contentType('application/json').send(funder);
 };
 
-const putFunder = (req: Request, res: Response, next: NextFunction): void => {
+const putFunder = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const shortCode = req.params.funderShortCode;
 	if (!isShortCode(shortCode)) {
-		next(
-			new InputValidationError('Invalid short code.', isShortCode.errors ?? []),
+		throw new InputValidationError(
+			'Invalid short code.',
+			isShortCode.errors ?? [],
 		);
-		return;
 	}
 	if (!isWritableFunder(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableFunder.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableFunder.errors ?? [],
 		);
-		return;
 	}
 	const { name, keycloakOrganizationId } = req.body;
 
-	(async () => {
-		const funder = await createOrUpdateFunder(db, null, {
-			shortCode,
-			name,
-			keycloakOrganizationId,
-		});
-		res.status(201).contentType('application/json').send(funder);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error creating funder.', error));
-			return;
-		}
-		next(error);
+	const funder = await createOrUpdateFunder(db, null, {
+		shortCode,
+		name,
+		keycloakOrganizationId,
 	});
+	res.status(201).contentType('application/json').send(funder);
 };
 
 export const fundersHandlers = {

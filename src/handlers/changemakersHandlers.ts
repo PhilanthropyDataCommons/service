@@ -11,13 +11,11 @@ import {
 import {
 	isId,
 	isWritableChangemaker,
-	isTinyPgErrorWithQueryContext,
 	isAuthContext,
 	getKeycloakUserIdFromAuthContext,
 	isPartialWritableChangemaker,
 } from '../types';
 import {
-	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
 	NoDataReturnedError,
@@ -27,222 +25,139 @@ import {
 	extractPaginationParameters,
 	extractProposalParameters,
 } from '../queryParameters';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const postChangemaker = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const postChangemaker = async (req: Request, res: Response) => {
 	if (!isWritableChangemaker(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableChangemaker.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableChangemaker.errors ?? [],
 		);
-		return;
 	}
-	createChangemaker(db, null, req.body)
-		.then((changemaker) => {
-			res.status(201).contentType('application/json').send(changemaker);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error creating base field.', error));
-				return;
-			}
-			next(error);
-		});
+	const changemaker = await createChangemaker(db, null, req.body);
+	res.status(201).contentType('application/json').send(changemaker);
 };
 
-const getChangemakers = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getChangemakers = async (req: Request, res: Response) => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { limit, offset } = getLimitValues(paginationParameters);
 	const { proposalId } = extractProposalParameters(req);
 	const authContext = isAuthContext(req) ? req : null;
-	loadChangemakerBundle(db, authContext, proposalId, limit, offset)
-		.then((changemakerBundle) => {
-			res.status(200).contentType('application/json').send(changemakerBundle);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving changemakers.', error));
-				return;
-			}
-			next(error);
-		});
+	const changemakerBundle = await loadChangemakerBundle(
+		db,
+		authContext,
+		proposalId,
+		limit,
+		offset,
+	);
+	res.status(200).contentType('application/json').send(changemakerBundle);
 };
 
-const getChangemaker = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getChangemaker = async (req: Request, res: Response) => {
 	const { changemakerId } = req.params;
 	if (!isId(changemakerId)) {
-		next(new InputValidationError('Invalid request body.', isId.errors ?? []));
-		return;
+		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
 	const authContext = isAuthContext(req) ? req : undefined;
-	loadChangemaker(
+	const changemaker = await loadChangemaker(
 		db,
 		null,
 		getKeycloakUserIdFromAuthContext(authContext),
 		changemakerId,
-	)
-		.then((changemaker) => {
-			res.status(200).contentType('application/json').send(changemaker);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving changemaker.', error));
-				return;
-			}
-			next(error);
-		});
+	);
+	res.status(200).contentType('application/json').send(changemaker);
 };
 
-const patchChangemaker = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const patchChangemaker = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const { changemakerId } = req.params;
 	if (!isId(changemakerId)) {
-		next(
-			new InputValidationError('Invalid request parameter.', isId.errors ?? []),
+		throw new InputValidationError(
+			'Invalid request parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
 	if (!isPartialWritableChangemaker(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isPartialWritableChangemaker.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isPartialWritableChangemaker.errors ?? [],
 		);
-		return;
 	}
 
-	updateChangemaker(db, null, req.body, changemakerId)
-		.then((changemaker) => {
-			res.status(200).contentType('application/json').send(changemaker);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error updating changemaker.', error));
-				return;
-			}
-			if (error instanceof NoDataReturnedError) {
-				// In the case of `PATCH`, when the query succeeds but returns no data,
-				// it is more likely to be "ID not found" than a programming error. In
-				// the case of a `PUT`, on the other hand, leave it as a 500 because a
-				// `PUT` should succeed when all the inputs were valid.
-				next(
-					new NotFoundError(
-						'The given changemaker was not found.',
-						{
-							entityType: 'Changemaker',
-							entityPrimaryKey: {
-								changemakerId,
-							},
-						},
-						{ cause: error },
-					),
-				);
-			}
-			next(error);
-		});
+	try {
+		const changemaker = await updateChangemaker(
+			db,
+			null,
+			req.body,
+			changemakerId,
+		);
+		res.status(200).contentType('application/json').send(changemaker);
+	} catch (error: unknown) {
+		if (error instanceof NoDataReturnedError) {
+			// In the case of `PATCH`, when the query succeeds but returns no data,
+			// it is more likely to be "ID not found" than a programming error. In
+			// the case of a `PUT`, on the other hand, leave it as a 500 because a
+			// `PUT` should succeed when all the inputs were valid.
+			throw new NotFoundError(
+				'The given changemaker was not found.',
+				{
+					entityType: 'Changemaker',
+					entityPrimaryKey: {
+						changemakerId,
+					},
+				},
+				{ cause: error },
+			);
+		}
+		throw error;
+	}
 };
 
-const putChangemakerFiscalSponsor = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const putChangemakerFiscalSponsor = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
 	}
 	const { changemakerId, fiscalSponsorChangemakerId } = req.params;
 	if (!isId(changemakerId)) {
-		next(
-			new InputValidationError(
-				'Invalid changemakerId parameter.',
-				isId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid changemakerId parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
 	if (!isId(fiscalSponsorChangemakerId)) {
-		next(
-			new InputValidationError(
-				'Invalid fiscalSponsorChangemakerId parameter.',
-				isId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid fiscalSponsorChangemakerId parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
 
-	(async () => {
-		const updatedChangemaker = await createOrUpdateFiscalSponsorship(db, req, {
-			fiscalSponseeChangemakerId: changemakerId,
-			fiscalSponsorChangemakerId,
-		});
-		res.status(200).contentType('application/json').send(updatedChangemaker);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error creating item.', error));
-			return;
-		}
-		next(error);
+	const updatedChangemaker = await createOrUpdateFiscalSponsorship(db, req, {
+		fiscalSponseeChangemakerId: changemakerId,
+		fiscalSponsorChangemakerId,
 	});
+	res.status(200).contentType('application/json').send(updatedChangemaker);
 };
 
-const deleteChangemakerFiscalSponsor = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const deleteChangemakerFiscalSponsor = async (req: Request, res: Response) => {
 	const { changemakerId, fiscalSponsorChangemakerId } = req.params;
 	if (!isId(changemakerId)) {
-		next(
-			new InputValidationError(
-				'Invalid changemakerId parameter.',
-				isId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid changemakerId parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
 	if (!isId(fiscalSponsorChangemakerId)) {
-		next(
-			new InputValidationError(
-				'Invalid fiscalSponsorChangemakerId parameter.',
-				isId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid fiscalSponsorChangemakerId parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
 
-	(async () => {
-		await removeFiscalSponsorship(changemakerId, fiscalSponsorChangemakerId);
-		res.status(204).contentType('application/json').send();
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error deleting item.', error));
-			return;
-		}
-		next(error);
-	});
+	await removeFiscalSponsorship(changemakerId, fiscalSponsorChangemakerId);
+	res.status(204).contentType('application/json').send();
 };
 
 export const changemakersHandlers = {

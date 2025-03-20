@@ -8,12 +8,10 @@ import {
 } from '../database';
 import {
 	isAuthContext,
-	isTinyPgErrorWithQueryContext,
 	isWritableChangemakerProposal,
 	Permission,
 } from '../types';
 import {
-	DatabaseError,
 	FailedMiddlewareError,
 	InputValidationError,
 	NotFoundError,
@@ -25,65 +23,45 @@ import {
 	extractPaginationParameters,
 } from '../queryParameters';
 import { authContextHasFunderPermission } from '../authorization';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const getChangemakerProposals = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getChangemakerProposals = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { changemakerId } = extractChangemakerParameters(req);
 	const { proposalId } = extractProposalParameters(req);
 
-	(async () => {
-		const changemakerProposalBundle = await loadChangemakerProposalBundle(
-			db,
-			req,
-			changemakerId,
-			proposalId,
-			limit,
-			offset,
-		);
-		res
-			.status(200)
-			.contentType('application/json')
-			.send(changemakerProposalBundle);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error retrieving changemaker proposals.', error));
-			return;
-		}
-		next(error);
-	});
+	const changemakerProposalBundle = await loadChangemakerProposalBundle(
+		db,
+		req,
+		changemakerId,
+		proposalId,
+		limit,
+		offset,
+	);
+	res
+		.status(200)
+		.contentType('application/json')
+		.send(changemakerProposalBundle);
 };
 
-const postChangemakerProposal = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const postChangemakerProposal = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
 	}
 	if (!isWritableChangemakerProposal(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableChangemakerProposal.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableChangemakerProposal.errors ?? [],
 		);
-		return;
 	}
 	const { proposalId, changemakerId } = req.body;
 
-	(async () => {
+	try {
 		const proposal = await loadProposal(db, req, proposalId);
 		const opportunity = await loadOpportunity(db, req, proposal.opportunityId);
 		if (
@@ -102,21 +80,14 @@ const postChangemakerProposal = (
 			proposalId,
 		});
 		res.status(201).contentType('application/json').send(changemakerProposal);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error creating changemaker proposal.', error));
-			return;
-		}
+	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
-			next(
-				new UnprocessableEntityError(
-					`related ${error.details.entityType} not found.`,
-				),
+			throw new UnprocessableEntityError(
+				`related ${error.details.entityType} not found.`,
 			);
-			return;
 		}
-		next(error);
-	});
+		throw error;
+	}
 };
 
 export const changemakerProposalsHandlers = {

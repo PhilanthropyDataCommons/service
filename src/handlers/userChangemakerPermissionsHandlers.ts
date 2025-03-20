@@ -9,140 +9,89 @@ import {
 	isId,
 	isKeycloakId,
 	isPermission,
-	isTinyPgErrorWithQueryContext,
 	isWritableUserChangemakerPermission,
 } from '../types';
-import {
-	DatabaseError,
-	FailedMiddlewareError,
-	InputValidationError,
-} from '../errors';
-import type { Request, Response, NextFunction } from 'express';
+import { FailedMiddlewareError, InputValidationError } from '../errors';
+import type { Request, Response } from 'express';
 
-const deleteUserChangemakerPermission = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const deleteUserChangemakerPermission = async (req: Request, res: Response) => {
 	const { userKeycloakUserId, changemakerId, permission } = req.params;
 	if (!isKeycloakId(userKeycloakUserId)) {
-		next(
-			new InputValidationError(
-				'Invalid userKeycloakUserId parameter.',
-				isKeycloakId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid userKeycloakUserId parameter.',
+			isKeycloakId.errors ?? [],
 		);
-		return;
 	}
 	if (!isId(changemakerId)) {
-		next(
-			new InputValidationError(
-				'Invalid changemakerId parameter.',
-				isId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid changemakerId parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
 	if (!isPermission(permission)) {
-		next(
-			new InputValidationError(
-				'Invalid permission parameter.',
-				isPermission.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid permission parameter.',
+			isPermission.errors ?? [],
 		);
-		return;
 	}
 
-	(async () => {
-		await assertUserChangemakerPermissionExists(
-			userKeycloakUserId,
-			changemakerId,
-			permission,
-		);
-		await removeUserChangemakerPermission(
-			userKeycloakUserId,
-			changemakerId,
-			permission,
-		);
-		res.status(204).contentType('application/json').send();
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error deleting item.', error));
-			return;
-		}
-		next(error);
-	});
+	await assertUserChangemakerPermissionExists(
+		userKeycloakUserId,
+		changemakerId,
+		permission,
+	);
+	await removeUserChangemakerPermission(
+		userKeycloakUserId,
+		changemakerId,
+		permission,
+	);
+	res.status(204).contentType('application/json').send();
 };
 
-const putUserChangemakerPermission = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const putUserChangemakerPermission = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
 	const { userKeycloakUserId, changemakerId, permission } = req.params;
 	const createdBy = req.user.keycloakUserId;
 
 	if (!isKeycloakId(userKeycloakUserId)) {
-		next(
-			new InputValidationError(
-				'Invalid userKeycloakUserId parameter.',
-				isKeycloakId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid userKeycloakUserId parameter.',
+			isKeycloakId.errors ?? [],
 		);
-		return;
 	}
 	if (!isId(changemakerId)) {
-		next(
-			new InputValidationError(
-				'Invalid changemakerId parameter.',
-				isId.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid changemakerId parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
 	if (!isPermission(permission)) {
-		next(
-			new InputValidationError(
-				'Invalid permission parameter.',
-				isPermission.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid permission parameter.',
+			isPermission.errors ?? [],
 		);
-		return;
 	}
 	if (!isWritableUserChangemakerPermission(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableUserChangemakerPermission.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableUserChangemakerPermission.errors ?? [],
 		);
-		return;
 	}
 
-	(async () => {
-		const userChangemakerPermission =
-			await createOrUpdateUserChangemakerPermission(db, null, {
-				userKeycloakUserId,
-				changemakerId,
-				permission,
-				createdBy,
-			});
-		res
-			.status(201)
-			.contentType('application/json')
-			.send(userChangemakerPermission);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error creating item.', error));
-			return;
-		}
-		next(error);
-	});
+	const userChangemakerPermission =
+		await createOrUpdateUserChangemakerPermission(db, null, {
+			userKeycloakUserId,
+			changemakerId,
+			permission,
+			createdBy,
+		});
+	res
+		.status(201)
+		.contentType('application/json')
+		.send(userChangemakerPermission);
 };
 
 const userChangemakerPermissionsHandlers = {

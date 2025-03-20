@@ -11,13 +11,11 @@ import {
 } from '../database';
 import {
 	isAuthContext,
-	isTinyPgErrorWithQueryContext,
 	isWritableProposalVersionWithFieldValues,
 	isId,
 	Permission,
 } from '../types';
 import {
-	DatabaseError,
 	InputValidationError,
 	InputConflictError,
 	NotFoundError,
@@ -26,7 +24,7 @@ import {
 } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
 import { authContextHasFunderPermission } from '../authorization';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 import type {
 	Proposal,
 	ApplicationForm,
@@ -125,29 +123,21 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 	await Promise.all(applicationFormFieldQueries);
 };
 
-const postProposalVersion = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const postProposalVersion = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	if (!isWritableProposalVersionWithFieldValues(req.body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isWritableProposalVersionWithFieldValues.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritableProposalVersionWithFieldValues.errors ?? [],
 		);
-		return;
 	}
 
 	const { sourceId, fieldValues, proposalId, applicationFormId } = req.body;
 	const createdBy = req.user.keycloakUserId;
 
-	(async () => {
+	try {
 		const proposal = await loadProposal(db, req, proposalId);
 		const opportunity = await loadOpportunity(db, req, proposal.opportunityId);
 		if (
@@ -212,67 +202,38 @@ const postProposalVersion = (
 					fieldValues: proposalFieldValues,
 				});
 		});
-	})().catch((error: unknown) => {
+	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			if (error.details.entityType === 'Source') {
-				next(
-					new InputConflictError(`The related entity does not exist`, {
-						entityType: 'Source',
-						entityId: sourceId,
-					}),
-				);
-				return;
+				throw new InputConflictError(`The related entity does not exist`, {
+					entityType: 'Source',
+					entityId: sourceId,
+				});
 			}
 			if (error.details.entityType === 'Proposal') {
-				next(
-					new InputConflictError(`The related entity does not exist`, {
-						entityType: 'Proposal',
-						entityId: proposalId,
-					}),
-				);
-				return;
+				throw new InputConflictError(`The related entity does not exist`, {
+					entityType: 'Proposal',
+					entityId: proposalId,
+				});
 			}
 		}
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(
-				new DatabaseError(
-					'Something went wrong when asserting the validity of the provided Proposal Version.',
-					error,
-				),
-			);
-			return;
-		}
-		next(error);
-	});
+		throw error;
+	}
 };
 
-const getProposalVersion = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getProposalVersion = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const { proposalVersionId } = req.params;
 	if (!isId(proposalVersionId)) {
-		next(
-			new InputValidationError('Invalid query parameter.', isId.errors ?? []),
+		throw new InputValidationError(
+			'Invalid query parameter.',
+			isId.errors ?? [],
 		);
-		return;
 	}
-	loadProposalVersion(db, req, proposalVersionId)
-		.then((item) => {
-			res.status(200).contentType('application/json').send(item);
-		})
-		.catch((error: unknown) => {
-			if (isTinyPgErrorWithQueryContext(error)) {
-				next(new DatabaseError('Error retrieving item.', error));
-				return;
-			}
-			next(error);
-		});
+	const proposalVersion = await loadProposalVersion(db, req, proposalVersionId);
+	res.status(200).contentType('application/json').send(proposalVersion);
 };
 
 export const proposalVersionsHandlers = {

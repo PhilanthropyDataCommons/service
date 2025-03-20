@@ -5,7 +5,7 @@ import { s3Client } from '../s3Client';
 import { isPresignedPostRequestWrite } from '../types';
 import { InputValidationError } from '../errors';
 import type { PresignedPost } from '@aws-sdk/s3-presigned-post';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
 const { S3_BUCKET } = requireEnv('S3_BUCKET');
 
@@ -23,33 +23,21 @@ const generatePresignedPost = async (
 		],
 	});
 
-const createPresignedPostRequest = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const createPresignedPostRequest = async (req: Request, res: Response) => {
 	const body = req.body as unknown;
 	if (!isPresignedPostRequestWrite(body)) {
-		next(
-			new InputValidationError(
-				'Invalid request body.',
-				isPresignedPostRequestWrite.errors ?? [],
-			),
+		throw new InputValidationError(
+			'Invalid request body.',
+			isPresignedPostRequestWrite.errors ?? [],
 		);
-		return;
 	}
 
-	(async () => {
-		const { fileType, fileSize } = body;
-		const presignedPost = await generatePresignedPost(fileType, fileSize);
-
-		res.status(201).contentType('application/json').send({
-			fileType,
-			fileSize,
-			presignedPost,
-		});
-	})().catch((error) => {
-		next(error);
+	const { fileType, fileSize } = body;
+	const presignedPost = await generatePresignedPost(fileType, fileSize);
+	res.status(201).contentType('application/json').send({
+		fileType,
+		fileSize,
+		presignedPost,
 	});
 };
 

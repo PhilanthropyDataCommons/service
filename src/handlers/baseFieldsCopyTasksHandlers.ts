@@ -7,29 +7,19 @@ import {
 import {
 	TaskStatus,
 	isAuthContext,
-	isTinyPgErrorWithQueryContext,
 	isWritableBaseFieldsCopyTask,
 } from '../types';
-import {
-	DatabaseError,
-	FailedMiddlewareError,
-	InputValidationError,
-} from '../errors';
+import { FailedMiddlewareError, InputValidationError } from '../errors';
 import {
 	extractCreatedByParameters,
 	extractPaginationParameters,
 } from '../queryParameters';
 import { addCopyBaseFieldsJob } from '../jobQueue';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const postBaseFieldsCopyTask = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-) => {
+const postBaseFieldsCopyTask = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
 	if (!isWritableBaseFieldsCopyTask(req.body)) {
@@ -41,60 +31,39 @@ const postBaseFieldsCopyTask = (
 
 	const { pdcApiUrl } = req.body;
 	const createdBy = req.user.keycloakUserId;
-	(async () => {
-		const baseFieldsCopyTask = await createBaseFieldsCopyTask(db, null, {
-			pdcApiUrl,
-			status: TaskStatus.PENDING,
-			createdBy,
-		});
-
-		await addCopyBaseFieldsJob({
-			baseFieldsCopyTaskId: baseFieldsCopyTask.id,
-		});
-
-		res.status(201).contentType('application/json').send(baseFieldsCopyTask);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error creating basefield copy task.', error));
-		} else {
-			next(error);
-		}
+	const baseFieldsCopyTask = await createBaseFieldsCopyTask(db, null, {
+		pdcApiUrl,
+		status: TaskStatus.PENDING,
+		createdBy,
 	});
+
+	await addCopyBaseFieldsJob({
+		baseFieldsCopyTaskId: baseFieldsCopyTask.id,
+	});
+
+	res.status(201).contentType('application/json').send(baseFieldsCopyTask);
 };
 
-const getBaseFieldsCopyTasks = (
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void => {
+const getBaseFieldsCopyTasks = async (req: Request, res: Response) => {
 	if (!isAuthContext(req)) {
-		next(new FailedMiddlewareError('Unexpected lack of auth context.'));
-		return;
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { createdBy } = extractCreatedByParameters(req);
-	(async () => {
-		const baseFieldsCopyTaskBundle = await loadBaseFieldsCopyTaskBundle(
-			db,
-			req,
-			createdBy,
-			limit,
-			offset,
-		);
+	const baseFieldsCopyTaskBundle = await loadBaseFieldsCopyTaskBundle(
+		db,
+		req,
+		createdBy,
+		limit,
+		offset,
+	);
 
-		res
-			.status(200)
-			.contentType('application/json')
-			.send(baseFieldsCopyTaskBundle);
-	})().catch((error: unknown) => {
-		if (isTinyPgErrorWithQueryContext(error)) {
-			next(new DatabaseError('Error retrieving basefields copy tasks.', error));
-			return;
-		}
-		next(error);
-	});
+	res
+		.status(200)
+		.contentType('application/json')
+		.send(baseFieldsCopyTaskBundle);
 };
 
 export const baseFieldsCopyTasksHandlers = {

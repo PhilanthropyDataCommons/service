@@ -55,6 +55,12 @@
 					}
 				]
 			}
+		},
+		{
+			"files": ["**/*.test.ts"],
+			"rules": {
+				"@typescript-eslint/no-misused-promises": "off"
+			}
 		}
 	],
 	"env": {

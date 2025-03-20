@@ -18,7 +18,7 @@ export const jwtOptions: Params = {
 		jwksUri: `${AUTH_SERVER_ISSUER}/protocol/openid-connect/certs`,
 		rateLimit: true,
 		jwksRequestsPerMinute: 100,
-	}) as GetVerificationKey,
+	}) as unknown as GetVerificationKey,
 	issuer,
 	algorithms: ['RS256'],
 	credentialsRequired: false,

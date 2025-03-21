@@ -1,6 +1,5 @@
 import {
 	db,
-	assertUserGroupDataProviderPermissionExists,
 	createOrUpdateUserGroupDataProviderPermission,
 	removeUserGroupDataProviderPermission,
 } from '../database';
@@ -40,12 +39,9 @@ const deleteUserGroupDataProviderPermission = async (
 		);
 	}
 
-	await assertUserGroupDataProviderPermissionExists(
-		keycloakOrganizationId,
-		dataProviderShortCode,
-		permission,
-	);
 	await removeUserGroupDataProviderPermission(
+		db,
+		null,
 		keycloakOrganizationId,
 		dataProviderShortCode,
 		permission,

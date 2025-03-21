@@ -3,4 +3,5 @@ SET not_after = now()
 WHERE
 	fiscal_sponsee_changemaker_id = :fiscalSponseeChangemakerId
 	AND fiscal_sponsor_changemaker_id = :fiscalSponsorChangemakerId
-	AND NOT is_expired(not_after);
+	AND NOT is_expired(not_after)
+RETURNING fiscal_sponsorship_to_json(fiscal_sponsorships) AS object;

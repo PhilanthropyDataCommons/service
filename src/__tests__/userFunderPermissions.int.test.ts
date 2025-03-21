@@ -260,6 +260,8 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				createdBy: user.keycloakUserId,
 			});
 			await removeUserFunderPermission(
+				db,
+				null,
 				user.keycloakUserId,
 				funder.shortCode,
 				Permission.EDIT,

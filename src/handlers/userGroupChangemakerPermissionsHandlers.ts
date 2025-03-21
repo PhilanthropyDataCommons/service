@@ -1,6 +1,5 @@
 import {
 	db,
-	assertUserGroupChangemakerPermissionExists,
 	createOrUpdateUserGroupChangemakerPermission,
 	removeUserGroupChangemakerPermission,
 } from '../database';
@@ -38,12 +37,9 @@ const deleteUserGroupChangemakerPermission = async (
 		);
 	}
 
-	await assertUserGroupChangemakerPermissionExists(
-		keycloakOrganizationId,
-		changemakerId,
-		permission,
-	);
 	await removeUserGroupChangemakerPermission(
+		db,
+		null,
 		keycloakOrganizationId,
 		changemakerId,
 		permission,

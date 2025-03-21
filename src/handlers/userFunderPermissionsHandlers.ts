@@ -1,6 +1,5 @@
 import {
 	db,
-	assertUserFunderPermissionExists,
 	createOrUpdateUserFunderPermission,
 	removeUserFunderPermission,
 } from '../database';
@@ -36,12 +35,9 @@ const deleteUserFunderPermission = async (req: Request, res: Response) => {
 		);
 	}
 
-	await assertUserFunderPermissionExists(
-		userKeycloakUserId,
-		funderShortCode,
-		permission,
-	);
 	await removeUserFunderPermission(
+		db,
+		null,
 		userKeycloakUserId,
 		funderShortCode,
 		permission,

@@ -1,6 +1,5 @@
 import {
 	db,
-	assertUserChangemakerPermissionExists,
 	createOrUpdateUserChangemakerPermission,
 	removeUserChangemakerPermission,
 } from '../database';
@@ -35,12 +34,9 @@ const deleteUserChangemakerPermission = async (req: Request, res: Response) => {
 		);
 	}
 
-	await assertUserChangemakerPermissionExists(
-		userKeycloakUserId,
-		changemakerId,
-		permission,
-	);
 	await removeUserChangemakerPermission(
+		db,
+		null,
 		userKeycloakUserId,
 		changemakerId,
 		permission,

@@ -1,6 +1,5 @@
 import {
 	db,
-	assertUserDataProviderPermissionExists,
 	createOrUpdateUserDataProviderPermission,
 	removeUserDataProviderPermission,
 } from '../database';
@@ -39,12 +38,9 @@ const deleteUserDataProviderPermission = async (
 		);
 	}
 
-	await assertUserDataProviderPermissionExists(
-		userKeycloakUserId,
-		dataProviderShortCode,
-		permission,
-	);
 	await removeUserDataProviderPermission(
+		db,
+		null,
 		userKeycloakUserId,
 		dataProviderShortCode,
 		permission,

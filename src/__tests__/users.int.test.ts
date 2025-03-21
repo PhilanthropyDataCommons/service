@@ -136,6 +136,8 @@ describe('/users', () => {
 				createdBy: systemUser.keycloakUserId,
 			});
 			await removeUserChangemakerPermission(
+				db,
+				null,
 				testUser.keycloakUserId,
 				changemaker.id,
 				Permission.VIEW,

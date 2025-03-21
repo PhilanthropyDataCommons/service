@@ -1,5 +1,4 @@
 import {
-	assertSourceExists,
 	createProposalFieldValue,
 	createProposalVersion,
 	db,
@@ -161,7 +160,6 @@ const postProposalVersion = async (req: Request, res: Response) => {
 				applicationFormId,
 				fieldValues,
 			),
-			assertSourceExists(sourceId),
 		]);
 		const finalProposalVersion = await db.transaction(async (transactionDb) => {
 			const proposalVersion = await createProposalVersion(transactionDb, req, {

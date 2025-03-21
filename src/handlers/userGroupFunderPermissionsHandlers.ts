@@ -1,6 +1,5 @@
 import {
 	db,
-	assertUserGroupFunderPermissionExists,
 	createOrUpdateUserGroupFunderPermission,
 	removeUserGroupFunderPermission,
 } from '../database';
@@ -36,11 +35,6 @@ const deleteUserGroupFunderPermission = async (req: Request, res: Response) => {
 		);
 	}
 
-	await assertUserGroupFunderPermissionExists(
-		keycloakOrganizationId,
-		funderShortCode,
-		permission,
-	);
 	await removeUserGroupFunderPermission(
 		db,
 		null,

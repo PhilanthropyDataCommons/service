@@ -1,5 +1,5 @@
-import type { FiscalSponsorship } from '../../../types';
 import { generateRemoveItemOperation } from '../generators';
+import type { FiscalSponsorship } from '../../../types';
 
 const removeFiscalSponsorship = generateRemoveItemOperation<
 	FiscalSponsorship,

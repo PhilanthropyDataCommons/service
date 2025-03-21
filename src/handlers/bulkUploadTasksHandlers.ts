@@ -1,6 +1,5 @@
 import {
 	db,
-	assertSourceExists,
 	createBulkUploadTask,
 	getLimitValues,
 	loadBulkUploadTaskBundle,
@@ -13,9 +12,7 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
-	InputConflictError,
 	InputValidationError,
-	NotFoundError,
 	UnprocessableEntityError,
 } from '../errors';
 import {
@@ -54,31 +51,18 @@ const postBulkUploadTask = async (req: Request, res: Response) => {
 		);
 	}
 
-	await assertSourceExists(sourceId);
-	try {
-		const bulkUploadTask = await createBulkUploadTask(db, null, {
-			sourceId,
-			funderShortCode,
-			fileName,
-			sourceKey,
-			status: TaskStatus.PENDING,
-			createdBy,
-		});
-		await addProcessBulkUploadJob({
-			bulkUploadId: bulkUploadTask.id,
-		});
-		res.status(201).contentType('application/json').send(bulkUploadTask);
-	} catch (error: unknown) {
-		if (error instanceof NotFoundError) {
-			if (error.details.entityType === 'Source') {
-				throw new InputConflictError(`The related entity does not exist`, {
-					entityType: 'Source',
-					entityId: sourceId,
-				});
-			}
-		}
-		throw error;
-	}
+	const bulkUploadTask = await createBulkUploadTask(db, null, {
+		sourceId,
+		funderShortCode,
+		fileName,
+		sourceKey,
+		status: TaskStatus.PENDING,
+		createdBy,
+	});
+	await addProcessBulkUploadJob({
+		bulkUploadId: bulkUploadTask.id,
+	});
+	res.status(201).contentType('application/json').send(bulkUploadTask);
 };
 
 const getBulkUploadTasks = async (req: Request, res: Response) => {

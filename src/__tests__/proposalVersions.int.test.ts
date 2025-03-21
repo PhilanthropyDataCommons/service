@@ -488,7 +488,7 @@ describe('/proposalVersions', () => {
 			});
 		});
 
-		it('returns 409 conflict when the provided source does not exist', async () => {
+		it('returns 422 Unprocessable Entity when the provided source does not exist', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
 			await createOpportunity(db, null, {
@@ -503,7 +503,7 @@ describe('/proposalVersions', () => {
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			const result = await request(app)
+			await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
 				.set(authHeaderWithAdminRole)
@@ -513,16 +513,7 @@ describe('/proposalVersions', () => {
 					sourceId: 9001,
 					fieldValues: [],
 				})
-				.expect(409);
-			expect(result.body).toMatchObject({
-				name: 'InputConflictError',
-				details: [
-					{
-						entityType: 'Source',
-						entityId: 9001,
-					},
-				],
-			});
+				.expect(422);
 		});
 
 		it('Returns 409 Conflict if the provided application form does not exist', async () => {

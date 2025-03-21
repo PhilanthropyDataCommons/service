@@ -41,6 +41,8 @@ const deleteUserChangemakerPermission = async (req: Request, res: Response) => {
 		permission,
 	);
 	await removeUserChangemakerPermission(
+		db,
+		null,
 		userKeycloakUserId,
 		changemakerId,
 		permission,

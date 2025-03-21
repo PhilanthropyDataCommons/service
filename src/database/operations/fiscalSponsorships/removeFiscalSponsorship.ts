@@ -1,28 +1,12 @@
-import { NotFoundError } from '../../../errors';
-import { db } from '../../db';
-import type { Id } from '../../../types';
+import { generateRemoveItemOperation } from '../generators';
+import type { FiscalSponsorship } from '../../../types';
 
-const removeFiscalSponsorship = async (
-	fiscalSponseeChangemakerId: Id,
-	fiscalSponsorChangemakerId: Id,
-): Promise<void> => {
-	const result = await db.sql('fiscalSponsorships.deleteOne', {
-		fiscalSponseeChangemakerId,
-		fiscalSponsorChangemakerId,
-	});
-
-	if (result.row_count === 0) {
-		throw new NotFoundError(
-			'The item did not exist and could not be deleted.',
-			{
-				entityType: 'FiscalSponsorship',
-				entityPrimaryKey: {
-					fiscalSponseeChangemakerId,
-					fiscalSponsorChangemakerId,
-				},
-			},
-		);
-	}
-};
+const removeFiscalSponsorship = generateRemoveItemOperation<
+	FiscalSponsorship,
+	[fiscalSponseeChangemakerId: number, fiscalSponsorChangemakerId: number]
+>('fiscalSponsorships.deleteOne', 'FiscalSponsorship', [
+	'fiscalSponseeChangemakerId',
+	'fiscalSponsorChangemakerId',
+]);
 
 export { removeFiscalSponsorship };

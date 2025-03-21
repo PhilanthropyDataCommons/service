@@ -156,7 +156,12 @@ const deleteChangemakerFiscalSponsor = async (req: Request, res: Response) => {
 		);
 	}
 
-	await removeFiscalSponsorship(changemakerId, fiscalSponsorChangemakerId);
+	await removeFiscalSponsorship(
+		db,
+		null,
+		changemakerId,
+		fiscalSponsorChangemakerId,
+	);
 	res.status(204).contentType('application/json').send();
 };
 

@@ -44,6 +44,8 @@ const deleteUserGroupChangemakerPermission = async (
 		permission,
 	);
 	await removeUserGroupChangemakerPermission(
+		db,
+		null,
 		keycloakOrganizationId,
 		changemakerId,
 		permission,

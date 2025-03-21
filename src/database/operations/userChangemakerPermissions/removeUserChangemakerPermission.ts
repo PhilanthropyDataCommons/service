@@ -1,32 +1,18 @@
-import { NotFoundError } from '../../../errors';
-import { keycloakIdToString } from '../../../types';
-import { db } from '../../db';
-import type { KeycloakId, Permission } from '../../../types';
+import { generateRemoveItemOperation } from '../generators';
+import type {
+	KeycloakId,
+	Id,
+	Permission,
+	UserChangemakerPermission,
+} from '../../../types';
 
-const removeUserChangemakerPermission = async (
-	userKeycloakUserId: KeycloakId,
-	changemakerId: number,
-	permission: Permission,
-): Promise<void> => {
-	const result = await db.sql('userChangemakerPermissions.deleteOne', {
-		userKeycloakUserId,
-		permission,
-		changemakerId,
-	});
-
-	if (result.row_count === 0) {
-		throw new NotFoundError(
-			'The item did not exist and could not be deleted.',
-			{
-				entityType: 'UserChangemakerPermission',
-				entityPrimaryKey: {
-					userKeycloakUserId: keycloakIdToString(userKeycloakUserId),
-					permission,
-					changemakerId,
-				},
-			},
-		);
-	}
-};
+const removeUserChangemakerPermission = generateRemoveItemOperation<
+	UserChangemakerPermission,
+	[userKeycloakUserId: KeycloakId, changemakerId: Id, permission: Permission]
+>('userChangemakerPermissions.deleteOne', 'UserChangemakerPermission', [
+	'userKeycloakUserId',
+	'changemakerId',
+	'permission',
+]);
 
 export { removeUserChangemakerPermission };

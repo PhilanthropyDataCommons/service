@@ -247,6 +247,8 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 					createdBy: user.keycloakUserId,
 				});
 				await removeUserGroupChangemakerPermission(
+					db,
+					null,
 					organizationAsChangemaker.keycloakOrganizationId as KeycloakId,
 					changemaker.id,
 					Permission.EDIT,

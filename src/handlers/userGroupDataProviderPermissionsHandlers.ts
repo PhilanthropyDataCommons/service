@@ -46,6 +46,8 @@ const deleteUserGroupDataProviderPermission = async (
 		permission,
 	);
 	await removeUserGroupDataProviderPermission(
+		db,
+		null,
 		keycloakOrganizationId,
 		dataProviderShortCode,
 		permission,

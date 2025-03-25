@@ -55,7 +55,7 @@
 		"@types/node": "^22.13.13",
 		"@types/node-fetch": "^2.6.12",
 		"@types/pg": "^8.11.11",
-		"@types/supertest": "^6.0.2",
+		"@types/supertest": "^6.0.3",
 		"@types/swagger-ui-express": "^4.1.8",
 		"@typescript-eslint/eslint-plugin": "^7.18.0",
 		"@typescript-eslint/parser": "^7.18.0",

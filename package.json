@@ -47,7 +47,7 @@
 	},
 	"type": "commonjs",
 	"devDependencies": {
-		"@tsconfig/node22": "^22.0.0",
+		"@tsconfig/node22": "^22.0.1",
 		"@types/cors": "^2.8.17",
 		"@types/express": "^5.0.1",
 		"@types/jest": "^29.5.14",

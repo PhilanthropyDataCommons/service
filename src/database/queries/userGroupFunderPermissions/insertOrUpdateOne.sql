@@ -8,7 +8,7 @@ INSERT INTO user_group_funder_permissions (
 	:keycloakOrganizationId,
 	:permission,
 	:funderShortCode,
-	:createdBy,
+	:authContextKeycloakUserId,
 	NULL
 )
 ON CONFLICT (keycloak_organization_id, permission, funder_short_code) DO UPDATE

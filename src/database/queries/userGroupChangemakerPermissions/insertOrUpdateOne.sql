@@ -8,7 +8,7 @@ INSERT INTO user_group_changemaker_permissions (
 	:keycloakOrganizationId,
 	:permission,
 	:changemakerId,
-	:createdBy,
+	:authContextKeycloakUserId,
 	null
 )
 ON CONFLICT (keycloak_organization_id, permission, changemaker_id) DO UPDATE

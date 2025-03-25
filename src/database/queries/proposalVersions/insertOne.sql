@@ -8,7 +8,7 @@ INSERT INTO proposal_versions (
 	:proposalId,
 	:applicationFormId,
 	:sourceId,
-	:createdBy,
+	:authContextKeycloakUserId,
 	coalesce(
 		(
 			SELECT max(pv.version) + 1

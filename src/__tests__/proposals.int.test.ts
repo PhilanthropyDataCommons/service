@@ -20,7 +20,7 @@ import {
 	createOrUpdateFunder,
 	createOrUpdateUserChangemakerPermission,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithoutSub as authHeaderWithNoSubj,
@@ -68,6 +68,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns proposals the user has permission to view', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const anotherFunder = await loadSystemFunder(db, null);
 			const visibleFunder = await createOrUpdateFunder(db, null, {
 				name: 'Visible Funder',
@@ -79,19 +83,15 @@ describe('/proposals', () => {
 				taxId: '123-123-123',
 				keycloakOrganizationId: null,
 			});
-			const systemUser = await loadSystemUser(db, null);
-			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: visibleFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
+			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: visibleChangemaker.id,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const visibleOpportunity = await createOpportunity(db, null, {
 				title: '🔥',
@@ -102,24 +102,29 @@ describe('/proposals', () => {
 				funderShortCode: anotherFunder.shortCode,
 			});
 			await createTestBaseFields();
-			const funderVisibleProposal = await createProposal(db, null, {
-				externalId: 'proposal-1',
-				opportunityId: visibleOpportunity.id,
-				createdBy: testUser.keycloakUserId,
-			});
-			const changemakerVisibleProposal = await createProposal(db, null, {
-				externalId: 'proposal-2',
-				opportunityId: anotherOpportunity.id,
-				createdBy: testUser.keycloakUserId,
-			});
+			const funderVisibleProposal = await createProposal(
+				db,
+				testUserAuthContext,
+				{
+					externalId: 'proposal-1',
+					opportunityId: visibleOpportunity.id,
+				},
+			);
+			const changemakerVisibleProposal = await createProposal(
+				db,
+				testUserAuthContext,
+				{
+					externalId: 'proposal-2',
+					opportunityId: anotherOpportunity.id,
+				},
+			);
 			await createChangemakerProposal(db, null, {
 				changemakerId: visibleChangemaker.id,
 				proposalId: changemakerVisibleProposal.id,
 			});
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-3',
 				opportunityId: anotherOpportunity.id,
-				createdBy: testUser.keycloakUserId,
 			});
 			const response = await request(app)
 				.get('/proposals')
@@ -132,23 +137,22 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when a changemaker filter is provided', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
 
-			const testUser = await loadTestUser();
 			await createTestBaseFields();
-			const proposal = await createProposal(db, null, {
+			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '123-123-123',
@@ -201,39 +205,36 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when search is provided', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
 
-			const testUser = await loadTestUser();
 			const systemSource = await loadSystemSource(db, null);
 			await createTestBaseFields();
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createProposalVersion(db, null, {
+			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(db, null, {
+			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 2,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
@@ -315,26 +316,26 @@ describe('/proposals', () => {
 		});
 
 		it('returns all proposals present in the database regardless of createdBy value when loading as an administrator', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const anotherUser = await createOrUpdateUser(db, null, {
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+			});
+			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
 
-			const testUser = await loadTestUser();
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			});
 			await createTestBaseFields();
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(db, null, {
+			await createProposal(db, anotherUserAuthContext, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: anotherUser.keycloakUserId,
 			});
 			const response = await request(app)
 				.get('/proposals')
@@ -364,26 +365,26 @@ describe('/proposals', () => {
 		});
 
 		it('returns a correct subset of proposals when createdBy is provided as an administrator', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const anotherUser = await createOrUpdateUser(db, null, {
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+			});
+			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
 
-			const testUser = await loadTestUser();
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			});
 			await createTestBaseFields();
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(db, null, {
+			await createProposal(db, anotherUserAuthContext, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: anotherUser.keycloakUserId,
 			});
 			const response = await request(app)
 				.get(
@@ -407,26 +408,26 @@ describe('/proposals', () => {
 		});
 
 		it("returns just the administrator's proposals when createdBy is set to `me` as an administrator", async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const anotherUser = await createOrUpdateUser(db, null, {
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+			});
+			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
 
-			const testUser = await loadTestUser();
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			});
 			await createTestBaseFields();
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(db, null, {
+			await createProposal(db, anotherUserAuthContext, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: anotherUser.keycloakUserId,
 			});
 			const response = await request(app)
 				.get(`/proposals?createdBy=me`)
@@ -451,38 +452,35 @@ describe('/proposals', () => {
 			// This should pass even if the default text search config is 'simple'.
 			// See https://github.com/PhilanthropyDataCommons/service/issues/336
 			await db.query("set default_text_search_config = 'simple';");
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Grand opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const testUser = await loadTestUser();
 			const systemSource = await loadSystemSource(db, null);
 			await createTestBaseFields();
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-4999',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-5003',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
 			});
-			await createProposalVersion(db, null, {
+			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(db, null, {
+			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 2,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.keycloakUserId,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
@@ -564,19 +562,19 @@ describe('/proposals', () => {
 		});
 
 		it('returns according to pagination parameters', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
 
-			const testUser = await loadTestUser();
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
-				await createProposal(db, null, {
+				await createProposal(db, testUserAuthContext, {
 					externalId: `proposal-${i + 1}`,
 					opportunityId: 1,
-					createdBy: testUser.keycloakUserId,
 				});
 			}, Promise.resolve());
 			const response = await request(app)
@@ -666,19 +664,19 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when the current user does not have permission to view the provided id', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
+			const anotherUser = await createOrUpdateUser(db, null, {
+				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+			});
+			const anotherUserAuthContext = getAuthContext(anotherUser);
+			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '⛰️',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			});
-			await createProposal(db, null, {
+			await createProposal(db, anotherUserAuthContext, {
 				externalId: `proposal-1`,
 				opportunityId: 1,
-				createdBy: anotherUser.keycloakUserId,
 			});
 
 			const response = await request(app)
@@ -717,22 +715,21 @@ describe('/proposals', () => {
 		});
 
 		it('returns the one proposal asked for', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '⛰️',
 				funderShortCode: systemFunder.shortCode,
 			});
 
-			const testUser = await loadTestUser();
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-1`,
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-2`,
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
 
 			const response = await request(app)
@@ -750,6 +747,8 @@ describe('/proposals', () => {
 		});
 
 		it('returns one proposal with deep fields', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🌎',
@@ -771,24 +770,20 @@ describe('/proposals', () => {
 				position: 2,
 				label: 'Long summary or abstract',
 			});
-			const testUser = await loadTestUser();
 			const systemSource = await loadSystemSource(db, null);
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(db, null, {
+			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(db, null, {
+			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
@@ -967,6 +962,7 @@ describe('/proposals', () => {
 
 		it('returns the proposal if an administrator requests a proposal they do not own', async () => {
 			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createTestBaseFields();
@@ -989,22 +985,19 @@ describe('/proposals', () => {
 				position: 2,
 				label: 'Long summary or abstract',
 			});
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(db, null, {
+			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposalVersion(db, null, {
+			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
-				createdBy: testUser.keycloakUserId,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
@@ -1224,14 +1217,14 @@ describe('/proposals', () => {
 		});
 
 		it('creates exactly one proposal when the user has write permissions on the opportunity funder', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
 			await createOpportunity(db, null, {
 				title: '🔥',

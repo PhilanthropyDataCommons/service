@@ -11,7 +11,7 @@ import {
 	createOrUpdateUserFunderPermission,
 	createOrUpdateFunder,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithoutSub as authHeaderWithNoSub,
@@ -41,6 +41,9 @@ describe('/tasks/bulkUploads', () => {
 
 		it('returns all bulk upload tasks that the user is allowed to view', async () => {
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const anotherFunder = await createOrUpdateFunder(db, null, {
@@ -48,27 +51,23 @@ describe('/tasks/bulkUploads', () => {
 				name: 'Another Funder',
 				keycloakOrganizationId: null,
 			});
-			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createBulkUploadTask(db, null, {
+			await createBulkUploadTask(db, testUserAuthContext, {
 				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
-				createdBy: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 			});
-			await createBulkUploadTask(db, null, {
+			await createBulkUploadTask(db, testUserAuthContext, {
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
-				createdBy: testUser.keycloakUserId,
 				funderShortCode: anotherFunder.shortCode,
 			});
 
@@ -102,23 +101,23 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			await createBulkUploadTask(db, null, {
+			const anotherUserAuthContext = getAuthContext(anotherUser);
+			await createBulkUploadTask(db, testUserAuthContext, {
 				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
-				createdBy: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 			});
-			await createBulkUploadTask(db, null, {
+			await createBulkUploadTask(db, anotherUserAuthContext, {
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
-				createdBy: anotherUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 			});
 
@@ -165,23 +164,23 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			await createBulkUploadTask(db, null, {
+			const anotherUserAuthContext = getAuthContext(anotherUser);
+			await createBulkUploadTask(db, testUserAuthContext, {
 				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
-				createdBy: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 			});
-			await createBulkUploadTask(db, null, {
+			await createBulkUploadTask(db, anotherUserAuthContext, {
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
-				createdBy: anotherUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 			});
 
@@ -217,23 +216,23 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
-			await createBulkUploadTask(db, null, {
+			const anotherUserAuthContext = getAuthContext(anotherUser);
+			await createBulkUploadTask(db, testUserAuthContext, {
 				sourceId: systemSource.id,
 				fileName: 'foo.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 				status: TaskStatus.PENDING,
-				createdBy: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 			});
-			await createBulkUploadTask(db, null, {
+			await createBulkUploadTask(db, anotherUserAuthContext, {
 				sourceId: systemSource.id,
 				fileName: 'bar.csv',
 				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: TaskStatus.COMPLETED,
-				createdBy: anotherUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 			});
 
@@ -267,14 +266,14 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
-				await createBulkUploadTask(db, null, {
+				await createBulkUploadTask(db, testUserAuthContext, {
 					sourceId: systemSource.id,
 					fileName: `bar-${i + 1}.csv`,
 					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 					status: TaskStatus.COMPLETED,
-					createdBy: testUser.keycloakUserId,
 					funderShortCode: systemFunder.shortCode,
 				});
 			}, Promise.resolve());
@@ -383,12 +382,12 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
 
 			const before = await loadTableMetrics('bulk_upload_tasks');
@@ -426,18 +425,17 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
 			});
 
 			const before = await loadTableMetrics('bulk_upload_tasks');
@@ -468,12 +466,12 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
@@ -494,12 +492,12 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
@@ -521,12 +519,12 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
@@ -548,12 +546,12 @@ describe('/tasks/bulkUploads', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const result = await request(app)
 				.post('/tasks/bulkUploads')

@@ -59,7 +59,6 @@ const putUserGroupDataProviderPermission = async (
 
 	const { keycloakOrganizationId, dataProviderShortCode, permission } =
 		req.params;
-	const createdBy = req.user.keycloakUserId;
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
@@ -87,11 +86,10 @@ const putUserGroupDataProviderPermission = async (
 	}
 
 	const userGroupFunderPermission =
-		await createOrUpdateUserGroupDataProviderPermission(db, null, {
+		await createOrUpdateUserGroupDataProviderPermission(db, req, {
 			keycloakOrganizationId,
 			dataProviderShortCode,
 			permission,
-			createdBy,
 		});
 	res
 		.status(201)

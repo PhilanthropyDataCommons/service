@@ -23,6 +23,7 @@ import {
 	loadChangemakerByTaxId,
 	updateBulkUploadTask,
 	loadSystemUser,
+	loadUserByKeycloakUserId,
 } from '../database/operations';
 import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
@@ -325,19 +326,31 @@ export const processBulkUploadTask = async (
 		});
 		csvReadStream.pipe(parser);
 		let recordNumber = 0;
+
+		// This is a monkey patch to create an "auth context" for the sole purpose
+		// of populating `createdBy`.  This is shallow, and if we ever update our create
+		// queries to require a full auth context, this will not be sufficient.
+		const userAgentCreateAuthContext = {
+			user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
+			role: {
+				isAdministrator: false,
+			},
+		};
 		await parser.forEach(async (record: string[]) => {
 			recordNumber += 1;
-			const proposal = await createProposal(db, null, {
+			const proposal = await createProposal(db, userAgentCreateAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: `${recordNumber}`,
-				createdBy: bulkUploadTask.createdBy,
 			});
-			const proposalVersion = await createProposalVersion(db, null, {
-				proposalId: proposal.id,
-				applicationFormId: applicationForm.id,
-				sourceId: bulkUploadTask.sourceId,
-				createdBy: bulkUploadTask.createdBy,
-			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				userAgentCreateAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: bulkUploadTask.sourceId,
+				},
+			);
 
 			const changemakerName = record[changemakerNameIndex];
 			const changemakerTaxId = record[changemakerTaxIdIndex];

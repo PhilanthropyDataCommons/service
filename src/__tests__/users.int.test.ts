@@ -14,7 +14,7 @@ import {
 	loadTableMetrics,
 	removeUserChangemakerPermission,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -59,6 +59,7 @@ describe('/users', () => {
 
 		it('returns the permissions associated with a user', async () => {
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				name: 'Test Provider',
@@ -75,23 +76,24 @@ describe('/users', () => {
 				taxId: '12-3456789',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				permission: Permission.MANAGE,
-				dataProviderShortCode: dataProvider.shortCode,
-				createdBy: systemUser.keycloakUserId,
-			});
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserDataProviderPermission(
+				db,
+				systemUserAuthContext,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					permission: Permission.MANAGE,
+					dataProviderShortCode: dataProvider.shortCode,
+				},
+			);
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				permission: Permission.EDIT,
 				funderShortCode: funder.shortCode,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
+			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				permission: Permission.VIEW,
 				changemakerId: changemaker.id,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const { count: userCount } = await loadTableMetrics('users');
 
@@ -123,17 +125,17 @@ describe('/users', () => {
 
 		it('does not return deleted permissions associated with a user', async () => {
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const changemaker = await createChangemaker(db, null, {
 				name: 'Test Changemaker',
 				taxId: '12-3456789',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
+			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				permission: Permission.VIEW,
 				changemakerId: changemaker.id,
-				createdBy: systemUser.keycloakUserId,
 			});
 			await removeUserChangemakerPermission(
 				db,

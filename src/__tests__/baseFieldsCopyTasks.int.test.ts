@@ -6,7 +6,7 @@ import {
 	createOrUpdateUser,
 	loadTableMetrics,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -38,20 +38,20 @@ describe('/tasks/baseFieldsCopy', () => {
 
 		it('returns all BaseFieldsCopy Tasks for administrative users', async () => {
 			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
+			const anotherUserAuthContext = getAuthContext(anotherUser);
 
-			await createBaseFieldsCopyTask(db, null, {
+			await createBaseFieldsCopyTask(db, testUserAuthContext, {
 				pdcApiUrl: MOCK_API_URL,
 				status: TaskStatus.PENDING,
-				createdBy: testUser.keycloakUserId,
 			});
 
-			await createBaseFieldsCopyTask(db, null, {
+			await createBaseFieldsCopyTask(db, anotherUserAuthContext, {
 				pdcApiUrl: MOCK_API_URL,
 				status: TaskStatus.COMPLETED,
-				createdBy: anotherUser.keycloakUserId,
 			});
 
 			await request(app)
@@ -85,12 +85,12 @@ describe('/tasks/baseFieldsCopy', () => {
 
 		it('supports pagination', async () => {
 			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			await Array.from(Array(20)).reduce(async (p) => {
 				await p;
-				await createBaseFieldsCopyTask(db, null, {
+				await createBaseFieldsCopyTask(db, testUserAuthContext, {
 					pdcApiUrl: MOCK_API_URL,
 					status: TaskStatus.COMPLETED,
-					createdBy: testUser.keycloakUserId,
 				});
 			}, Promise.resolve());
 

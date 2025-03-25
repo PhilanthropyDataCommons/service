@@ -1,16 +1,13 @@
 import { generateCreateOrUpdateItemOperation } from '../generators';
-import type {
-	ProposalVersion,
-	InternallyWritableProposalVersion,
-} from '../../../types';
+import type { ProposalVersion, WritableProposalVersion } from '../../../types';
 
 const createProposalVersion = generateCreateOrUpdateItemOperation<
 	ProposalVersion,
-	InternallyWritableProposalVersion,
+	WritableProposalVersion,
 	[]
 >(
 	'proposalVersions.insertOne',
-	['proposalId', 'applicationFormId', 'sourceId', 'createdBy'],
+	['proposalId', 'applicationFormId', 'sourceId'],
 	[],
 );
 

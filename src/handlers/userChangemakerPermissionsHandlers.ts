@@ -50,7 +50,6 @@ const putUserChangemakerPermission = async (req: Request, res: Response) => {
 	}
 
 	const { userKeycloakUserId, changemakerId, permission } = req.params;
-	const createdBy = req.user.keycloakUserId;
 
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(
@@ -78,11 +77,10 @@ const putUserChangemakerPermission = async (req: Request, res: Response) => {
 	}
 
 	const userChangemakerPermission =
-		await createOrUpdateUserChangemakerPermission(db, null, {
+		await createOrUpdateUserChangemakerPermission(db, req, {
 			userKeycloakUserId,
 			changemakerId,
 			permission,
-			createdBy,
 		});
 	res
 		.status(201)

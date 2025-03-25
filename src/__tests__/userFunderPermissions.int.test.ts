@@ -8,7 +8,7 @@ import {
 	loadUserFunderPermission,
 	removeUserFunderPermission,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -107,22 +107,22 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 		});
 
 		it('creates and returns the new user funder permission when user has permission to manage the funder', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: user.keycloakUserId,
 			});
 
 			const response = await request(app)
 				.put(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -130,30 +130,30 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 			expect(response.body).toEqual({
 				funderShortCode: funder.shortCode,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 		});
 
 		it('does not update `createdBy`, but returns the user funder permission when user has permission to manage the funder', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
 			});
 
 			const response = await request(app)
 				.put(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -163,7 +163,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				createdAt: expectTimestamp,
 				createdBy: systemUser.keycloakUserId,
 				permission: Permission.MANAGE,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 		});
 	});
@@ -247,28 +247,28 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 		});
 
 		it('returns 404 if the permission had existed and previously been deleted', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			await removeUserFunderPermission(
 				db,
 				null,
-				user.keycloakUserId,
+				testUser.keycloakUserId,
 				funder.shortCode,
 				Permission.EDIT,
 			);
 			await request(app)
 				.delete(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -276,35 +276,35 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 		});
 
 		it('deletes the user funder permission when the user has administrative credentials', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserFunderPermission(
 				db,
 				null,
-				user.keycloakUserId,
+				testUser.keycloakUserId,
 				funder.shortCode,
 				Permission.EDIT,
 			);
 			expect(permission).toEqual({
 				funderShortCode: funder.shortCode,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -313,7 +313,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				loadUserFunderPermission(
 					db,
 					null,
-					user.keycloakUserId,
+					testUser.keycloakUserId,
 					funder.shortCode,
 					Permission.EDIT,
 				),
@@ -321,41 +321,40 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 		});
 
 		it('deletes the user funder permission when the user has permission to manage the funder', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: user.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserFunderPermission(
 				db,
 				null,
-				user.keycloakUserId,
+				testUser.keycloakUserId,
 				funder.shortCode,
 				Permission.EDIT,
 			);
 			expect(permission).toEqual({
 				funderShortCode: funder.shortCode,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeader)
 				.send()
@@ -364,7 +363,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				loadUserFunderPermission(
 					db,
 					null,
-					user.keycloakUserId,
+					testUser.keycloakUserId,
 					funder.shortCode,
 					Permission.EDIT,
 				),

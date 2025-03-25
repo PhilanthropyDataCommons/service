@@ -16,7 +16,7 @@ interface BaseFieldsCopyTask {
 type WritableBaseFieldsCopyTask = Writable<BaseFieldsCopyTask>;
 
 type InternallyWritableBaseFieldsCopyTask = WritableBaseFieldsCopyTask &
-	Pick<BaseFieldsCopyTask, 'status' | 'createdBy'>;
+	Pick<BaseFieldsCopyTask, 'status'>;
 
 const writableBaseFieldsCopyTaskSchema: JSONSchemaType<WritableBaseFieldsCopyTask> =
 	{

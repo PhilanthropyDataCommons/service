@@ -7,7 +7,7 @@ import {
 	loadUserGroupChangemakerPermission,
 	removeUserGroupChangemakerPermission,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -228,7 +228,8 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 			});
 
 			it('returns 404 if the permission had existed and previously been deleted', async () => {
-				const user = await loadTestUser();
+				const testUser = await loadTestUser();
+				const testUserAuthContext = getAuthContext(testUser);
 				const organizationAsChangemaker = await createChangemaker(db, null, {
 					taxId: '11-1111111',
 					name: 'Example Inc.',
@@ -239,13 +240,16 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 					name: 'Example Inc.',
 					keycloakOrganizationId: null,
 				});
-				await createOrUpdateUserGroupChangemakerPermission(db, null, {
-					keycloakOrganizationId:
-						organizationAsChangemaker.keycloakOrganizationId as KeycloakId,
-					changemakerId: changemaker.id,
-					permission: Permission.EDIT,
-					createdBy: user.keycloakUserId,
-				});
+				await createOrUpdateUserGroupChangemakerPermission(
+					db,
+					testUserAuthContext,
+					{
+						keycloakOrganizationId:
+							organizationAsChangemaker.keycloakOrganizationId as KeycloakId,
+						changemakerId: changemaker.id,
+						permission: Permission.EDIT,
+					},
+				);
 				await removeUserGroupChangemakerPermission(
 					db,
 					null,
@@ -263,7 +267,8 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 			});
 
 			it('deletes the userGroup changemaker permission when the user has administrative credentials', async () => {
-				const user = await loadTestUser();
+				const testUser = await loadTestUser();
+				const testUserAuthContext = getAuthContext(testUser);
 				const organizationAsChangemaker = await createChangemaker(db, null, {
 					taxId: '11-1111111',
 					name: 'Example Inc.',
@@ -274,13 +279,16 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 					name: 'Example Inc.',
 					keycloakOrganizationId: null,
 				});
-				await createOrUpdateUserGroupChangemakerPermission(db, null, {
-					keycloakOrganizationId:
-						organizationAsChangemaker.keycloakOrganizationId as KeycloakId,
-					changemakerId: changemaker.id,
-					permission: Permission.EDIT,
-					createdBy: user.keycloakUserId,
-				});
+				await createOrUpdateUserGroupChangemakerPermission(
+					db,
+					testUserAuthContext,
+					{
+						keycloakOrganizationId:
+							organizationAsChangemaker.keycloakOrganizationId as KeycloakId,
+						changemakerId: changemaker.id,
+						permission: Permission.EDIT,
+					},
+				);
 				const permission = await loadUserGroupChangemakerPermission(
 					db,
 					null,
@@ -291,7 +299,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 				expect(permission).toEqual({
 					changemakerId: changemaker.id,
 					createdAt: expectTimestamp,
-					createdBy: user.keycloakUserId,
+					createdBy: testUser.keycloakUserId,
 					permission: Permission.EDIT,
 					keycloakOrganizationId:
 						organizationAsChangemaker.keycloakOrganizationId,
@@ -307,7 +315,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 					loadUserGroupChangemakerPermission(
 						db,
 						null,
-						user.keycloakUserId,
+						testUser.keycloakUserId,
 						changemaker.id,
 						Permission.EDIT,
 					),

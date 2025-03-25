@@ -134,7 +134,6 @@ const postProposalVersion = async (req: Request, res: Response) => {
 	}
 
 	const { sourceId, fieldValues, proposalId, applicationFormId } = req.body;
-	const createdBy = req.user.keycloakUserId;
 
 	try {
 		const proposal = await loadProposal(db, req, proposalId);
@@ -166,7 +165,6 @@ const postProposalVersion = async (req: Request, res: Response) => {
 				proposalId,
 				applicationFormId,
 				sourceId,
-				createdBy,
 			});
 			const proposalFieldValues = await Promise.all(
 				fieldValues.map(async (fieldValue) => {

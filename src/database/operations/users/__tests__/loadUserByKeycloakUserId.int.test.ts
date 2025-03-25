@@ -15,12 +15,13 @@ import {
 } from '../..';
 import { db } from '../../../db';
 import { Permission, stringToKeycloakId } from '../../../../types';
-import { expectTimestamp } from '../../../../test/utils';
+import { expectTimestamp, getAuthContext } from '../../../../test/utils';
 
 describe('loadUserByKeycloakUserId', () => {
 	it('should populate roles correctly based on direct permissions as well as user groups permissions', async () => {
-		const ephemeralExpiration = new Date(Date.now() + 3600000).toISOString();
 		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const ephemeralExpiration = new Date(Date.now() + 3600000).toISOString();
 		const user = await createOrUpdateUser(db, null, {
 			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
 		});
@@ -73,88 +74,92 @@ describe('loadUserByKeycloakUserId', () => {
 		});
 
 		// Assign EDIT and VIEW via direct permissions
-		await createOrUpdateUserChangemakerPermission(db, null, {
+		await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
 			userKeycloakUserId: user.keycloakUserId,
 			changemakerId: changemaker.id,
 			permission: Permission.EDIT,
-			createdBy: systemUser.keycloakUserId,
 		});
-		await createOrUpdateUserChangemakerPermission(db, null, {
+		await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
 			userKeycloakUserId: user.keycloakUserId,
 			changemakerId: changemaker.id,
 			permission: Permission.VIEW,
-			createdBy: systemUser.keycloakUserId,
 		});
-		await createOrUpdateUserFunderPermission(db, null, {
+		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 			userKeycloakUserId: user.keycloakUserId,
 			funderShortCode: funder.shortCode,
 			permission: Permission.EDIT,
-			createdBy: systemUser.keycloakUserId,
 		});
-		await createOrUpdateUserFunderPermission(db, null, {
+		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 			userKeycloakUserId: user.keycloakUserId,
 			funderShortCode: funder.shortCode,
 			permission: Permission.VIEW,
-			createdBy: systemUser.keycloakUserId,
 		});
-		await createOrUpdateUserDataProviderPermission(db, null, {
+		await createOrUpdateUserDataProviderPermission(db, systemUserAuthContext, {
 			userKeycloakUserId: user.keycloakUserId,
 			dataProviderShortCode: dataProvider.shortCode,
 			permission: Permission.EDIT,
-			createdBy: systemUser.keycloakUserId,
 		});
-		await createOrUpdateUserDataProviderPermission(db, null, {
+		await createOrUpdateUserDataProviderPermission(db, systemUserAuthContext, {
 			userKeycloakUserId: user.keycloakUserId,
 			dataProviderShortCode: dataProvider.shortCode,
 			permission: Permission.VIEW,
-			createdBy: systemUser.keycloakUserId,
 		});
 
 		// Assign MANAGE and VIEW via group permissions
-		await createOrUpdateUserGroupChangemakerPermission(db, null, {
-			keycloakOrganizationId: stringToKeycloakId(
-				changemakerKeycloakOrganizationId,
-			),
-			changemakerId: changemaker.id,
-			permission: Permission.MANAGE,
-			createdBy: systemUser.keycloakUserId,
-		});
-		await createOrUpdateUserGroupChangemakerPermission(db, null, {
-			keycloakOrganizationId: stringToKeycloakId(
-				changemakerKeycloakOrganizationId,
-			),
-			changemakerId: changemaker.id,
-			permission: Permission.VIEW,
-			createdBy: systemUser.keycloakUserId,
-		});
-		await createOrUpdateUserGroupFunderPermission(db, null, {
+		await createOrUpdateUserGroupChangemakerPermission(
+			db,
+			systemUserAuthContext,
+			{
+				keycloakOrganizationId: stringToKeycloakId(
+					changemakerKeycloakOrganizationId,
+				),
+				changemakerId: changemaker.id,
+				permission: Permission.MANAGE,
+			},
+		);
+		await createOrUpdateUserGroupChangemakerPermission(
+			db,
+			systemUserAuthContext,
+			{
+				keycloakOrganizationId: stringToKeycloakId(
+					changemakerKeycloakOrganizationId,
+				),
+				changemakerId: changemaker.id,
+				permission: Permission.VIEW,
+			},
+		);
+		await createOrUpdateUserGroupFunderPermission(db, systemUserAuthContext, {
 			keycloakOrganizationId: stringToKeycloakId(funderKeycloakOrganizationId),
 			funderShortCode: funder.shortCode,
 			permission: Permission.MANAGE,
-			createdBy: systemUser.keycloakUserId,
 		});
-		await createOrUpdateUserGroupFunderPermission(db, null, {
+		await createOrUpdateUserGroupFunderPermission(db, systemUserAuthContext, {
 			keycloakOrganizationId: stringToKeycloakId(funderKeycloakOrganizationId),
 			funderShortCode: funder.shortCode,
 			permission: Permission.VIEW,
-			createdBy: systemUser.keycloakUserId,
 		});
-		await createOrUpdateUserGroupDataProviderPermission(db, null, {
-			keycloakOrganizationId: stringToKeycloakId(
-				dataProviderKeycloakOrganizationId,
-			),
-			dataProviderShortCode: dataProvider.shortCode,
-			permission: Permission.MANAGE,
-			createdBy: systemUser.keycloakUserId,
-		});
-		await createOrUpdateUserGroupDataProviderPermission(db, null, {
-			keycloakOrganizationId: stringToKeycloakId(
-				dataProviderKeycloakOrganizationId,
-			),
-			dataProviderShortCode: dataProvider.shortCode,
-			permission: Permission.VIEW,
-			createdBy: systemUser.keycloakUserId,
-		});
+		await createOrUpdateUserGroupDataProviderPermission(
+			db,
+			systemUserAuthContext,
+			{
+				keycloakOrganizationId: stringToKeycloakId(
+					dataProviderKeycloakOrganizationId,
+				),
+				dataProviderShortCode: dataProvider.shortCode,
+				permission: Permission.MANAGE,
+			},
+		);
+		await createOrUpdateUserGroupDataProviderPermission(
+			db,
+			systemUserAuthContext,
+			{
+				keycloakOrganizationId: stringToKeycloakId(
+					dataProviderKeycloakOrganizationId,
+				),
+				dataProviderShortCode: dataProvider.shortCode,
+				permission: Permission.VIEW,
+			},
+		);
 
 		const populatedUser = await loadUserByKeycloakUserId(
 			db,
@@ -193,6 +198,7 @@ describe('loadUserByKeycloakUserId', () => {
 
 	it('should not populate roles for expired group associations', async () => {
 		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
 		const user = await createOrUpdateUser(db, null, {
 			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
 		});
@@ -245,28 +251,33 @@ describe('loadUserByKeycloakUserId', () => {
 		});
 
 		// Assign VIEW via group permissions
-		await createOrUpdateUserGroupChangemakerPermission(db, null, {
-			keycloakOrganizationId: stringToKeycloakId(
-				changemakerKeycloakOrganizationId,
-			),
-			changemakerId: changemaker.id,
-			permission: Permission.VIEW,
-			createdBy: systemUser.keycloakUserId,
-		});
-		await createOrUpdateUserGroupFunderPermission(db, null, {
+		await createOrUpdateUserGroupChangemakerPermission(
+			db,
+			systemUserAuthContext,
+			{
+				keycloakOrganizationId: stringToKeycloakId(
+					changemakerKeycloakOrganizationId,
+				),
+				changemakerId: changemaker.id,
+				permission: Permission.VIEW,
+			},
+		);
+		await createOrUpdateUserGroupFunderPermission(db, systemUserAuthContext, {
 			keycloakOrganizationId: stringToKeycloakId(funderKeycloakOrganizationId),
 			funderShortCode: funder.shortCode,
 			permission: Permission.VIEW,
-			createdBy: systemUser.keycloakUserId,
 		});
-		await createOrUpdateUserGroupDataProviderPermission(db, null, {
-			keycloakOrganizationId: stringToKeycloakId(
-				dataProviderKeycloakOrganizationId,
-			),
-			dataProviderShortCode: dataProvider.shortCode,
-			permission: Permission.VIEW,
-			createdBy: systemUser.keycloakUserId,
-		});
+		await createOrUpdateUserGroupDataProviderPermission(
+			db,
+			systemUserAuthContext,
+			{
+				keycloakOrganizationId: stringToKeycloakId(
+					dataProviderKeycloakOrganizationId,
+				),
+				dataProviderShortCode: dataProvider.shortCode,
+				permission: Permission.VIEW,
+			},
+		);
 
 		const populatedUser = await loadUserByKeycloakUserId(
 			db,

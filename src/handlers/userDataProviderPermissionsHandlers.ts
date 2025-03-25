@@ -54,7 +54,6 @@ const putUserDataProviderPermission = async (req: Request, res: Response) => {
 	}
 
 	const { userKeycloakUserId, dataProviderShortCode, permission } = req.params;
-	const createdBy = req.user.keycloakUserId;
 
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(
@@ -83,12 +82,11 @@ const putUserDataProviderPermission = async (req: Request, res: Response) => {
 
 	const userFunderPermission = await createOrUpdateUserDataProviderPermission(
 		db,
-		null,
+		req,
 		{
 			userKeycloakUserId,
 			dataProviderShortCode,
 			permission,
-			createdBy,
 		},
 	);
 	res.status(201).contentType('application/json').send(userFunderPermission);

@@ -8,7 +8,7 @@ import {
 	loadUserChangemakerPermission,
 	removeUserChangemakerPermission,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -104,21 +104,21 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 		});
 
 		it('creates and returns the new user changemaker permission when user has permission to manage the changemaker', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserChangemakerPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.MANAGE,
-				createdBy: user.keycloakUserId,
 			});
 			const response = await request(app)
 				.put(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -126,29 +126,29 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 			expect(response.body).toEqual({
 				changemakerId: changemaker.id,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 		});
 
 		it('does not update `createdBy`, but returns the user changemaker permission when user has permission to manage the changemaker', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const response = await request(app)
 				.put(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -158,7 +158,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 				createdAt: expectTimestamp,
 				createdBy: systemUser.keycloakUserId,
 				permission: Permission.MANAGE,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 		});
 	});
@@ -244,28 +244,28 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 		});
 
 		it('returns 404 if the permission had existed and previously been deleted', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserChangemakerPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			await removeUserChangemakerPermission(
 				db,
 				null,
-				user.keycloakUserId,
+				testUser.keycloakUserId,
 				changemaker.id,
 				Permission.EDIT,
 			);
 			await request(app)
 				.delete(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -273,35 +273,35 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 		});
 
 		it('deletes the user changemaker permission when the user has administrative credentials', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserChangemakerPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserChangemakerPermission(
 				db,
 				null,
-				user.keycloakUserId,
+				testUser.keycloakUserId,
 				changemaker.id,
 				Permission.EDIT,
 			);
 			expect(permission).toEqual({
 				changemakerId: changemaker.id,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -310,7 +310,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 				loadUserChangemakerPermission(
 					db,
 					null,
-					user.keycloakUserId,
+					testUser.keycloakUserId,
 					changemaker.id,
 					Permission.EDIT,
 				),
@@ -318,41 +318,40 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 		});
 
 		it('deletes the user changemaker permission when the user has permission to manage the changemaker', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserChangemakerPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.MANAGE,
-				createdBy: user.keycloakUserId,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserChangemakerPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserChangemakerPermission(
 				db,
 				null,
-				user.keycloakUserId,
+				testUser.keycloakUserId,
 				changemaker.id,
 				Permission.EDIT,
 			);
 			expect(permission).toEqual({
 				changemakerId: changemaker.id,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeader)
 				.send()
@@ -361,7 +360,7 @@ describe('/users/changemakers/:changemakerId/permissions/:permission', () => {
 				loadUserChangemakerPermission(
 					db,
 					null,
-					user.keycloakUserId,
+					testUser.keycloakUserId,
 					changemaker.id,
 					Permission.EDIT,
 				),

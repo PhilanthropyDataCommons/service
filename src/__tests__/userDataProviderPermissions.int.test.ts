@@ -8,7 +8,7 @@ import {
 	removeUserDataProviderPermission,
 	loadSystemUser,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -107,22 +107,22 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 		});
 
 		it('creates and returns the new user data provider permission when user has permission to manage the data provider', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserDataProviderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: user.keycloakUserId,
 			});
 
 			const response = await request(app)
 				.put(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -130,30 +130,34 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 			expect(response.body).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 		});
 
 		it('does not update `createdBy`, but returns the user data provider permission when user has permission to manage the data provider', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
-				dataProviderShortCode: dataProvider.shortCode,
-				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
-			});
+			await createOrUpdateUserDataProviderPermission(
+				db,
+				systemUserAuthContext,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					dataProviderShortCode: dataProvider.shortCode,
+					permission: Permission.MANAGE,
+				},
+			);
 
 			const response = await request(app)
 				.put(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -163,7 +167,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				createdAt: expectTimestamp,
 				createdBy: systemUser.keycloakUserId,
 				permission: Permission.MANAGE,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 		});
 	});
@@ -249,28 +253,28 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 		});
 
 		it('returns 404 if the permission had existed and previously been deleted', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserDataProviderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			await removeUserDataProviderPermission(
 				db,
 				null,
-				user.keycloakUserId,
+				testUser.keycloakUserId,
 				dataProvider.shortCode,
 				Permission.EDIT,
 			);
 			await request(app)
 				.delete(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -278,35 +282,35 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 		});
 
 		it('deletes the user data provider permission when the user has administrative credentials', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserDataProviderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserDataProviderPermission(
 				db,
 				null,
-				user.keycloakUserId,
+				testUser.keycloakUserId,
 				dataProvider.shortCode,
 				Permission.EDIT,
 			);
 			expect(permission).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send()
@@ -315,7 +319,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				loadUserDataProviderPermission(
 					db,
 					null,
-					user.keycloakUserId,
+					testUser.keycloakUserId,
 					dataProvider.shortCode,
 					Permission.EDIT,
 				),
@@ -323,41 +327,40 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 		});
 
 		it('deletes the user data provider permission when the user has permission to manage the data provider', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserDataProviderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: user.keycloakUserId,
 			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: user.keycloakUserId,
+			await createOrUpdateUserDataProviderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
 				dataProviderShortCode: dataProvider.shortCode,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserDataProviderPermission(
 				db,
 				null,
-				user.keycloakUserId,
+				testUser.keycloakUserId,
 				dataProvider.shortCode,
 				Permission.EDIT,
 			);
 			expect(permission).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				userKeycloakUserId: user.keycloakUserId,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 			await request(app)
 				.delete(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeader)
 				.send()
@@ -366,7 +369,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				loadUserDataProviderPermission(
 					db,
 					null,
-					user.keycloakUserId,
+					testUser.keycloakUserId,
 					dataProvider.shortCode,
 					Permission.EDIT,
 				),

@@ -19,7 +19,7 @@ type InternallyWritableUserGroupFunderPermission =
 	WritableUserGroupFunderPermission &
 		Pick<
 			UserGroupFunderPermission,
-			'keycloakOrganizationId' | 'permission' | 'funderShortCode' | 'createdBy'
+			'keycloakOrganizationId' | 'permission' | 'funderShortCode'
 		>;
 
 const writableUserGroupFunderPermissionSchema: JSONSchemaType<WritableUserGroupFunderPermission> =

@@ -1,10 +1,10 @@
 import { generateCreateOrUpdateItemOperation } from '../generators';
-import type { Proposal, InternallyWritableProposal } from '../../../types';
+import type { Proposal, WritableProposal } from '../../../types';
 
 const createProposal = generateCreateOrUpdateItemOperation<
 	Proposal,
-	InternallyWritableProposal,
+	WritableProposal,
 	[]
->('proposals.insertOne', ['opportunityId', 'externalId', 'createdBy'], []);
+>('proposals.insertOne', ['opportunityId', 'externalId'], []);
 
 export { createProposal };

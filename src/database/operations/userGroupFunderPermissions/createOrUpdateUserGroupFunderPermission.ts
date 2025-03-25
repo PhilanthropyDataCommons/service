@@ -11,7 +11,7 @@ const createOrUpdateUserGroupFunderPermission =
 		[]
 	>(
 		'userGroupFunderPermissions.insertOrUpdateOne',
-		['keycloakOrganizationId', 'permission', 'funderShortCode', 'createdBy'],
+		['keycloakOrganizationId', 'permission', 'funderShortCode'],
 		[],
 	);
 

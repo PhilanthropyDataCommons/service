@@ -10,7 +10,7 @@ const createOrUpdateUserFunderPermission = generateCreateOrUpdateItemOperation<
 	[]
 >(
 	'userFunderPermissions.insertOrUpdateOne',
-	['userKeycloakUserId', 'permission', 'funderShortCode', 'createdBy'],
+	['userKeycloakUserId', 'permission', 'funderShortCode'],
 	[],
 );
 

@@ -17,22 +17,22 @@ import {
 	TaskStatus,
 	BaseFieldDataType,
 	BaseFieldScope,
+	AuthContext,
 } from '../../types';
-import { expectTimestamp } from '../../test/utils';
+import { expectTimestamp, getAuthContext } from '../../test/utils';
 
 const MOCK_API_URL = 'https://example.com';
 
 const createTestBaseFieldsCopyTask = async (
+	authContext: AuthContext,
 	overrideValues?: Partial<InternallyWritableBaseFieldsCopyTask>,
 ): Promise<BaseFieldsCopyTask> => {
-	const systemUser = await loadSystemUser(db, null);
 	const defaultValues = {
 		pdcApiUrl: MOCK_API_URL,
 		status: TaskStatus.PENDING,
 		statusUpdatedAt: new Date(Date.now()).toISOString(),
-		createdBy: systemUser.keycloakUserId,
 	};
-	return createBaseFieldsCopyTask(db, null, {
+	return createBaseFieldsCopyTask(db, authContext, {
 		...defaultValues,
 		...overrideValues,
 	});
@@ -170,9 +170,14 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should not process or modify processing status if the task is not PENDING', async () => {
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.IN_PROGRESS,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.IN_PROGRESS,
+			},
+		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
 			.reply(200, mockBaseFields);
@@ -193,9 +198,14 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should fail if the remote url is unavailable', async () => {
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
 			.reply(404, 'page not found');
@@ -216,9 +226,14 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should fail if the remote url is available, but sends back invalid basefield data', async () => {
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
 			.reply(200, [
@@ -248,9 +263,14 @@ describe('copyBaseFields', () => {
 	it('should not insert any remote basefields if there are no basefields in the remote instance', async () => {
 		const before = await loadTableMetrics('base_fields');
 
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 		const request = nock(MOCK_API_URL).get('/baseFields').reply(200, []);
 
 		await copyBaseFields(
@@ -275,9 +295,14 @@ describe('copyBaseFields', () => {
 	it('should insert all remote basefields to an empty local database', async () => {
 		const before = await loadTableMetrics('base_fields');
 
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
 			.reply(200, [mockFirstNameBaseField]);
@@ -340,9 +365,14 @@ describe('copyBaseFields', () => {
 
 		const before = await loadTableMetrics('base_fields');
 
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
 			.reply(200, mockBaseFields);
@@ -396,9 +426,14 @@ describe('copyBaseFields', () => {
 
 		const before = await loadTableMetrics('base_fields');
 
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
 			.reply(200, [mockRemoteBaseField]);
@@ -458,9 +493,14 @@ describe('copyBaseFields', () => {
 
 		const before = await loadTableMetrics('base_fields');
 
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
 			.reply(200, [mockRemoteBaseField, mockFirstNameBaseField]);
@@ -546,9 +586,14 @@ describe('copyBaseFields', () => {
 			.get('/baseFields')
 			.reply(200, [mockFirstNameBaseFieldWithNoLocalizations]);
 
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -606,9 +651,14 @@ describe('copyBaseFields', () => {
 			.get('/baseFields')
 			.reply(200, [mockFirstNameBaseField]);
 
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -663,9 +713,14 @@ describe('copyBaseFields', () => {
 	it('should insert all valid remote basefields into the database, and have status set as completed', async () => {
 		const before = await loadTableMetrics('base_fields');
 
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
 			.reply(200, mockBaseFields);
@@ -700,9 +755,14 @@ describe('copyBaseFields', () => {
 
 		const before = await loadTableMetrics('base_fields');
 
-		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask({
-			status: TaskStatus.PENDING,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			systemUserAuthContext,
+			{
+				status: TaskStatus.PENDING,
+			},
+		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
 			.reply(200, [mockFirstNameBaseField]);

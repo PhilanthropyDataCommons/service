@@ -57,7 +57,6 @@ const putUserGroupChangemakerPermission = async (
 	}
 
 	const { keycloakOrganizationId, changemakerId, permission } = req.params;
-	const createdBy = req.user.keycloakUserId;
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
@@ -85,11 +84,10 @@ const putUserGroupChangemakerPermission = async (
 	}
 
 	const userGroupChangemakerPermission =
-		await createOrUpdateUserGroupChangemakerPermission(db, null, {
+		await createOrUpdateUserGroupChangemakerPermission(db, req, {
 			keycloakOrganizationId,
 			changemakerId,
 			permission,
-			createdBy,
 		});
 	res
 		.status(201)

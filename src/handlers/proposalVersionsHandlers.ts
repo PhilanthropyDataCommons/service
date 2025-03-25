@@ -163,7 +163,7 @@ const postProposalVersion = async (req: Request, res: Response) => {
 			),
 			assertSourceExists(sourceId),
 		]);
-		await db.transaction(async (transactionDb) => {
+		const finalProposalVersion = await db.transaction(async (transactionDb) => {
 			const proposalVersion = await createProposalVersion(transactionDb, req, {
 				proposalId,
 				applicationFormId,
@@ -194,14 +194,12 @@ const postProposalVersion = async (req: Request, res: Response) => {
 					return proposalFieldValue;
 				}),
 			);
-			res
-				.status(201)
-				.contentType('application/json')
-				.send({
-					...proposalVersion,
-					fieldValues: proposalFieldValues,
-				});
+			return {
+				...proposalVersion,
+				fieldValues: proposalFieldValues,
+			};
 		});
+		res.status(201).contentType('application/json').send(finalProposalVersion);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			if (error.details.entityType === 'Source') {

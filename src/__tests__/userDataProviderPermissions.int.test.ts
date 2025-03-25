@@ -262,6 +262,8 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				createdBy: user.keycloakUserId,
 			});
 			await removeUserDataProviderPermission(
+				db,
+				null,
 				user.keycloakUserId,
 				dataProvider.shortCode,
 				Permission.EDIT,

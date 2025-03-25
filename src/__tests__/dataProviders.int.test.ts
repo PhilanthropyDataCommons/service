@@ -22,7 +22,7 @@ describe('/dataProviders', () => {
 		});
 
 		it('returns all data providers present in the database', async () => {
-			const systemDataProvider = await loadSystemDataProvider();
+			const systemDataProvider = await loadSystemDataProvider(db, null);
 			await createOrUpdateDataProvider(db, null, {
 				shortCode: 'dataRUs',
 				name: 'Data R Us',

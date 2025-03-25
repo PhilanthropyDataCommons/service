@@ -42,6 +42,8 @@ const deleteUserGroupFunderPermission = async (req: Request, res: Response) => {
 		permission,
 	);
 	await removeUserGroupFunderPermission(
+		db,
+		null,
 		keycloakOrganizationId,
 		funderShortCode,
 		permission,

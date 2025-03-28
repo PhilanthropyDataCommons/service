@@ -7,7 +7,7 @@ rules:
   tags-alphabetical: off
   parameter-description: off
   no-path-trailing-slash: error
-  no-identical-paths: off
+  no-identical-paths: error
   no-ambiguous-paths: off
   path-declaration-must-exist: error
   path-not-include-query: error

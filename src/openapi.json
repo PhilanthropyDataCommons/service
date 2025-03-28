@@ -2730,41 +2730,6 @@
 				}
 			}
 		},
-		"/dataProviders/{dataProviderId}": {
-			"get": {
-				"operationId": "getDataPRoviderById",
-				"summary": "Gets a specific data provider.",
-				"tags": ["Data Providers"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"parameters": [
-					{
-						"name": "dataProviderId",
-						"description": "The PDC-generated ID of a data provider.",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"type": "integer"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "The data provider.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/DataProvider"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
 		"/funders": {
 			"get": {
 				"operationId": "getFunders",

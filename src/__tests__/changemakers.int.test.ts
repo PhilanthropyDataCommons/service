@@ -21,6 +21,7 @@ import {
 } from '../database';
 import {
 	expectTimestamp,
+	getAuthContext,
 	getTestUserKeycloakUserId,
 	loadTestUser,
 } from '../test/utils';
@@ -29,6 +30,7 @@ import {
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
 import {
+	AuthContext,
 	BaseField,
 	BaseFieldDataType,
 	BaseFieldScope,
@@ -174,16 +176,16 @@ describe('/changemakers', () => {
 		});
 
 		it('returns a subset of changemakers present in the database when a proposal filter is provided', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const testUser = await loadTestUser();
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
 			await createChangemaker(db, null, {
 				taxId: '123-123-123',
@@ -220,21 +222,20 @@ describe('/changemakers', () => {
 		});
 
 		it('does not return duplicate changemakers when a changemaker has multiple proposals', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const testUser = await loadTestUser();
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
-			await createProposal(db, null, {
+			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-2',
 				opportunityId: 1,
-				createdBy: testUser.keycloakUserId,
 			});
 			await createChangemaker(db, null, {
 				taxId: '123-123-123',
@@ -324,6 +325,7 @@ describe('/changemakers', () => {
 		describe('tests that find gold data among proposals and share a common db', () => {
 			let systemSource: Source;
 			let systemUser: User;
+			let systemUserAuthContext: AuthContext;
 			let baseFieldEmail: BaseField;
 			let baseFieldPhone: BaseField;
 			let baseFieldWebsite: BaseField;
@@ -341,6 +343,7 @@ describe('/changemakers', () => {
 			beforeEach(async () => {
 				systemSource = await loadSystemSource(db, null);
 				systemUser = await loadSystemUser(db, null);
+				systemUserAuthContext = getAuthContext(systemUser);
 				baseFieldEmail = await createBaseField(db, null, {
 					label: 'Fifty one fifty three',
 					shortCode: 'fifty_one_fifty_three',
@@ -423,10 +426,9 @@ describe('/changemakers', () => {
 				const changemakerId = firstChangemaker.id;
 				const opportunityId = firstFunderOpportunity.id;
 				const proposalId = (
-					await createProposal(db, null, {
+					await createProposal(db, systemUserAuthContext, {
 						opportunityId,
 						externalId: 'Proposal',
-						createdBy: systemUser.keycloakUserId,
 					})
 				).id;
 				await createChangemakerProposal(db, null, {
@@ -442,11 +444,10 @@ describe('/changemakers', () => {
 				// Older field that is valid
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
-						await createProposalVersion(db, null, {
+						await createProposalVersion(db, systemUserAuthContext, {
 							proposalId,
 							applicationFormId: applicationFormIdEarliest,
 							sourceId: systemSource.id,
-							createdBy: systemUser.keycloakUserId,
 						})
 					).id,
 					applicationFormFieldId: (
@@ -468,11 +469,10 @@ describe('/changemakers', () => {
 				).id;
 				const latestValidValue = await createProposalFieldValue(db, null, {
 					proposalVersionId: (
-						await createProposalVersion(db, null, {
+						await createProposalVersion(db, systemUserAuthContext, {
 							proposalId,
 							applicationFormId: applicationFormIdLatestValid,
 							sourceId: systemSource.id,
-							createdBy: systemUser.keycloakUserId,
 						})
 					).id,
 					applicationFormFieldId: (
@@ -495,11 +495,10 @@ describe('/changemakers', () => {
 				// Latest value but invalid
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
-						await createProposalVersion(db, null, {
+						await createProposalVersion(db, systemUserAuthContext, {
 							proposalId,
 							applicationFormId: applicationFormIdLatest,
 							sourceId: systemSource.id,
-							createdBy: systemUser.keycloakUserId,
 						})
 					).id,
 					applicationFormFieldId: (
@@ -540,10 +539,9 @@ describe('/changemakers', () => {
 				const baseFieldId = baseFieldPhone.id;
 				const opportunity = firstFunderOpportunity;
 				const proposalId = (
-					await createProposal(db, null, {
+					await createProposal(db, systemUserAuthContext, {
 						opportunityId: opportunity.id,
 						externalId: `Proposal to ${opportunity.title}`,
-						createdBy: systemUser.keycloakUserId,
 					})
 				).id;
 				await createChangemakerProposal(db, null, {
@@ -561,11 +559,10 @@ describe('/changemakers', () => {
 					null,
 					{
 						proposalVersionId: (
-							await createProposalVersion(db, null, {
+							await createProposalVersion(db, systemUserAuthContext, {
 								proposalId,
 								applicationFormId: applicationFormIdChangemakerEarliest,
 								sourceId: changemakerSourceId,
-								createdBy: systemUser.keycloakUserId,
 							})
 						).id,
 						applicationFormFieldId: (
@@ -589,11 +586,10 @@ describe('/changemakers', () => {
 				// Set up newer field value that is from the funder.
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
-						await createProposalVersion(db, null, {
+						await createProposalVersion(db, systemUserAuthContext, {
 							proposalId,
 							applicationFormId: applicationFormIdFunderLatest,
 							sourceId: funderSourceId,
-							createdBy: systemUser.keycloakUserId,
 						})
 					).id,
 					applicationFormFieldId: (
@@ -630,10 +626,9 @@ describe('/changemakers', () => {
 				const baseFieldId = baseFieldPhone.id;
 				const opportunity = firstFunderOpportunity;
 				const proposalId = (
-					await createProposal(db, null, {
+					await createProposal(db, systemUserAuthContext, {
 						opportunityId: opportunity.id,
 						externalId: `Another proposal to ${opportunity.title}`,
-						createdBy: systemUser.keycloakUserId,
 					})
 				).id;
 				await createChangemakerProposal(db, null, {
@@ -648,11 +643,10 @@ describe('/changemakers', () => {
 				// Set up older field value that is from the funder. We'll expect this to be returned.
 				const funderEarliestValue = await createProposalFieldValue(db, null, {
 					proposalVersionId: (
-						await createProposalVersion(db, null, {
+						await createProposalVersion(db, systemUserAuthContext, {
 							proposalId,
 							applicationFormId: applicationFormIdFunderEarliest,
 							sourceId: funderSourceId,
-							createdBy: systemUser.keycloakUserId,
 						})
 					).id,
 					applicationFormFieldId: (
@@ -675,11 +669,10 @@ describe('/changemakers', () => {
 				// Set up newer field value that is from the data platform provider.
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
-						await createProposalVersion(db, null, {
+						await createProposalVersion(db, systemUserAuthContext, {
 							proposalId,
 							applicationFormId: applicationFormIdDataProviderLatest,
 							sourceId: dataProviderSourceId,
-							createdBy: systemUser.keycloakUserId,
 						})
 					).id,
 					applicationFormFieldId: (
@@ -712,10 +705,9 @@ describe('/changemakers', () => {
 				// Set up data platform provider sources.
 				// Associate one opportunity, one changemaker, and two responses with a base field.
 				const proposalId = (
-					await createProposal(db, null, {
+					await createProposal(db, systemUserAuthContext, {
 						opportunityId: firstFunderOpportunity.id,
 						externalId: `Yet another proposal to ${firstFunderOpportunity.title}`,
-						createdBy: systemUser.keycloakUserId,
 					})
 				).id;
 				await createChangemakerProposal(db, null, {
@@ -730,11 +722,10 @@ describe('/changemakers', () => {
 				// Set up older field value.
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
-						await createProposalVersion(db, null, {
+						await createProposalVersion(db, systemUserAuthContext, {
 							proposalId,
 							applicationFormId: applicationFormIdDataProviderEarliest,
 							sourceId: firstDataProviderSourceId,
-							createdBy: systemUser.keycloakUserId,
 						})
 					).id,
 					applicationFormFieldId: (
@@ -760,11 +751,10 @@ describe('/changemakers', () => {
 					null,
 					{
 						proposalVersionId: (
-							await createProposalVersion(db, null, {
+							await createProposalVersion(db, systemUserAuthContext, {
 								proposalId,
 								applicationFormId: applicationFormIdDataProviderLatest,
 								sourceId: secondDataProviderSourceId,
-								createdBy: systemUser.keycloakUserId,
 							})
 						).id,
 						applicationFormFieldId: (

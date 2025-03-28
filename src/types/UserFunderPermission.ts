@@ -18,7 +18,7 @@ type WritableUserFunderPermission = Writable<UserFunderPermission>;
 type InternallyWritableUserFunderPermission = WritableUserFunderPermission &
 	Pick<
 		UserFunderPermission,
-		'userKeycloakUserId' | 'permission' | 'funderShortCode' | 'createdBy'
+		'userKeycloakUserId' | 'permission' | 'funderShortCode'
 	>;
 
 const writableUserFunderPermissionSchema: JSONSchemaType<WritableUserFunderPermission> =

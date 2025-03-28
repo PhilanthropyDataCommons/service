@@ -25,7 +25,7 @@ interface BulkUploadTask {
 type WritableBulkUploadTask = Writable<BulkUploadTask>;
 
 type InternallyWritableBulkUploadTask = WritableBulkUploadTask &
-	Pick<BulkUploadTask, 'status' | 'fileSize' | 'createdBy'>;
+	Pick<BulkUploadTask, 'status' | 'fileSize'>;
 
 const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 	type: 'object',

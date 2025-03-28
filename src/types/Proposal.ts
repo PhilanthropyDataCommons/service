@@ -15,9 +15,6 @@ interface Proposal {
 
 type WritableProposal = Writable<Proposal>;
 
-type InternallyWritableProposal = WritableProposal &
-	Pick<Proposal, 'createdBy'>;
-
 const writableProposalSchema: JSONSchemaType<WritableProposal> = {
 	type: 'object',
 	properties: {
@@ -36,7 +33,6 @@ const isWritableProposal = ajv.compile(writableProposalSchema);
 
 export {
 	isWritableProposal,
-	InternallyWritableProposal,
 	Proposal,
 	WritableProposal,
 	writableProposalSchema,

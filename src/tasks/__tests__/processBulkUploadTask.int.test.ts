@@ -25,6 +25,7 @@ import {
 } from '../../types';
 import {
 	expectTimestamp,
+	getAuthContext,
 	getTestAuthContext,
 	NO_LIMIT,
 	NO_OFFSET,
@@ -33,6 +34,7 @@ import type {
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
 	Changemaker,
+	AuthContext,
 } from '../../types';
 
 const { S3_BUCKET, S3_PATH_STYLE } = requireEnv('S3_BUCKET', 'S3_PATH_STYLE');
@@ -56,9 +58,9 @@ const getS3Path = () => (S3_PATH_STYLE === 'true' ? `/${S3_BUCKET}` : '');
 const getS3KeyPath = (key: string) => `${getS3Path()}/${key}`;
 
 const createTestBulkUploadTask = async (
+	authContext: AuthContext,
 	overrideValues?: Partial<InternallyWritableBulkUploadTask>,
 ): Promise<BulkUploadTask> => {
-	const systemUser = await loadSystemUser(db, null);
 	const systemSource = await loadSystemSource(db, null);
 	const systemFunder = await loadSystemFunder(db, null);
 	const defaultValues = {
@@ -67,9 +69,8 @@ const createTestBulkUploadTask = async (
 		funderShortCode: systemFunder.shortCode,
 		sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
 		status: TaskStatus.PENDING,
-		createdBy: systemUser.keycloakUserId,
 	};
-	return createBulkUploadTask(db, null, {
+	return createBulkUploadTask(db, authContext, {
 		...defaultValues,
 		...overrideValues,
 	});
@@ -145,7 +146,12 @@ const mockS3ResponsesForBulkUploadTaskProcessing = async (
 describe('processBulkUploadTask', () => {
 	it('should attempt to access the contents of the sourceKey associated with the specified bulk upload', async () => {
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
@@ -162,7 +168,12 @@ describe('processBulkUploadTask', () => {
 	it('should attempt to copy the contents of the sourceKey associated with the specified bulk upload to a processed location', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
@@ -179,7 +190,12 @@ describe('processBulkUploadTask', () => {
 	it('should attempt to delete the unprocessed file of the sourceKey associated with the specified bulk upload', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
@@ -196,7 +212,12 @@ describe('processBulkUploadTask', () => {
 	it('should fail if the sourceKey is not accessible', async () => {
 		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		const sourceRequest = nock(await getS3Endpoint())
 			.get(getS3KeyPath(sourceKey))
 			.query({ 'x-id': 'GetObject' })
@@ -222,7 +243,12 @@ describe('processBulkUploadTask', () => {
 	it('should not process, and fail, if the sourceKey is not in the unprocessed namespace', async () => {
 		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_BULK_UPLOAD_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
@@ -248,10 +274,15 @@ describe('processBulkUploadTask', () => {
 	it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
 		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({
-			sourceKey,
-			status: TaskStatus.IN_PROGRESS,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{
+				sourceKey,
+				status: TaskStatus.IN_PROGRESS,
+			},
+		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
@@ -275,7 +306,12 @@ describe('processBulkUploadTask', () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/invalidShortCode.csv`,
@@ -300,7 +336,12 @@ describe('processBulkUploadTask', () => {
 	it('should move the csv file to processed location if the csv contains an invalid short code', async () => {
 		await createTestBaseFields();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/invalidShortCode.csv`,
@@ -319,7 +360,12 @@ describe('processBulkUploadTask', () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/empty.csv`,
@@ -346,7 +392,12 @@ describe('processBulkUploadTask', () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
@@ -373,12 +424,15 @@ describe('processBulkUploadTask', () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const systemSource = await loadSystemSource(db, null);
-		const systemUser = await loadSystemUser(db, null);
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({
-			sourceKey,
-			createdBy: systemUser.keycloakUserId,
-		});
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{
+				sourceKey,
+			},
+		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
@@ -622,7 +676,12 @@ describe('processBulkUploadTask', () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
-		const bulkUploadTask = await createTestBulkUploadTask({ sourceKey });
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			{ sourceKey },
+		);
 		await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
 			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplateWithChangemakers.csv`,

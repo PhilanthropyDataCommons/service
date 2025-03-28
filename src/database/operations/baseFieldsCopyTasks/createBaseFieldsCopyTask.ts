@@ -8,6 +8,6 @@ const createBaseFieldsCopyTask = generateCreateOrUpdateItemOperation<
 	BaseFieldsCopyTask,
 	InternallyWritableBaseFieldsCopyTask,
 	[]
->('baseFieldsCopyTasks.insertOne', ['status', 'pdcApiUrl', 'createdBy'], []);
+>('baseFieldsCopyTasks.insertOne', ['status', 'pdcApiUrl'], []);
 
 export { createBaseFieldsCopyTask };

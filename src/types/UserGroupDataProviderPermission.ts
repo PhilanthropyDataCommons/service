@@ -20,10 +20,7 @@ type InternallyWritableUserGroupDataProviderPermission =
 	WritableUserGroupDataProviderPermission &
 		Pick<
 			UserGroupDataProviderPermission,
-			| 'keycloakOrganizationId'
-			| 'dataProviderShortCode'
-			| 'permission'
-			| 'createdBy'
+			'keycloakOrganizationId' | 'dataProviderShortCode' | 'permission'
 		>;
 
 const writableUserGroupDataProviderSchema: JSONSchemaType<WritableUserGroupDataProviderPermission> =

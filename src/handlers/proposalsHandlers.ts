@@ -69,7 +69,6 @@ const postProposal = async (req: Request, res: Response) => {
 	}
 
 	const { externalId, opportunityId } = req.body;
-	const createdBy = req.user.keycloakUserId;
 
 	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
@@ -84,10 +83,9 @@ const postProposal = async (req: Request, res: Response) => {
 				'You do not have write permissions on the funder associated with this opportunity.',
 			);
 		}
-		const proposal = await createProposal(db, null, {
+		const proposal = await createProposal(db, req, {
 			opportunityId,
 			externalId,
-			createdBy,
 		});
 		res.status(201).contentType('application/json').send(proposal);
 	} catch (error: unknown) {

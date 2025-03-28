@@ -13,7 +13,7 @@ import {
 	createOrUpdateUserFunderPermission,
 	createOrUpdateUserDataProviderPermission,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -236,17 +236,17 @@ describe('/sources', () => {
 
 		it('creates and returns exactly one changemaker source for a user with edit permissions on that changemaker', async () => {
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
+			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -271,23 +271,22 @@ describe('/sources', () => {
 
 		it('returns 422 if the user does not have edit permission on the changemaker', async () => {
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
+			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserChangemakerPermission(db, null, {
+			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				changemakerId: changemaker.id,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -339,17 +338,17 @@ describe('/sources', () => {
 
 		it('creates and returns exactly one funder source for a user with edit permissions on that funder', async () => {
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'foo',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -374,23 +373,22 @@ describe('/sources', () => {
 
 		it('returns 422 if the user does not have edit permission on the funder', async () => {
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'foo',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -442,18 +440,22 @@ describe('/sources', () => {
 
 		it('creates and returns exactly one data provider source for a user with edit permissions on the data provider', async () => {
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'foo',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				dataProviderShortCode: dataProvider.shortCode,
-				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
-			});
+			await createOrUpdateUserDataProviderPermission(
+				db,
+				systemUserAuthContext,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					dataProviderShortCode: dataProvider.shortCode,
+					permission: Permission.EDIT,
+				},
+			);
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')
@@ -477,24 +479,31 @@ describe('/sources', () => {
 
 		it('returns 422 if the user does not have edit permission on the data provider', async () => {
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'foo',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				dataProviderShortCode: dataProvider.shortCode,
-				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
-			});
-			await createOrUpdateUserDataProviderPermission(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				dataProviderShortCode: dataProvider.shortCode,
-				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
-			});
+			await createOrUpdateUserDataProviderPermission(
+				db,
+				systemUserAuthContext,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					dataProviderShortCode: dataProvider.shortCode,
+					permission: Permission.MANAGE,
+				},
+			);
+			await createOrUpdateUserDataProviderPermission(
+				db,
+				systemUserAuthContext,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					dataProviderShortCode: dataProvider.shortCode,
+					permission: Permission.VIEW,
+				},
+			);
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')

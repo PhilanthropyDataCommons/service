@@ -11,12 +11,7 @@ const createOrUpdateUserGroupDataProviderPermission =
 		[]
 	>(
 		'userGroupDataProviderPermissions.insertOrUpdateOne',
-		[
-			'keycloakOrganizationId',
-			'permission',
-			'dataProviderShortCode',
-			'createdBy',
-		],
+		['keycloakOrganizationId', 'permission', 'dataProviderShortCode'],
 		[],
 	);
 

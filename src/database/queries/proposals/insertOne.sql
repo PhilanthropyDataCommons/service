@@ -5,6 +5,6 @@ INSERT INTO proposals (
 ) VALUES (
 	:externalId,
 	:opportunityId,
-	:createdBy
+	:authContextKeycloakUserId
 )
 RETURNING proposal_to_json(proposals) AS object;

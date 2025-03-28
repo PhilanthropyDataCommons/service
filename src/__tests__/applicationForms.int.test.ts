@@ -14,7 +14,7 @@ import {
 } from '../database';
 import { getLogger } from '../logger';
 import { BaseFieldDataType, BaseFieldScope, Permission } from '../types';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -107,12 +107,12 @@ describe('/applicationForms', () => {
 		it('returns only application forms that the user is allowed to view', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const otherFunder = await createOrUpdateFunder(db, null, {
 				shortCode: 'otherFunder',
@@ -262,12 +262,12 @@ describe('/applicationForms', () => {
 		it('returns an application form with its fields when the user has read access to the relevant funder', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
 			await createOpportunity(db, null, {
 				title: 'Holiday opportunity 🎄',
@@ -340,18 +340,17 @@ describe('/applicationForms', () => {
 		it('should return 404 when the user does not have read access to the relevant funder', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
 			});
 			await createOpportunity(db, null, {
 				title: 'Holiday opportunity 🎄',
@@ -396,18 +395,17 @@ describe('/applicationForms', () => {
 		it('creates exactly one application form as a user with proper permissions', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
@@ -465,18 +463,17 @@ describe('/applicationForms', () => {
 		it(`returns 401 unauthorized if the user does not have edit permission on the associated opportunity's funder`, async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
 			});
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',

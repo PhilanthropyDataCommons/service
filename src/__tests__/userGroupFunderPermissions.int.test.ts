@@ -7,7 +7,7 @@ import {
 	loadUserGroupFunderPermission,
 	removeUserGroupFunderPermission,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -221,17 +221,17 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 		});
 
 		it('returns 404 if the permission had existed and previously been deleted', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: mockKeycloakOrganizationId,
 			});
-			await createOrUpdateUserGroupFunderPermission(db, null, {
+			await createOrUpdateUserGroupFunderPermission(db, testUserAuthContext, {
 				keycloakOrganizationId: funder.keycloakOrganizationId as KeycloakId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			await removeUserGroupFunderPermission(
 				db,
@@ -252,17 +252,17 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 		});
 
 		it('deletes the userGroup funder permission when the user has administrative credentials', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: mockKeycloakOrganizationId,
 			});
-			await createOrUpdateUserGroupFunderPermission(db, null, {
+			await createOrUpdateUserGroupFunderPermission(db, testUserAuthContext, {
 				keycloakOrganizationId: funder.keycloakOrganizationId as KeycloakId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
 			});
 			const permission = await loadUserGroupFunderPermission(
 				db,
@@ -274,7 +274,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			expect(permission).toEqual({
 				funderShortCode: funder.shortCode,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
 				keycloakOrganizationId: funder.keycloakOrganizationId as KeycloakId,
 			});

@@ -12,7 +12,9 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	InputConflictError,
 	InputValidationError,
+	NotFoundError,
 	UnprocessableEntityError,
 } from '../errors';
 import {
@@ -36,7 +38,6 @@ const postBulkUploadTask = async (req: Request, res: Response) => {
 	}
 
 	const { sourceId, funderShortCode, fileName, sourceKey } = req.body;
-	const createdBy = req.user.keycloakUserId;
 
 	if (!authContextHasFunderPermission(req, funderShortCode, Permission.EDIT)) {
 		throw new UnprocessableEntityError(
@@ -51,18 +52,29 @@ const postBulkUploadTask = async (req: Request, res: Response) => {
 		);
 	}
 
-	const bulkUploadTask = await createBulkUploadTask(db, null, {
-		sourceId,
-		funderShortCode,
-		fileName,
-		sourceKey,
-		status: TaskStatus.PENDING,
-		createdBy,
-	});
-	await addProcessBulkUploadJob({
-		bulkUploadId: bulkUploadTask.id,
-	});
-	res.status(201).contentType('application/json').send(bulkUploadTask);
+	try {
+		const bulkUploadTask = await createBulkUploadTask(db, req, {
+			sourceId,
+			funderShortCode,
+			fileName,
+			sourceKey,
+			status: TaskStatus.PENDING,
+		});
+		await addProcessBulkUploadJob({
+			bulkUploadId: bulkUploadTask.id,
+		});
+		res.status(201).contentType('application/json').send(bulkUploadTask);
+	} catch (error: unknown) {
+		if (error instanceof NotFoundError) {
+			if (error.details.entityType === 'Source') {
+				throw new InputConflictError(`The related entity does not exist`, {
+					entityType: 'Source',
+					entityId: sourceId,
+				});
+			}
+		}
+		throw error;
+	}
 };
 
 const getBulkUploadTasks = async (req: Request, res: Response) => {

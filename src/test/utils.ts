@@ -1,5 +1,5 @@
 import { db, createOrUpdateUser, loadUserByKeycloakUserId } from '../database';
-import { stringToKeycloakId } from '../types';
+import { stringToKeycloakId, User } from '../types';
 
 export const isoTimestampPattern =
 	/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|(\+|-)\d{2}:\d{2})$/;
@@ -33,12 +33,15 @@ export const createTestUser = async () =>
 export const loadTestUser = async () =>
 	loadUserByKeycloakUserId(db, null, getTestUserKeycloakUserId());
 
-export const getTestAuthContext = async () => ({
-	user: await loadTestUser(),
+export const getAuthContext = (user: User, isAdministrator = false) => ({
+	user,
 	role: {
-		isAdministrator: true,
+		isAdministrator,
 	},
 });
+
+export const getTestAuthContext = async () =>
+	getAuthContext(await loadTestUser(), true);
 
 export const NO_OFFSET = 0;
 

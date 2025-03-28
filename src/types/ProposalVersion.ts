@@ -23,9 +23,6 @@ interface ProposalVersion {
 
 type WritableProposalVersion = Writable<ProposalVersion>;
 
-type InternallyWritableProposalVersion = WritableProposalVersion &
-	Pick<ProposalVersion, 'createdBy'>;
-
 type WritableProposalVersionWithFieldValues = WritableProposalVersion & {
 	fieldValues: WritableProposalFieldValueWithProposalVersionContext[];
 };
@@ -56,8 +53,8 @@ const isWritableProposalVersionWithFieldValues = ajv.compile(
 );
 
 export {
-	InternallyWritableProposalVersion,
 	ProposalVersion,
+	WritableProposalVersion,
 	WritableProposalVersionWithFieldValues,
 	isWritableProposalVersionWithFieldValues,
 };

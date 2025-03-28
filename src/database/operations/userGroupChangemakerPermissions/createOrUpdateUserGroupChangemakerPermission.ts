@@ -11,7 +11,7 @@ const createOrUpdateUserGroupChangemakerPermission =
 		[]
 	>(
 		'userGroupChangemakerPermissions.insertOrUpdateOne',
-		['keycloakOrganizationId', 'permission', 'changemakerId', 'createdBy'],
+		['keycloakOrganizationId', 'permission', 'changemakerId'],
 		[],
 	);
 

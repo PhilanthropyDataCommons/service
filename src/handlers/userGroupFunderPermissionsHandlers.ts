@@ -51,7 +51,6 @@ const putUserGroupFunderPermission = async (req: Request, res: Response) => {
 	}
 
 	const { keycloakOrganizationId, funderShortCode, permission } = req.params;
-	const createdBy = req.user.keycloakUserId;
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
@@ -79,11 +78,10 @@ const putUserGroupFunderPermission = async (req: Request, res: Response) => {
 	}
 
 	const userGroupFunderPermission =
-		await createOrUpdateUserGroupFunderPermission(db, null, {
+		await createOrUpdateUserGroupFunderPermission(db, req, {
 			keycloakOrganizationId,
 			funderShortCode,
 			permission,
-			createdBy,
 		});
 	res
 		.status(201)

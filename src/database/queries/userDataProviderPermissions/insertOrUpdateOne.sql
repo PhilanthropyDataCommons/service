@@ -8,7 +8,7 @@ INSERT INTO user_data_provider_permissions (
 	:userKeycloakUserId,
 	:permission::permission_t,
 	:dataProviderShortCode,
-	:createdBy,
+	:authContextKeycloakUserId,
 	null
 )
 ON CONFLICT (

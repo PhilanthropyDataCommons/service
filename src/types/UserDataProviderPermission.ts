@@ -19,10 +19,7 @@ type InternallyWritableUserDataProviderPermission =
 	WritableUserDataProviderPermission &
 		Pick<
 			UserDataProviderPermission,
-			| 'userKeycloakUserId'
-			| 'permission'
-			| 'dataProviderShortCode'
-			| 'createdBy'
+			'userKeycloakUserId' | 'permission' | 'dataProviderShortCode'
 		>;
 
 const writableUserDataProviderSchema: JSONSchemaType<WritableUserDataProviderPermission> =

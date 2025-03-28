@@ -7,7 +7,7 @@ import {
 	loadUserGroupDataProviderPermission,
 	removeUserGroupDataProviderPermission,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -222,19 +222,23 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 		});
 
 		it('returns 404 if the permission had existed and previously been deleted', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: mockKeycloakOrganizationId,
 			});
-			await createOrUpdateUserGroupDataProviderPermission(db, null, {
-				keycloakOrganizationId:
-					dataProvider.keycloakOrganizationId as KeycloakId,
-				dataProviderShortCode: dataProvider.shortCode,
-				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
-			});
+			await createOrUpdateUserGroupDataProviderPermission(
+				db,
+				testUserAuthContext,
+				{
+					keycloakOrganizationId:
+						dataProvider.keycloakOrganizationId as KeycloakId,
+					dataProviderShortCode: dataProvider.shortCode,
+					permission: Permission.EDIT,
+				},
+			);
 			await removeUserGroupDataProviderPermission(
 				db,
 				null,
@@ -254,19 +258,23 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 		});
 
 		it('deletes the userGroup data provider permission when the user has administrative credentials', async () => {
-			const user = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			const dataProvider = await createOrUpdateDataProvider(db, null, {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: mockKeycloakOrganizationId,
 			});
-			await createOrUpdateUserGroupDataProviderPermission(db, null, {
-				keycloakOrganizationId:
-					dataProvider.keycloakOrganizationId as KeycloakId,
-				dataProviderShortCode: dataProvider.shortCode,
-				permission: Permission.EDIT,
-				createdBy: user.keycloakUserId,
-			});
+			await createOrUpdateUserGroupDataProviderPermission(
+				db,
+				testUserAuthContext,
+				{
+					keycloakOrganizationId:
+						dataProvider.keycloakOrganizationId as KeycloakId,
+					dataProviderShortCode: dataProvider.shortCode,
+					permission: Permission.EDIT,
+				},
+			);
 			const permission = await loadUserGroupDataProviderPermission(
 				db,
 				null,
@@ -277,7 +285,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			expect(permission).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
 				createdAt: expectTimestamp,
-				createdBy: user.keycloakUserId,
+				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
 				keycloakOrganizationId: mockKeycloakOrganizationId,
 			});

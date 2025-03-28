@@ -9,7 +9,7 @@ import {
 	loadSystemUser,
 	createOrUpdateFunder,
 } from '../database';
-import { expectTimestamp, loadTestUser } from '../test/utils';
+import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -68,19 +68,19 @@ describe('/opportunities', () => {
 		});
 
 		it('returns only opportunities the user is allowed to view', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
 			const visibleFunder = await loadSystemFunder(db, null);
 			const anotherFunder = await createOrUpdateFunder(db, null, {
 				name: 'another funder',
 				shortCode: 'anotherFunder',
 				keycloakOrganizationId: null,
 			});
-			const systemUser = await loadSystemUser(db, null);
-			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: visibleFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const visibleOpportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
@@ -135,14 +135,14 @@ describe('/opportunities', () => {
 		});
 
 		it('returns an opportunity when the user has funder permission', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: '✨',
@@ -208,14 +208,14 @@ describe('/opportunities', () => {
 		});
 
 		it('creates and returns exactly one opportunity when edit funder permission is set', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const before = await loadTableMetrics('opportunities');
 			const result = await request(app)
@@ -238,20 +238,19 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 401 unauthorized if the user does not have edit permission on the associated funder', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, null, {
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
-				createdBy: systemUser.keycloakUserId,
 			});
-			await createOrUpdateUserFunderPermission(db, null, {
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.MANAGE,
-				createdBy: systemUser.keycloakUserId,
 			});
 			const before = await loadTableMetrics('opportunities');
 			await request(app)

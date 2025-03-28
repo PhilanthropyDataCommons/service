@@ -19,7 +19,7 @@ type InternallyWritableUserGroupChangemakerPermission =
 	WritableUserGroupChangemakerPermission &
 		Pick<
 			UserGroupChangemakerPermission,
-			'keycloakOrganizationId' | 'changemakerId' | 'permission' | 'createdBy'
+			'keycloakOrganizationId' | 'changemakerId' | 'permission'
 		>;
 
 const writableUserGroupChangemakerPermissionSchema: JSONSchemaType<WritableUserGroupChangemakerPermission> =

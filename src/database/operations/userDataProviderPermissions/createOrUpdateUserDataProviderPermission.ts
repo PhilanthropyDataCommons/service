@@ -11,7 +11,7 @@ const createOrUpdateUserDataProviderPermission =
 		[]
 	>(
 		'userDataProviderPermissions.insertOrUpdateOne',
-		['userKeycloakUserId', 'permission', 'dataProviderShortCode', 'createdBy'],
+		['userKeycloakUserId', 'permission', 'dataProviderShortCode'],
 		[],
 	);
 

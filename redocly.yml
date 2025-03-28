@@ -8,7 +8,7 @@ rules:
   parameter-description: off
   no-path-trailing-slash: error
   no-identical-paths: error
-  no-ambiguous-paths: off
+  no-ambiguous-paths: error
   path-declaration-must-exist: error
   path-not-include-query: error
   path-parameters-defined: error

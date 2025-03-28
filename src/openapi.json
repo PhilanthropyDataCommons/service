@@ -10,6 +10,11 @@
 		}
 	},
 	"components": {
+		"responses": {
+			"NotFound": {
+				"description": "The specified resource was not found"
+			}
+		},
 		"parameters": {
 			"keycloakUserIdParam": {
 				"name": "keycloakUserId",
@@ -1527,6 +1532,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -1569,6 +1577,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					},
 					"409": {
 						"description": "There was a unique key conflict.",
@@ -1624,6 +1635,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -1663,6 +1677,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -2192,6 +2209,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion of the fiscal sponsorship."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -2374,6 +2394,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -2500,6 +2523,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -2638,6 +2664,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -2673,6 +2702,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -2754,6 +2786,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -2789,6 +2824,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -2985,6 +3023,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3062,6 +3103,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3100,6 +3144,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3176,6 +3223,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3253,6 +3303,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3325,6 +3378,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3380,6 +3436,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3426,6 +3485,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3481,6 +3543,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3527,6 +3592,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3582,6 +3650,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3628,6 +3699,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3683,6 +3757,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3729,6 +3806,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3784,6 +3864,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3830,6 +3913,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3885,6 +3971,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3931,6 +4020,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}

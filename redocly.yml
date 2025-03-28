@@ -44,7 +44,7 @@ rules:
   no-server-trailing-slash: error
   no-empty-servers: off # https://github.com/PhilanthropyDataCommons/service/issues/1568
   no-example-value-and-externalValue: error
-  no-unused-components: off
+  no-unused-components: error
   no-undefined-server-variable: error
   no-server-variables-empty-enum: error
   spec-components-invalid-map-name: error

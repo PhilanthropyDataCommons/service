@@ -1,4 +1,4 @@
-import { phone } from 'phone';
+import validator from 'validator';
 import { BaseFieldDataType } from './types';
 import { ajv } from './ajv';
 
@@ -24,7 +24,28 @@ const isString = ajv.compile({
 	type: 'string',
 });
 
-const isPhoneNumberString = (value: string) => phone(value).isValid;
+// The validator package has only one phone number validator function,
+// 'isMobilePhone.' but the PDC does not currently have any requirement
+// for a phone number to be a mobile number, nor does the function seem
+// to discriminate on landline numbers.
+const isPhoneNumberString = (value: string) => validator.isMobilePhone(value);
+
+const isCurrencyWithCodeString = (value: string) => {
+	const [currency, code] = value.split(' ');
+
+	if (!currency || !code) {
+		return false;
+	}
+
+	return (
+		validator.isCurrency(currency, {
+			require_symbol: false,
+			allow_negatives: false,
+			thousands_separator: '',
+			require_decimal: true,
+		}) && validator.isISO4217(code)
+	);
+};
 
 export const fieldValueIsValid = (
 	fieldValue: string,
@@ -41,6 +62,8 @@ export const fieldValueIsValid = (
 			return isUrlString(fieldValue);
 		case BaseFieldDataType.BOOLEAN:
 			return isBooleanString(fieldValue);
+		case BaseFieldDataType.CURRENCY:
+			return isCurrencyWithCodeString(fieldValue);
 		default:
 			return isString(fieldValue);
 	}

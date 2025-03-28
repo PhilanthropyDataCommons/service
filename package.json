@@ -57,6 +57,7 @@
 		"@types/pg": "^8.11.11",
 		"@types/supertest": "^6.0.3",
 		"@types/swagger-ui-express": "^4.1.8",
+		"@types/validator": "^13.12.3",
 		"@typescript-eslint/eslint-plugin": "^7.18.0",
 		"@typescript-eslint/parser": "^7.18.0",
 		"copyfiles": "^2.4.1",
@@ -97,7 +98,6 @@
 		"monocle-ts": "^2.3.13",
 		"newtype-ts": "^0.3.5",
 		"node-fetch": "^2.7.0",
-		"phone": "^3.1.58",
 		"pino": "^9.6.0",
 		"pino-http": "^10.4.0",
 		"postgres-schema-migrations": "^6.1.0",
@@ -106,7 +106,8 @@
 		"swagger-ui-express": "^5.0.1",
 		"tinypg": "^7.0.0",
 		"tmp-promise": "^3.0.3",
-		"uuid": "^11.1.0"
+		"uuid": "^11.1.0",
+		"validator": "^13.15.0"
 	},
 	"overrides": {
 		"mock-jwks": {

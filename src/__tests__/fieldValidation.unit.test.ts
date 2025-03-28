@@ -65,7 +65,7 @@ describe('field value validation against BaseFieldDataType', () => {
 		expect(fieldValueIsValid('TrUE', BaseFieldDataType.BOOLEAN)).toBe(false);
 		expect(fieldValueIsValid('FaLSE', BaseFieldDataType.BOOLEAN)).toBe(false);
 	});
-	test('validate a valid URL as URL', () => {
+	test('validate a valid url as URL', () => {
 		expect(
 			fieldValueIsValid('https://www.test.com', BaseFieldDataType.URL),
 		).toBe(true);
@@ -73,7 +73,7 @@ describe('field value validation against BaseFieldDataType', () => {
 			fieldValueIsValid('http://www.test.com', BaseFieldDataType.URL),
 		).toBe(true);
 	});
-	test('validate an invalid URL as URL', () => {
+	test('validate an invalid url as URL', () => {
 		expect(fieldValueIsValid('testdotcom', BaseFieldDataType.URL)).toBe(false);
 		expect(fieldValueIsValid('www.testdotcom', BaseFieldDataType.URL)).toBe(
 			false,

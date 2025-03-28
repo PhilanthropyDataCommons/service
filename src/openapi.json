@@ -79,9 +79,8 @@
 				"schema": {
 					"oneOf": [
 						{
-							"type": "string",
-							"format": "uuid",
-							"nullable": true
+							"type": ["string", "null"],
+							"format": "uuid"
 						},
 						{
 							"enum": ["me"]
@@ -143,8 +142,7 @@
 					},
 					"fileSize": {
 						"description": "File size in bytes",
-						"type": "integer",
-						"nullable": true,
+						"type": ["integer", "null"],
 						"readOnly": true,
 						"example": 42,
 						"minimum": 0
@@ -208,9 +206,8 @@
 			},
 			"keycloakOrganizationId": {
 				"description": "If available, the PDC Keycloak Organization ID for this entity.",
-				"type": "string",
-				"format": "uuid",
-				"nullable": true
+				"type": ["string", "null"],
+				"format": "uuid"
 			},
 			"BaseFieldsCopyTask": {
 				"type": "object",
@@ -786,28 +783,25 @@
 				"type": "object",
 				"properties": {
 					"baseFieldId": {
-						"type": "integer",
-						"example": 1,
-						"readOnly": "true"
+						"type": ["integer", "null"],
+						"example": 1
 					},
 					"language": {
 						"type": "string",
 						"example": "en",
-						"readOnly": "true"
+						"readOnly": true
 					},
 					"label": {
 						"type": "string",
 						"example": "Applicant Name"
 					},
 					"description": {
-						"type": "string",
-						"example": "The Name of the Applicant",
-						"nullable": true
+						"type": ["string", "null"],
+						"example": "The Name of the Applicant"
 					},
 					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
+						"type": ["string", "null"],
+						"format": "date-time"
 					}
 				},
 				"required": ["baseFieldId", "language", "localization", "label"]
@@ -2147,10 +2141,9 @@
 										},
 										"notAfter": {
 											"description": "For internal use. This always be null in a response from this endpoint.",
-											"type": "string",
+											"type": ["string", "null"],
 											"format": "date-time",
 											"readOnly": true,
-											"nullable": true,
 											"example": null
 										}
 									},

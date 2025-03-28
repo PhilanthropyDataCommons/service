@@ -26,7 +26,7 @@ rules:
   no-unresolved-refs: error
   no-enum-type-mismatch: error
   paths-kebab-case: off
-  struct: off
+  struct: error
   spec-strict-refs: off
   no-http-verbs-in-paths: off
   no-invalid-parameter-examples: off

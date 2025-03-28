@@ -1,30 +1,30 @@
 rules:
   info-contact: off
-  info-license: off
+  info-license: error
   info-license-url: off
-  info-license-strict: off
-  tag-description: off
+  info-license-strict: error
+  tag-description: error
   tags-alphabetical: off
   parameter-description: off
-  no-path-trailing-slash: off
+  no-path-trailing-slash: error
   no-identical-paths: off
   no-ambiguous-paths: off
-  path-declaration-must-exist: off
-  path-not-include-query: off
-  path-parameters-defined: off
+  path-declaration-must-exist: error
+  path-not-include-query: error
+  path-parameters-defined: error
   operation-description: off
-  operation-2xx-response: off
+  operation-2xx-response: error
   operation-4xx-response: off
-  operation-operationId: off
-  operation-summary: off
-  operation-operationId-unique: off
-  operation-operationId-url-safe: off
-  operation-parameters-unique: off
+  operation-operationId: error
+  operation-summary: error
+  operation-operationId-unique: error
+  operation-operationId-url-safe: error
+  operation-parameters-unique: error
   operation-tag-defined: off
-  security-defined: off
+  security-defined: error
   operation-singular-tag: off
-  no-unresolved-refs: off
-  no-enum-type-mismatch: off
+  no-unresolved-refs: error
+  no-enum-type-mismatch: error
   paths-kebab-case: off
   struct: off
   spec-strict-refs: off
@@ -39,15 +39,15 @@ rules:
   response-contains-header: off
   scalar-property-missing-example: off
   no-required-schema-properties-undefined: off
-  no-invalid-media-type-examples: off
-  no-server-example.com: off
-  no-server-trailing-slash: off
-  no-empty-servers: off
-  no-example-value-and-externalValue: off
+  no-invalid-media-type-examples: error
+  no-server-example.com: error
+  no-server-trailing-slash: error
+  no-empty-servers: off # https://github.com/PhilanthropyDataCommons/service/issues/1568
+  no-example-value-and-externalValue: error
   no-unused-components: off
-  no-undefined-server-variable: off
-  no-server-variables-empty-enum: off
-  spec-components-invalid-map-name: off
+  no-undefined-server-variable: error
+  no-server-variables-empty-enum: error
+  spec-components-invalid-map-name: error
   boolean-parameter-prefixes: off
   component-name-unique: off
   operation-4xx-problem-details-rfc7807: off

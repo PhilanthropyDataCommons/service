@@ -13,6 +13,7 @@ export enum BaseFieldDataType {
 	EMAIL = 'email',
 	URL = 'url',
 	BOOLEAN = 'boolean',
+	CURRENCY = 'currency',
 }
 
 export enum BaseFieldScope {

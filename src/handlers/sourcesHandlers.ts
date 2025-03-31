@@ -4,6 +4,7 @@ import {
 	getLimitValues,
 	loadSource,
 	loadSourceBundle,
+	removeSource,
 } from '../database';
 import { isAuthContext, isId, isWritableSource, Permission } from '../types';
 import {
@@ -93,8 +94,19 @@ const getSource = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(source);
 };
 
+const deleteSource = async (req: Request, res: Response) => {
+	const { sourceId } = req.params;
+	if (!isId(sourceId)) {
+		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
+	}
+
+	const item = await removeSource(db, null, sourceId);
+	res.status(200).contentType('application/json').send(item);
+};
+
 export const sourcesHandlers = {
 	postSource,
 	getSources,
 	getSource,
+	deleteSource,
 };

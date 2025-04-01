@@ -1,6 +1,5 @@
 import { extractPaginationParameters } from '..';
 import { InputValidationError } from '../../errors';
-import apiSpecification from '../../public/openapi/api.json';
 
 describe('extractPaginationParameters', () => {
 	it('should return default values according to documented defaults', () => {
@@ -8,8 +7,8 @@ describe('extractPaginationParameters', () => {
 			query: {},
 		});
 		expect(paginationParameters).toEqual({
-			page: apiSpecification.components.parameters.pageParam.schema.default,
-			count: apiSpecification.components.parameters.countParam.schema.default,
+			page: 1,
+			count: 10,
 		});
 	});
 

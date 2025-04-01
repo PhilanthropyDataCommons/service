@@ -44,7 +44,7 @@ jobs:
         run: 'pip install -r sqlfluff/requirements.txt'
       - name: Lint SQL
         run: sqlfluff lint --format github-annotation-native src/database/
-  swagger:
+  openapi:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
         with:
           node-version-file: .node-version
       - run: npm ci
-      - run: npm run lint:swagger
+      - run: npm run lint:openapi
   tsc:
     runs-on: ubuntu-latest
     steps:

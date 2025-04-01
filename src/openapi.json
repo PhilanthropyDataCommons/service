@@ -10,6 +10,11 @@
 		}
 	},
 	"components": {
+		"responses": {
+			"NotFound": {
+				"description": "The specified resource was not found"
+			}
+		},
 		"parameters": {
 			"keycloakUserIdParam": {
 				"name": "keycloakUserId",
@@ -74,9 +79,8 @@
 				"schema": {
 					"oneOf": [
 						{
-							"type": "string",
-							"format": "uuid",
-							"nullable": true
+							"type": ["string", "null"],
+							"format": "uuid"
 						},
 						{
 							"enum": ["me"]
@@ -138,8 +142,7 @@
 					},
 					"fileSize": {
 						"description": "File size in bytes",
-						"type": "integer",
-						"nullable": true,
+						"type": ["integer", "null"],
 						"readOnly": true,
 						"example": 42,
 						"minimum": 0
@@ -203,9 +206,8 @@
 			},
 			"keycloakOrganizationId": {
 				"description": "If available, the PDC Keycloak Organization ID for this entity.",
-				"type": "string",
-				"format": "uuid",
-				"nullable": true
+				"type": ["string", "null"],
+				"format": "uuid"
 			},
 			"BaseFieldsCopyTask": {
 				"type": "object",
@@ -781,28 +783,25 @@
 				"type": "object",
 				"properties": {
 					"baseFieldId": {
-						"type": "integer",
-						"example": 1,
-						"readOnly": "true"
+						"type": ["integer", "null"],
+						"example": 1
 					},
 					"language": {
 						"type": "string",
 						"example": "en",
-						"readOnly": "true"
+						"readOnly": true
 					},
 					"label": {
 						"type": "string",
 						"example": "Applicant Name"
 					},
 					"description": {
-						"type": "string",
-						"example": "The Name of the Applicant",
-						"nullable": true
+						"type": ["string", "null"],
+						"example": "The Name of the Applicant"
 					},
 					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
+						"type": ["string", "null"],
+						"format": "date-time"
 					}
 				},
 				"required": ["baseFieldId", "language", "localization", "label"]
@@ -1132,106 +1131,6 @@
 				"type": "string",
 				"enum": ["manage", "edit", "view"]
 			},
-			"ChangemakerRole": {
-				"type": "object",
-				"properties": {
-					"changemakerId": {
-						"type": "integer",
-						"readOnly": true
-					},
-					"userKeycloakUserId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"accessType": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["changemakerId", "userKeycloakUserId", "assignedRole"]
-			},
-			"DataProviderRole": {
-				"type": "object",
-				"properties": {
-					"dataProviderShortCode": {
-						"type": "string",
-						"readOnly": true
-					},
-					"userKeycloakUserId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"accessType": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"dataProviderShortCode",
-					"userKeycloakUserId",
-					"assignedRole"
-				]
-			},
-			"FunderRole": {
-				"type": "object",
-				"properties": {
-					"funderShortCode": {
-						"type": "string",
-						"readOnly": true
-					},
-					"userKeycloakUserId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"accessType": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["funderShortCode", "userKeycloakUserId", "assignedRole"]
-			},
-			"RoleMap": {
-				"type": "object",
-				"propertyNames": {
-					"$ref": "#/components/schemas/Permission"
-				},
-				"additionalProperties": {
-					"type": "boolean"
-				}
-			},
 			"User": {
 				"type": "object",
 				"properties": {
@@ -1527,6 +1426,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -1569,6 +1471,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					},
 					"409": {
 						"description": "There was a unique key conflict.",
@@ -1624,6 +1529,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -1663,6 +1571,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -2130,10 +2041,9 @@
 										},
 										"notAfter": {
 											"description": "For internal use. This always be null in a response from this endpoint.",
-											"type": "string",
+											"type": ["string", "null"],
 											"format": "date-time",
 											"readOnly": true,
-											"nullable": true,
 											"example": null
 										}
 									},
@@ -2192,6 +2102,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion of the fiscal sponsorship."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -2374,6 +2287,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -2500,6 +2416,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -2638,6 +2557,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -2673,6 +2595,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -2730,41 +2655,6 @@
 				}
 			}
 		},
-		"/dataProviders/{dataProviderId}": {
-			"get": {
-				"operationId": "getDataPRoviderById",
-				"summary": "Gets a specific data provider.",
-				"tags": ["Data Providers"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"parameters": [
-					{
-						"name": "dataProviderId",
-						"description": "The PDC-generated ID of a data provider.",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"type": "integer"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "The data provider.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/DataProvider"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
 		"/funders": {
 			"get": {
 				"operationId": "getFunders",
@@ -2789,6 +2679,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -2824,6 +2717,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3020,6 +2916,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3097,6 +2996,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3135,6 +3037,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3211,6 +3116,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3288,6 +3196,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3360,6 +3271,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3415,6 +3329,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3461,6 +3378,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3516,6 +3436,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3562,6 +3485,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3617,6 +3543,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3663,6 +3592,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3718,6 +3650,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3764,6 +3699,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3819,6 +3757,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3865,6 +3806,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}
@@ -3920,6 +3864,9 @@
 								}
 							}
 						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			},
@@ -3966,6 +3913,9 @@
 				"responses": {
 					"204": {
 						"description": "Confirmation of successful deletion."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
 				}
 			}

@@ -1,0 +1,42 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 3407
+		},
+		"status": {
+			"type": "string",
+			"readOnly": true,
+			"enum": ["pending", "in_progress", "completed", "failed", "canceled"]
+		},
+		"pdcApiUrl": {
+			"type": "string"
+		},
+		"statusUpdatedAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that created this BaseFieldCopyTask",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": [
+		"id",
+		"pdcApiUrl",
+		"status",
+		"statusUpdatedAt",
+		"createdBy",
+		"createdAt"
+	]
+}

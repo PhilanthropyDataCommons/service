@@ -1,6 +1,6 @@
 import { InputValidationError } from '../errors';
 import { isPaginationParametersQuery } from '../types';
-import apiSpecification from '../openapi.json';
+import apiSpecification from '../public/openapi/api.json';
 import type { Request } from 'express';
 import type { PaginationParameters } from '../types';
 

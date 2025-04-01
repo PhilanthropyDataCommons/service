@@ -23,7 +23,7 @@ jobs:
           repository: 'PhilanthropyDataCommons/sdk'
           path: 'sdk'
       - name: Copy API definition
-        run: cp service/src/openapi.json sdk/openapi.json
+        run: cp service/src/public/openapi/api.json sdk/openapi.json
       - name: Setup Java
         uses: actions/setup-java@v4
         with:

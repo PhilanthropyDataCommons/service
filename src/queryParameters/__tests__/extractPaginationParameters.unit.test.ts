@@ -1,6 +1,6 @@
 import { extractPaginationParameters } from '..';
 import { InputValidationError } from '../../errors';
-import apiSpecification from '../../openapi.json';
+import apiSpecification from '../../public/openapi/api.json';
 
 describe('extractPaginationParameters', () => {
 	it('should return default values according to documented defaults', () => {

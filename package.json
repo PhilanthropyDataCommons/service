@@ -12,7 +12,7 @@
 		"format:sqlfluff": "./venv/bin/sqlfluff fix src/database/",
 		"lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:tsc && npm run lint:openapi && npm run lint:sqlfluff",
 		"lint:eslint": "eslint ./src --ext .ts --max-warnings=0",
-		"lint:openapi": "npx @redocly/cli lint src/openapi.json",
+		"lint:openapi": "npx @redocly/cli lint src/public/openapi/api.json",
 		"lint:tsc": "tsc --noEmit -p tsconfig.dev.json",
 		"lint:prettier": "prettier . --check",
 		"lint:sqlfluff": "./venv/bin/sqlfluff lint src/database/",

@@ -1,4 +1,4 @@
-import apiSpecification from '../openapi.json';
+import apiSpecification from '../public/openapi/api.json';
 
 describe('openapi.json', () => {
 	describe('page parameter', () => {

@@ -22,8 +22,18 @@ jobs:
         with:
           repository: 'PhilanthropyDataCommons/sdk'
           path: 'sdk'
+      - name: Setup Node for API building
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: service/.node-version
+      - name: Install dependencies for API building
+        working-directory: service
+        run: npm ci
+      - name: Build the API definition
+        working-directory: service
+        run: npm run build:openapi
       - name: Copy API definition
-        run: cp service/src/public/openapi/api.json sdk/openapi.json
+        run: cp service/dist/openapi/api.json sdk/openapi.json
       - name: Setup Java
         uses: actions/setup-java@v4
         with:

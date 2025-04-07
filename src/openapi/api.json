@@ -571,23 +571,7 @@
 				"$ref": "./components/schemas/BaseFieldLocalization.json"
 			},
 			"BaseFieldLocalizationBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/BaseFieldLocalization"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/BaseFieldLocalizationBundle.json"
 			},
 			"PdcError": {
 				"$ref": "./components/schemas/PdcError.json"

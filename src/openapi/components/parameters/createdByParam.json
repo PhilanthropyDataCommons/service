@@ -1,0 +1,17 @@
+{
+	"schema": {
+		"oneOf": [
+			{
+				"type": ["string", "null"],
+				"format": "uuid"
+			},
+			{
+				"enum": ["me"]
+			}
+		]
+	},
+	"in": "query",
+	"name": "createdBy",
+	"required": false,
+	"description": "A reference to a user entity, or 'me'."
+}

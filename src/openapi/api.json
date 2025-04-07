@@ -513,53 +513,7 @@
 				"required": ["id", "opportunityId", "version", "fields", "createdAt"]
 			},
 			"ApplicationFormField": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3613
-					},
-					"applicationFormId": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3529
-					},
-					"baseFieldId": {
-						"type": "integer",
-						"example": 3011
-					},
-					"baseField": {
-						"readOnly": true,
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/BaseField"
-							}
-						]
-					},
-					"position": {
-						"type": "integer",
-						"example": 19
-					},
-					"label": {
-						"type": "string",
-						"example": "Your First Name"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"applicationFormId",
-					"baseFieldId",
-					"baseField",
-					"position",
-					"label",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/ApplicationFormField.json"
 			},
 			"shortCode": {
 				"$ref": "./components/schemas/shortCode.json"

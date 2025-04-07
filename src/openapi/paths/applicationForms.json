@@ -1,0 +1,92 @@
+{
+	"get": {
+		"operationId": "getApplicationForms",
+		"summary": "Gets a list of application forms.",
+		"tags": ["Application Forms"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "All application forms currently registered in the PDC.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ApplicationFormBundle.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	},
+	"post": {
+		"operationId": "addApplicationForm",
+		"summary": "Adds a new application form.",
+		"tags": ["Application Forms"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/ApplicationForm.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new application form that was created, with populated fields",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ApplicationForm.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"409": {
+				"description": "There was a unique key conflict.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"422": {
+				"description": "The application references entities that do not exist in the database.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

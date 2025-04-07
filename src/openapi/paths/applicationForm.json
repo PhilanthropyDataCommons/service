@@ -1,0 +1,38 @@
+{
+	"get": {
+		"operationId": "getApplicationFormById",
+		"summary": "Gets a specific application form.",
+		"tags": ["Application Forms"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "applicationFormId",
+				"description": "The PDC-generated ID of an application form.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The requested application form.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ApplicationForm.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

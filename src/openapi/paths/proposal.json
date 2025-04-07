@@ -1,0 +1,38 @@
+{
+	"get": {
+		"operationId": "getProposalById",
+		"summary": "Gets a specific proposal.",
+		"tags": ["Proposals"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "proposalId",
+				"description": "The PDC-generated ID of a proposal.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The proposal.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Proposal.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

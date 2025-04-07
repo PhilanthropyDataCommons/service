@@ -1,0 +1,58 @@
+{
+	"put": {
+		"operationId": "updateBaseFieldById",
+		"summary": "Updates a base field.",
+		"tags": ["Base Fields"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "baseFieldId",
+				"description": "The PDC-generated ID of a base field.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/BaseField.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"200": {
+				"description": "The updated base field.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/BaseField.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"description": "The base field could not be found."
+			}
+		}
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"get": {
+		"operationId": "getProposalVersionById",
+		"summary": "Gets a specific proposal version.",
+		"tags": ["Proposals"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "proposalVersionId",
+				"description": "The PDC-generated ID of a proposal version.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The requested proposalVersion.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ProposalVersion.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

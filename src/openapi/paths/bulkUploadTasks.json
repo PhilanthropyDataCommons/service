@@ -1,0 +1,84 @@
+{
+	"get": {
+		"operationId": "getBulkUploadTasks",
+		"summary": "Gets a list of bulk upload tasks.",
+		"tags": ["Tasks"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{ "$ref": "../components/parameters/pageParam.json" },
+			{ "$ref": "../components/parameters/countParam.json" },
+			{ "$ref": "../components/parameters/createdByParam.json" }
+		],
+		"responses": {
+			"200": {
+				"description": "Requested bulk uploads registered in the PDC.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/BulkUploadTaskBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	},
+	"post": {
+		"operationId": "addBulkUploadTask",
+		"summary": "Registers a bulk upload task. This lets PDC ingest data previously uploaded via a POST to the /presignedPostRequests endpoint.",
+		"tags": ["Tasks"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/BulkUploadTask.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The bulk upload",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/BulkUploadTask.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

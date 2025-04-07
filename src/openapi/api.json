@@ -125,23 +125,7 @@
 				"$ref": "./components/schemas/BaseFieldsCopyTask.json"
 			},
 			"BaseFieldsCopyTaskBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/BaseFieldsCopyTask"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/BaseFieldsCopyTaskBundle.json"
 			},
 			"DataProvider": {
 				"$ref": "./components/schemas/DataProvider.json"

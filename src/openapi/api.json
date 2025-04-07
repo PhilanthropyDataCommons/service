@@ -1196,7 +1196,7 @@
 						"$ref": "#/components/schemas/Permission",
 						"readOnly": true
 					},
-					"funderShortcode": {
+					"funderShortCode": {
 						"$ref": "#/components/schemas/shortCode",
 						"readOnly": true
 					},
@@ -1218,7 +1218,7 @@
 				},
 				"required": [
 					"permission",
-					"funderShortcode",
+					"funderShortCode",
 					"userKeycloakUserId",
 					"createdBy",
 					"createdAt"
@@ -1231,7 +1231,7 @@
 						"$ref": "#/components/schemas/Permission",
 						"readOnly": true
 					},
-					"dataProviderShortcode": {
+					"dataProviderShortCode": {
 						"$ref": "#/components/schemas/shortCode",
 						"readOnly": true
 					},
@@ -1253,7 +1253,7 @@
 				},
 				"required": [
 					"id",
-					"dataProviderShortcode",
+					"dataProviderShortCode",
 					"userKeycloakUserId",
 					"createdBy",
 					"createdAt"
@@ -1286,7 +1286,7 @@
 						"readOnly": true
 					}
 				},
-				"required": ["id", "", "createdAt"]
+				"required": ["id", "createdAt"]
 			},
 			"UserGroupFunderPermission": {
 				"type": "object",
@@ -1295,7 +1295,7 @@
 						"$ref": "#/components/schemas/Permission",
 						"readOnly": true
 					},
-					"funderShortcode": {
+					"funderShortCode": {
 						"$ref": "#/components/schemas/shortCode",
 						"readOnly": true
 					},
@@ -1317,7 +1317,7 @@
 				},
 				"required": [
 					"permission",
-					"funderShortcode",
+					"funderShortCode",
 					"userKeycloakUserId",
 					"createdBy",
 					"createdAt"
@@ -1330,7 +1330,7 @@
 						"$ref": "#/components/schemas/Permission",
 						"readOnly": true
 					},
-					"dataProviderShortcode": {
+					"dataProviderShortCode": {
 						"$ref": "#/components/schemas/shortCode",
 						"readOnly": true
 					},
@@ -1352,7 +1352,7 @@
 				},
 				"required": [
 					"id",
-					"dataProviderShortcode",
+					"dataProviderShortCode",
 					"userKeycloakUserId",
 					"createdBy",
 					"createdAt"

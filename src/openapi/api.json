@@ -116,23 +116,7 @@
 				"$ref": "./components/schemas/BulkUploadTask.json"
 			},
 			"BulkUploadTaskBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/BulkUploadTask"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/BulkUploadTaskBundle.json"
 			},
 			"keycloakOrganizationId": {
 				"$ref": "./components/schemas/keycloakOrganizationId.json"

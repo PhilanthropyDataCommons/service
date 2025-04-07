@@ -12,7 +12,7 @@
 	"components": {
 		"responses": {
 			"NotFound": {
-				"description": "The specified resource was not found"
+				"$ref": "./components/responses/NotFound.json"
 			}
 		},
 		"parameters": {

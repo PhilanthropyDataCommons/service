@@ -229,60 +229,7 @@
 				]
 			},
 			"ProposalVersion": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3821
-					},
-					"proposalId": {
-						"type": "integer",
-						"example": 3709
-					},
-					"sourceId": {
-						"type": "integer"
-					},
-					"source": {
-						"$ref": "#/components/schemas/Source",
-						"readOnly": true
-					},
-					"applicationFormId": {
-						"type": "integer",
-						"example": 3529
-					},
-					"version": {
-						"type": "integer",
-						"example": 17,
-						"readOnly": true
-					},
-					"fieldValues": {
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/ProposalFieldValue"
-						}
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					},
-					"createdBy": {
-						"description": "The keycloak user id of the PDC user that created this bulk upload",
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"proposalId",
-					"sourceId",
-					"applicationFormId",
-					"version",
-					"fieldValues",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/ProposalVersion.json"
 			},
 			"ProposalFieldValue": {
 				"$ref": "./components/schemas/ProposalFieldValue.json"

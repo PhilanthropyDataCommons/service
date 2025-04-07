@@ -696,26 +696,7 @@
 				]
 			},
 			"PlatformProviderResponse": {
-				"type": "object",
-				"properties": {
-					"externalId": {
-						"type": "string",
-						"example": "000000000"
-					},
-					"platformProvider": {
-						"type": "string",
-						"example": "DataPlatformProviderX"
-					},
-					"data": {
-						"type": "object"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["externalId", "platformProvider", "data", "createdAt"]
+				"$ref": "./components/schemas/PlatformProviderResponse.json"
 			},
 			"Bundle": {
 				"type": "object",

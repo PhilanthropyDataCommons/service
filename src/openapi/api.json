@@ -670,8 +670,7 @@
 				]
 			},
 			"shortCode": {
-				"type": "string",
-				"pattern": "^[\\w\\-]+$"
+				"$ref": "./components/schemas/shortCode.json"
 			},
 			"BaseField": {
 				"type": "object",

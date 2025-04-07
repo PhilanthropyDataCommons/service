@@ -243,77 +243,7 @@
 			"$ref": "./paths/baseFieldLocalization.json"
 		},
 		"/opportunities": {
-			"get": {
-				"operationId": "getOpportunities",
-				"summary": "Gets a list of opportunities.",
-				"tags": ["Opportunities"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"parameters": [
-					{ "$ref": "#/components/parameters/pageParam" },
-					{ "$ref": "#/components/parameters/countParam" }
-				],
-				"responses": {
-					"200": {
-						"description": "A list of known funding opportunities.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/OpportunityBundle"
-								}
-							}
-						}
-					},
-					"404": {
-						"$ref": "#/components/responses/NotFound"
-					}
-				}
-			},
-			"post": {
-				"operationId": "addOpportunity",
-				"summary": "Adds a new opportunity.",
-				"tags": ["Opportunities"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/Opportunity"
-							}
-						}
-					}
-				},
-				"responses": {
-					"201": {
-						"description": "The new opportunity that was created.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Opportunity"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication was not provided or was invalid.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PdcError"
-								}
-							}
-						}
-					}
-				}
-			}
+			"$ref": "./paths/opportunities.json"
 		},
 		"/opportunities/{opportunityId}": {
 			"get": {

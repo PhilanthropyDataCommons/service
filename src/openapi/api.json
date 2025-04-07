@@ -143,40 +143,7 @@
 				"$ref": "./components/schemas/PartialChangemaker.json"
 			},
 			"ChangemakerProposal": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true
-					},
-					"changemakerId": {
-						"type": "integer"
-					},
-					"changemaker": {
-						"$ref": "#/components/schemas/Changemaker",
-						"readOnly": true
-					},
-					"proposalId": {
-						"type": "integer"
-					},
-					"proposal": {
-						"$ref": "#/components/schemas/Proposal",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"changemakerId",
-					"changemaker",
-					"proposalId",
-					"proposal",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/ChangemakerProposal.json"
 			},
 			"PresignedPostRequest": {
 				"$ref": "./components/schemas/PresignedPostRequest.json"

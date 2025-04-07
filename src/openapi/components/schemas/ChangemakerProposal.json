@@ -1,0 +1,36 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true
+		},
+		"changemakerId": {
+			"type": "integer"
+		},
+		"changemaker": {
+			"$ref": "./Changemaker.json",
+			"readOnly": true
+		},
+		"proposalId": {
+			"type": "integer"
+		},
+		"proposal": {
+			"$ref": "./Proposal.json",
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": [
+		"id",
+		"changemakerId",
+		"changemaker",
+		"proposalId",
+		"proposal",
+		"createdAt"
+	]
+}

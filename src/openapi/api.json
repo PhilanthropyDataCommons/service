@@ -896,39 +896,7 @@
 				"$ref": "./components/schemas/UserGroupFunderPermission.json"
 			},
 			"UserGroupDataProviderPermission": {
-				"type": "object",
-				"properties": {
-					"permission": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"dataProviderShortCode": {
-						"$ref": "#/components/schemas/shortCode",
-						"readOnly": true
-					},
-					"keycloakOrganizationId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"dataProviderShortCode",
-					"userKeycloakUserId",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/UserGroupDataProviderPermission.json"
 			}
 		}
 	},

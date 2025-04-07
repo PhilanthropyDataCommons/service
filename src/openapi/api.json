@@ -230,26 +230,7 @@
 				]
 			},
 			"DataProvider": {
-				"type": "object",
-				"properties": {
-					"shortCode": {
-						"$ref": "#/components/schemas/shortCode",
-						"readOnly": true
-					},
-					"name": {
-						"type": "string",
-						"example": "Philanthropy Data Warehouse"
-					},
-					"keycloakOrganizationId": {
-						"$ref": "#/components/schemas/keycloakOrganizationId"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["id", "name", "createdAt"]
+				"$ref": "./components/schemas/DataProvider.json"
 			},
 			"Funder": {
 				"type": "object",

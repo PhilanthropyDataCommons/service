@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"type": "string"
+	},
+	"in": "query",
+	"name": "_content",
+	"required": false,
+	"description": "A web-search formatted string to select specific entities returned."
+}

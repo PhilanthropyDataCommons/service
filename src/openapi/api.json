@@ -26,13 +26,7 @@
 				"$ref": "./components/parameters/countParam.json"
 			},
 			"searchParam": {
-				"schema": {
-					"type": "string"
-				},
-				"in": "query",
-				"name": "_content",
-				"required": false,
-				"description": "A web-search formatted string to select specific entities returned."
+				"$ref": "./components/parameters/searchParam.json"
 			},
 			"changemakerParam": {
 				"schema": {

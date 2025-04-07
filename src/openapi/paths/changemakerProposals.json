@@ -1,0 +1,82 @@
+{
+	"get": {
+		"operationId": "getChangemakerProposals",
+		"summary": "Gets a list of ChangemakerProposals.",
+		"tags": ["Changemaker Proposals"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{ "$ref": "../components/parameters/pageParam.json" },
+			{ "$ref": "../components/parameters/countParam.json" },
+			{ "$ref": "../components/parameters/changemakerParam.json" },
+			{ "$ref": "../components/parameters/proposalParam.json" }
+		],
+		"responses": {
+			"200": {
+				"description": "The requested ChangemakerProposals.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ChangemakerProposalBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	},
+	"post": {
+		"operationId": "addChangemakerProposal",
+		"summary": "Adds a new ChangemakerProposal associated with a specific changemaker.",
+		"tags": ["Changemaker Proposals"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/ChangemakerProposal.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new ChangemakerProposal",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ChangemakerProposal.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -237,42 +237,7 @@
 			"$ref": "./paths/funder.json"
 		},
 		"/baseFields/{baseFieldId}/localizations": {
-			"get": {
-				"operationId": "getBaseFieldLocalizationsByBaseFieldId",
-				"summary": "Gets a list of base fields localizations for a given basefield.",
-				"tags": ["Base Fields"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"parameters": [
-					{
-						"name": "baseFieldId",
-						"description": "The PDC-generated ID of a base field.",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"type": "integer"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "All base field localizations for a given base field in the PDC.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BaseFieldLocalizationBundle"
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "The base field could not be found."
-					}
-				}
-			}
+			"$ref": "./paths/baseFieldLocalizations.json"
 		},
 		"/baseFields/{baseFieldId}/localizations/{language}": {
 			"put": {

@@ -1,0 +1,28 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 3203
+		},
+		"title": {
+			"type": "string",
+			"example": "The Open Source Foundation 2022 Challenge"
+		},
+		"funderShortCode": {
+			"type": "string",
+			"example": "pdc"
+		},
+		"funder": {
+			"$ref": "./Funder.json",
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": ["id", "title", "createdAt"]
+}

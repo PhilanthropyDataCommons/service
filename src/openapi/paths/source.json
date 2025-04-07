@@ -1,0 +1,81 @@
+{
+	"get": {
+		"operationId": "getSourceById",
+		"summary": "Gets a specific source.",
+		"tags": ["Sources"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "sourceId",
+				"description": "The PDC-generated ID of a source.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The source.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Source.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	},
+	"delete": {
+		"operationId": "deleteSourceById",
+		"summary": "Deletes a specific source.",
+		"tags": ["Sources"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "sourceId",
+				"description": "The PDC-generated ID of a source to be deleted.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The deleted source.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Source.json"
+						}
+					}
+				}
+			},
+			"422": {
+				"description": "The referenced entity does not exist in the database.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

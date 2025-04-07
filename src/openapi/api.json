@@ -258,36 +258,7 @@
 			"$ref": "./paths/source.json"
 		},
 		"/users": {
-			"get": {
-				"operationId": "getUsers",
-				"summary": "Gets a list of users.",
-				"tags": ["Users"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"parameters": [
-					{ "$ref": "#/components/parameters/pageParam" },
-					{ "$ref": "#/components/parameters/countParam" },
-					{ "$ref": "#/components/parameters/keycloakUserIdParam" }
-				],
-				"responses": {
-					"200": {
-						"description": "A list of users.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserBundle"
-								}
-							}
-						}
-					},
-					"404": {
-						"$ref": "#/components/responses/NotFound"
-					}
-				}
-			}
+			"$ref": "./paths/users.json"
 		},
 		"/users/{userKeycloakUserId}/changemakers/{changemakerId}/permissions/{permission}": {
 			"put": {

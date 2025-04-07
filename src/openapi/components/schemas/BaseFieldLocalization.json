@@ -1,0 +1,27 @@
+{
+	"type": "object",
+	"properties": {
+		"baseFieldId": {
+			"type": ["integer", "null"],
+			"example": 1
+		},
+		"language": {
+			"type": "string",
+			"example": "en",
+			"readOnly": true
+		},
+		"label": {
+			"type": "string",
+			"example": "Applicant Name"
+		},
+		"description": {
+			"type": ["string", "null"],
+			"example": "The Name of the Applicant"
+		},
+		"createdAt": {
+			"type": ["string", "null"],
+			"format": "date-time"
+		}
+	},
+	"required": ["baseFieldId", "language", "localization", "label"]
+}

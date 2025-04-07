@@ -1,0 +1,10 @@
+{
+	"name": "keycloakUserId",
+	"description": "The Keycloak userId associated with the desired user.",
+	"in": "query",
+	"required": false,
+	"schema": {
+		"type": "string",
+		"format": "uuid"
+	}
+}

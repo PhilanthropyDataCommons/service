@@ -878,23 +878,7 @@
 				"$ref": "./components/schemas/User.json"
 			},
 			"UserBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/User"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/UserBundle.json"
 			},
 			"UserChangemakerPermission": {
 				"type": "object",

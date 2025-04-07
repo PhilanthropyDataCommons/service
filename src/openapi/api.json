@@ -881,39 +881,7 @@
 				"$ref": "./components/schemas/UserBundle.json"
 			},
 			"UserChangemakerPermission": {
-				"type": "object",
-				"properties": {
-					"permission": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"changemakerId": {
-						"type": "integer",
-						"readOnly": true
-					},
-					"userKeycloakUserId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"permission",
-					"changemakerId",
-					"userKeycloakUserId",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/UserChangemakerPermission.json"
 			},
 			"UserFunderPermission": {
 				"type": "object",

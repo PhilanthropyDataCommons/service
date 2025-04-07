@@ -872,8 +872,7 @@
 				]
 			},
 			"Permission": {
-				"type": "string",
-				"enum": ["manage", "edit", "view"]
+				"$ref": "./components/schemas/Permission.json"
 			},
 			"User": {
 				"type": "object",

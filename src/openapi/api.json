@@ -213,58 +213,7 @@
 			"$ref": "./paths/proposal.json"
 		},
 		"/proposalVersions": {
-			"post": {
-				"operationId": "addProposalVersion",
-				"summary": "Adds a new proposal version.",
-				"tags": ["Proposals"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ProposalVersion"
-							}
-						}
-					}
-				},
-				"responses": {
-					"201": {
-						"description": "The new proposal version that was created, with populated field values",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ProposalVersion"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication was not provided or was invalid.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PdcError"
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "The proposal version references entities that do not exist in the database.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PdcError"
-								}
-							}
-						}
-					}
-				}
-			}
+			"$ref": "./paths/proposalVersions.json"
 		},
 		"/proposalVersions/{proposalVersionId}": {
 			"get": {

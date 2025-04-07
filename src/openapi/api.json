@@ -505,23 +505,7 @@
 				]
 			},
 			"SourceBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/Source"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/SourceBundle.json"
 			},
 			"Source": {
 				"$ref": "./components/schemas/Source.json"

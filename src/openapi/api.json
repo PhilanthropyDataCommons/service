@@ -225,35 +225,7 @@
 			"$ref": "./paths/baseField.json"
 		},
 		"/dataProviders": {
-			"get": {
-				"operationId": "getDataProviders",
-				"summary": "Gets a list of data providers.",
-				"tags": ["Data Providers"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"parameters": [
-					{ "$ref": "#/components/parameters/pageParam" },
-					{ "$ref": "#/components/parameters/countParam" }
-				],
-				"responses": {
-					"200": {
-						"description": "A list of data providers.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/DataProviderBundle"
-								}
-							}
-						}
-					},
-					"404": {
-						"$ref": "#/components/responses/NotFound"
-					}
-				}
-			}
+			"$ref": "./paths/dataProviders.json"
 		},
 		"/dataProviders/{dataProviderShortCode}": {
 			"get": {

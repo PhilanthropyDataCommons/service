@@ -205,7 +205,7 @@
 				]
 			},
 			"keycloakOrganizationId": {
-				"$ref": "./components/schemas/keycloakOrganizationId.json"
+				"$ref": "./components/schemas/BaseFieldsCopyTask.json"
 			},
 			"BaseFieldsCopyTask": {
 				"$ref": "./components/schemas/BaseFieldsCopyTask.json"
@@ -670,8 +670,7 @@
 				]
 			},
 			"shortCode": {
-				"type": "string",
-				"pattern": "^[\\w\\-]+$"
+				"$ref": "./components/schemas/shortCode.json"
 			},
 			"BaseField": {
 				"type": "object",

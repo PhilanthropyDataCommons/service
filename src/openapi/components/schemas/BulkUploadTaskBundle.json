@@ -1,0 +1,19 @@
+{
+	"allOf": [
+		{
+			"$ref": "./Bundle.json"
+		},
+		{
+			"type": "object",
+			"properties": {
+				"entries": {
+					"type": "array",
+					"items": {
+						"$ref": "./BulkUploadTask.json"
+					}
+				}
+			},
+			"required": ["entries"]
+		}
+	]
+}

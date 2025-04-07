@@ -239,51 +239,7 @@
 				"$ref": "./components/schemas/ShallowChangemaker.json"
 			},
 			"Changemaker": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/ShallowChangemaker"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"fiscalSponsors": {
-								"type": "array",
-								"description": "Fiscal sponsors (past and present) of this changemaker. Empty when unauthenticated. The response here will not include values for `fields` nor `fiscalSponsors` to avoid infinite recursion. Use the returned `id` to call $getChangemakerById for those details.",
-								"items": {
-									"$ref": "#/components/schemas/ShallowChangemaker"
-								},
-								"readOnly": true,
-								"example": [
-									{
-										"id": 74,
-										"name": "Community Development",
-										"taxId": "US123456789",
-										"fields": [],
-										"createdAt": "2025-02-07T13:16:16.191509-06:00",
-										"fiscalSponsors": [],
-										"keycloakOrganizationId": "f16a71f8-e67b-43ab-a258-31cd8a99a97a"
-									}
-								]
-							},
-							"fields": {
-								"type": "array",
-								"description": "For each base field, the best available value related to this changemaker. Empty when unauthenticated or when recursively querying changemakers, for example, within fiscal sponsors.",
-								"items": {
-									"$ref": "#/components/schemas/ProposalFieldValue"
-								},
-								"readOnly": true
-							}
-						},
-						"required": [
-							"id",
-							"taxId",
-							"name",
-							"createdAt",
-							"fields",
-							"fiscalSponsors"
-						]
-					}
-				]
+				"$ref": "./components/schemas/Changemaker.json"
 			},
 			"PartialChangemaker": {
 				"$ref": "./components/schemas/PartialChangemaker.json"

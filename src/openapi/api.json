@@ -721,23 +721,7 @@
 				]
 			},
 			"DataProviderBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/DataProvider"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/DataProviderBundle.json"
 			},
 			"FunderBundle": {
 				"allOf": [

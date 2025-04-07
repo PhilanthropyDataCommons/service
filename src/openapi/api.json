@@ -194,23 +194,7 @@
 				"$ref": "./components/schemas/Bundle.json"
 			},
 			"ApplicationFormBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/ApplicationForm"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/ApplicationFormBundle.json"
 			},
 			"DataProviderBundle": {
 				"$ref": "./components/schemas/DataProviderBundle.json"

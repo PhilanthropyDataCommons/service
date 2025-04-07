@@ -233,26 +233,7 @@
 				"$ref": "./components/schemas/DataProvider.json"
 			},
 			"Funder": {
-				"type": "object",
-				"properties": {
-					"shortCode": {
-						"$ref": "#/components/schemas/shortCode",
-						"readOnly": true
-					},
-					"name": {
-						"type": "string",
-						"example": "Example Foundation"
-					},
-					"keycloakOrganizationId": {
-						"$ref": "#/components/schemas/keycloakOrganizationId"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["id", "name", "createdAt"]
+				"$ref": "./components/schemas/Funder.json"
 			},
 			"ShallowChangemaker": {
 				"type": "object",

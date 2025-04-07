@@ -580,23 +580,7 @@
 				"$ref": "./components/schemas/Opportunity.json"
 			},
 			"OpportunityBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/Opportunity"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/OpportunityBundle.json"
 			},
 			"PlatformProviderResponse": {
 				"$ref": "./components/schemas/PlatformProviderResponse.json"

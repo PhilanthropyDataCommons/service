@@ -724,23 +724,7 @@
 				"$ref": "./components/schemas/DataProviderBundle.json"
 			},
 			"FunderBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/Funder"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/FunderBundle.json"
 			},
 			"ChangemakerBundle": {
 				"allOf": [

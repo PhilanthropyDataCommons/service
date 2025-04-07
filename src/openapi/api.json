@@ -231,35 +231,7 @@
 			"$ref": "./paths/dataProvider.json"
 		},
 		"/funders": {
-			"get": {
-				"operationId": "getFunders",
-				"summary": "Gets a list of funders.",
-				"tags": ["Funders"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"parameters": [
-					{ "$ref": "#/components/parameters/pageParam" },
-					{ "$ref": "#/components/parameters/countParam" }
-				],
-				"responses": {
-					"200": {
-						"description": "A list of funders.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/FunderBundle"
-								}
-							}
-						}
-					},
-					"404": {
-						"$ref": "#/components/responses/NotFound"
-					}
-				}
-			}
+			"$ref": "./paths/funders.json"
 		},
 		"/funders/{funderShortCode}": {
 			"get": {

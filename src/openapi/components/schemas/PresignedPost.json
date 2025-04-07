@@ -1,0 +1,19 @@
+{
+	"type": "object",
+	"properties": {
+		"url": {
+			"type": "string"
+		},
+		"fields": {
+			"type": "object",
+			"properties": {
+				"key": {
+					"type": "string",
+					"example": "96ddab90-1931-478d-8c02-a1dc80ae01e5"
+				}
+			},
+			"required": ["key"]
+		}
+	},
+	"required": ["url", "fields"]
+}

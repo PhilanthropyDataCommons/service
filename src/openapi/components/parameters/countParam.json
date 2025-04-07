@@ -1,0 +1,11 @@
+{
+	"schema": {
+		"type": "integer",
+		"minimum": 1,
+		"default": 10
+	},
+	"in": "query",
+	"name": "_count",
+	"required": false,
+	"description": "The maximum number of items that should appear per page or request."
+}

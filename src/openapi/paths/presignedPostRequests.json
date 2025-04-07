@@ -1,0 +1,44 @@
+{
+	"post": {
+		"operationId": "addPresignedPostRequest",
+		"summary": "Requests a presigned post URL.",
+		"tags": ["Presigned Posts"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/PresignedPostRequest.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The presigned post request. Use the contents of this JSON to POST form data to S3. After posting data to S3, use the /bulkUploadTasks endpoint to let PDC ingest the data.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PresignedPostRequest.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -524,73 +524,7 @@
 				]
 			},
 			"Source": {
-				"allOf": [
-					{
-						"type": "object",
-						"properties": {
-							"id": {
-								"type": "integer",
-								"readOnly": true
-							},
-							"label": {
-								"type": "string",
-								"example": "A Source"
-							},
-							"relatedEntityId": {
-								"type": "integer"
-							},
-							"createdAt": {
-								"type": "string",
-								"format": "date-time",
-								"readOnly": true
-							}
-						},
-						"required": ["id", "label", "relatedEntityId", "createdAt"]
-					},
-					{
-						"oneOf": [
-							{
-								"type": "object",
-								"properties": {
-									"dataProviderShortCode": {
-										"type": "string"
-									},
-									"dataProvider": {
-										"$ref": "#/components/schemas/DataProvider",
-										"readOnly": true
-									}
-								},
-								"required": ["dataProviderShortCode", "dataProvider"]
-							},
-							{
-								"type": "object",
-								"properties": {
-									"funderShortCode": {
-										"type": "string"
-									},
-									"funder": {
-										"$ref": "#/components/schemas/Funder",
-										"readOnly": true
-									}
-								},
-								"required": ["funderShortCode", "funder"]
-							},
-							{
-								"type": "object",
-								"properties": {
-									"changemakerId": {
-										"type": "number"
-									},
-									"changemaker": {
-										"$ref": "#/components/schemas/Changemaker",
-										"readOnly": true
-									}
-								},
-								"required": ["changemakerId", "changemaker"]
-							}
-						]
-					}
-				]
+				"$ref": "./components/schemas/Source.json"
 			},
 			"Permission": {
 				"$ref": "./components/schemas/Permission.json"

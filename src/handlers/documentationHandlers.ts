@@ -34,4 +34,16 @@ const getRootApiSpec = async (req: Request, res: Response) => {
 	res.send(expandedDocumentation);
 };
 
-export const documentationHandlers = { getRootApiSpec };
+const getAuthApiSpec = async (req: Request, res: Response) => {
+	const expandedDocumentation = await getExpandedDocumentation(
+		'components/securitySchemes/auth.json',
+	);
+	res.type('application/json');
+	res.set(
+		'Content-Length',
+		Buffer.byteLength(expandedDocumentation, 'utf8').toString(),
+	);
+	res.send(expandedDocumentation);
+};
+
+export const documentationHandlers = { getRootApiSpec, getAuthApiSpec };

@@ -325,23 +325,7 @@
 				]
 			},
 			"PresignedPostRequest": {
-				"type": "object",
-				"properties": {
-					"fileType": {
-						"type": "string",
-						"example": "application/octet-stream"
-					},
-					"fileSize": {
-						"type": "integer",
-						"minimum": 0,
-						"example": 512
-					},
-					"presignedPost": {
-						"$ref": "#/components/schemas/PresignedPost",
-						"readOnly": true
-					}
-				},
-				"required": ["fileType", "fileSize", "presignedPost"]
+				"$ref": "./components/schemas/PresignedPostRequest.json"
 			},
 			"PresignedPost": {
 				"$ref": "./components/schemas/PresignedPost.json"

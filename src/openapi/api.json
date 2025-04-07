@@ -286,21 +286,7 @@
 				]
 			},
 			"PartialChangemaker": {
-				"type": "object",
-				"properties": {
-					"taxId": {
-						"type": "string",
-						"example": "11-1111111"
-					},
-					"name": {
-						"type": "string",
-						"example": "Example Inc."
-					},
-					"keycloakOrganizationId": {
-						"$ref": "#/components/schemas/keycloakOrganizationId"
-					}
-				},
-				"required": []
+				"$ref": "./components/schemas/PartialChangemaker.json"
 			},
 			"ChangemakerProposal": {
 				"type": "object",

@@ -20,15 +20,7 @@
 				"$ref": "./components/parameters/keycloakUserIdParam.json"
 			},
 			"pageParam": {
-				"schema": {
-					"type": "integer",
-					"minimum": 1,
-					"default": 1
-				},
-				"in": "query",
-				"name": "_page",
-				"required": false,
-				"description": "The page number being retrieved."
+				"$ref": "./components/parameters/pageParam.json"
 			},
 			"countParam": {
 				"schema": {

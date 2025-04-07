@@ -1,0 +1,38 @@
+{
+	"get": {
+		"operationId": "getOpportunityById",
+		"summary": "Gets a specific opportunity.",
+		"tags": ["Opportunities"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "opportunityId",
+				"description": "The PDC-generated ID of an opportunity, RFC, potential award or grant, etc.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The funding opportunity.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Opportunity.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

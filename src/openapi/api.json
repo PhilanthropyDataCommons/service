@@ -206,23 +206,7 @@
 				"$ref": "./components/schemas/ChangemakerBundle.json"
 			},
 			"ChangemakerProposalBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/ChangemakerProposal"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/ChangemakerProposalBundle.json"
 			},
 			"ProposalBundle": {
 				"allOf": [

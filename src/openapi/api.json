@@ -17,80 +17,25 @@
 		},
 		"parameters": {
 			"keycloakUserIdParam": {
-				"name": "keycloakUserId",
-				"description": "The Keycloak userId associated with the desired user.",
-				"in": "query",
-				"required": false,
-				"schema": {
-					"type": "string",
-					"format": "uuid"
-				}
+				"$ref": "./components/parameters/keycloakUserIdParam.json"
 			},
 			"pageParam": {
-				"schema": {
-					"type": "integer",
-					"minimum": 1,
-					"default": 1
-				},
-				"in": "query",
-				"name": "_page",
-				"required": false,
-				"description": "The page number being retrieved."
+				"$ref": "./components/parameters/pageParam.json"
 			},
 			"countParam": {
-				"schema": {
-					"type": "integer",
-					"minimum": 1,
-					"default": 10
-				},
-				"in": "query",
-				"name": "_count",
-				"required": false,
-				"description": "The maximum number of items that should appear per page or request."
+				"$ref": "./components/parameters/countParam.json"
 			},
 			"searchParam": {
-				"schema": {
-					"type": "string"
-				},
-				"in": "query",
-				"name": "_content",
-				"required": false,
-				"description": "A web-search formatted string to select specific entities returned."
+				"$ref": "./components/parameters/searchParam.json"
 			},
 			"changemakerParam": {
-				"schema": {
-					"type": "integer"
-				},
-				"in": "query",
-				"name": "changemaker",
-				"required": false,
-				"description": "A reference (ID) to an existing changemaker entity."
+				"$ref": "./components/parameters/changemakerParam.json"
 			},
 			"proposalParam": {
-				"schema": {
-					"type": "integer"
-				},
-				"in": "query",
-				"name": "proposal",
-				"required": false,
-				"description": "A reference (ID) to an existing proposal entity."
+				"$ref": "./components/parameters/proposalParam.json"
 			},
 			"createdByParam": {
-				"schema": {
-					"oneOf": [
-						{
-							"type": ["string", "null"],
-							"format": "uuid"
-						},
-						{
-							"enum": ["me"]
-						}
-					]
-				},
-				"in": "query",
-				"name": "createdBy",
-				"required": false,
-				"description": "A reference to a user entity, or 'me'."
+				"$ref": "./components/parameters/createdByParam.json"
 			}
 		},
 		"securitySchemes": {

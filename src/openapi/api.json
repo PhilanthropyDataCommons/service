@@ -293,23 +293,7 @@
 				"$ref": "./components/schemas/FunderBundle.json"
 			},
 			"ChangemakerBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/Changemaker"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/ChangemakerBundle.json"
 			},
 			"ChangemakerProposalBundle": {
 				"allOf": [

@@ -1,0 +1,51 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 3943
+		},
+		"proposalVersionId": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 3709
+		},
+		"applicationFormFieldId": {
+			"type": "integer",
+			"example": 3613
+		},
+		"applicationFormField": {
+			"$ref": "./ApplicationFormField.json",
+			"readOnly": true
+		},
+		"position": {
+			"type": "integer",
+			"example": 23
+		},
+		"value": {
+			"type": "string",
+			"example": "Some arbitrary value"
+		},
+		"isValid": {
+			"type": "boolean",
+			"example": "true",
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": [
+		"id",
+		"proposalVersionId",
+		"applicationFormFieldId",
+		"applicationFormField",
+		"position",
+		"value",
+		"isValid",
+		"createdAt"
+	]
+}

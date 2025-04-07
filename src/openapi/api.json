@@ -252,73 +252,7 @@
 			"$ref": "./paths/platformProviderResponses.json"
 		},
 		"/sources": {
-			"get": {
-				"operationId": "getSources",
-				"summary": "Gets a list of sources.",
-				"tags": ["Sources"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "All sources currently registered in the PDC.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/SourceBundle"
-								}
-							}
-						}
-					},
-					"404": {
-						"$ref": "#/components/responses/NotFound"
-					}
-				}
-			},
-			"post": {
-				"operationId": "addSource",
-				"summary": "Adds a new source.",
-				"tags": ["Sources"],
-				"security": [
-					{
-						"auth": []
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/Source"
-							}
-						}
-					}
-				},
-				"responses": {
-					"201": {
-						"description": "The new source that was created.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Source"
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Authentication was not provided or was invalid.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PdcError"
-								}
-							}
-						}
-					}
-				}
-			}
+			"$ref": "./paths/sources.json"
 		},
 		"/sources/{sourceId}": {
 			"get": {

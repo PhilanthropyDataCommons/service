@@ -1,0 +1,52 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 3011
+		},
+		"label": {
+			"type": "string",
+			"example": "First Name"
+		},
+		"description": {
+			"type": "string",
+			"example": "The first name of the applicant"
+		},
+		"shortCode": {
+			"$ref": "./shortCode.json"
+		},
+		"localizations": {
+			"type": "object",
+			"additionalProperties": {
+				"$ref": "./BaseFieldLocalization.json"
+			},
+			"readOnly": true,
+			"description": "Keys can be expected to be IETF language tags."
+		},
+		"dataType": {
+			"type": "string",
+			"enum": ["string", "number", "email", "phone_number", "url", "boolean"],
+			"example": "string"
+		},
+		"scope": {
+			"type": "string",
+			"enum": ["proposal", "changemaker"]
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": [
+		"id",
+		"label",
+		"description",
+		"shortCode",
+		"dataType",
+		"scope",
+		"createdAt"
+	]
+}

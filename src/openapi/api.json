@@ -646,19 +646,7 @@
 				]
 			},
 			"PdcError": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"details": {
-						"type": "array",
-						"items": {}
-					}
-				}
+				"$ref": "./components/schemas/PdcError.json"
 			},
 			"Opportunity": {
 				"type": "object",

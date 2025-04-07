@@ -113,77 +113,7 @@
 		},
 		"schemas": {
 			"BulkUploadTask": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3407
-					},
-					"sourceId": {
-						"type": "integer"
-					},
-					"source": {
-						"$ref": "#/components/schemas/Source",
-						"readOnly": true
-					},
-					"funderShortCode": {
-						"type": "string",
-						"example": "pdc"
-					},
-					"funder": {
-						"$ref": "#/components/schemas/Funder",
-						"readOnly": true
-					},
-					"fileName": {
-						"type": "string",
-						"example": "upload.csv",
-						"pattern": "^.+\\.csv$"
-					},
-					"fileSize": {
-						"description": "File size in bytes",
-						"type": ["integer", "null"],
-						"readOnly": true,
-						"example": 42,
-						"minimum": 0
-					},
-					"sourceKey": {
-						"type": "string",
-						"example": "550e8400-e29b-41d4-a716-446655440000",
-						"minLength": 1
-					},
-					"status": {
-						"type": "string",
-						"readOnly": true,
-						"enum": [
-							"pending",
-							"in_progress",
-							"completed",
-							"failed",
-							"canceled"
-						]
-					},
-					"createdBy": {
-						"description": "The keycloak user id of the PDC user that created this bulk upload",
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"sourceId",
-					"fileName",
-					"sourceKey",
-					"status",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/BulkUploadTask.json"
 			},
 			"BulkUploadTaskBundle": {
 				"allOf": [

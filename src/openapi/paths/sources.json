@@ -1,0 +1,69 @@
+{
+	"get": {
+		"operationId": "getSources",
+		"summary": "Gets a list of sources.",
+		"tags": ["Sources"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "All sources currently registered in the PDC.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/SourceBundle.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	},
+	"post": {
+		"operationId": "addSource",
+		"summary": "Adds a new source.",
+		"tags": ["Sources"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/Source.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new source that was created.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Source.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

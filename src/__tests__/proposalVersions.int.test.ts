@@ -345,13 +345,13 @@ describe('/proposalVersions', () => {
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'firstName',
 				position: 1,
 				label: 'First Name',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 2,
+				baseFieldShortCode: 'lastName',
 				position: 2,
 				label: 'Last Name',
 			});
@@ -697,13 +697,13 @@ describe('/proposalVersions', () => {
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'firstName',
 				position: 1,
 				label: 'First Name',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 2,
+				baseFieldShortCode: 'lastName',
 				position: 2,
 				label: 'Last Name',
 			});

@@ -11,11 +11,11 @@ baseFieldsRouter.post(
 	baseFieldsHandlers.postBaseField,
 );
 baseFieldsRouter.get(
-	'/:baseFieldId/localizations',
-	baseFieldsHandlers.getBaseFieldLocalizationsByBaseFieldId,
+	'/:baseFieldShortCode/localizations',
+	baseFieldsHandlers.getBaseFieldLocalizationsByBaseFieldShortCode,
 );
 baseFieldsRouter.put(
-	'/:baseFieldId/localizations/:language',
+	'/:baseFieldShortCode/localizations/:language',
 	requireAdministratorRole,
 	baseFieldsHandlers.putBaseFieldLocalization,
 );

@@ -422,7 +422,7 @@ describe('/changemakers', () => {
 
 			it('returns the latest valid value for a base field when auth id is sent', async () => {
 				// Associate a base field associated with one opportunity/org, and add three responses.
-				const baseFieldId = baseFieldEmail.id;
+				const baseFieldShortCode = baseFieldEmail.shortCode;
 				const changemakerId = firstChangemaker.id;
 				const opportunityId = firstFunderOpportunity.id;
 				const proposalId = (
@@ -454,7 +454,7 @@ describe('/changemakers', () => {
 						await createApplicationFormField(db, null, {
 							label: 'Org email',
 							applicationFormId: applicationFormIdEarliest,
-							baseFieldId,
+							baseFieldShortCode,
 							position: 5279,
 						})
 					).id,
@@ -479,7 +479,7 @@ describe('/changemakers', () => {
 						await createApplicationFormField(db, null, {
 							label: 'Email contact',
 							applicationFormId: applicationFormIdLatestValid,
-							baseFieldId,
+							baseFieldShortCode,
 							position: 5347,
 						})
 					).id,
@@ -505,7 +505,7 @@ describe('/changemakers', () => {
 						await createApplicationFormField(db, null, {
 							label: 'Contact email address',
 							applicationFormId: applicationFormIdLatest,
-							baseFieldId,
+							baseFieldShortCode,
 							position: 5209,
 						})
 					).id,
@@ -536,7 +536,7 @@ describe('/changemakers', () => {
 				const changemakerSourceId = secondChangemakerSourceId;
 				const funderSourceId = firstFunderSourceId;
 				// Associate one opportunity, one changemaker, and two responses with a base field.
-				const baseFieldId = baseFieldPhone.id;
+				const baseFieldShortCode = baseFieldPhone.shortCode;
 				const opportunity = firstFunderOpportunity;
 				const proposalId = (
 					await createProposal(db, systemUserAuthContext, {
@@ -569,7 +569,7 @@ describe('/changemakers', () => {
 							await createApplicationFormField(db, null, {
 								label: 'Org phone',
 								applicationFormId: applicationFormIdChangemakerEarliest,
-								baseFieldId,
+								baseFieldShortCode,
 								position: 5407,
 							})
 						).id,
@@ -596,7 +596,7 @@ describe('/changemakers', () => {
 						await createApplicationFormField(db, null, {
 							label: 'Phone contact',
 							applicationFormId: applicationFormIdFunderLatest,
-							baseFieldId,
+							baseFieldShortCode,
 							position: 5417,
 						})
 					).id,
@@ -623,7 +623,7 @@ describe('/changemakers', () => {
 				const funderSourceId = firstFunderSourceId;
 				const dataProviderSourceId = firstDataProviderSourceId;
 				// Associate one opportunity, one changemaker, and two responses with a base field.
-				const baseFieldId = baseFieldPhone.id;
+				const baseFieldShortCode = baseFieldPhone.shortCode;
 				const opportunity = firstFunderOpportunity;
 				const proposalId = (
 					await createProposal(db, systemUserAuthContext, {
@@ -653,7 +653,7 @@ describe('/changemakers', () => {
 						await createApplicationFormField(db, null, {
 							label: 'Organization phone 5437',
 							applicationFormId: applicationFormIdFunderEarliest,
-							baseFieldId,
+							baseFieldShortCode,
 							position: 5437,
 						})
 					).id,
@@ -679,7 +679,7 @@ describe('/changemakers', () => {
 						await createApplicationFormField(db, null, {
 							label: 'Phone contact',
 							applicationFormId: applicationFormIdDataProviderLatest,
-							baseFieldId,
+							baseFieldShortCode,
 							position: 5443,
 						})
 					).id,
@@ -732,7 +732,7 @@ describe('/changemakers', () => {
 						await createApplicationFormField(db, null, {
 							label: 'Organization website 5479',
 							applicationFormId: applicationFormIdDataProviderEarliest,
-							baseFieldId: baseFieldWebsite.id,
+							baseFieldShortCode: baseFieldWebsite.shortCode,
 							position: 5479,
 						})
 					).id,
@@ -761,7 +761,7 @@ describe('/changemakers', () => {
 							await createApplicationFormField(db, null, {
 								label: 'Phone contact',
 								applicationFormId: applicationFormIdDataProviderLatest,
-								baseFieldId: baseFieldWebsite.id,
+								baseFieldShortCode: baseFieldWebsite.shortCode,
 								position: 5501,
 							})
 						).id,

@@ -1,11 +1,11 @@
 INSERT INTO application_form_fields (
 	application_form_id,
-	base_field_id,
+	base_field_short_code,
 	position,
 	label
 ) VALUES (
 	:applicationFormId,
-	:baseFieldId,
+	:baseFieldShortCode,
 	:position,
 	:label
 )

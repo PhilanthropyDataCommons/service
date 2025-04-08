@@ -40,20 +40,19 @@ const createTestBaseFieldsCopyTask = async (
 };
 
 const mockFirstNameBaseField: BaseField = {
-	id: 1,
 	label: 'First Name',
 	description: 'The first name of the applicant',
 	shortCode: 'first_name',
 	localizations: {
 		en: {
-			baseFieldId: 1,
+			baseFieldShortCode: 'first_name',
 			language: 'en',
 			label: 'First name',
 			description: 'The first name of the Applicant',
 			createdAt: '2024-10-17T01:46:58.494Z',
 		},
 		fr: {
-			baseFieldId: 1,
+			baseFieldShortCode: 'first_name',
 			language: 'fr',
 			label: 'Le Prenom',
 			description: 'Le Prenom de la Applicant',
@@ -67,7 +66,6 @@ const mockFirstNameBaseField: BaseField = {
 };
 
 const mockFirstNameBaseFieldWithNoLocalizations: BaseField = {
-	id: 1,
 	label: 'First Name',
 	description: 'The first name of the applicant',
 	shortCode: 'first_name',
@@ -79,20 +77,19 @@ const mockFirstNameBaseFieldWithNoLocalizations: BaseField = {
 };
 
 const mockLastNameBaseField: BaseField = {
-	id: 2,
 	label: 'Last Name',
 	description: 'The last name of the applicant',
 	shortCode: 'last_name',
 	localizations: {
 		en: {
-			baseFieldId: 2,
+			baseFieldShortCode: 'last_name',
 			language: 'en',
 			label: 'Last name',
 			description: 'The Last name of the Applicant',
 			createdAt: '2024-10-17T01:46:58.494Z',
 		},
 		fr: {
-			baseFieldId: 2,
+			baseFieldShortCode: 'last_name',
 			language: 'fr',
 			label: 'Nom de famille',
 			description: 'Le nom de la famille de la applicant',
@@ -331,23 +328,26 @@ describe('copyBaseFields', () => {
 		expect(before.count).toEqual(0);
 		expect(after.count).toEqual(1);
 
-		const insertedRemoteBaseField = await loadBaseField(db, null, 1);
+		const insertedRemoteBaseField = await loadBaseField(
+			db,
+			null,
+			mockFirstNameBaseField.shortCode,
+		);
 
 		expect(insertedRemoteBaseField).toEqual({
-			id: 1,
 			label: 'First Name',
 			description: 'The first name of the applicant',
 			shortCode: mockFirstNameBaseField.shortCode,
 			localizations: {
 				en: {
-					baseFieldId: 1,
+					baseFieldShortCode: mockFirstNameBaseField.shortCode,
 					language: 'en',
 					label: 'First name',
 					description: 'The first name of the Applicant',
 					createdAt: expectTimestamp,
 				},
 				fr: {
-					baseFieldId: 1,
+					baseFieldShortCode: mockFirstNameBaseField.shortCode,
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',
@@ -406,7 +406,7 @@ describe('copyBaseFields', () => {
 		const localBaseFieldAfterInsertion = await loadBaseField(
 			db,
 			null,
-			localBaseField.id,
+			localBaseField.shortCode,
 		);
 
 		expect(localBaseFieldAfterInsertion).toEqual(localBaseField);
@@ -426,7 +426,6 @@ describe('copyBaseFields', () => {
 		});
 
 		const mockRemoteBaseField: BaseField = {
-			id: 1,
 			label: 'Local Data',
 			description: 'This is local data',
 			shortCode: 'ld',
@@ -464,16 +463,19 @@ describe('copyBaseFields', () => {
 
 		const after = await loadTableMetrics('base_fields');
 
-		const updatedBaseField = await loadBaseField(db, null, localBaseField.id);
+		const updatedBaseField = await loadBaseField(
+			db,
+			null,
+			localBaseField.shortCode,
+		);
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(1);
 
 		expect(updatedBaseField).toEqual({
-			id: localBaseField.id,
 			label: 'Local Data',
 			description: 'This is local data',
-			shortCode: 'ld',
+			shortCode: localBaseField.shortCode,
 			dataType: 'string',
 			scope: 'proposal',
 			valueRelevanceHours: null,
@@ -534,16 +536,19 @@ describe('copyBaseFields', () => {
 
 		const after = await loadTableMetrics('base_fields');
 
-		const updatedBaseField = await loadBaseField(db, null, localBaseField.id);
+		const updatedBaseField = await loadBaseField(
+			db,
+			null,
+			localBaseField.shortCode,
+		);
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(2);
 
 		expect(updatedBaseField).toEqual({
-			id: localBaseField.id,
 			label: 'Local Data',
 			description: 'This is local data',
-			shortCode: 'ld',
+			shortCode: localBaseField.shortCode,
 			dataType: 'string',
 			scope: 'proposal',
 			valueRelevanceHours: null,
@@ -551,23 +556,26 @@ describe('copyBaseFields', () => {
 			localizations: {},
 		});
 
-		const insertedRemoteBaseField = await loadBaseField(db, null, 3);
+		const insertedRemoteBaseField = await loadBaseField(
+			db,
+			null,
+			mockFirstNameBaseField.shortCode,
+		);
 
 		expect(insertedRemoteBaseField).toEqual({
-			id: 3,
 			label: 'First Name',
 			description: 'The first name of the applicant',
 			shortCode: mockFirstNameBaseField.shortCode,
 			localizations: {
 				en: {
-					baseFieldId: 3,
+					baseFieldShortCode: mockFirstNameBaseField.shortCode,
 					language: 'en',
 					label: 'First name',
 					description: 'The first name of the Applicant',
 					createdAt: expectTimestamp,
 				},
 				fr: {
-					baseFieldId: 3,
+					baseFieldShortCode: mockFirstNameBaseField.shortCode,
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',
@@ -595,7 +603,7 @@ describe('copyBaseFields', () => {
 		});
 
 		await createOrUpdateBaseFieldLocalization(db, null, {
-			baseFieldId: localBaseField.id,
+			baseFieldShortCode: localBaseField.shortCode,
 			label: 'Le Prenom',
 			description: 'Le Prenom de la Applicant',
 			language: 'fr',
@@ -625,16 +633,19 @@ describe('copyBaseFields', () => {
 			baseFieldsCopyTask.id,
 		);
 
-		const updatedBaseField = await loadBaseField(db, null, localBaseField.id);
+		const updatedBaseField = await loadBaseField(
+			db,
+			null,
+			localBaseField.shortCode,
+		);
 
 		expect(updatedBaseField).toEqual({
-			id: localBaseField.id,
 			label: 'First Name',
 			description: 'The first name of the applicant',
 			shortCode: mockFirstNameBaseField.shortCode,
 			localizations: {
 				fr: {
-					baseFieldId: localBaseField.id,
+					baseFieldShortCode: localBaseField.shortCode,
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',
@@ -662,7 +673,7 @@ describe('copyBaseFields', () => {
 		});
 
 		await createOrUpdateBaseFieldLocalization(db, null, {
-			baseFieldId: localBaseField.id,
+			baseFieldShortCode: localBaseField.shortCode,
 			label: 'Nombre de Pila',
 			description: 'Nombre de Pila',
 			language: 'sp',
@@ -692,30 +703,33 @@ describe('copyBaseFields', () => {
 			baseFieldsCopyTask.id,
 		);
 
-		const updatedBaseField = await loadBaseField(db, null, localBaseField.id);
+		const updatedBaseField = await loadBaseField(
+			db,
+			null,
+			localBaseField.shortCode,
+		);
 
 		expect(updatedBaseField).toEqual({
-			id: localBaseField.id,
 			label: 'First Name',
 			description: 'The first name of the applicant',
 			shortCode: mockFirstNameBaseField.shortCode,
 			localizations: {
 				en: {
-					baseFieldId: localBaseField.id,
+					baseFieldShortCode: localBaseField.shortCode,
 					language: 'en',
 					label: 'First name',
 					description: 'The first name of the Applicant',
 					createdAt: expectTimestamp,
 				},
 				fr: {
-					baseFieldId: localBaseField.id,
+					baseFieldShortCode: localBaseField.shortCode,
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',
 					createdAt: expectTimestamp,
 				},
 				sp: {
-					baseFieldId: localBaseField.id,
+					baseFieldShortCode: localBaseField.shortCode,
 					label: 'Nombre de Pila',
 					description: 'Nombre de Pila',
 					language: 'sp',
@@ -803,26 +817,25 @@ describe('copyBaseFields', () => {
 
 		const after = await loadTableMetrics('base_fields');
 
-		const updatedBaseField = await loadBaseField(db, null, baseField.id);
+		const updatedBaseField = await loadBaseField(db, null, baseField.shortCode);
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(1);
 
 		expect(updatedBaseField).toEqual({
-			id: baseField.id,
 			label: 'First Name',
 			description: 'The first name of the applicant',
-			shortCode: 'first_name',
+			shortCode: baseField.shortCode,
 			localizations: {
 				en: {
-					baseFieldId: baseField.id,
+					baseFieldShortCode: baseField.shortCode,
 					language: 'en',
 					label: 'First name',
 					description: 'The first name of the Applicant',
 					createdAt: expectTimestamp,
 				},
 				fr: {
-					baseFieldId: 1,
+					baseFieldShortCode: baseField.shortCode,
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',

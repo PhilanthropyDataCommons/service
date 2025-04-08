@@ -28,7 +28,7 @@ BEGIN
   )
   INTO proposal_field_values_json
   FROM (
-    SELECT DISTINCT ON (bf.id) pfv.*
+    SELECT DISTINCT ON (bf.short_code) pfv.*
     FROM proposal_field_values pfv
     -- Remove field values for unauthenticated users while also (re)validating the user ID:
     INNER JOIN users u
@@ -36,7 +36,7 @@ BEGIN
     INNER JOIN application_form_fields aff
       ON pfv.application_form_field_id = aff.id
     INNER JOIN base_fields bf
-      ON aff.base_field_id = bf.id
+      ON aff.base_field_short_code = bf.short_code
     INNER JOIN proposal_versions pv
       ON pfv.proposal_version_id = pv.id
     INNER JOIN changemakers_proposals op
@@ -50,7 +50,7 @@ BEGIN
       AND u.keycloak_user_id IS NOT NULL
       -- Guard against the valid-but-not-really-valid-here system user:
       AND u.keycloak_user_id != system_keycloak_user_id()
-      ORDER BY bf.id,
+      ORDER BY bf.short_code,
         -- The three "Source" sorts are as a class, not on an individual column within the class.
         -- In other words, if there are many funders that sourced data, they are treated equally
         -- until further sorted by the remaining (non-Source) sort clauses.

@@ -1,2 +1,2 @@
 export * from './createOrUpdateBaseFieldLocalizations';
-export * from './loadBaseFieldLocalizationsBundleByBaseFieldId';
+export * from './loadBaseFieldLocalizationsBundleByBaseFieldShortCode';

@@ -11,9 +11,9 @@
 			"readOnly": true,
 			"example": 3529
 		},
-		"baseFieldId": {
-			"type": "integer",
-			"example": 3011
+		"baseFieldShortCode": {
+			"type": "string",
+			"example": "first_name"
 		},
 		"baseField": {
 			"readOnly": true,
@@ -40,7 +40,7 @@
 	"required": [
 		"id",
 		"applicationFormId",
-		"baseFieldId",
+		"baseFieldShortCode",
 		"baseField",
 		"position",
 		"label",

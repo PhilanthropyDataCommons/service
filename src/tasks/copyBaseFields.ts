@@ -75,7 +75,7 @@ const copyBaseField = async (targetBaseField: BaseField) => {
 		Object.entries(targetBaseField.localizations).map(
 			async ([language, baseFieldLocalization]) => {
 				await createOrUpdateBaseFieldLocalization(db, null, {
-					baseFieldId: copiedBaseField.id,
+					baseFieldShortCode: copiedBaseField.shortCode,
 					language,
 					label: baseFieldLocalization.label,
 					description: baseFieldLocalization.description,

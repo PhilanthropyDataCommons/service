@@ -3,7 +3,7 @@ import { app } from '../app';
 import {
 	createApplicationForm,
 	createApplicationFormField,
-	createBaseField,
+	createOrUpdateBaseField,
 	createOpportunity,
 	createChangemaker,
 	createChangemakerProposal,
@@ -34,7 +34,7 @@ import {
 } from '../types';
 
 const createTestBaseFields = async () => {
-	await createBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
@@ -42,7 +42,7 @@ const createTestBaseFields = async () => {
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
 	});
-	await createBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'Title',
 		description: 'The title of the proposal',
 		shortCode: 'title',
@@ -240,7 +240,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'summary',
 				position: 1,
 				label: 'Short summary',
 			});
@@ -296,12 +296,11 @@ describe('/proposals', () => {
 										applicationFormField: {
 											id: 1,
 											applicationFormId: 1,
-											baseFieldId: 1,
+											baseFieldShortCode: 'summary',
 											baseField: {
 												createdAt: expectTimestamp,
 												dataType: 'string',
 												description: 'A summary of the proposal',
-												id: 1,
 												label: 'Summary',
 												scope: 'proposal',
 												valueRelevanceHours: null,
@@ -490,7 +489,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'summary',
 				position: 1,
 				label: 'Concise summary',
 			});
@@ -546,12 +545,11 @@ describe('/proposals', () => {
 										applicationFormField: {
 											id: 1,
 											applicationFormId: 1,
-											baseFieldId: 1,
+											baseFieldShortCode: 'summary',
 											baseField: {
 												createdAt: expectTimestamp,
 												dataType: 'string',
 												description: 'A summary of the proposal',
-												id: 1,
 												label: 'Summary',
 												scope: 'proposal',
 												valueRelevanceHours: null,
@@ -770,13 +768,13 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 2,
+				baseFieldShortCode: 'title',
 				position: 1,
 				label: 'Short summary or title',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'summary',
 				position: 2,
 				label: 'Long summary or abstract',
 			});
@@ -860,12 +858,11 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
-									baseFieldId: 2,
+									baseFieldShortCode: 'title',
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
 										description: 'The title of the proposal',
-										id: 2,
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
@@ -889,12 +886,11 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
-									baseFieldId: 1,
+									baseFieldShortCode: 'summary',
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
 										description: 'A summary of the proposal',
-										id: 1,
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
@@ -930,12 +926,11 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
-									baseFieldId: 2,
+									baseFieldShortCode: 'title',
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
 										description: 'The title of the proposal',
-										id: 2,
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
@@ -959,12 +954,11 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
-									baseFieldId: 1,
+									baseFieldShortCode: 'summary',
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
 										description: 'A summary of the proposal',
-										id: 1,
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
@@ -997,13 +991,13 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 2,
+				baseFieldShortCode: 'title',
 				position: 1,
 				label: 'Short summary or title',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'summary',
 				position: 2,
 				label: 'Long summary or abstract',
 			});
@@ -1086,12 +1080,11 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
-									baseFieldId: 2,
+									baseFieldShortCode: 'title',
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
 										description: 'The title of the proposal',
-										id: 2,
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
@@ -1115,12 +1108,11 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
-									baseFieldId: 1,
+									baseFieldShortCode: 'summary',
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
 										description: 'A summary of the proposal',
-										id: 1,
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
@@ -1156,12 +1148,11 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
-									baseFieldId: 2,
+									baseFieldShortCode: 'title',
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
 										description: 'The title of the proposal',
-										id: 2,
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
@@ -1185,12 +1176,11 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
-									baseFieldId: 1,
+									baseFieldShortCode: 'summary',
 									baseField: {
 										createdAt: expectTimestamp,
 										dataType: 'string',
 										description: 'A summary of the proposal',
-										id: 1,
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,

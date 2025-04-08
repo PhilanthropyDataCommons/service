@@ -1,15 +1,15 @@
 INSERT INTO base_field_localizations (
-	base_field_id,
+	base_field_short_code,
 	language,
 	label,
 	description
 ) VALUES (
-	:baseFieldId,
+	:baseFieldShortCode,
 	:language,
 	:label,
 	:description
 )
-ON CONFLICT (base_field_id, language)
+ON CONFLICT (base_field_short_code, language)
 DO UPDATE
 	SET
 		label = excluded.label,

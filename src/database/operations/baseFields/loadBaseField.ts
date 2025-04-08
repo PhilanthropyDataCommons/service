@@ -1,10 +1,9 @@
 import { generateLoadItemOperation } from '../generators';
-import type { BaseField, Id } from '../../../types';
+import type { BaseField, ShortCode } from '../../../types';
 
-const loadBaseField = generateLoadItemOperation<BaseField, [baseFieldId: Id]>(
-	'baseFields.selectById',
-	'BaseField',
-	['baseFieldId'],
-);
+const loadBaseField = generateLoadItemOperation<
+	BaseField,
+	[baseFieldShortCode: ShortCode]
+>('baseFields.selectByShortCode', 'BaseField', ['shortCode']);
 
 export { loadBaseField };

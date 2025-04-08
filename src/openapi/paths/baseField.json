@@ -1,7 +1,7 @@
 {
 	"put": {
-		"operationId": "updateBaseFieldById",
-		"summary": "Updates a base field.",
+		"operationId": "createOrUpdateBaseField",
+		"summary": "Creates or updates a base field by short code.",
 		"tags": ["Base Fields"],
 		"security": [
 			{
@@ -10,12 +10,12 @@
 		],
 		"parameters": [
 			{
-				"name": "baseFieldId",
-				"description": "The PDC-generated ID of a base field.",
+				"name": "baseFieldShortCode",
+				"description": "The short-code for a base field.",
 				"in": "path",
 				"required": true,
 				"schema": {
-					"type": "integer"
+					"type": "string"
 				}
 			}
 		],

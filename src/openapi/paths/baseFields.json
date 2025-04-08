@@ -26,57 +26,5 @@
 				"$ref": "../components/responses/NotFound.json"
 			}
 		}
-	},
-	"post": {
-		"operationId": "addBaseField",
-		"summary": "Adds a new base field.",
-		"tags": ["Base Fields"],
-		"security": [
-			{
-				"auth": []
-			}
-		],
-		"requestBody": {
-			"required": true,
-			"content": {
-				"application/json": {
-					"schema": {
-						"$ref": "../components/schemas/BaseField.json"
-					}
-				}
-			}
-		},
-		"responses": {
-			"201": {
-				"description": "The new base field that was created.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/BaseField.json"
-						}
-					}
-				}
-			},
-			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
-			},
-			"409": {
-				"description": "There was a unique key conflict.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
-			}
-		}
 	}
 }

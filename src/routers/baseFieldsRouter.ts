@@ -5,22 +5,17 @@ import { requireAdministratorRole } from '../middleware';
 const baseFieldsRouter = express.Router();
 
 baseFieldsRouter.get('/', baseFieldsHandlers.getBaseFields);
-baseFieldsRouter.post(
-	'/',
-	requireAdministratorRole,
-	baseFieldsHandlers.postBaseField,
-);
 baseFieldsRouter.put(
-	'/:baseFieldId',
+	'/:baseFieldShortCode',
 	requireAdministratorRole,
 	baseFieldsHandlers.putBaseField,
 );
 baseFieldsRouter.get(
-	'/:baseFieldId/localizations',
-	baseFieldsHandlers.getBaseFieldLocalizationsByBaseFieldId,
+	'/:baseFieldShortCode/localizations',
+	baseFieldsHandlers.getBaseFieldLocalizationsByBaseFieldShortCode,
 );
 baseFieldsRouter.put(
-	'/:baseFieldId/localizations/:language',
+	'/:baseFieldShortCode/localizations/:language',
 	requireAdministratorRole,
 	baseFieldsHandlers.putBaseFieldLocalization,
 );

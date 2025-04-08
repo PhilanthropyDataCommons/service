@@ -1,9 +1,9 @@
 {
 	"type": "object",
 	"properties": {
-		"baseFieldId": {
-			"type": ["integer", "null"],
-			"example": 1
+		"baseFieldShortCode": {
+			"type": "string",
+			"example": "first_name"
 		},
 		"language": {
 			"type": "string",
@@ -23,5 +23,5 @@
 			"format": "date-time"
 		}
 	},
-	"required": ["baseFieldId", "language", "localization", "label"]
+	"required": ["baseFieldShortCode", "language", "localization", "label"]
 }

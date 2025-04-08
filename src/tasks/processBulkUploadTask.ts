@@ -183,7 +183,7 @@ const createApplicationFormFieldsForBulkUploadTask = async (
 			}
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId,
-				baseFieldId: baseField.id,
+				baseFieldShortCode: baseField.shortCode,
 				position: index,
 				label: baseField.label,
 			});

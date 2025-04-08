@@ -10,14 +10,13 @@ BEGIN
       loc.language, base_field_localization_to_json(loc)
     )
     FROM base_field_localizations loc
-    WHERE loc.base_field_id = base_field.id
+    WHERE loc.base_field_short_code = base_field.short_code
   );
 
   RETURN jsonb_build_object(
-    'id', base_field.id,
+		'shortCode', base_field.short_code,
     'label', base_field.label,
     'description', base_field.description,
-    'shortCode', base_field.short_code,
     'dataType', base_field.data_type,
     'scope', base_field.scope,
     'valueRelevanceHours', base_field.value_relevance_hours,

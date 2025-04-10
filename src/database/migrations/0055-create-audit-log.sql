@@ -35,11 +35,58 @@
 --
 -- Should really be converted into a relocatable EXTENSION, with control and
 -- upgrade files.
-CREATE SCHEMA audit;
-REVOKE ALL ON SCHEMA audit
-FROM public;
-COMMENT ON SCHEMA audit
-IS 'Out-of-table audit/history logging tables and trigger functions';
+
+-- In order to create separate audit schemas, for example during tests or when
+-- using a non-default schema name, use a function to generate a schema based
+-- on the currently used schema name.
+
+-- Function to create an audit schema with the given name. CREATE SCHEMA
+-- expects a literal value.
+CREATE OR REPLACE FUNCTION create_and_use_audit_schema(new_schema_name text)
+RETURNS void AS $$
+BEGIN
+    -- Save the existing search path and schema in order to restore/use later
+    EXECUTE format('SET pdc.old_search_path TO %I', current_setting('search_path'));
+    EXECUTE format('SET pdc.old_schema TO %I', current_schema());
+    -- Execute the dynamic CREATE SCHEMA statement
+    EXECUTE format('CREATE SCHEMA IF NOT EXISTS %I', new_schema_name);
+    EXECUTE format('REVOKE ALL ON SCHEMA %I FROM public', new_schema_name);
+    EXECUTE format('COMMENT ON SCHEMA %I IS '
+    '''Out-of-table audit/history logging tables and trigger functions''',
+    new_schema_name);
+    EXECUTE format('SET search_path TO %s', new_schema_name);
+END;
+$$ LANGUAGE plpgsql;
+
+-- To declare the next functions to be in the new schema, use the new schema
+-- first. This also allows us to avoid literal schema qualification for tables.
+SELECT create_and_use_audit_schema(format('audit_%I', current_schema));
+
+CREATE OR REPLACE FUNCTION use_previous_search_path()
+RETURNS void AS $$
+BEGIN
+    CASE WHEN starts_with(current_schema, 'audit_')
+    AND current_setting('pdc.old_search_path') IS NOT NULL THEN
+        EXECUTE format('SET search_path TO %s', current_setting('pdc.old_search_path'));
+    END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION use_previous_search_path_and_destroy_current_schema()
+RETURNS void AS $$
+DECLARE
+    audit_schema text;
+BEGIN
+    SELECT current_schema() INTO audit_schema;
+    CASE WHEN starts_with(audit_schema, 'audit_')
+    AND current_setting('pdc.old_search_path') IS NOT NULL THEN
+        EXECUTE format('SET search_path TO %s', current_setting('pdc.old_search_path'));
+        EXECUTE format('DROP SCHEMA %I CASCADE', audit_schema);
+    END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
+
 --
 -- Audited data. Lots of information is available, it's just a matter of how
 -- much you really want to record. See:
@@ -57,7 +104,7 @@ IS 'Out-of-table audit/history logging tables and trigger functions';
 -- you're interested in, into a temporary table where you CREATE any useful
 -- indexes and do your analysis.
 --
-CREATE TABLE audit.logged_actions (
+CREATE TABLE logged_actions (
 	event_id bigserial PRIMARY KEY,
 	schema_name text NOT NULL,
 	table_name text NOT NULL,
@@ -76,69 +123,71 @@ CREATE TABLE audit.logged_actions (
 	changed_fields jsonb,
 	statement_only boolean NOT NULL
 );
-REVOKE ALL ON audit.logged_actions
+REVOKE ALL ON logged_actions
 FROM public;
-COMMENT ON TABLE audit.logged_actions IS
+COMMENT ON TABLE logged_actions IS
 'History of auditable actions on audited tables, from '
-'audit.if_modified_func()';
-COMMENT ON COLUMN audit.logged_actions.event_id IS
+'if_modified_func()';
+COMMENT ON COLUMN logged_actions.event_id IS
 'Unique identifier for each auditable event';
-COMMENT ON COLUMN audit.logged_actions.schema_name IS
+COMMENT ON COLUMN logged_actions.schema_name IS
 'Database schema audited table for this event is in';
-COMMENT ON COLUMN audit.logged_actions.table_name IS
+COMMENT ON COLUMN logged_actions.table_name IS
 'Non-schema-qualified table name of table event occured in';
-COMMENT ON COLUMN audit.logged_actions.relid IS
+COMMENT ON COLUMN logged_actions.relid IS
 'Table OID. Changes with drop/create. Get with ''tablename''::regclass';
-COMMENT ON COLUMN audit.logged_actions.session_user_name IS
+COMMENT ON COLUMN logged_actions.session_user_name IS
 'Login / session user whose statement caused the audited event';
-COMMENT ON COLUMN audit.logged_actions.action_tstamp_tx IS
+COMMENT ON COLUMN logged_actions.action_tstamp_tx IS
 'Transaction start timestamp for tx in which audited event occurred';
-COMMENT ON COLUMN audit.logged_actions.action_tstamp_stm IS
+COMMENT ON COLUMN logged_actions.action_tstamp_stm IS
 'Statement start timestamp for tx in which audited event occurred';
-COMMENT ON COLUMN audit.logged_actions.action_tstamp_clk IS
+COMMENT ON COLUMN logged_actions.action_tstamp_clk IS
 'Wall clock time at which audited event''s trigger call occurred';
-COMMENT ON COLUMN audit.logged_actions.transaction_id IS
+COMMENT ON COLUMN logged_actions.transaction_id IS
 'Identifier of transaction that made the change. May wrap, but unique paired '
 'with action_tstamp_tx.';
-COMMENT ON COLUMN audit.logged_actions.client_addr IS
+COMMENT ON COLUMN logged_actions.client_addr IS
 'IP address of client that issued query. Null for unix domain socket.';
-COMMENT ON COLUMN audit.logged_actions.client_port IS
+COMMENT ON COLUMN logged_actions.client_port IS
 'Remote peer IP port address of client that issued query. Undefined for unix '
 'socket.';
-COMMENT ON COLUMN audit.logged_actions.client_query IS
+COMMENT ON COLUMN logged_actions.client_query IS
 'Top-level query that caused this auditable event. May be more than one '
 'statement.';
-COMMENT ON COLUMN audit.logged_actions.application_name IS
+COMMENT ON COLUMN logged_actions.application_name IS
 'Application name set when this audit event occurred. Can be changed '
 'in-session by client.';
-COMMENT ON COLUMN audit.logged_actions.action IS
+COMMENT ON COLUMN logged_actions.action IS
 'Action type; I = insert, D = delete, U = update, T = truncate';
-COMMENT ON COLUMN audit.logged_actions.row_data IS
+COMMENT ON COLUMN logged_actions.row_data IS
 'Record value. Null for statement-level trigger. For INSERT this is the new '
 'tuple. For DELETE and UPDATE it is the old tuple.';
-COMMENT ON COLUMN audit.logged_actions.changed_fields IS
+COMMENT ON COLUMN logged_actions.changed_fields IS
 'New values of fields changed by UPDATE. Null except for row-level UPDATE '
 ' events.';
-COMMENT ON COLUMN audit.logged_actions.statement_only IS
+COMMENT ON COLUMN logged_actions.statement_only IS
 '''t'' if audit event is from an FOR EACH STATEMENT trigger, ''f'' for FOR '
 'EACH ROW';
-CREATE INDEX logged_actions_relid_idx ON audit.logged_actions (relid);
+CREATE INDEX logged_actions_relid_idx ON logged_actions (relid);
 CREATE INDEX logged_actions_action_tstamp_tx_stm_idx
-ON audit.logged_actions (action_tstamp_stm);
-CREATE INDEX logged_actions_action_idx ON audit.logged_actions (action);
-CREATE OR REPLACE FUNCTION audit.if_modified_func() RETURNS trigger AS $body$
+ON logged_actions (action_tstamp_stm);
+CREATE INDEX logged_actions_action_idx ON logged_actions (action);
+CREATE OR REPLACE FUNCTION if_modified_func() RETURNS trigger AS $body$
 DECLARE
-	audit_row audit.logged_actions;
+    -- TODO: why do I need to explicitly name the schema here?!?!?!?!?!
+	audit_row audit_public.logged_actions;
 	include_values boolean;
 	log_diffs boolean;
 	h_old jsonb;
 	h_new jsonb;
 	excluded_cols text [] = ARRAY []::text [];
-	BEGIN IF TG_WHEN <> 'AFTER' THEN RAISE EXCEPTION 'audit.if_modified_func()'
+	BEGIN IF TG_WHEN <> 'AFTER' THEN RAISE EXCEPTION 'if_modified_func()'
     ' may only run as an AFTER trigger';
 END IF;
 audit_row = ROW(
-	nextval('audit.logged_actions_event_id_seq'),
+    -- TODO: why do I need to explicitly name the schema here?!?!?!?!?!
+	nextval('audit_public.logged_actions_event_id_seq'),
 	-- event_id
 	TG_TABLE_SCHEMA::text,
 	-- schema_name
@@ -206,19 +255,18 @@ ELSIF (
 	AND TG_OP IN ('INSERT', 'UPDATE', 'DELETE', 'TRUNCATE')
 ) THEN audit_row.statement_only = 't';
 ELSE RAISE EXCEPTION
-'[audit.if_modified_func] - Trigger func added as trigger for unhandled case: %, %',
+'[if_modified_func] - Trigger func added as trigger for unhandled case: %, %',
 TG_OP,
 TG_LEVEL;
 RETURN NULL;
 END IF;
-INSERT INTO audit.logged_actions
+-- TODO: why do I need to explicitly name the schema here?!?!?!?!?!
+INSERT INTO audit_public.logged_actions
 VALUES (audit_row.*);
 RETURN NULL;
 END;
-$body$ LANGUAGE plpgsql SECURITY DEFINER
-SET search_path = pg_catalog,
-public;
-COMMENT ON FUNCTION audit.if_modified_func() IS $body$ Track changes to a table
+$body$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION if_modified_func() IS $body$ Track changes to a table
  at the statement and / or row level.Optional parameters to trigger in CREATE
  TRIGGER call: param 0: boolean, whether to log the query text.Default 
  't'.param 1: text [], columns to ignore in updates.Default [].Updates to 
@@ -233,7 +281,7 @@ COMMENT ON FUNCTION audit.if_modified_func() IS $body$ Track changes to a table
  user name logged is the login role for the session.The audit trigger cannot
  obtain the active role because it is reset by the SECURITY DEFINER invocation
  of the audit trigger its self.$body$;
-CREATE OR REPLACE FUNCTION audit.audit_table(
+CREATE OR REPLACE FUNCTION audit_table(
 	target_table regclass,
 	audit_rows boolean,
 	audit_query_text boolean,
@@ -243,7 +291,7 @@ CREATE OR REPLACE FUNCTION audit.audit_table(
 DECLARE stm_targets text = 'INSERT OR UPDATE OR DELETE OR TRUNCATE';
 _q_txt text;
 _ignored_cols_snip text = '';
-BEGIN PERFORM audit.deaudit_table(target_table);
+BEGIN PERFORM deaudit_table(target_table);
 IF audit_rows THEN
     IF array_length(ignored_cols, 1) > 0
     THEN _ignored_cols_snip = ', ' || quote_literal(ignored_cols);
@@ -252,7 +300,7 @@ _q_txt = 'CREATE TRIGGER audit_trigger_row AFTER ' || CASE
 	WHEN audit_inserts THEN 'INSERT OR '
 	ELSE ''
 END || 'UPDATE OR DELETE ON ' || target_table 
-|| ' FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func(' 
+|| ' FOR EACH ROW EXECUTE PROCEDURE if_modified_func(' 
 || quote_literal(audit_query_text) || _ignored_cols_snip || ');';
 RAISE NOTICE '%',
 _q_txt;
@@ -262,14 +310,14 @@ ELSE
 END IF;
 _q_txt = 'CREATE TRIGGER audit_trigger_stm AFTER ' || stm_targets
 || ' ON ' || target_table
-|| ' FOR EACH STATEMENT EXECUTE PROCEDURE audit.if_modified_func('
+|| ' FOR EACH STATEMENT EXECUTE PROCEDURE if_modified_func('
 || quote_literal(audit_query_text) || ');';
 RAISE NOTICE '%',
 _q_txt;
 EXECUTE _q_txt;
 END;
 $body$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION audit.audit_table(
+COMMENT ON FUNCTION audit_table(
 	regclass, boolean, boolean, boolean, text []
 ) IS $body$
 Add auditing support to a table.Arguments: target_table: Table name, schema
@@ -280,52 +328,52 @@ Add auditing support to a table.Arguments: target_table: Table name, schema
  update diffs, ignore updates that change only ignored cols.$body$;
 -- Adaptor to older variant without the audit_inserts parameter for backwards
 -- compatibility
-CREATE OR REPLACE FUNCTION audit.audit_table(
+CREATE OR REPLACE FUNCTION audit_table(
 	target_table regclass,
 	audit_rows boolean,
 	audit_query_text boolean,
 	ignored_cols text []
 ) RETURNS void AS $body$
-SELECT audit.audit_table($1, $2, $3, BOOLEAN 't', ignored_cols);
+SELECT audit_table($1, $2, $3, BOOLEAN 't', ignored_cols);
 $body$ LANGUAGE sql;
 -- Pg doesn't allow variadic calls with 0 params, so provide a wrapper
-CREATE OR REPLACE FUNCTION audit.audit_table(
+CREATE OR REPLACE FUNCTION audit_table(
 	target_table regclass,
 	audit_rows boolean,
 	audit_query_text boolean,
 	audit_inserts boolean
 ) RETURNS void AS $body$
-SELECT audit.audit_table($1, $2, $3, $4, ARRAY []::text []);
+SELECT audit_table($1, $2, $3, $4, ARRAY []::text []);
 $body$ LANGUAGE sql;
 -- Older wrapper for backwards compatibility
-CREATE OR REPLACE FUNCTION audit.audit_table(
+CREATE OR REPLACE FUNCTION audit_table(
 	target_table regclass,
 	audit_rows boolean,
 	audit_query_text boolean
 ) RETURNS void AS $body$
-SELECT audit.audit_table($1, $2, $3, BOOLEAN 't', ARRAY []::text []);
+SELECT audit_table($1, $2, $3, BOOLEAN 't', ARRAY []::text []);
 $body$ LANGUAGE sql;
 -- And provide a convenience call wrapper for the simplest case
 -- of row-level logging with no excluded cols and query logging enabled.
-CREATE OR REPLACE FUNCTION audit.audit_table(
+CREATE OR REPLACE FUNCTION audit_table(
 	target_table regclass
 ) RETURNS void AS $body$
-SELECT audit.audit_table($1, BOOLEAN 't', BOOLEAN 't', BOOLEAN 't');
+SELECT audit_table($1, BOOLEAN 't', BOOLEAN 't', BOOLEAN 't');
 $body$ LANGUAGE sql;
-COMMENT ON FUNCTION audit.audit_table(regclass) IS $body$
+COMMENT ON FUNCTION audit_table(regclass) IS $body$
 Add auditing support to the given table.Row - level changes will be logged with
  full client query text.No cols are ignored.$body$;
-CREATE OR REPLACE FUNCTION audit.deaudit_table(
+CREATE OR REPLACE FUNCTION deaudit_table(
 	target_table regclass
 ) RETURNS void AS $body$ BEGIN EXECUTE
 'DROP TRIGGER IF EXISTS audit_trigger_row ON ' || target_table;
 EXECUTE 'DROP TRIGGER IF EXISTS audit_trigger_stm ON ' || target_table;
 END;
 $body$ LANGUAGE plpgsql;
-COMMENT ON FUNCTION audit.deaudit_table(
+COMMENT ON FUNCTION deaudit_table(
 	regclass
 ) IS $body$ Remove auditing support to the given table.$body$;
-CREATE OR REPLACE VIEW audit.tableslist AS
+CREATE OR REPLACE VIEW tableslist AS
 SELECT DISTINCT
 	triggers.trigger_schema AS schema,
 	triggers.event_object_table AS auditedtable
@@ -338,33 +386,38 @@ WHERE
 ORDER BY
 	schema,
 	auditedtable;
-COMMENT ON VIEW audit.tableslist IS $body$ View showing all tables with auditing
+COMMENT ON VIEW tableslist IS $body$ View showing all tables with auditing
 set up.Ordered by schema,
 	then table.$body$;
 
--- Enable audit logs on PDC tables
-SELECT audit.audit_table('application_form_fields');
-SELECT audit.audit_table('application_forms');
-SELECT audit.audit_table('base_field_localizations');
-SELECT audit.audit_table('base_fields');
-SELECT audit.audit_table('base_fields_copy_tasks');
-SELECT audit.audit_table('bulk_upload_tasks');
-SELECT audit.audit_table('changemakers');
-SELECT audit.audit_table('changemakers_proposals');
-SELECT audit.audit_table('data_providers');
-SELECT audit.audit_table('ephemeral_user_group_associations');
-SELECT audit.audit_table('fiscal_sponsorships');
-SELECT audit.audit_table('funders');
-SELECT audit.audit_table('migrations');
-SELECT audit.audit_table('opportunities');
-SELECT audit.audit_table('platform_provider_responses');
-SELECT audit.audit_table('proposal_field_values');
-SELECT audit.audit_table('proposal_versions');
-SELECT audit.audit_table('proposals');
-SELECT audit.audit_table('sources');
-SELECT audit.audit_table('user_changemaker_permissions');
-SELECT audit.audit_table('user_funder_permissions');
-SELECT audit.audit_table('user_group_changemaker_permissions');
-SELECT audit.audit_table('user_group_data_provider_permissions');
-SELECT audit.audit_table('user_group_funder_permissions');
-SELECT audit.audit_table('users');
+-- Enable audit logs on PDC tables (using a single statement to speed up tests)
+SELECT
+	audit_table(current_setting('pdc.old_schema') || '.application_form_fields') AS aff,
+	audit_table(current_setting('pdc.old_schema') || '.application_forms') AS af,
+	audit_table(current_setting('pdc.old_schema') || '.base_field_localizations') AS bfl,
+	audit_table(current_setting('pdc.old_schema') || '.base_fields') AS bf,
+	audit_table(current_setting('pdc.old_schema') || '.base_fields_copy_tasks') AS bfct,
+	audit_table(current_setting('pdc.old_schema') || '.bulk_upload_tasks') AS but,
+	-- audit_table('changemakers') AS c,
+	-- audit_table('changemakers_proposals') AS cp,
+	-- audit_table('data_providers') AS dp,
+	-- audit_table('ephemeral_user_group_associations') AS euga,
+	-- audit_table('fiscal_sponsorships') AS fs,
+	-- audit_table('funders') AS f,
+	-- audit_table('migrations') AS m,
+	-- audit_table('opportunities') AS o,
+	-- audit_table('platform_provider_responses') AS ppr,
+	-- audit_table('proposal_field_values') AS pfv,
+	-- audit_table('proposal_versions') AS pv,
+	-- audit_table('proposals') AS p,
+	-- audit_table('sources') AS s,
+	-- audit_table('user_changemaker_permissions') AS ucp,
+	-- audit_table('user_funder_permissions') AS ufp,
+	-- audit_table('user_group_changemaker_permissions') AS ugcp,
+	-- audit_table('user_group_data_provider_permissions') AS ugdpp,
+	-- audit_table('user_group_funder_permissions') AS ugfp,
+	audit_table(current_setting('pdc.old_schema') || '.users') AS u;
+
+SELECT use_previous_search_path();
+DROP FUNCTION create_and_use_audit_schema;
+

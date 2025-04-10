@@ -36,6 +36,8 @@ const setSchema = async (schemaName: string): Promise<void> => {
 };
 
 const dropSchema = async (schemaName: string): Promise<void> => {
+	// src/database/migrations/0055-create-audit-log.sql creates an audit schema.
+	await db.query(`DROP SCHEMA audit_${schemaName} CASCADE;`);
 	await db.query(`DROP SCHEMA ${schemaName} CASCADE;`);
 };
 

@@ -1,0 +1,22 @@
+{
+	"type": "object",
+	"properties": {
+		"shortCode": {
+			"$ref": "./shortCode.json",
+			"readOnly": true
+		},
+		"name": {
+			"type": "string",
+			"example": "Philanthropy Data Warehouse"
+		},
+		"keycloakOrganizationId": {
+			"$ref": "./keycloakOrganizationId.json"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": ["id", "name", "createdAt"]
+}

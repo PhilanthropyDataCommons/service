@@ -1,0 +1,27 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 3407
+		},
+		"taxId": {
+			"type": "string",
+			"example": "11-1111111"
+		},
+		"name": {
+			"type": "string",
+			"example": "Example Inc."
+		},
+		"keycloakOrganizationId": {
+			"$ref": "./keycloakOrganizationId.json"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": ["id", "taxId", "name", "createdAt"]
+}

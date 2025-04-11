@@ -1,0 +1,5 @@
+{
+	"description": "If available, the PDC Keycloak Organization ID for this entity.",
+	"type": ["string", "null"],
+	"format": "uuid"
+}

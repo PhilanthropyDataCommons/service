@@ -1,0 +1,49 @@
+{
+	"type": "object",
+	"properties": {
+		"keycloakUserId": {
+			"type": "string",
+			"example": "550e8400-e29b-41d4-a716-446655440000"
+		},
+		"permissions": {
+			"type": "object",
+			"readOnly": true,
+			"properties": {
+				"changemaker": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "array",
+						"items": {
+							"$ref": "./Permission.json"
+						}
+					}
+				},
+				"dataProvider": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "array",
+						"items": {
+							"$ref": "./Permission.json"
+						}
+					}
+				},
+				"funder": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "array",
+						"items": {
+							"$ref": "./Permission.json"
+						}
+					}
+				}
+			},
+			"required": ["changemaker", "dataProvider", "funder"]
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": ["keycloakUserId", "createdAt"]
+}

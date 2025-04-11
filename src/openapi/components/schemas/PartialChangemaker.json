@@ -1,0 +1,17 @@
+{
+	"type": "object",
+	"properties": {
+		"taxId": {
+			"type": "string",
+			"example": "11-1111111"
+		},
+		"name": {
+			"type": "string",
+			"example": "Example Inc."
+		},
+		"keycloakOrganizationId": {
+			"$ref": "./keycloakOrganizationId.json"
+		}
+	},
+	"required": []
+}

@@ -23,4 +23,21 @@ describe('documentationHandlers', () => {
 			expect(sendMock).toHaveBeenCalledWith(`{ "foo": "${issuer}" }`);
 		});
 	});
+	describe('getAuthApiSpec', () => {
+		it('should return expanded file content', async () => {
+			jest
+				.spyOn(fs, 'readFile')
+				.mockResolvedValue('{ "foo": "{{AUTH_ISSUER}}" }');
+			const sendMock = jest.fn();
+			await documentationHandlers.getRootApiSpec(
+				{} as Request,
+				{
+					type: () => {},
+					set: () => {},
+					send: sendMock,
+				} as unknown as Response,
+			);
+			expect(sendMock).toHaveBeenCalledWith(`{ "foo": "${issuer}" }`);
+		});
+	});
 });

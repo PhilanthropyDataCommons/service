@@ -31,6 +31,10 @@ documentationRouter.get(
 	'/openapi/api.json',
 	documentationHandlers.getRootApiSpec,
 );
+documentationRouter.get(
+	'/openapi/components/securitySchemes/auth.json',
+	documentationHandlers.getAuthApiSpec,
+);
 documentationRouter.use(
 	'/openapi',
 	express.static(path.join(__dirname, '../openapi')),

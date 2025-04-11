@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"type": "integer"
+	},
+	"in": "query",
+	"name": "changemaker",
+	"required": false,
+	"description": "A reference (ID) to an existing changemaker entity."
+}

@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"type": "integer"
+	},
+	"in": "query",
+	"name": "proposal",
+	"required": false,
+	"description": "A reference (ID) to an existing proposal entity."
+}

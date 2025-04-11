@@ -24,6 +24,7 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use('/openapi', express.static(path.join(__dirname, 'openapi')));
 app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use('/', rootRouter);
 app.use(errorHandler);

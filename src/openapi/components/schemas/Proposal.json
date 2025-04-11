@@ -1,0 +1,44 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 3709
+		},
+		"opportunityId": {
+			"type": "integer",
+			"example": 3203
+		},
+		"externalId": {
+			"type": "string",
+			"example": "AnIdGeneratedByAGms"
+		},
+		"versions": {
+			"type": "array",
+			"items": {
+				"$ref": "./ProposalVersion.json"
+			},
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that created this proposal",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		}
+	},
+	"required": [
+		"id",
+		"opportunityId",
+		"externalId",
+		"versions",
+		"createdAt",
+		"createdBy"
+	]
+}

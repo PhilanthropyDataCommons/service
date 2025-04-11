@@ -1,0 +1,31 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 3529
+		},
+		"opportunityId": {
+			"type": "integer",
+			"example": 3203
+		},
+		"version": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 13
+		},
+		"fields": {
+			"type": "array",
+			"items": {
+				"$ref": "./ApplicationFormField.json"
+			}
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": ["id", "opportunityId", "version", "fields", "createdAt"]
+}

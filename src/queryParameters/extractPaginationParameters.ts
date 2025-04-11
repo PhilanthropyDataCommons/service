@@ -1,6 +1,5 @@
 import { InputValidationError } from '../errors';
 import { isPaginationParametersQuery } from '../types';
-import apiSpecification from '../openapi.json';
 import type { Request } from 'express';
 import type { PaginationParameters } from '../types';
 
@@ -15,12 +14,8 @@ export const extractPaginationParameters = ({
 	}
 	/* eslint-disable no-underscore-dangle */
 	return {
-		page:
-			query._page ??
-			apiSpecification.components.parameters.pageParam.schema.default,
-		count:
-			query._count ??
-			apiSpecification.components.parameters.countParam.schema.default,
+		page: query._page ?? 1,
+		count: query._count ?? 10,
 	};
 	/* eslint-enable no-underscore-dangle */
 };

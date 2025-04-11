@@ -99,9 +99,9 @@
 				"description": "The OAuth 2.0 (and OpenID Connect) Authorization Code flow.",
 				"flows": {
 					"authorizationCode": {
-						"authorizationUrl": "https://example.com/protocol/openid-connect/auth",
-						"tokenUrl": "https://example.com/protocol/openid-connect/token",
-						"refreshUrl": "https://example.com/protocol/openid-connect/token",
+						"authorizationUrl": "{{AUTH_ISSUER}}/protocol/openid-connect/auth",
+						"tokenUrl": "{{AUTH_ISSUER}}/protocol/openid-connect/token",
+						"refreshUrl": "{{AUTH_ISSUER}}/protocol/openid-connect/token",
 						"scopes": {
 							"openid": "Use OpenID Connect (recommended).",
 							"roles": "Read your roles (recommended).",
@@ -113,1295 +113,136 @@
 		},
 		"schemas": {
 			"BulkUploadTask": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3407
-					},
-					"sourceId": {
-						"type": "integer"
-					},
-					"source": {
-						"$ref": "#/components/schemas/Source",
-						"readOnly": true
-					},
-					"funderShortCode": {
-						"type": "string",
-						"example": "pdc"
-					},
-					"funder": {
-						"$ref": "#/components/schemas/Funder",
-						"readOnly": true
-					},
-					"fileName": {
-						"type": "string",
-						"example": "upload.csv",
-						"pattern": "^.+\\.csv$"
-					},
-					"fileSize": {
-						"description": "File size in bytes",
-						"type": ["integer", "null"],
-						"readOnly": true,
-						"example": 42,
-						"minimum": 0
-					},
-					"sourceKey": {
-						"type": "string",
-						"example": "550e8400-e29b-41d4-a716-446655440000",
-						"minLength": 1
-					},
-					"status": {
-						"type": "string",
-						"readOnly": true,
-						"enum": [
-							"pending",
-							"in_progress",
-							"completed",
-							"failed",
-							"canceled"
-						]
-					},
-					"createdBy": {
-						"description": "The keycloak user id of the PDC user that created this bulk upload",
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"sourceId",
-					"fileName",
-					"sourceKey",
-					"status",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/BulkUploadTask.json"
 			},
 			"BulkUploadTaskBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/BulkUploadTask"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/BulkUploadTaskBundle.json"
 			},
 			"keycloakOrganizationId": {
-				"description": "If available, the PDC Keycloak Organization ID for this entity.",
-				"type": ["string", "null"],
-				"format": "uuid"
+				"$ref": "./components/schemas/keycloakOrganizationId.json"
 			},
 			"BaseFieldsCopyTask": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3407
-					},
-					"status": {
-						"type": "string",
-						"readOnly": true,
-						"enum": [
-							"pending",
-							"in_progress",
-							"completed",
-							"failed",
-							"canceled"
-						]
-					},
-					"pdcApiUrl": {
-						"type": "string"
-					},
-					"statusUpdatedAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					},
-					"createdBy": {
-						"description": "The keycloak user id of the PDC user that created this BaseFieldCopyTask",
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"pdcApiUrl",
-					"status",
-					"statusUpdatedAt",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/BaseFieldsCopyTask.json"
 			},
 			"BaseFieldsCopyTaskBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/BaseFieldsCopyTask"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/BaseFieldsCopyTaskBundle.json"
 			},
 			"DataProvider": {
-				"type": "object",
-				"properties": {
-					"shortCode": {
-						"$ref": "#/components/schemas/shortCode",
-						"readOnly": true
-					},
-					"name": {
-						"type": "string",
-						"example": "Philanthropy Data Warehouse"
-					},
-					"keycloakOrganizationId": {
-						"$ref": "#/components/schemas/keycloakOrganizationId"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["id", "name", "createdAt"]
+				"$ref": "./components/schemas/DataProvider.json"
 			},
 			"Funder": {
-				"type": "object",
-				"properties": {
-					"shortCode": {
-						"$ref": "#/components/schemas/shortCode",
-						"readOnly": true
-					},
-					"name": {
-						"type": "string",
-						"example": "Example Foundation"
-					},
-					"keycloakOrganizationId": {
-						"$ref": "#/components/schemas/keycloakOrganizationId"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["id", "name", "createdAt"]
+				"$ref": "./components/schemas/Funder.json"
 			},
 			"ShallowChangemaker": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3407
-					},
-					"taxId": {
-						"type": "string",
-						"example": "11-1111111"
-					},
-					"name": {
-						"type": "string",
-						"example": "Example Inc."
-					},
-					"keycloakOrganizationId": {
-						"$ref": "#/components/schemas/keycloakOrganizationId"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["id", "taxId", "name", "createdAt"]
+				"$ref": "./components/schemas/ShallowChangemaker.json"
 			},
 			"Changemaker": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/ShallowChangemaker"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"fiscalSponsors": {
-								"type": "array",
-								"description": "Fiscal sponsors (past and present) of this changemaker. Empty when unauthenticated. The response here will not include values for `fields` nor `fiscalSponsors` to avoid infinite recursion. Use the returned `id` to call $getChangemakerById for those details.",
-								"items": {
-									"$ref": "#/components/schemas/ShallowChangemaker"
-								},
-								"readOnly": true,
-								"example": [
-									{
-										"id": 74,
-										"name": "Community Development",
-										"taxId": "US123456789",
-										"fields": [],
-										"createdAt": "2025-02-07T13:16:16.191509-06:00",
-										"fiscalSponsors": [],
-										"keycloakOrganizationId": "f16a71f8-e67b-43ab-a258-31cd8a99a97a"
-									}
-								]
-							},
-							"fields": {
-								"type": "array",
-								"description": "For each base field, the best available value related to this changemaker. Empty when unauthenticated or when recursively querying changemakers, for example, within fiscal sponsors.",
-								"items": {
-									"$ref": "#/components/schemas/ProposalFieldValue"
-								},
-								"readOnly": true
-							}
-						},
-						"required": [
-							"id",
-							"taxId",
-							"name",
-							"createdAt",
-							"fields",
-							"fiscalSponsors"
-						]
-					}
-				]
+				"$ref": "./components/schemas/Changemaker.json"
 			},
 			"PartialChangemaker": {
-				"type": "object",
-				"properties": {
-					"taxId": {
-						"type": "string",
-						"example": "11-1111111"
-					},
-					"name": {
-						"type": "string",
-						"example": "Example Inc."
-					},
-					"keycloakOrganizationId": {
-						"$ref": "#/components/schemas/keycloakOrganizationId"
-					}
-				},
-				"required": []
+				"$ref": "./components/schemas/PartialChangemaker.json"
 			},
 			"ChangemakerProposal": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true
-					},
-					"changemakerId": {
-						"type": "integer"
-					},
-					"changemaker": {
-						"$ref": "#/components/schemas/Changemaker",
-						"readOnly": true
-					},
-					"proposalId": {
-						"type": "integer"
-					},
-					"proposal": {
-						"$ref": "#/components/schemas/Proposal",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"changemakerId",
-					"changemaker",
-					"proposalId",
-					"proposal",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/ChangemakerProposal.json"
 			},
 			"PresignedPostRequest": {
-				"type": "object",
-				"properties": {
-					"fileType": {
-						"type": "string",
-						"example": "application/octet-stream"
-					},
-					"fileSize": {
-						"type": "integer",
-						"minimum": 0,
-						"example": 512
-					},
-					"presignedPost": {
-						"$ref": "#/components/schemas/PresignedPost",
-						"readOnly": true
-					}
-				},
-				"required": ["fileType", "fileSize", "presignedPost"]
+				"$ref": "./components/schemas/PresignedPostRequest.json"
 			},
 			"PresignedPost": {
-				"type": "object",
-				"properties": {
-					"url": {
-						"type": "string"
-					},
-					"fields": {
-						"type": "object",
-						"properties": {
-							"key": {
-								"type": "string",
-								"example": "96ddab90-1931-478d-8c02-a1dc80ae01e5"
-							}
-						},
-						"required": ["key"]
-					}
-				},
-				"required": ["url", "fields"]
+				"$ref": "./components/schemas/PresignedPost.json"
 			},
 			"Proposal": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3709
-					},
-					"opportunityId": {
-						"type": "integer",
-						"example": 3203
-					},
-					"externalId": {
-						"type": "string",
-						"example": "AnIdGeneratedByAGms"
-					},
-					"versions": {
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/ProposalVersion"
-						},
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					},
-					"createdBy": {
-						"description": "The keycloak user id of the PDC user that created this proposal",
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"opportunityId",
-					"externalId",
-					"versions",
-					"createdAt",
-					"createdBy"
-				]
+				"$ref": "./components/schemas/Proposal.json"
 			},
 			"ProposalVersion": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3821
-					},
-					"proposalId": {
-						"type": "integer",
-						"example": 3709
-					},
-					"sourceId": {
-						"type": "integer"
-					},
-					"source": {
-						"$ref": "#/components/schemas/Source",
-						"readOnly": true
-					},
-					"applicationFormId": {
-						"type": "integer",
-						"example": 3529
-					},
-					"version": {
-						"type": "integer",
-						"example": 17,
-						"readOnly": true
-					},
-					"fieldValues": {
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/ProposalFieldValue"
-						}
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					},
-					"createdBy": {
-						"description": "The keycloak user id of the PDC user that created this bulk upload",
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"proposalId",
-					"sourceId",
-					"applicationFormId",
-					"version",
-					"fieldValues",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/ProposalVersion.json"
 			},
 			"ProposalFieldValue": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3943
-					},
-					"proposalVersionId": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3709
-					},
-					"applicationFormFieldId": {
-						"type": "integer",
-						"example": 3613
-					},
-					"applicationFormField": {
-						"$ref": "#/components/schemas/ApplicationFormField",
-						"readOnly": true
-					},
-					"position": {
-						"type": "integer",
-						"example": 23
-					},
-					"value": {
-						"type": "string",
-						"example": "Some arbitrary value"
-					},
-					"isValid": {
-						"type": "boolean",
-						"example": "true",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"proposalVersionId",
-					"applicationFormFieldId",
-					"applicationFormField",
-					"position",
-					"value",
-					"isValid",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/ProposalFieldValue.json"
 			},
 			"ApplicationForm": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3529
-					},
-					"opportunityId": {
-						"type": "integer",
-						"example": 3203
-					},
-					"version": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 13
-					},
-					"fields": {
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/ApplicationFormField"
-						}
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["id", "opportunityId", "version", "fields", "createdAt"]
+				"$ref": "./components/schemas/ApplicationForm.json"
 			},
 			"ApplicationFormField": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3613
-					},
-					"applicationFormId": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3529
-					},
-					"baseFieldId": {
-						"type": "integer",
-						"example": 3011
-					},
-					"baseField": {
-						"readOnly": true,
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/BaseField"
-							}
-						]
-					},
-					"position": {
-						"type": "integer",
-						"example": 19
-					},
-					"label": {
-						"type": "string",
-						"example": "Your First Name"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"applicationFormId",
-					"baseFieldId",
-					"baseField",
-					"position",
-					"label",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/ApplicationFormField.json"
 			},
 			"shortCode": {
-				"type": "string",
-				"pattern": "^[\\w\\-]+$"
+				"$ref": "./components/schemas/shortCode.json"
 			},
 			"BaseField": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3011
-					},
-					"label": {
-						"type": "string",
-						"example": "First Name"
-					},
-					"description": {
-						"type": "string",
-						"example": "The first name of the applicant"
-					},
-					"shortCode": {
-						"$ref": "#/components/schemas/shortCode"
-					},
-					"localizations": {
-						"type": "object",
-						"additionalProperties": {
-							"$ref": "#/components/schemas/BaseFieldLocalization"
-						},
-						"readOnly": true,
-						"description": "Keys can be expected to be IETF language tags."
-					},
-					"dataType": {
-						"type": "string",
-						"enum": [
-							"string",
-							"number",
-							"email",
-							"phone_number",
-							"url",
-							"boolean"
-						],
-						"example": "string"
-					},
-					"scope": {
-						"type": "string",
-						"enum": ["proposal", "changemaker"]
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"label",
-					"description",
-					"shortCode",
-					"dataType",
-					"scope",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/BaseField.json"
 			},
 			"BaseFieldLocalization": {
-				"type": "object",
-				"properties": {
-					"baseFieldId": {
-						"type": ["integer", "null"],
-						"example": 1
-					},
-					"language": {
-						"type": "string",
-						"example": "en",
-						"readOnly": true
-					},
-					"label": {
-						"type": "string",
-						"example": "Applicant Name"
-					},
-					"description": {
-						"type": ["string", "null"],
-						"example": "The Name of the Applicant"
-					},
-					"createdAt": {
-						"type": ["string", "null"],
-						"format": "date-time"
-					}
-				},
-				"required": ["baseFieldId", "language", "localization", "label"]
+				"$ref": "./components/schemas/BaseFieldLocalization.json"
 			},
 			"BaseFieldLocalizationBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/BaseFieldLocalization"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/BaseFieldLocalizationBundle.json"
 			},
 			"PdcError": {
-				"type": "object",
-				"properties": {
-					"message": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"details": {
-						"type": "array",
-						"items": {}
-					}
-				}
+				"$ref": "./components/schemas/PdcError.json"
 			},
 			"Opportunity": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"type": "integer",
-						"readOnly": true,
-						"example": 3203
-					},
-					"title": {
-						"type": "string",
-						"example": "The Open Source Foundation 2022 Challenge"
-					},
-					"funderShortCode": {
-						"type": "string",
-						"example": "pdc"
-					},
-					"funder": {
-						"$ref": "#/components/schemas/Funder",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["id", "title", "createdAt"]
+				"$ref": "./components/schemas/Opportunity.json"
 			},
 			"OpportunityBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/Opportunity"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/OpportunityBundle.json"
 			},
 			"PlatformProviderResponse": {
-				"type": "object",
-				"properties": {
-					"externalId": {
-						"type": "string",
-						"example": "000000000"
-					},
-					"platformProvider": {
-						"type": "string",
-						"example": "DataPlatformProviderX"
-					},
-					"data": {
-						"type": "object"
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["externalId", "platformProvider", "data", "createdAt"]
+				"$ref": "./components/schemas/PlatformProviderResponse.json"
 			},
 			"Bundle": {
-				"type": "object",
-				"properties": {
-					"entries": {
-						"type": "array",
-						"items": {},
-						"description": "The collection of requested resources."
-					},
-					"total": {
-						"type": "integer",
-						"description": "The total number of requested resources that exist in the database, across all pages.",
-						"example": 20
-					}
-				},
-				"required": ["entries", "total"]
+				"$ref": "./components/schemas/Bundle.json"
 			},
 			"ApplicationFormBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/ApplicationForm"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/ApplicationFormBundle.json"
 			},
 			"DataProviderBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/DataProvider"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/DataProviderBundle.json"
 			},
 			"FunderBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/Funder"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/FunderBundle.json"
 			},
 			"ChangemakerBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/Changemaker"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/ChangemakerBundle.json"
 			},
 			"ChangemakerProposalBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/ChangemakerProposal"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/ChangemakerProposalBundle.json"
 			},
 			"ProposalBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/Proposal"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/ProposalBundle.json"
 			},
 			"SourceBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/Source"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/SourceBundle.json"
 			},
 			"Source": {
-				"allOf": [
-					{
-						"type": "object",
-						"properties": {
-							"id": {
-								"type": "integer",
-								"readOnly": true
-							},
-							"label": {
-								"type": "string",
-								"example": "A Source"
-							},
-							"relatedEntityId": {
-								"type": "integer"
-							},
-							"createdAt": {
-								"type": "string",
-								"format": "date-time",
-								"readOnly": true
-							}
-						},
-						"required": ["id", "label", "relatedEntityId", "createdAt"]
-					},
-					{
-						"oneOf": [
-							{
-								"type": "object",
-								"properties": {
-									"dataProviderShortCode": {
-										"type": "string"
-									},
-									"dataProvider": {
-										"$ref": "#/components/schemas/DataProvider",
-										"readOnly": true
-									}
-								},
-								"required": ["dataProviderShortCode", "dataProvider"]
-							},
-							{
-								"type": "object",
-								"properties": {
-									"funderShortCode": {
-										"type": "string"
-									},
-									"funder": {
-										"$ref": "#/components/schemas/Funder",
-										"readOnly": true
-									}
-								},
-								"required": ["funderShortCode", "funder"]
-							},
-							{
-								"type": "object",
-								"properties": {
-									"changemakerId": {
-										"type": "number"
-									},
-									"changemaker": {
-										"$ref": "#/components/schemas/Changemaker",
-										"readOnly": true
-									}
-								},
-								"required": ["changemakerId", "changemaker"]
-							}
-						]
-					}
-				]
+				"$ref": "./components/schemas/Source.json"
 			},
 			"Permission": {
-				"type": "string",
-				"enum": ["manage", "edit", "view"]
+				"$ref": "./components/schemas/Permission.json"
 			},
 			"User": {
-				"type": "object",
-				"properties": {
-					"keycloakUserId": {
-						"type": "string",
-						"example": "550e8400-e29b-41d4-a716-446655440000"
-					},
-					"permissions": {
-						"type": "object",
-						"readOnly": true,
-						"properties": {
-							"changemaker": {
-								"type": "object",
-								"additionalProperties": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/Permission"
-									}
-								}
-							},
-							"dataProvider": {
-								"type": "object",
-								"additionalProperties": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/Permission"
-									}
-								}
-							},
-							"funder": {
-								"type": "object",
-								"additionalProperties": {
-									"type": "array",
-									"items": {
-										"$ref": "#/components/schemas/Permission"
-									}
-								}
-							}
-						},
-						"required": ["changemaker", "dataProvider", "funder"]
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["keycloakUserId", "createdAt"]
+				"$ref": "./components/schemas/User.json"
 			},
 			"UserBundle": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/Bundle"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"entries": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/User"
-								}
-							}
-						},
-						"required": ["entries"]
-					}
-				]
+				"$ref": "./components/schemas/UserBundle.json"
 			},
 			"UserChangemakerPermission": {
-				"type": "object",
-				"properties": {
-					"permission": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"changemakerId": {
-						"type": "integer",
-						"readOnly": true
-					},
-					"userKeycloakUserId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"permission",
-					"changemakerId",
-					"userKeycloakUserId",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/UserChangemakerPermission.json"
 			},
 			"UserFunderPermission": {
-				"type": "object",
-				"properties": {
-					"permission": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"funderShortcode": {
-						"$ref": "#/components/schemas/shortCode",
-						"readOnly": true
-					},
-					"userKeycloakUserId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"permission",
-					"funderShortcode",
-					"userKeycloakUserId",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/UserFunderPermission.json"
 			},
 			"UserDataProviderPermission": {
-				"type": "object",
-				"properties": {
-					"permission": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"dataProviderShortcode": {
-						"$ref": "#/components/schemas/shortCode",
-						"readOnly": true
-					},
-					"userKeycloakUserId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"dataProviderShortcode",
-					"userKeycloakUserId",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/UserDataProviderPermission.json"
 			},
 			"UserGroupChangemakerPermission": {
-				"type": "object",
-				"properties": {
-					"permission": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"changemakerId": {
-						"type": "integer",
-						"readOnly": true
-					},
-					"keycloakOrganizationId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": ["id", "", "createdAt"]
+				"$ref": "./components/schemas/UserGroupChangemakerPermission.json"
 			},
 			"UserGroupFunderPermission": {
-				"type": "object",
-				"properties": {
-					"permission": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"funderShortcode": {
-						"$ref": "#/components/schemas/shortCode",
-						"readOnly": true
-					},
-					"keycloakOrganizationId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"permission",
-					"funderShortcode",
-					"userKeycloakUserId",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/UserGroupFunderPermission.json"
 			},
 			"UserGroupDataProviderPermission": {
-				"type": "object",
-				"properties": {
-					"permission": {
-						"$ref": "#/components/schemas/Permission",
-						"readOnly": true
-					},
-					"dataProviderShortcode": {
-						"$ref": "#/components/schemas/shortCode",
-						"readOnly": true
-					},
-					"keycloakOrganizationId": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdBy": {
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"createdAt": {
-						"type": "string",
-						"format": "date-time",
-						"readOnly": true
-					}
-				},
-				"required": [
-					"id",
-					"dataProviderShortcode",
-					"userKeycloakUserId",
-					"createdBy",
-					"createdAt"
-				]
+				"$ref": "./components/schemas/UserGroupDataProviderPermission.json"
 			}
 		}
 	},

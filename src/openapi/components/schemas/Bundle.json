@@ -1,0 +1,16 @@
+{
+	"type": "object",
+	"properties": {
+		"entries": {
+			"type": "array",
+			"items": {},
+			"description": "The collection of requested resources."
+		},
+		"total": {
+			"type": "integer",
+			"description": "The total number of requested resources that exist in the database, across all pages.",
+			"example": 20
+		}
+	},
+	"required": ["entries", "total"]
+}

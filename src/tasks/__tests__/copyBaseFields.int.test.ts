@@ -20,6 +20,7 @@ import {
 	AuthContext,
 } from '../../types';
 import { expectTimestamp, getAuthContext } from '../../test/utils';
+import type { BaseField } from '../../types';
 
 const MOCK_API_URL = 'https://example.com';
 
@@ -38,7 +39,7 @@ const createTestBaseFieldsCopyTask = async (
 	});
 };
 
-const mockFirstNameBaseField = {
+const mockFirstNameBaseField: BaseField = {
 	id: 1,
 	label: 'First Name',
 	description: 'The first name of the applicant',
@@ -59,23 +60,23 @@ const mockFirstNameBaseField = {
 			createdAt: '2024-10-17T01:46:58.494Z',
 		},
 	},
-	dataType: 'string',
-	scope: 'proposal',
+	dataType: BaseFieldDataType.STRING,
+	scope: BaseFieldScope.PROPOSAL,
 	createdAt: '2024-10-17T01:46:58.494Z',
 };
 
-const mockFirstNameBaseFieldWithNoLocalizations = {
+const mockFirstNameBaseFieldWithNoLocalizations: BaseField = {
 	id: 1,
 	label: 'First Name',
 	description: 'The first name of the applicant',
 	shortCode: 'first_name',
 	localizations: {},
-	dataType: 'string',
-	scope: 'proposal',
+	dataType: BaseFieldDataType.STRING,
+	scope: BaseFieldScope.PROPOSAL,
 	createdAt: '2024-10-17T01:46:58.494Z',
 };
 
-const mockLastNameBaseField = {
+const mockLastNameBaseField: BaseField = {
 	id: 2,
 	label: 'Last Name',
 	description: 'The last name of the applicant',
@@ -96,8 +97,8 @@ const mockLastNameBaseField = {
 			createdAt: '2024-10-17T01:46:58.494Z',
 		},
 	},
-	dataType: 'string',
-	scope: 'proposal',
+	dataType: BaseFieldDataType.STRING,
+	scope: BaseFieldScope.PROPOSAL,
 	createdAt: '2024-10-17T01:46:58.494Z',
 };
 

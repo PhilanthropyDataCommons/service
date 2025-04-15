@@ -1,0 +1,91 @@
+{
+	"get": {
+		"operationId": "getFunderById",
+		"summary": "Gets a specific funder.",
+		"tags": ["Funders"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "funderShortCode",
+				"description": "The short code of a funder.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The funder.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Funder.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	},
+	"put": {
+		"operationId": "createOrUpdateFunder",
+		"summary": "Creates or updates a new funder.",
+		"tags": ["Funders"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "funderShortCode",
+				"description": "The short code of a funder.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/Funder.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new funder that was created.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Funder.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

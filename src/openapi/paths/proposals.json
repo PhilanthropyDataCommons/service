@@ -1,0 +1,103 @@
+{
+	"get": {
+		"operationId": "getProposals",
+		"summary": "Gets a list of proposals.",
+		"tags": ["Proposals"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{ "$ref": "../components/parameters/pageParam.json" },
+			{ "$ref": "../components/parameters/countParam.json" },
+			{ "$ref": "../components/parameters/searchParam.json" },
+			{ "$ref": "../components/parameters/changemakerParam.json" },
+			{ "$ref": "../components/parameters/createdByParam.json" }
+		],
+		"responses": {
+			"200": {
+				"description": "A set of proposals currently registered in the PDC.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ProposalBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	},
+	"post": {
+		"operationId": "addProposal",
+		"summary": "Adds a new proposal.",
+		"tags": ["Proposals"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/Proposal.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new proposal that was created",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Proposal.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"409": {
+				"description": "There was a unique key conflict.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"422": {
+				"description": "The proposal references entities that do not exist in the database.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,81 @@
+{
+	"get": {
+		"operationId": "getBaseFieldsCopyTasks",
+		"summary": "Gets a list of basefieldcopytasks.",
+		"tags": ["Tasks"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{ "$ref": "../components/parameters/pageParam.json" },
+			{ "$ref": "../components/parameters/countParam.json" },
+			{ "$ref": "../components/parameters/createdByParam.json" }
+		],
+		"responses": {
+			"200": {
+				"description": "Requested BaseFieldCopyTasks registered in the PDC.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/BaseFieldsCopyTaskBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	},
+	"post": {
+		"operationId": "addBaseFieldsCopyTask",
+		"summary": "Creates a BaseFieldsCopyTask entity, which is then used to enqueue a basefield copying job to the job queue. This pulls basefields from a remote PDC instance and upserts them into the local database",
+		"tags": ["Tasks"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/BaseFieldsCopyTask.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The Sync BaseField",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/BaseFieldsCopyTask.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

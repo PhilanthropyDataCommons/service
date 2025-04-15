@@ -55,13 +55,21 @@ export const fetchBaseFieldsFromRemote = async (
 };
 
 const copyBaseField = async (targetBaseField: BaseField) => {
-	const { scope, dataType, shortCode, label, description } = targetBaseField;
+	const {
+		scope,
+		dataType,
+		shortCode,
+		label,
+		description,
+		valueRelevanceHours,
+	} = targetBaseField;
 	const copiedBaseField = await createOrUpdateBaseField(db, null, {
 		scope,
 		dataType,
 		shortCode,
 		label,
 		description,
+		valueRelevanceHours,
 	});
 	await Promise.all(
 		Object.entries(targetBaseField.localizations).map(

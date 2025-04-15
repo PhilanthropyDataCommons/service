@@ -7,7 +7,14 @@ const updateBaseField = generateCreateOrUpdateItemOperation<
 	[baseFieldId: number]
 >(
 	'baseFields.updateById',
-	['label', 'description', 'shortCode', 'dataType', 'scope'],
+	[
+		'label',
+		'description',
+		'shortCode',
+		'dataType',
+		'scope',
+		'valueRelevanceHours',
+	],
 	['baseFieldId'],
 );
 

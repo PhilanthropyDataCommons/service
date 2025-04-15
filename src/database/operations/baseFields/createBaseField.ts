@@ -7,7 +7,14 @@ const createBaseField = generateCreateOrUpdateItemOperation<
 	[]
 >(
 	'baseFields.insertOne',
-	['scope', 'dataType', 'shortCode', 'label', 'description'],
+	[
+		'scope',
+		'dataType',
+		'shortCode',
+		'label',
+		'description',
+		'valueRelevanceHours',
+	],
 	[],
 );
 

@@ -22,6 +22,7 @@ const createTestBaseField = async () =>
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
+		valueRelevanceHours: null,
 	});
 
 const createTestBaseFieldWithLocalization = async () => {
@@ -31,6 +32,7 @@ const createTestBaseFieldWithLocalization = async () => {
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
+		valueRelevanceHours: null,
 	});
 	await createOrUpdateBaseFieldLocalization(db, null, {
 		baseFieldId: baseField.id,
@@ -57,6 +59,7 @@ describe('/baseFields', () => {
 				shortCode: 'firstName',
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
 			});
 			const baseFieldTwo = await createBaseField(db, null, {
 				label: 'Last Name',
@@ -64,6 +67,7 @@ describe('/baseFields', () => {
 				shortCode: 'lastName',
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
 			});
 
 			await createOrUpdateBaseFieldLocalization(db, null, {
@@ -143,6 +147,7 @@ describe('/baseFields', () => {
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('base_fields');
@@ -154,6 +159,7 @@ describe('/baseFields', () => {
 				shortCode: '🩳',
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
 				localizations: {},
 				createdAt: expectTimestamp,
 			});
@@ -170,6 +176,7 @@ describe('/baseFields', () => {
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -188,6 +195,7 @@ describe('/baseFields', () => {
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -206,6 +214,7 @@ describe('/baseFields', () => {
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -224,6 +233,7 @@ describe('/baseFields', () => {
 					description: '😍',
 					shortCode: '🩳',
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -243,6 +253,7 @@ describe('/baseFields', () => {
 					shortCode: '🩳',
 					dataType: '🤡',
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -261,6 +272,26 @@ describe('/baseFields', () => {
 					description: '😍',
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
+					valueRelevanceHours: null,
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 400 bad request when no valueRelevanceHours is sent', async () => {
+			const result = await request(app)
+				.post('/baseFields')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: '🏷️',
+					description: '😍',
+					shortCode: '🩳',
+					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.PROPOSAL,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -295,6 +326,7 @@ describe('/baseFields', () => {
 				shortCode: 'firstName',
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
 			});
 			const result = await request(app)
 				.post('/baseFields')
@@ -306,6 +338,7 @@ describe('/baseFields', () => {
 					shortCode: 'firstName',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 				})
 				.expect(409);
 			expect(result.body).toMatchObject({
@@ -338,6 +371,7 @@ describe('/baseFields', () => {
 				shortCode: 'summary',
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
 			});
 			await request(app)
 				.put('/baseFields/1')
@@ -349,6 +383,7 @@ describe('/baseFields', () => {
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.NUMBER,
 					scope: BaseFieldScope.ORGANIZATION,
+					valueRelevanceHours: 9001,
 				})
 				.expect(200);
 			const baseFields = await loadBaseFields();
@@ -359,6 +394,7 @@ describe('/baseFields', () => {
 				shortCode: '🩳',
 				dataType: BaseFieldDataType.NUMBER,
 				scope: BaseFieldScope.ORGANIZATION,
+				valueRelevanceHours: 9001,
 				localizations: {},
 				createdAt: expectTimestamp,
 			});
@@ -375,6 +411,7 @@ describe('/baseFields', () => {
 					description: '😍',
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.NUMBER,
+					valueRelevanceHours: null,
 					scope: BaseFieldScope.ORGANIZATION,
 				})
 				.expect(200);
@@ -385,6 +422,7 @@ describe('/baseFields', () => {
 				shortCode: '🩳',
 				dataType: BaseFieldDataType.NUMBER,
 				scope: BaseFieldScope.ORGANIZATION,
+				valueRelevanceHours: null,
 				localizations: {},
 				createdAt: expectTimestamp,
 			});
@@ -401,6 +439,8 @@ describe('/baseFields', () => {
 					shortCode: '🩳',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.ORGANIZATION,
+					valueRelevanceHours: null,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -419,6 +459,8 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.ORGANIZATION,
+					valueRelevanceHours: null,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -437,6 +479,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
+					valueRelevanceHours: null,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -455,6 +498,48 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					shortCode: '🩳',
+					scope: BaseFieldScope.ORGANIZATION,
+					valueRelevanceHours: null,
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 400 bad request when no scope is sent', async () => {
+			await createTestBaseField();
+			const result = await request(app)
+				.put('/baseFields/1')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: '🏷️',
+					description: '😍',
+					shortCode: '🩳',
+					dataType: BaseFieldDataType.STRING,
+					valueRelevanceHours: null,
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 400 bad request when no valueRelevanceHours is sent', async () => {
+			await createTestBaseField();
+			const result = await request(app)
+				.put('/baseFields/1')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: '🏷️',
+					description: '😍',
+					shortCode: '🩳',
+					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.ORGANIZATION,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -492,6 +577,7 @@ describe('/baseFields', () => {
 					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 				})
 				.expect(404);
 		});
@@ -509,6 +595,7 @@ describe('/baseFields', () => {
 				shortCode: 'firstName',
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
 			});
 
 			await createOrUpdateBaseFieldLocalization(db, null, {

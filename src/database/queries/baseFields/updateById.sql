@@ -3,6 +3,7 @@ UPDATE base_fields SET
 	description = :description,
 	short_code = :shortCode,
 	data_type = :dataType,
-	scope = :scope
+	scope = :scope,
+	value_relevance_hours = :valueRelevanceHours
 WHERE id = :baseFieldId
 RETURNING base_field_to_json(base_fields) AS object;

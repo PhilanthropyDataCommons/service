@@ -1,9 +1,9 @@
 import { generateCreateOrUpdateItemOperation } from '../generators';
-import type { BaseField, WritableBaseField } from '../../../types';
+import type { BaseField, InternallyWritableBaseField } from '../../../types';
 
 const createBaseField = generateCreateOrUpdateItemOperation<
 	BaseField,
-	WritableBaseField,
+	InternallyWritableBaseField,
 	[]
 >(
 	'baseFields.insertOne',

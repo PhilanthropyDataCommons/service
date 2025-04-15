@@ -1,11 +1,12 @@
 import type { JSONSchemaType } from 'ajv';
 import type { BaseField } from './BaseField';
 import type { Writable } from './Writable';
+import type { ShortCode } from './ShortCode';
 
 interface ApplicationFormField {
 	readonly id: number;
 	applicationFormId: number;
-	baseFieldId: number;
+	baseFieldShortCode: ShortCode;
 	readonly baseField: BaseField;
 	position: number;
 	label: string;
@@ -23,8 +24,8 @@ const writableApplicationFormFieldWithApplicationContextSchema: JSONSchemaType<W
 	{
 		type: 'object',
 		properties: {
-			baseFieldId: {
-				type: 'integer',
+			baseFieldShortCode: {
+				type: 'string',
 			},
 			position: {
 				type: 'integer',
@@ -33,7 +34,7 @@ const writableApplicationFormFieldWithApplicationContextSchema: JSONSchemaType<W
 				type: 'string',
 			},
 		},
-		required: ['baseFieldId', 'position', 'label'],
+		required: ['baseFieldShortCode', 'position', 'label'],
 	};
 
 export {

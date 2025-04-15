@@ -10,12 +10,12 @@ BEGIN
   SELECT base_field_to_json(base_fields.*)
   INTO base_field_json
   FROM base_fields
-  WHERE base_fields.id = application_form_field.base_field_id;
+  WHERE base_fields.short_code = application_form_field.base_field_short_code;
 
   RETURN jsonb_build_object(
     'id', application_form_field.id,
     'applicationFormId', application_form_field.application_form_id,
-    'baseFieldId', application_form_field.base_field_id,
+    'baseFieldShortCode', application_form_field.base_field_short_code,
     'baseField', base_field_json,
     'position', application_form_field.position,
     'label', application_form_field.label,

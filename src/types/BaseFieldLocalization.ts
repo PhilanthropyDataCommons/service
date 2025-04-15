@@ -1,9 +1,10 @@
 import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
+import type { ShortCode } from './ShortCode';
 
 interface BaseFieldLocalization {
-	readonly baseFieldId: number;
+	readonly baseFieldShortCode: ShortCode;
 	readonly language: string;
 	label: string;
 	description: string;
@@ -13,11 +14,11 @@ interface BaseFieldLocalization {
 const baseFieldLocalizationSchema: JSONSchemaType<BaseFieldLocalization> = {
 	type: 'object',
 	properties: {
-		language: {
+		baseFieldShortCode: {
 			type: 'string',
 		},
-		baseFieldId: {
-			type: 'number',
+		language: {
+			type: 'string',
 		},
 		label: {
 			type: 'string',
@@ -29,7 +30,13 @@ const baseFieldLocalizationSchema: JSONSchemaType<BaseFieldLocalization> = {
 			type: 'string',
 		},
 	},
-	required: ['description', 'language', 'label', 'baseFieldId', 'createdAt'],
+	required: [
+		'baseFieldShortCode',
+		'description',
+		'language',
+		'label',
+		'createdAt',
+	],
 	additionalProperties: true,
 };
 
@@ -50,17 +57,17 @@ const writableBaseFieldLocalizationSchema: JSONSchemaType<WritableBaseFieldLocal
 	};
 
 type InternallyWritableBaseFieldLocalization = Writable<BaseFieldLocalization> &
-	Pick<BaseFieldLocalization, 'baseFieldId' | 'language'>;
+	Pick<BaseFieldLocalization, 'baseFieldShortCode' | 'language'>;
 
 const internallyWritableBaseFieldLocalizationSchema: JSONSchemaType<InternallyWritableBaseFieldLocalization> =
 	{
 		type: 'object',
 		properties: {
-			language: {
+			baseFieldShortCode: {
 				type: 'string',
 			},
-			baseFieldId: {
-				type: 'number',
+			language: {
+				type: 'string',
 			},
 			label: {
 				type: 'string',
@@ -69,7 +76,7 @@ const internallyWritableBaseFieldLocalizationSchema: JSONSchemaType<InternallyWr
 				type: 'string',
 			},
 		},
-		required: ['description', 'language', 'label', 'baseFieldId'],
+		required: ['baseFieldShortCode', 'description', 'language', 'label'],
 		additionalProperties: true,
 	};
 

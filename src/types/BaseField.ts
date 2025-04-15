@@ -5,6 +5,7 @@ import {
 } from './BaseFieldLocalization';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
+import type { ShortCode } from './ShortCode';
 
 export enum BaseFieldDataType {
 	STRING = 'string',
@@ -22,10 +23,9 @@ export enum BaseFieldScope {
 }
 
 interface BaseField {
-	readonly id: number;
+	readonly shortCode: ShortCode;
 	label: string;
 	description: string;
-	shortCode: string;
 	dataType: BaseFieldDataType;
 	scope: BaseFieldScope;
 	readonly localizations: Record<string, BaseFieldLocalization>;
@@ -35,9 +35,6 @@ interface BaseField {
 const baseFieldSchema: JSONSchemaType<BaseField> = {
 	type: 'object',
 	properties: {
-		id: {
-			type: 'number',
-		},
 		label: {
 			type: 'string',
 		},
@@ -65,7 +62,6 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 		},
 	},
 	required: [
-		'id',
 		'label',
 		'description',
 		'shortCode',
@@ -81,6 +77,9 @@ const isBaseField = ajv.compile(baseFieldSchema);
 
 type WritableBaseField = Writable<BaseField>;
 
+type InternallyWritableBaseField = WritableBaseField &
+	Pick<BaseField, 'shortCode'>;
+
 const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 	type: 'object',
 	properties: {
@@ -88,9 +87,6 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 			type: 'string',
 		},
 		description: {
-			type: 'string',
-		},
-		shortCode: {
 			type: 'string',
 		},
 		dataType: {
@@ -102,15 +98,47 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 			enum: Object.values(BaseFieldScope),
 		},
 	},
-	required: ['label', 'description', 'shortCode', 'dataType', 'scope'],
+	required: ['label', 'description', 'dataType', 'scope'],
 };
 
+const internallyWritableBaseFieldSchema: JSONSchemaType<InternallyWritableBaseField> =
+	{
+		type: 'object',
+		properties: {
+			shortCode: {
+				type: 'string',
+			},
+			label: {
+				type: 'string',
+			},
+			description: {
+				type: 'string',
+			},
+			dataType: {
+				type: 'string',
+				enum: Object.values(BaseFieldDataType),
+			},
+			scope: {
+				type: 'string',
+				enum: Object.values(BaseFieldScope),
+			},
+		},
+		required: ['shortCode', 'label', 'description', 'dataType', 'scope'],
+	};
+
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
+
+const isInternallyWritableBaseField = ajv.compile(
+	internallyWritableBaseFieldSchema,
+);
 
 export {
 	BaseField,
 	baseFieldSchema,
 	isBaseField,
+	InternallyWritableBaseField,
+	internallyWritableBaseFieldSchema,
+	isInternallyWritableBaseField,
 	WritableBaseField,
 	isWritableBaseField,
 	writableBaseFieldSchema,

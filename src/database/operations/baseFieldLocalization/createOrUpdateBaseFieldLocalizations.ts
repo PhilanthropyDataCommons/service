@@ -10,7 +10,7 @@ const createOrUpdateBaseFieldLocalization = generateCreateOrUpdateItemOperation<
 	[]
 >(
 	'baseFieldLocalizations.createOrUpdateByPrimaryKey',
-	['baseFieldId', 'language', 'label', 'description'],
+	['baseFieldShortCode', 'language', 'label', 'description'],
 	[],
 );
 

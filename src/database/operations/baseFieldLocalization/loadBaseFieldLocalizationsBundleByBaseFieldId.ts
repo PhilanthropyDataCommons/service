@@ -1,11 +1,12 @@
 import { generateLoadBundleOperation } from '../generators';
-import type { BaseFieldLocalization } from '../../../types';
+import type { BaseFieldLocalization, ShortCode } from '../../../types';
 
 const loadBaseFieldLocalizationsBundleByBaseFieldId =
-	generateLoadBundleOperation<BaseFieldLocalization, [baseFieldId: number]>(
-		'baseFieldLocalizations.selectWithPagination',
-		'base_field_localizations',
-		['baseFieldId'],
-	);
+	generateLoadBundleOperation<
+		BaseFieldLocalization,
+		[baseFieldShortCode: ShortCode]
+	>('baseFieldLocalizations.selectWithPagination', 'base_field_localizations', [
+		'baseFieldShortCode',
+	]);
 
 export { loadBaseFieldLocalizationsBundleByBaseFieldId };

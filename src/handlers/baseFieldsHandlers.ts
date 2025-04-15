@@ -3,7 +3,6 @@ import {
 	db,
 	createBaseField,
 	loadBaseFields,
-	updateBaseField,
 	createOrUpdateBaseFieldLocalization,
 	loadBaseFieldLocalizationsBundleByBaseFieldId,
 	loadBaseField,
@@ -37,27 +36,6 @@ const postBaseField = async (req: Request, res: Response) => {
 
 	const baseField = await createBaseField(db, null, req.body);
 	res.status(201).contentType('application/json').send(baseField);
-};
-
-const putBaseField = async (
-	req: Request<{ baseFieldId: string }>,
-	res: Response,
-) => {
-	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
-	if (Number.isNaN(baseFieldId)) {
-		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
-	}
-	const body = req.body as unknown;
-	if (!isWritableBaseField(body)) {
-		throw new InputValidationError(
-			'Invalid request body.',
-			isWritableBaseField.errors ?? [],
-		);
-	}
-
-	await assertBaseFieldExists(baseFieldId);
-	const baseField = await updateBaseField(db, null, body, baseFieldId);
-	res.status(200).contentType('application/json').send(baseField);
 };
 
 const getBaseFieldLocalizationsByBaseFieldId = async (
@@ -122,7 +100,6 @@ const putBaseFieldLocalization = async (
 export const baseFieldsHandlers = {
 	getBaseFields,
 	postBaseField,
-	putBaseField,
 	getBaseFieldLocalizationsByBaseFieldId,
 	putBaseFieldLocalization,
 };

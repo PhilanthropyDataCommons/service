@@ -10,11 +10,6 @@ baseFieldsRouter.post(
 	requireAdministratorRole,
 	baseFieldsHandlers.postBaseField,
 );
-baseFieldsRouter.put(
-	'/:baseFieldId',
-	requireAdministratorRole,
-	baseFieldsHandlers.putBaseField,
-);
 baseFieldsRouter.get(
 	'/:baseFieldId/localizations',
 	baseFieldsHandlers.getBaseFieldLocalizationsByBaseFieldId,

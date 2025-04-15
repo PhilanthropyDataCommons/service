@@ -83,6 +83,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		shortCode: 'proposal_submitter_email',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
+		valueRelevanceHours: null,
 	});
 	await createBaseField(db, null, {
 		label: 'Organization Name',
@@ -90,6 +91,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		shortCode: 'organization_name',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
+		valueRelevanceHours: null,
 	});
 	await createBaseField(db, null, {
 		label: 'Organization EIN',
@@ -97,6 +99,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		shortCode: 'organization_tax_id',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
+		valueRelevanceHours: null,
 	});
 };
 
@@ -508,6 +511,7 @@ describe('processBulkUploadTask', () => {
 											id: 1,
 											label: 'Proposal Submitter Email',
 											scope: 'proposal',
+											valueRelevanceHours: null,
 											shortCode: 'proposal_submitter_email',
 											localizations: {},
 										},
@@ -535,6 +539,7 @@ describe('processBulkUploadTask', () => {
 											id: 2,
 											label: 'Organization Name',
 											scope: 'organization',
+											valueRelevanceHours: null,
 											shortCode: 'organization_name',
 											localizations: {},
 										},
@@ -584,6 +589,7 @@ describe('processBulkUploadTask', () => {
 											id: 1,
 											label: 'Proposal Submitter Email',
 											scope: 'proposal',
+											valueRelevanceHours: null,
 											shortCode: 'proposal_submitter_email',
 											localizations: {},
 										},
@@ -611,6 +617,7 @@ describe('processBulkUploadTask', () => {
 											id: 2,
 											label: 'Organization Name',
 											scope: 'organization',
+											valueRelevanceHours: null,
 											shortCode: 'organization_name',
 											localizations: {},
 										},

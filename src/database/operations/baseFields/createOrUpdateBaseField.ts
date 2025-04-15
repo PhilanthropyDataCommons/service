@@ -7,7 +7,14 @@ const createOrUpdateBaseField = generateCreateOrUpdateItemOperation<
 	[]
 >(
 	'baseFields.createOrUpdateByShortcode',
-	['scope', 'dataType', 'shortCode', 'label', 'description'],
+	[
+		'scope',
+		'dataType',
+		'shortCode',
+		'label',
+		'description',
+		'valueRelevanceHours',
+	],
 	[],
 );
 

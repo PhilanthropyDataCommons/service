@@ -36,14 +36,21 @@ const isCurrencyWithCodeString = (value: string) => {
 	if (!currency || !code) {
 		return false;
 	}
-
+	const currencyValidatorFields = {
+		require_symbol: false,
+		allow_negatives: false,
+		require_decimal: true,
+	};
 	return (
-		validator.isCurrency(currency, {
-			require_symbol: false,
-			allow_negatives: false,
-			thousands_separator: '',
-			require_decimal: true,
-		}) && validator.isISO4217(code)
+		(validator.isCurrency(currency, {
+			...currencyValidatorFields,
+			thousands_separator: ',',
+		}) ||
+			validator.isCurrency(currency, {
+				...currencyValidatorFields,
+				thousands_separator: '',
+			})) &&
+		validator.isISO4217(code)
 	);
 };
 

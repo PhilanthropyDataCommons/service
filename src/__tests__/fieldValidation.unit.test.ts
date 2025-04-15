@@ -86,6 +86,9 @@ describe('field value validation against BaseFieldDataType', () => {
 		expect(
 			fieldValueIsValid('1000000.00 CAD', BaseFieldDataType.CURRENCY),
 		).toBe(true);
+		expect(
+			fieldValueIsValid('1,000,000.00 USD', BaseFieldDataType.CURRENCY),
+		).toBe(true);
 		expect(fieldValueIsValid('7.00 USD', BaseFieldDataType.CURRENCY)).toBe(
 			true,
 		);
@@ -97,14 +100,14 @@ describe('field value validation against BaseFieldDataType', () => {
 		expect(fieldValueIsValid('1000000.00', BaseFieldDataType.CURRENCY)).toBe(
 			false,
 		);
+		expect(fieldValueIsValid('1.000.000.00', BaseFieldDataType.CURRENCY)).toBe(
+			false,
+		);
 		expect(
 			fieldValueIsValid(
 				'1000000.00 NOTAREALCURRENCYTAG',
 				BaseFieldDataType.CURRENCY,
 			),
-		).toBe(false);
-		expect(
-			fieldValueIsValid('1,000,000.00 USD', BaseFieldDataType.CURRENCY),
 		).toBe(false);
 		expect(fieldValueIsValid('1000.001 USD', BaseFieldDataType.CURRENCY)).toBe(
 			false,

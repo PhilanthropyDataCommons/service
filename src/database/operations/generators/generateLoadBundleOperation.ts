@@ -44,6 +44,11 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
 		const entries = result.rows.map((row) => row.object);
 		const metrics = await loadTableMetrics(tableName);
+		await db.sql('auditLogs.insertOne', {
+			authContextKeycloakUserId: queryParameters.authContextKeycloakUserId,
+			queryName,
+			queryParameters,
+		});
 		return {
 			entries,
 			total: metrics.count,

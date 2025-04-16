@@ -54,6 +54,12 @@ const generateRemoveItemOperation =
 					lookupValues: queryParameters,
 				},
 			);
+		} else {
+			await db.sql('auditLogs.insertOne', {
+				authContextKeycloakUserId,
+				queryName,
+				queryParameters,
+			});
 		}
 		return object;
 	};

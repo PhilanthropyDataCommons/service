@@ -67,6 +67,12 @@ const generateCreateOrUpdateItemOperation =
 			throw new NoDataReturnedError(
 				'The database did not return a query result.',
 			);
+		} else {
+			await db.sql('auditLogs.insertOne', {
+				authContextKeycloakUserId,
+				queryName,
+				queryParameters,
+			});
 		}
 		return object;
 	};

@@ -59,7 +59,7 @@
 		"@types/pg": "^8.11.13",
 		"@types/supertest": "^6.0.3",
 		"@types/swagger-ui-express": "^4.1.8",
-		"@types/validator": "^13.12.3",
+		"@types/validator": "^13.15.0",
 		"@typescript-eslint/eslint-plugin": "^7.18.0",
 		"@typescript-eslint/parser": "^7.18.0",
 		"copyfiles": "^2.4.1",

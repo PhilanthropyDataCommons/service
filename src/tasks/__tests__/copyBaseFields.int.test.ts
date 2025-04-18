@@ -20,6 +20,7 @@ import {
 	AuthContext,
 } from '../../types';
 import { expectTimestamp, getAuthContext } from '../../test/utils';
+import type { BaseField } from '../../types';
 
 const MOCK_API_URL = 'https://example.com';
 
@@ -38,7 +39,7 @@ const createTestBaseFieldsCopyTask = async (
 	});
 };
 
-const mockFirstNameBaseField = {
+const mockFirstNameBaseField: BaseField = {
 	id: 1,
 	label: 'First Name',
 	description: 'The first name of the applicant',
@@ -59,23 +60,25 @@ const mockFirstNameBaseField = {
 			createdAt: '2024-10-17T01:46:58.494Z',
 		},
 	},
-	dataType: 'string',
-	scope: 'proposal',
+	dataType: BaseFieldDataType.STRING,
+	scope: BaseFieldScope.PROPOSAL,
+	valueRelevanceHours: null,
 	createdAt: '2024-10-17T01:46:58.494Z',
 };
 
-const mockFirstNameBaseFieldWithNoLocalizations = {
+const mockFirstNameBaseFieldWithNoLocalizations: BaseField = {
 	id: 1,
 	label: 'First Name',
 	description: 'The first name of the applicant',
 	shortCode: 'first_name',
 	localizations: {},
-	dataType: 'string',
-	scope: 'proposal',
+	dataType: BaseFieldDataType.STRING,
+	scope: BaseFieldScope.PROPOSAL,
+	valueRelevanceHours: null,
 	createdAt: '2024-10-17T01:46:58.494Z',
 };
 
-const mockLastNameBaseField = {
+const mockLastNameBaseField: BaseField = {
 	id: 2,
 	label: 'Last Name',
 	description: 'The last name of the applicant',
@@ -96,8 +99,9 @@ const mockLastNameBaseField = {
 			createdAt: '2024-10-17T01:46:58.494Z',
 		},
 	},
-	dataType: 'string',
-	scope: 'proposal',
+	dataType: BaseFieldDataType.STRING,
+	scope: BaseFieldScope.PROPOSAL,
+	valueRelevanceHours: null,
 	createdAt: '2024-10-17T01:46:58.494Z',
 };
 
@@ -305,7 +309,12 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, [mockFirstNameBaseField]);
+			.reply(200, [
+				{
+					...mockFirstNameBaseField,
+					valueRelevanceHours: 9001,
+				},
+			]);
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -347,6 +356,7 @@ describe('copyBaseFields', () => {
 			},
 			dataType: 'string',
 			scope: 'proposal',
+			valueRelevanceHours: 9001,
 			createdAt: expectTimestamp,
 		});
 
@@ -361,6 +371,7 @@ describe('copyBaseFields', () => {
 			shortCode: 'local',
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
+			valueRelevanceHours: null,
 		});
 
 		const before = await loadTableMetrics('base_fields');
@@ -411,9 +422,10 @@ describe('copyBaseFields', () => {
 			shortCode: 'ld',
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
+			valueRelevanceHours: null,
 		});
 
-		const mockRemoteBaseField = {
+		const mockRemoteBaseField: BaseField = {
 			id: 1,
 			label: 'Local Data',
 			description: 'This is local data',
@@ -422,6 +434,7 @@ describe('copyBaseFields', () => {
 			createdAt: '2024-10-17T01:46:58.494Z',
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
+			valueRelevanceHours: null,
 		};
 
 		const before = await loadTableMetrics('base_fields');
@@ -463,6 +476,7 @@ describe('copyBaseFields', () => {
 			shortCode: 'ld',
 			dataType: 'string',
 			scope: 'proposal',
+			valueRelevanceHours: null,
 			createdAt: localBaseField.createdAt,
 			localizations: {},
 		});
@@ -478,6 +492,7 @@ describe('copyBaseFields', () => {
 			shortCode: 'ld',
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
+			valueRelevanceHours: null,
 		});
 
 		const mockRemoteBaseField = {
@@ -489,6 +504,7 @@ describe('copyBaseFields', () => {
 			createdAt: '2024-10-17T01:46:58.494Z',
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
+			valueRelevanceHours: null,
 		};
 
 		const before = await loadTableMetrics('base_fields');
@@ -530,6 +546,7 @@ describe('copyBaseFields', () => {
 			shortCode: 'ld',
 			dataType: 'string',
 			scope: 'proposal',
+			valueRelevanceHours: null,
 			createdAt: localBaseField.createdAt,
 			localizations: {},
 		});
@@ -559,6 +576,7 @@ describe('copyBaseFields', () => {
 			},
 			dataType: 'string',
 			scope: 'proposal',
+			valueRelevanceHours: null,
 			createdAt: expectTimestamp,
 		});
 
@@ -573,6 +591,7 @@ describe('copyBaseFields', () => {
 			shortCode: mockFirstNameBaseField.shortCode,
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
+			valueRelevanceHours: null,
 		});
 
 		await createOrUpdateBaseFieldLocalization(db, null, {
@@ -624,6 +643,7 @@ describe('copyBaseFields', () => {
 			},
 			dataType: 'string',
 			scope: 'proposal',
+			valueRelevanceHours: null,
 			createdAt: localBaseField.createdAt,
 		});
 
@@ -638,6 +658,7 @@ describe('copyBaseFields', () => {
 			shortCode: mockFirstNameBaseField.shortCode,
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
+			valueRelevanceHours: null,
 		});
 
 		await createOrUpdateBaseFieldLocalization(db, null, {
@@ -703,6 +724,7 @@ describe('copyBaseFields', () => {
 			},
 			dataType: 'string',
 			scope: 'proposal',
+			valueRelevanceHours: null,
 			createdAt: localBaseField.createdAt,
 		});
 
@@ -751,6 +773,7 @@ describe('copyBaseFields', () => {
 			shortCode: mockFirstNameBaseField.shortCode,
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
+			valueRelevanceHours: null,
 		});
 
 		const before = await loadTableMetrics('base_fields');
@@ -808,6 +831,7 @@ describe('copyBaseFields', () => {
 			},
 			dataType: 'string',
 			scope: 'proposal',
+			valueRelevanceHours: null,
 			createdAt: baseField.createdAt,
 		});
 

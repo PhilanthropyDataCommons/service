@@ -350,6 +350,7 @@ describe('/changemakers', () => {
 					description: 'Five thousand one hundred fifty three.',
 					dataType: BaseFieldDataType.EMAIL,
 					scope: BaseFieldScope.ORGANIZATION,
+					valueRelevanceHours: null,
 				});
 				baseFieldPhone = await createBaseField(db, null, {
 					label: 'Fifty three ninety nine',
@@ -357,6 +358,7 @@ describe('/changemakers', () => {
 					description: 'Five thousand three hundred ninety nine.',
 					dataType: BaseFieldDataType.PHONE_NUMBER,
 					scope: BaseFieldScope.ORGANIZATION,
+					valueRelevanceHours: null,
 				});
 				baseFieldWebsite = await createBaseField(db, null, {
 					label: 'Fifty four seventy one 5471',
@@ -364,6 +366,7 @@ describe('/changemakers', () => {
 					description: 'Five thousand four hundred seventy one.',
 					dataType: BaseFieldDataType.URL,
 					scope: BaseFieldScope.ORGANIZATION,
+					valueRelevanceHours: null,
 				});
 				firstChangemaker = await createChangemaker(db, null, {
 					name: 'Five thousand one hundred forty seven reasons',

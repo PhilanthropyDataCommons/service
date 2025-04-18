@@ -47,8 +47,7 @@ const putBaseField = async (
 	if (Number.isNaN(baseFieldId)) {
 		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}
-	const body = req.body as unknown;
-	if (!isWritableBaseField(body)) {
+	if (!isWritableBaseField(req.body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableBaseField.errors ?? [],
@@ -56,7 +55,27 @@ const putBaseField = async (
 	}
 
 	await assertBaseFieldExists(baseFieldId);
-	const baseField = await updateBaseField(db, null, body, baseFieldId);
+	const {
+		label,
+		description,
+		shortCode,
+		dataType,
+		scope,
+		valueRelevanceHours,
+	} = req.body;
+	const baseField = await updateBaseField(
+		db,
+		null,
+		{
+			label,
+			description,
+			shortCode,
+			dataType,
+			scope,
+			valueRelevanceHours,
+		},
+		baseFieldId,
+	);
 	res.status(200).contentType('application/json').send(baseField);
 };
 

@@ -28,6 +28,7 @@ interface BaseField {
 	shortCode: string;
 	dataType: BaseFieldDataType;
 	scope: BaseFieldScope;
+	valueRelevanceHours: number | null;
 	readonly localizations: Record<string, BaseFieldLocalization>;
 	readonly createdAt: string;
 }
@@ -55,6 +56,11 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 			type: 'string',
 			enum: Object.values(BaseFieldScope),
 		},
+		valueRelevanceHours: {
+			type: 'number',
+			minimum: 0,
+			nullable: true as false, // see https://github.com/ajv-validator/ajv/issues/2163
+		},
 		localizations: {
 			type: 'object',
 			additionalProperties: baseFieldLocalizationSchema,
@@ -71,6 +77,7 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 		'shortCode',
 		'dataType',
 		'scope',
+		'valueRelevanceHours',
 		'localizations',
 		'createdAt',
 	],
@@ -101,8 +108,20 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 			type: 'string',
 			enum: Object.values(BaseFieldScope),
 		},
+		valueRelevanceHours: {
+			type: 'number',
+			minimum: 0,
+			nullable: true as false, // see https://github.com/ajv-validator/ajv/issues/2163
+		},
 	},
-	required: ['label', 'description', 'shortCode', 'dataType', 'scope'],
+	required: [
+		'label',
+		'description',
+		'shortCode',
+		'dataType',
+		'scope',
+		'valueRelevanceHours',
+	],
 };
 
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);

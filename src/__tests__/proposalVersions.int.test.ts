@@ -34,6 +34,7 @@ const createTestBaseFields = async () => {
 		shortCode: 'firstName',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
+		valueRelevanceHours: null,
 	});
 	await createBaseField(db, null, {
 		label: 'Last Name',
@@ -41,6 +42,7 @@ const createTestBaseFields = async () => {
 		shortCode: 'lastName',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
+		valueRelevanceHours: null,
 	});
 };
 

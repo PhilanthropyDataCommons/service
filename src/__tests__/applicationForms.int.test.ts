@@ -29,6 +29,7 @@ const createTestBaseFields = async () => {
 		shortCode: 'organizationName',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
+		valueRelevanceHours: null,
 	});
 	await createBaseField(db, null, {
 		label: 'Years of work',
@@ -36,6 +37,7 @@ const createTestBaseFields = async () => {
 		shortCode: 'yearsOfWork',
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
+		valueRelevanceHours: null,
 	});
 };
 

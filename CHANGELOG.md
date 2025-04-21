@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.17.1 2025-04-21
+
+### Added
+
+- `BaseFields` now have a `valueRelevanceHours` attribute which signal how long values associated with the base field are considered relevant.
+
 ## 0.17.0 2025-02-13
 
 ### Changed

@@ -3,13 +3,15 @@ INSERT INTO base_fields (
 	description,
 	short_code,
 	data_type,
-	scope
+	scope,
+	value_relevance_hours
 )
 VALUES (
 	:label,
 	:description,
 	:shortCode,
 	:dataType,
-	:scope
+	:scope,
+	:valueRelevanceHours
 )
 RETURNING base_field_to_json(base_fields) AS object;

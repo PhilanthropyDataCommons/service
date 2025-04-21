@@ -8,7 +8,8 @@ INSERT INTO data_providers (
 	:keycloakOrganizationId
 )
 ON CONFLICT (short_code)
-DO UPDATE SET
-name = excluded.name,
-keycloak_organization_id = excluded.keycloak_organization_id
+DO UPDATE
+	SET
+		name = excluded.name,
+		keycloak_organization_id = excluded.keycloak_organization_id
 RETURNING data_provider_to_json(data_providers) AS object;

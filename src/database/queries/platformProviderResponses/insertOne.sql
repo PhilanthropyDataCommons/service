@@ -9,9 +9,9 @@ VALUES (
 	:data
 )
 ON CONFLICT (external_id, platform_provider) DO UPDATE
-SET
-data = excluded.data,
-created_at = excluded.created_at
+	SET
+		data = excluded.data,
+		created_at = excluded.created_at
 RETURNING
 	external_id AS "externalId",
 	platform_provider AS "platformProvider",

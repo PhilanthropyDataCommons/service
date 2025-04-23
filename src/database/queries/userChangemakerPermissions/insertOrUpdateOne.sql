@@ -12,6 +12,6 @@ INSERT INTO user_changemaker_permissions (
 	null
 )
 ON CONFLICT (user_keycloak_user_id, permission, changemaker_id) DO UPDATE
-SET not_after = null
+	SET not_after = null
 RETURNING user_changemaker_permission_to_json(user_changemaker_permissions)
 	AS object;

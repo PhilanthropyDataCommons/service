@@ -12,5 +12,5 @@ INSERT INTO user_funder_permissions (
 	NULL
 )
 ON CONFLICT (user_keycloak_user_id, permission, funder_short_code) DO UPDATE
-SET not_after = NULL
+	SET not_after = NULL
 RETURNING user_funder_permission_to_json(user_funder_permissions) AS object;

@@ -54,7 +54,7 @@
 		"@types/express": "^5.0.1",
 		"@types/jest": "^29.5.14",
 		"@types/language-tags": "^1.0.4",
-		"@types/node": "^22.14.1",
+		"@types/node": "^22.15.2",
 		"@types/node-fetch": "^2.6.12",
 		"@types/pg": "^8.11.14",
 		"@types/supertest": "^6.0.3",

@@ -8,6 +8,7 @@ interface ProposalFieldValue {
 	applicationFormFieldId: number;
 	position: number;
 	value: string;
+	goodAsOf: string | null;
 	readonly createdAt: string;
 	readonly applicationFormField: ApplicationFormField;
 	readonly isValid: boolean;
@@ -33,8 +34,12 @@ const writableProposalFieldValueWithProposalVersionContextSchema: JSONSchemaType
 			value: {
 				type: 'string',
 			},
+			goodAsOf: {
+				type: 'string',
+				nullable: true as false, // see https://github.com/ajv-validator/ajv/issues/2163
+			},
 		},
-		required: ['applicationFormFieldId', 'position', 'value'],
+		required: ['applicationFormFieldId', 'position', 'value', 'goodAsOf'],
 	};
 
 type InternallyWritableProposalFieldValue = WritableProposalFieldValue &

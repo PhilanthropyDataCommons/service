@@ -250,6 +250,7 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'This is a summary',
 				isValid: true,
+				goodAsOf: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
@@ -257,6 +258,7 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'This is a pair of pants',
 				isValid: true,
+				goodAsOf: null,
 			});
 			const response = await request(app)
 				.get('/proposals?_content=summary')
@@ -289,6 +291,7 @@ describe('/proposals', () => {
 										position: 1,
 										value: 'This is a summary',
 										isValid: true,
+										goodAsOf: null,
 										createdAt: expectTimestamp,
 										applicationFormField: {
 											id: 1,
@@ -497,6 +500,7 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'This is a summary',
 				isValid: true,
+				goodAsOf: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
@@ -504,6 +508,7 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'This is a pair of pants',
 				isValid: true,
+				goodAsOf: null,
 			});
 			const response = await request(app)
 				.get('/proposals?_content=summary')
@@ -536,6 +541,7 @@ describe('/proposals', () => {
 										position: 1,
 										value: 'This is a summary',
 										isValid: true,
+										goodAsOf: null,
 										createdAt: expectTimestamp,
 										applicationFormField: {
 											id: 1,
@@ -795,6 +801,7 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'Title for version 1 from 2525-01-04',
 				isValid: true,
+				goodAsOf: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
@@ -802,6 +809,7 @@ describe('/proposals', () => {
 				position: 2,
 				value: 'Abstract for version 1 from 2525-01-04',
 				isValid: true,
+				goodAsOf: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
@@ -809,6 +817,7 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'Title for version 2 from 2525-01-04',
 				isValid: true,
+				goodAsOf: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
@@ -816,6 +825,7 @@ describe('/proposals', () => {
 				position: 2,
 				value: 'Abstract for version 2 from 2525-01-04',
 				isValid: true,
+				goodAsOf: null,
 			});
 			const response = await request(app)
 				.get('/proposals/1')
@@ -845,6 +855,7 @@ describe('/proposals', () => {
 								position: 1,
 								value: 'Title for version 2 from 2525-01-04',
 								isValid: true,
+								goodAsOf: null,
 								createdAt: expectTimestamp,
 								applicationFormField: {
 									id: 1,
@@ -873,6 +884,7 @@ describe('/proposals', () => {
 								position: 2,
 								value: 'Abstract for version 2 from 2525-01-04',
 								isValid: true,
+								goodAsOf: null,
 								createdAt: expectTimestamp,
 								applicationFormField: {
 									id: 2,
@@ -914,6 +926,7 @@ describe('/proposals', () => {
 								value: 'Title for version 1 from 2525-01-04',
 								createdAt: expectTimestamp,
 								isValid: true,
+								goodAsOf: null,
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
@@ -941,6 +954,7 @@ describe('/proposals', () => {
 								position: 2,
 								value: 'Abstract for version 1 from 2525-01-04',
 								isValid: true,
+								goodAsOf: null,
 								createdAt: expectTimestamp,
 								applicationFormField: {
 									id: 2,
@@ -1013,6 +1027,7 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'Title for version 1 from 2525-01-04',
 				isValid: true,
+				goodAsOf: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
@@ -1020,6 +1035,7 @@ describe('/proposals', () => {
 				position: 2,
 				value: 'Abstract for version 1 from 2525-01-04',
 				isValid: true,
+				goodAsOf: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
@@ -1027,6 +1043,7 @@ describe('/proposals', () => {
 				position: 1,
 				value: 'Title for version 2 from 2525-01-04',
 				isValid: true,
+				goodAsOf: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 2,
@@ -1034,6 +1051,7 @@ describe('/proposals', () => {
 				position: 2,
 				value: 'Abstract for version 2 from 2525-01-04',
 				isValid: true,
+				goodAsOf: null,
 			});
 			const response = await request(app)
 				.get('/proposals/1')
@@ -1063,6 +1081,7 @@ describe('/proposals', () => {
 								position: 1,
 								value: 'Title for version 2 from 2525-01-04',
 								isValid: true,
+								goodAsOf: null,
 								createdAt: expectTimestamp,
 								applicationFormField: {
 									id: 1,
@@ -1091,6 +1110,7 @@ describe('/proposals', () => {
 								position: 2,
 								value: 'Abstract for version 2 from 2525-01-04',
 								isValid: true,
+								goodAsOf: null,
 								createdAt: expectTimestamp,
 								applicationFormField: {
 									id: 2,
@@ -1132,6 +1152,7 @@ describe('/proposals', () => {
 								value: 'Title for version 1 from 2525-01-04',
 								createdAt: expectTimestamp,
 								isValid: true,
+								goodAsOf: null,
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
@@ -1159,6 +1180,7 @@ describe('/proposals', () => {
 								position: 2,
 								value: 'Abstract for version 1 from 2525-01-04',
 								isValid: true,
+								goodAsOf: null,
 								createdAt: expectTimestamp,
 								applicationFormField: {
 									id: 2,

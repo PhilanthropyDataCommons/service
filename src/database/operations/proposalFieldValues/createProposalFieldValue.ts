@@ -16,6 +16,7 @@ const createProposalFieldValue = generateCreateOrUpdateItemOperation<
 		'position',
 		'value',
 		'isValid',
+		'goodAsOf',
 	],
 	[],
 );

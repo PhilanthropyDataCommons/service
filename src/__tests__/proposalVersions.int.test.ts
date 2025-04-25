@@ -372,12 +372,14 @@ describe('/proposalVersions', () => {
 							position: 1,
 							value: 'Gronald',
 							isValid: true,
+							goodAsOf: '2025-04-25T12:34:03-04:00',
 						},
 						{
 							applicationFormFieldId: 2,
 							position: 1,
 							value: 'Plorp',
 							isValid: true,
+							goodAsOf: null,
 						},
 					],
 				})
@@ -395,6 +397,7 @@ describe('/proposalVersions', () => {
 						position: 1,
 						value: 'Gronald',
 						isValid: true,
+						goodAsOf: '2025-04-25T16:34:03+00:00',
 						createdAt: expectTimestamp,
 					},
 					{
@@ -403,6 +406,7 @@ describe('/proposalVersions', () => {
 						position: 1,
 						value: 'Plorp',
 						isValid: true,
+						goodAsOf: null,
 						createdAt: expectTimestamp,
 					},
 				],
@@ -658,6 +662,7 @@ describe('/proposalVersions', () => {
 							position: 1,
 							value: 'Gronald',
 							isValid: true,
+							goodAsOf: null,
 						},
 					],
 				})
@@ -725,6 +730,7 @@ describe('/proposalVersions', () => {
 							position: 1,
 							value: 'Gronald',
 							isValid: true,
+							goodAsOf: null,
 						},
 					],
 				})

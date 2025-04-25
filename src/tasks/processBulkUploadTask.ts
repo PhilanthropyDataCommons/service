@@ -390,6 +390,7 @@ export const processBulkUploadTask = async (
 						value: fieldValue,
 						position: index,
 						isValid,
+						goodAsOf: null,
 					});
 				}),
 			);

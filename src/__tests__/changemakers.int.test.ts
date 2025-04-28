@@ -464,6 +464,7 @@ describe('/changemakers', () => {
 					position: 5297,
 					value: 'validbutold@emailaddress.com',
 					isValid: true,
+					goodAsOf: null,
 				});
 				const applicationFormIdLatestValid = (
 					await createApplicationForm(db, null, {
@@ -489,6 +490,7 @@ describe('/changemakers', () => {
 					position: 5381,
 					value: 'valid@emailaddress.com',
 					isValid: true,
+					goodAsOf: null,
 				});
 				const applicationFormIdLatest = (
 					await createApplicationForm(db, null, {
@@ -515,6 +517,7 @@ describe('/changemakers', () => {
 					position: 5231,
 					value: 'invalid-email-address.com',
 					isValid: false,
+					goodAsOf: null,
 				});
 				await request(app)
 					.get(`/changemakers/${changemakerId}`)
@@ -579,6 +582,7 @@ describe('/changemakers', () => {
 						position: 5413,
 						value: '+15555555555',
 						isValid: true,
+						goodAsOf: null,
 					},
 				);
 				const applicationFormIdFunderLatest = (
@@ -606,6 +610,7 @@ describe('/changemakers', () => {
 					position: 5419,
 					value: '+16666666666',
 					isValid: true,
+					goodAsOf: null,
 				});
 				await request(app)
 					.get(`/changemakers/${changemaker.id}`)
@@ -663,6 +668,7 @@ describe('/changemakers', () => {
 					position: 5441,
 					value: '+15555555441',
 					isValid: true,
+					goodAsOf: null,
 				});
 				const applicationFormIdDataProviderLatest = (
 					await createApplicationForm(db, null, {
@@ -689,6 +695,7 @@ describe('/changemakers', () => {
 					position: 5449,
 					value: '+16666665449',
 					isValid: true,
+					goodAsOf: null,
 				});
 				await request(app)
 					.get(`/changemakers/${changemaker.id}`)
@@ -742,6 +749,7 @@ describe('/changemakers', () => {
 					position: 5483,
 					value: '+15555555483',
 					isValid: true,
+					goodAsOf: null,
 				});
 				const applicationFormIdDataProviderLatest = (
 					await createApplicationForm(db, null, {
@@ -771,6 +779,7 @@ describe('/changemakers', () => {
 						position: 5503,
 						value: '+16666665503',
 						isValid: true,
+						goodAsOf: null,
 					},
 				);
 				await request(app)

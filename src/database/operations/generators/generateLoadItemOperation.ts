@@ -1,3 +1,4 @@
+import { createDbOperationAuditLog } from '../dbOperationAuditLogs/createDbOperationAuditLog';
 import { NotFoundError } from '../../../errors';
 import {
 	getIsAdministratorFromAuthContext,
@@ -50,6 +51,11 @@ const generateLoadItemOperation =
 			throw new NotFoundError(`Entity not found`, {
 				entityType,
 				lookupValues: queryParameters,
+			});
+		} else {
+			await createDbOperationAuditLog(db, authContext, {
+				queryName,
+				queryParameters,
 			});
 		}
 		return object;

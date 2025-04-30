@@ -40,8 +40,8 @@ export const getAuthContext = (user: User, isAdministrator = false) => ({
 	},
 });
 
-export const getTestAuthContext = async () =>
-	getAuthContext(await loadTestUser(), true);
+export const getTestAuthContext = async (isAdministrator = true) =>
+	getAuthContext(await loadTestUser(), isAdministrator);
 
 export const NO_OFFSET = 0;
 

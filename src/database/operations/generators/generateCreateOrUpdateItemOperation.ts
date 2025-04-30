@@ -1,3 +1,4 @@
+import { createDbOperationAuditLog } from '../dbOperationAuditLogs/createDbOperationAuditLog';
 import { NoDataReturnedError } from '../../../errors/NoDataReturnedError';
 import {
 	getIsAdministratorFromAuthContext,
@@ -67,6 +68,11 @@ const generateCreateOrUpdateItemOperation =
 			throw new NoDataReturnedError(
 				'The database did not return a query result.',
 			);
+		} else {
+			await createDbOperationAuditLog(db, authContext, {
+				queryName,
+				queryParameters,
+			});
 		}
 		return object;
 	};

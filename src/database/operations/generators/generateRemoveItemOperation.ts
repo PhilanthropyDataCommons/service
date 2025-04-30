@@ -1,3 +1,4 @@
+import { createDbOperationAuditLog } from '../dbOperationAuditLogs/createDbOperationAuditLog';
 import { NotFoundError } from '../../../errors';
 import {
 	getIsAdministratorFromAuthContext,
@@ -54,6 +55,11 @@ const generateRemoveItemOperation =
 					lookupValues: queryParameters,
 				},
 			);
+		} else {
+			await createDbOperationAuditLog(db, authContext, {
+				queryName,
+				queryParameters,
+			});
 		}
 		return object;
 	};

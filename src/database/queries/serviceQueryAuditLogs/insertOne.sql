@@ -1,4 +1,4 @@
-INSERT INTO db_operation_audit_logs (
+INSERT INTO service_query_audit_logs (
 	user_keycloak_user_id,
 	user_is_administrator,
 	query_name,

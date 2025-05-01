@@ -1,6 +1,8 @@
-import { describe, expect, test } from '@jest/globals';
+// The unusual import of @jest/globals is to help @typescript-eslint
+// not complain about `expect.any(Number)` below in the test assertion.
+import { expect } from '@jest/globals';
 import { db } from '../database/db';
-import { createDbOperationAuditLog } from '../database/operations/dbOperationAuditLogs/createDbOperationAuditLog';
+import { createServiceQueryAuditLog } from '../database/operations/serviceQueryAuditLogs';
 import { loadUnifiedAuditLogBundle } from '../database/operations/unifiedAuditLogs';
 import {
 	expectTimestamp,
@@ -9,15 +11,15 @@ import {
 	NO_OFFSET,
 } from '../test/utils';
 
-describe('db operation audit logs appear', () => {
-	test('direct call to createDbOperationAuditLog appears', async () => {
+describe('service query audit logs', () => {
+	it('appears in logs when createServiceQueryAuditLog is called', async () => {
 		const authContext = await getTestAuthContext(false);
 		const administratorAuthContext = await getTestAuthContext(true);
 		const queryParameters = {
 			keyOne: 'Value 1 of Pretend query 5099',
 			keyTwo: 'Value 2 of Pretend query 5099',
 		};
-		await createDbOperationAuditLog(db, authContext, {
+		await createServiceQueryAuditLog(db, authContext, {
 			queryName: 'Pretend query 5099',
 			queryParameters,
 		});

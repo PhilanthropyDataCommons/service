@@ -1,4 +1,4 @@
-import { createDbOperationAuditLog } from '../dbOperationAuditLogs/createDbOperationAuditLog';
+import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import { NoDataReturnedError } from '../../../errors/NoDataReturnedError';
 import {
 	getIsAdministratorFromAuthContext,
@@ -69,7 +69,7 @@ const generateCreateOrUpdateItemOperation =
 				'The database did not return a query result.',
 			);
 		} else {
-			await createDbOperationAuditLog(db, authContext, {
+			await createServiceQueryAuditLog(db, authContext, {
 				queryName,
 				queryParameters,
 			});

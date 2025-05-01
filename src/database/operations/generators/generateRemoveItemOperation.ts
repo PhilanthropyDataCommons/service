@@ -1,4 +1,4 @@
-import { createDbOperationAuditLog } from '../dbOperationAuditLogs/createDbOperationAuditLog';
+import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import { NotFoundError } from '../../../errors';
 import {
 	getIsAdministratorFromAuthContext,
@@ -56,7 +56,7 @@ const generateRemoveItemOperation =
 				},
 			);
 		} else {
-			await createDbOperationAuditLog(db, authContext, {
+			await createServiceQueryAuditLog(db, authContext, {
 				queryName,
 				queryParameters,
 			});

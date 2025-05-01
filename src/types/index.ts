@@ -36,6 +36,7 @@ export * from './Source';
 export * from './TableMetrics';
 export * from './TaskStatus';
 export * from './TinyPgErrorWithQueryContext';
+export * from './UnifiedAuditLog';
 export * from './User';
 export * from './UserChangemakerPermission';
 export * from './UserDataProviderPermission';

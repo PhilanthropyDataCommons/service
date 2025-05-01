@@ -48,6 +48,7 @@
 	},
 	"type": "commonjs",
 	"devDependencies": {
+		"@jest/globals": "^29.7.0",
 		"@redocly/cli": "^1.34.2",
 		"@tsconfig/node22": "^22.0.1",
 		"@types/cors": "^2.8.17",

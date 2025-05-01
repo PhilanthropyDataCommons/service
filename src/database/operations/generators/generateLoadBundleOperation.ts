@@ -1,3 +1,4 @@
+import { createDbOperationAuditLog } from '../dbOperationAuditLogs/createDbOperationAuditLog';
 import { loadTableMetrics } from '../generic/loadTableMetrics';
 import {
 	getIsAdministratorFromAuthContext,
@@ -44,6 +45,10 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
 		const entries = result.rows.map((row) => row.object);
 		const metrics = await loadTableMetrics(tableName);
+		await createDbOperationAuditLog(db, authContext, {
+			queryName,
+			queryParameters,
+		});
 		return {
 			entries,
 			total: metrics.count,

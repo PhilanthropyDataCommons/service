@@ -3,7 +3,7 @@ import { app } from '../app';
 import {
 	createApplicationForm,
 	createApplicationFormField,
-	createBaseField,
+	createOrUpdateBaseField,
 	createOpportunity,
 	createOrUpdateFunder,
 	createOrUpdateUserFunderPermission,
@@ -23,7 +23,7 @@ import {
 const logger = getLogger(__filename);
 
 const createTestBaseFields = async () => {
-	await createBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'Organization Name',
 		description: 'The organizational name of the applicant',
 		shortCode: 'organizationName',
@@ -31,7 +31,7 @@ const createTestBaseFields = async () => {
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
 	});
-	await createBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'Years of work',
 		description: 'The number of years the project will take to complete',
 		shortCode: 'yearsOfWork',
@@ -191,25 +191,25 @@ describe('/applicationForms', () => {
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
 				applicationFormId: 3,
-				baseFieldId: 2,
+				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Anni Worki',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 3,
-				baseFieldId: 1,
+				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Org Nomen',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 2,
-				baseFieldId: 1,
+				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 2,
-				baseFieldId: 2,
+				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 			});
@@ -226,9 +226,8 @@ describe('/applicationForms', () => {
 					{
 						id: 4,
 						applicationFormId: 2,
-						baseFieldId: 2,
+						baseFieldShortCode: 'yearsOfWork',
 						baseField: {
-							id: 2,
 							label: 'Years of work',
 							description:
 								'The number of years the project will take to complete',
@@ -243,9 +242,8 @@ describe('/applicationForms', () => {
 					{
 						id: 3,
 						applicationFormId: 2,
-						baseFieldId: 1,
+						baseFieldShortCode: 'organizationName',
 						baseField: {
-							id: 1,
 							label: 'Organization Name',
 							description: 'The organizational name of the applicant',
 							shortCode: 'organizationName',
@@ -281,13 +279,13 @@ describe('/applicationForms', () => {
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 2,
+				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 			});
@@ -302,11 +300,9 @@ describe('/applicationForms', () => {
 				version: 1,
 				fields: [
 					{
-						id: 2,
 						applicationFormId: 1,
-						baseFieldId: 2,
+						baseFieldShortCode: 'yearsOfWork',
 						baseField: {
-							id: 2,
 							label: 'Years of work',
 							description:
 								'The number of years the project will take to complete',
@@ -319,11 +315,9 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp,
 					},
 					{
-						id: 1,
 						applicationFormId: 1,
-						baseFieldId: 1,
+						baseFieldShortCode: 'organizationName',
 						baseField: {
-							id: 1,
 							label: 'Organization Name',
 							description: 'The organizational name of the applicant',
 							shortCode: 'organizationName',
@@ -364,13 +358,13 @@ describe('/applicationForms', () => {
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 2,
+				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 			});
@@ -512,9 +506,9 @@ describe('/applicationForms', () => {
 					opportunityId: '1',
 					fields: [
 						{
-							baseFieldId: '1',
+							baseFieldShortCode: 'organizationName',
 							position: 1,
-							label: 'Your First Name',
+							label: 'Organization Name',
 						},
 					],
 				})
@@ -529,10 +523,10 @@ describe('/applicationForms', () => {
 				fields: [
 					{
 						applicationFormId: 1,
-						baseFieldId: 1,
+						baseFieldShortCode: 'organizationName',
 						createdAt: expectTimestamp,
 						id: 1,
-						label: 'Your First Name',
+						label: 'Organization Name',
 						position: 1,
 					},
 				],
@@ -660,9 +654,9 @@ describe('/applicationForms', () => {
 					opportunityId: '1',
 					fields: [
 						{
-							baseFieldId: '1',
+							baseFieldShortCode: 'organizationName',
 							position: 1,
-							label: 'Your First Name',
+							label: 'Organization Name',
 						},
 					],
 				})

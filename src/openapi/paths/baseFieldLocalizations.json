@@ -1,6 +1,6 @@
 {
 	"get": {
-		"operationId": "getBaseFieldLocalizationsByBaseFieldId",
+		"operationId": "getBaseFieldLocalizationsByBaseFieldShortCode",
 		"summary": "Gets a list of base fields localizations for a given basefield.",
 		"tags": ["Base Fields"],
 		"security": [
@@ -10,8 +10,8 @@
 		],
 		"parameters": [
 			{
-				"name": "baseFieldId",
-				"description": "The PDC-generated ID of a base field.",
+				"name": "baseFieldShortCode",
+				"description": "The short-code of a base field.",
 				"in": "path",
 				"required": true,
 				"schema": {

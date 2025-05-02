@@ -2,7 +2,7 @@ import nock from 'nock';
 import { requireEnv } from 'require-env-variable';
 import {
 	db,
-	createBaseField,
+	createOrUpdateBaseField,
 	loadBulkUploadTask,
 	loadProposalBundle,
 	loadApplicationFormBundle,
@@ -77,7 +77,7 @@ const createTestBulkUploadTask = async (
 };
 
 const createTestBaseFields = async (): Promise<void> => {
-	await createBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'Proposal Submitter Email',
 		description: 'The email address of the person who submitted the proposal.',
 		shortCode: 'proposal_submitter_email',
@@ -85,7 +85,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
 	});
-	await createBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'Organization Name',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_name',
@@ -93,7 +93,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
 	});
-	await createBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'Organization EIN',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_tax_id',
@@ -508,14 +508,13 @@ describe('processBulkUploadTask', () => {
 											dataType: 'string',
 											description:
 												'The email address of the person who submitted the proposal.',
-											id: 1,
 											label: 'Proposal Submitter Email',
 											scope: 'proposal',
 											valueRelevanceHours: null,
 											shortCode: 'proposal_submitter_email',
 											localizations: {},
 										},
-										baseFieldId: 1,
+										baseFieldShortCode: 'proposal_submitter_email',
 										createdAt: expectTimestamp,
 										id: expect.any(Number) as number,
 										label: 'Proposal Submitter Email',
@@ -537,14 +536,13 @@ describe('processBulkUploadTask', () => {
 											createdAt: expectTimestamp,
 											dataType: 'string',
 											description: 'The name of the applying organization.',
-											id: 2,
 											label: 'Organization Name',
 											scope: 'organization',
 											valueRelevanceHours: null,
 											shortCode: 'organization_name',
 											localizations: {},
 										},
-										baseFieldId: 2,
+										baseFieldShortCode: 'organization_name',
 										createdAt: expectTimestamp,
 										id: expect.any(Number) as number,
 										label: 'Organization Name',
@@ -588,14 +586,13 @@ describe('processBulkUploadTask', () => {
 											dataType: 'string',
 											description:
 												'The email address of the person who submitted the proposal.',
-											id: 1,
 											label: 'Proposal Submitter Email',
 											scope: 'proposal',
 											valueRelevanceHours: null,
 											shortCode: 'proposal_submitter_email',
 											localizations: {},
 										},
-										baseFieldId: 1,
+										baseFieldShortCode: 'proposal_submitter_email',
 										createdAt: expectTimestamp,
 										id: expect.any(Number) as number,
 										label: 'Proposal Submitter Email',
@@ -617,14 +614,13 @@ describe('processBulkUploadTask', () => {
 											createdAt: expectTimestamp,
 											dataType: 'string',
 											description: 'The name of the applying organization.',
-											id: 2,
 											label: 'Organization Name',
 											scope: 'organization',
 											valueRelevanceHours: null,
 											shortCode: 'organization_name',
 											localizations: {},
 										},
-										baseFieldId: 2,
+										baseFieldShortCode: 'organization_name',
 										createdAt: expectTimestamp,
 										id: expect.any(Number) as number,
 										label: 'Organization Name',

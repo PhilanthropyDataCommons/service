@@ -4,7 +4,7 @@ import {
 	db,
 	createApplicationForm,
 	createApplicationFormField,
-	createBaseField,
+	createOrUpdateBaseField,
 	createOpportunity,
 	createProposal,
 	createProposalVersion,
@@ -28,7 +28,7 @@ import {
 const logger = getLogger(__filename);
 
 const createTestBaseFields = async () => {
-	await createBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'First Name',
 		description: 'The first name of the applicant',
 		shortCode: 'firstName',
@@ -36,7 +36,7 @@ const createTestBaseFields = async () => {
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
 	});
-	await createBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'Last Name',
 		description: 'The last name of the applicant',
 		shortCode: 'lastName',
@@ -347,13 +347,13 @@ describe('/proposalVersions', () => {
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'firstName',
 				position: 1,
 				label: 'First Name',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 2,
+				baseFieldShortCode: 'lastName',
 				position: 2,
 				label: 'Last Name',
 			});
@@ -704,13 +704,13 @@ describe('/proposalVersions', () => {
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 1,
+				baseFieldShortCode: 'firstName',
 				position: 1,
 				label: 'First Name',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldId: 2,
+				baseFieldShortCode: 'lastName',
 				position: 2,
 				label: 'Last Name',
 			});

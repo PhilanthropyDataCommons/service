@@ -6,7 +6,7 @@ CREATE FUNCTION base_field_localization_to_json(
 RETURNS jsonb AS $$
 BEGIN
   RETURN jsonb_build_object(
-    'baseFieldId', base_field_localization.base_field_id,
+    'baseFieldShortCode', base_field_localization.base_field_short_code,
     'language', base_field_localization.language,
     'label', base_field_localization.label,
     'description', base_field_localization.description,

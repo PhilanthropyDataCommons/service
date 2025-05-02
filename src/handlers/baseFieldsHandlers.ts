@@ -1,11 +1,10 @@
 import { InputValidationError } from '../errors';
 import {
 	db,
-	createBaseField,
+	createOrUpdateBaseField,
 	loadBaseFields,
-	updateBaseField,
 	createOrUpdateBaseFieldLocalization,
-	loadBaseFieldLocalizationsBundleByBaseFieldId,
+	loadBaseFieldLocalizationsBundleByBaseFieldShortCode,
 	loadBaseField,
 	getLimitValues,
 } from '../database';
@@ -15,11 +14,15 @@ import {
 	isWritableBaseField,
 	isWritableBaseFieldLocalization,
 	isId,
+	ShortCode,
+	isShortCode,
 } from '../types';
 import type { Request, Response } from 'express';
 
-const assertBaseFieldExists = async (baseFieldId: number): Promise<void> => {
-	await loadBaseField(db, null, baseFieldId);
+const assertBaseFieldExists = async (
+	baseFieldShortCode: ShortCode,
+): Promise<void> => {
+	await loadBaseField(db, null, baseFieldShortCode);
 };
 
 const getBaseFields = async (req: Request, res: Response) => {
@@ -27,25 +30,16 @@ const getBaseFields = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(baseFields);
 };
 
-const postBaseField = async (req: Request, res: Response) => {
-	if (!isWritableBaseField(req.body)) {
-		throw new InputValidationError(
-			'Invalid request body.',
-			isWritableBaseField.errors ?? [],
-		);
-	}
-
-	const baseField = await createBaseField(db, null, req.body);
-	res.status(201).contentType('application/json').send(baseField);
-};
-
 const putBaseField = async (
-	req: Request<{ baseFieldId: string }>,
+	req: Request<{ baseFieldShortCode: string }>,
 	res: Response,
 ) => {
-	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
-	if (Number.isNaN(baseFieldId)) {
-		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
+	const { baseFieldShortCode } = req.params;
+	if (!isShortCode(baseFieldShortCode)) {
+		throw new InputValidationError(
+			'Invalid short code parameter.',
+			isShortCode.errors ?? [],
+		);
 	}
 	if (!isWritableBaseField(req.body)) {
 		throw new InputValidationError(
@@ -54,47 +48,37 @@ const putBaseField = async (
 		);
 	}
 
-	await assertBaseFieldExists(baseFieldId);
-	const {
+	const { label, description, dataType, scope, valueRelevanceHours } = req.body;
+	const baseField = await createOrUpdateBaseField(db, null, {
 		label,
 		description,
-		shortCode,
 		dataType,
 		scope,
 		valueRelevanceHours,
-	} = req.body;
-	const baseField = await updateBaseField(
-		db,
-		null,
-		{
-			label,
-			description,
-			shortCode,
-			dataType,
-			scope,
-			valueRelevanceHours,
-		},
-		baseFieldId,
-	);
+		shortCode: baseFieldShortCode,
+	});
 	res.status(200).contentType('application/json').send(baseField);
 };
 
-const getBaseFieldLocalizationsByBaseFieldId = async (
-	req: Request<{ baseFieldId: string }>,
+const getBaseFieldLocalizationsByBaseFieldShortCode = async (
+	req: Request<{ baseFieldShortCode: ShortCode }>,
 	res: Response,
 ) => {
-	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
-	if (!isId(baseFieldId)) {
-		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
+	const { baseFieldShortCode } = req.params;
+	if (!isShortCode(baseFieldShortCode)) {
+		throw new InputValidationError(
+			'Invalid short code parameter.',
+			isShortCode.errors ?? [],
+		);
 	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	await assertBaseFieldExists(baseFieldId);
+	await assertBaseFieldExists(baseFieldShortCode);
 	const baseFieldLocalizations =
-		await loadBaseFieldLocalizationsBundleByBaseFieldId(
+		await loadBaseFieldLocalizationsBundleByBaseFieldShortCode(
 			db,
 			null,
-			baseFieldId,
+			baseFieldShortCode,
 			limit,
 			offset,
 		);
@@ -102,12 +86,15 @@ const getBaseFieldLocalizationsByBaseFieldId = async (
 };
 
 const putBaseFieldLocalization = async (
-	req: Request<{ baseFieldId: string; language: string }>,
+	req: Request<{ baseFieldShortCode: ShortCode; language: string }>,
 	res: Response,
 ) => {
-	const baseFieldId = Number.parseInt(req.params.baseFieldId, 10);
-	if (!isId(baseFieldId)) {
-		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
+	const { baseFieldShortCode, language } = req.params;
+	if (!isShortCode(baseFieldShortCode)) {
+		throw new InputValidationError(
+			'Invalid shortcode parameter.',
+			isId.errors ?? [],
+		);
 	}
 
 	if (!isValidLanguageTag(req.params.language)) {
@@ -120,19 +107,19 @@ const putBaseFieldLocalization = async (
 	if (!isWritableBaseFieldLocalization(req.body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
-			isWritableBaseField.errors ?? [],
+			isWritableBaseFieldLocalization.errors ?? [],
 		);
 	}
 	const { label, description } = req.body;
-	await assertBaseFieldExists(baseFieldId);
+	await assertBaseFieldExists(baseFieldShortCode);
 	const baseFieldLocalization = await createOrUpdateBaseFieldLocalization(
 		db,
 		null,
 		{
 			label,
 			description,
-			baseFieldId,
-			language: req.params.language,
+			baseFieldShortCode,
+			language,
 		},
 	);
 	res.status(200).contentType('application/json').send(baseFieldLocalization);
@@ -140,8 +127,7 @@ const putBaseFieldLocalization = async (
 
 export const baseFieldsHandlers = {
 	getBaseFields,
-	postBaseField,
 	putBaseField,
-	getBaseFieldLocalizationsByBaseFieldId,
+	getBaseFieldLocalizationsByBaseFieldShortCode,
 	putBaseFieldLocalization,
 };

@@ -2,13 +2,13 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
-	createBaseField,
+	createOrUpdateBaseField,
 	createOrUpdateBaseFieldLocalization,
-	loadBaseFieldLocalizationsBundleByBaseFieldId,
-	loadBaseFields,
+	loadBaseFieldLocalizationsBundleByBaseFieldShortCode,
 	loadTableMetrics,
+	loadBaseFields,
 } from '../database';
-import { BaseFieldDataType, BaseFieldScope, PostgresErrorCode } from '../types';
+import { BaseFieldDataType, BaseFieldScope } from '../types';
 import { expectTimestamp, NO_LIMIT, NO_OFFSET } from '../test/utils';
 import {
 	mockJwt as authHeader,
@@ -16,7 +16,7 @@ import {
 } from '../test/mockJwt';
 
 const createTestBaseField = async () =>
-	createBaseField(db, null, {
+	createOrUpdateBaseField(db, null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
@@ -26,7 +26,7 @@ const createTestBaseField = async () =>
 	});
 
 const createTestBaseFieldWithLocalization = async () => {
-	const baseField = await createBaseField(db, null, {
+	const baseField = await createOrUpdateBaseField(db, null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
@@ -34,12 +34,17 @@ const createTestBaseFieldWithLocalization = async () => {
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
 	});
-	await createOrUpdateBaseFieldLocalization(db, null, {
-		baseFieldId: baseField.id,
-		label: 'Le Resume',
-		description: 'Le Resume de la Applicant',
-		language: 'fr',
-	});
+	const baseFieldLocalization = await createOrUpdateBaseFieldLocalization(
+		db,
+		null,
+		{
+			baseFieldShortCode: baseField.shortCode,
+			label: 'Le Resume',
+			description: 'Le Resume de la Applicant',
+			language: 'fr',
+		},
+	);
+	return { baseField, baseFieldLocalization };
 };
 
 describe('/baseFields', () => {
@@ -53,7 +58,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns all base fields present in the database', async () => {
-			const baseFieldOne = await createBaseField(db, null, {
+			const baseFieldOne = await createOrUpdateBaseField(db, null, {
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
@@ -61,7 +66,7 @@ describe('/baseFields', () => {
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
 			});
-			const baseFieldTwo = await createBaseField(db, null, {
+			const baseFieldTwo = await createOrUpdateBaseField(db, null, {
 				label: 'Last Name',
 				description: 'The last name of the applicant',
 				shortCode: 'lastName',
@@ -71,14 +76,14 @@ describe('/baseFields', () => {
 			});
 
 			await createOrUpdateBaseFieldLocalization(db, null, {
-				baseFieldId: baseFieldOne.id,
+				baseFieldShortCode: baseFieldOne.shortCode,
 				language: 'fr',
 				label: 'prenom',
 				description: 'le prenom',
 			});
 
 			await createOrUpdateBaseFieldLocalization(db, null, {
-				baseFieldId: baseFieldTwo.id,
+				baseFieldShortCode: baseFieldTwo.shortCode,
 				language: 'fr',
 				label: 'postnom',
 				description: 'le postnom',
@@ -87,7 +92,6 @@ describe('/baseFields', () => {
 			const result = await request(app).get('/baseFields').expect(200);
 			expect(result.body).toMatchObject([
 				{
-					id: 1,
 					label: 'First Name',
 					description: 'The first name of the applicant',
 					shortCode: 'firstName',
@@ -98,14 +102,13 @@ describe('/baseFields', () => {
 							label: 'prenom',
 							language: 'fr',
 							createdAt: expectTimestamp,
-							baseFieldId: 1,
+							baseFieldShortCode: 'firstName',
 							description: 'le prenom',
 						},
 					},
 					createdAt: expectTimestamp,
 				},
 				{
-					id: 2,
 					label: 'Last Name',
 					description: 'The last name of the applicant',
 					shortCode: 'lastName',
@@ -116,7 +119,7 @@ describe('/baseFields', () => {
 							label: 'postnom',
 							language: 'fr',
 							createdAt: expectTimestamp,
-							baseFieldId: 2,
+							baseFieldShortCode: 'lastName',
 							description: 'le postnom',
 						},
 					},
@@ -126,37 +129,35 @@ describe('/baseFields', () => {
 		});
 	});
 
-	describe('POST /', () => {
+	describe('PUT /:baseFieldShortCode', () => {
 		it('requires authentication', async () => {
-			await request(app).post('/baseFields').expect(401);
+			await request(app).put('/baseFields/summary').expect(401);
 		});
 
 		it('requires administrator role', async () => {
-			await request(app).post('/baseFields').set(authHeader).expect(401);
+			await request(app).put('/baseFields/summary').set(authHeader).expect(401);
 		});
 
 		it('creates exactly one base field', async () => {
 			const before = await loadTableMetrics('base_fields');
 			const result = await request(app)
-				.post('/baseFields')
+				.put('/baseFields/shorts')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
 					valueRelevanceHours: null,
 				})
-				.expect(201);
+				.expect(200);
 			const after = await loadTableMetrics('base_fields');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
-				id: expect.any(Number) as number,
 				label: '🏷️',
 				description: '😍',
-				shortCode: '🩳',
+				shortCode: 'shorts',
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
@@ -168,11 +169,10 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when no label is sent', async () => {
 			const result = await request(app)
-				.post('/baseFields')
+				.put('/baseFields/shorts')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
-					shortCode: '🩳',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
@@ -187,12 +187,11 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when no description is sent', async () => {
 			const result = await request(app)
-				.post('/baseFields')
+				.put('/baseFields/shorts')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
 					valueRelevanceHours: null,
@@ -204,9 +203,9 @@ describe('/baseFields', () => {
 			});
 		});
 
-		it('returns 400 bad request when no shortCode is sent', async () => {
+		it('returns 400 bad request when invalid shortcode is provided', async () => {
 			const result = await request(app)
-				.post('/baseFields')
+				.put('/baseFields/invalid-shortcode!')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
@@ -225,13 +224,12 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when no dataType is sent', async () => {
 			const result = await request(app)
-				.post('/baseFields')
+				.put('/baseFields/shorts')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					scope: BaseFieldScope.PROPOSAL,
 					valueRelevanceHours: null,
 				})
@@ -244,13 +242,12 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when an invalid dataType is sent', async () => {
 			const result = await request(app)
-				.post('/baseFields')
+				.put('/baseFields/shorts')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					dataType: '🤡',
 					scope: BaseFieldScope.PROPOSAL,
 					valueRelevanceHours: null,
@@ -264,13 +261,12 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when no scope is sent', async () => {
 			const result = await request(app)
-				.post('/baseFields')
+				.put('/baseFields/shorts')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					valueRelevanceHours: null,
 				})
@@ -283,13 +279,12 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when no valueRelevanceHours is sent', async () => {
 			const result = await request(app)
-				.post('/baseFields')
+				.put('/baseFields/shorts')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
 				})
@@ -302,13 +297,12 @@ describe('/baseFields', () => {
 
 		it('returns 400 bad request when an invalid scope is sent', async () => {
 			const result = await request(app)
-				.post('/baseFields')
+				.put('/baseFields/shorts')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					scope: '🤡',
 				})
@@ -319,53 +313,11 @@ describe('/baseFields', () => {
 			});
 		});
 
-		it('returns 409 conflict when a duplicate short name is submitted', async () => {
-			await createBaseField(db, null, {
-				label: 'First Name',
-				description: 'The first name of the applicant',
-				shortCode: 'firstName',
-				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.PROPOSAL,
-				valueRelevanceHours: null,
-			});
-			const result = await request(app)
-				.post('/baseFields')
-				.type('application/json')
-				.set(adminUserAuthHeader)
-				.send({
-					label: '🏷️',
-					description: '😍',
-					shortCode: 'firstName',
-					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.PROPOSAL,
-					valueRelevanceHours: null,
-				})
-				.expect(409);
-			expect(result.body).toMatchObject({
-				name: 'DatabaseError',
-				details: [
-					{
-						code: PostgresErrorCode.UNIQUE_VIOLATION,
-					},
-				],
-			});
-		});
-	});
-
-	describe('PUT /:baseFieldId', () => {
-		it('requires authentication', async () => {
-			await request(app).put('/baseFields/1').expect(401);
-		});
-
-		it('requires administrator role', async () => {
-			await request(app).put('/baseFields/1').set(authHeader).expect(401);
-		});
-
 		it('updates the specified base field', async () => {
 			// Not using the helper here because observing a change in values is explicitly
 			// the point of the test, so having full explicit control of the original value
 			// seems important.  Some day when we add better test tooling we can have it all.
-			await createBaseField(db, null, {
+			const baseField = await createOrUpdateBaseField(db, null, {
 				label: 'Summary',
 				description: 'A summary of the proposal',
 				shortCode: 'summary',
@@ -374,13 +326,12 @@ describe('/baseFields', () => {
 				valueRelevanceHours: null,
 			});
 			await request(app)
-				.put('/baseFields/1')
+				.put(`/baseFields/${baseField.shortCode}`)
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.NUMBER,
 					scope: BaseFieldScope.ORGANIZATION,
 					valueRelevanceHours: 9001,
@@ -388,10 +339,9 @@ describe('/baseFields', () => {
 				.expect(200);
 			const baseFields = await loadBaseFields();
 			expect(baseFields[0]).toMatchObject({
-				id: 1,
 				label: '🏷️',
 				description: '😍',
-				shortCode: '🩳',
+				shortCode: 'summary',
 				dataType: BaseFieldDataType.NUMBER,
 				scope: BaseFieldScope.ORGANIZATION,
 				valueRelevanceHours: 9001,
@@ -403,23 +353,21 @@ describe('/baseFields', () => {
 		it('returns the updated base field', async () => {
 			await createTestBaseField();
 			const result = await request(app)
-				.put('/baseFields/1')
+				.put('/baseFields/summary')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.NUMBER,
 					valueRelevanceHours: null,
 					scope: BaseFieldScope.ORGANIZATION,
 				})
 				.expect(200);
 			expect(result.body).toMatchObject({
-				id: 1,
 				label: '🏷️',
 				description: '😍',
-				shortCode: '🩳',
+				shortCode: 'summary',
 				dataType: BaseFieldDataType.NUMBER,
 				scope: BaseFieldScope.ORGANIZATION,
 				valueRelevanceHours: null,
@@ -432,11 +380,10 @@ describe('/baseFields', () => {
 			await createTestBaseField();
 
 			const result = await request(app)
-				.put('/baseFields/1')
+				.put('/baseFields/summary')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
-					shortCode: '🩳',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.ORGANIZATION,
@@ -452,33 +399,13 @@ describe('/baseFields', () => {
 		it('returns 400 bad request when no description is sent', async () => {
 			await createTestBaseField();
 			const result = await request(app)
-				.put('/baseFields/1')
+				.put('/baseFields/summary')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.ORGANIZATION,
-					valueRelevanceHours: null,
-				})
-				.expect(400);
-			expect(result.body).toMatchObject({
-				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 400 bad request when no shortCode is sent', async () => {
-			await createTestBaseField();
-			const result = await request(app)
-				.put('/baseFields/1')
-				.type('application/json')
-				.set(adminUserAuthHeader)
-				.send({
-					label: '🏷️',
-					description: '😍',
-					dataType: BaseFieldDataType.STRING,
 					valueRelevanceHours: null,
 				})
 				.expect(400);
@@ -491,13 +418,12 @@ describe('/baseFields', () => {
 		it('returns 400 bad request when no dataType is sent', async () => {
 			await createTestBaseField();
 			const result = await request(app)
-				.put('/baseFields/1')
+				.put('/baseFields/summary')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					scope: BaseFieldScope.ORGANIZATION,
 					valueRelevanceHours: null,
 				})
@@ -511,13 +437,12 @@ describe('/baseFields', () => {
 		it('returns 400 bad request when no scope is sent', async () => {
 			await createTestBaseField();
 			const result = await request(app)
-				.put('/baseFields/1')
+				.put('/baseFields/summary')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					valueRelevanceHours: null,
 				})
@@ -531,13 +456,12 @@ describe('/baseFields', () => {
 		it('returns 400 bad request when no valueRelevanceHours is sent', async () => {
 			await createTestBaseField();
 			const result = await request(app)
-				.put('/baseFields/1')
+				.put('/baseFields/summary')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: '🏷️',
 					description: '😍',
-					shortCode: '🩳',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.ORGANIZATION,
 				})
@@ -547,49 +471,16 @@ describe('/baseFields', () => {
 				details: expect.any(Array) as unknown[],
 			});
 		});
-
-		it('returns 400 when a non-numeric ID is sent', async () => {
-			const result = await request(app)
-				.put('/baseFields/notanumber')
-				.type('application/json')
-				.set(adminUserAuthHeader)
-				.send({
-					label: '🏷️',
-					description: '😍',
-					shortCode: 'firstName',
-					dataType: BaseFieldDataType.STRING,
-				})
-				.expect(400);
-			expect(result.body).toMatchObject({
-				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 404 when attempting to update a non-existent record', async () => {
-			await request(app)
-				.put('/baseFields/1')
-				.type('application/json')
-				.set(adminUserAuthHeader)
-				.send({
-					label: '🏷️',
-					description: '😍',
-					shortCode: '🩳',
-					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.PROPOSAL,
-					valueRelevanceHours: null,
-				})
-				.expect(404);
-		});
 	});
-	describe('GET /:baseFieldId/localizations', () => {
+
+	describe('GET /:baseFieldShortCode/localizations', () => {
 		it('does not require authentication', async () => {
 			await createTestBaseFieldWithLocalization();
-			await request(app).get('/baseFields/1/localizations').expect(200);
+			await request(app).get(`/baseFields/summary/localizations`).expect(200);
 		});
 
-		it('returns all base field localizations related to the given baseFieldId', async () => {
-			await createBaseField(db, null, {
+		it('returns all base field localizations related to the given baseFieldShortCode', async () => {
+			const baseField = await createOrUpdateBaseField(db, null, {
 				label: 'First Name',
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
@@ -599,34 +490,34 @@ describe('/baseFields', () => {
 			});
 
 			await createOrUpdateBaseFieldLocalization(db, null, {
-				baseFieldId: 1,
+				baseFieldShortCode: baseField.shortCode,
 				language: 'fr',
 				label: 'prenom',
 				description: 'le prenom',
 			});
 
 			await createOrUpdateBaseFieldLocalization(db, null, {
-				baseFieldId: 1,
+				baseFieldShortCode: baseField.shortCode,
 				language: 'en',
 				label: 'First Name',
 				description: 'The First Name of the applicant',
 			});
 
 			const result = await request(app)
-				.get('/baseFields/1/localizations')
+				.get(`/baseFields/${baseField.shortCode}/localizations`)
 				.expect(200);
 			expect(result.body).toMatchObject({
 				total: 2,
 				entries: [
 					{
-						baseFieldId: 1,
+						baseFieldShortCode: baseField.shortCode,
 						language: 'fr',
 						label: 'prenom',
 						description: 'le prenom',
 						createdAt: expectTimestamp,
 					},
 					{
-						baseFieldId: 1,
+						baseFieldShortCode: baseField.shortCode,
 						language: 'en',
 						label: 'First Name',
 						description: 'The First Name of the applicant',
@@ -635,9 +526,10 @@ describe('/baseFields', () => {
 				],
 			});
 		});
+
 		it('returns 404 when a base field is referenced that does not exist', async () => {
 			const result = await request(app)
-				.get('/baseFields/1/localizations')
+				.get('/baseFields/fakeShortCode/localizations')
 				.expect(404);
 			expect(result.body).toMatchObject({
 				name: 'NotFoundError',
@@ -648,16 +540,28 @@ describe('/baseFields', () => {
 				],
 			});
 		});
+
+		it('returns 400 when an invalid shortcode is sent', async () => {
+			const result = await request(app)
+				.get('/baseFields/invalidShortcode!!!/localizations')
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
 	});
 
-	describe('PUT /:baseFieldId/localizations/:language', () => {
+	describe('PUT /:baseFieldShortCode/localizations/:language', () => {
 		it('requires authentication', async () => {
-			await request(app).put('/baseFields/1/localizations/fr').expect(401);
+			await request(app)
+				.put('/baseFields/summary/localizations/fr')
+				.expect(401);
 		});
 
 		it('requires administrator role', async () => {
 			await request(app)
-				.put('/baseFields/1/localizations/fr')
+				.put('/baseFields/summary/localizations/fr')
 				.set(authHeader)
 				.expect(401);
 		});
@@ -666,7 +570,7 @@ describe('/baseFields', () => {
 			const testBaseField = await createTestBaseField();
 			const before = await loadTableMetrics('base_field_localizations');
 			await request(app)
-				.put('/baseFields/1/localizations/fr')
+				.put(`/baseFields/${testBaseField.shortCode}/localizations/fr`)
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
@@ -676,16 +580,16 @@ describe('/baseFields', () => {
 				.expect(200);
 			const after = await loadTableMetrics('base_field_localizations');
 			const baseFieldLocalizations =
-				await loadBaseFieldLocalizationsBundleByBaseFieldId(
+				await loadBaseFieldLocalizationsBundleByBaseFieldShortCode(
 					db,
 					null,
-					testBaseField.id,
+					testBaseField.shortCode,
 					NO_LIMIT,
 					NO_OFFSET,
 				);
 			expect(before.count).toEqual(0);
 			expect(baseFieldLocalizations.entries[0]).toMatchObject({
-				baseFieldId: 1,
+				baseFieldShortCode: testBaseField.shortCode,
 				label: 'Résume',
 				description: 'Le Résume de proposal',
 				createdAt: expectTimestamp,
@@ -694,22 +598,22 @@ describe('/baseFields', () => {
 		});
 
 		it('updates only the specified base field if it does exist', async () => {
-			const testBaseField = await createTestBaseField();
+			const baseField = await createTestBaseField();
 			await createOrUpdateBaseFieldLocalization(db, null, {
-				baseFieldId: 1,
+				baseFieldShortCode: baseField.shortCode,
 				language: 'fr',
 				label: 'Résume',
 				description: 'Le Résume de proposal',
 			});
 			await createOrUpdateBaseFieldLocalization(db, null, {
-				baseFieldId: 1,
+				baseFieldShortCode: baseField.shortCode,
 				language: 'en',
 				label: 'Summary',
 				description: 'The Summary of a proposal',
 			});
 			const before = await loadTableMetrics('base_field_localizations');
 			await request(app)
-				.put('/baseFields/1/localizations/fr')
+				.put(`/baseFields/${baseField.shortCode}/localizations/fr`)
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
@@ -719,22 +623,22 @@ describe('/baseFields', () => {
 				.expect(200);
 			const after = await loadTableMetrics('base_field_localizations');
 			const baseFieldLocalizations =
-				await loadBaseFieldLocalizationsBundleByBaseFieldId(
+				await loadBaseFieldLocalizationsBundleByBaseFieldShortCode(
 					db,
 					null,
-					testBaseField.id,
+					baseField.shortCode,
 					NO_LIMIT,
 					NO_OFFSET,
 				);
 			expect(before.count).toEqual(2);
 			expect(baseFieldLocalizations.entries[0]).toMatchObject({
-				baseFieldId: 1,
+				baseFieldShortCode: baseField.shortCode,
 				label: 'Le Résume',
 				description: 'Le grand Résume de proposal',
 				createdAt: expectTimestamp,
 			});
 			expect(baseFieldLocalizations.entries[1]).toMatchObject({
-				baseFieldId: 1,
+				baseFieldShortCode: baseField.shortCode,
 				label: 'Summary',
 				description: 'The Summary of a proposal',
 				createdAt: expectTimestamp,
@@ -742,11 +646,28 @@ describe('/baseFields', () => {
 			expect(after.count).toEqual(2);
 		});
 
+		it('returns 400 when an invalid shortcode is sent', async () => {
+			await createTestBaseField();
+			const result = await request(app)
+				.put('/baseFields/invalid-shortcode!!!!!/localizations/en')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: 'Ejyo',
+					description: 'HoSghaj je nguv',
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
 		it('returns 400 bad request when no label is sent', async () => {
 			await createTestBaseField();
 
 			const result = await request(app)
-				.put('/baseFields/1/localizations/fr')
+				.put('/baseFields/summary/localizations/fr')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
@@ -762,27 +683,11 @@ describe('/baseFields', () => {
 		it('returns 400 bad request when no description is sent', async () => {
 			await createTestBaseField();
 			const result = await request(app)
-				.put('/baseFields/1/localizations/fr')
+				.put('/baseFields/summary/localizations/fr')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
 					label: 'Résume',
-				})
-				.expect(400);
-			expect(result.body).toMatchObject({
-				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
-			});
-		});
-
-		it('returns 400 when a non-numeric ID is sent', async () => {
-			const result = await request(app)
-				.put('/baseFields/notanumber/localizations/fr')
-				.type('application/json')
-				.set(adminUserAuthHeader)
-				.send({
-					label: 'Résume',
-					description: 'Le Résume de proposal',
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -795,7 +700,7 @@ describe('/baseFields', () => {
 			await createTestBaseField();
 			const result = await request(app)
 				.put(
-					'/baseFields/1/localizations/theLanguageKlingonWhichIsNotARealLanguage',
+					'/baseFields/summary/localizations/theLanguageKlingonWhichIsNotARealLanguage',
 				)
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -812,7 +717,7 @@ describe('/baseFields', () => {
 
 		it('returns 404 when a base field is referenced that does not exist', async () => {
 			const result = await request(app)
-				.put('/baseFields/1/localizations/fr')
+				.put('/baseFields/shortCode/localizations/fr')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({

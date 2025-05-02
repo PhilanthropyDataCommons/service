@@ -5,6 +5,7 @@ import {
 } from './BaseFieldLocalization';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
+import type { ShortCode } from './ShortCode';
 
 export enum BaseFieldDataType {
 	STRING = 'string',
@@ -22,10 +23,9 @@ export enum BaseFieldScope {
 }
 
 interface BaseField {
-	readonly id: number;
+	readonly shortCode: ShortCode;
 	label: string;
 	description: string;
-	shortCode: string;
 	dataType: BaseFieldDataType;
 	scope: BaseFieldScope;
 	valueRelevanceHours: number | null;
@@ -36,9 +36,6 @@ interface BaseField {
 const baseFieldSchema: JSONSchemaType<BaseField> = {
 	type: 'object',
 	properties: {
-		id: {
-			type: 'number',
-		},
 		label: {
 			type: 'string',
 		},
@@ -71,7 +68,6 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 		},
 	},
 	required: [
-		'id',
 		'label',
 		'description',
 		'shortCode',
@@ -88,6 +84,9 @@ const isBaseField = ajv.compile(baseFieldSchema);
 
 type WritableBaseField = Writable<BaseField>;
 
+type InternallyWritableBaseField = WritableBaseField &
+	Pick<BaseField, 'shortCode'>;
+
 const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 	type: 'object',
 	properties: {
@@ -95,9 +94,6 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 			type: 'string',
 		},
 		description: {
-			type: 'string',
-		},
-		shortCode: {
 			type: 'string',
 		},
 		dataType: {
@@ -117,7 +113,6 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 	required: [
 		'label',
 		'description',
-		'shortCode',
 		'dataType',
 		'scope',
 		'valueRelevanceHours',
@@ -130,6 +125,7 @@ export {
 	BaseField,
 	baseFieldSchema,
 	isBaseField,
+	InternallyWritableBaseField,
 	WritableBaseField,
 	isWritableBaseField,
 	writableBaseFieldSchema,

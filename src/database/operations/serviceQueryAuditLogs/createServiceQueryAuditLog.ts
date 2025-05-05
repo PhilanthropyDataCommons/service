@@ -1,7 +1,7 @@
 import TinyPg from 'tinypg';
 import { AuthContext } from '../../../types';
 
-export const createDbOperationAuditLog = async (
+const createServiceQueryAuditLog = async (
 	db: TinyPg,
 	authContext: AuthContext | null,
 	createValues: {
@@ -9,10 +9,12 @@ export const createDbOperationAuditLog = async (
 		queryParameters: object;
 	},
 ): Promise<void> => {
-	await db.sql('dbOperationAuditLogs.insertOne', {
+	await db.sql<object>('serviceQueryAuditLogs.insertOne', {
 		authContextKeycloakUserId: authContext?.user?.keycloakUserId,
 		authContextIsAdministrator: authContext?.role?.isAdministrator,
 		queryName: createValues.queryName,
 		queryParameters: createValues.queryParameters,
 	});
 };
+
+export { createServiceQueryAuditLog };

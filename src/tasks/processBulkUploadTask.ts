@@ -27,6 +27,7 @@ import {
 } from '../database/operations';
 import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
+import { allNoLeaks } from '../promises';
 import type { Readable } from 'stream';
 import type { GetObjectCommandOutput } from '@aws-sdk/client-s3';
 import type { JobHelpers, Logger } from 'graphile-worker';
@@ -171,7 +172,7 @@ const createApplicationFormFieldsForBulkUploadTask = async (
 ): Promise<ApplicationFormField[]> => {
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
 	const baseFields = await loadBaseFields();
-	const applicationFormFields = await Promise.all(
+	const applicationFormFields = await allNoLeaks(
 		shortCodes.map(async (shortCode, index) => {
 			const baseField = baseFields.find(
 				(candidateBaseField) => candidateBaseField.shortCode === shortCode,
@@ -372,7 +373,7 @@ export const processBulkUploadTask = async (
 				}
 			}
 
-			await Promise.all(
+			await allNoLeaks(
 				record.map<Promise<ProposalFieldValue>>(async (fieldValue, index) => {
 					const applicationFormField = applicationFormFields[index];
 					if (applicationFormField === undefined) {

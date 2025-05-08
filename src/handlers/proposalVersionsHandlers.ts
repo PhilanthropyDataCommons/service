@@ -23,6 +23,7 @@ import {
 } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
 import { authContextHasFunderPermission } from '../authorization';
+import { allNoLeaks } from '../promises';
 import type { Request, Response } from 'express';
 import type {
 	Proposal,
@@ -119,7 +120,7 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 			}
 		},
 	);
-	await Promise.all(applicationFormFieldQueries);
+	await allNoLeaks(applicationFormFieldQueries);
 };
 
 const postProposalVersion = async (req: Request, res: Response) => {
@@ -149,24 +150,22 @@ const postProposalVersion = async (req: Request, res: Response) => {
 				'You do not have write permissions on this proposal.',
 			);
 		}
-		await Promise.all([
-			assertApplicationFormExistsForProposal(
-				req,
-				applicationFormId,
-				proposalId,
-			),
-			assertProposalFieldValuesMapToApplicationForm(
-				applicationFormId,
-				fieldValues,
-			),
-		]);
+		await assertApplicationFormExistsForProposal(
+			req,
+			applicationFormId,
+			proposalId,
+		);
+		await assertProposalFieldValuesMapToApplicationForm(
+			applicationFormId,
+			fieldValues,
+		);
 		const finalProposalVersion = await db.transaction(async (transactionDb) => {
 			const proposalVersion = await createProposalVersion(transactionDb, req, {
 				proposalId,
 				applicationFormId,
 				sourceId,
 			});
-			const proposalFieldValues = await Promise.all(
+			const proposalFieldValues = await allNoLeaks(
 				fieldValues.map(async (fieldValue) => {
 					const { value, applicationFormFieldId } = fieldValue;
 					const applicationFormField = await loadApplicationFormField(

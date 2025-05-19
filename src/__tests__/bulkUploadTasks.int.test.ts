@@ -55,6 +55,7 @@ describe('/tasks/bulkUploads', () => {
 				shortCode: 'anotherFunder',
 				name: 'Another Funder',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,

@@ -128,6 +128,7 @@ describe('/applicationForms', () => {
 				shortCode: 'otherFunder',
 				name: 'Other Funder',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',

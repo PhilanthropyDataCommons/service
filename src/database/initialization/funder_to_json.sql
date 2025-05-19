@@ -7,7 +7,8 @@ BEGIN
     'shortCode', funder.short_code,
     'name', funder.name,
     'keycloakOrganizationId', funder.keycloak_organization_id,
-    'createdAt', funder.created_at
+    'createdAt', funder.created_at,
+    'isCollaborative', funder.is_collaborative
   );
 END;
 $$ LANGUAGE plpgsql;

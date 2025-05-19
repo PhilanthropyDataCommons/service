@@ -1,0 +1,161 @@
+{
+	"get": {
+		"operationId": "getFunderCollaborativeMemberByShortCode",
+		"summary": "Gets a specific funder collaborative member.",
+		"tags": ["Funder Collaborative Members"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "funderShortCode",
+				"description": "The short code of a funder collaborative member.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			},
+			{
+				"name": "memberFunderShortCode",
+				"description": "The short code of a member.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The funder collaborative member.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/FunderCollaborativeMember.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	},
+	"post": {
+		"operationId": "createOrUpdateFunderCollaborativeMember",
+		"summary": "Creates or updates a new funder collaborative member.",
+		"tags": ["Funder Collaborative Members"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "funderShortCode",
+				"description": "The short code of a funder.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			},
+			{
+				"name": "memberFunderShortCode",
+				"description": "The short code of a member.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/FunderCollaborativeMember.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new funder collaborative member that was created.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/FunderCollaborativeMember.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	},
+	"delete": {
+		"operationId": "deleteFunderCollaborativeMemberByShortCode",
+		"summary": "Deletes a specific funder collaborative member.",
+		"tags": ["Funder Collaborative Members"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "funderShortCode",
+				"description": "The short code of a funder collaborative member.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			},
+			{
+				"name": "memberFunderShortCode",
+				"description": "The short code of a member.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The deleted funder collaborative member.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/FunderCollaborativeMember.json"
+						}
+					}
+				}
+			},
+			"422": {
+				"description": "The referenced entity does not exist in the database.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

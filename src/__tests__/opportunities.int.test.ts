@@ -77,6 +77,7 @@ describe('/opportunities', () => {
 				name: 'another funder',
 				shortCode: 'anotherFunder',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,

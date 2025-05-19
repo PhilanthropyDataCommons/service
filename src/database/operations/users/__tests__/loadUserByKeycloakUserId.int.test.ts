@@ -48,6 +48,7 @@ describe('loadUserByKeycloakUserId', () => {
 			keycloakOrganizationId: funderKeycloakOrganizationId,
 			name: 'Foo Funder',
 			shortCode: 'fooFunder',
+			isCollaborative: false,
 		});
 		const dataProviderKeycloakOrganizationId =
 			'9426f49a-4c11-4d26-9e58-2b62bf2ee512';
@@ -280,6 +281,7 @@ describe('loadUserByKeycloakUserId', () => {
 			keycloakOrganizationId: funderKeycloakOrganizationId,
 			name: 'Foo Funder',
 			shortCode: 'fooFunder',
+			isCollaborative: false,
 		});
 		await createEphemeralUserGroupAssociation(db, null, {
 			userKeycloakUserId: user.keycloakUserId,

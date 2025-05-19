@@ -219,6 +219,7 @@ describe('/users/opportunities/:opportunityId/permissions/:opportunityPermission
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Test Opportunity',

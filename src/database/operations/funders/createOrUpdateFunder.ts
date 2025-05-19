@@ -7,7 +7,7 @@ const createOrUpdateFunder = generateCreateOrUpdateItemOperation<
 	[]
 >(
 	'funders.insertOrUpdateOne',
-	['shortCode', 'name', 'keycloakOrganizationId'],
+	['shortCode', 'name', 'keycloakOrganizationId', 'isCollaborative'],
 	[],
 );
 

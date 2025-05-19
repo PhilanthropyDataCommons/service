@@ -50,6 +50,7 @@ describe('/changemakerProposals', () => {
 				name: 'Visible Funder',
 				shortCode: 'visibleFunder',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			const visibleChangemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',

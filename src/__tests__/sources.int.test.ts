@@ -216,6 +216,7 @@ describe('/sources', () => {
 				shortCode: 'exampleFunder',
 				name: 'Example Funder',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createSource(db, null, {
 				label: 'Example Corp',
@@ -319,6 +320,7 @@ describe('/sources', () => {
 				shortCode: 'foo',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -350,6 +352,7 @@ describe('/sources', () => {
 				shortCode: 'foo',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -385,6 +388,7 @@ describe('/sources', () => {
 				shortCode: 'foo',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,

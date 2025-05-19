@@ -12,6 +12,7 @@ interface Funder {
 	// https://github.com/ajv-validator/ajv/issues/2283 and/or
 	// https://github.com/ajv-validator/ajv/issues/2163.
 	keycloakOrganizationId: KeycloakId | null | undefined;
+	isCollaborative: boolean;
 	readonly createdAt: string;
 }
 
@@ -29,8 +30,11 @@ const writableFunderSchema: JSONSchemaType<WritableFunder> = {
 			...keycloakIdSchema,
 			nullable: true,
 		},
+		isCollaborative: {
+			type: 'boolean',
+		},
 	},
-	required: ['name'],
+	required: ['name', 'isCollaborative'],
 };
 
 const isWritableFunder = ajv.compile(writableFunderSchema);

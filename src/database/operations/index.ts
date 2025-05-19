@@ -9,6 +9,7 @@ export * from './changemakers';
 export * from './dataProviders';
 export * from './ephemeralUserGroupAssociations';
 export * from './fiscalSponsorships';
+export * from './funderCollaborativeMembers';
 export * from './funders';
 export * from './generic';
 export * from './opportunities';

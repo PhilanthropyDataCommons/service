@@ -87,6 +87,7 @@ describe('/proposals', () => {
 				name: 'Visible Funder',
 				shortCode: 'visibleFunder',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			const visibleChangemaker = await createChangemaker(db, null, {
 				name: 'Visible Changemaker',

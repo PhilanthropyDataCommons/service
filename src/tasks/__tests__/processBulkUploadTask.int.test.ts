@@ -22,6 +22,7 @@ import {
 	BaseFieldScope,
 	TaskStatus,
 	Proposal,
+	BaseFieldSensitivityClassification,
 } from '../../types';
 import {
 	expectTimestamp,
@@ -84,6 +85,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Organization Name',
@@ -92,6 +94,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Organization EIN',
@@ -100,6 +103,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 };
 
@@ -512,6 +516,7 @@ describe('processBulkUploadTask', () => {
 											scope: 'proposal',
 											valueRelevanceHours: null,
 											shortCode: 'proposal_submitter_email',
+											sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 											localizations: {},
 										},
 										baseFieldShortCode: 'proposal_submitter_email',
@@ -539,6 +544,7 @@ describe('processBulkUploadTask', () => {
 											label: 'Organization Name',
 											scope: 'organization',
 											valueRelevanceHours: null,
+											sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 											shortCode: 'organization_name',
 											localizations: {},
 										},
@@ -589,6 +595,7 @@ describe('processBulkUploadTask', () => {
 											label: 'Proposal Submitter Email',
 											scope: 'proposal',
 											valueRelevanceHours: null,
+											sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 											shortCode: 'proposal_submitter_email',
 											localizations: {},
 										},
@@ -617,6 +624,7 @@ describe('processBulkUploadTask', () => {
 											label: 'Organization Name',
 											scope: 'organization',
 											valueRelevanceHours: null,
+											sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 											shortCode: 'organization_name',
 											localizations: {},
 										},

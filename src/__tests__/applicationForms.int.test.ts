@@ -13,7 +13,12 @@ import {
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { BaseFieldDataType, BaseFieldScope, Permission } from '../types';
+import {
+	BaseFieldDataType,
+	BaseFieldScope,
+	BaseFieldSensitivityClassification,
+	Permission,
+} from '../types';
 import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
@@ -30,6 +35,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Years of work',
@@ -38,6 +44,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 };
 

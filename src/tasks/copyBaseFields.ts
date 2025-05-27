@@ -62,6 +62,7 @@ const copyBaseField = async (targetBaseField: BaseField) => {
 		label,
 		description,
 		valueRelevanceHours,
+		sensitivityClassification,
 	} = targetBaseField;
 	const copiedBaseField = await createOrUpdateBaseField(db, null, {
 		scope,
@@ -70,6 +71,7 @@ const copyBaseField = async (targetBaseField: BaseField) => {
 		label,
 		description,
 		valueRelevanceHours,
+		sensitivityClassification,
 	});
 	await Promise.all(
 		Object.entries(targetBaseField.localizations).map(

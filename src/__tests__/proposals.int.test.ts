@@ -29,6 +29,7 @@ import {
 import {
 	BaseFieldDataType,
 	BaseFieldScope,
+	BaseFieldSensitivityClassification,
 	keycloakIdToString,
 	Permission,
 } from '../types';
@@ -41,6 +42,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Title',
@@ -49,6 +51,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 };
 
@@ -305,6 +308,7 @@ describe('/proposals', () => {
 												scope: 'proposal',
 												valueRelevanceHours: null,
 												shortCode: 'summary',
+												sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 												localizations: {},
 											},
 											label: 'Short summary',
@@ -553,6 +557,7 @@ describe('/proposals', () => {
 												label: 'Summary',
 												scope: 'proposal',
 												valueRelevanceHours: null,
+												sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 												shortCode: 'summary',
 												localizations: {},
 											},
@@ -867,6 +872,7 @@ describe('/proposals', () => {
 										scope: 'proposal',
 										valueRelevanceHours: null,
 										shortCode: 'title',
+										sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 										localizations: {},
 									},
 									position: 1,
@@ -894,6 +900,7 @@ describe('/proposals', () => {
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'summary',
 										localizations: {},
 									},
@@ -934,6 +941,7 @@ describe('/proposals', () => {
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'title',
 										localizations: {},
 									},
@@ -962,6 +970,7 @@ describe('/proposals', () => {
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'summary',
 										localizations: {},
 									},
@@ -1088,6 +1097,7 @@ describe('/proposals', () => {
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'title',
 										localizations: {},
 									},
@@ -1116,6 +1126,7 @@ describe('/proposals', () => {
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'summary',
 										localizations: {},
 									},
@@ -1156,6 +1167,7 @@ describe('/proposals', () => {
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'title',
 										localizations: {},
 									},
@@ -1184,6 +1196,7 @@ describe('/proposals', () => {
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'summary',
 										localizations: {},
 									},

@@ -90,13 +90,14 @@ describe('/baseFields', () => {
 			});
 
 			const result = await request(app).get('/baseFields').expect(200);
-			expect(result.body).toMatchObject([
+			expect(result.body).toEqual([
 				{
 					label: 'First Name',
 					description: 'The first name of the applicant',
 					shortCode: 'firstName',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 					localizations: {
 						fr: {
 							label: 'prenom',
@@ -114,6 +115,7 @@ describe('/baseFields', () => {
 					shortCode: 'lastName',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
 					localizations: {
 						fr: {
 							label: 'postnom',
@@ -338,7 +340,7 @@ describe('/baseFields', () => {
 				})
 				.expect(200);
 			const baseFields = await loadBaseFields();
-			expect(baseFields[0]).toMatchObject({
+			expect(baseFields[0]).toEqual({
 				label: '🏷️',
 				description: '😍',
 				shortCode: 'summary',

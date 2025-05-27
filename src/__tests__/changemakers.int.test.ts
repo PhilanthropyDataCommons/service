@@ -34,6 +34,7 @@ import {
 	BaseField,
 	BaseFieldDataType,
 	BaseFieldScope,
+	BaseFieldSensitivityClassification,
 	Changemaker,
 	DataProvider,
 	Funder,
@@ -351,6 +352,8 @@ describe('/changemakers', () => {
 					dataType: BaseFieldDataType.EMAIL,
 					scope: BaseFieldScope.ORGANIZATION,
 					valueRelevanceHours: null,
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.RESTRICTED,
 				});
 				baseFieldPhone = await createOrUpdateBaseField(db, null, {
 					label: 'Fifty three ninety nine',
@@ -359,6 +362,8 @@ describe('/changemakers', () => {
 					dataType: BaseFieldDataType.PHONE_NUMBER,
 					scope: BaseFieldScope.ORGANIZATION,
 					valueRelevanceHours: null,
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.RESTRICTED,
 				});
 				baseFieldWebsite = await createOrUpdateBaseField(db, null, {
 					label: 'Fifty four seventy one 5471',
@@ -367,6 +372,8 @@ describe('/changemakers', () => {
 					dataType: BaseFieldDataType.URL,
 					scope: BaseFieldScope.ORGANIZATION,
 					valueRelevanceHours: null,
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.RESTRICTED,
 				});
 				firstChangemaker = await createChangemaker(db, null, {
 					name: 'Five thousand one hundred forty seven reasons',

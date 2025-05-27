@@ -22,6 +22,7 @@ import {
 	BaseFieldScope,
 	TaskStatus,
 	Proposal,
+	BaseFieldSensitivityClassification,
 } from '../../types';
 import {
 	expectTimestamp,
@@ -84,6 +85,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Organization Name',
@@ -92,6 +94,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Organization EIN',
@@ -100,6 +103,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 };
 

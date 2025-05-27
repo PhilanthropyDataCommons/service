@@ -29,6 +29,7 @@ import {
 import {
 	BaseFieldDataType,
 	BaseFieldScope,
+	BaseFieldSensitivityClassification,
 	keycloakIdToString,
 	Permission,
 } from '../types';
@@ -41,6 +42,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Title',
@@ -49,6 +51,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 };
 

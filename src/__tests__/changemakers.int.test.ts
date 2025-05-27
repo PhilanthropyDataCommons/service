@@ -32,6 +32,7 @@ import {
 import {
 	BaseFieldDataType,
 	BaseFieldScope,
+	BaseFieldSensitivityClassification,
 	PostgresErrorCode,
 	stringToKeycloakId,
 } from '../types';
@@ -60,6 +61,7 @@ const setupTestContext = async () => {
 		dataType: BaseFieldDataType.EMAIL,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	const baseFieldPhone = await createOrUpdateBaseField(db, null, {
 		label: 'Fifty three ninety nine',
@@ -68,6 +70,7 @@ const setupTestContext = async () => {
 		dataType: BaseFieldDataType.PHONE_NUMBER,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	const baseFieldWebsite = await createOrUpdateBaseField(db, null, {
 		label: 'Fifty four seventy one 5471',
@@ -76,6 +79,7 @@ const setupTestContext = async () => {
 		dataType: BaseFieldDataType.URL,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	const firstChangemaker = await createChangemaker(db, null, {
 		name: 'Five thousand one hundred forty seven reasons',

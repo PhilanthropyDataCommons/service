@@ -812,6 +812,76 @@ describe('/changemakers', () => {
 						});
 					});
 			});
+
+			it('does not return forbidden base field data', async () => {
+				const {
+					secondChangemaker: changemaker,
+					systemUserAuthContext,
+					firstFunderOpportunity,
+					firstFunderSourceId: funderSourceId,
+				} = await setupTestContext();
+
+				const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
+					label: 'Forbidden Field',
+					shortCode: 'forbiddenField',
+					description: 'This field is forbidden',
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.FORBIDDEN,
+					dataType: BaseFieldDataType.STRING,
+					valueRelevanceHours: null,
+					scope: BaseFieldScope.ORGANIZATION,
+				});
+				const opportunity = firstFunderOpportunity;
+				const proposal = await createProposal(db, systemUserAuthContext, {
+					opportunityId: opportunity.id,
+					externalId: `Another proposal to ${opportunity.title}`,
+				});
+				await createChangemakerProposal(db, null, {
+					changemakerId: changemaker.id,
+					proposalId: proposal.id,
+				});
+				const applicationForm = await createApplicationForm(db, null, {
+					opportunityId: opportunity.id,
+				});
+				const applicationFormField = await createApplicationFormField(
+					db,
+					null,
+					{
+						label: 'Forbidden',
+						applicationFormId: applicationForm.id,
+						baseFieldShortCode: forbiddenBaseField.shortCode,
+						position: 1,
+					},
+				);
+				const proposalVersion = await createProposalVersion(
+					db,
+					systemUserAuthContext,
+					{
+						proposalId: proposal.id,
+						applicationFormId: applicationForm.id,
+						sourceId: funderSourceId,
+					},
+				);
+				await createProposalFieldValue(db, null, {
+					proposalVersionId: proposalVersion.id,
+					applicationFormFieldId: applicationFormField.id,
+					position: 1,
+					value: 'foo',
+					isValid: true,
+					goodAsOf: null,
+				});
+				await request(app)
+					.get(`/changemakers/${changemaker.id}`)
+					.set(authHeader)
+					.expect(200)
+					.expect((res) => {
+						expect(res.body).toEqual({
+							...changemaker,
+							createdAt: expectTimestamp,
+							fields: [],
+						});
+					});
+			});
 		});
 	});
 

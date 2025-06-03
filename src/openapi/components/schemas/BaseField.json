@@ -48,6 +48,7 @@
 		"description",
 		"dataType",
 		"scope",
+		"valueRelevanceHours",
 		"createdAt"
 	]
 }

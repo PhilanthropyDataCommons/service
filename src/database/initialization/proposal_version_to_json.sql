@@ -12,7 +12,10 @@ BEGIN
 	)
 	INTO proposal_field_values_json
 	FROM proposal_field_values
+	INNER JOIN application_form_fields on proposal_field_values.application_form_field_id = application_form_fields.id
+	INNER JOIN base_fields on application_form_fields.base_field_short_code = base_fields.short_code
 	WHERE proposal_field_values.proposal_version_id = proposal_version.id
+		AND base_fields.sensitivity_classification != 'forbidden';
 
 	SELECT source_to_json(sources.*)
 	INTO source_json

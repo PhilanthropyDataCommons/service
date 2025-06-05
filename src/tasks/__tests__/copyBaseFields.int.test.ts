@@ -18,6 +18,7 @@ import {
 	BaseFieldDataType,
 	BaseFieldScope,
 	AuthContext,
+	BaseFieldSensitivityClassification,
 } from '../../types';
 import { expectTimestamp, getAuthContext } from '../../test/utils';
 import type { BaseField } from '../../types';
@@ -62,6 +63,7 @@ const mockFirstNameBaseField: BaseField = {
 	dataType: BaseFieldDataType.STRING,
 	scope: BaseFieldScope.PROPOSAL,
 	valueRelevanceHours: null,
+	sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	createdAt: '2024-10-17T01:46:58.494Z',
 };
 
@@ -73,6 +75,7 @@ const mockFirstNameBaseFieldWithNoLocalizations: BaseField = {
 	dataType: BaseFieldDataType.STRING,
 	scope: BaseFieldScope.PROPOSAL,
 	valueRelevanceHours: null,
+	sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	createdAt: '2024-10-17T01:46:58.494Z',
 };
 
@@ -99,6 +102,7 @@ const mockLastNameBaseField: BaseField = {
 	dataType: BaseFieldDataType.STRING,
 	scope: BaseFieldScope.PROPOSAL,
 	valueRelevanceHours: null,
+	sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	createdAt: '2024-10-17T01:46:58.494Z',
 };
 
@@ -357,6 +361,7 @@ describe('copyBaseFields', () => {
 			dataType: 'string',
 			scope: 'proposal',
 			valueRelevanceHours: 9001,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 			createdAt: expectTimestamp,
 		});
 
@@ -372,6 +377,7 @@ describe('copyBaseFields', () => {
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		});
 
 		const before = await loadTableMetrics('base_fields');
@@ -423,6 +429,7 @@ describe('copyBaseFields', () => {
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		});
 
 		const mockRemoteBaseField: BaseField = {
@@ -434,6 +441,7 @@ describe('copyBaseFields', () => {
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		};
 
 		const before = await loadTableMetrics('base_fields');
@@ -479,6 +487,7 @@ describe('copyBaseFields', () => {
 			dataType: 'string',
 			scope: 'proposal',
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 			createdAt: localBaseField.createdAt,
 			localizations: {},
 		});
@@ -495,6 +504,7 @@ describe('copyBaseFields', () => {
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		});
 
 		const mockRemoteBaseField = {
@@ -507,6 +517,7 @@ describe('copyBaseFields', () => {
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		};
 
 		const before = await loadTableMetrics('base_fields');
@@ -552,6 +563,7 @@ describe('copyBaseFields', () => {
 			dataType: 'string',
 			scope: 'proposal',
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 			createdAt: localBaseField.createdAt,
 			localizations: {},
 		});
@@ -585,6 +597,7 @@ describe('copyBaseFields', () => {
 			dataType: 'string',
 			scope: 'proposal',
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 			createdAt: expectTimestamp,
 		});
 
@@ -600,6 +613,7 @@ describe('copyBaseFields', () => {
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		});
 
 		await createOrUpdateBaseFieldLocalization(db, null, {
@@ -655,6 +669,7 @@ describe('copyBaseFields', () => {
 			dataType: 'string',
 			scope: 'proposal',
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 			createdAt: localBaseField.createdAt,
 		});
 
@@ -670,6 +685,7 @@ describe('copyBaseFields', () => {
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		});
 
 		await createOrUpdateBaseFieldLocalization(db, null, {
@@ -739,6 +755,7 @@ describe('copyBaseFields', () => {
 			dataType: 'string',
 			scope: 'proposal',
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 			createdAt: localBaseField.createdAt,
 		});
 
@@ -788,6 +805,7 @@ describe('copyBaseFields', () => {
 			dataType: BaseFieldDataType.STRING,
 			scope: BaseFieldScope.PROPOSAL,
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		});
 
 		const before = await loadTableMetrics('base_fields');
@@ -845,6 +863,7 @@ describe('copyBaseFields', () => {
 			dataType: 'string',
 			scope: 'proposal',
 			valueRelevanceHours: null,
+			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 			createdAt: baseField.createdAt,
 		});
 

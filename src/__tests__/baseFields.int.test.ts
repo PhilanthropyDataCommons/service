@@ -8,7 +8,11 @@ import {
 	loadTableMetrics,
 	loadBaseFields,
 } from '../database';
-import { BaseFieldDataType, BaseFieldScope } from '../types';
+import {
+	BaseFieldDataType,
+	BaseFieldScope,
+	BaseFieldSensitivityClassification,
+} from '../types';
 import { expectTimestamp, NO_LIMIT, NO_OFFSET } from '../test/utils';
 import {
 	mockJwt as authHeader,
@@ -23,6 +27,7 @@ const createTestBaseField = async () =>
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 
 const createTestBaseFieldWithLocalization = async () => {
@@ -33,6 +38,7 @@ const createTestBaseFieldWithLocalization = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	const baseFieldLocalization = await createOrUpdateBaseFieldLocalization(
 		db,
@@ -65,6 +71,8 @@ describe('/baseFields', () => {
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			const baseFieldTwo = await createOrUpdateBaseField(db, null, {
 				label: 'Last Name',
@@ -73,6 +81,8 @@ describe('/baseFields', () => {
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			await createOrUpdateBaseFieldLocalization(db, null, {
@@ -90,13 +100,16 @@ describe('/baseFields', () => {
 			});
 
 			const result = await request(app).get('/baseFields').expect(200);
-			expect(result.body).toMatchObject([
+			expect(result.body).toEqual([
 				{
 					label: 'First Name',
 					description: 'The first name of the applicant',
 					shortCode: 'firstName',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.RESTRICTED,
 					localizations: {
 						fr: {
 							label: 'prenom',
@@ -114,6 +127,9 @@ describe('/baseFields', () => {
 					shortCode: 'lastName',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
+					valueRelevanceHours: null,
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.RESTRICTED,
 					localizations: {
 						fr: {
 							label: 'postnom',
@@ -150,6 +166,7 @@ describe('/baseFields', () => {
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.PROPOSAL,
 					valueRelevanceHours: null,
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(200);
 			const after = await loadTableMetrics('base_fields');
@@ -161,6 +178,7 @@ describe('/baseFields', () => {
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				localizations: {},
 				createdAt: expectTimestamp,
 			});
@@ -324,6 +342,8 @@ describe('/baseFields', () => {
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			await request(app)
 				.put(`/baseFields/${baseField.shortCode}`)
@@ -335,42 +355,18 @@ describe('/baseFields', () => {
 					dataType: BaseFieldDataType.NUMBER,
 					scope: BaseFieldScope.ORGANIZATION,
 					valueRelevanceHours: 9001,
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(200);
 			const baseFields = await loadBaseFields();
-			expect(baseFields[0]).toMatchObject({
+			expect(baseFields[0]).toEqual({
 				label: '🏷️',
 				description: '😍',
 				shortCode: 'summary',
 				dataType: BaseFieldDataType.NUMBER,
 				scope: BaseFieldScope.ORGANIZATION,
 				valueRelevanceHours: 9001,
-				localizations: {},
-				createdAt: expectTimestamp,
-			});
-		});
-
-		it('returns the updated base field', async () => {
-			await createTestBaseField();
-			const result = await request(app)
-				.put('/baseFields/summary')
-				.type('application/json')
-				.set(adminUserAuthHeader)
-				.send({
-					label: '🏷️',
-					description: '😍',
-					dataType: BaseFieldDataType.NUMBER,
-					valueRelevanceHours: null,
-					scope: BaseFieldScope.ORGANIZATION,
-				})
-				.expect(200);
-			expect(result.body).toMatchObject({
-				label: '🏷️',
-				description: '😍',
-				shortCode: 'summary',
-				dataType: BaseFieldDataType.NUMBER,
-				scope: BaseFieldScope.ORGANIZATION,
-				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				localizations: {},
 				createdAt: expectTimestamp,
 			});
@@ -388,6 +384,7 @@ describe('/baseFields', () => {
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.ORGANIZATION,
 					valueRelevanceHours: null,
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -407,6 +404,7 @@ describe('/baseFields', () => {
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.ORGANIZATION,
 					valueRelevanceHours: null,
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -426,6 +424,7 @@ describe('/baseFields', () => {
 					description: '😍',
 					scope: BaseFieldScope.ORGANIZATION,
 					valueRelevanceHours: null,
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -445,6 +444,7 @@ describe('/baseFields', () => {
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
 					valueRelevanceHours: null,
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -464,6 +464,27 @@ describe('/baseFields', () => {
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
 					scope: BaseFieldScope.ORGANIZATION,
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expect.any(Array) as unknown[],
+			});
+		});
+
+		it('returns 400 bad request when no sensitivityClassification is sent', async () => {
+			await createTestBaseField();
+			const result = await request(app)
+				.put('/baseFields/summary')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: '🏷️',
+					description: '😍',
+					dataType: BaseFieldDataType.STRING,
+					scope: BaseFieldScope.ORGANIZATION,
+					valueRelevanceHours: null,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -487,6 +508,7 @@ describe('/baseFields', () => {
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 			});
 
 			await createOrUpdateBaseFieldLocalization(db, null, {

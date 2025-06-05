@@ -48,13 +48,21 @@ const putBaseField = async (
 		);
 	}
 
-	const { label, description, dataType, scope, valueRelevanceHours } = req.body;
+	const {
+		label,
+		description,
+		dataType,
+		scope,
+		valueRelevanceHours,
+		sensitivityClassification,
+	} = req.body;
 	const baseField = await createOrUpdateBaseField(db, null, {
 		label,
 		description,
 		dataType,
 		scope,
 		valueRelevanceHours,
+		sensitivityClassification,
 		shortCode: baseFieldShortCode,
 	});
 	res.status(200).contentType('application/json').send(baseField);

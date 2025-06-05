@@ -22,6 +22,12 @@ export enum BaseFieldScope {
 	ORGANIZATION = 'organization',
 }
 
+enum BaseFieldSensitivityClassification {
+	PUBLIC = 'public',
+	RESTRICTED = 'restricted',
+	FORBIDDEN = 'forbidden',
+}
+
 interface BaseField {
 	readonly shortCode: ShortCode;
 	label: string;
@@ -29,6 +35,7 @@ interface BaseField {
 	dataType: BaseFieldDataType;
 	scope: BaseFieldScope;
 	valueRelevanceHours: number | null;
+	sensitivityClassification: BaseFieldSensitivityClassification;
 	readonly localizations: Record<string, BaseFieldLocalization>;
 	readonly createdAt: string;
 }
@@ -58,6 +65,10 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 			minimum: 0,
 			nullable: true as false, // see https://github.com/ajv-validator/ajv/issues/2163
 		},
+		sensitivityClassification: {
+			type: 'string',
+			enum: Object.values(BaseFieldSensitivityClassification),
+		},
 		localizations: {
 			type: 'object',
 			additionalProperties: baseFieldLocalizationSchema,
@@ -74,6 +85,7 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 		'dataType',
 		'scope',
 		'valueRelevanceHours',
+		'sensitivityClassification',
 		'localizations',
 		'createdAt',
 	],
@@ -109,6 +121,10 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 			minimum: 0,
 			nullable: true as false, // see https://github.com/ajv-validator/ajv/issues/2163
 		},
+		sensitivityClassification: {
+			type: 'string',
+			enum: Object.values(BaseFieldSensitivityClassification),
+		},
 	},
 	required: [
 		'label',
@@ -116,6 +132,7 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 		'dataType',
 		'scope',
 		'valueRelevanceHours',
+		'sensitivityClassification',
 	],
 };
 
@@ -123,6 +140,7 @@ const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 
 export {
 	BaseField,
+	BaseFieldSensitivityClassification,
 	baseFieldSchema,
 	isBaseField,
 	InternallyWritableBaseField,

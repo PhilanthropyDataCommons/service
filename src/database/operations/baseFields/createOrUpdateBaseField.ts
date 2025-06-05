@@ -14,6 +14,7 @@ const createOrUpdateBaseField = generateCreateOrUpdateItemOperation<
 		'label',
 		'description',
 		'valueRelevanceHours',
+		'sensitivityClassification',
 	],
 	[],
 );

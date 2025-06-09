@@ -325,6 +325,62 @@ describe('/proposals', () => {
 			});
 		});
 
+		it('does not return proposals where there is a search match against a forbidden base field', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const systemSource = await loadSystemSource(db, null);
+			const forbiddenField = await createOrUpdateBaseField(db, null, {
+				label: 'Forbidden Field',
+				description: 'A field that should not be searchable',
+				shortCode: 'forbidden',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+			await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: 1,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 1,
+			});
+			await createProposalVersion(db, testUserAuthContext, {
+				proposalId: 1,
+				applicationFormId: 1,
+				sourceId: systemSource.id,
+			});
+			await createApplicationFormField(db, null, {
+				applicationFormId: 1,
+				baseFieldShortCode: forbiddenField.shortCode,
+				position: 1,
+				label: 'Not Allowed',
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: 1,
+				applicationFormFieldId: 1,
+				position: 1,
+				value: 'Totally Forbidden',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			const response = await request(app)
+				.get('/proposals?_content=Forbidden')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+
+			expect(response.body).toEqual({
+				total: 1,
+				entries: [],
+			});
+		});
+
 		it('returns all proposals present in the database regardless of createdBy value when loading as an administrator', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);

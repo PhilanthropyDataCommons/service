@@ -810,7 +810,7 @@ describe('/changemakers', () => {
 					shortCode: 'forbiddenField',
 					description: 'This field is forbidden',
 					sensitivityClassification:
-						BaseFieldSensitivityClassification.FORBIDDEN,
+						BaseFieldSensitivityClassification.RESTRICTED,
 					dataType: BaseFieldDataType.STRING,
 					valueRelevanceHours: null,
 					scope: BaseFieldScope.ORGANIZATION,
@@ -854,6 +854,12 @@ describe('/changemakers', () => {
 					isValid: true,
 					goodAsOf: null,
 				});
+				await createOrUpdateBaseField(db, null, {
+					...forbiddenBaseField,
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.FORBIDDEN,
+				});
+
 				await request(app)
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)

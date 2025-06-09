@@ -421,6 +421,65 @@ describe('/proposalVersions', () => {
 			expect(after.count).toEqual(2);
 		});
 
+		it('returns 400 bad request when attempting to provide data for a forbidden field', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: 1,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 1,
+			});
+			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
+				label: 'Forbidden Field',
+				description: 'This field should not be used in proposal versions',
+				shortCode: 'forbiddenField',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+			const forbiddenApplicationFormField = await createApplicationFormField(
+				db,
+				null,
+				{
+					applicationFormId: 1,
+					baseFieldShortCode: forbiddenBaseField.shortCode,
+					position: 1,
+					label: 'Forbidden Field',
+				},
+			);
+
+			const before = await loadTableMetrics('proposal_versions');
+			await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					proposalId: 1,
+					applicationFormId: 1,
+					sourceId: systemSource.id,
+					fieldValues: [
+						{
+							applicationFormFieldId: forbiddenApplicationFormField.id,
+							position: 1,
+							value: 'This should not be allowed',
+							goodAsOf: null,
+						},
+					],
+				})
+				.expect(400);
+			const after = await loadTableMetrics('proposal_versions');
+			expect(after.count).toEqual(before.count);
+		});
+
 		it('returns 400 bad request when no proposal id is provided', async () => {
 			await request(app)
 				.post('/proposalVersions')

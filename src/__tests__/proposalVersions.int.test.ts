@@ -444,7 +444,8 @@ describe('/proposalVersions', () => {
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
-				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			const forbiddenApplicationFormField = await createApplicationFormField(
 				db,
@@ -456,6 +457,10 @@ describe('/proposalVersions', () => {
 					label: 'Forbidden Field',
 				},
 			);
+			await createOrUpdateBaseField(db, null, {
+				...forbiddenBaseField,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
 
 			const before = await loadTableMetrics('proposal_versions');
 			await request(app)

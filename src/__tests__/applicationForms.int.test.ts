@@ -571,6 +571,42 @@ describe('/applicationForms', () => {
 			});
 		});
 
+		it('returns 400 when attempting to create a form field using a forbidden base field', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
+				label: 'Forbidden Field',
+				description: 'This field should not be used in application forms',
+				shortCode: 'forbiddenField',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+
+			const before = await loadTableMetrics('application_forms');
+			await request(app)
+				.post('/applicationForms')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					opportunityId: opportunity.id,
+					fields: [
+						{
+							baseFieldShortCode: forbiddenBaseField.shortCode,
+							position: 1,
+							label: 'Forbidden Field',
+						},
+					],
+				})
+				.expect(400);
+			const after = await loadTableMetrics('application_forms');
+			expect(after.count).toEqual(before.count);
+		});
+
 		it('returns 400 bad request when no opportunity id is provided', async () => {
 			await request(app)
 				.post('/applicationForms')

@@ -341,7 +341,8 @@ describe('/proposals', () => {
 				dataType: BaseFieldDataType.STRING,
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
-				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
@@ -372,6 +373,10 @@ describe('/proposals', () => {
 				value: 'Totally Forbidden',
 				isValid: true,
 				goodAsOf: null,
+			});
+			await createOrUpdateBaseField(db, null, {
+				...forbiddenField,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});
 
 			const response = await request(app)
@@ -1294,7 +1299,8 @@ describe('/proposals', () => {
 				description: 'This field should not be returned',
 				scope: BaseFieldScope.PROPOSAL,
 				valueRelevanceHours: null,
-				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			await createOpportunity(db, null, {
 				title: '🌎',
@@ -1344,6 +1350,11 @@ describe('/proposals', () => {
 				isValid: true,
 				goodAsOf: null,
 			});
+			await createOrUpdateBaseField(db, null, {
+				...forbiddenBaseField,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+
 			const response = await request(app)
 				.get('/proposals/1')
 				.set(authHeaderWithAdminRole)

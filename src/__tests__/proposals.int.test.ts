@@ -325,6 +325,66 @@ describe('/proposals', () => {
 			});
 		});
 
+		it('does not return proposals where there is a search match against a forbidden base field', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const systemSource = await loadSystemSource(db, null);
+			const forbiddenField = await createOrUpdateBaseField(db, null, {
+				label: 'Forbidden Field',
+				description: 'A field that should not be searchable',
+				shortCode: 'forbidden',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				testUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+				},
+			);
+			const applicationFormField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: forbiddenField.shortCode,
+				position: 1,
+				label: 'Not Allowed',
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: applicationFormField.id,
+				position: 1,
+				value: 'Totally Forbidden',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			const response = await request(app)
+				.get('/proposals?_content=Forbidden')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+
+			expect(response.body).toEqual({
+				total: 1,
+				entries: [],
+			});
+		});
+
 		it('returns all proposals present in the database regardless of createdBy value when loading as an administrator', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);

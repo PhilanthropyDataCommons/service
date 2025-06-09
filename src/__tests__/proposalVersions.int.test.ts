@@ -16,6 +16,7 @@ import {
 	createChangemaker,
 	createOrUpdateUserChangemakerPermission,
 	createChangemakerProposal,
+	createProposalFieldValue,
 } from '../database';
 import { getLogger } from '../logger';
 import {
@@ -457,6 +458,23 @@ describe('/proposalVersions', () => {
 					label: 'Forbidden Field',
 				},
 			);
+			await createProposal(db, testUserAuthContext, {
+				externalId: `proposal-2525-01-04T00Z`,
+				opportunityId: 1,
+			});
+			await createProposalVersion(db, testUserAuthContext, {
+				proposalId: 1,
+				applicationFormId: 1,
+				sourceId: systemSource.id,
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: 1,
+				applicationFormFieldId: forbiddenApplicationFormField.id,
+				position: 1,
+				value: 'Should not be returned',
+				isValid: true,
+				goodAsOf: null,
+			});
 			await createOrUpdateBaseField(db, null, {
 				...forbiddenBaseField,
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,

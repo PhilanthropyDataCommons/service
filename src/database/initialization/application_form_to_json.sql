@@ -11,7 +11,9 @@ BEGIN
   )
   INTO application_form_fields_json
   FROM application_form_fields
-  WHERE application_form_fields.application_form_id = application_form.id;
+	JOIN base_fields ON application_form_fields.base_field_short_code = base_fields.short_code
+	WHERE application_form_fields.application_form_id = application_form.id
+		AND base_fields.sensitivity_classification != 'forbidden';
 
   RETURN jsonb_build_object(
     'id', application_form.id,

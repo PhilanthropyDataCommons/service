@@ -340,6 +340,49 @@ describe('/applicationForms', () => {
 			});
 		});
 
+		it('does not return formFields associated with `FORBIDDEN` BaseFields', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Holiday opportunity 🎄',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
+				label: 'Forbidden Field',
+				description: 'This field should not be used in application forms',
+				shortCode: 'forbiddenField',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: forbiddenBaseField.shortCode,
+				position: 1,
+				label: 'Anni Worki',
+			});
+			await createOrUpdateBaseField(db, null, {
+				...forbiddenBaseField,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+			const result = await request(app)
+				.get('/applicationForms/1')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+
+			expect(result.body).toMatchObject({
+				id: 1,
+				opportunityId: 1,
+				version: 1,
+				fields: [],
+				createdAt: expectTimestamp,
+			});
+		});
+
 		it('should return 404 when the user does not have read access to the relevant funder', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);

@@ -12,10 +12,9 @@ export const extractPaginationParameters = ({
 			isPaginationParametersQuery.errors ?? [],
 		);
 	}
-	/* eslint-disable no-underscore-dangle */
+
 	return {
 		page: query._page ?? 1,
 		count: query._count ?? 10,
 	};
-	/* eslint-enable no-underscore-dangle */
 };

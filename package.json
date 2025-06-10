@@ -12,7 +12,7 @@
 		"format:prettier": "prettier . --write",
 		"format:sqlfluff": "./venv/bin/sqlfluff fix src/database/",
 		"lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:tsc && npm run lint:openapi && npm run lint:sqlfluff",
-		"lint:eslint": "eslint ./src --ext .ts --max-warnings=0",
+		"lint:eslint": "eslint ./src --max-warnings=0",
 		"lint:openapi": "npx @redocly/cli lint src/openapi/api.json",
 		"lint:tsc": "tsc --noEmit -p tsconfig.dev.json",
 		"lint:prettier": "prettier . --check",
@@ -48,6 +48,7 @@
 	},
 	"type": "commonjs",
 	"devDependencies": {
+		"@eslint/js": "^9.28.0",
 		"@jest/globals": "^29.7.0",
 		"@redocly/cli": "^1.34.3",
 		"@tsconfig/node22": "^22.0.1",
@@ -61,11 +62,10 @@
 		"@types/supertest": "^6.0.3",
 		"@types/swagger-ui-express": "^4.1.8",
 		"@types/validator": "^13.15.1",
-		"@typescript-eslint/eslint-plugin": "^7.18.0",
-		"@typescript-eslint/parser": "^7.18.0",
 		"copyfiles": "^2.4.1",
-		"eslint": "^8.57.0",
+		"eslint": "^9.28.0",
 		"eslint-config-prettier": "^10.1.5",
+		"eslint-import-resolver-typescript": "^4.4.3",
 		"eslint-plugin-import": "^2.31.0",
 		"eslint-plugin-sort-exports": "^0.9.1",
 		"expect-type": "^1.2.1",
@@ -80,7 +80,8 @@
 		"swagger-spec-validator": "^5.0.0",
 		"ts-jest": "^29.3.4",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.8.3"
+		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.34.0"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.826.0",

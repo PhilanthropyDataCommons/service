@@ -24,6 +24,9 @@ describe('allNoLeaks', () => {
 
 	it('should throw an error with object reason', async () => {
 		const errorReasonToThrow = { weird: 'object' };
+
+		// The point is to test handling of non-error rejections.
+		// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
 		const errorTask = Promise.reject(errorReasonToThrow);
 		try {
 			await allNoLeaks([errorTask]);
@@ -39,6 +42,9 @@ describe('allNoLeaks', () => {
 
 	it('should throw an error with array reason', async () => {
 		const errorReasonToThrow = [2025, 5, 8];
+
+		// The point is to test handling of non-error rejections.
+		// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
 		const errorTask = Promise.reject(errorReasonToThrow);
 		try {
 			await allNoLeaks([errorTask]);
@@ -54,6 +60,9 @@ describe('allNoLeaks', () => {
 
 	it('should throw an error with string reason', async () => {
 		const errorReasonToThrow = 'I am a string';
+
+		// The point is to test handling of non-error rejections.
+		// eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
 		const errorTask = Promise.reject(errorReasonToThrow);
 		try {
 			await allNoLeaks([errorTask]);

@@ -1,6 +1,7 @@
 // This is a utility type definition and needs some weird / wonky types, so we need our linter to chill out
-/* eslint-disable @typescript-eslint/no-type-alias */
-/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
+/* eslint-disable @typescript-eslint/no-wrapper-object-types */
 
 // This set of types is inspired by https://stackoverflow.com/a/62362197/159522
 // The final `Writable` utility type will create a deep copy of a type with all

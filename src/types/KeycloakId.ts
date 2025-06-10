@@ -5,8 +5,7 @@ import { isUuid, uuidSchema } from './Uuid';
 import type { Uuid } from './Uuid';
 import type { JSONSchemaType } from 'ajv';
 
-interface KeycloakId
-	extends Newtype<{ readonly KeycloakId: unique symbol }, Uuid> {}
+type KeycloakId = Newtype<{ readonly KeycloakId: unique symbol }, Uuid>;
 
 const keycloakIdIsomorphism = createNewtypeIsomorphism<KeycloakId>();
 

@@ -1,4 +1,3 @@
-/* eslint-disable import/first */
 // Jest hoists .mock() calls, so this needs to go before imports.
 // See https://stackoverflow.com/a/67595592/159522
 const mockedCreatePresignedPost = jest.fn();

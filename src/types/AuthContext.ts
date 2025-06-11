@@ -42,7 +42,7 @@ const getIsAdministratorFromAuthContext = (
 ): boolean | undefined => req?.role?.isAdministrator;
 
 export {
-	AuthContext,
+	type AuthContext,
 	authContextSchema,
 	isAuthContext,
 	getKeycloakUserIdFromAuthContext,

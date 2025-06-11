@@ -12,4 +12,4 @@ const uuidSchema: JSONSchemaType<Uuid> = {
 
 const isUuid = ajv.compile(uuidSchema);
 
-export { Uuid, uuidSchema, isUuid };
+export { type Uuid, uuidSchema, isUuid };

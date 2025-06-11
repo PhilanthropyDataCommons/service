@@ -10,4 +10,4 @@ interface UnifiedAuditLog {
 	readonly details: object | null;
 }
 
-export { UnifiedAuditLog };
+export { type UnifiedAuditLog };

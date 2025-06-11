@@ -33,7 +33,7 @@ const isWritableProposal = ajv.compile(writableProposalSchema);
 
 export {
 	isWritableProposal,
-	Proposal,
-	WritableProposal,
+	type Proposal,
+	type WritableProposal,
 	writableProposalSchema,
 };

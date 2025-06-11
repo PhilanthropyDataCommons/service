@@ -38,8 +38,8 @@ const writableApplicationFormFieldWithApplicationContextSchema: JSONSchemaType<W
 	};
 
 export {
-	ApplicationFormField,
-	WritableApplicationFormField,
-	WritableApplicationFormFieldWithApplicationContext,
+	type ApplicationFormField,
+	type WritableApplicationFormField,
+	type WritableApplicationFormFieldWithApplicationContext,
 	writableApplicationFormFieldWithApplicationContextSchema,
 };

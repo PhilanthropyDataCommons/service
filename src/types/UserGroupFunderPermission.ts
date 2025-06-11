@@ -34,8 +34,8 @@ const isWritableUserGroupFunderPermission = ajv.compile(
 );
 
 export {
-	InternallyWritableUserGroupFunderPermission,
-	UserGroupFunderPermission,
-	WritableUserGroupFunderPermission,
+	type InternallyWritableUserGroupFunderPermission,
+	type UserGroupFunderPermission,
+	type WritableUserGroupFunderPermission,
 	isWritableUserGroupFunderPermission,
 };

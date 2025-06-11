@@ -10,4 +10,4 @@ const shortCodeSchema: JSONSchemaType<ShortCode> = {
 
 const isShortCode = ajv.compile(shortCodeSchema);
 
-export { ShortCode, shortCodeSchema, isShortCode };
+export { type ShortCode, shortCodeSchema, isShortCode };

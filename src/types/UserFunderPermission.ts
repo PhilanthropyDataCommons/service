@@ -33,8 +33,8 @@ const isWritableUserFunderPermission = ajv.compile(
 );
 
 export {
-	InternallyWritableUserFunderPermission,
-	UserFunderPermission,
-	WritableUserFunderPermission,
+	type InternallyWritableUserFunderPermission,
+	type UserFunderPermission,
+	type WritableUserFunderPermission,
 	isWritableUserFunderPermission,
 };

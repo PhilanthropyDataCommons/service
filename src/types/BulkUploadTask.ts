@@ -51,9 +51,9 @@ const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 const isWritableBulkUploadTask = ajv.compile(writableBulkUploadTaskSchema);
 
 export {
-	BulkUploadTask,
-	InternallyWritableBulkUploadTask,
-	WritableBulkUploadTask,
+	type BulkUploadTask,
+	type InternallyWritableBulkUploadTask,
+	type WritableBulkUploadTask,
 	isWritableBulkUploadTask,
 	writableBulkUploadTaskSchema,
 };

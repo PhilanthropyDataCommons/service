@@ -69,11 +69,11 @@ const isPartialWritableChangemaker = ajv.compile(
 );
 export {
 	isWritableChangemaker,
-	Changemaker,
-	ShallowChangemaker,
-	WritableChangemaker,
+	type Changemaker,
+	type ShallowChangemaker,
+	type WritableChangemaker,
 	writableChangemakerSchema,
-	PartialWritableChangemaker,
+	type PartialWritableChangemaker,
 	partialWritableChangemakerSchema,
 	isPartialWritableChangemaker,
 };

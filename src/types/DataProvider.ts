@@ -36,8 +36,8 @@ const writableDataProviderSchema: JSONSchemaType<WritableDataProvider> = {
 const isWritableDataProvider = ajv.compile(writableDataProviderSchema);
 
 export {
-	DataProvider,
-	InternallyWritableDataProvider,
+	type DataProvider,
+	type InternallyWritableDataProvider,
 	isWritableDataProvider,
-	WritableDataProvider,
+	type WritableDataProvider,
 };

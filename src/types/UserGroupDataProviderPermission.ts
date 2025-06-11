@@ -35,8 +35,8 @@ const isWritableUserGroupDataProviderPermission = ajv.compile(
 );
 
 export {
-	InternallyWritableUserGroupDataProviderPermission,
-	UserGroupDataProviderPermission,
-	WritableUserGroupDataProviderPermission,
+	type InternallyWritableUserGroupDataProviderPermission,
+	type UserGroupDataProviderPermission,
+	type WritableUserGroupDataProviderPermission,
 	isWritableUserGroupDataProviderPermission,
 };

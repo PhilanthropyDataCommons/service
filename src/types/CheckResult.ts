@@ -2,4 +2,4 @@ interface CheckResult {
 	result: boolean;
 }
 
-export { CheckResult };
+export { type CheckResult };

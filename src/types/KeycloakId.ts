@@ -28,7 +28,7 @@ const keycloakIdToString = (keycloakId: KeycloakId): string =>
 
 export {
 	isKeycloakId,
-	KeycloakId,
+	type KeycloakId,
 	keycloakIdSchema,
 	stringToKeycloakId,
 	keycloakIdToString,

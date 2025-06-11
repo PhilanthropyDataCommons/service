@@ -19,7 +19,7 @@ const copyBaseFieldsJobPayloadSchema: JSONSchemaType<CopyBaseFieldsJobPayload> =
 const isCopyBaseFieldsJobPayload = ajv.compile(copyBaseFieldsJobPayloadSchema);
 
 export {
-	CopyBaseFieldsJobPayload,
+	type CopyBaseFieldsJobPayload,
 	copyBaseFieldsJobPayloadSchema,
 	isCopyBaseFieldsJobPayload,
 };

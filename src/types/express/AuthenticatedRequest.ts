@@ -148,7 +148,7 @@ const hasMeaningfulAuthSub = (req: Request): boolean => {
 };
 
 export {
-	AuthenticatedRequest,
+	type AuthenticatedRequest,
 	getAuthSubFromRequest,
 	getRealmAccessRolesFromRequest,
 	getKeycloakOrganizationIdsFromRequest,

@@ -72,4 +72,4 @@ const writableSourceSchema: JSONSchemaType<WritableSource> = {
 
 const isWritableSource = ajv.compile(writableSourceSchema);
 
-export { Source, WritableSource, isWritableSource };
+export { type Source, type WritableSource, isWritableSource };

@@ -122,11 +122,11 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 
 export {
-	BaseField,
+	type BaseField,
 	baseFieldSchema,
 	isBaseField,
-	InternallyWritableBaseField,
-	WritableBaseField,
+	type InternallyWritableBaseField,
+	type WritableBaseField,
 	isWritableBaseField,
 	writableBaseFieldSchema,
 };

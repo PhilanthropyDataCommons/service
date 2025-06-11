@@ -34,8 +34,8 @@ const isWritableUserGroupChangemakerPermission = ajv.compile(
 );
 
 export {
-	InternallyWritableUserGroupChangemakerPermission,
-	UserGroupChangemakerPermission,
-	WritableUserGroupChangemakerPermission,
+	type InternallyWritableUserGroupChangemakerPermission,
+	type UserGroupChangemakerPermission,
+	type WritableUserGroupChangemakerPermission,
 	isWritableUserGroupChangemakerPermission,
 };

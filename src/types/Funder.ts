@@ -34,4 +34,9 @@ const writableFunderSchema: JSONSchemaType<WritableFunder> = {
 
 const isWritableFunder = ajv.compile(writableFunderSchema);
 
-export { Funder, InternallyWritableFunder, isWritableFunder, WritableFunder };
+export {
+	type Funder,
+	type InternallyWritableFunder,
+	isWritableFunder,
+	type WritableFunder,
+};

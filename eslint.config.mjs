@@ -25,7 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'@typescript-eslint/consistent-type-exports': 'off',
 			'@typescript-eslint/consistent-type-imports': 'off',
 			'@typescript-eslint/explicit-function-return-type': 'off',
 			'@typescript-eslint/init-declarations': 'off',
@@ -138,6 +137,8 @@ export default defineConfig([
 					ignoreCase: true,
 				},
 			],
+			// Indexes shouldn't care about the nature of the exports they are collating
+			'@typescript-eslint/consistent-type-exports': 'off',
 		},
 	},
 ]);

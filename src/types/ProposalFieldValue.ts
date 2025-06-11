@@ -46,8 +46,8 @@ type InternallyWritableProposalFieldValue = WritableProposalFieldValue &
 	Pick<ProposalFieldValue, 'isValid'>;
 
 export {
-	InternallyWritableProposalFieldValue,
-	ProposalFieldValue,
-	WritableProposalFieldValueWithProposalVersionContext,
+	type InternallyWritableProposalFieldValue,
+	type ProposalFieldValue,
+	type WritableProposalFieldValueWithProposalVersionContext,
 	writableProposalFieldValueWithProposalVersionContextSchema,
 };

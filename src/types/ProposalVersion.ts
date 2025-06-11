@@ -53,8 +53,8 @@ const isWritableProposalVersionWithFieldValues = ajv.compile(
 );
 
 export {
-	ProposalVersion,
-	WritableProposalVersion,
-	WritableProposalVersionWithFieldValues,
+	type ProposalVersion,
+	type WritableProposalVersion,
+	type WritableProposalVersionWithFieldValues,
 	isWritableProposalVersionWithFieldValues,
 };

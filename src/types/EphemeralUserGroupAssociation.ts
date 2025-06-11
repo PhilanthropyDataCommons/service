@@ -19,7 +19,7 @@ type InternallyWritableEphemeralUserGroupAssociation =
 		>;
 
 export {
-	EphemeralUserGroupAssociation,
-	InternallyWritableEphemeralUserGroupAssociation,
-	WritableEphemeralUserGroupAssociation,
+	type EphemeralUserGroupAssociation,
+	type InternallyWritableEphemeralUserGroupAssociation,
+	type WritableEphemeralUserGroupAssociation,
 };

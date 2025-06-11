@@ -33,8 +33,8 @@ const isWritableBaseFieldsCopyTask = ajv.compile(
 	writableBaseFieldsCopyTaskSchema,
 );
 export {
-	BaseFieldsCopyTask,
-	WritableBaseFieldsCopyTask,
+	type BaseFieldsCopyTask,
+	type WritableBaseFieldsCopyTask,
 	isWritableBaseFieldsCopyTask,
-	InternallyWritableBaseFieldsCopyTask,
+	type InternallyWritableBaseFieldsCopyTask,
 };

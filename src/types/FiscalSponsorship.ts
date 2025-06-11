@@ -5,4 +5,4 @@ interface FiscalSponsorship {
 	fiscalSponsorChangemakerId: Id;
 }
 
-export { FiscalSponsorship };
+export { type FiscalSponsorship };

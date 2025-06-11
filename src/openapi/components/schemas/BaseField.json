@@ -36,6 +36,10 @@
 			"example": 24,
 			"description": "Duration (in hours) for which values of this base field are considered relevant."
 		},
+		"sensitivityClassification": {
+			"type": "string",
+			"enum": ["public", "restricted", "forbidden"]
+		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",
@@ -48,6 +52,8 @@
 		"description",
 		"dataType",
 		"scope",
+		"valueRelevanceHours",
+		"sensitivityClassification",
 		"createdAt"
 	]
 }

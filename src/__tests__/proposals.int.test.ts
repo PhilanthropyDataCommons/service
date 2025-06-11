@@ -29,6 +29,7 @@ import {
 import {
 	BaseFieldDataType,
 	BaseFieldScope,
+	BaseFieldSensitivityClassification,
 	keycloakIdToString,
 	Permission,
 } from '../types';
@@ -41,6 +42,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Title',
@@ -49,6 +51,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 };
 
@@ -305,6 +308,8 @@ describe('/proposals', () => {
 												scope: 'proposal',
 												valueRelevanceHours: null,
 												shortCode: 'summary',
+												sensitivityClassification:
+													BaseFieldSensitivityClassification.RESTRICTED,
 												localizations: {},
 											},
 											label: 'Short summary',
@@ -317,6 +322,67 @@ describe('/proposals', () => {
 						],
 					},
 				],
+			});
+		});
+
+		it('does not return proposals where there is a search match against a forbidden base field', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemFunder = await loadSystemFunder(db, null);
+			await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const systemSource = await loadSystemSource(db, null);
+			const forbiddenField = await createOrUpdateBaseField(db, null, {
+				label: 'Forbidden Field',
+				description: 'A field that should not be searchable',
+				shortCode: 'forbidden',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: 1,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 1,
+			});
+			await createProposalVersion(db, testUserAuthContext, {
+				proposalId: 1,
+				applicationFormId: 1,
+				sourceId: systemSource.id,
+			});
+			await createApplicationFormField(db, null, {
+				applicationFormId: 1,
+				baseFieldShortCode: forbiddenField.shortCode,
+				position: 1,
+				label: 'Not Allowed',
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: 1,
+				applicationFormFieldId: 1,
+				position: 1,
+				value: 'Totally Forbidden',
+				isValid: true,
+				goodAsOf: null,
+			});
+			await createOrUpdateBaseField(db, null, {
+				...forbiddenField,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+
+			const response = await request(app)
+				.get('/proposals?_content=Forbidden')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+
+			expect(response.body).toEqual({
+				total: 1,
+				entries: [],
 			});
 		});
 
@@ -553,6 +619,8 @@ describe('/proposals', () => {
 												label: 'Summary',
 												scope: 'proposal',
 												valueRelevanceHours: null,
+												sensitivityClassification:
+													BaseFieldSensitivityClassification.RESTRICTED,
 												shortCode: 'summary',
 												localizations: {},
 											},
@@ -867,6 +935,8 @@ describe('/proposals', () => {
 										scope: 'proposal',
 										valueRelevanceHours: null,
 										shortCode: 'title',
+										sensitivityClassification:
+											BaseFieldSensitivityClassification.RESTRICTED,
 										localizations: {},
 									},
 									position: 1,
@@ -894,6 +964,8 @@ describe('/proposals', () => {
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification:
+											BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'summary',
 										localizations: {},
 									},
@@ -934,6 +1006,8 @@ describe('/proposals', () => {
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification:
+											BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'title',
 										localizations: {},
 									},
@@ -962,6 +1036,8 @@ describe('/proposals', () => {
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification:
+											BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'summary',
 										localizations: {},
 									},
@@ -1088,6 +1164,8 @@ describe('/proposals', () => {
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification:
+											BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'title',
 										localizations: {},
 									},
@@ -1116,6 +1194,8 @@ describe('/proposals', () => {
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification:
+											BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'summary',
 										localizations: {},
 									},
@@ -1156,6 +1236,8 @@ describe('/proposals', () => {
 										label: 'Title',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification:
+											BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'title',
 										localizations: {},
 									},
@@ -1184,11 +1266,139 @@ describe('/proposals', () => {
 										label: 'Summary',
 										scope: 'proposal',
 										valueRelevanceHours: null,
+										sensitivityClassification:
+											BaseFieldSensitivityClassification.RESTRICTED,
 										shortCode: 'summary',
 										localizations: {},
 									},
 									position: 2,
 									label: 'Long summary or abstract',
+									createdAt: expectTimestamp,
+								},
+							},
+						],
+					},
+				],
+			});
+		});
+
+		it('does not return proposal field values associated with forbidden base fields', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			await createTestBaseFields();
+			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
+				shortCode: 'forbiddenField',
+				dataType: BaseFieldDataType.STRING,
+				label: 'Forbidden Field',
+				description: 'This field should not be returned',
+				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			await createOpportunity(db, null, {
+				title: '🌎',
+				funderShortCode: systemFunder.shortCode,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 1,
+			});
+			await createApplicationFormField(db, null, {
+				applicationFormId: 1,
+				baseFieldShortCode: 'title',
+				position: 1,
+				label: 'Short summary or title',
+			});
+			const forbiddenApplicationFormField = await createApplicationFormField(
+				db,
+				null,
+				{
+					applicationFormId: 1,
+					baseFieldShortCode: forbiddenBaseField.shortCode,
+					position: 2,
+					label: 'forbidden field',
+				},
+			);
+			await createProposal(db, testUserAuthContext, {
+				externalId: `proposal-2525-01-04T00Z`,
+				opportunityId: 1,
+			});
+			await createProposalVersion(db, testUserAuthContext, {
+				proposalId: 1,
+				applicationFormId: 1,
+				sourceId: systemSource.id,
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: 1,
+				applicationFormFieldId: 1,
+				position: 1,
+				value: 'Title for version 1 from 2525-01-04',
+				isValid: true,
+				goodAsOf: null,
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: 1,
+				applicationFormFieldId: forbiddenApplicationFormField.id,
+				position: 1,
+				value: 'Should not be returned',
+				isValid: true,
+				goodAsOf: null,
+			});
+			await createOrUpdateBaseField(db, null, {
+				...forbiddenBaseField,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+
+			const response = await request(app)
+				.get('/proposals/1')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				id: 1,
+				opportunityId: 1,
+				externalId: 'proposal-2525-01-04T00Z',
+				createdAt: expectTimestamp,
+				createdBy: testUser.keycloakUserId,
+				versions: [
+					{
+						id: 1,
+						proposalId: 1,
+						sourceId: systemSource.id,
+						source: systemSource,
+						applicationFormId: 1,
+						version: 1,
+						createdAt: expectTimestamp,
+						createdBy: testUser.keycloakUserId,
+						fieldValues: [
+							{
+								id: 1,
+								proposalVersionId: 1,
+								applicationFormFieldId: 1,
+								position: 1,
+								value: 'Title for version 1 from 2525-01-04',
+								createdAt: expectTimestamp,
+								isValid: true,
+								goodAsOf: null,
+								applicationFormField: {
+									id: 1,
+									applicationFormId: 1,
+									baseFieldShortCode: 'title',
+									baseField: {
+										createdAt: expectTimestamp,
+										dataType: 'string',
+										description: 'The title of the proposal',
+										label: 'Title',
+										scope: 'proposal',
+										valueRelevanceHours: null,
+										sensitivityClassification:
+											BaseFieldSensitivityClassification.RESTRICTED,
+										shortCode: 'title',
+										localizations: {},
+									},
+									position: 1,
+									label: 'Short summary or title',
 									createdAt: expectTimestamp,
 								},
 							},

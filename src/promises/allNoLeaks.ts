@@ -20,7 +20,7 @@ const getErrorFromReason = (reason: unknown): Error => {
  * Here we offer a simplified `Promise.all`-like API wrapping `Promise.allSettled` functionality.
  * Use this function in place of `Promise.all` in almost all circumstances.
  */
-export const allNoLeaks = async <T>(values: Promise<T>[]) => {
+export const allNoLeaks = async <T>(values: Array<Promise<T>>) => {
 	const settled = await Promise.allSettled(values);
 	const rejectedTask = settled.find(isRejected);
 	if (rejectedTask !== undefined) {

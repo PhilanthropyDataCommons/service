@@ -35,7 +35,7 @@ describe('Writable', () => {
 		const writable: Writable<Bar> = {
 			a: [{ b: 42 }],
 		};
-		expectTypeOf(writable).toEqualTypeOf<{ a: { b: number }[] }>();
+		expectTypeOf(writable).toEqualTypeOf<{ a: Array<{ b: number }> }>();
 	});
 
 	it('should convert Set attributes to have the Set item types as Writable', () => {

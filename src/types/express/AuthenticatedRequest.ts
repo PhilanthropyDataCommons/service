@@ -1,6 +1,7 @@
-import { Request as JwtRequest } from 'express-jwt';
 import { ajv } from '../../ajv';
-import { KeycloakId, keycloakIdSchema } from '../KeycloakId';
+import { keycloakIdSchema } from '../KeycloakId';
+import type { KeycloakId } from '../KeycloakId';
+import type { Request as JwtRequest } from 'express-jwt';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
 import type { AuthContext } from '../AuthContext';

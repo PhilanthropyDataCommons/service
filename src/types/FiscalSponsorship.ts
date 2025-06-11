@@ -1,4 +1,4 @@
-import { Id } from './Id';
+import type { Id } from './Id';
 
 interface FiscalSponsorship {
 	fiscalSponseeChangemakerId: Id;

@@ -11,16 +11,14 @@ import {
 	loadBaseField,
 	createOrUpdateBaseFieldLocalization,
 } from '../../database';
-import {
+import { BaseFieldDataType, BaseFieldScope, TaskStatus } from '../../types';
+import { expectTimestamp, getAuthContext } from '../../test/utils';
+import type {
+	BaseField,
 	InternallyWritableBaseFieldsCopyTask,
 	BaseFieldsCopyTask,
-	TaskStatus,
-	BaseFieldDataType,
-	BaseFieldScope,
 	AuthContext,
 } from '../../types';
-import { expectTimestamp, getAuthContext } from '../../test/utils';
-import type { BaseField } from '../../types';
 
 const MOCK_API_URL = 'https://example.com';
 

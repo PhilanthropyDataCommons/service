@@ -14,10 +14,10 @@ import {
 	isWritableBaseField,
 	isWritableBaseFieldLocalization,
 	isId,
-	ShortCode,
 	isShortCode,
 } from '../types';
 import type { Request, Response } from 'express';
+import type { ShortCode } from '../types';
 
 const assertBaseFieldExists = async (
 	baseFieldShortCode: ShortCode,

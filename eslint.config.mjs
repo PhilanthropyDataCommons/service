@@ -25,7 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'@typescript-eslint/consistent-type-imports': 'off',
 			'@typescript-eslint/explicit-function-return-type': 'off',
 			'@typescript-eslint/init-declarations': 'off',
 			'@typescript-eslint/no-confusing-void-expression': 'off',

@@ -12,11 +12,10 @@
  *
  * If any of the checks fail, the middleware will pass an appropriate error to the next middleware.
  */
-import { Response, NextFunction } from 'express';
 import { InputValidationError, UnauthorizedError } from '../errors';
 import { isAuthContext, isShortCode } from '../types';
 import type { Permission } from '../types';
-import type { Request } from 'express';
+import type { Response, Request, NextFunction } from 'express';
 
 const requireFunderPermission =
 	(permission: Permission) =>

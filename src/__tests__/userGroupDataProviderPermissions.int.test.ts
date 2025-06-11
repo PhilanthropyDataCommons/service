@@ -12,8 +12,9 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { KeycloakId, keycloakIdToString, Permission } from '../types';
+import { keycloakIdToString, Permission } from '../types';
 import { NotFoundError } from '../errors';
+import type { KeycloakId } from '../types';
 
 const mockKeycloakOrganizationId = '123e4567-e89b-12d3-a456-426614174000';
 

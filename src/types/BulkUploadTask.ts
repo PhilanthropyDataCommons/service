@@ -1,6 +1,6 @@
 import { ajv } from '../ajv';
-import { TaskStatus } from './TaskStatus';
 import { shortCodeSchema } from './ShortCode';
+import type { TaskStatus } from './TaskStatus';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { Source } from './Source';

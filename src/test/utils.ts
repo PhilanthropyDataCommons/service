@@ -1,5 +1,6 @@
 import { db, createOrUpdateUser, loadUserByKeycloakUserId } from '../database';
-import { stringToKeycloakId, User } from '../types';
+import { stringToKeycloakId } from '../types';
+import type { User } from '../types';
 
 export const isoTimestampPattern =
 	/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|(\+|-)\d{2}:\d{2})$/;

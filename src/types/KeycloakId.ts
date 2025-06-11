@@ -1,7 +1,8 @@
-import { Newtype, iso as createNewtypeIsomorphism } from 'newtype-ts';
+import { iso as createNewtypeIsomorphism } from 'newtype-ts';
 import { InternalValidationError } from '../errors';
 import { ajv } from '../ajv';
 import { isUuid, uuidSchema } from './Uuid';
+import type { Newtype } from 'newtype-ts';
 import type { Uuid } from './Uuid';
 import type { JSONSchemaType } from 'ajv';
 

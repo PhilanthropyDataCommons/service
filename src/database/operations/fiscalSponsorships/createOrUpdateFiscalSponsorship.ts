@@ -1,6 +1,5 @@
 import { generateCreateOrUpdateItemOperation } from '../generators';
-import { Writable } from '../../../types/Writable';
-import type { FiscalSponsorship } from '../../../types';
+import type { FiscalSponsorship, Writable } from '../../../types';
 
 const createOrUpdateFiscalSponsorship = generateCreateOrUpdateItemOperation<
 	FiscalSponsorship,

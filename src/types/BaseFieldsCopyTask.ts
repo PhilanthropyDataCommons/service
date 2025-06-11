@@ -1,5 +1,5 @@
 import { ajv } from '../ajv';
-import { TaskStatus } from './TaskStatus';
+import type { TaskStatus } from './TaskStatus';
 import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { KeycloakId } from './KeycloakId';

@@ -1,5 +1,5 @@
-import TinyPg from 'tinypg';
-import { AuthContext } from '../../../types';
+import type TinyPg from 'tinypg';
+import type { AuthContext } from '../../../types';
 
 const createServiceQueryAuditLog = async (
 	db: TinyPg,

@@ -17,12 +17,7 @@ import {
 import { s3Client } from '../../s3Client';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUploadTask } from '../processBulkUploadTask';
-import {
-	BaseFieldDataType,
-	BaseFieldScope,
-	TaskStatus,
-	Proposal,
-} from '../../types';
+import { BaseFieldDataType, BaseFieldScope, TaskStatus } from '../../types';
 import {
 	expectTimestamp,
 	getAuthContext,
@@ -35,6 +30,7 @@ import type {
 	InternallyWritableBulkUploadTask,
 	Changemaker,
 	AuthContext,
+	Proposal,
 } from '../../types';
 
 const { S3_BUCKET, S3_PATH_STYLE } = requireEnv('S3_BUCKET', 'S3_PATH_STYLE');

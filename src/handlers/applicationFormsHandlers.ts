@@ -24,7 +24,10 @@ import { extractPaginationParameters } from '../queryParameters';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
-const getApplicationForms = async (req: Request, res: Response) => {
+const getApplicationForms = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -39,7 +42,10 @@ const getApplicationForms = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(applicationFormBundle);
 };
 
-const getApplicationForm = async (req: Request, res: Response) => {
+const getApplicationForm = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -53,7 +59,10 @@ const getApplicationForm = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(applicationForm);
 };
 
-const postApplicationForms = async (req: Request, res: Response) => {
+const postApplicationForms = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

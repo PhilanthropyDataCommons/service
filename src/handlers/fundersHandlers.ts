@@ -11,7 +11,7 @@ import { extractPaginationParameters } from '../queryParameters';
 import { isShortCode } from '../types/ShortCode';
 import type { Request, Response } from 'express';
 
-const getFunders = async (req: Request, res: Response) => {
+const getFunders = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
@@ -23,7 +23,7 @@ const getFunders = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(funderBundle);
 };
 
-const getFunder = async (req: Request, res: Response) => {
+const getFunder = async (req: Request, res: Response): Promise<void> => {
 	const { funderShortCode } = req.params;
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(
@@ -35,7 +35,7 @@ const getFunder = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(funder);
 };
 
-const putFunder = async (req: Request, res: Response) => {
+const putFunder = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

@@ -2,6 +2,7 @@ import { Logger, quickAddJob, run, runMigrations } from 'graphile-worker';
 import { copyBaseFields, processBulkUploadTask } from './tasks';
 import { getLogger } from './logger';
 import { db } from './database/db';
+import type { Job } from 'graphile-worker';
 import type {
 	CopyBaseFieldsJobPayload,
 	ProcessBulkUploadJobPayload,
@@ -33,7 +34,7 @@ export const jobQueueLogger = new Logger((scope) => (level, message, meta) => {
 	}
 });
 
-export const startJobQueue = async () => {
+export const startJobQueue = async (): Promise<void> => {
 	const runner = await run({
 		logger: jobQueueLogger,
 		pgPool: db.pool,
@@ -50,13 +51,16 @@ export const startJobQueue = async () => {
 	});
 };
 
-export const runJobQueueMigrations = async () =>
+export const runJobQueueMigrations = async (): Promise<void> =>
 	runMigrations({
 		logger: jobQueueLogger,
 		pgPool: db.pool,
 	});
 
-export const addJob = async (jobType: JobType, payload: unknown) =>
+export const addJob = async (
+	jobType: JobType,
+	payload: unknown,
+): Promise<Job> =>
 	quickAddJob(
 		{
 			logger: jobQueueLogger,
@@ -68,7 +72,8 @@ export const addJob = async (jobType: JobType, payload: unknown) =>
 
 export const addProcessBulkUploadJob = async (
 	payload: ProcessBulkUploadJobPayload,
-) => addJob(JobType.PROCESS_BULK_UPLOAD, payload);
+): Promise<Job> => addJob(JobType.PROCESS_BULK_UPLOAD, payload);
 
-export const addCopyBaseFieldsJob = async (payload: CopyBaseFieldsJobPayload) =>
-	addJob(JobType.COPY_BASE_FIELDS, payload);
+export const addCopyBaseFieldsJob = async (
+	payload: CopyBaseFieldsJobPayload,
+): Promise<Job> => addJob(JobType.COPY_BASE_FIELDS, payload);

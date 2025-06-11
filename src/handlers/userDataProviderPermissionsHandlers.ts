@@ -17,7 +17,7 @@ import type { Request, Response } from 'express';
 const deleteUserDataProviderPermission = async (
 	req: Request,
 	res: Response,
-) => {
+): Promise<void> => {
 	const { userKeycloakUserId, dataProviderShortCode, permission } = req.params;
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(
@@ -48,7 +48,10 @@ const deleteUserDataProviderPermission = async (
 	res.status(204).contentType('application/json').send();
 };
 
-const putUserDataProviderPermission = async (req: Request, res: Response) => {
+const putUserDataProviderPermission = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

@@ -50,7 +50,7 @@ export const fetchBaseFieldsFromRemote = async (
 	}
 };
 
-const copyBaseField = async (targetBaseField: BaseField) => {
+const copyBaseField = async (targetBaseField: BaseField): Promise<void> => {
 	const {
 		scope,
 		dataType,

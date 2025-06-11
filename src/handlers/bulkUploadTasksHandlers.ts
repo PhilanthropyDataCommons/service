@@ -26,7 +26,10 @@ import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
-const postBulkUploadTask = async (req: Request, res: Response) => {
+const postBulkUploadTask = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -77,7 +80,10 @@ const postBulkUploadTask = async (req: Request, res: Response) => {
 	}
 };
 
-const getBulkUploadTasks = async (req: Request, res: Response) => {
+const getBulkUploadTasks = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

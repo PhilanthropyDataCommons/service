@@ -16,7 +16,7 @@ import type { Request, Response } from 'express';
 const deleteUserGroupChangemakerPermission = async (
 	req: Request,
 	res: Response,
-) => {
+): Promise<void> => {
 	const { keycloakOrganizationId, changemakerId, permission } = req.params;
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
@@ -50,7 +50,7 @@ const deleteUserGroupChangemakerPermission = async (
 const putUserGroupChangemakerPermission = async (
 	req: Request,
 	res: Response,
-) => {
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;

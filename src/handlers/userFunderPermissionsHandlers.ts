@@ -14,7 +14,10 @@ import {
 import { FailedMiddlewareError, InputValidationError } from '../errors';
 import type { Request, Response } from 'express';
 
-const deleteUserFunderPermission = async (req: Request, res: Response) => {
+const deleteUserFunderPermission = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	const { userKeycloakUserId, funderShortCode, permission } = req.params;
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(
@@ -45,7 +48,10 @@ const deleteUserFunderPermission = async (req: Request, res: Response) => {
 	res.status(204).contentType('application/json').send();
 };
 
-const putUserFunderPermission = async (req: Request, res: Response) => {
+const putUserFunderPermission = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

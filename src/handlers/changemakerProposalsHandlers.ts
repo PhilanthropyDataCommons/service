@@ -25,7 +25,10 @@ import {
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
-const getChangemakerProposals = async (req: Request, res: Response) => {
+const getChangemakerProposals = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -48,7 +51,10 @@ const getChangemakerProposals = async (req: Request, res: Response) => {
 		.send(changemakerProposalBundle);
 };
 
-const postChangemakerProposal = async (req: Request, res: Response) => {
+const postChangemakerProposal = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;

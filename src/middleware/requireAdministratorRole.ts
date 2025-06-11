@@ -6,7 +6,7 @@ const requireAdministratorRole = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
-) => {
+): void => {
 	if (!isAuthContext(req) || req.role?.isAdministrator !== true) {
 		next(
 			new UnauthorizedError('Your account must have the administrator role.'),

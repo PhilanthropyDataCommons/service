@@ -20,7 +20,7 @@ import {
 } from '../authorization';
 import type { Request, Response } from 'express';
 
-const postSource = async (req: Request, res: Response) => {
+const postSource = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -74,7 +74,7 @@ const postSource = async (req: Request, res: Response) => {
 	res.status(201).contentType('application/json').send(source);
 };
 
-const getSources = async (req: Request, res: Response) => {
+const getSources = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -85,7 +85,7 @@ const getSources = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(bundle);
 };
 
-const getSource = async (req: Request, res: Response) => {
+const getSource = async (req: Request, res: Response): Promise<void> => {
 	const { sourceId } = req.params;
 	if (!isId(sourceId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
@@ -94,7 +94,7 @@ const getSource = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(source);
 };
 
-const deleteSource = async (req: Request, res: Response) => {
+const deleteSource = async (req: Request, res: Response): Promise<void> => {
 	const { sourceId } = req.params;
 	if (!isId(sourceId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);

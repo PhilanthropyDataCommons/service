@@ -6,7 +6,7 @@ const requireAuthentication = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
-) => {
+): void => {
 	if (!('auth' in req)) {
 		next(new UnauthorizedError('No authorization token was found.'));
 		return;

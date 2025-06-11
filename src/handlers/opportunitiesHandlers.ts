@@ -20,7 +20,7 @@ import { extractPaginationParameters } from '../queryParameters';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
-const getOpportunities = async (req: Request, res: Response) => {
+const getOpportunities = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -30,7 +30,7 @@ const getOpportunities = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(opportunityBundle);
 };
 
-const getOpportunity = async (req: Request, res: Response) => {
+const getOpportunity = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
@@ -43,7 +43,7 @@ const getOpportunity = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(opportunity);
 };
 
-const postOpportunity = async (req: Request, res: Response) => {
+const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

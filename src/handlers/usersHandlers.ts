@@ -7,7 +7,7 @@ import {
 } from '../queryParameters';
 import type { Request, Response } from 'express';
 
-const getUsers = async (req: Request, res: Response) => {
+const getUsers = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;

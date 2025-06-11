@@ -25,7 +25,7 @@ const assertBaseFieldExists = async (
 	await loadBaseField(db, null, baseFieldShortCode);
 };
 
-const getBaseFields = async (req: Request, res: Response) => {
+const getBaseFields = async (req: Request, res: Response): Promise<void> => {
 	const baseFields = await loadBaseFields();
 	res.status(200).contentType('application/json').send(baseFields);
 };
@@ -33,7 +33,7 @@ const getBaseFields = async (req: Request, res: Response) => {
 const putBaseField = async (
 	req: Request<{ baseFieldShortCode: string }>,
 	res: Response,
-) => {
+): Promise<void> => {
 	const { baseFieldShortCode } = req.params;
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
@@ -63,7 +63,7 @@ const putBaseField = async (
 const getBaseFieldLocalizationsByBaseFieldShortCode = async (
 	req: Request<{ baseFieldShortCode: ShortCode }>,
 	res: Response,
-) => {
+): Promise<void> => {
 	const { baseFieldShortCode } = req.params;
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
@@ -88,7 +88,7 @@ const getBaseFieldLocalizationsByBaseFieldShortCode = async (
 const putBaseFieldLocalization = async (
 	req: Request<{ baseFieldShortCode: ShortCode; language: string }>,
 	res: Response,
-) => {
+): Promise<void> => {
 	const { baseFieldShortCode, language } = req.params;
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(

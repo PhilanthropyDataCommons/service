@@ -25,7 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'@typescript-eslint/explicit-function-return-type': 'off',
 			'@typescript-eslint/init-declarations': 'off',
 			'@typescript-eslint/no-confusing-void-expression': 'off',
 			'@typescript-eslint/no-deprecated': 'off',
@@ -138,6 +137,15 @@ export default defineConfig([
 			],
 			// Indexes shouldn't care about the nature of the exports they are collating
 			'@typescript-eslint/consistent-type-exports': 'off',
+		},
+	},
+	{
+		files: ['**/*test.ts'],
+
+		rules: {
+			// Forcing return type definitions in our ad-hoc test functions is not worth
+			// the added effort / verbosity.
+			'@typescript-eslint/explicit-function-return-type': 'off',
 		},
 	},
 ]);

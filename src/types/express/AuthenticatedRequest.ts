@@ -140,7 +140,7 @@ const getKeycloakOrganizationIdsFromRequest = (req: Request): KeycloakId[] =>
 			)
 		: [];
 
-const getJwtExpFromRequest = (req: Request) =>
+const getJwtExpFromRequest = (req: Request): number | null =>
 	isObjectWithAuthWithExp(req) ? req.auth.exp : null;
 
 const hasMeaningfulAuthSub = (req: Request): boolean => {

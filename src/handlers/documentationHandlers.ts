@@ -3,7 +3,9 @@ import fs from 'fs/promises';
 import { issuer } from '../auth/jwtOptions';
 import type { Request, Response } from 'express';
 
-const readAndExpandDocumentationFile = async (relativeFilePath: string) => {
+const readAndExpandDocumentationFile = async (
+	relativeFilePath: string,
+): Promise<string> => {
 	const absoluteFilePath = path.join(__dirname, '../openapi', relativeFilePath);
 	const rawContent = await fs.readFile(absoluteFilePath, 'utf8');
 	const expandedContent = rawContent.replace(/{{AUTH_ISSUER}}/g, issuer);
@@ -24,7 +26,7 @@ const getExpandedDocumentation = async (
 	return expandedContent;
 };
 
-const getRootApiSpec = async (req: Request, res: Response) => {
+const getRootApiSpec = async (req: Request, res: Response): Promise<void> => {
 	const expandedDocumentation = await getExpandedDocumentation('api.json');
 	res.type('application/json');
 	res.set(
@@ -34,7 +36,7 @@ const getRootApiSpec = async (req: Request, res: Response) => {
 	res.send(expandedDocumentation);
 };
 
-const getAuthApiSpec = async (req: Request, res: Response) => {
+const getAuthApiSpec = async (req: Request, res: Response): Promise<void> => {
 	const expandedDocumentation = await getExpandedDocumentation(
 		'components/securitySchemes/auth.json',
 	);

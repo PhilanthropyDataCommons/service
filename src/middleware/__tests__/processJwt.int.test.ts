@@ -162,8 +162,8 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 		processJwt(mockRequest, mockResponse, nextMock);
 		await allowNextToResolve();
 
-		expect(customMiddleware).toBeCalledTimes(1);
-		expect(nextMock).toBeCalledTimes(1);
+		expect(customMiddleware).toHaveBeenCalledTimes(1);
+		expect(nextMock).toHaveBeenCalledTimes(1);
 	});
 
 	it('calls next if middleware throws an error before calling next', async () => {
@@ -180,7 +180,7 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 		jest.unmock('express-jwt');
 
 		expect(mockRequest.auth).toBe(undefined);
-		expect(customMiddleware).toBeCalledTimes(1);
-		expect(nextMock).toBeCalledTimes(1);
+		expect(customMiddleware).toHaveBeenCalledTimes(1);
+		expect(nextMock).toHaveBeenCalledTimes(1);
 	});
 });

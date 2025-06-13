@@ -25,7 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'@typescript-eslint/no-import-type-side-effects': 'off',
 			'@typescript-eslint/no-magic-numbers': 'off',
 			'@typescript-eslint/no-unnecessary-boolean-literal-compare': 'off',
 			'@typescript-eslint/no-unnecessary-condition': 'off',

@@ -170,7 +170,7 @@ describe('/changemakers', () => {
 				.get('/changemakers')
 				.set(authHeader)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
 						entries: [
@@ -193,8 +193,8 @@ describe('/changemakers', () => {
 								fields: [],
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 
 		it('returns according to pagination parameters', async () => {
@@ -214,7 +214,7 @@ describe('/changemakers', () => {
 				})
 				.set(authHeader)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 20,
 						entries: [
@@ -264,8 +264,8 @@ describe('/changemakers', () => {
 								fields: [],
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 
 		it('returns a subset of changemakers present in the database when a proposal filter is provided', async () => {
@@ -391,7 +391,7 @@ describe('/changemakers', () => {
 				.get('/changemakers/2')
 				.set(authHeader)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						id: 2,
 						taxId: '22-2222222',
@@ -400,8 +400,8 @@ describe('/changemakers', () => {
 						createdAt: expectTimestamp,
 						fiscalSponsors: [],
 						fields: [],
-					}),
-				);
+					});
+				});
 		});
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
@@ -523,7 +523,7 @@ describe('/changemakers', () => {
 					.get(`/changemakers/${changemakerId}`)
 					.set(authHeader)
 					.expect(200)
-					.expect((res) =>
+					.expect((res) => {
 						expect(res.body).toEqual({
 							id: changemakerId,
 							name: 'Five thousand one hundred forty seven reasons',
@@ -532,8 +532,8 @@ describe('/changemakers', () => {
 							createdAt: expectTimestamp,
 							fiscalSponsors: [],
 							fields: [latestValidValue],
-						}),
-					);
+						});
+					});
 			});
 
 			it('returns older changemaker data when newer funder data is present', async () => {
@@ -619,13 +619,13 @@ describe('/changemakers', () => {
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
 					.expect(200)
-					.expect((res) =>
+					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
 							createdAt: expectTimestamp,
 							fields: [changemakerEarliestValue],
-						}),
-					);
+						});
+					});
 			});
 
 			it('returns older funder data when newer data platform provider data is present', async () => {
@@ -707,13 +707,13 @@ describe('/changemakers', () => {
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
 					.expect(200)
-					.expect((res) =>
+					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
 							createdAt: expectTimestamp,
 							fields: [funderEarliestValue],
-						}),
-					);
+						});
+					});
 			});
 
 			it('returns newer data when only data platform provider data is present', async () => {
@@ -800,13 +800,13 @@ describe('/changemakers', () => {
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
 					.expect(200)
-					.expect((res) =>
+					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
 							createdAt: expectTimestamp,
 							fields: [dataProviderNewestValue],
-						}),
-					);
+						});
+					});
 			});
 		});
 	});

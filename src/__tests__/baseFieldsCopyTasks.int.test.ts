@@ -58,7 +58,7 @@ describe('/tasks/baseFieldsCopy', () => {
 				.get('/tasks/baseFieldsCopy')
 				.set(authHeaderWithAdminRole)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
 						entries: [
@@ -79,8 +79,8 @@ describe('/tasks/baseFieldsCopy', () => {
 								createdBy: testUser.keycloakUserId,
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 
 		it('supports pagination', async () => {
@@ -102,7 +102,7 @@ describe('/tasks/baseFieldsCopy', () => {
 				})
 				.set(authHeaderWithAdminRole)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 20,
 						entries: [
@@ -147,8 +147,8 @@ describe('/tasks/baseFieldsCopy', () => {
 								createdBy: testUser.keycloakUserId,
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 	});
 

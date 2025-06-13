@@ -75,7 +75,7 @@ describe('/tasks/bulkUploads', () => {
 				.get('/tasks/bulkUploads')
 				.set(authHeader)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
 						entries: [
@@ -93,8 +93,8 @@ describe('/tasks/bulkUploads', () => {
 								createdBy: testUser.keycloakUserId,
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 
 		it('returns all bulk uploads for administrative users', async () => {
@@ -125,7 +125,7 @@ describe('/tasks/bulkUploads', () => {
 				.get('/tasks/bulkUploads')
 				.set(authHeaderWithAdminRole)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
 						entries: [
@@ -156,8 +156,8 @@ describe('/tasks/bulkUploads', () => {
 								createdBy: testUser.keycloakUserId,
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 
 		it('returns upload tasks for specified createdBy user', async () => {
@@ -190,7 +190,7 @@ describe('/tasks/bulkUploads', () => {
 				)
 				.set(authHeaderWithAdminRole)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
 						entries: [
@@ -208,8 +208,8 @@ describe('/tasks/bulkUploads', () => {
 								createdBy: anotherUser.keycloakUserId,
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 
 		it('returns upload tasks for the admin user when createdBy is set to me as an admin', async () => {
@@ -240,7 +240,7 @@ describe('/tasks/bulkUploads', () => {
 				.get(`/tasks/bulkUploads?createdBy=me`)
 				.set(authHeaderWithAdminRole)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
 						entries: [
@@ -258,8 +258,8 @@ describe('/tasks/bulkUploads', () => {
 								createdBy: testUser.keycloakUserId,
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 
 		it('supports pagination', async () => {
@@ -286,7 +286,7 @@ describe('/tasks/bulkUploads', () => {
 				})
 				.set(authHeaderWithAdminRole)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 20,
 						entries: [
@@ -361,8 +361,8 @@ describe('/tasks/bulkUploads', () => {
 								createdBy: testUser.keycloakUserId,
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 	});
 

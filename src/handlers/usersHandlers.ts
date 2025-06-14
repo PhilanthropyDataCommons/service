@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import { db, getLimitValues, loadUserBundle } from '../database';
 import { isAuthContext } from '../types';
 import { FailedMiddlewareError } from '../errors';
@@ -24,7 +25,7 @@ const getUsers = async (req: Request, res: Response): Promise<void> => {
 		offset,
 	);
 
-	res.status(200).contentType('application/json').send(userBundle);
+	res.status(StatusCodes.OK).contentType('application/json').send(userBundle);
 };
 
 const usersHandlers = {

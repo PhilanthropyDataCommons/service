@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	createProposalFieldValue,
 	createProposalVersion,
@@ -26,8 +27,6 @@ import { authContextHasFunderPermission } from '../authorization';
 import { allNoLeaks } from '../promises';
 import type { Request, Response } from 'express';
 import type {
-	Proposal,
-	ApplicationForm,
 	WritableProposalFieldValueWithProposalVersionContext,
 	AuthContext,
 } from '../types';
@@ -37,37 +36,33 @@ const assertApplicationFormExistsForProposal = async (
 	applicationFormId: number,
 	proposalId: number,
 ): Promise<void> => {
-	let applicationForm: ApplicationForm;
-	try {
-		applicationForm = await loadApplicationForm(
-			db,
-			authContext,
-			applicationFormId,
-		);
-	} catch {
+	const applicationForm = await loadApplicationForm(
+		db,
+		authContext,
+		applicationFormId,
+	).catch(() => {
 		throw new InputConflictError('The Application Form does not exist.', {
 			entityType: 'ApplicationForm',
 			entityId: applicationFormId,
 		});
-	}
+	});
 
-	let proposal: Proposal;
-	try {
-		proposal = await loadProposal(db, authContext, proposalId);
-	} catch (err) {
-		if (err instanceof NotFoundError) {
-			throw new InputConflictError(
-				`The specified Proposal does not exist (${proposalId}).`,
-				{
-					entityType: 'Proposal',
-					entityId: proposalId,
-					contextEntityType: 'ApplicationForm',
-					contextEntityId: applicationFormId,
-				},
-			);
-		}
-		throw err;
-	}
+	const proposal = await loadProposal(db, authContext, proposalId).catch(
+		(err) => {
+			if (err instanceof NotFoundError) {
+				throw new InputConflictError(
+					`The specified Proposal does not exist (${proposalId}).`,
+					{
+						entityType: 'Proposal',
+						entityId: proposalId,
+						contextEntityType: 'ApplicationForm',
+						contextEntityId: applicationFormId,
+					},
+				);
+			}
+			throw err;
+		},
+	);
 
 	if (proposal.opportunityId !== applicationForm.opportunityId) {
 		throw new InputConflictError(
@@ -197,7 +192,10 @@ const postProposalVersion = async (
 				fieldValues: proposalFieldValues,
 			};
 		});
-		res.status(201).contentType('application/json').send(finalProposalVersion);
+		res
+			.status(StatusCodes.CREATED)
+			.contentType('application/json')
+			.send(finalProposalVersion);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			if (error.details.entityType === 'Source') {
@@ -232,7 +230,10 @@ const getProposalVersion = async (
 		);
 	}
 	const proposalVersion = await loadProposalVersion(db, req, proposalVersionId);
-	res.status(200).contentType('application/json').send(proposalVersion);
+	res
+		.status(StatusCodes.OK)
+		.contentType('application/json')
+		.send(proposalVersion);
 };
 
 export const proposalVersionsHandlers = {

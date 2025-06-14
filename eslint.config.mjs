@@ -25,12 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'@typescript-eslint/init-declarations': 'off',
-			'@typescript-eslint/no-confusing-void-expression': 'off',
-			'@typescript-eslint/no-deprecated': 'off',
-			'@typescript-eslint/no-empty-function': 'off',
-			'@typescript-eslint/no-import-type-side-effects': 'off',
-			'@typescript-eslint/no-magic-numbers': 'off',
 			'@typescript-eslint/no-unnecessary-boolean-literal-compare': 'off',
 			'@typescript-eslint/no-unnecessary-condition': 'off',
 			'@typescript-eslint/no-unnecessary-template-expression': 'off',
@@ -146,6 +140,9 @@ export default defineConfig([
 			// Forcing return type definitions in our ad-hoc test functions is not worth
 			// the added effort / verbosity.
 			'@typescript-eslint/explicit-function-return-type': 'off',
+
+			// Tests use hard coded numbers in lots of places, and that's OK for now.
+			'@typescript-eslint/no-magic-numbers': 'off',
 		},
 	},
 ]);

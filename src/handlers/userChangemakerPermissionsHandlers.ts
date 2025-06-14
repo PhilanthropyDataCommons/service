@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	createOrUpdateUserChangemakerPermission,
@@ -44,7 +45,7 @@ const deleteUserChangemakerPermission = async (
 		changemakerId,
 		permission,
 	);
-	res.status(204).contentType('application/json').send();
+	res.status(StatusCodes.NO_CONTENT).contentType('application/json').send();
 };
 
 const putUserChangemakerPermission = async (
@@ -89,7 +90,7 @@ const putUserChangemakerPermission = async (
 			permission,
 		});
 	res
-		.status(201)
+		.status(StatusCodes.CREATED)
 		.contentType('application/json')
 		.send(userChangemakerPermission);
 };

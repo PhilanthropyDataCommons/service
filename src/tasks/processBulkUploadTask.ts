@@ -29,7 +29,6 @@ import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
 import type { Readable } from 'stream';
-import type { GetObjectCommandOutput } from '@aws-sdk/client-s3';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
@@ -50,29 +49,26 @@ const downloadS3ObjectToTemporaryStorage = async (
 	key: string,
 	logger: Logger,
 ): Promise<FileResult> => {
-	let temporaryFile: FileResult;
-	try {
-		temporaryFile = await tmp.file();
-	} catch (err) {
+	const temporaryFile = await tmp.file().catch(() => {
 		throw new Error('Unable to create a temporary file');
-	}
+	});
+
 	const writeStream = fs.createWriteStream(temporaryFile.path, {
 		autoClose: true,
 	});
 
-	let s3Response: GetObjectCommandOutput;
-	try {
-		s3Response = await s3Client.getObject({
+	const s3Response = await s3Client
+		.getObject({
 			Key: key,
 			Bucket: S3_BUCKET,
+		})
+		.catch(async (err) => {
+			logger.error('Failed to load an object from S3', { err, key });
+			await temporaryFile.cleanup();
+			throw new Error('Unable to load the s3 object');
 		});
-		if (s3Response.Body === undefined) {
-			throw new Error('S3 did not return a body');
-		}
-	} catch (err) {
-		logger.error('Failed to load an object from S3', { err, key });
-		await temporaryFile.cleanup();
-		throw new Error('Unable to load the s3 object');
+	if (s3Response.Body === undefined) {
+		throw new Error('S3 did not return a body');
 	}
 
 	const s3Body = s3Response.Body as Readable;
@@ -125,11 +121,15 @@ const assertShortCodesAreValid = async (
 	await assertShortCodesReferToExistingBaseFields(shortCodes);
 };
 
+// The meaning of "0" here is pretty explicit, especially wrapped in a named helper
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
+const isEmpty = <T>(arr: T[]): boolean => arr.length === 0;
+
 const assertCsvContainsValidShortCodes = async (
 	csvPath: string,
 ): Promise<void> => {
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
-	if (shortCodes.length === 0) {
+	if (isEmpty(shortCodes)) {
 		throw new Error('No short codes detected in the first row of the CSV');
 	}
 	await assertShortCodesAreValid(shortCodes);
@@ -274,22 +274,19 @@ export const processBulkUploadTask = async (
 		return;
 	}
 
-	let bulkUploadFile: FileResult;
-	let bulkUploadHasFailed = false;
-	try {
-		await updateBulkUploadTask(
-			db,
-			null,
-			{
-				status: TaskStatus.IN_PROGRESS,
-			},
-			bulkUploadTask.id,
-		);
-		bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
-			bulkUploadTask.sourceKey,
-			helpers.logger,
-		);
-	} catch (err) {
+	await updateBulkUploadTask(
+		db,
+		null,
+		{
+			status: TaskStatus.IN_PROGRESS,
+		},
+		bulkUploadTask.id,
+	);
+
+	const bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
+		bulkUploadTask.sourceKey,
+		helpers.logger,
+	).catch(async (err) => {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
 		await updateBulkUploadTask(
 			db,
@@ -299,9 +296,13 @@ export const processBulkUploadTask = async (
 			},
 			bulkUploadTask.id,
 		);
+	});
+
+	if (!bulkUploadFile) {
 		return;
 	}
 
+	let bulkUploadHasFailed = false;
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(
 		bulkUploadFile.path,
 	);
@@ -322,8 +323,9 @@ export const processBulkUploadTask = async (
 				applicationForm.id,
 			);
 		const csvReadStream = fs.createReadStream(bulkUploadFile.path);
+		const STARTING_ROW = 2;
 		const parser = parse({
-			from: 2,
+			from: STARTING_ROW,
 		});
 		csvReadStream.pipe(parser);
 		let recordNumber = 0;
@@ -338,7 +340,7 @@ export const processBulkUploadTask = async (
 			},
 		};
 		await parser.forEach(async (record: string[]) => {
-			recordNumber += 1;
+			recordNumber++;
 			const proposal = await createProposal(db, userAgentCreateAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: `${recordNumber}`,

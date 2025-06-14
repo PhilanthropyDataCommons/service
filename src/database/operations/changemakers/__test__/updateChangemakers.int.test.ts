@@ -57,6 +57,6 @@ describe('updateChangemaker', () => {
 		);
 		await expect(async () => {
 			await result;
-		}).rejects.toThrowError();
+		}).rejects.toThrow();
 	});
 });

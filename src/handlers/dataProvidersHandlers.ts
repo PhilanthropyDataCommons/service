@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	getLimitValues,
@@ -25,7 +26,10 @@ const getDataProviders = async (req: Request, res: Response): Promise<void> => {
 		offset,
 	);
 
-	res.status(200).contentType('application/json').send(dataProviderBundle);
+	res
+		.status(StatusCodes.OK)
+		.contentType('application/json')
+		.send(dataProviderBundle);
 };
 
 const getDataProvider = async (req: Request, res: Response): Promise<void> => {
@@ -37,7 +41,7 @@ const getDataProvider = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 	const dataProvider = await loadDataProvider(db, null, dataProviderShortCode);
-	res.status(200).contentType('application/json').send(dataProvider);
+	res.status(StatusCodes.OK).contentType('application/json').send(dataProvider);
 };
 
 const putDataProvider = async (req: Request, res: Response): Promise<void> => {
@@ -63,7 +67,10 @@ const putDataProvider = async (req: Request, res: Response): Promise<void> => {
 		name,
 		keycloakOrganizationId,
 	});
-	res.status(201).contentType('application/json').send(dataProvider);
+	res
+		.status(StatusCodes.CREATED)
+		.contentType('application/json')
+		.send(dataProvider);
 };
 
 export const dataProviderHandlers = {

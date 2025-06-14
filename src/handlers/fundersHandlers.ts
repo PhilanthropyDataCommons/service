@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	createOrUpdateFunder,
@@ -20,7 +21,7 @@ const getFunders = async (req: Request, res: Response): Promise<void> => {
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const funderBundle = await loadFunderBundle(db, req, limit, offset);
 
-	res.status(200).contentType('application/json').send(funderBundle);
+	res.status(StatusCodes.OK).contentType('application/json').send(funderBundle);
 };
 
 const getFunder = async (req: Request, res: Response): Promise<void> => {
@@ -32,7 +33,7 @@ const getFunder = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 	const funder = await loadFunder(db, null, funderShortCode);
-	res.status(200).contentType('application/json').send(funder);
+	res.status(StatusCodes.OK).contentType('application/json').send(funder);
 };
 
 const putFunder = async (req: Request, res: Response): Promise<void> => {
@@ -59,7 +60,7 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 		name,
 		keycloakOrganizationId,
 	});
-	res.status(201).contentType('application/json').send(funder);
+	res.status(StatusCodes.CREATED).contentType('application/json').send(funder);
 };
 
 export const fundersHandlers = {

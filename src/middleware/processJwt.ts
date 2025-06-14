@@ -9,9 +9,9 @@ const expressJwtMiddleware = expressjwt(jwtOptions);
 const processJwt = (req: Request, res: Response, next: NextFunction): void => {
 	let nextHasBeenCalled = false;
 
-	const wrappedNext = (...args: unknown[]): unknown => {
+	const wrappedNext = (...args: unknown[]): void => {
 		nextHasBeenCalled = true;
-		return next(...args);
+		next(...args);
 	};
 
 	expressJwtMiddleware(req, res, wrappedNext).catch((err: unknown) => {

@@ -1,7 +1,7 @@
 import { generateCreateOrUpdateItemOperation } from '../generators';
-import {
-	type ChangemakerProposal,
-	type WritableChangemakerProposal,
+import type {
+	ChangemakerProposal,
+	WritableChangemakerProposal,
 } from '../../../types';
 
 const createChangemakerProposal = generateCreateOrUpdateItemOperation<

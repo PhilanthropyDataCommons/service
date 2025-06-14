@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	createApplicationForm,
@@ -39,7 +40,10 @@ const getApplicationForms = async (
 		limit,
 		offset,
 	);
-	res.status(200).contentType('application/json').send(applicationFormBundle);
+	res
+		.status(StatusCodes.OK)
+		.contentType('application/json')
+		.send(applicationFormBundle);
 };
 
 const getApplicationForm = async (
@@ -56,7 +60,10 @@ const getApplicationForm = async (
 	}
 
 	const applicationForm = await loadApplicationForm(db, req, applicationFormId);
-	res.status(200).contentType('application/json').send(applicationForm);
+	res
+		.status(StatusCodes.OK)
+		.contentType('application/json')
+		.send(applicationForm);
 };
 
 const postApplicationForms = async (
@@ -98,7 +105,7 @@ const postApplicationForms = async (
 			),
 		);
 		res
-			.status(201)
+			.status(StatusCodes.CREATED)
 			.contentType('application/json')
 			.send({
 				...applicationForm,

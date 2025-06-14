@@ -14,10 +14,12 @@ import {
 } from '../types';
 import { getSystemUser } from '../config';
 import { InputValidationError } from '../errors';
+import { MS_PER_SECOND } from '../constants';
 import type { Request, NextFunction, Response } from 'express';
 import type { AuthenticatedRequest } from '../types';
 
 const MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS = 180;
+const JWT_NEVER_EXPIRES = 0;
 
 const addUserContext = (
 	req: Request,
@@ -26,7 +28,7 @@ const addUserContext = (
 ): void => {
 	const keycloakUserId = getAuthSubFromRequest(req);
 	const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
-	const jwtExpiration = getJwtExpFromRequest(req) ?? 0;
+	const jwtExpiration = getJwtExpFromRequest(req) ?? JWT_NEVER_EXPIRES;
 	const systemUser = getSystemUser();
 	if (
 		keycloakUserId === undefined ||
@@ -59,7 +61,7 @@ const addUserContext = (
 							Math.max(
 								jwtExpiration,
 								MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS,
-							) * 1000,
+							) * MS_PER_SECOND,
 						).toISOString(),
 					}),
 				);

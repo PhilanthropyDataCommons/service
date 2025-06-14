@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	createSource,
@@ -71,7 +72,7 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 	// Because because writableSource is a union type it is hard to extract the values directly without
 	// losing type context that the union provided.
 	const source = await createSource(db, null, req.body);
-	res.status(201).contentType('application/json').send(source);
+	res.status(StatusCodes.CREATED).contentType('application/json').send(source);
 };
 
 const getSources = async (req: Request, res: Response): Promise<void> => {
@@ -82,7 +83,7 @@ const getSources = async (req: Request, res: Response): Promise<void> => {
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const bundle = await loadSourceBundle(db, req, limit, offset);
 
-	res.status(200).contentType('application/json').send(bundle);
+	res.status(StatusCodes.OK).contentType('application/json').send(bundle);
 };
 
 const getSource = async (req: Request, res: Response): Promise<void> => {
@@ -91,7 +92,7 @@ const getSource = async (req: Request, res: Response): Promise<void> => {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
 	const source = await loadSource(db, null, sourceId);
-	res.status(200).contentType('application/json').send(source);
+	res.status(StatusCodes.OK).contentType('application/json').send(source);
 };
 
 const deleteSource = async (req: Request, res: Response): Promise<void> => {
@@ -101,7 +102,7 @@ const deleteSource = async (req: Request, res: Response): Promise<void> => {
 	}
 
 	const item = await removeSource(db, null, sourceId);
-	res.status(200).contentType('application/json').send(item);
+	res.status(StatusCodes.OK).contentType('application/json').send(item);
 };
 
 export const sourcesHandlers = {

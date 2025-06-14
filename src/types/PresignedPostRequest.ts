@@ -2,6 +2,8 @@ import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { PresignedPost } from '@aws-sdk/s3-presigned-post';
 
+const MINIMUM_PRESIGNED_POST_FILE_SIZE_BYTES = 0;
+
 export interface PresignedPostRequest {
 	fileType: string;
 	fileSize: number;
@@ -22,7 +24,7 @@ export const presignedPostRequestSchema: JSONSchemaType<PresignedPostRequest> =
 			},
 			fileSize: {
 				type: 'integer',
-				minimum: 0,
+				minimum: MINIMUM_PRESIGNED_POST_FILE_SIZE_BYTES,
 			},
 			presignedPost: {
 				type: 'object',
@@ -55,7 +57,7 @@ export const presignedPostRequestWriteSchema: JSONSchemaType<PresignedPostReques
 			},
 			fileSize: {
 				type: 'integer',
-				minimum: 0,
+				minimum: MINIMUM_PRESIGNED_POST_FILE_SIZE_BYTES,
 			},
 		},
 		required: ['fileType', 'fileSize'],

@@ -1,9 +1,11 @@
+import { StatusCodes } from 'http-status-codes';
 import { v4 as uuidv4 } from 'uuid';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { requireEnv } from 'require-env-variable';
 import { s3Client } from '../s3Client';
 import { isPresignedPostRequestWrite } from '../types';
 import { InputValidationError } from '../errors';
+import { SECONDS_PER_HOUR } from '../constants';
 import type { PresignedPost } from '@aws-sdk/s3-presigned-post';
 import type { Request, Response } from 'express';
 
@@ -16,7 +18,7 @@ const generatePresignedPost = async (
 	createPresignedPost(s3Client, {
 		Bucket: S3_BUCKET,
 		Key: `unprocessed/${uuidv4()}`,
-		Expires: 3600, // 1 hour
+		Expires: SECONDS_PER_HOUR,
 		Conditions: [
 			['eq', '$Content-Type', fileType],
 			['content-length-range', fileSize, fileSize],
@@ -37,7 +39,7 @@ const createPresignedPostRequest = async (
 
 	const { fileType, fileSize } = body;
 	const presignedPost = await generatePresignedPost(fileType, fileSize);
-	res.status(201).contentType('application/json').send({
+	res.status(StatusCodes.CREATED).contentType('application/json').send({
 		fileType,
 		fileSize,
 		presignedPost,

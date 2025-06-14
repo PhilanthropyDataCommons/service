@@ -1,22 +1,23 @@
 import { ajv } from '../ajv';
 import { InputValidationError } from '../errors';
+import { idSchema } from '../types';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
+import type { Id } from '../types';
 
 interface ProposalParameters {
-	proposalId: number | undefined;
+	proposalId: Id | undefined;
 }
 
 interface ProposalParametersQuery {
-	proposal: number | undefined;
+	proposal: Id | undefined;
 }
 
 const proposalParametersQuerySchema: JSONSchemaType<ProposalParametersQuery> = {
 	type: 'object',
 	properties: {
 		proposal: {
-			type: 'integer',
-			minimum: 1,
+			...idSchema,
 			nullable: true,
 		},
 	},

@@ -27,6 +27,8 @@ type WritableBulkUploadTask = Writable<BulkUploadTask>;
 type InternallyWritableBulkUploadTask = WritableBulkUploadTask &
 	Pick<BulkUploadTask, 'status' | 'fileSize'>;
 
+const MINIMUM_SOURCE_KEY_LENGTH = 1;
+
 const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 	type: 'object',
 	properties: {
@@ -39,7 +41,7 @@ const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 		},
 		sourceKey: {
 			type: 'string',
-			minLength: 1,
+			minLength: MINIMUM_SOURCE_KEY_LENGTH,
 		},
 		funderShortCode: {
 			...shortCodeSchema,

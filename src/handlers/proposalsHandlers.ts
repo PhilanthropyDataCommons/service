@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import {
 	db,
 	createProposal,
@@ -42,7 +43,10 @@ const getProposals = async (req: Request, res: Response): Promise<void> => {
 		offset,
 	);
 
-	res.status(200).contentType('application/json').send(proposalBundle);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(proposalBundle);
 };
 
 const getProposal = async (req: Request, res: Response): Promise<void> => {
@@ -54,7 +58,10 @@ const getProposal = async (req: Request, res: Response): Promise<void> => {
 		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}
 	const proposal = await loadProposal(db, req, proposalId);
-	res.status(200).contentType('application/json').send(proposal);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(proposal);
 };
 
 const postProposal = async (req: Request, res: Response): Promise<void> => {
@@ -87,7 +94,10 @@ const postProposal = async (req: Request, res: Response): Promise<void> => {
 			opportunityId,
 			externalId,
 		});
-		res.status(201).contentType('application/json').send(proposal);
+		res
+			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+			.contentType('application/json')
+			.send(proposal);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			throw new UnprocessableEntityError(

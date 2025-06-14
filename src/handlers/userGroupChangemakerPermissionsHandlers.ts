@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import {
 	db,
 	createOrUpdateUserGroupChangemakerPermission,
@@ -44,7 +45,10 @@ const deleteUserGroupChangemakerPermission = async (
 		changemakerId,
 		permission,
 	);
-	res.status(204).contentType('application/json').send();
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.NO_CONTENT)
+		.contentType('application/json')
+		.send();
 };
 
 const putUserGroupChangemakerPermission = async (
@@ -90,7 +94,7 @@ const putUserGroupChangemakerPermission = async (
 			permission,
 		});
 	res
-		.status(201)
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
 		.send(userGroupChangemakerPermission);
 };

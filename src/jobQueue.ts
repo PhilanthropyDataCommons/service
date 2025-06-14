@@ -10,6 +10,9 @@ import type {
 
 const logger = getLogger(__filename);
 
+const CONCURRENT_JOB_COUNT = 5;
+const POLL_INTERVAL_MS = 1000;
+
 enum JobType {
 	PROCESS_BULK_UPLOAD = 'processBulkUploadTask',
 	COPY_BASE_FIELDS = 'copyBaseFields',
@@ -38,9 +41,9 @@ export const startJobQueue = async (): Promise<void> => {
 	const runner = await run({
 		logger: jobQueueLogger,
 		pgPool: db.pool,
-		concurrency: 5,
+		concurrency: CONCURRENT_JOB_COUNT,
 		noHandleSignals: false,
-		pollInterval: 1000,
+		pollInterval: POLL_INTERVAL_MS,
 		taskList: {
 			processBulkUploadTask,
 			copyBaseFields,

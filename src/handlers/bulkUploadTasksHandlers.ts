@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import {
 	db,
 	createBulkUploadTask,
@@ -66,7 +67,10 @@ const postBulkUploadTask = async (
 		await addProcessBulkUploadJob({
 			bulkUploadId: bulkUploadTask.id,
 		});
-		res.status(201).contentType('application/json').send(bulkUploadTask);
+		res
+			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+			.contentType('application/json')
+			.send(bulkUploadTask);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			if (error.details.entityType === 'Source') {
@@ -98,7 +102,10 @@ const getBulkUploadTasks = async (
 		offset,
 	);
 
-	res.status(200).contentType('application/json').send(bulkUploadTaskBundle);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(bulkUploadTaskBundle);
 };
 
 export const bulkUploadTasksHandlers = {

@@ -121,11 +121,15 @@ const assertShortCodesAreValid = async (
 	await assertShortCodesReferToExistingBaseFields(shortCodes);
 };
 
+// The meaning of "0" here is pretty explicit, especially wrapped in a named helper
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
+const isEmpty = <T>(arr: T[]): boolean => arr.length === 0;
+
 const assertCsvContainsValidShortCodes = async (
 	csvPath: string,
 ): Promise<void> => {
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
-	if (shortCodes.length === 0) {
+	if (isEmpty(shortCodes)) {
 		throw new Error('No short codes detected in the first row of the CSV');
 	}
 	await assertShortCodesAreValid(shortCodes);
@@ -319,8 +323,9 @@ export const processBulkUploadTask = async (
 				applicationForm.id,
 			);
 		const csvReadStream = fs.createReadStream(bulkUploadFile.path);
+		const STARTING_ROW = 2;
 		const parser = parse({
-			from: 2,
+			from: STARTING_ROW,
 		});
 		csvReadStream.pipe(parser);
 		let recordNumber = 0;
@@ -335,7 +340,7 @@ export const processBulkUploadTask = async (
 			},
 		};
 		await parser.forEach(async (record: string[]) => {
-			recordNumber += 1;
+			recordNumber++;
 			const proposal = await createProposal(db, userAgentCreateAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: `${recordNumber}`,

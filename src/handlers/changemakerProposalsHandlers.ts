@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import {
 	db,
 	createChangemakerProposal,
@@ -46,7 +47,7 @@ const getChangemakerProposals = async (
 		offset,
 	);
 	res
-		.status(200)
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')
 		.send(changemakerProposalBundle);
 };
@@ -85,7 +86,10 @@ const postChangemakerProposal = async (
 			changemakerId,
 			proposalId,
 		});
-		res.status(201).contentType('application/json').send(changemakerProposal);
+		res
+			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+			.contentType('application/json')
+			.send(changemakerProposal);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			throw new UnprocessableEntityError(

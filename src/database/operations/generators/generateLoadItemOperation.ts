@@ -46,8 +46,8 @@ const generateLoadItemOperation =
 		);
 
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
-		const { object } = result.rows[0] ?? {};
-		if (object === undefined) {
+		const [wrappedObject] = result.rows;
+		if (wrappedObject === undefined) {
 			throw new NotFoundError(`Entity not found`, {
 				entityType,
 				lookupValues: queryParameters,
@@ -58,7 +58,7 @@ const generateLoadItemOperation =
 				queryParameters,
 			});
 		}
-		return object;
+		return wrappedObject.object;
 	};
 
 export { generateLoadItemOperation };

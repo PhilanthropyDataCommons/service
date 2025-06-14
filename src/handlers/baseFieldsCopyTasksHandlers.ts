@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import {
 	db,
 	createBaseFieldsCopyTask,
@@ -42,7 +43,10 @@ const postBaseFieldsCopyTask = async (
 		baseFieldsCopyTaskId: baseFieldsCopyTask.id,
 	});
 
-	res.status(201).contentType('application/json').send(baseFieldsCopyTask);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.contentType('application/json')
+		.send(baseFieldsCopyTask);
 };
 
 const getBaseFieldsCopyTasks = async (
@@ -65,7 +69,7 @@ const getBaseFieldsCopyTasks = async (
 	);
 
 	res
-		.status(200)
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')
 		.send(baseFieldsCopyTaskBundle);
 };

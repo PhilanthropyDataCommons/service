@@ -63,8 +63,8 @@ const generateCreateOrUpdateItemOperation =
 		};
 
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
-		const { object } = result.rows[0] ?? {};
-		if (object === undefined) {
+		const [wrappedObject] = result.rows;
+		if (wrappedObject === undefined) {
 			throw new NoDataReturnedError(
 				'The database did not return a query result.',
 			);
@@ -74,7 +74,7 @@ const generateCreateOrUpdateItemOperation =
 				queryParameters,
 			});
 		}
-		return object;
+		return wrappedObject.object;
 	};
 
 export { generateCreateOrUpdateItemOperation };

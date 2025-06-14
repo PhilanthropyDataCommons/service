@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	createApplicationForm,
@@ -39,7 +40,10 @@ const getApplicationForms = async (
 		limit,
 		offset,
 	);
-	res.status(200).contentType('application/json').send(applicationFormBundle);
+	res
+		.status(StatusCodes.OK)
+		.contentType('application/json')
+		.send(applicationFormBundle);
 };
 
 const getApplicationForm = async (
@@ -56,7 +60,10 @@ const getApplicationForm = async (
 	}
 
 	const applicationForm = await loadApplicationForm(db, req, applicationFormId);
-	res.status(200).contentType('application/json').send(applicationForm);
+	res
+		.status(StatusCodes.OK)
+		.contentType('application/json')
+		.send(applicationForm);
 };
 
 const postApplicationForms = async (
@@ -103,7 +110,10 @@ const postApplicationForms = async (
 				fields: applicationFormFields,
 			};
 		});
-		res.status(201).contentType('application/json').send(finalApplicationForm);
+		res
+			.status(StatusCodes.CREATED)
+			.contentType('application/json')
+			.send(finalApplicationForm);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			throw new UnprocessableEntityError('A related entity was not found');

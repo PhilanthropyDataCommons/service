@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	createOrUpdateUserFunderPermission,
@@ -45,7 +46,7 @@ const deleteUserFunderPermission = async (
 		funderShortCode,
 		permission,
 	);
-	res.status(204).contentType('application/json').send();
+	res.status(StatusCodes.NO_CONTENT).contentType('application/json').send();
 };
 
 const putUserFunderPermission = async (
@@ -92,7 +93,10 @@ const putUserFunderPermission = async (
 			permission,
 		},
 	);
-	res.status(201).contentType('application/json').send(userFunderPermission);
+	res
+		.status(StatusCodes.CREATED)
+		.contentType('application/json')
+		.send(userFunderPermission);
 };
 
 const userFunderPermissionsHandlers = {

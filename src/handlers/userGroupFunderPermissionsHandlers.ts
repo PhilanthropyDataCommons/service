@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	createOrUpdateUserGroupFunderPermission,
@@ -45,7 +46,7 @@ const deleteUserGroupFunderPermission = async (
 		funderShortCode,
 		permission,
 	);
-	res.status(204).contentType('application/json').send();
+	res.status(StatusCodes.NO_CONTENT).contentType('application/json').send();
 };
 
 const putUserGroupFunderPermission = async (
@@ -90,7 +91,7 @@ const putUserGroupFunderPermission = async (
 			permission,
 		});
 	res
-		.status(201)
+		.status(StatusCodes.CREATED)
 		.contentType('application/json')
 		.send(userGroupFunderPermission);
 };

@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	createProposalFieldValue,
 	createProposalVersion,
@@ -191,7 +192,10 @@ const postProposalVersion = async (
 				fieldValues: proposalFieldValues,
 			};
 		});
-		res.status(201).contentType('application/json').send(finalProposalVersion);
+		res
+			.status(StatusCodes.CREATED)
+			.contentType('application/json')
+			.send(finalProposalVersion);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			if (error.details.entityType === 'Source') {
@@ -226,7 +230,10 @@ const getProposalVersion = async (
 		);
 	}
 	const proposalVersion = await loadProposalVersion(db, req, proposalVersionId);
-	res.status(200).contentType('application/json').send(proposalVersion);
+	res
+		.status(StatusCodes.OK)
+		.contentType('application/json')
+		.send(proposalVersion);
 };
 
 export const proposalVersionsHandlers = {

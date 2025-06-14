@@ -46,8 +46,8 @@ const generateRemoveItemOperation =
 		);
 
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
-		const { object } = result.rows[0] ?? {};
-		if (object === undefined) {
+		const [firstRow] = result.rows;
+		if (firstRow === undefined) {
 			throw new NotFoundError(
 				`The item did not exist and could not be deleted`,
 				{
@@ -61,7 +61,7 @@ const generateRemoveItemOperation =
 				queryParameters,
 			});
 		}
-		return object;
+		return firstRow.object;
 	};
 
 export { generateRemoveItemOperation };

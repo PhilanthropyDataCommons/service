@@ -7,6 +7,10 @@ interface LimitValues {
 	offset: number;
 }
 
+const API_PAGE_OFFSET = 1;
+const apiPageToZeroIndexedPage = (page: number): number =>
+	page - API_PAGE_OFFSET;
+
 export const getLimitValues = (
 	paginationParameters: PaginationParameters,
 ): LimitValues => {
@@ -16,7 +20,7 @@ export const getLimitValues = (
 			isPaginationParameters.errors ?? [],
 		);
 	}
-	const zeroIndexedPage = paginationParameters.page - 1;
+	const zeroIndexedPage = apiPageToZeroIndexedPage(paginationParameters.page);
 	const limit = paginationParameters.count;
 	const offset = paginationParameters.count * zeroIndexedPage;
 	return {

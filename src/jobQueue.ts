@@ -2,6 +2,7 @@ import { Logger, quickAddJob, run, runMigrations } from 'graphile-worker';
 import { copyBaseFields, processBulkUploadTask } from './tasks';
 import { getLogger } from './logger';
 import { db } from './database/db';
+import { MS_PER_SECOND } from './constants';
 import type { Job } from 'graphile-worker';
 import type {
 	CopyBaseFieldsJobPayload,
@@ -9,6 +10,9 @@ import type {
 } from './types';
 
 const logger = getLogger(__filename);
+
+const CONCURRENT_JOB_COUNT = 5;
+const POLL_INTERVAL_MS = MS_PER_SECOND;
 
 enum JobType {
 	PROCESS_BULK_UPLOAD = 'processBulkUploadTask',
@@ -38,9 +42,9 @@ export const startJobQueue = async (): Promise<void> => {
 	const runner = await run({
 		logger: jobQueueLogger,
 		pgPool: db.pool,
-		concurrency: 5,
+		concurrency: CONCURRENT_JOB_COUNT,
 		noHandleSignals: false,
-		pollInterval: 1000,
+		pollInterval: POLL_INTERVAL_MS,
 		taskList: {
 			processBulkUploadTask,
 			copyBaseFields,

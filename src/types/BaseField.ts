@@ -1,4 +1,5 @@
 import { ajv } from '../ajv';
+import { MIN_NON_NEGATIVE_INTEGER } from '../constants';
 import { baseFieldLocalizationSchema } from './BaseFieldLocalization';
 import type { BaseFieldLocalization } from './BaseFieldLocalization';
 import type { JSONSchemaType } from 'ajv';
@@ -31,6 +32,8 @@ interface BaseField {
 	readonly createdAt: string;
 }
 
+const MINIMUM_VALUE_RELEVANCE_HOURS = MIN_NON_NEGATIVE_INTEGER;
+
 const baseFieldSchema: JSONSchemaType<BaseField> = {
 	type: 'object',
 	properties: {
@@ -53,7 +56,7 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 		},
 		valueRelevanceHours: {
 			type: 'number',
-			minimum: 0,
+			minimum: MINIMUM_VALUE_RELEVANCE_HOURS,
 			nullable: true as false, // see https://github.com/ajv-validator/ajv/issues/2163
 		},
 		localizations: {
@@ -104,7 +107,7 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 		},
 		valueRelevanceHours: {
 			type: 'number',
-			minimum: 0,
+			minimum: MINIMUM_VALUE_RELEVANCE_HOURS,
 			nullable: true as false, // see https://github.com/ajv-validator/ajv/issues/2163
 		},
 	},

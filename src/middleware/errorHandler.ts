@@ -1,4 +1,5 @@
 import { UnauthorizedError as JwtUnauthorizedError } from 'express-jwt';
+import { StatusCodes } from 'http-status-codes';
 import {
 	DatabaseError,
 	InternalValidationError,
@@ -17,17 +18,17 @@ const logger = getLogger(__filename);
 const getHttpStatusCodeForDatabaseErrorCode = (errorCode: string): number => {
 	switch (errorCode) {
 		case PostgresErrorCode.FOREIGN_KEY_VIOLATION.valueOf():
-			return 422;
+			return StatusCodes.UNPROCESSABLE_ENTITY;
 		case PostgresErrorCode.UNIQUE_VIOLATION.valueOf():
-			return 409;
+			return StatusCodes.CONFLICT;
 		case PostgresErrorCode.NUMBER_OUT_OF_RANGE.valueOf():
-			return 400;
+			return StatusCodes.BAD_REQUEST;
 		case PostgresErrorCode.CHECK_CONSTRAINT_VIOLATION.valueOf():
-			return 400;
+			return StatusCodes.BAD_REQUEST;
 		case PostgresErrorCode.INSUFFICIENT_RESOURCES.valueOf():
-			return 503;
+			return StatusCodes.SERVICE_UNAVAILABLE;
 		default:
-			return 500;
+			return StatusCodes.INTERNAL_SERVER_ERROR;
 	}
 };
 
@@ -61,34 +62,34 @@ const getHttpStatusCodeForError = (error: unknown): number => {
 		return getHttpStatusCodeForDatabaseErrorCode(errorCode);
 	}
 	if (error instanceof InternalValidationError) {
-		return 500;
+		return StatusCodes.INTERNAL_SERVER_ERROR;
 	}
 	if (error instanceof InputValidationError) {
-		return 400;
+		return StatusCodes.BAD_REQUEST;
 	}
 	if (error instanceof InputConflictError) {
-		return 409;
+		return StatusCodes.CONFLICT;
 	}
 	if (error instanceof UnauthorizedError) {
-		return 401;
+		return StatusCodes.UNAUTHORIZED;
 	}
 	if (error instanceof JwtUnauthorizedError) {
-		return 401;
+		return StatusCodes.UNAUTHORIZED;
 	}
 	if (error instanceof NotFoundError) {
-		return 404;
+		return StatusCodes.NOT_FOUND;
 	}
 	if (error instanceof UnprocessableEntityError) {
-		return 422;
+		return StatusCodes.UNPROCESSABLE_ENTITY;
 	}
 	// In the `jwks-rsa` library, when a rate limit is exceeded a string error gets thrown.
 	if (
 		typeof error === 'string' &&
 		error.includes('exceeds maximum tokens per interval')
 	) {
-		return 503;
+		return StatusCodes.SERVICE_UNAVAILABLE;
 	}
-	return 500;
+	return StatusCodes.INTERNAL_SERVER_ERROR;
 };
 
 const getMessageForError = (error: unknown): string => {
@@ -132,7 +133,7 @@ export const errorHandler = (
 		? new DatabaseError('Error with a database operation.', err)
 		: err;
 	const statusCode = getHttpStatusCodeForError(wrappedError);
-	if (statusCode >= 500) {
+	if (statusCode >= StatusCodes.INTERNAL_SERVER_ERROR.valueOf()) {
 		logger.error({ wrappedError, statusCode });
 	} else {
 		logger.debug({ wrappedError, statusCode });

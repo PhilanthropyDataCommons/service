@@ -1,6 +1,9 @@
 import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 
+const MINIMUM_PAGE_NUMBER = 1;
+const MINIMUM_ITEM_COUNT = 1;
+
 export interface PaginationParametersQuery {
 	_page: number | undefined | null;
 	_count: number | undefined | null;
@@ -12,12 +15,12 @@ export const paginationParametersQuerySchema: JSONSchemaType<PaginationParameter
 		properties: {
 			_page: {
 				type: 'integer',
-				minimum: 1,
+				minimum: MINIMUM_PAGE_NUMBER,
 				nullable: true,
 			},
 			_count: {
 				type: 'integer',
-				minimum: 1,
+				minimum: MINIMUM_ITEM_COUNT,
 				nullable: true,
 			},
 		},

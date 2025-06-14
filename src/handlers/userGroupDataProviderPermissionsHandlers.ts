@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	createOrUpdateUserGroupDataProviderPermission,
@@ -46,7 +47,7 @@ const deleteUserGroupDataProviderPermission = async (
 		dataProviderShortCode,
 		permission,
 	);
-	res.status(204).contentType('application/json').send();
+	res.status(StatusCodes.NO_CONTENT).contentType('application/json').send();
 };
 
 const putUserGroupDataProviderPermission = async (
@@ -92,7 +93,7 @@ const putUserGroupDataProviderPermission = async (
 			permission,
 		});
 	res
-		.status(201)
+		.status(StatusCodes.CREATED)
 		.contentType('application/json')
 		.send(userGroupFunderPermission);
 };

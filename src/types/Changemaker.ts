@@ -62,6 +62,9 @@ const partialWritableChangemakerSchema: JSONSchemaType<PartialWritableChangemake
 			},
 		},
 		additionalProperties: false,
+		// This is already semantically meaningful; as we add more patch
+		// types maybe we'll decide to find a non-lint-disabled-way to express this.
+		// eslint-disable-next-line @typescript-eslint/no-magic-numbers
 		minProperties: 1,
 	};
 

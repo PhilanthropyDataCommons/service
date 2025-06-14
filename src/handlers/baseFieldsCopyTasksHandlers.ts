@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import {
 	db,
 	createBaseFieldsCopyTask,
@@ -42,7 +43,10 @@ const postBaseFieldsCopyTask = async (
 		baseFieldsCopyTaskId: baseFieldsCopyTask.id,
 	});
 
-	res.status(201).contentType('application/json').send(baseFieldsCopyTask);
+	res
+		.status(StatusCodes.CREATED)
+		.contentType('application/json')
+		.send(baseFieldsCopyTask);
 };
 
 const getBaseFieldsCopyTasks = async (
@@ -65,7 +69,7 @@ const getBaseFieldsCopyTasks = async (
 	);
 
 	res
-		.status(200)
+		.status(StatusCodes.OK)
 		.contentType('application/json')
 		.send(baseFieldsCopyTaskBundle);
 };

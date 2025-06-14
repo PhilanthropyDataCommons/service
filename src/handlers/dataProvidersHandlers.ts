@@ -11,7 +11,7 @@ import { extractPaginationParameters } from '../queryParameters';
 import { isShortCode } from '../types/ShortCode';
 import type { Request, Response } from 'express';
 
-const getDataProviders = async (req: Request, res: Response) => {
+const getDataProviders = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
@@ -28,7 +28,7 @@ const getDataProviders = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(dataProviderBundle);
 };
 
-const getDataProvider = async (req: Request, res: Response) => {
+const getDataProvider = async (req: Request, res: Response): Promise<void> => {
 	const { dataProviderShortCode } = req.params;
 	if (!isShortCode(dataProviderShortCode)) {
 		throw new InputValidationError(
@@ -40,7 +40,7 @@ const getDataProvider = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(dataProvider);
 };
 
-const putDataProvider = async (req: Request, res: Response) => {
+const putDataProvider = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

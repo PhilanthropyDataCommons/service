@@ -5,11 +5,11 @@ import type { JSONSchemaType } from 'ajv';
 // The schema definition is more accurate / actually confirms the format.
 type Uuid = `${string}-${string}-${string}-${string}-${string}`;
 
-const uuidSchema = {
+const uuidSchema: JSONSchemaType<Uuid> = {
 	type: 'string',
 	format: 'uuid',
-} as JSONSchemaType<Uuid>;
+};
 
 const isUuid = ajv.compile(uuidSchema);
 
-export { Uuid, uuidSchema, isUuid };
+export { type Uuid, uuidSchema, isUuid };

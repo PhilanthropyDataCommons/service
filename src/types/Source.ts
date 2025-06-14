@@ -1,7 +1,7 @@
 import { ajv } from '../ajv';
-import { Funder } from './Funder';
-import { Changemaker } from './Changemaker';
-import { DataProvider } from './DataProvider';
+import type { Funder } from './Funder';
+import type { Changemaker } from './Changemaker';
+import type { DataProvider } from './DataProvider';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 
@@ -72,4 +72,4 @@ const writableSourceSchema: JSONSchemaType<WritableSource> = {
 
 const isWritableSource = ajv.compile(writableSourceSchema);
 
-export { Source, WritableSource, isWritableSource };
+export { type Source, type WritableSource, isWritableSource };

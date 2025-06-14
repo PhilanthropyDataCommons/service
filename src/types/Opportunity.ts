@@ -30,8 +30,8 @@ const writableOpportunitySchema: JSONSchemaType<WritableOpportunity> = {
 const isWritableOpportunity = ajv.compile(writableOpportunitySchema);
 
 export {
-	Opportunity,
-	WritableOpportunity,
+	type Opportunity,
+	type WritableOpportunity,
 	writableOpportunitySchema,
 	isWritableOpportunity,
 };

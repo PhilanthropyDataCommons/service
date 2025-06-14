@@ -1,10 +1,5 @@
 import fetch from 'node-fetch';
-import {
-	isCopyBaseFieldsJobPayload,
-	TaskStatus,
-	isBaseField,
-	BaseField,
-} from '../types';
+import { isCopyBaseFieldsJobPayload, TaskStatus, isBaseField } from '../types';
 import { db } from '../database/db';
 import {
 	createOrUpdateBaseField,
@@ -12,6 +7,7 @@ import {
 	loadBaseFieldsCopyTask,
 	updateBaseFieldsCopyTask,
 } from '../database/operations';
+import type { BaseField } from '../types';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { Response } from 'node-fetch';
 
@@ -54,7 +50,7 @@ export const fetchBaseFieldsFromRemote = async (
 	}
 };
 
-const copyBaseField = async (targetBaseField: BaseField) => {
+const copyBaseField = async (targetBaseField: BaseField): Promise<void> => {
 	const {
 		scope,
 		dataType,

@@ -85,10 +85,10 @@ const isWritableBaseFieldLocalization = ajv.compile(
 );
 
 export {
-	BaseFieldLocalization,
+	type BaseFieldLocalization,
 	baseFieldLocalizationSchema,
-	WritableBaseFieldLocalization,
-	InternallyWritableBaseFieldLocalization,
+	type WritableBaseFieldLocalization,
+	type InternallyWritableBaseFieldLocalization,
 	writableBaseFieldLocalizationSchema,
 	internallyWritableBaseFieldLocalizationSchema,
 	isWritableBaseFieldLocalization,

@@ -1,5 +1,11 @@
 import type { Request } from 'express';
 
-export const extractSearchParameters = (request: Request) => ({
+interface SearchParameters {
+	search: string;
+}
+
+export const extractSearchParameters = (
+	request: Request,
+): SearchParameters => ({
 	search: JSON.stringify(request.query._content),
 });

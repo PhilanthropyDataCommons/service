@@ -1,6 +1,7 @@
 import { ajv } from '../ajv';
-import { KeycloakId, keycloakIdSchema } from './KeycloakId';
-import { Writable } from './Writable';
+import { keycloakIdSchema } from './KeycloakId';
+import type { KeycloakId } from './KeycloakId';
+import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { ProposalFieldValue } from './ProposalFieldValue';
 
@@ -69,11 +70,11 @@ const isPartialWritableChangemaker = ajv.compile(
 );
 export {
 	isWritableChangemaker,
-	Changemaker,
-	ShallowChangemaker,
-	WritableChangemaker,
+	type Changemaker,
+	type ShallowChangemaker,
+	type WritableChangemaker,
 	writableChangemakerSchema,
-	PartialWritableChangemaker,
+	type PartialWritableChangemaker,
 	partialWritableChangemakerSchema,
 	isPartialWritableChangemaker,
 };

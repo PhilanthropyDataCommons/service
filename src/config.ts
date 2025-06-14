@@ -4,7 +4,7 @@ import type { User } from './types';
 
 let systemUser: User | null = null;
 
-export const loadConfig = async () => {
+export const loadConfig = async (): Promise<void> => {
 	systemUser = await loadSystemUser(db, null);
 };
 

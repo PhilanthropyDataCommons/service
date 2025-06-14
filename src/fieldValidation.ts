@@ -28,9 +28,10 @@ const isString = ajv.compile({
 // 'isMobilePhone.' but the PDC does not currently have any requirement
 // for a phone number to be a mobile number, nor does the function seem
 // to discriminate on landline numbers.
-const isPhoneNumberString = (value: string) => validator.isMobilePhone(value);
+const isPhoneNumberString = (value: string): boolean =>
+	validator.isMobilePhone(value);
 
-const isCurrencyWithCodeString = (value: string) => {
+const isCurrencyWithCodeString = (value: string): boolean => {
 	const [currency, code] = value.split(' ');
 
 	if (!currency || !code) {

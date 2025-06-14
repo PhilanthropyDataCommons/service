@@ -25,7 +25,7 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
 const generateCreateOrUpdateItemOperation =
 	<T, I extends Record<string, unknown>, P extends [...args: unknown[]]>(
 		queryName: string,
-		saveItemAttributes: KeysOfUnion<I>[],
+		saveItemAttributes: Array<KeysOfUnion<I>>,
 		parameterNames: { [K in keyof P]: string },
 	) =>
 	async (

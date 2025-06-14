@@ -1,6 +1,7 @@
 import { ajv } from '../ajv';
-import { KeycloakId, keycloakIdSchema } from './KeycloakId';
-import { Writable } from './Writable';
+import { keycloakIdSchema } from './KeycloakId';
+import type { KeycloakId } from './KeycloakId';
+import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { ShortCode } from './ShortCode';
 
@@ -36,8 +37,8 @@ const writableDataProviderSchema: JSONSchemaType<WritableDataProvider> = {
 const isWritableDataProvider = ajv.compile(writableDataProviderSchema);
 
 export {
-	DataProvider,
-	InternallyWritableDataProvider,
+	type DataProvider,
+	type InternallyWritableDataProvider,
 	isWritableDataProvider,
-	WritableDataProvider,
+	type WritableDataProvider,
 };

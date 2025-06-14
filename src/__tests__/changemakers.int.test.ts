@@ -30,18 +30,20 @@ import {
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
 import {
-	AuthContext,
-	BaseField,
 	BaseFieldDataType,
 	BaseFieldScope,
+	PostgresErrorCode,
+	stringToKeycloakId,
+} from '../types';
+import type {
+	AuthContext,
+	BaseField,
 	Changemaker,
 	DataProvider,
 	Funder,
 	Id,
 	Opportunity,
-	PostgresErrorCode,
 	Source,
-	stringToKeycloakId,
 	User,
 } from '../types';
 

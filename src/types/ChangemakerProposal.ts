@@ -31,7 +31,7 @@ const isWritableChangemakerProposal = ajv.compile(
 
 export {
 	isWritableChangemakerProposal,
-	ChangemakerProposal,
-	WritableChangemakerProposal,
+	type ChangemakerProposal,
+	type WritableChangemakerProposal,
 	writableChangemakerProposalSchema,
 };

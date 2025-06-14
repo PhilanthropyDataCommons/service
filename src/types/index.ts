@@ -45,3 +45,4 @@ export * from './UserGroupChangemakerPermission';
 export * from './UserGroupDataProviderPermission';
 export * from './UserGroupFunderPermission';
 export * from './Uuid';
+export * from './Writable';

@@ -1,4 +1,4 @@
-import { KeycloakId } from './KeycloakId';
+import type { KeycloakId } from './KeycloakId';
 
 interface UnifiedAuditLog {
 	readonly statementTimestamp: string;
@@ -10,4 +10,4 @@ interface UnifiedAuditLog {
 	readonly details: object | null;
 }
 
-export { UnifiedAuditLog };
+export { type UnifiedAuditLog };

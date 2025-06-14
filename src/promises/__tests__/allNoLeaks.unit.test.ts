@@ -4,7 +4,7 @@ import { allNoLeaks } from '../allNoLeaks';
 describe('allNoLeaks', () => {
 	it('should throw an error after companion long-duration `Promise` completes', async () => {
 		let longTaskCompleted = false;
-		const longTask: Promise<void> = new Promise((resolve) => {
+		const longTask = new Promise<void>((resolve) => {
 			setTimeout(() => {
 				longTaskCompleted = true;
 				resolve();

@@ -1,5 +1,5 @@
 import { ajv } from '../ajv';
-import { Permission } from './Permission';
+import type { Permission } from './Permission';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { KeycloakId } from './KeycloakId';
@@ -34,8 +34,8 @@ const isWritableUserGroupChangemakerPermission = ajv.compile(
 );
 
 export {
-	InternallyWritableUserGroupChangemakerPermission,
-	UserGroupChangemakerPermission,
-	WritableUserGroupChangemakerPermission,
+	type InternallyWritableUserGroupChangemakerPermission,
+	type UserGroupChangemakerPermission,
+	type WritableUserGroupChangemakerPermission,
 	isWritableUserGroupChangemakerPermission,
 };

@@ -123,7 +123,10 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 	await allNoLeaks(applicationFormFieldQueries);
 };
 
-const postProposalVersion = async (req: Request, res: Response) => {
+const postProposalVersion = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -214,7 +217,10 @@ const postProposalVersion = async (req: Request, res: Response) => {
 	}
 };
 
-const getProposalVersion = async (req: Request, res: Response) => {
+const getProposalVersion = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

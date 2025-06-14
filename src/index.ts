@@ -9,7 +9,7 @@ const logger = getLogger(__filename);
 const port = Number(process.env.PORT ?? 3001);
 const host = process.env.HOST ?? 'localhost';
 
-const start = async () => {
+const start = async (): Promise<void> => {
 	try {
 		await initializeDatabase();
 	} catch (err) {

@@ -1,5 +1,5 @@
-import { KeycloakId } from './KeycloakId';
-import { Writable } from './Writable';
+import type { KeycloakId } from './KeycloakId';
+import type { Writable } from './Writable';
 
 interface EphemeralUserGroupAssociation {
 	readonly userKeycloakUserId: KeycloakId;
@@ -19,7 +19,7 @@ type InternallyWritableEphemeralUserGroupAssociation =
 		>;
 
 export {
-	EphemeralUserGroupAssociation,
-	InternallyWritableEphemeralUserGroupAssociation,
-	WritableEphemeralUserGroupAssociation,
+	type EphemeralUserGroupAssociation,
+	type InternallyWritableEphemeralUserGroupAssociation,
+	type WritableEphemeralUserGroupAssociation,
 };

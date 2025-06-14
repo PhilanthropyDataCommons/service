@@ -12,11 +12,10 @@
  *
  * If any of the checks fail, the middleware will pass an appropriate error to the next middleware.
  */
-import { Response, NextFunction } from 'express';
 import { InputValidationError, UnauthorizedError } from '../errors';
 import { isAuthContext, isId } from '../types';
 import type { Permission } from '../types';
-import type { Request } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 const requireChangemakerPermission =
 	(permission: Permission) =>

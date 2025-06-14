@@ -1,13 +1,12 @@
-import { Response, NextFunction } from 'express';
 import { UnauthorizedError } from '../errors';
 import { hasMeaningfulAuthSub, isAuthContext } from '../types';
-import type { Request } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 const requireAuthentication = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
-) => {
+): void => {
 	if (!('auth' in req)) {
 		next(new UnauthorizedError('No authorization token was found.'));
 		return;

@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 import { issuer } from '../../auth/jwtOptions';
 import { documentationHandlers } from '../documentationHandlers';
-import type { Request, Response } from 'express';
+import { getMockRequest } from '../../test/mockExpress';
+import type { Response } from 'express';
 
 jest.mock('fs/promises');
 
@@ -11,15 +12,13 @@ describe('documentationHandlers', () => {
 			jest
 				.spyOn(fs, 'readFile')
 				.mockResolvedValue('{ "foo": "{{AUTH_ISSUER}}" }');
+			const req = getMockRequest();
 			const sendMock = jest.fn();
-			await documentationHandlers.getRootApiSpec(
-				{} as Request,
-				{
-					type: () => {},
-					set: () => {},
-					send: sendMock,
-				} as unknown as Response,
-			);
+			await documentationHandlers.getRootApiSpec(req, {
+				type: () => {},
+				set: () => {},
+				send: sendMock,
+			} as unknown as Response);
 			expect(sendMock).toHaveBeenCalledWith(`{ "foo": "${issuer}" }`);
 		});
 	});
@@ -28,15 +27,13 @@ describe('documentationHandlers', () => {
 			jest
 				.spyOn(fs, 'readFile')
 				.mockResolvedValue('{ "foo": "{{AUTH_ISSUER}}" }');
+			const req = getMockRequest();
 			const sendMock = jest.fn();
-			await documentationHandlers.getRootApiSpec(
-				{} as Request,
-				{
-					type: () => {},
-					set: () => {},
-					send: sendMock,
-				} as unknown as Response,
-			);
+			await documentationHandlers.getRootApiSpec(req, {
+				type: () => {},
+				set: () => {},
+				send: sendMock,
+			} as unknown as Response);
 			expect(sendMock).toHaveBeenCalledWith(`{ "foo": "${issuer}" }`);
 		});
 	});

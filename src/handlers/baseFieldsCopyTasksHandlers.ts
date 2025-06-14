@@ -17,7 +17,10 @@ import {
 import { addCopyBaseFieldsJob } from '../jobQueue';
 import type { Request, Response } from 'express';
 
-const postBaseFieldsCopyTask = async (req: Request, res: Response) => {
+const postBaseFieldsCopyTask = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -42,7 +45,10 @@ const postBaseFieldsCopyTask = async (req: Request, res: Response) => {
 	res.status(201).contentType('application/json').send(baseFieldsCopyTask);
 };
 
-const getBaseFieldsCopyTasks = async (req: Request, res: Response) => {
+const getBaseFieldsCopyTasks = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

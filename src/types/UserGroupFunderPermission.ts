@@ -1,5 +1,5 @@
 import { ajv } from '../ajv';
-import { Permission } from './Permission';
+import type { Permission } from './Permission';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { ShortCode } from './ShortCode';
@@ -34,8 +34,8 @@ const isWritableUserGroupFunderPermission = ajv.compile(
 );
 
 export {
-	InternallyWritableUserGroupFunderPermission,
-	UserGroupFunderPermission,
-	WritableUserGroupFunderPermission,
+	type InternallyWritableUserGroupFunderPermission,
+	type UserGroupFunderPermission,
+	type WritableUserGroupFunderPermission,
 	isWritableUserGroupFunderPermission,
 };

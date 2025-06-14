@@ -16,7 +16,7 @@ db.pool.on('connect', (client) => {
 	});
 });
 
-const initializeDatabase = async () => {
+const initializeDatabase = async (): Promise<void> => {
 	const initializationFiles = (
 		await fs.readdir(initializationDirectory)
 	).filter((file) => file.endsWith('.sql'));

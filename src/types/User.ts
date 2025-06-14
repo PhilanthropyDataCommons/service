@@ -58,4 +58,4 @@ const userSchema: JSONSchemaType<User> = {
 
 type WritableUser = Writable<User>;
 
-export { User, userSchema, WritableUser };
+export { type User, userSchema, type WritableUser };

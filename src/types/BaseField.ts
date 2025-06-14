@@ -1,8 +1,6 @@
 import { ajv } from '../ajv';
-import {
-	baseFieldLocalizationSchema,
-	BaseFieldLocalization,
-} from './BaseFieldLocalization';
+import { baseFieldLocalizationSchema } from './BaseFieldLocalization';
+import type { BaseFieldLocalization } from './BaseFieldLocalization';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { ShortCode } from './ShortCode';
@@ -122,11 +120,11 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 
 export {
-	BaseField,
+	type BaseField,
 	baseFieldSchema,
 	isBaseField,
-	InternallyWritableBaseField,
-	WritableBaseField,
+	type InternallyWritableBaseField,
+	type WritableBaseField,
 	isWritableBaseField,
 	writableBaseFieldSchema,
 };

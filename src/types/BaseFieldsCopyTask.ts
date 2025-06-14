@@ -1,5 +1,5 @@
 import { ajv } from '../ajv';
-import { TaskStatus } from './TaskStatus';
+import type { TaskStatus } from './TaskStatus';
 import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { KeycloakId } from './KeycloakId';
@@ -33,8 +33,8 @@ const isWritableBaseFieldsCopyTask = ajv.compile(
 	writableBaseFieldsCopyTaskSchema,
 );
 export {
-	BaseFieldsCopyTask,
-	WritableBaseFieldsCopyTask,
+	type BaseFieldsCopyTask,
+	type WritableBaseFieldsCopyTask,
 	isWritableBaseFieldsCopyTask,
-	InternallyWritableBaseFieldsCopyTask,
+	type InternallyWritableBaseFieldsCopyTask,
 };

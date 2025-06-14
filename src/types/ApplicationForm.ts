@@ -41,8 +41,8 @@ const isWritableApplicationFormWithFields = ajv.compile(
 );
 
 export {
-	ApplicationForm,
+	type ApplicationForm,
 	isWritableApplicationFormWithFields,
 	writableApplicationFormWithFieldsSchema,
-	WritableApplicationForm,
+	type WritableApplicationForm,
 };

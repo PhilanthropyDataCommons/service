@@ -23,7 +23,10 @@ const generatePresignedPost = async (
 		],
 	});
 
-const createPresignedPostRequest = async (req: Request, res: Response) => {
+const createPresignedPostRequest = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	const body = req.body as unknown;
 	if (!isPresignedPostRequestWrite(body)) {
 		throw new InputValidationError(

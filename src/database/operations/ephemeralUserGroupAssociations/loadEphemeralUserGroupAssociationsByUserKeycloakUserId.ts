@@ -1,5 +1,5 @@
 import { generateLoadBundleOperation } from '../generators';
-import { EphemeralUserGroupAssociation, type KeycloakId } from '../../../types';
+import type { EphemeralUserGroupAssociation, KeycloakId } from '../../../types';
 
 const loadEphemeralUserGroupAssociationsByUserKeycloakUserId =
 	generateLoadBundleOperation<

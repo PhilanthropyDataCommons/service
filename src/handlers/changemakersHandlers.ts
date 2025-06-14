@@ -27,7 +27,7 @@ import {
 } from '../queryParameters';
 import type { Request, Response } from 'express';
 
-const postChangemaker = async (req: Request, res: Response) => {
+const postChangemaker = async (req: Request, res: Response): Promise<void> => {
 	if (!isWritableChangemaker(req.body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
@@ -38,7 +38,7 @@ const postChangemaker = async (req: Request, res: Response) => {
 	res.status(201).contentType('application/json').send(changemaker);
 };
 
-const getChangemakers = async (req: Request, res: Response) => {
+const getChangemakers = async (req: Request, res: Response): Promise<void> => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { limit, offset } = getLimitValues(paginationParameters);
 	const { proposalId } = extractProposalParameters(req);
@@ -53,7 +53,7 @@ const getChangemakers = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(changemakerBundle);
 };
 
-const getChangemaker = async (req: Request, res: Response) => {
+const getChangemaker = async (req: Request, res: Response): Promise<void> => {
 	const { changemakerId } = req.params;
 	if (!isId(changemakerId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
@@ -68,7 +68,7 @@ const getChangemaker = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(changemaker);
 };
 
-const patchChangemaker = async (req: Request, res: Response) => {
+const patchChangemaker = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
@@ -115,7 +115,10 @@ const patchChangemaker = async (req: Request, res: Response) => {
 	}
 };
 
-const putChangemakerFiscalSponsor = async (req: Request, res: Response) => {
+const putChangemakerFiscalSponsor = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
@@ -141,7 +144,10 @@ const putChangemakerFiscalSponsor = async (req: Request, res: Response) => {
 	res.status(200).contentType('application/json').send(updatedChangemaker);
 };
 
-const deleteChangemakerFiscalSponsor = async (req: Request, res: Response) => {
+const deleteChangemakerFiscalSponsor = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
 	const { changemakerId, fiscalSponsorChangemakerId } = req.params;
 	if (!isId(changemakerId)) {
 		throw new InputValidationError(

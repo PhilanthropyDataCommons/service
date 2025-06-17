@@ -123,7 +123,7 @@ const assertShortCodesAreValid = async (
 
 // The meaning of "0" here is pretty explicit, especially wrapped in a named helper
 // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-const isEmpty = <T>(arr: T[]): boolean => arr.length === 0;
+const isEmpty = (arr: unknown[]): boolean => arr.length === 0;
 
 const assertCsvContainsValidShortCodes = async (
 	csvPath: string,

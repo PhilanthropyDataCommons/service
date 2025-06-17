@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-wrapper-object-types */
 /* eslint-disable @typescript-eslint/consistent-indexed-object-style */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-parameters */
 
 // This set of types is inspired by https://stackoverflow.com/a/62362197/159522
 // The final `Writable` utility type will create a deep copy of a type with all

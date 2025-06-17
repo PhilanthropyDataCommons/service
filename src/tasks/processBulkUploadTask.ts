@@ -98,7 +98,7 @@ const loadShortCodesFromBulkUploadTaskCsv = async (
 			hasLoadedShortCodes = true;
 		}
 	});
-	return shortCodes ?? [];
+	return shortCodes;
 };
 
 const assertShortCodesReferToExistingBaseFields = async (

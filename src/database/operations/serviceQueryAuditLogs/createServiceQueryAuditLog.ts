@@ -10,8 +10,8 @@ const createServiceQueryAuditLog = async (
 	},
 ): Promise<void> => {
 	await db.sql<object>('serviceQueryAuditLogs.insertOne', {
-		authContextKeycloakUserId: authContext?.user?.keycloakUserId,
-		authContextIsAdministrator: authContext?.role?.isAdministrator,
+		authContextKeycloakUserId: authContext?.user.keycloakUserId,
+		authContextIsAdministrator: authContext?.role.isAdministrator,
 		queryName: createValues.queryName,
 		queryParameters: createValues.queryParameters,
 	});

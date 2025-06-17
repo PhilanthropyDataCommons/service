@@ -33,13 +33,13 @@ const isAuthContext = ajv.compile(authContextSchema);
 const getKeycloakUserIdFromAuthContext = (
 	req: AuthContext | undefined | null,
 ): KeycloakId | undefined => {
-	const keycloakUserId = req?.user?.keycloakUserId;
+	const keycloakUserId = req?.user.keycloakUserId;
 	return keycloakUserId;
 };
 
 const getIsAdministratorFromAuthContext = (
 	req: AuthContext | undefined | null,
-): boolean | undefined => req?.role?.isAdministrator;
+): boolean | undefined => req?.role.isAdministrator;
 
 export {
 	type AuthContext,

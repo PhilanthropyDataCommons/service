@@ -16,9 +16,15 @@ import {
 	createChangemaker,
 	createOrUpdateUserChangemakerPermission,
 	createChangemakerProposal,
+	createProposalFieldValue,
 } from '../database';
 import { getLogger } from '../logger';
-import { BaseFieldDataType, BaseFieldScope, Permission } from '../types';
+import {
+	BaseFieldDataType,
+	BaseFieldScope,
+	BaseFieldSensitivityClassification,
+	Permission,
+} from '../types';
 import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
@@ -35,6 +41,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Last Name',
@@ -43,6 +50,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 };
 
@@ -412,6 +420,87 @@ describe('/proposalVersions', () => {
 				],
 			});
 			expect(after.count).toEqual(2);
+		});
+
+		it('returns 400 bad request when attempting to provide data for a forbidden field', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
+				label: 'Forbidden Field',
+				description: 'This field should not be used in proposal versions',
+				shortCode: 'forbiddenField',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.PROPOSAL,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			const forbiddenApplicationFormField = await createApplicationFormField(
+				db,
+				null,
+				{
+					applicationFormId: applicationForm.id,
+					baseFieldShortCode: forbiddenBaseField.shortCode,
+					position: 1,
+					label: 'Forbidden Field',
+				},
+			);
+			const proposalVersion = await createProposalVersion(
+				db,
+				testUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+				},
+			);
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: forbiddenApplicationFormField.id,
+				position: 1,
+				value: 'Should not be returned',
+				isValid: true,
+				goodAsOf: null,
+			});
+			await createOrUpdateBaseField(db, null, {
+				...forbiddenBaseField,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+
+			const before = await loadTableMetrics('proposal_versions');
+			await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+					fieldValues: [
+						{
+							applicationFormFieldId: forbiddenApplicationFormField.id,
+							position: 1,
+							value: 'This should not be allowed',
+							goodAsOf: null,
+						},
+					],
+				})
+				.expect(400);
+			const after = await loadTableMetrics('proposal_versions');
+			expect(after.count).toEqual(before.count);
 		});
 
 		it('returns 400 bad request when no proposal id is provided', async () => {

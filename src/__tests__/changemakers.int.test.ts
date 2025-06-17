@@ -32,6 +32,7 @@ import {
 import {
 	BaseFieldDataType,
 	BaseFieldScope,
+	BaseFieldSensitivityClassification,
 	PostgresErrorCode,
 	stringToKeycloakId,
 } from '../types';
@@ -60,6 +61,7 @@ const setupTestContext = async () => {
 		dataType: BaseFieldDataType.EMAIL,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	const baseFieldPhone = await createOrUpdateBaseField(db, null, {
 		label: 'Fifty three ninety nine',
@@ -68,6 +70,7 @@ const setupTestContext = async () => {
 		dataType: BaseFieldDataType.PHONE_NUMBER,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	const baseFieldWebsite = await createOrUpdateBaseField(db, null, {
 		label: 'Fifty four seventy one 5471',
@@ -76,6 +79,7 @@ const setupTestContext = async () => {
 		dataType: BaseFieldDataType.URL,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	const firstChangemaker = await createChangemaker(db, null, {
 		name: 'Five thousand one hundred forty seven reasons',
@@ -805,6 +809,82 @@ describe('/changemakers', () => {
 							...changemaker,
 							createdAt: expectTimestamp,
 							fields: [dataProviderNewestValue],
+						});
+					});
+			});
+
+			it('does not return forbidden base field data', async () => {
+				const {
+					secondChangemaker: changemaker,
+					systemUserAuthContext,
+					firstFunderOpportunity,
+					firstFunderSourceId: funderSourceId,
+				} = await setupTestContext();
+
+				const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
+					label: 'Forbidden Field',
+					shortCode: 'forbiddenField',
+					description: 'This field is forbidden',
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.RESTRICTED,
+					dataType: BaseFieldDataType.STRING,
+					valueRelevanceHours: null,
+					scope: BaseFieldScope.ORGANIZATION,
+				});
+				const opportunity = firstFunderOpportunity;
+				const proposal = await createProposal(db, systemUserAuthContext, {
+					opportunityId: opportunity.id,
+					externalId: `Another proposal to ${opportunity.title}`,
+				});
+				await createChangemakerProposal(db, null, {
+					changemakerId: changemaker.id,
+					proposalId: proposal.id,
+				});
+				const applicationForm = await createApplicationForm(db, null, {
+					opportunityId: opportunity.id,
+				});
+				const applicationFormField = await createApplicationFormField(
+					db,
+					null,
+					{
+						label: 'Forbidden',
+						applicationFormId: applicationForm.id,
+						baseFieldShortCode: forbiddenBaseField.shortCode,
+						position: 1,
+					},
+				);
+				const proposalVersion = await createProposalVersion(
+					db,
+					systemUserAuthContext,
+					{
+						proposalId: proposal.id,
+						applicationFormId: applicationForm.id,
+						sourceId: funderSourceId,
+					},
+				);
+				await createProposalFieldValue(db, null, {
+					proposalVersionId: proposalVersion.id,
+					applicationFormFieldId: applicationFormField.id,
+					position: 1,
+					value: 'foo',
+					isValid: true,
+					goodAsOf: null,
+				});
+				await createOrUpdateBaseField(db, null, {
+					...forbiddenBaseField,
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.FORBIDDEN,
+				});
+
+				await request(app)
+					.get(`/changemakers/${changemaker.id}`)
+					.set(authHeader)
+					.expect(200)
+					.expect((res) => {
+						expect(res.body).toEqual({
+							...changemaker,
+							createdAt: expectTimestamp,
+							fields: [],
 						});
 					});
 			});

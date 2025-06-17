@@ -86,24 +86,24 @@ const postApplicationForms = async (
 		) {
 			throw new UnauthorizedError();
 		}
-		const applicationForm = await createApplicationForm(db, null, {
-			opportunityId,
-		});
-		const applicationFormFields = await Promise.all(
-			fields.map(async (field) =>
-				createApplicationFormField(db, null, {
-					...field,
-					applicationFormId: applicationForm.id,
-				}),
-			),
-		);
-		res
-			.status(201)
-			.contentType('application/json')
-			.send({
+		const finalApplicationForm = await db.transaction(async (transactionDb) => {
+			const applicationForm = await createApplicationForm(transactionDb, null, {
+				opportunityId,
+			});
+			const applicationFormFields = await Promise.all(
+				fields.map(async (field) =>
+					createApplicationFormField(transactionDb, null, {
+						...field,
+						applicationFormId: applicationForm.id,
+					}),
+				),
+			);
+			return {
 				...applicationForm,
 				fields: applicationFormFields,
-			});
+			};
+		});
+		res.status(201).contentType('application/json').send(finalApplicationForm);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			throw new UnprocessableEntityError('A related entity was not found');

@@ -13,7 +13,12 @@ import {
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { BaseFieldDataType, BaseFieldScope, Permission } from '../types';
+import {
+	BaseFieldDataType,
+	BaseFieldScope,
+	BaseFieldSensitivityClassification,
+	Permission,
+} from '../types';
 import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
@@ -30,6 +35,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.ORGANIZATION,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	await createOrUpdateBaseField(db, null, {
 		label: 'Years of work',
@@ -38,6 +44,7 @@ const createTestBaseFields = async () => {
 		dataType: BaseFieldDataType.STRING,
 		scope: BaseFieldScope.PROPOSAL,
 		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 };
 
@@ -333,6 +340,49 @@ describe('/applicationForms', () => {
 			});
 		});
 
+		it('does not return formFields associated with `FORBIDDEN` BaseFields', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Holiday opportunity 🎄',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
+				label: 'Forbidden Field',
+				description: 'This field should not be used in application forms',
+				shortCode: 'forbiddenField',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: forbiddenBaseField.shortCode,
+				position: 1,
+				label: 'Anni Worki',
+			});
+			await createOrUpdateBaseField(db, null, {
+				...forbiddenBaseField,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+			const result = await request(app)
+				.get('/applicationForms/1')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+
+			expect(result.body).toMatchObject({
+				id: 1,
+				opportunityId: 1,
+				version: 1,
+				fields: [],
+				createdAt: expectTimestamp,
+			});
+		});
+
 		it('should return 404 when the user does not have read access to the relevant funder', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
@@ -562,6 +612,42 @@ describe('/applicationForms', () => {
 				version: 3,
 				createdAt: expectTimestamp,
 			});
+		});
+
+		it('returns 400 when attempting to create a form field using a forbidden base field', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
+				label: 'Forbidden Field',
+				description: 'This field should not be used in application forms',
+				shortCode: 'forbiddenField',
+				dataType: BaseFieldDataType.STRING,
+				scope: BaseFieldScope.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+
+			const before = await loadTableMetrics('application_forms');
+			await request(app)
+				.post('/applicationForms')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					opportunityId: opportunity.id,
+					fields: [
+						{
+							baseFieldShortCode: forbiddenBaseField.shortCode,
+							position: 1,
+							label: 'Forbidden Field',
+						},
+					],
+				})
+				.expect(400);
+			const after = await loadTableMetrics('application_forms');
+			expect(after.count).toEqual(before.count);
 		});
 
 		it('returns 400 bad request when no opportunity id is provided', async () => {

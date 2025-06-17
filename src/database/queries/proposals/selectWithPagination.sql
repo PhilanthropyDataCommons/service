@@ -5,6 +5,15 @@ FROM proposals
 		proposal_field_values
 		ON proposal_versions.id = proposal_field_values.proposal_version_id
 	LEFT JOIN
+		application_form_fields
+		ON
+			proposal_field_values.application_form_field_id = application_form_fields.id
+	LEFT JOIN
+		base_fields
+		ON (
+			application_form_fields.base_field_short_code = base_fields.short_code
+		)
+	LEFT JOIN
 		changemakers_proposals
 		ON proposals.id = changemakers_proposals.proposal_id
 WHERE
@@ -20,9 +29,11 @@ WHERE
 			OR :search = ''
 		) THEN
 			TRUE
-		ELSE
-			proposal_field_values.value_search
+		ELSE (
+			base_fields.sensitivity_classification != 'forbidden'
+			AND proposal_field_values.value_search
 			@@ websearch_to_tsquery('english', :search::text)
+		)
 	END
 	AND CASE
 		WHEN :changemakerId::integer IS NULL THEN

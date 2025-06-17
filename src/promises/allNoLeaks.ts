@@ -30,5 +30,5 @@ export const allNoLeaks = async <T>(
 	if (rejectedTask !== undefined) {
 		throw getErrorFromReason(rejectedTask.reason);
 	}
-	return settled.filter(isFulfilled)?.map((e) => e.value);
+	return settled.filter(isFulfilled).map((e) => e.value);
 };

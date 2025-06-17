@@ -113,7 +113,7 @@ describe('addUserContext', () => {
 					);
 					const ephemeralUserGroupAssociationExpirations =
 						ephemeralUserGroupAssociations.entries.map((item) =>
-							new Date(item.notAfter ?? 0).getTime(),
+							new Date(item.notAfter).getTime(),
 						);
 					expect(ephemeralUserGroupAssociationExpirations).toEqual([
 						new Date(expectedNotAfter).getTime(),

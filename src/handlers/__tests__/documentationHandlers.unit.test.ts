@@ -15,8 +15,8 @@ describe('documentationHandlers', () => {
 			const req = getMockRequest();
 			const sendMock = jest.fn();
 			await documentationHandlers.getRootApiSpec(req, {
-				type: () => {},
-				set: () => {},
+				type: jest.fn(),
+				set: jest.fn(),
 				send: sendMock,
 			} as unknown as Response);
 			expect(sendMock).toHaveBeenCalledWith(`{ "foo": "${issuer}" }`);
@@ -30,8 +30,8 @@ describe('documentationHandlers', () => {
 			const req = getMockRequest();
 			const sendMock = jest.fn();
 			await documentationHandlers.getRootApiSpec(req, {
-				type: () => {},
-				set: () => {},
+				type: jest.fn(),
+				set: jest.fn(),
 				send: sendMock,
 			} as unknown as Response);
 			expect(sendMock).toHaveBeenCalledWith(`{ "foo": "${issuer}" }`);

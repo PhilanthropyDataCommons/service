@@ -12,8 +12,8 @@ describe('requireAuthentication', () => {
 		requireAuthentication(mockRequest, mockResponse, nextMock);
 		await allowNextToResolve();
 
-		expect(nextMock).toBeCalled();
-		// We know that the first `calls` is populated due to the passage of `.toBeCalled`
+		expect(nextMock).toHaveBeenCalled();
+		// We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
 		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
@@ -33,8 +33,8 @@ describe('requireAuthentication', () => {
 		requireAuthentication(mockRequest, mockResponse, nextMock);
 		await allowNextToResolve();
 
-		expect(nextMock).toBeCalled();
-		// We know that the first `calls` is populated due to the passage of `.toBeCalled`
+		expect(nextMock).toHaveBeenCalled();
+		// We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
 		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
@@ -56,8 +56,8 @@ describe('requireAuthentication', () => {
 		requireAuthentication(mockRequest, mockResponse, nextMock);
 		await allowNextToResolve();
 
-		expect(nextMock).toBeCalled();
-		// We know that the first `calls` is populated due to the passage of `.toBeCalled`
+		expect(nextMock).toHaveBeenCalled();
+		// We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
 		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
@@ -77,8 +77,8 @@ describe('requireAuthentication', () => {
 		requireAuthentication(mockRequest, mockResponse, nextMock);
 		await allowNextToResolve();
 
-		expect(nextMock).toBeCalled();
-		// We know that the first `calls` is populated due to the passage of `.toBeCalled`
+		expect(nextMock).toHaveBeenCalled();
+		// We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
 		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
@@ -103,6 +103,6 @@ describe('requireAuthentication', () => {
 		requireAuthentication(mockRequest, mockResponse, nextMock);
 		await allowNextToResolve();
 
-		expect(nextMock).toBeCalledWith();
+		expect(nextMock).toHaveBeenCalledWith();
 	});
 });

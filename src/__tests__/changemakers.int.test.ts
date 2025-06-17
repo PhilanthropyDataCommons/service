@@ -35,17 +35,6 @@ import {
 	PostgresErrorCode,
 	stringToKeycloakId,
 } from '../types';
-import type {
-	AuthContext,
-	BaseField,
-	Changemaker,
-	DataProvider,
-	Funder,
-	Id,
-	Opportunity,
-	Source,
-	User,
-} from '../types';
 
 const insertTestChangemakers = async () => {
 	await createChangemaker(db, null, {
@@ -58,6 +47,108 @@ const insertTestChangemakers = async () => {
 		name: 'Another Inc.',
 		keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
 	});
+};
+
+const setupTestContext = async () => {
+	const systemSource = await loadSystemSource(db, null);
+	const systemUser = await loadSystemUser(db, null);
+	const systemUserAuthContext = getAuthContext(systemUser);
+	const baseFieldEmail = await createOrUpdateBaseField(db, null, {
+		label: 'Fifty one fifty three',
+		shortCode: 'fifty_one_fifty_three',
+		description: 'Five thousand one hundred fifty three.',
+		dataType: BaseFieldDataType.EMAIL,
+		scope: BaseFieldScope.ORGANIZATION,
+		valueRelevanceHours: null,
+	});
+	const baseFieldPhone = await createOrUpdateBaseField(db, null, {
+		label: 'Fifty three ninety nine',
+		shortCode: 'fifty_three_ninety_nine',
+		description: 'Five thousand three hundred ninety nine.',
+		dataType: BaseFieldDataType.PHONE_NUMBER,
+		scope: BaseFieldScope.ORGANIZATION,
+		valueRelevanceHours: null,
+	});
+	const baseFieldWebsite = await createOrUpdateBaseField(db, null, {
+		label: 'Fifty four seventy one 5471',
+		shortCode: 'fifty_four_seventy_one',
+		description: 'Five thousand four hundred seventy one.',
+		dataType: BaseFieldDataType.URL,
+		scope: BaseFieldScope.ORGANIZATION,
+		valueRelevanceHours: null,
+	});
+	const firstChangemaker = await createChangemaker(db, null, {
+		name: 'Five thousand one hundred forty seven reasons',
+		taxId: '05119',
+		keycloakOrganizationId: null,
+	});
+	const secondChangemaker = await createChangemaker(db, null, {
+		taxId: '5387',
+		name: 'Changemaker 5387',
+		keycloakOrganizationId: '8b15d276-be48-11ef-a061-5b4a50e82d50',
+	});
+	const secondChangemakerSourceId = (
+		await createSource(db, null, {
+			changemakerId: secondChangemaker.id,
+			label: `${secondChangemaker.name} source`,
+		})
+	).id;
+	const firstFunder = await createOrUpdateFunder(db, null, {
+		shortCode: 'funder_5393',
+		name: 'Funder 5393',
+		keycloakOrganizationId: null,
+	});
+	const firstFunderOpportunity = await createOpportunity(db, null, {
+		title: `${firstFunder.name} opportunity`,
+		funderShortCode: firstFunder.shortCode,
+	});
+	const firstFunderSourceId = (
+		await createSource(db, null, {
+			funderShortCode: firstFunder.shortCode,
+			label: `${firstFunder.name} source`,
+		})
+	).id;
+	const firstDataProvider = await createOrUpdateDataProvider(db, null, {
+		shortCode: 'data_provider_5431',
+		name: 'Data Platform Provider 5431',
+		keycloakOrganizationId: null,
+	});
+	const secondDataProvider = await createOrUpdateDataProvider(db, null, {
+		shortCode: 'data_provider_5477',
+		name: 'Data Platform Provider 5477',
+		keycloakOrganizationId: null,
+	});
+	const firstDataProviderSourceId = (
+		await createSource(db, null, {
+			dataProviderShortCode: firstDataProvider.shortCode,
+			label: `${firstDataProvider.name} source`,
+		})
+	).id;
+	const secondDataProviderSourceId = (
+		await createSource(db, null, {
+			dataProviderShortCode: secondDataProvider.shortCode,
+			label: `${secondDataProvider.name} source`,
+		})
+	).id;
+
+	return {
+		systemSource,
+		systemUser,
+		systemUserAuthContext,
+		baseFieldEmail,
+		baseFieldPhone,
+		baseFieldWebsite,
+		firstChangemaker,
+		secondChangemaker,
+		secondChangemakerSourceId,
+		firstFunder,
+		firstFunderOpportunity,
+		firstFunderSourceId,
+		firstDataProvider,
+		firstDataProviderSourceId,
+		secondDataProvider,
+		secondDataProviderSourceId,
+	};
 };
 
 describe('/changemakers', () => {
@@ -79,7 +170,7 @@ describe('/changemakers', () => {
 				.get('/changemakers')
 				.set(authHeader)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
 						entries: [
@@ -102,8 +193,8 @@ describe('/changemakers', () => {
 								fields: [],
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 
 		it('returns according to pagination parameters', async () => {
@@ -123,7 +214,7 @@ describe('/changemakers', () => {
 				})
 				.set(authHeader)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 20,
 						entries: [
@@ -173,8 +264,8 @@ describe('/changemakers', () => {
 								fields: [],
 							},
 						],
-					}),
-				);
+					});
+				});
 		});
 
 		it('returns a subset of changemakers present in the database when a proposal filter is provided', async () => {
@@ -300,7 +391,7 @@ describe('/changemakers', () => {
 				.get('/changemakers/2')
 				.set(authHeader)
 				.expect(200)
-				.expect((res) =>
+				.expect((res) => {
 					expect(res.body).toEqual({
 						id: 2,
 						taxId: '22-2222222',
@@ -309,8 +400,8 @@ describe('/changemakers', () => {
 						createdAt: expectTimestamp,
 						fiscalSponsors: [],
 						fields: [],
-					}),
-				);
+					});
+				});
 		});
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
@@ -325,107 +416,14 @@ describe('/changemakers', () => {
 		});
 
 		describe('tests that find gold data among proposals and share a common db', () => {
-			let systemSource: Source;
-			let systemUser: User;
-			let systemUserAuthContext: AuthContext;
-			let baseFieldEmail: BaseField;
-			let baseFieldPhone: BaseField;
-			let baseFieldWebsite: BaseField;
-			let firstChangemaker: Changemaker;
-			let secondChangemaker: Changemaker;
-			let secondChangemakerSourceId: Id;
-			let firstFunder: Funder;
-			let firstFunderOpportunity: Opportunity;
-			let firstFunderSourceId: Id;
-			let firstDataProvider: DataProvider;
-			let firstDataProviderSourceId: Id;
-			let secondDataProvider: DataProvider;
-			let secondDataProviderSourceId: Id;
-
-			beforeEach(async () => {
-				systemSource = await loadSystemSource(db, null);
-				systemUser = await loadSystemUser(db, null);
-				systemUserAuthContext = getAuthContext(systemUser);
-				baseFieldEmail = await createOrUpdateBaseField(db, null, {
-					label: 'Fifty one fifty three',
-					shortCode: 'fifty_one_fifty_three',
-					description: 'Five thousand one hundred fifty three.',
-					dataType: BaseFieldDataType.EMAIL,
-					scope: BaseFieldScope.ORGANIZATION,
-					valueRelevanceHours: null,
-				});
-				baseFieldPhone = await createOrUpdateBaseField(db, null, {
-					label: 'Fifty three ninety nine',
-					shortCode: 'fifty_three_ninety_nine',
-					description: 'Five thousand three hundred ninety nine.',
-					dataType: BaseFieldDataType.PHONE_NUMBER,
-					scope: BaseFieldScope.ORGANIZATION,
-					valueRelevanceHours: null,
-				});
-				baseFieldWebsite = await createOrUpdateBaseField(db, null, {
-					label: 'Fifty four seventy one 5471',
-					shortCode: 'fifty_four_seventy_one',
-					description: 'Five thousand four hundred seventy one.',
-					dataType: BaseFieldDataType.URL,
-					scope: BaseFieldScope.ORGANIZATION,
-					valueRelevanceHours: null,
-				});
-				firstChangemaker = await createChangemaker(db, null, {
-					name: 'Five thousand one hundred forty seven reasons',
-					taxId: '05119',
-					keycloakOrganizationId: null,
-				});
-				secondChangemaker = await createChangemaker(db, null, {
-					taxId: '5387',
-					name: 'Changemaker 5387',
-					keycloakOrganizationId: '8b15d276-be48-11ef-a061-5b4a50e82d50',
-				});
-				secondChangemakerSourceId = (
-					await createSource(db, null, {
-						changemakerId: secondChangemaker.id,
-						label: `${secondChangemaker.name} source`,
-					})
-				).id;
-				firstFunder = await createOrUpdateFunder(db, null, {
-					shortCode: 'funder_5393',
-					name: 'Funder 5393',
-					keycloakOrganizationId: null,
-				});
-				firstFunderOpportunity = await createOpportunity(db, null, {
-					title: `${firstFunder.name} opportunity`,
-					funderShortCode: firstFunder.shortCode,
-				});
-				firstFunderSourceId = (
-					await createSource(db, null, {
-						funderShortCode: firstFunder.shortCode,
-						label: `${firstFunder.name} source`,
-					})
-				).id;
-				firstDataProvider = await createOrUpdateDataProvider(db, null, {
-					shortCode: 'data_provider_5431',
-					name: 'Data Platform Provider 5431',
-					keycloakOrganizationId: null,
-				});
-				secondDataProvider = await createOrUpdateDataProvider(db, null, {
-					shortCode: 'data_provider_5477',
-					name: 'Data Platform Provider 5477',
-					keycloakOrganizationId: null,
-				});
-				firstDataProviderSourceId = (
-					await createSource(db, null, {
-						dataProviderShortCode: firstDataProvider.shortCode,
-						label: `${firstDataProvider.name} source`,
-					})
-				).id;
-				secondDataProviderSourceId = (
-					await createSource(db, null, {
-						dataProviderShortCode: secondDataProvider.shortCode,
-						label: `${secondDataProvider.name} source`,
-					})
-				).id;
-			});
-
 			it('returns the latest valid value for a base field when auth id is sent', async () => {
+				const {
+					firstChangemaker,
+					firstFunderOpportunity,
+					baseFieldEmail,
+					systemUserAuthContext,
+					systemSource,
+				} = await setupTestContext();
 				// Associate a base field associated with one opportunity/org, and add three responses.
 				const baseFieldShortCode = baseFieldEmail.shortCode;
 				const changemakerId = firstChangemaker.id;
@@ -525,7 +523,7 @@ describe('/changemakers', () => {
 					.get(`/changemakers/${changemakerId}`)
 					.set(authHeader)
 					.expect(200)
-					.expect((res) =>
+					.expect((res) => {
 						expect(res.body).toEqual({
 							id: changemakerId,
 							name: 'Five thousand one hundred forty seven reasons',
@@ -534,18 +532,21 @@ describe('/changemakers', () => {
 							createdAt: expectTimestamp,
 							fiscalSponsors: [],
 							fields: [latestValidValue],
-						}),
-					);
+						});
+					});
 			});
 
 			it('returns older changemaker data when newer funder data is present', async () => {
-				// Set up changemaker and funder sources.
-				const changemaker = secondChangemaker;
-				const changemakerSourceId = secondChangemakerSourceId;
-				const funderSourceId = firstFunderSourceId;
-				// Associate one opportunity, one changemaker, and two responses with a base field.
+				const {
+					secondChangemaker: changemaker,
+					secondChangemakerSourceId: changemakerSourceId,
+					firstFunderSourceId: funderSourceId,
+					firstFunderOpportunity: opportunity,
+					baseFieldPhone,
+					systemUserAuthContext,
+				} = await setupTestContext();
+
 				const baseFieldShortCode = baseFieldPhone.shortCode;
-				const opportunity = firstFunderOpportunity;
 				const proposalId = (
 					await createProposal(db, systemUserAuthContext, {
 						opportunityId: opportunity.id,
@@ -618,23 +619,26 @@ describe('/changemakers', () => {
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
 					.expect(200)
-					.expect((res) =>
+					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
 							createdAt: expectTimestamp,
 							fields: [changemakerEarliestValue],
-						}),
-					);
+						});
+					});
 			});
 
 			it('returns older funder data when newer data platform provider data is present', async () => {
-				// Set up funder and data platform provider sources.
-				const changemaker = secondChangemaker;
-				const funderSourceId = firstFunderSourceId;
-				const dataProviderSourceId = firstDataProviderSourceId;
-				// Associate one opportunity, one changemaker, and two responses with a base field.
+				const {
+					secondChangemaker: changemaker,
+					firstFunderSourceId: funderSourceId,
+					firstDataProviderSourceId: dataProviderSourceId,
+					baseFieldPhone,
+					firstFunderOpportunity: opportunity,
+					systemUserAuthContext,
+				} = await setupTestContext();
+
 				const baseFieldShortCode = baseFieldPhone.shortCode;
-				const opportunity = firstFunderOpportunity;
 				const proposalId = (
 					await createProposal(db, systemUserAuthContext, {
 						opportunityId: opportunity.id,
@@ -703,17 +707,25 @@ describe('/changemakers', () => {
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
 					.expect(200)
-					.expect((res) =>
+					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
 							createdAt: expectTimestamp,
 							fields: [funderEarliestValue],
-						}),
-					);
+						});
+					});
 			});
 
 			it('returns newer data when only data platform provider data is present', async () => {
-				const changemaker = secondChangemaker;
+				const {
+					secondChangemaker: changemaker,
+					systemUserAuthContext,
+					firstFunderOpportunity,
+					firstDataProviderSourceId,
+					baseFieldWebsite,
+					secondDataProviderSourceId,
+				} = await setupTestContext();
+
 				// Set up data platform provider sources.
 				// Associate one opportunity, one changemaker, and two responses with a base field.
 				const proposalId = (
@@ -788,13 +800,13 @@ describe('/changemakers', () => {
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
 					.expect(200)
-					.expect((res) =>
+					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
 							createdAt: expectTimestamp,
 							fields: [dataProviderNewestValue],
-						}),
-					);
+						});
+					});
 			});
 		});
 	});

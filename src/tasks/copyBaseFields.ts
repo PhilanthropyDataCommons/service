@@ -108,7 +108,6 @@ export const copyBaseFields = async (
 		return;
 	}
 
-	let remoteBaseFields: BaseField[];
 	let taskFailed = false;
 
 	await updateBaseFieldsCopyTask(
@@ -120,12 +119,10 @@ export const copyBaseFields = async (
 		baseFieldsCopyTask.id,
 	);
 
-	try {
-		remoteBaseFields = await fetchBaseFieldsFromRemote(
-			baseFieldsCopyTask.pdcApiUrl,
-			helpers.logger,
-		);
-	} catch (err) {
+	const remoteBaseFields = await fetchBaseFieldsFromRemote(
+		baseFieldsCopyTask.pdcApiUrl,
+		helpers.logger,
+	).catch(async (err) => {
 		helpers.logger.warn('Fetching data from remote instance failed', { err });
 		await updateBaseFieldsCopyTask(
 			db,
@@ -135,6 +132,9 @@ export const copyBaseFields = async (
 			},
 			baseFieldsCopyTask.id,
 		);
+	});
+
+	if (!remoteBaseFields) {
 		return;
 	}
 

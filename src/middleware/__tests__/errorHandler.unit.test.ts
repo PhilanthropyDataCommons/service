@@ -17,8 +17,8 @@ describe('errorHandler', () => {
 		res.send = sendMock;
 		const next = jest.fn();
 		errorHandler(err, req, res, next);
-		expect(statusMock).toBeCalledWith(500);
-		expect(sendMock).toBeCalledWith(
+		expect(statusMock).toHaveBeenCalledWith(500);
+		expect(sendMock).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: 'UnknownError',
 				message: 'Unknown error.',
@@ -39,8 +39,8 @@ describe('errorHandler', () => {
 		res.send = sendMock;
 		const next = jest.fn();
 		errorHandler(err, req, res, next);
-		expect(statusMock).toBeCalledWith(401);
-		expect(sendMock).toBeCalledWith(
+		expect(statusMock).toHaveBeenCalledWith(401);
+		expect(sendMock).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: 'UnauthorizedError',
 				message: '',
@@ -61,8 +61,8 @@ describe('errorHandler', () => {
 		res.send = sendMock;
 		const next = jest.fn();
 		errorHandler(err, req, res, next);
-		expect(statusMock).toBeCalledWith(503);
-		expect(sendMock).toBeCalledWith(
+		expect(statusMock).toHaveBeenCalledWith(503);
+		expect(sendMock).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: 'UnknownError',
 				message: 'Unknown error.',
@@ -90,8 +90,8 @@ describe('errorHandler', () => {
 		res.send = sendMock;
 		const next = jest.fn();
 		errorHandler(err, req, res, next);
-		expect(statusMock).toBeCalledWith(500);
-		expect(sendMock).toBeCalledWith(
+		expect(statusMock).toHaveBeenCalledWith(500);
+		expect(sendMock).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: 'DatabaseError',
 				message: 'Unexpected database error.',

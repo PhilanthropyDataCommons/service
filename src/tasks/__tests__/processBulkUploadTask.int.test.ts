@@ -118,7 +118,7 @@ const mockS3GetObjectReplyWithFile = async (
 
 const mockS3CopyObjectReply = async (sourceKey: string) =>
 	nock(await getS3Endpoint())
-		.put(getS3KeyPath(`${sourceKey}`))
+		.put(getS3KeyPath(sourceKey))
 		.query({ 'x-id': 'CopyObject' })
 		.reply(
 			200,
@@ -127,7 +127,7 @@ const mockS3CopyObjectReply = async (sourceKey: string) =>
 
 const mockS3DeleteObjectReply = async (sourceKey: string) =>
 	nock(await getS3Endpoint())
-		.delete(getS3KeyPath(`${sourceKey}`))
+		.delete(getS3KeyPath(sourceKey))
 		.query({ 'x-id': 'DeleteObject' })
 		.reply(204);
 

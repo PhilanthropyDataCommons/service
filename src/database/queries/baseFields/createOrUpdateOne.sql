@@ -3,7 +3,7 @@ INSERT INTO base_fields (
 	description,
 	short_code,
 	data_type,
-	scope,
+	category,
 	value_relevance_hours,
 	sensitivity_classification
 )
@@ -12,7 +12,7 @@ VALUES (
 	:description,
 	:shortCode,
 	:dataType,
-	:scope,
+	:category,
 	:valueRelevanceHours,
 	:sensitivityClassification
 )
@@ -22,7 +22,7 @@ DO UPDATE
 		label = excluded.label,
 		description = excluded.description,
 		data_type = excluded.data_type,
-		scope = excluded.scope,
+		category = excluded.category,
 		value_relevance_hours = excluded.value_relevance_hours,
 		sensitivity_classification = excluded.sensitivity_classification
 RETURNING base_field_to_json(base_fields) AS object;

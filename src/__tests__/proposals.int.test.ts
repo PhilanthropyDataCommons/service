@@ -28,7 +28,7 @@ import {
 } from '../test/mockJwt';
 import {
 	BaseFieldDataType,
-	BaseFieldScope,
+	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	keycloakIdToString,
 	Permission,
@@ -40,7 +40,7 @@ const createTestBaseFields = async () => {
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.PROPOSAL,
+		category: BaseFieldCategory.PROJECT,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -49,7 +49,7 @@ const createTestBaseFields = async () => {
 		description: 'The title of the proposal',
 		shortCode: 'title',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.PROPOSAL,
+		category: BaseFieldCategory.PROJECT,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -305,7 +305,7 @@ describe('/proposals', () => {
 												dataType: 'string',
 												description: 'A summary of the proposal',
 												label: 'Summary',
-												scope: 'proposal',
+												category: 'project',
 												valueRelevanceHours: null,
 												shortCode: 'summary',
 												sensitivityClassification:
@@ -339,7 +339,7 @@ describe('/proposals', () => {
 				description: 'A field that should not be searchable',
 				shortCode: 'forbidden',
 				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.PROPOSAL,
+				category: BaseFieldCategory.PROJECT,
 				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
@@ -621,7 +621,7 @@ describe('/proposals', () => {
 												dataType: 'string',
 												description: 'A summary of the proposal',
 												label: 'Summary',
-												scope: 'proposal',
+												category: 'project',
 												valueRelevanceHours: null,
 												sensitivityClassification:
 													BaseFieldSensitivityClassification.RESTRICTED,
@@ -936,7 +936,7 @@ describe('/proposals', () => {
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
-										scope: 'proposal',
+										category: 'project',
 										valueRelevanceHours: null,
 										shortCode: 'title',
 										sensitivityClassification:
@@ -966,7 +966,7 @@ describe('/proposals', () => {
 										dataType: 'string',
 										description: 'A summary of the proposal',
 										label: 'Summary',
-										scope: 'proposal',
+										category: 'project',
 										valueRelevanceHours: null,
 										sensitivityClassification:
 											BaseFieldSensitivityClassification.RESTRICTED,
@@ -1008,7 +1008,7 @@ describe('/proposals', () => {
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
-										scope: 'proposal',
+										category: 'project',
 										valueRelevanceHours: null,
 										sensitivityClassification:
 											BaseFieldSensitivityClassification.RESTRICTED,
@@ -1038,7 +1038,7 @@ describe('/proposals', () => {
 										dataType: 'string',
 										description: 'A summary of the proposal',
 										label: 'Summary',
-										scope: 'proposal',
+										category: 'project',
 										valueRelevanceHours: null,
 										sensitivityClassification:
 											BaseFieldSensitivityClassification.RESTRICTED,
@@ -1166,7 +1166,7 @@ describe('/proposals', () => {
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
-										scope: 'proposal',
+										category: 'project',
 										valueRelevanceHours: null,
 										sensitivityClassification:
 											BaseFieldSensitivityClassification.RESTRICTED,
@@ -1196,7 +1196,7 @@ describe('/proposals', () => {
 										dataType: 'string',
 										description: 'A summary of the proposal',
 										label: 'Summary',
-										scope: 'proposal',
+										category: 'project',
 										valueRelevanceHours: null,
 										sensitivityClassification:
 											BaseFieldSensitivityClassification.RESTRICTED,
@@ -1238,7 +1238,7 @@ describe('/proposals', () => {
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
-										scope: 'proposal',
+										category: 'project',
 										valueRelevanceHours: null,
 										sensitivityClassification:
 											BaseFieldSensitivityClassification.RESTRICTED,
@@ -1268,7 +1268,7 @@ describe('/proposals', () => {
 										dataType: 'string',
 										description: 'A summary of the proposal',
 										label: 'Summary',
-										scope: 'proposal',
+										category: 'project',
 										valueRelevanceHours: null,
 										sensitivityClassification:
 											BaseFieldSensitivityClassification.RESTRICTED,
@@ -1297,7 +1297,7 @@ describe('/proposals', () => {
 				dataType: BaseFieldDataType.STRING,
 				label: 'Forbidden Field',
 				description: 'This field should not be returned',
-				scope: BaseFieldScope.PROPOSAL,
+				category: BaseFieldCategory.PROJECT,
 				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
@@ -1394,7 +1394,7 @@ describe('/proposals', () => {
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
-										scope: 'proposal',
+										category: 'project',
 										valueRelevanceHours: null,
 										sensitivityClassification:
 											BaseFieldSensitivityClassification.RESTRICTED,

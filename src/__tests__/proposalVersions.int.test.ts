@@ -21,7 +21,7 @@ import {
 import { getLogger } from '../logger';
 import {
 	BaseFieldDataType,
-	BaseFieldScope,
+	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	Permission,
 } from '../types';
@@ -39,7 +39,7 @@ const createTestBaseFields = async () => {
 		description: 'The first name of the applicant',
 		shortCode: 'firstName',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.PROPOSAL,
+		category: BaseFieldCategory.PROJECT,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -48,7 +48,7 @@ const createTestBaseFields = async () => {
 		description: 'The last name of the applicant',
 		shortCode: 'lastName',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.PROPOSAL,
+		category: BaseFieldCategory.PROJECT,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -443,7 +443,7 @@ describe('/proposalVersions', () => {
 				description: 'This field should not be used in proposal versions',
 				shortCode: 'forbiddenField',
 				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.PROPOSAL,
+				category: BaseFieldCategory.PROJECT,
 				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,

@@ -52,7 +52,7 @@ const putBaseField = async (
 		label,
 		description,
 		dataType,
-		scope,
+		category,
 		valueRelevanceHours,
 		sensitivityClassification,
 	} = req.body;
@@ -60,7 +60,7 @@ const putBaseField = async (
 		label,
 		description,
 		dataType,
-		scope,
+		category,
 		valueRelevanceHours,
 		sensitivityClassification,
 		shortCode: baseFieldShortCode,

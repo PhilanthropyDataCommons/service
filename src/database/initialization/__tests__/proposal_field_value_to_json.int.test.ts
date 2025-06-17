@@ -13,7 +13,7 @@ import {
 import { getAuthContext, loadTestUser } from '../../../test/utils';
 import {
 	BaseFieldDataType,
-	BaseFieldScope,
+	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 } from '../../../types';
 
@@ -39,7 +39,7 @@ describe('/proposal_field_value_to_json', () => {
 			description: 'This field should not be used in proposal versions',
 			shortCode: 'forbiddenField',
 			dataType: BaseFieldDataType.STRING,
-			scope: BaseFieldScope.PROPOSAL,
+			category: BaseFieldCategory.PROJECT,
 			valueRelevanceHours: null,
 			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		});

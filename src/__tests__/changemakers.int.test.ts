@@ -31,7 +31,7 @@ import {
 } from '../test/mockJwt';
 import {
 	BaseFieldDataType,
-	BaseFieldScope,
+	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	PostgresErrorCode,
 	stringToKeycloakId,
@@ -59,7 +59,7 @@ const setupTestContext = async () => {
 		shortCode: 'fifty_one_fifty_three',
 		description: 'Five thousand one hundred fifty three.',
 		dataType: BaseFieldDataType.EMAIL,
-		scope: BaseFieldScope.ORGANIZATION,
+		category: BaseFieldCategory.ORGANIZATION,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -68,7 +68,7 @@ const setupTestContext = async () => {
 		shortCode: 'fifty_three_ninety_nine',
 		description: 'Five thousand three hundred ninety nine.',
 		dataType: BaseFieldDataType.PHONE_NUMBER,
-		scope: BaseFieldScope.ORGANIZATION,
+		category: BaseFieldCategory.ORGANIZATION,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -77,7 +77,7 @@ const setupTestContext = async () => {
 		shortCode: 'fifty_four_seventy_one',
 		description: 'Five thousand four hundred seventy one.',
 		dataType: BaseFieldDataType.URL,
-		scope: BaseFieldScope.ORGANIZATION,
+		category: BaseFieldCategory.ORGANIZATION,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -829,7 +829,7 @@ describe('/changemakers', () => {
 						BaseFieldSensitivityClassification.RESTRICTED,
 					dataType: BaseFieldDataType.STRING,
 					valueRelevanceHours: null,
-					scope: BaseFieldScope.ORGANIZATION,
+					category: BaseFieldCategory.ORGANIZATION,
 				});
 				const opportunity = firstFunderOpportunity;
 				const proposal = await createProposal(db, systemUserAuthContext, {

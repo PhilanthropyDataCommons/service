@@ -19,7 +19,7 @@ import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUploadTask } from '../processBulkUploadTask';
 import {
 	BaseFieldDataType,
-	BaseFieldScope,
+	BaseFieldCategory,
 	TaskStatus,
 	BaseFieldSensitivityClassification,
 } from '../../types';
@@ -83,7 +83,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		description: 'The email address of the person who submitted the proposal.',
 		shortCode: 'proposal_submitter_email',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.PROPOSAL,
+		category: BaseFieldCategory.PROJECT,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -92,7 +92,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_name',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.ORGANIZATION,
+		category: BaseFieldCategory.ORGANIZATION,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -101,7 +101,7 @@ const createTestBaseFields = async (): Promise<void> => {
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_tax_id',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.ORGANIZATION,
+		category: BaseFieldCategory.ORGANIZATION,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -513,7 +513,7 @@ describe('processBulkUploadTask', () => {
 											description:
 												'The email address of the person who submitted the proposal.',
 											label: 'Proposal Submitter Email',
-											scope: 'proposal',
+											category: 'project',
 											valueRelevanceHours: null,
 											shortCode: 'proposal_submitter_email',
 											sensitivityClassification:
@@ -543,7 +543,7 @@ describe('processBulkUploadTask', () => {
 											dataType: 'string',
 											description: 'The name of the applying organization.',
 											label: 'Organization Name',
-											scope: 'organization',
+											category: 'organization',
 											valueRelevanceHours: null,
 											sensitivityClassification:
 												BaseFieldSensitivityClassification.RESTRICTED,
@@ -595,7 +595,7 @@ describe('processBulkUploadTask', () => {
 											description:
 												'The email address of the person who submitted the proposal.',
 											label: 'Proposal Submitter Email',
-											scope: 'proposal',
+											category: 'project',
 											valueRelevanceHours: null,
 											sensitivityClassification:
 												BaseFieldSensitivityClassification.RESTRICTED,
@@ -625,7 +625,7 @@ describe('processBulkUploadTask', () => {
 											dataType: 'string',
 											description: 'The name of the applying organization.',
 											label: 'Organization Name',
-											scope: 'organization',
+											category: 'organization',
 											valueRelevanceHours: null,
 											sensitivityClassification:
 												BaseFieldSensitivityClassification.RESTRICTED,

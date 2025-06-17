@@ -44,7 +44,7 @@ BEGIN
     INNER JOIN sources s
       ON pv.source_id = s.id
     WHERE op.changemaker_id = changemaker.id
-      AND bf.scope = 'organization'
+      AND bf.category = 'organization'
 			AND bf.sensitivity_classification != 'forbidden'
       AND pfv.is_valid
       -- Guard against possible removal of NON NULL constraint on users table:

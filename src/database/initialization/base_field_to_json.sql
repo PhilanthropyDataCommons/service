@@ -18,7 +18,7 @@ BEGIN
     'label', base_field.label,
     'description', base_field.description,
     'dataType', base_field.data_type,
-    'scope', base_field.scope,
+    'category', base_field.category,
     'valueRelevanceHours', base_field.value_relevance_hours,
     'sensitivityClassification', base_field.sensitivity_classification,
     'createdAt', to_json(base_field.created_at)::jsonb,

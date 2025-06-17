@@ -52,7 +52,7 @@ export const fetchBaseFieldsFromRemote = async (
 
 const copyBaseField = async (targetBaseField: BaseField): Promise<void> => {
 	const {
-		scope,
+		category,
 		dataType,
 		shortCode,
 		label,
@@ -61,7 +61,7 @@ const copyBaseField = async (targetBaseField: BaseField): Promise<void> => {
 		sensitivityClassification,
 	} = targetBaseField;
 	const copiedBaseField = await createOrUpdateBaseField(db, null, {
-		scope,
+		category,
 		dataType,
 		shortCode,
 		label,

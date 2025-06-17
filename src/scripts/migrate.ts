@@ -13,7 +13,7 @@ migrate()
 	.catch(async (reason: unknown) => {
 		logger.error('Migrations failed!');
 		if (reason instanceof Error) {
-			logger.error(`${reason.message}`);
+			logger.error(reason.message);
 		}
 		await db.close();
 		process.exit(EXIT_CODE_FAILURE);

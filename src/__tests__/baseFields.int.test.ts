@@ -10,7 +10,7 @@ import {
 } from '../database';
 import {
 	BaseFieldDataType,
-	BaseFieldScope,
+	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 } from '../types';
 import { expectTimestamp, NO_LIMIT, NO_OFFSET } from '../test/utils';
@@ -25,7 +25,7 @@ const createTestBaseField = async () =>
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.PROPOSAL,
+		category: BaseFieldCategory.PROJECT,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -36,7 +36,7 @@ const createTestBaseFieldWithLocalization = async () => {
 		description: 'A summary of the proposal',
 		shortCode: 'summary',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.PROPOSAL,
+		category: BaseFieldCategory.PROJECT,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -69,7 +69,7 @@ describe('/baseFields', () => {
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
 				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.PROPOSAL,
+				category: BaseFieldCategory.PROJECT,
 				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
@@ -79,7 +79,7 @@ describe('/baseFields', () => {
 				description: 'The last name of the applicant',
 				shortCode: 'lastName',
 				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.PROPOSAL,
+				category: BaseFieldCategory.PROJECT,
 				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
@@ -106,7 +106,7 @@ describe('/baseFields', () => {
 					description: 'The first name of the applicant',
 					shortCode: 'firstName',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.PROPOSAL,
+					category: BaseFieldCategory.PROJECT,
 					valueRelevanceHours: null,
 					sensitivityClassification:
 						BaseFieldSensitivityClassification.RESTRICTED,
@@ -126,7 +126,7 @@ describe('/baseFields', () => {
 					description: 'The last name of the applicant',
 					shortCode: 'lastName',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.PROPOSAL,
+					category: BaseFieldCategory.PROJECT,
 					valueRelevanceHours: null,
 					sensitivityClassification:
 						BaseFieldSensitivityClassification.RESTRICTED,
@@ -164,7 +164,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.PROPOSAL,
+					category: BaseFieldCategory.PROJECT,
 					valueRelevanceHours: null,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
@@ -176,7 +176,7 @@ describe('/baseFields', () => {
 				description: '😍',
 				shortCode: 'shorts',
 				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.PROPOSAL,
+				category: BaseFieldCategory.PROJECT,
 				valueRelevanceHours: null,
 				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				localizations: {},
@@ -193,7 +193,7 @@ describe('/baseFields', () => {
 				.send({
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.PROPOSAL,
+					category: BaseFieldCategory.PROJECT,
 					valueRelevanceHours: null,
 				})
 				.expect(400);
@@ -211,7 +211,7 @@ describe('/baseFields', () => {
 				.send({
 					label: '🏷️',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.PROPOSAL,
+					category: BaseFieldCategory.PROJECT,
 					valueRelevanceHours: null,
 				})
 				.expect(400);
@@ -230,7 +230,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.PROPOSAL,
+					category: BaseFieldCategory.PROJECT,
 					valueRelevanceHours: null,
 				})
 				.expect(400);
@@ -248,7 +248,7 @@ describe('/baseFields', () => {
 				.send({
 					label: '🏷️',
 					description: '😍',
-					scope: BaseFieldScope.PROPOSAL,
+					category: BaseFieldCategory.PROJECT,
 					valueRelevanceHours: null,
 				})
 				.expect(400);
@@ -267,7 +267,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: '🤡',
-					scope: BaseFieldScope.PROPOSAL,
+					category: BaseFieldCategory.PROJECT,
 					valueRelevanceHours: null,
 				})
 				.expect(400);
@@ -277,7 +277,7 @@ describe('/baseFields', () => {
 			});
 		});
 
-		it('returns 400 bad request when no scope is sent', async () => {
+		it('returns 400 bad request when no category is sent', async () => {
 			const result = await request(app)
 				.put('/baseFields/shorts')
 				.type('application/json')
@@ -304,7 +304,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.PROPOSAL,
+					category: BaseFieldCategory.PROJECT,
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -313,7 +313,7 @@ describe('/baseFields', () => {
 			});
 		});
 
-		it('returns 400 bad request when an invalid scope is sent', async () => {
+		it('returns 400 bad request when an invalid category is sent', async () => {
 			const result = await request(app)
 				.put('/baseFields/shorts')
 				.type('application/json')
@@ -322,7 +322,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
-					scope: '🤡',
+					category: '🤡',
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -340,7 +340,7 @@ describe('/baseFields', () => {
 				description: 'A summary of the proposal',
 				shortCode: 'summary',
 				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.PROPOSAL,
+				category: BaseFieldCategory.PROJECT,
 				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
@@ -353,7 +353,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: BaseFieldDataType.NUMBER,
-					scope: BaseFieldScope.ORGANIZATION,
+					category: BaseFieldCategory.ORGANIZATION,
 					valueRelevanceHours: 9001,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
@@ -364,7 +364,7 @@ describe('/baseFields', () => {
 				description: '😍',
 				shortCode: 'summary',
 				dataType: BaseFieldDataType.NUMBER,
-				scope: BaseFieldScope.ORGANIZATION,
+				category: BaseFieldCategory.ORGANIZATION,
 				valueRelevanceHours: 9001,
 				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				localizations: {},
@@ -382,7 +382,7 @@ describe('/baseFields', () => {
 				.send({
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.ORGANIZATION,
+					category: BaseFieldCategory.ORGANIZATION,
 					valueRelevanceHours: null,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
@@ -402,7 +402,7 @@ describe('/baseFields', () => {
 				.send({
 					label: '🏷️',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.ORGANIZATION,
+					category: BaseFieldCategory.ORGANIZATION,
 					valueRelevanceHours: null,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
@@ -422,7 +422,7 @@ describe('/baseFields', () => {
 				.send({
 					label: '🏷️',
 					description: '😍',
-					scope: BaseFieldScope.ORGANIZATION,
+					category: BaseFieldCategory.ORGANIZATION,
 					valueRelevanceHours: null,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
@@ -433,7 +433,7 @@ describe('/baseFields', () => {
 			});
 		});
 
-		it('returns 400 bad request when no scope is sent', async () => {
+		it('returns 400 bad request when no category is sent', async () => {
 			await createTestBaseField();
 			const result = await request(app)
 				.put('/baseFields/summary')
@@ -463,7 +463,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.ORGANIZATION,
+					category: BaseFieldCategory.ORGANIZATION,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(400);
@@ -483,7 +483,7 @@ describe('/baseFields', () => {
 					label: '🏷️',
 					description: '😍',
 					dataType: BaseFieldDataType.STRING,
-					scope: BaseFieldScope.ORGANIZATION,
+					category: BaseFieldCategory.ORGANIZATION,
 					valueRelevanceHours: null,
 				})
 				.expect(400);
@@ -506,7 +506,7 @@ describe('/baseFields', () => {
 				description: 'The first name of the applicant',
 				shortCode: 'firstName',
 				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.PROPOSAL,
+				category: BaseFieldCategory.PROJECT,
 				valueRelevanceHours: null,
 				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 			});

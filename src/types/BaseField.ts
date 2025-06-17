@@ -15,9 +15,18 @@ export enum BaseFieldDataType {
 	CURRENCY = 'currency',
 }
 
-export enum BaseFieldScope {
-	PROPOSAL = 'proposal',
+enum BaseFieldCategory {
+	PROJECT = 'project',
 	ORGANIZATION = 'organization',
+	NEEDS_ASSESSMENT = 'needs_assessment',
+	METHODOLOGY = 'methodology',
+	BUDGET = 'budget',
+	EVALUATION = 'evaluation',
+	SUSTAINABILIY = 'sustainability',
+	PARTNERSHIPS = 'partnerships',
+	OUTCOMES = 'outcomes',
+	TECHNICAL = 'technical',
+	UNCATEGORIZED = 'uncategorized',
 }
 
 enum BaseFieldSensitivityClassification {
@@ -31,7 +40,7 @@ interface BaseField {
 	label: string;
 	description: string;
 	dataType: BaseFieldDataType;
-	scope: BaseFieldScope;
+	category: BaseFieldCategory;
 	valueRelevanceHours: number | null;
 	sensitivityClassification: BaseFieldSensitivityClassification;
 	readonly localizations: Record<string, BaseFieldLocalization>;
@@ -54,9 +63,9 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 			type: 'string',
 			enum: Object.values(BaseFieldDataType),
 		},
-		scope: {
+		category: {
 			type: 'string',
-			enum: Object.values(BaseFieldScope),
+			enum: Object.values(BaseFieldCategory),
 		},
 		valueRelevanceHours: {
 			type: 'number',
@@ -81,7 +90,7 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 		'description',
 		'shortCode',
 		'dataType',
-		'scope',
+		'category',
 		'valueRelevanceHours',
 		'sensitivityClassification',
 		'localizations',
@@ -110,9 +119,9 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 			type: 'string',
 			enum: Object.values(BaseFieldDataType),
 		},
-		scope: {
+		category: {
 			type: 'string',
-			enum: Object.values(BaseFieldScope),
+			enum: Object.values(BaseFieldCategory),
 		},
 		valueRelevanceHours: {
 			type: 'number',
@@ -128,7 +137,7 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 		'label',
 		'description',
 		'dataType',
-		'scope',
+		'category',
 		'valueRelevanceHours',
 		'sensitivityClassification',
 	],
@@ -139,6 +148,7 @@ const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 export {
 	type BaseField,
 	BaseFieldSensitivityClassification,
+	BaseFieldCategory,
 	baseFieldSchema,
 	isBaseField,
 	type InternallyWritableBaseField,

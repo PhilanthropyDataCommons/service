@@ -15,7 +15,7 @@ import {
 import { getLogger } from '../logger';
 import {
 	BaseFieldDataType,
-	BaseFieldScope,
+	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	Permission,
 } from '../types';
@@ -33,7 +33,7 @@ const createTestBaseFields = async () => {
 		description: 'The organizational name of the applicant',
 		shortCode: 'organizationName',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.ORGANIZATION,
+		category: BaseFieldCategory.ORGANIZATION,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -42,7 +42,7 @@ const createTestBaseFields = async () => {
 		description: 'The number of years the project will take to complete',
 		shortCode: 'yearsOfWork',
 		dataType: BaseFieldDataType.STRING,
-		scope: BaseFieldScope.PROPOSAL,
+		category: BaseFieldCategory.PROJECT,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
@@ -354,7 +354,7 @@ describe('/applicationForms', () => {
 				description: 'This field should not be used in application forms',
 				shortCode: 'forbiddenField',
 				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.ORGANIZATION,
+				category: BaseFieldCategory.ORGANIZATION,
 				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
@@ -625,7 +625,7 @@ describe('/applicationForms', () => {
 				description: 'This field should not be used in application forms',
 				shortCode: 'forbiddenField',
 				dataType: BaseFieldDataType.STRING,
-				scope: BaseFieldScope.ORGANIZATION,
+				category: BaseFieldCategory.ORGANIZATION,
 				valueRelevanceHours: null,
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});

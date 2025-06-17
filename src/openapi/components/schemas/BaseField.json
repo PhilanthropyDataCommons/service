@@ -26,9 +26,21 @@
 			"enum": ["string", "number", "email", "phone_number", "url", "boolean"],
 			"example": "string"
 		},
-		"scope": {
+		"category": {
 			"type": "string",
-			"enum": ["proposal", "changemaker"]
+			"enum": [
+				"project",
+				"organization",
+				"needs_assessment",
+				"methodology",
+				"budget",
+				"evaluation",
+				"sustainability",
+				"partnerships",
+				"outcomes",
+				"technical",
+				"uncategorized"
+			]
 		},
 		"valueRelevanceHours": {
 			"type": ["integer", "null"],
@@ -51,7 +63,7 @@
 		"label",
 		"description",
 		"dataType",
-		"scope",
+		"category",
 		"valueRelevanceHours",
 		"sensitivityClassification",
 		"createdAt"

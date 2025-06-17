@@ -8,7 +8,7 @@ const createOrUpdateBaseField = generateCreateOrUpdateItemOperation<
 >(
 	'baseFields.createOrUpdateOne',
 	[
-		'scope',
+		'category',
 		'dataType',
 		'shortCode',
 		'label',

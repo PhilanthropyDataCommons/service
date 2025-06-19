@@ -48,7 +48,7 @@ const assertApplicationFormExistsForProposal = async (
 	});
 
 	const proposal = await loadProposal(db, authContext, proposalId).catch(
-		(err) => {
+		(err: unknown) => {
 			if (err instanceof NotFoundError) {
 				throw new InputConflictError(
 					`The specified Proposal does not exist (${proposalId}).`,

@@ -25,7 +25,12 @@ import {
 	BaseFieldSensitivityClassification,
 	Permission,
 } from '../types';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	expectArray,
+	expectNumber,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -188,7 +193,7 @@ describe('/proposalVersions', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -199,7 +204,7 @@ describe('/proposalVersions', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -400,22 +405,22 @@ describe('/proposalVersions', () => {
 				proposalId: 1,
 				fieldValues: [
 					{
-						id: expect.any(Number) as number,
+						id: expectNumber(),
 						applicationFormFieldId: 1,
 						position: 1,
 						value: 'Gronald',
 						isValid: true,
 						goodAsOf: '2025-04-25T16:34:03+00:00',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 					{
-						id: expect.any(Number) as number,
+						id: expectNumber(),
 						applicationFormFieldId: 2,
 						position: 1,
 						value: 'Plorp',
 						isValid: true,
 						goodAsOf: null,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
 			});

@@ -7,16 +7,18 @@ import {
 	loadUserGroupChangemakerPermission,
 	removeUserGroupChangemakerPermission,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import { expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { keycloakIdToString, Permission } from '../types';
+import { keycloakIdToString, Permission, stringToKeycloakId } from '../types';
 import { NotFoundError } from '../errors';
-import type { KeycloakId } from '../types';
 
-const mockKeycloakOrganizationId = '123e4567-e89b-12d3-a456-426614174000';
+const mockKeycloakOrganizationId = stringToKeycloakId(
+	'123e4567-e89b-12d3-a456-426614174000',
+);
 
 describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () => {
 	describe('PUT /', () => {
@@ -33,7 +35,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 			});
 			await request(app)
 				.put(
-					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 				)
 				.send({})
 				.expect(401);
@@ -53,7 +55,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 			});
 			await request(app)
 				.put(
-					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
 				.send({})
@@ -78,7 +80,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 			});
 			await request(app)
 				.put(
-					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/notanId/permissions/${Permission.MANAGE}`,
+					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/notanId/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send({})
@@ -93,7 +95,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 			});
 			await request(app)
 				.put(
-					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/1/permissions/notAPermission`,
+					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/1/permissions/notAPermission`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send({})
@@ -117,14 +119,14 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 
 			const response = await request(app)
 				.put(
-					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+					`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send({})
 				.expect(201);
 			expect(response.body).toEqual({
 				changemakerId: changemaker.id,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: user.keycloakUserId,
 				permission: Permission.EDIT,
 				keycloakOrganizationId:
@@ -146,7 +148,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 				});
 				await request(app)
 					.delete(
-						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 					)
 					.send()
 					.expect(401);
@@ -165,7 +167,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 				});
 				await request(app)
 					.delete(
-						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 					)
 					.set(authHeader)
 					.send()
@@ -190,7 +192,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 				});
 				await request(app)
 					.delete(
-						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/notanId/permissions/${Permission.MANAGE}`,
+						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/notanId/permissions/${Permission.MANAGE}`,
 					)
 					.set(authHeaderWithAdminRole)
 					.send()
@@ -221,7 +223,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 				});
 				await request(app)
 					.delete(
-						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
+						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/${changemaker.id}/permissions/${Permission.MANAGE}`,
 					)
 					.set(authHeaderWithAdminRole)
 					.send()
@@ -245,8 +247,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 					db,
 					testUserAuthContext,
 					{
-						keycloakOrganizationId:
-							organizationAsChangemaker.keycloakOrganizationId as KeycloakId,
+						keycloakOrganizationId: mockKeycloakOrganizationId,
 						changemakerId: changemaker.id,
 						permission: Permission.EDIT,
 					},
@@ -254,13 +255,13 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 				await removeUserGroupChangemakerPermission(
 					db,
 					null,
-					organizationAsChangemaker.keycloakOrganizationId as KeycloakId,
+					mockKeycloakOrganizationId,
 					changemaker.id,
 					Permission.EDIT,
 				);
 				await request(app)
 					.delete(
-						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 					)
 					.set(authHeaderWithAdminRole)
 					.send()
@@ -284,8 +285,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 					db,
 					testUserAuthContext,
 					{
-						keycloakOrganizationId:
-							organizationAsChangemaker.keycloakOrganizationId as KeycloakId,
+						keycloakOrganizationId: mockKeycloakOrganizationId,
 						changemakerId: changemaker.id,
 						permission: Permission.EDIT,
 					},
@@ -293,13 +293,13 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 				const permission = await loadUserGroupChangemakerPermission(
 					db,
 					null,
-					organizationAsChangemaker.keycloakOrganizationId as KeycloakId,
+					mockKeycloakOrganizationId,
 					changemaker.id,
 					Permission.EDIT,
 				);
 				expect(permission).toEqual({
 					changemakerId: changemaker.id,
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					createdBy: testUser.keycloakUserId,
 					permission: Permission.EDIT,
 					keycloakOrganizationId:
@@ -307,7 +307,7 @@ describe('/userGroups/changemakers/:changemakerId/permissions/:permission', () =
 				});
 				await request(app)
 					.delete(
-						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId as KeycloakId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
+						`/userGroups/${keycloakIdToString(organizationAsChangemaker.keycloakOrganizationId)}/changemakers/${changemaker.id}/permissions/${Permission.EDIT}`,
 					)
 					.set(authHeaderWithAdminRole)
 					.send()

@@ -17,7 +17,8 @@ import {
 	TaskStatus,
 	BaseFieldSensitivityClassification,
 } from '../../types';
-import { expectTimestamp, getAuthContext } from '../../test/utils';
+import { getAuthContext } from '../../test/utils';
+import { expectTimestamp } from '../../test/asymettricMatchers';
 import type {
 	BaseField,
 	InternallyWritableBaseFieldsCopyTask,
@@ -350,21 +351,21 @@ describe('copyBaseFields', () => {
 					language: 'en',
 					label: 'First name',
 					description: 'The first name of the Applicant',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 				fr: {
 					baseFieldShortCode: mockFirstNameBaseField.shortCode,
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 			},
 			dataType: 'string',
 			category: 'project',
 			valueRelevanceHours: 9001,
 			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
-			createdAt: expectTimestamp,
+			createdAt: expectTimestamp(),
 		});
 
 		expect(updatedBaseFieldsCopyTask.status).toEqual(TaskStatus.COMPLETED);
@@ -586,21 +587,21 @@ describe('copyBaseFields', () => {
 					language: 'en',
 					label: 'First name',
 					description: 'The first name of the Applicant',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 				fr: {
 					baseFieldShortCode: mockFirstNameBaseField.shortCode,
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 			},
 			dataType: 'string',
 			category: 'project',
 			valueRelevanceHours: null,
 			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
-			createdAt: expectTimestamp,
+			createdAt: expectTimestamp(),
 		});
 
 		expect(updatedBaseFieldsCopyTask.status).toEqual(TaskStatus.COMPLETED);
@@ -665,7 +666,7 @@ describe('copyBaseFields', () => {
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 			},
 			dataType: 'string',
@@ -737,21 +738,21 @@ describe('copyBaseFields', () => {
 					language: 'en',
 					label: 'First name',
 					description: 'The first name of the Applicant',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 				fr: {
 					baseFieldShortCode: localBaseField.shortCode,
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 				sp: {
 					baseFieldShortCode: localBaseField.shortCode,
 					label: 'Nombre de Pila',
 					description: 'Nombre de Pila',
 					language: 'sp',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 			},
 			dataType: 'string',
@@ -852,14 +853,14 @@ describe('copyBaseFields', () => {
 					language: 'en',
 					label: 'First name',
 					description: 'The first name of the Applicant',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 				fr: {
 					baseFieldShortCode: baseField.shortCode,
 					language: 'fr',
 					label: 'Le Prenom',
 					description: 'Le Prenom de la Applicant',
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 			},
 			dataType: 'string',

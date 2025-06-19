@@ -2,13 +2,6 @@ import { db, createOrUpdateUser, loadUserByKeycloakUserId } from '../database';
 import { stringToKeycloakId } from '../types';
 import type { AuthContext, KeycloakId, User } from '../types';
 
-export const isoTimestampPattern =
-	/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|(\+|-)\d{2}:\d{2})$/;
-
-export const expectTimestamp = expect.stringMatching(
-	isoTimestampPattern,
-) as string;
-
 // Because expressjwt does not synchronously call next, but rather calls setImmediate(next),
 // send another call to setImmediate to make sure previous calls to setImmediate have made it
 // through the event loop. Otherwise jest misses the call (it hasn't happened yet). Kudos:
@@ -18,7 +11,7 @@ export const allowNextToResolve = async (): Promise<void> =>
 
 export const generateNextWithAssertions = (
 	runAssertions: (err?: unknown) => Promise<void>,
-	done: jest.DoneCallback,
+	done: (value?: unknown) => unknown,
 ): jest.Mock =>
 	jest.fn((err?) => {
 		runAssertions(err).then(done).catch(done);

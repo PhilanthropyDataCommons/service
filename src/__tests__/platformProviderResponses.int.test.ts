@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import { db, loadTableMetrics } from '../database';
-import { expectTimestamp } from '../test/utils';
+import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
 describe('/platformProviderResponses', () => {
@@ -40,7 +40,7 @@ describe('/platformProviderResponses', () => {
 					data: {
 						goodbyeGalaxy: '17',
 					},
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 				{
 					externalId: '000000000',
@@ -48,7 +48,7 @@ describe('/platformProviderResponses', () => {
 					data: {
 						helloWorld: 42,
 					},
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 			]);
 		});
@@ -60,7 +60,7 @@ describe('/platformProviderResponses', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});
@@ -88,7 +88,7 @@ describe('/platformProviderResponses', () => {
 				data: {
 					helloWorld: 42,
 				},
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(1);
 		});
@@ -121,7 +121,7 @@ describe('/platformProviderResponses', () => {
 				data: {
 					helloWorld: 52,
 				},
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 		});
 
@@ -143,7 +143,7 @@ describe('/platformProviderResponses', () => {
 			expect(after.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});

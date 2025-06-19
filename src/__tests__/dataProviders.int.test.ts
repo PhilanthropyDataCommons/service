@@ -7,7 +7,7 @@ import {
 	loadSystemDataProvider,
 	loadTableMetrics,
 } from '../database';
-import { expectTimestamp } from '../test/utils';
+import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -42,13 +42,13 @@ describe('/dataProviders', () => {
 				entries: [
 					{
 						shortCode: 'nonProfitWarehouse',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						name: 'Nonprofit Warehouse',
 						keycloakOrganizationId: null,
 					},
 					{
 						shortCode: 'dataRUs',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						name: 'Data R Us',
 						keycloakOrganizationId: null,
 					},
@@ -82,7 +82,7 @@ describe('/dataProviders', () => {
 				.expect(200);
 			expect(response.body).toStrictEqual({
 				shortCode: 'nonProfitWarehouse',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				name: 'Nonprofit Warehouse',
 				keycloakOrganizationId: null,
 			});
@@ -119,7 +119,7 @@ describe('/dataProviders', () => {
 			expect(result.body).toStrictEqual({
 				shortCode: 'firework',
 				name: '🎆',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				keycloakOrganizationId: null,
 			});
 			expect(after.count).toEqual(before.count + 1);
@@ -169,7 +169,7 @@ describe('/dataProviders', () => {
 				shortCode: 'firework',
 				name: '🎆',
 				keycloakOrganizationId: '8b0163ac-bd91-11ef-8579-9fa8ab9f4b7d',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count);
 			expect(anotherDataProviderAfter).toEqual(anotherDataProviderBefore);
@@ -184,7 +184,7 @@ describe('/dataProviders', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 

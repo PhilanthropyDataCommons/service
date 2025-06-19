@@ -9,7 +9,8 @@ import {
 	loadSystemUser,
 	createOrUpdateFunder,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -50,14 +51,14 @@ describe('/opportunities', () => {
 				entries: [
 					{
 						id: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						title: 'Tremendous opportunity 👌',
 						funderShortCode: systemFunder.shortCode,
 						funder: systemFunder,
 					},
 					{
 						id: 2,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						title: 'Terrific opportunity 👐',
 						funderShortCode: systemFunder.shortCode,
 						funder: systemFunder,
@@ -127,7 +128,7 @@ describe('/opportunities', () => {
 				.expect(200);
 			expect(response.body).toEqual({
 				id: 2,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				title: '✨',
 				funderShortCode: systemFunder.shortCode,
 				funder: systemFunder,
@@ -162,7 +163,7 @@ describe('/opportunities', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -173,7 +174,7 @@ describe('/opportunities', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -232,7 +233,7 @@ describe('/opportunities', () => {
 			expect(result.body).toMatchObject({
 				id: 1,
 				title: '🎆',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(1);
 		});
@@ -277,7 +278,7 @@ describe('/opportunities', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -290,7 +291,7 @@ describe('/opportunities', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});

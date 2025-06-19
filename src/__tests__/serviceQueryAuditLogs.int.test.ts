@@ -4,12 +4,8 @@ import { expect } from '@jest/globals';
 import { db } from '../database/db';
 import { createServiceQueryAuditLog } from '../database/operations/serviceQueryAuditLogs';
 import { loadUnifiedAuditLogBundle } from '../database/operations/unifiedAuditLogs';
-import {
-	expectTimestamp,
-	getTestAuthContext,
-	NO_LIMIT,
-	NO_OFFSET,
-} from '../test/utils';
+import { getTestAuthContext, NO_LIMIT, NO_OFFSET } from '../test/utils';
+import { expectTimestamp } from '../test/asymettricMatchers';
 
 describe('service query audit logs', () => {
 	it('appears in logs when createServiceQueryAuditLog is called', async () => {
@@ -30,7 +26,7 @@ describe('service query audit logs', () => {
 			NO_OFFSET,
 		);
 		expect(unifiedAuditLogsViewRows.entries).toContainEqual({
-			statementTimestamp: expectTimestamp,
+			statementTimestamp: expectTimestamp(),
 			userKeycloakUserId: authContext.user.keycloakUserId,
 			userIsAdministrator: false,
 			pid: expect.any(Number),

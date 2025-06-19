@@ -32,7 +32,7 @@ describe('addUserContext', () => {
 				const nextMock = generateNextWithAssertions(runAssertions, done);
 				addUserContext(req, res, nextMock);
 			})
-			.catch((e) => {
+			.catch((e: unknown) => {
 				done(e);
 			});
 	});
@@ -61,7 +61,7 @@ describe('addUserContext', () => {
 				const nextMock = generateNextWithAssertions(runAssertions, done);
 				addUserContext(req, res, nextMock);
 			})
-			.catch((e) => {
+			.catch((e: unknown) => {
 				done(e);
 			});
 	});
@@ -129,7 +129,7 @@ describe('addUserContext', () => {
 				const nextMock = generateNextWithAssertions(runAssertions, done);
 				addUserContext(req, res, nextMock);
 			})
-			.catch((e) => {
+			.catch((e: unknown) => {
 				done(e);
 			});
 	});
@@ -159,7 +159,7 @@ describe('addUserContext', () => {
 				const nextMock = generateNextWithAssertions(runAssertions, done);
 				addUserContext(req, res, nextMock);
 			})
-			.catch((e) => {
+			.catch((e: unknown) => {
 				done(e);
 			});
 	});
@@ -180,7 +180,7 @@ describe('addUserContext', () => {
 				const nextMock = generateNextWithAssertions(runAssertions, done);
 				addUserContext(req, res, nextMock);
 			})
-			.catch((e) => {
+			.catch((e: unknown) => {
 				done(e);
 			});
 	});

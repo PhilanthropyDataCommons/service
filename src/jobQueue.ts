@@ -49,7 +49,7 @@ export const startJobQueue = async (): Promise<void> => {
 			copyBaseFields,
 		},
 	});
-	runner.promise.catch((err) => {
+	runner.promise.catch((err: unknown) => {
 		logger.error(err, 'The queue worker failed.');
 	});
 };

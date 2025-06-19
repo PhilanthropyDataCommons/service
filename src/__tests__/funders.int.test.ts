@@ -7,7 +7,7 @@ import {
 	loadTableMetrics,
 	loadSystemFunder,
 } from '../database';
-import { expectTimestamp } from '../test/utils';
+import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -39,13 +39,13 @@ describe('/funders', () => {
 				entries: [
 					{
 						shortCode: 'theFoundationFoundation',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						name: 'The Foundation Foundation',
 						keycloakOrganizationId: null,
 					},
 					{
 						shortCode: 'theFundFund',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						name: 'The Fund Fund',
 						keycloakOrganizationId: null,
 					},
@@ -79,7 +79,7 @@ describe('/funders', () => {
 				.expect(200);
 			expect(response.body).toStrictEqual({
 				shortCode: 'theFoundationFoundation',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
 			});
@@ -116,7 +116,7 @@ describe('/funders', () => {
 			expect(result.body).toMatchObject({
 				shortCode: 'firework',
 				name: '🎆',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -154,7 +154,7 @@ describe('/funders', () => {
 				shortCode: 'firework',
 				name: '🎆',
 				keycloakOrganizationId: null,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count);
 			expect(anotherFunderAfter).toEqual(anotherFunderBefore);
@@ -169,7 +169,7 @@ describe('/funders', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 

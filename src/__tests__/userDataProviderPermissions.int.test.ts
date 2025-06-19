@@ -8,7 +8,8 @@ import {
 	removeUserDataProviderPermission,
 	loadSystemUser,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import { expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -99,7 +100,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				.expect(201);
 			expect(response.body).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: user.keycloakUserId,
 				permission: Permission.EDIT,
 				userKeycloakUserId: user.keycloakUserId,
@@ -129,7 +130,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				.expect(201);
 			expect(response.body).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -164,7 +165,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 				.expect(201);
 			expect(response.body).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: systemUser.keycloakUserId,
 				permission: Permission.MANAGE,
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -303,7 +304,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 			);
 			expect(permission).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -353,7 +354,7 @@ describe('/users/dataProviders/:dataProviderShortcode/permissions/:permission', 
 			);
 			expect(permission).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
 				userKeycloakUserId: testUser.keycloakUserId,

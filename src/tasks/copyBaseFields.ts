@@ -9,16 +9,13 @@ import {
 } from '../database/operations';
 import type { BaseField } from '../types';
 import type { JobHelpers, Logger } from 'graphile-worker';
-import type { Response } from 'node-fetch';
 
 export const fetchBaseFieldsFromRemote = async (
 	pdcApiUrl: string,
 	logger: Logger,
 ): Promise<BaseField[]> => {
 	try {
-		const response = (await fetch(
-			`${pdcApiUrl}/baseFields`,
-		)) as unknown as Response;
+		const response = await fetch(`${pdcApiUrl}/baseFields`);
 
 		if (!response.ok) {
 			logger.error('Failed to fetch base fields from remote PDC instance', {

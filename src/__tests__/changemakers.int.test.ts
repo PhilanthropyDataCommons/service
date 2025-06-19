@@ -20,11 +20,15 @@ import {
 	loadSystemFunder,
 } from '../database';
 import {
-	expectTimestamp,
 	getAuthContext,
 	getTestUserKeycloakUserId,
 	loadTestUser,
 } from '../test/utils';
+import {
+	expectArray,
+	expectString,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -183,7 +187,7 @@ describe('/changemakers', () => {
 								taxId: '22-2222222',
 								name: 'Another Inc.',
 								keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								fiscalSponsors: [],
 								fields: [],
 							},
@@ -192,7 +196,7 @@ describe('/changemakers', () => {
 								taxId: '11-1111111',
 								name: 'Example Inc.',
 								keycloakOrganizationId: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								fiscalSponsors: [],
 								fields: [],
 							},
@@ -227,7 +231,7 @@ describe('/changemakers', () => {
 								taxId: '11-1111111',
 								name: 'Changemaker 15',
 								keycloakOrganizationId: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								fiscalSponsors: [],
 								fields: [],
 							},
@@ -236,7 +240,7 @@ describe('/changemakers', () => {
 								taxId: '11-1111111',
 								name: 'Changemaker 14',
 								keycloakOrganizationId: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								fiscalSponsors: [],
 								fields: [],
 							},
@@ -245,7 +249,7 @@ describe('/changemakers', () => {
 								taxId: '11-1111111',
 								name: 'Changemaker 13',
 								keycloakOrganizationId: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								fiscalSponsors: [],
 								fields: [],
 							},
@@ -254,7 +258,7 @@ describe('/changemakers', () => {
 								taxId: '11-1111111',
 								name: 'Changemaker 12',
 								keycloakOrganizationId: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								fiscalSponsors: [],
 								fields: [],
 							},
@@ -263,7 +267,7 @@ describe('/changemakers', () => {
 								taxId: '11-1111111',
 								name: 'Changemaker 11',
 								keycloakOrganizationId: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								fiscalSponsors: [],
 								fields: [],
 							},
@@ -310,7 +314,7 @@ describe('/changemakers', () => {
 						taxId: '123-123-123',
 						name: 'Canadian Company',
 						keycloakOrganizationId: null,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						fiscalSponsors: [],
 						fields: [],
 					},
@@ -359,7 +363,7 @@ describe('/changemakers', () => {
 						taxId: '123-123-123',
 						name: 'Canadian Company',
 						keycloakOrganizationId: null,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						fiscalSponsors: [],
 						fields: [],
 					},
@@ -374,7 +378,7 @@ describe('/changemakers', () => {
 				.expect(400);
 			expect(response.body).toMatchObject({
 				name: 'InputValidationError',
-				message: expect.any(String) as string,
+				message: expectString(),
 			});
 		});
 	});
@@ -401,7 +405,7 @@ describe('/changemakers', () => {
 						taxId: '22-2222222',
 						name: 'Another Inc.',
 						keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						fiscalSponsors: [],
 						fields: [],
 					});
@@ -533,7 +537,7 @@ describe('/changemakers', () => {
 							name: 'Five thousand one hundred forty seven reasons',
 							taxId: '05119',
 							keycloakOrganizationId: null,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							fiscalSponsors: [],
 							fields: [latestValidValue],
 						});
@@ -626,7 +630,7 @@ describe('/changemakers', () => {
 					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							fields: [changemakerEarliestValue],
 						});
 					});
@@ -714,7 +718,7 @@ describe('/changemakers', () => {
 					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							fields: [funderEarliestValue],
 						});
 					});
@@ -807,7 +811,7 @@ describe('/changemakers', () => {
 					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							fields: [dataProviderNewestValue],
 						});
 					});
@@ -883,7 +887,7 @@ describe('/changemakers', () => {
 					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							fields: [],
 						});
 					});
@@ -915,7 +919,7 @@ describe('/changemakers', () => {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				fiscalSponsors: [],
 				fields: [],
 			});
@@ -933,7 +937,7 @@ describe('/changemakers', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -948,7 +952,7 @@ describe('/changemakers', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -1000,7 +1004,7 @@ describe('/changemakers', () => {
 			expect(result.body).toStrictEqual({
 				...changemaker,
 				keycloakOrganizationId: newOrganizationId,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				fields: [],
 			});
 		});
@@ -1023,7 +1027,7 @@ describe('/changemakers', () => {
 			expect(result.body).toStrictEqual({
 				...changemaker,
 				taxId: newTaxId,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				fields: [],
 			});
 		});
@@ -1052,7 +1056,7 @@ describe('/changemakers', () => {
 				...newChangemakerFields,
 				id: changemaker.id,
 				taxId: changemaker.taxId,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				fiscalSponsors: [],
 				fields: [],
 			});
@@ -1073,7 +1077,7 @@ describe('/changemakers', () => {
 				.expect(404);
 			expect(result.body).toMatchObject({
 				name: 'NotFoundError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -1160,7 +1164,7 @@ describe('/changemakers', () => {
 			expect(result.body).toStrictEqual({
 				fiscalSponseeChangemakerId: fiscalSponsee.id,
 				fiscalSponsorChangemakerId: fiscalSponsor.id,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: getTestUserKeycloakUserId(),
 				notAfter: null,
 			});
@@ -1175,7 +1179,7 @@ describe('/changemakers', () => {
 			expect(resultTwo.body).toStrictEqual({
 				fiscalSponseeChangemakerId: fiscalSponsee.id,
 				fiscalSponsorChangemakerId: fiscalSponsorTwo.id,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: getTestUserKeycloakUserId(),
 				notAfter: null,
 			});
@@ -1185,7 +1189,7 @@ describe('/changemakers', () => {
 				.expect(200);
 			expect(changemakerResult.body).toStrictEqual({
 				...fiscalSponsee,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				fiscalSponsors: [
 					{
 						id: fiscalSponsor.id,
@@ -1329,7 +1333,7 @@ describe('/changemakers', () => {
 				.expect(200);
 			expect(changemakerResult.body).toStrictEqual({
 				...fiscalSponsee,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				fiscalSponsors: [
 					{
 						id: fiscalSponsorToKeep.id,

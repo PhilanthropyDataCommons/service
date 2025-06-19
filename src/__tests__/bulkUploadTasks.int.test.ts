@@ -11,7 +11,12 @@ import {
 	createOrUpdateUserFunderPermission,
 	createOrUpdateFunder,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	expectArray,
+	expectNumber,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithoutSub as authHeaderWithNoSub,
@@ -89,7 +94,7 @@ describe('/tasks/bulkUploads', () => {
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 								status: TaskStatus.PENDING,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 						],
@@ -139,7 +144,7 @@ describe('/tasks/bulkUploads', () => {
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: anotherUser.keycloakUserId,
 							},
 							{
@@ -152,7 +157,7 @@ describe('/tasks/bulkUploads', () => {
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 								status: TaskStatus.PENDING,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 						],
@@ -204,7 +209,7 @@ describe('/tasks/bulkUploads', () => {
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: anotherUser.keycloakUserId,
 							},
 						],
@@ -254,7 +259,7 @@ describe('/tasks/bulkUploads', () => {
 								fileSize: null,
 								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
 								status: TaskStatus.PENDING,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 						],
@@ -301,7 +306,7 @@ describe('/tasks/bulkUploads', () => {
 								sourceKey:
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 							{
@@ -315,7 +320,7 @@ describe('/tasks/bulkUploads', () => {
 								sourceKey:
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 							{
@@ -329,7 +334,7 @@ describe('/tasks/bulkUploads', () => {
 								sourceKey:
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 							{
@@ -343,7 +348,7 @@ describe('/tasks/bulkUploads', () => {
 								sourceKey:
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 							{
@@ -357,7 +362,7 @@ describe('/tasks/bulkUploads', () => {
 								sourceKey:
 									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 						],
@@ -406,7 +411,7 @@ describe('/tasks/bulkUploads', () => {
 
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({
-				id: expect.any(Number) as number,
+				id: expectNumber(),
 				sourceId: systemSource.id,
 				source: systemSource,
 				fileName: 'foo.csv',
@@ -415,7 +420,7 @@ describe('/tasks/bulkUploads', () => {
 				funder: systemFunder,
 				sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: 'pending',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(1);
@@ -484,7 +489,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -511,7 +516,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -538,7 +543,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -564,7 +569,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});

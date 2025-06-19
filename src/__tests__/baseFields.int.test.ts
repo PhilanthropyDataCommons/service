@@ -13,7 +13,8 @@ import {
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 } from '../types';
-import { expectTimestamp, NO_LIMIT, NO_OFFSET } from '../test/utils';
+import { NO_LIMIT, NO_OFFSET } from '../test/utils';
+import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -114,12 +115,12 @@ describe('/baseFields', () => {
 						fr: {
 							label: 'prenom',
 							language: 'fr',
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							baseFieldShortCode: 'firstName',
 							description: 'le prenom',
 						},
 					},
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 				{
 					label: 'Last Name',
@@ -134,12 +135,12 @@ describe('/baseFields', () => {
 						fr: {
 							label: 'postnom',
 							language: 'fr',
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							baseFieldShortCode: 'lastName',
 							description: 'le postnom',
 						},
 					},
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 				},
 			]);
 		});
@@ -180,7 +181,7 @@ describe('/baseFields', () => {
 				valueRelevanceHours: null,
 				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				localizations: {},
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(1);
 		});
@@ -199,7 +200,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -217,7 +218,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -236,7 +237,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -254,7 +255,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -273,7 +274,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -291,7 +292,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -309,7 +310,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -327,7 +328,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -368,7 +369,7 @@ describe('/baseFields', () => {
 				valueRelevanceHours: 9001,
 				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				localizations: {},
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 		});
 
@@ -389,7 +390,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -409,7 +410,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -429,7 +430,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -449,7 +450,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -469,7 +470,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -489,7 +490,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});
@@ -536,14 +537,14 @@ describe('/baseFields', () => {
 						language: 'fr',
 						label: 'prenom',
 						description: 'le prenom',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 					{
 						baseFieldShortCode: baseField.shortCode,
 						language: 'en',
 						label: 'First Name',
 						description: 'The First Name of the applicant',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
 			});
@@ -569,7 +570,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});
@@ -614,7 +615,7 @@ describe('/baseFields', () => {
 				baseFieldShortCode: testBaseField.shortCode,
 				label: 'Résume',
 				description: 'Le Résume de proposal',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(1);
 		});
@@ -657,13 +658,13 @@ describe('/baseFields', () => {
 				baseFieldShortCode: baseField.shortCode,
 				label: 'Le Résume',
 				description: 'Le grand Résume de proposal',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(baseFieldLocalizations.entries[1]).toMatchObject({
 				baseFieldShortCode: baseField.shortCode,
 				label: 'Summary',
 				description: 'The Summary of a proposal',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(2);
 		});
@@ -681,7 +682,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -698,7 +699,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -714,7 +715,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -733,7 +734,7 @@ describe('/baseFields', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 

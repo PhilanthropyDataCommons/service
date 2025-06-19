@@ -24,18 +24,20 @@ import {
 	BaseFieldSensitivityClassification,
 } from '../../types';
 import {
-	expectTimestamp,
 	getAuthContext,
 	getTestAuthContext,
 	NO_LIMIT,
 	NO_OFFSET,
 } from '../../test/utils';
+import {
+	expectNumber,
+	expectObject,
+	expectTimestamp,
+} from '../../test/asymettricMatchers';
 import type {
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
-	Changemaker,
 	AuthContext,
-	Proposal,
 } from '../../types';
 
 const { S3_BUCKET, S3_PATH_STYLE } = requireEnv('S3_BUCKET', 'S3_PATH_STYLE');
@@ -478,7 +480,7 @@ describe('processBulkUploadTask', () => {
 		expect(applicationForm).toMatchObject({
 			opportunityId: opportunity.id,
 			version: 1,
-			createdAt: expectTimestamp,
+			createdAt: expectTimestamp(),
 		});
 
 		const proposalBundle = await loadProposalBundle(
@@ -493,7 +495,7 @@ describe('processBulkUploadTask', () => {
 		expect(proposalBundle).toEqual({
 			entries: [
 				{
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					createdBy: systemUser.keycloakUserId,
 					externalId: '2',
 					id: 2,
@@ -501,14 +503,14 @@ describe('processBulkUploadTask', () => {
 					versions: [
 						{
 							applicationFormId: 1,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							createdBy: systemUser.keycloakUserId,
 							fieldValues: [
 								{
 									applicationFormField: {
 										applicationFormId: 1,
 										baseField: {
-											createdAt: expectTimestamp,
+											createdAt: expectTimestamp(),
 											dataType: 'string',
 											description:
 												'The email address of the person who submitted the proposal.',
@@ -521,14 +523,14 @@ describe('processBulkUploadTask', () => {
 											localizations: {},
 										},
 										baseFieldShortCode: 'proposal_submitter_email',
-										createdAt: expectTimestamp,
-										id: expect.any(Number) as number,
+										createdAt: expectTimestamp(),
+										id: expectNumber(),
 										label: 'Proposal Submitter Email',
 										position: 0,
 									},
-									applicationFormFieldId: expect.any(Number) as number,
-									createdAt: expectTimestamp,
-									id: expect.any(Number) as number,
+									applicationFormFieldId: expectNumber(),
+									createdAt: expectTimestamp(),
+									id: expectNumber(),
 									isValid: true,
 									goodAsOf: null,
 									position: 0,
@@ -539,7 +541,7 @@ describe('processBulkUploadTask', () => {
 									applicationFormField: {
 										applicationFormId: 1,
 										baseField: {
-											createdAt: expectTimestamp,
+											createdAt: expectTimestamp(),
 											dataType: 'string',
 											description: 'The name of the applying organization.',
 											label: 'Organization Name',
@@ -551,14 +553,14 @@ describe('processBulkUploadTask', () => {
 											localizations: {},
 										},
 										baseFieldShortCode: 'organization_name',
-										createdAt: expectTimestamp,
-										id: expect.any(Number) as number,
+										createdAt: expectTimestamp(),
+										id: expectNumber(),
 										label: 'Organization Name',
 										position: 1,
 									},
-									applicationFormFieldId: expect.any(Number) as number,
-									createdAt: expectTimestamp,
-									id: expect.any(Number) as number,
+									applicationFormFieldId: expectNumber(),
+									createdAt: expectTimestamp(),
+									id: expectNumber(),
 									isValid: true,
 									goodAsOf: null,
 									position: 1,
@@ -575,7 +577,7 @@ describe('processBulkUploadTask', () => {
 					],
 				},
 				{
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					createdBy: systemUser.keycloakUserId,
 					externalId: '1',
 					id: 1,
@@ -583,14 +585,14 @@ describe('processBulkUploadTask', () => {
 					versions: [
 						{
 							applicationFormId: 1,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							createdBy: systemUser.keycloakUserId,
 							fieldValues: [
 								{
 									applicationFormField: {
 										applicationFormId: 1,
 										baseField: {
-											createdAt: expectTimestamp,
+											createdAt: expectTimestamp(),
 											dataType: 'string',
 											description:
 												'The email address of the person who submitted the proposal.',
@@ -603,14 +605,14 @@ describe('processBulkUploadTask', () => {
 											localizations: {},
 										},
 										baseFieldShortCode: 'proposal_submitter_email',
-										createdAt: expectTimestamp,
-										id: expect.any(Number) as number,
+										createdAt: expectTimestamp(),
+										id: expectNumber(),
 										label: 'Proposal Submitter Email',
 										position: 0,
 									},
-									applicationFormFieldId: expect.any(Number) as number,
-									createdAt: expectTimestamp,
-									id: expect.any(Number) as number,
+									applicationFormFieldId: expectNumber(),
+									createdAt: expectTimestamp(),
+									id: expectNumber(),
 									isValid: true,
 									goodAsOf: null,
 									position: 0,
@@ -621,7 +623,7 @@ describe('processBulkUploadTask', () => {
 									applicationFormField: {
 										applicationFormId: 1,
 										baseField: {
-											createdAt: expectTimestamp,
+											createdAt: expectTimestamp(),
 											dataType: 'string',
 											description: 'The name of the applying organization.',
 											label: 'Organization Name',
@@ -633,14 +635,14 @@ describe('processBulkUploadTask', () => {
 											localizations: {},
 										},
 										baseFieldShortCode: 'organization_name',
-										createdAt: expectTimestamp,
-										id: expect.any(Number) as number,
+										createdAt: expectTimestamp(),
+										id: expectNumber(),
 										label: 'Organization Name',
 										position: 1,
 									},
-									applicationFormFieldId: expect.any(Number) as number,
-									createdAt: expectTimestamp,
-									id: expect.any(Number) as number,
+									applicationFormFieldId: expectNumber(),
+									createdAt: expectTimestamp(),
+									id: expectNumber(),
 									isValid: true,
 									goodAsOf: null,
 									position: 1,
@@ -733,7 +735,7 @@ describe('processBulkUploadTask', () => {
 		expect(changemakerBundle).toEqual({
 			entries: [
 				{
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					taxId: '51-2144346',
 					id: 1,
 					name: 'Foo LLC.',
@@ -747,20 +749,20 @@ describe('processBulkUploadTask', () => {
 		expect(changemakerProposalBundle).toEqual({
 			entries: [
 				{
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					id: 2,
 					changemakerId: 1,
 					proposalId: 2,
-					changemaker: expect.any(Object) as Changemaker,
-					proposal: expect.any(Object) as Proposal,
+					changemaker: expectObject(),
+					proposal: expectObject(),
 				},
 				{
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					id: 1,
 					changemakerId: 1,
 					proposalId: 1,
-					changemaker: expect.any(Object) as Changemaker,
-					proposal: expect.any(Object) as Proposal,
+					changemaker: expectObject(),
+					proposal: expectObject(),
 				},
 			],
 			total: 2,

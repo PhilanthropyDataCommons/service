@@ -13,7 +13,8 @@ import {
 	createOrUpdateFunder,
 	createOrUpdateUserChangemakerPermission,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -169,7 +170,7 @@ describe('/changemakerProposals', () => {
 							name: 'Example Inc.',
 							taxId: '11-1111111',
 							keycloakOrganizationId: null,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							fiscalSponsors: [],
 							fields: [],
 						},
@@ -179,10 +180,10 @@ describe('/changemakerProposals', () => {
 							opportunityId: 1,
 							externalId: '2',
 							versions: [],
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							createdBy: testUser.keycloakUserId,
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 					{
 						id: 1,
@@ -192,7 +193,7 @@ describe('/changemakerProposals', () => {
 							name: 'Example Inc.',
 							taxId: '11-1111111',
 							keycloakOrganizationId: null,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							fiscalSponsors: [],
 							fields: [],
 						},
@@ -202,10 +203,10 @@ describe('/changemakerProposals', () => {
 							opportunityId: 1,
 							externalId: '1',
 							versions: [],
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							createdBy: testUser.keycloakUserId,
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
 				total: 2,
@@ -251,7 +252,7 @@ describe('/changemakerProposals', () => {
 							name: 'Example Inc.',
 							taxId: '11-1111111',
 							keycloakOrganizationId: null,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							fiscalSponsors: [],
 							fields: [],
 						},
@@ -261,10 +262,10 @@ describe('/changemakerProposals', () => {
 							opportunityId: 1,
 							externalId: '1',
 							versions: [],
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 							createdBy: testUser.keycloakUserId,
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
 				total: 2,
@@ -318,7 +319,7 @@ describe('/changemakerProposals', () => {
 					name: 'Example Inc.',
 					taxId: '11-1111111',
 					keycloakOrganizationId: null,
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					fiscalSponsors: [],
 					fields: [],
 				},
@@ -328,10 +329,10 @@ describe('/changemakerProposals', () => {
 					opportunityId: 1,
 					externalId: '1',
 					versions: [],
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					createdBy: testUser.keycloakUserId,
 				},
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(1);
 		});
@@ -380,7 +381,7 @@ describe('/changemakerProposals', () => {
 					name: 'Example Inc.',
 					taxId: '11-1111111',
 					keycloakOrganizationId: null,
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					fiscalSponsors: [],
 					fields: [],
 				},
@@ -390,10 +391,10 @@ describe('/changemakerProposals', () => {
 					opportunityId: 1,
 					externalId: '1',
 					versions: [],
-					createdAt: expectTimestamp,
+					createdAt: expectTimestamp(),
 					createdBy: testUser.keycloakUserId,
 				},
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -465,7 +466,7 @@ describe('/changemakerProposals', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -492,7 +493,7 @@ describe('/changemakerProposals', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 

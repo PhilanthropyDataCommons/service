@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { parse } from 'csv-parse';
 import { requireEnv } from 'require-env-variable';
@@ -28,7 +29,6 @@ import {
 import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
-import type { Readable } from 'stream';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
@@ -71,7 +71,11 @@ const downloadS3ObjectToTemporaryStorage = async (
 		throw new Error('S3 did not return a body');
 	}
 
-	const s3Body = s3Response.Body as Readable;
+	const s3Body = s3Response.Body;
+	if (!(s3Body instanceof Readable)) {
+		throw new Error('S3 response body is not a readable stream');
+	}
+
 	try {
 		await finished(s3Body.pipe(writeStream));
 	} catch (err) {

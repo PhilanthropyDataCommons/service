@@ -18,7 +18,8 @@ import {
 	createApplicationForm,
 	loadSystemFunder,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -90,7 +91,7 @@ describe('/sources', () => {
 			const result = await agent.get('/sources/a').set(authHeader).expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -101,7 +102,7 @@ describe('/sources', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -147,7 +148,7 @@ describe('/sources', () => {
 				label: 'Example Corp',
 				changemakerId: changemaker.id,
 				changemaker,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(2);
 		});
@@ -269,7 +270,7 @@ describe('/sources', () => {
 				label: 'Example Corp',
 				changemakerId: changemaker.id,
 				changemaker,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -336,7 +337,7 @@ describe('/sources', () => {
 				label: 'Example Corp',
 				funderShortCode: 'foo',
 				funder,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(2);
 		});
@@ -371,7 +372,7 @@ describe('/sources', () => {
 				label: 'Example Corp',
 				funderShortCode: 'foo',
 				funder,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -438,7 +439,7 @@ describe('/sources', () => {
 				label: 'Example Corp',
 				dataProviderShortCode: 'foo',
 				dataProvider,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(2);
 		});
@@ -477,7 +478,7 @@ describe('/sources', () => {
 				label: 'Example Corp',
 				dataProviderShortCode: 'foo',
 				dataProvider,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -545,7 +546,7 @@ describe('/sources', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -560,7 +561,7 @@ describe('/sources', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});

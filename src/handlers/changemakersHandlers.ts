@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import {
 	db,
 	getLimitValues,
@@ -35,7 +36,10 @@ const postChangemaker = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 	const changemaker = await createChangemaker(db, null, req.body);
-	res.status(201).contentType('application/json').send(changemaker);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.contentType('application/json')
+		.send(changemaker);
 };
 
 const getChangemakers = async (req: Request, res: Response): Promise<void> => {
@@ -50,7 +54,10 @@ const getChangemakers = async (req: Request, res: Response): Promise<void> => {
 		limit,
 		offset,
 	);
-	res.status(200).contentType('application/json').send(changemakerBundle);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(changemakerBundle);
 };
 
 const getChangemaker = async (req: Request, res: Response): Promise<void> => {
@@ -65,7 +72,10 @@ const getChangemaker = async (req: Request, res: Response): Promise<void> => {
 		getKeycloakUserIdFromAuthContext(authContext),
 		changemakerId,
 	);
-	res.status(200).contentType('application/json').send(changemaker);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(changemaker);
 };
 
 const patchChangemaker = async (req: Request, res: Response): Promise<void> => {
@@ -93,7 +103,10 @@ const patchChangemaker = async (req: Request, res: Response): Promise<void> => {
 			req.body,
 			changemakerId,
 		);
-		res.status(200).contentType('application/json').send(changemaker);
+		res
+			.status(HTTP_STATUS.SUCCESSFUL.OK)
+			.contentType('application/json')
+			.send(changemaker);
 	} catch (error: unknown) {
 		if (error instanceof NoDataReturnedError) {
 			// In the case of `PATCH`, when the query succeeds but returns no data,
@@ -141,7 +154,10 @@ const putChangemakerFiscalSponsor = async (
 		fiscalSponseeChangemakerId: changemakerId,
 		fiscalSponsorChangemakerId,
 	});
-	res.status(200).contentType('application/json').send(updatedChangemaker);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(updatedChangemaker);
 };
 
 const deleteChangemakerFiscalSponsor = async (
@@ -168,7 +184,10 @@ const deleteChangemakerFiscalSponsor = async (
 		changemakerId,
 		fiscalSponsorChangemakerId,
 	);
-	res.status(204).contentType('application/json').send();
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.NO_CONTENT)
+		.contentType('application/json')
+		.send();
 };
 
 export const changemakersHandlers = {

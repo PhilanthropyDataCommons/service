@@ -19,7 +19,8 @@ import {
 	BaseFieldSensitivityClassification,
 	Permission,
 } from '../types';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -91,19 +92,19 @@ describe('/applicationForms', () => {
 			expect(response.body).toMatchObject({
 				entries: [
 					{
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						id: 1,
 						opportunityId: 1,
 						version: 1,
 					},
 					{
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						id: 2,
 						opportunityId: 1,
 						version: 2,
 					},
 					{
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						id: 3,
 						opportunityId: 2,
 						version: 1,
@@ -152,14 +153,14 @@ describe('/applicationForms', () => {
 			expect(response.body).toEqual({
 				entries: [
 					{
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						id: 1,
 						opportunityId: 1,
 						fields: [],
 						version: 1,
 					},
 					{
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						id: 2,
 						opportunityId: 1,
 						fields: [],
@@ -240,11 +241,11 @@ describe('/applicationForms', () => {
 								'The number of years the project will take to complete',
 							shortCode: 'yearsOfWork',
 							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 						},
 						position: 1,
 						label: 'Duration of work in years',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 					{
 						id: 3,
@@ -255,14 +256,14 @@ describe('/applicationForms', () => {
 							description: 'The organizational name of the applicant',
 							shortCode: 'organizationName',
 							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 						},
 						position: 2,
 						label: 'Name of Organization',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 		});
 
@@ -315,11 +316,11 @@ describe('/applicationForms', () => {
 								'The number of years the project will take to complete',
 							shortCode: 'yearsOfWork',
 							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 						},
 						position: 1,
 						label: 'Duration of work in years',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 					{
 						applicationFormId: 1,
@@ -329,14 +330,14 @@ describe('/applicationForms', () => {
 							description: 'The organizational name of the applicant',
 							shortCode: 'organizationName',
 							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp,
+							createdAt: expectTimestamp(),
 						},
 						position: 2,
 						label: 'Name of Organization',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 		});
 
@@ -379,7 +380,7 @@ describe('/applicationForms', () => {
 				opportunityId: 1,
 				version: 1,
 				fields: [],
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 		});
 
@@ -428,7 +429,7 @@ describe('/applicationForms', () => {
 				.expect(404);
 			expect(result.body).toMatchObject({
 				name: 'NotFoundError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});
@@ -474,7 +475,7 @@ describe('/applicationForms', () => {
 				opportunityId: 1,
 				version: 1,
 				fields: [],
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(1);
 		});
@@ -501,7 +502,7 @@ describe('/applicationForms', () => {
 				opportunityId: 1,
 				version: 1,
 				fields: [],
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -574,13 +575,13 @@ describe('/applicationForms', () => {
 					{
 						applicationFormId: 1,
 						baseFieldShortCode: 'organizationName',
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						id: 1,
 						label: 'Organization Name',
 						position: 1,
 					},
 				],
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(1);
 		});
@@ -610,7 +611,7 @@ describe('/applicationForms', () => {
 				id: 3,
 				opportunityId: 1,
 				version: 3,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 			});
 		});
 
@@ -688,7 +689,7 @@ describe('/applicationForms', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -704,7 +705,7 @@ describe('/applicationForms', () => {
 				.expect(422);
 			expect(result.body).toMatchObject({
 				name: 'UnprocessableEntityError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -749,7 +750,7 @@ describe('/applicationForms', () => {
 				.expect(500);
 			expect(result.body).toMatchObject({
 				name: 'UnknownError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});

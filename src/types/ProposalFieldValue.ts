@@ -36,7 +36,10 @@ const writableProposalFieldValueWithProposalVersionContextSchema: JSONSchemaType
 			},
 			goodAsOf: {
 				type: 'string',
-				nullable: true as false, // see https://github.com/ajv-validator/ajv/issues/2163
+				// This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
+				// See: https://github.com/ajv-validator/ajv/issues/2163
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+				nullable: true as false,
 			},
 		},
 		required: ['applicationFormFieldId', 'position', 'value', 'goodAsOf'],

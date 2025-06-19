@@ -1,4 +1,5 @@
 import { UnauthorizedError as JwtUnauthorizedError } from 'express-jwt';
+import { HTTP_STATUS } from '../constants';
 import {
 	DatabaseError,
 	InternalValidationError,
@@ -17,17 +18,17 @@ const logger = getLogger(__filename);
 const getHttpStatusCodeForDatabaseErrorCode = (errorCode: string): number => {
 	switch (errorCode) {
 		case PostgresErrorCode.FOREIGN_KEY_VIOLATION.valueOf():
-			return 422;
+			return HTTP_STATUS.CLIENT_ERROR.UNPROCESSABLE_CONTENT;
 		case PostgresErrorCode.UNIQUE_VIOLATION.valueOf():
-			return 409;
+			return HTTP_STATUS.CLIENT_ERROR.CONFLICT;
 		case PostgresErrorCode.NUMBER_OUT_OF_RANGE.valueOf():
-			return 400;
+			return HTTP_STATUS.CLIENT_ERROR.BAD_REQUEST;
 		case PostgresErrorCode.CHECK_CONSTRAINT_VIOLATION.valueOf():
-			return 400;
+			return HTTP_STATUS.CLIENT_ERROR.BAD_REQUEST;
 		case PostgresErrorCode.INSUFFICIENT_RESOURCES.valueOf():
-			return 503;
+			return HTTP_STATUS.SERVER_ERROR.SERVICE_UNAVAILABLE;
 		default:
-			return 500;
+			return HTTP_STATUS.SERVER_ERROR.INTERNAL_SERVER_ERROR;
 	}
 };
 
@@ -57,43 +58,55 @@ const getNameForError = (error: unknown): string => {
 
 const getHttpStatusCodeForError = (error: unknown): number => {
 	if (error instanceof DatabaseError) {
-		const errorCode = error.tinyPgError.queryContext.error.code;
+		const {
+			tinyPgError: {
+				queryContext: {
+					error: { code: errorCode },
+				},
+			},
+		} = error;
 		return getHttpStatusCodeForDatabaseErrorCode(errorCode);
 	}
 	if (error instanceof InternalValidationError) {
-		return 500;
+		return HTTP_STATUS.SERVER_ERROR.INTERNAL_SERVER_ERROR;
 	}
 	if (error instanceof InputValidationError) {
-		return 400;
+		return HTTP_STATUS.CLIENT_ERROR.BAD_REQUEST;
 	}
 	if (error instanceof InputConflictError) {
-		return 409;
+		return HTTP_STATUS.CLIENT_ERROR.CONFLICT;
 	}
 	if (error instanceof UnauthorizedError) {
-		return 401;
+		return HTTP_STATUS.CLIENT_ERROR.UNAUTHORIZED;
 	}
 	if (error instanceof JwtUnauthorizedError) {
-		return 401;
+		return HTTP_STATUS.CLIENT_ERROR.UNAUTHORIZED;
 	}
 	if (error instanceof NotFoundError) {
-		return 404;
+		return HTTP_STATUS.CLIENT_ERROR.NOT_FOUND;
 	}
 	if (error instanceof UnprocessableEntityError) {
-		return 422;
+		return HTTP_STATUS.CLIENT_ERROR.UNPROCESSABLE_CONTENT;
 	}
 	// In the `jwks-rsa` library, when a rate limit is exceeded a string error gets thrown.
 	if (
 		typeof error === 'string' &&
 		error.includes('exceeds maximum tokens per interval')
 	) {
-		return 503;
+		return HTTP_STATUS.SERVER_ERROR.SERVICE_UNAVAILABLE;
 	}
-	return 500;
+	return HTTP_STATUS.SERVER_ERROR.INTERNAL_SERVER_ERROR;
 };
 
 const getMessageForError = (error: unknown): string => {
 	if (error instanceof DatabaseError) {
-		const errorCode = error.tinyPgError.queryContext.error.code;
+		const {
+			tinyPgError: {
+				queryContext: {
+					error: { code: errorCode },
+				},
+			},
+		} = error;
 		return getMessageForDatabaseErrorCode(errorCode);
 	}
 	if (error instanceof Error) {
@@ -132,7 +145,7 @@ export const errorHandler = (
 		? new DatabaseError('Error with a database operation.', err)
 		: err;
 	const statusCode = getHttpStatusCodeForError(wrappedError);
-	if (statusCode >= 500) {
+	if (Object.values(HTTP_STATUS.SERVER_ERROR).includes(statusCode)) {
 		logger.error({ wrappedError, statusCode });
 	} else {
 		logger.debug({ wrappedError, statusCode });

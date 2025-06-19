@@ -24,7 +24,7 @@ const requireChangemakerPermission =
 			next(new UnauthorizedError('The request lacks an AuthContext.'));
 			return;
 		}
-		if (req.role?.isAdministrator === true) {
+		if (req.role.isAdministrator) {
 			next();
 			return;
 		}

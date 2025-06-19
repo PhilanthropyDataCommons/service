@@ -7,16 +7,18 @@ import {
 	loadUserGroupFunderPermission,
 	removeUserGroupFunderPermission,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import { expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { keycloakIdToString, Permission } from '../types';
+import { keycloakIdToString, Permission, stringToKeycloakId } from '../types';
 import { NotFoundError } from '../errors';
-import type { KeycloakId } from '../types';
 
-const mockKeycloakOrganizationId = '123e4567-e89b-12d3-a456-426614174000';
+const mockKeycloakOrganizationId = stringToKeycloakId(
+	'123e4567-e89b-12d3-a456-426614174000',
+);
 
 describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 	describe('PUT /', () => {
@@ -29,7 +31,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.send({})
@@ -45,7 +47,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
@@ -73,7 +75,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/this is not valid/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -91,7 +93,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/notAPermission`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -110,7 +112,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			const response = await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -118,10 +120,10 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 				.expect(201);
 			expect(response.body).toEqual({
 				funderShortCode: funder.shortCode,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: user.keycloakUserId,
 				permission: Permission.EDIT,
-				keycloakOrganizationId: funder.keycloakOrganizationId as KeycloakId,
+				keycloakOrganizationId: funder.keycloakOrganizationId,
 			});
 		});
 	});
@@ -136,7 +138,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.send()
@@ -152,7 +154,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
@@ -179,7 +181,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/this is not valid/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -196,7 +198,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/notAPermission`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -213,7 +215,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -230,21 +232,21 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 				keycloakOrganizationId: mockKeycloakOrganizationId,
 			});
 			await createOrUpdateUserGroupFunderPermission(db, testUserAuthContext, {
-				keycloakOrganizationId: funder.keycloakOrganizationId as KeycloakId,
+				keycloakOrganizationId: mockKeycloakOrganizationId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
 			});
 			await removeUserGroupFunderPermission(
 				db,
 				null,
-				funder.keycloakOrganizationId as KeycloakId,
+				mockKeycloakOrganizationId,
 				funder.shortCode,
 				Permission.EDIT,
 			);
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -261,28 +263,28 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 				keycloakOrganizationId: mockKeycloakOrganizationId,
 			});
 			await createOrUpdateUserGroupFunderPermission(db, testUserAuthContext, {
-				keycloakOrganizationId: funder.keycloakOrganizationId as KeycloakId,
+				keycloakOrganizationId: mockKeycloakOrganizationId,
 				funderShortCode: funder.shortCode,
 				permission: Permission.EDIT,
 			});
 			const permission = await loadUserGroupFunderPermission(
 				db,
 				null,
-				funder.keycloakOrganizationId as KeycloakId,
+				mockKeycloakOrganizationId,
 				funder.shortCode,
 				Permission.EDIT,
 			);
 			expect(permission).toEqual({
 				funderShortCode: funder.shortCode,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
-				keycloakOrganizationId: funder.keycloakOrganizationId as KeycloakId,
+				keycloakOrganizationId: funder.keycloakOrganizationId,
 			});
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						funder.keycloakOrganizationId as KeycloakId,
+						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -292,7 +294,7 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 				loadUserGroupFunderPermission(
 					db,
 					null,
-					funder.keycloakOrganizationId as KeycloakId,
+					mockKeycloakOrganizationId,
 					funder.shortCode,
 					Permission.EDIT,
 				),

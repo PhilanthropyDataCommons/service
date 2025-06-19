@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import {
 	db,
 	createOrUpdateUserGroupDataProviderPermission,
@@ -46,7 +47,10 @@ const deleteUserGroupDataProviderPermission = async (
 		dataProviderShortCode,
 		permission,
 	);
-	res.status(204).contentType('application/json').send();
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.NO_CONTENT)
+		.contentType('application/json')
+		.send();
 };
 
 const putUserGroupDataProviderPermission = async (
@@ -92,7 +96,7 @@ const putUserGroupDataProviderPermission = async (
 			permission,
 		});
 	res
-		.status(201)
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
 		.send(userGroupFunderPermission);
 };

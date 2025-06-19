@@ -6,7 +6,12 @@ import {
 	createOrUpdateUser,
 	loadTableMetrics,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	expectArray,
+	expectNumber,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -65,17 +70,17 @@ describe('/tasks/baseFieldsCopy', () => {
 							{
 								id: 2,
 								status: TaskStatus.COMPLETED,
-								statusUpdatedAt: expectTimestamp,
+								statusUpdatedAt: expectTimestamp(),
 								pdcApiUrl: MOCK_API_URL,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: anotherUser.keycloakUserId,
 							},
 							{
 								id: 1,
 								status: TaskStatus.PENDING,
-								statusUpdatedAt: expectTimestamp,
+								statusUpdatedAt: expectTimestamp(),
 								pdcApiUrl: MOCK_API_URL,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 						],
@@ -109,41 +114,41 @@ describe('/tasks/baseFieldsCopy', () => {
 							{
 								id: 15,
 								status: TaskStatus.COMPLETED,
-								statusUpdatedAt: expectTimestamp,
+								statusUpdatedAt: expectTimestamp(),
 								pdcApiUrl: MOCK_API_URL,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 							{
 								id: 14,
 								status: TaskStatus.COMPLETED,
-								statusUpdatedAt: expectTimestamp,
+								statusUpdatedAt: expectTimestamp(),
 								pdcApiUrl: MOCK_API_URL,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 							{
 								id: 13,
 								status: TaskStatus.COMPLETED,
-								statusUpdatedAt: expectTimestamp,
+								statusUpdatedAt: expectTimestamp(),
 								pdcApiUrl: MOCK_API_URL,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 							{
 								id: 12,
 								status: TaskStatus.COMPLETED,
-								statusUpdatedAt: expectTimestamp,
+								statusUpdatedAt: expectTimestamp(),
 								pdcApiUrl: MOCK_API_URL,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 							{
 								id: 11,
 								status: TaskStatus.COMPLETED,
-								statusUpdatedAt: expectTimestamp,
+								statusUpdatedAt: expectTimestamp(),
 								pdcApiUrl: MOCK_API_URL,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 							},
 						],
@@ -173,7 +178,7 @@ describe('/tasks/baseFieldsCopy', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -186,7 +191,7 @@ describe('/tasks/baseFieldsCopy', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -205,11 +210,11 @@ describe('/tasks/baseFieldsCopy', () => {
 
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({
-				id: expect.any(Number) as number,
+				id: expectNumber(),
 				status: 'pending',
 				pdcApiUrl: MOCK_API_URL,
-				statusUpdatedAt: expectTimestamp,
-				createdAt: expectTimestamp,
+				statusUpdatedAt: expectTimestamp(),
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(1);
@@ -227,7 +232,7 @@ describe('/tasks/baseFieldsCopy', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 	});

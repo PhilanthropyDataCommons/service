@@ -7,16 +7,18 @@ import {
 	loadUserGroupDataProviderPermission,
 	removeUserGroupDataProviderPermission,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import { expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { keycloakIdToString, Permission } from '../types';
+import { keycloakIdToString, Permission, stringToKeycloakId } from '../types';
 import { NotFoundError } from '../errors';
-import type { KeycloakId } from '../types';
 
-const mockKeycloakOrganizationId = '123e4567-e89b-12d3-a456-426614174000';
+const mockKeycloakOrganizationId = stringToKeycloakId(
+	'123e4567-e89b-12d3-a456-426614174000',
+);
 
 describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permission', () => {
 	describe('PUT /', () => {
@@ -29,7 +31,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.send({})
@@ -45,7 +47,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
@@ -73,7 +75,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/this is not valid/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -91,7 +93,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/ExampleInc/permissions/notAPermission`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -110,7 +112,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			const response = await request(app)
 				.put(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -118,11 +120,10 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 				.expect(201);
 			expect(response.body).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: user.keycloakUserId,
 				permission: Permission.EDIT,
-				keycloakOrganizationId:
-					dataProvider.keycloakOrganizationId as KeycloakId,
+				keycloakOrganizationId: dataProvider.keycloakOrganizationId,
 			});
 		});
 	});
@@ -137,7 +138,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.send()
@@ -153,7 +154,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
@@ -180,7 +181,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/this is not valid/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -197,7 +198,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/ExampleInc/permissions/notAPermission`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -214,7 +215,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -234,8 +235,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 				db,
 				testUserAuthContext,
 				{
-					keycloakOrganizationId:
-						dataProvider.keycloakOrganizationId as KeycloakId,
+					keycloakOrganizationId: mockKeycloakOrganizationId,
 					dataProviderShortCode: dataProvider.shortCode,
 					permission: Permission.EDIT,
 				},
@@ -243,14 +243,14 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await removeUserGroupDataProviderPermission(
 				db,
 				null,
-				dataProvider.keycloakOrganizationId as KeycloakId,
+				mockKeycloakOrganizationId,
 				dataProvider.shortCode,
 				Permission.EDIT,
 			);
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -270,8 +270,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 				db,
 				testUserAuthContext,
 				{
-					keycloakOrganizationId:
-						dataProvider.keycloakOrganizationId as KeycloakId,
+					keycloakOrganizationId: mockKeycloakOrganizationId,
 					dataProviderShortCode: dataProvider.shortCode,
 					permission: Permission.EDIT,
 				},
@@ -279,13 +278,13 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			const permission = await loadUserGroupDataProviderPermission(
 				db,
 				null,
-				dataProvider.keycloakOrganizationId as KeycloakId,
+				mockKeycloakOrganizationId,
 				dataProvider.shortCode,
 				Permission.EDIT,
 			);
 			expect(permission).toEqual({
 				dataProviderShortCode: dataProvider.shortCode,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				permission: Permission.EDIT,
 				keycloakOrganizationId: mockKeycloakOrganizationId,
@@ -293,7 +292,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 			await request(app)
 				.delete(
 					`/userGroups/${keycloakIdToString(
-						dataProvider.keycloakOrganizationId as KeycloakId,
+						dataProvider.keycloakOrganizationId,
 					)}/dataProviders/${dataProvider.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
@@ -303,7 +302,7 @@ describe('/userGroups/dataProviders/:dataProviderShortCode/permissions/:permissi
 				loadUserGroupDataProviderPermission(
 					db,
 					null,
-					dataProvider.keycloakOrganizationId as KeycloakId,
+					mockKeycloakOrganizationId,
 					dataProvider.shortCode,
 					Permission.EDIT,
 				),

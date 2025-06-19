@@ -20,7 +20,12 @@ import {
 	createOrUpdateFunder,
 	createOrUpdateUserChangemakerPermission,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	expectArray,
+	expectString,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithoutSub as authHeaderWithNoSubj,
@@ -179,7 +184,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
 					},
@@ -194,7 +199,7 @@ describe('/proposals', () => {
 				.expect(400);
 			expect(response.body).toMatchObject({
 				name: 'InputValidationError',
-				message: expect.any(String) as string,
+				message: expectString(),
 			});
 		});
 
@@ -205,7 +210,7 @@ describe('/proposals', () => {
 				.expect(400);
 			expect(response.body).toMatchObject({
 				name: 'InputValidationError',
-				message: expect.any(String) as string,
+				message: expectString(),
 			});
 		});
 
@@ -274,7 +279,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [
 							{
@@ -284,7 +289,7 @@ describe('/proposals', () => {
 								source: systemSource,
 								version: 1,
 								applicationFormId: 1,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 								fieldValues: [
 									{
@@ -295,13 +300,13 @@ describe('/proposals', () => {
 										value: 'This is a summary',
 										isValid: true,
 										goodAsOf: null,
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										applicationFormField: {
 											id: 1,
 											applicationFormId: 1,
 											baseFieldShortCode: 'summary',
 											baseField: {
-												createdAt: expectTimestamp,
+												createdAt: expectTimestamp(),
 												dataType: 'string',
 												description: 'A summary of the proposal',
 												label: 'Summary',
@@ -314,7 +319,7 @@ describe('/proposals', () => {
 											},
 											label: 'Short summary',
 											position: 1,
-											createdAt: expectTimestamp,
+											createdAt: expectTimestamp(),
 										},
 									},
 								],
@@ -423,7 +428,7 @@ describe('/proposals', () => {
 						id: 2,
 						externalId: 'proposal-2',
 						opportunityId: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: anotherUser.keycloakUserId,
 						versions: [],
 					},
@@ -431,7 +436,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
 					},
@@ -474,7 +479,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
 					},
@@ -515,7 +520,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
 					},
@@ -590,7 +595,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-4999',
 						opportunityId: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [
 							{
@@ -600,7 +605,7 @@ describe('/proposals', () => {
 								source: systemSource,
 								version: 1,
 								applicationFormId: 1,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
 								fieldValues: [
 									{
@@ -611,13 +616,13 @@ describe('/proposals', () => {
 										value: 'This is a summary',
 										isValid: true,
 										goodAsOf: null,
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										applicationFormField: {
 											id: 1,
 											applicationFormId: 1,
 											baseFieldShortCode: 'summary',
 											baseField: {
-												createdAt: expectTimestamp,
+												createdAt: expectTimestamp(),
 												dataType: 'string',
 												description: 'A summary of the proposal',
 												label: 'Summary',
@@ -630,7 +635,7 @@ describe('/proposals', () => {
 											},
 											label: 'Concise summary',
 											position: 1,
-											createdAt: expectTimestamp,
+											createdAt: expectTimestamp(),
 										},
 									},
 								],
@@ -673,7 +678,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-15',
 						opportunityId: 1,
 						versions: [],
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
 					{
@@ -681,7 +686,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-14',
 						opportunityId: 1,
 						versions: [],
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
 					{
@@ -689,7 +694,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-13',
 						opportunityId: 1,
 						versions: [],
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
 					{
@@ -697,7 +702,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-12',
 						opportunityId: 1,
 						versions: [],
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
 					{
@@ -705,7 +710,7 @@ describe('/proposals', () => {
 						externalId: 'proposal-11',
 						opportunityId: 1,
 						versions: [],
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
 				],
@@ -726,7 +731,7 @@ describe('/proposals', () => {
 				.expect(404);
 			expect(response.body).toEqual({
 				name: 'NotFoundError',
-				message: expect.any(String) as string,
+				message: expectString(),
 				details: [
 					{
 						name: 'NotFoundError',
@@ -765,7 +770,7 @@ describe('/proposals', () => {
 				.expect(404);
 			expect(response.body).toEqual({
 				name: 'NotFoundError',
-				message: expect.any(String) as string,
+				message: expectString(),
 				details: [
 					{
 						name: 'NotFoundError',
@@ -789,7 +794,7 @@ describe('/proposals', () => {
 				.expect(400);
 			expect(response.body).toEqual({
 				name: 'InputValidationError',
-				message: expect.any(String) as string,
+				message: expectString(),
 				details: [expect.any(Object)],
 			});
 		});
@@ -821,7 +826,7 @@ describe('/proposals', () => {
 				externalId: 'proposal-2',
 				versions: [],
 				opportunityId: 1,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 			});
 		});
@@ -905,7 +910,7 @@ describe('/proposals', () => {
 				id: 1,
 				opportunityId: 1,
 				externalId: 'proposal-2525-01-04T00Z',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				versions: [
 					{
@@ -915,7 +920,7 @@ describe('/proposals', () => {
 						source: systemSource,
 						applicationFormId: 1,
 						version: 2,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						fieldValues: [
 							{
@@ -926,13 +931,13 @@ describe('/proposals', () => {
 								value: 'Title for version 2 from 2525-01-04',
 								isValid: true,
 								goodAsOf: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
 									baseFieldShortCode: 'title',
 									baseField: {
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
@@ -945,7 +950,7 @@ describe('/proposals', () => {
 									},
 									position: 1,
 									label: 'Short summary or title',
-									createdAt: expectTimestamp,
+									createdAt: expectTimestamp(),
 								},
 							},
 							{
@@ -956,13 +961,13 @@ describe('/proposals', () => {
 								value: 'Abstract for version 2 from 2525-01-04',
 								isValid: true,
 								goodAsOf: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
 									baseFieldShortCode: 'summary',
 									baseField: {
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										dataType: 'string',
 										description: 'A summary of the proposal',
 										label: 'Summary',
@@ -975,7 +980,7 @@ describe('/proposals', () => {
 									},
 									position: 2,
 									label: 'Long summary or abstract',
-									createdAt: expectTimestamp,
+									createdAt: expectTimestamp(),
 								},
 							},
 						],
@@ -987,7 +992,7 @@ describe('/proposals', () => {
 						source: systemSource,
 						applicationFormId: 1,
 						version: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						fieldValues: [
 							{
@@ -996,7 +1001,7 @@ describe('/proposals', () => {
 								applicationFormFieldId: 1,
 								position: 1,
 								value: 'Title for version 1 from 2525-01-04',
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								isValid: true,
 								goodAsOf: null,
 								applicationFormField: {
@@ -1004,7 +1009,7 @@ describe('/proposals', () => {
 									applicationFormId: 1,
 									baseFieldShortCode: 'title',
 									baseField: {
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
@@ -1017,7 +1022,7 @@ describe('/proposals', () => {
 									},
 									position: 1,
 									label: 'Short summary or title',
-									createdAt: expectTimestamp,
+									createdAt: expectTimestamp(),
 								},
 							},
 							{
@@ -1028,13 +1033,13 @@ describe('/proposals', () => {
 								value: 'Abstract for version 1 from 2525-01-04',
 								isValid: true,
 								goodAsOf: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
 									baseFieldShortCode: 'summary',
 									baseField: {
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										dataType: 'string',
 										description: 'A summary of the proposal',
 										label: 'Summary',
@@ -1047,7 +1052,7 @@ describe('/proposals', () => {
 									},
 									position: 2,
 									label: 'Long summary or abstract',
-									createdAt: expectTimestamp,
+									createdAt: expectTimestamp(),
 								},
 							},
 						],
@@ -1135,7 +1140,7 @@ describe('/proposals', () => {
 				id: 1,
 				opportunityId: 1,
 				externalId: 'proposal-2525-01-04T00Z',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				versions: [
 					{
@@ -1145,7 +1150,7 @@ describe('/proposals', () => {
 						source: systemSource,
 						applicationFormId: 1,
 						version: 2,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						fieldValues: [
 							{
@@ -1156,13 +1161,13 @@ describe('/proposals', () => {
 								value: 'Title for version 2 from 2525-01-04',
 								isValid: true,
 								goodAsOf: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
 									baseFieldShortCode: 'title',
 									baseField: {
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
@@ -1175,7 +1180,7 @@ describe('/proposals', () => {
 									},
 									position: 1,
 									label: 'Short summary or title',
-									createdAt: expectTimestamp,
+									createdAt: expectTimestamp(),
 								},
 							},
 							{
@@ -1186,13 +1191,13 @@ describe('/proposals', () => {
 								value: 'Abstract for version 2 from 2525-01-04',
 								isValid: true,
 								goodAsOf: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
 									baseFieldShortCode: 'summary',
 									baseField: {
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										dataType: 'string',
 										description: 'A summary of the proposal',
 										label: 'Summary',
@@ -1205,7 +1210,7 @@ describe('/proposals', () => {
 									},
 									position: 2,
 									label: 'Long summary or abstract',
-									createdAt: expectTimestamp,
+									createdAt: expectTimestamp(),
 								},
 							},
 						],
@@ -1217,7 +1222,7 @@ describe('/proposals', () => {
 						source: systemSource,
 						applicationFormId: 1,
 						version: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						fieldValues: [
 							{
@@ -1226,7 +1231,7 @@ describe('/proposals', () => {
 								applicationFormFieldId: 1,
 								position: 1,
 								value: 'Title for version 1 from 2525-01-04',
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								isValid: true,
 								goodAsOf: null,
 								applicationFormField: {
@@ -1234,7 +1239,7 @@ describe('/proposals', () => {
 									applicationFormId: 1,
 									baseFieldShortCode: 'title',
 									baseField: {
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
@@ -1247,7 +1252,7 @@ describe('/proposals', () => {
 									},
 									position: 1,
 									label: 'Short summary or title',
-									createdAt: expectTimestamp,
+									createdAt: expectTimestamp(),
 								},
 							},
 							{
@@ -1258,13 +1263,13 @@ describe('/proposals', () => {
 								value: 'Abstract for version 1 from 2525-01-04',
 								isValid: true,
 								goodAsOf: null,
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
 									baseFieldShortCode: 'summary',
 									baseField: {
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										dataType: 'string',
 										description: 'A summary of the proposal',
 										label: 'Summary',
@@ -1277,7 +1282,7 @@ describe('/proposals', () => {
 									},
 									position: 2,
 									label: 'Long summary or abstract',
-									createdAt: expectTimestamp,
+									createdAt: expectTimestamp(),
 								},
 							},
 						],
@@ -1363,7 +1368,7 @@ describe('/proposals', () => {
 				id: 1,
 				opportunityId: 1,
 				externalId: 'proposal-2525-01-04T00Z',
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				versions: [
 					{
@@ -1373,7 +1378,7 @@ describe('/proposals', () => {
 						source: systemSource,
 						applicationFormId: 1,
 						version: 1,
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						fieldValues: [
 							{
@@ -1382,7 +1387,7 @@ describe('/proposals', () => {
 								applicationFormFieldId: 1,
 								position: 1,
 								value: 'Title for version 1 from 2525-01-04',
-								createdAt: expectTimestamp,
+								createdAt: expectTimestamp(),
 								isValid: true,
 								goodAsOf: null,
 								applicationFormField: {
@@ -1390,7 +1395,7 @@ describe('/proposals', () => {
 									applicationFormId: 1,
 									baseFieldShortCode: 'title',
 									baseField: {
-										createdAt: expectTimestamp,
+										createdAt: expectTimestamp(),
 										dataType: 'string',
 										description: 'The title of the proposal',
 										label: 'Title',
@@ -1403,7 +1408,7 @@ describe('/proposals', () => {
 									},
 									position: 1,
 									label: 'Short summary or title',
-									createdAt: expectTimestamp,
+									createdAt: expectTimestamp(),
 								},
 							},
 						],
@@ -1448,7 +1453,7 @@ describe('/proposals', () => {
 				id: 1,
 				externalId: 'proposal123',
 				opportunityId: 1,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(1);
@@ -1483,7 +1488,7 @@ describe('/proposals', () => {
 				id: 1,
 				externalId: 'proposal123',
 				opportunityId: 1,
-				createdAt: expectTimestamp,
+				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(before.count + 1);
@@ -1500,7 +1505,7 @@ describe('/proposals', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 
@@ -1515,7 +1520,7 @@ describe('/proposals', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
-				details: expect.any(Array) as unknown[],
+				details: expectArray(),
 			});
 		});
 

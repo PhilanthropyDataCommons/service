@@ -3,6 +3,9 @@ import { isPaginationParametersQuery } from '../types';
 import type { Request } from 'express';
 import type { PaginationParameters } from '../types';
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_COUNT = 10;
+
 export const extractPaginationParameters = ({
 	query,
 }: Pick<Request, 'query'>): PaginationParameters => {
@@ -14,7 +17,7 @@ export const extractPaginationParameters = ({
 	}
 
 	return {
-		page: query._page ?? 1,
-		count: query._count ?? 10,
+		page: query._page ?? DEFAULT_PAGE,
+		count: query._count ?? DEFAULT_COUNT,
 	};
 };

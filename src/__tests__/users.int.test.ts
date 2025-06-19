@@ -14,7 +14,8 @@ import {
 	loadTableMetrics,
 	removeUserChangemakerPermission,
 } from '../database';
-import { expectTimestamp, getAuthContext, loadTestUser } from '../test/utils';
+import { getAuthContext, loadTestUser } from '../test/utils';
+import { expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -51,7 +52,7 @@ describe('/users', () => {
 							dataProvider: {},
 							funder: {},
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
 			});
@@ -117,7 +118,7 @@ describe('/users', () => {
 								testFunder: [Permission.EDIT],
 							},
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
 			});
@@ -160,7 +161,7 @@ describe('/users', () => {
 							dataProvider: {},
 							funder: {},
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
 			});
@@ -233,7 +234,7 @@ describe('/users', () => {
 							dataProvider: {},
 							funder: {},
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 					{
 						keycloakUserId: uuids[13],
@@ -242,7 +243,7 @@ describe('/users', () => {
 							dataProvider: {},
 							funder: {},
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 					{
 						keycloakUserId: uuids[12],
@@ -251,7 +252,7 @@ describe('/users', () => {
 							dataProvider: {},
 							funder: {},
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 					{
 						keycloakUserId: uuids[11],
@@ -260,7 +261,7 @@ describe('/users', () => {
 							dataProvider: {},
 							funder: {},
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 					{
 						keycloakUserId: uuids[10],
@@ -269,7 +270,7 @@ describe('/users', () => {
 							dataProvider: {},
 							funder: {},
 						},
-						createdAt: expectTimestamp,
+						createdAt: expectTimestamp(),
 					},
 				],
 			});

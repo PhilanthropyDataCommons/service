@@ -5,8 +5,9 @@ import { getLogger } from './logger';
 import { loadConfig } from './config';
 
 const logger = getLogger(__filename);
+const DEFAULT_PORT = 3001;
 
-const port = Number(process.env.PORT ?? 3001);
+const port = Number(process.env.PORT ?? DEFAULT_PORT);
 const host = process.env.HOST ?? 'localhost';
 
 const start = async (): Promise<void> => {

@@ -15,7 +15,11 @@ import {
 } from '../..';
 import { db } from '../../../db';
 import { Permission, stringToKeycloakId } from '../../../../types';
-import { expectTimestamp, getAuthContext } from '../../../../test/utils';
+import { getAuthContext } from '../../../../test/utils';
+import {
+	expectArrayContaining,
+	expectTimestamp,
+} from '../../../../test/asymettricMatchers';
 
 describe('loadUserByKeycloakUserId', () => {
 	it('should populate roles correctly based on direct permissions as well as user groups permissions', async () => {
@@ -168,29 +172,29 @@ describe('loadUserByKeycloakUserId', () => {
 		);
 
 		expect(populatedUser).toEqual({
-			createdAt: expectTimestamp,
+			createdAt: expectTimestamp(),
 			keycloakUserId: user.keycloakUserId,
 			permissions: {
 				changemaker: {
-					1: expect.arrayContaining([
+					1: expectArrayContaining([
 						Permission.MANAGE,
 						Permission.EDIT,
 						Permission.VIEW,
-					]) as Permission[],
+					]),
 				},
 				dataProvider: {
-					fooDataProvider: expect.arrayContaining([
+					fooDataProvider: expectArrayContaining([
 						Permission.MANAGE,
 						Permission.EDIT,
 						Permission.VIEW,
-					]) as Permission[],
+					]),
 				},
 				funder: {
-					fooFunder: expect.arrayContaining([
+					fooFunder: expectArrayContaining([
 						Permission.MANAGE,
 						Permission.EDIT,
 						Permission.VIEW,
-					]) as Permission[],
+					]),
 				},
 			},
 		});
@@ -286,7 +290,7 @@ describe('loadUserByKeycloakUserId', () => {
 		);
 
 		expect(populatedUser).toEqual({
-			createdAt: expectTimestamp,
+			createdAt: expectTimestamp(),
 			keycloakUserId: user.keycloakUserId,
 			permissions: {
 				changemaker: {},

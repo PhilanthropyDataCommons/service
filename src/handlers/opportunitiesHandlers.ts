@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import {
 	db,
 	createOpportunity,
@@ -27,7 +28,10 @@ const getOpportunities = async (req: Request, res: Response): Promise<void> => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const opportunityBundle = await loadOpportunityBundle(db, req, limit, offset);
-	res.status(200).contentType('application/json').send(opportunityBundle);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(opportunityBundle);
 };
 
 const getOpportunity = async (req: Request, res: Response): Promise<void> => {
@@ -40,7 +44,10 @@ const getOpportunity = async (req: Request, res: Response): Promise<void> => {
 		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}
 	const opportunity = await loadOpportunity(db, req, opportunityId);
-	res.status(200).contentType('application/json').send(opportunity);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(opportunity);
 };
 
 const postOpportunity = async (req: Request, res: Response): Promise<void> => {
@@ -63,7 +70,10 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 		throw new UnauthorizedError();
 	}
 	const opportunity = await createOpportunity(db, null, req.body);
-	res.status(201).contentType('application/json').send(opportunity);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.contentType('application/json')
+		.send(opportunity);
 };
 
 export const opportunitiesHandlers = {

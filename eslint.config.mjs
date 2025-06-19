@@ -25,12 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'@typescript-eslint/no-magic-numbers': 'off',
-			'@typescript-eslint/no-unnecessary-boolean-literal-compare': 'off',
-			'@typescript-eslint/no-unnecessary-condition': 'off',
-			'@typescript-eslint/no-unnecessary-template-expression': 'off',
-			'@typescript-eslint/no-unnecessary-type-parameters': 'off',
-			'@typescript-eslint/no-unsafe-type-assertion': 'off',
 			'@typescript-eslint/non-nullable-type-assertion-style': 'off',
 			'@typescript-eslint/prefer-destructuring': 'off',
 			'@typescript-eslint/prefer-optional-chain': 'off',
@@ -68,6 +62,13 @@ export default defineConfig([
 		},
 
 		rules: {
+			'@typescript-eslint/no-magic-numbers': [
+				'error',
+				{
+					detectObjects: false,
+					ignoreEnums: true,
+				},
+			],
 			'import/prefer-default-export': 'off',
 			'import/no-default-export': 'error',
 			'@typescript-eslint/prefer-readonly-parameter-types': 'off',
@@ -141,6 +142,9 @@ export default defineConfig([
 			// Forcing return type definitions in our ad-hoc test functions is not worth
 			// the added effort / verbosity.
 			'@typescript-eslint/explicit-function-return-type': 'off',
+
+			// Tests use hard coded numbers in lots of places, and that's OK for now.
+			'@typescript-eslint/no-magic-numbers': 'off',
 		},
 	},
 ]);

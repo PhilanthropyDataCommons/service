@@ -1,14 +1,16 @@
 import { ajv } from '../ajv';
 import { InputValidationError } from '../errors';
+import { idSchema } from '../types';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
+import type { Id } from '../types';
 
 interface ChangemakerParameters {
-	changemakerId: number | undefined;
+	changemakerId: Id | undefined;
 }
 
 interface ChangemakerParametersQuery {
-	changemaker: number | undefined;
+	changemaker: Id | undefined;
 }
 
 const changemakerParametersQuerySchema: JSONSchemaType<ChangemakerParametersQuery> =
@@ -16,8 +18,7 @@ const changemakerParametersQuerySchema: JSONSchemaType<ChangemakerParametersQuer
 		type: 'object',
 		properties: {
 			changemaker: {
-				type: 'integer',
-				minimum: 1,
+				...idSchema,
 				nullable: true,
 			},
 		},

@@ -5,6 +5,7 @@ import request from 'supertest';
 import { requireEnv } from 'require-env-variable';
 import { app } from '../app';
 import { mockJwt as authHeader } from '../test/mockJwt';
+import { expectString } from '../test/asymettricMatchers';
 
 const { S3_BUCKET } = requireEnv('S3_BUCKET');
 
@@ -45,7 +46,7 @@ describe('/presignedPostRequests', () => {
 				expect.anything(),
 				{
 					Bucket: S3_BUCKET,
-					Key: expect.stringMatching(/.*/) as string,
+					Key: expectString(),
 					Expires: 3600,
 					Conditions: [
 						['eq', '$Content-Type', 'application/octet-stream'],

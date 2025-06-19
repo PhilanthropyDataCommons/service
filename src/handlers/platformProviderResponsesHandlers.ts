@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import { ajv } from '../ajv';
 import { db } from '../database';
 import { isTinyPgErrorWithQueryContext } from '../types';
@@ -44,7 +45,7 @@ const getPlatformProviderResponsesByExternalId = (
 			const { rows: platformProviderResponses } =
 				platformProviderResponsesQueryResult;
 			res
-				.status(200)
+				.status(HTTP_STATUS.SUCCESSFUL.OK)
 				.contentType('application/json')
 				.send(platformProviderResponses);
 		})
@@ -102,9 +103,9 @@ const postPlatformProviderResponse = (
 		req.body,
 	)
 		.then((opportunitiesQueryResult) => {
-			const platformProviderResponse = opportunitiesQueryResult.rows[0];
+			const [platformProviderResponse] = opportunitiesQueryResult.rows;
 			res
-				.status(201)
+				.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 				.contentType('application/json')
 				.send(platformProviderResponse);
 		})

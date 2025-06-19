@@ -1,15 +1,16 @@
 import { requireAuthentication } from '../requireAuthentication';
 import { UnauthorizedError } from '../../errors';
 import { allowNextToResolve, loadTestUser } from '../../test/utils';
-import type { NextFunction, Response } from 'express';
-import type { Request as JWTRequest } from 'express-jwt';
+import { getMockRequest, getMockResponse } from '../../test/mockExpress';
+import type { NextFunction } from 'express';
+import type { AuthenticatedRequest } from '../../types';
 
 describe('requireAuthentication', () => {
 	it('calls next with an UnauthorizedError when no auth value is provided', async () => {
-		const mockRequest = {} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		const req = getMockRequest();
+		const res = getMockResponse();
 		const nextMock = jest.fn();
-		requireAuthentication(mockRequest, mockResponse, nextMock);
+		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 
 		expect(nextMock).toHaveBeenCalled();
@@ -23,14 +24,12 @@ describe('requireAuthentication', () => {
 	});
 
 	it('calls next with an UnauthorizedError when no auth sub is provided', async () => {
-		const testUser = await loadTestUser();
-		const mockRequest = {
-			auth: {},
-			user: testUser,
-		} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {};
+		req.user = await loadTestUser();
 		const nextMock = jest.fn();
-		requireAuthentication(mockRequest, mockResponse, nextMock);
+		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 
 		expect(nextMock).toHaveBeenCalled();
@@ -44,16 +43,14 @@ describe('requireAuthentication', () => {
 	});
 
 	it('calls next with an UnauthorizedError when a blank auth sub is provided', async () => {
-		const testUser = await loadTestUser();
-		const mockRequest = {
-			auth: {
-				sub: '',
-			},
-			user: testUser,
-		} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			sub: '',
+		};
+		req.user = await loadTestUser();
 		const nextMock = jest.fn();
-		requireAuthentication(mockRequest, mockResponse, nextMock);
+		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 
 		expect(nextMock).toHaveBeenCalled();
@@ -67,14 +64,13 @@ describe('requireAuthentication', () => {
 	});
 
 	it('calls next with an UnauthorizedError when there is no user provided', async () => {
-		const mockRequest = {
-			auth: {
-				sub: 'test@example.com',
-			},
-		} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			sub: 'test@example.com',
+		};
 		const nextMock = jest.fn();
-		requireAuthentication(mockRequest, mockResponse, nextMock);
+		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 
 		expect(nextMock).toHaveBeenCalled();
@@ -88,19 +84,17 @@ describe('requireAuthentication', () => {
 	});
 
 	it('calls next when when an auth value is provided', async () => {
-		const testUser = await loadTestUser();
-		const mockRequest = {
-			auth: {
-				sub: 'test@example.com',
-			},
-			role: {
-				isAdministrator: false,
-			},
-			user: testUser,
-		} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			sub: 'test@example.com',
+		};
+		req.role = {
+			isAdministrator: false,
+		};
+		req.user = await loadTestUser();
 		const nextMock: NextFunction = jest.fn();
-		requireAuthentication(mockRequest, mockResponse, nextMock);
+		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 
 		expect(nextMock).toHaveBeenCalledWith();

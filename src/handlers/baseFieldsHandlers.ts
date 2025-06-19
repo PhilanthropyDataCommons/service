@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '../constants';
 import { InputValidationError } from '../errors';
 import {
 	db,
@@ -27,7 +28,10 @@ const assertBaseFieldExists = async (
 
 const getBaseFields = async (req: Request, res: Response): Promise<void> => {
 	const baseFields = await loadBaseFields();
-	res.status(200).contentType('application/json').send(baseFields);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(baseFields);
 };
 
 const putBaseField = async (
@@ -65,7 +69,10 @@ const putBaseField = async (
 		sensitivityClassification,
 		shortCode: baseFieldShortCode,
 	});
-	res.status(200).contentType('application/json').send(baseField);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(baseField);
 };
 
 const getBaseFieldLocalizationsByBaseFieldShortCode = async (
@@ -90,7 +97,10 @@ const getBaseFieldLocalizationsByBaseFieldShortCode = async (
 			limit,
 			offset,
 		);
-	res.status(200).contentType('application/json').send(baseFieldLocalizations);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(baseFieldLocalizations);
 };
 
 const putBaseFieldLocalization = async (
@@ -130,7 +140,10 @@ const putBaseFieldLocalization = async (
 			language,
 		},
 	);
-	res.status(200).contentType('application/json').send(baseFieldLocalization);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(baseFieldLocalization);
 };
 
 export const baseFieldsHandlers = {

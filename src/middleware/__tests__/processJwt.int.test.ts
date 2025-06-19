@@ -9,9 +9,11 @@ import {
 	generateNextWithAssertions,
 } from '../../test/utils';
 import { mockJwt as authHeader, getMockJwt } from '../../test/mockJwt';
-import type { NextFunction, Response } from 'express';
-import type { Request as JWTRequest } from 'express-jwt';
+import { getMockRequest, getMockResponse } from '../../test/mockExpress';
+import { expectNumber } from '../../test/asymettricMatchers';
+import type { NextFunction } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
+import type { AuthenticatedRequest } from '../../types';
 
 const { AUTH_SERVER_ISSUER } = requireEnv('AUTH_SERVER_ISSUER');
 
@@ -40,31 +42,30 @@ jest.mock('express-jwt', () => ({
 
 describe('processJwt', () => {
 	it('does NOT populate an auth value when no auth header is sent', (done) => {
-		const mockRequest = {} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
 		const makeAssertions = async () => {
-			expect(mockRequest.auth).toBe(undefined);
+			expect(req.auth).toBe(undefined);
 		};
 		const nextMock = generateNextWithAssertions(makeAssertions, done);
 
-		processJwt(mockRequest, mockResponse, nextMock);
+		processJwt(req, res, nextMock);
 	});
 
 	it('does NOT populate an auth value when an auth header with an invalid issuer is sent', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
 		const mockJwt = getMockJwt({
 			iss: 'NotTheCorrectIssuer',
 		});
-		const mockRequest = {
-			headers: mockJwt,
-		} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		req.headers = mockJwt;
 		const makeAssertions = async (err: unknown) => {
 			expect(err).toBeInstanceOf(Error);
-			expect(mockRequest.auth).toBe(undefined);
+			expect(req.auth).toBe(undefined);
 		};
 		const nextMock = generateNextWithAssertions(makeAssertions, done);
 
-		processJwt(mockRequest, mockResponse, nextMock);
+		processJwt(req, res, nextMock);
 	});
 
 	it('does NOT populate an auth value when an auth header signed with an invalid key is used', (done) => {
@@ -108,33 +109,33 @@ QZTDn6isr91MBTaPLQPheJPiV5ISrCF/HMy1LnQb4pBvNEeE4QFNUSHT4HofLro1
 DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 +GfkC1U5a882gMp8nhMbzTQQ
 -----END PRIVATE KEY-----`;
-
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
 		const badJwt = getMockJwt({}, (payload: JwtPayload) =>
 			jwt.sign(payload, badPrivateKey, { algorithm: 'RS256' }),
 		);
-		const mockRequest = {
-			headers: badJwt,
-		} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		req.headers = badJwt;
 		const makeAssertions = async (err: unknown) => {
 			expect(err).toBeInstanceOf(Error);
+			// We just validated that err is an Error, but eslint doesn't recognize that fact.
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			expect((err as Error).message).toBe('invalid signature');
-			expect(mockRequest.auth).toBe(undefined);
+			expect(req.auth).toBe(undefined);
 		};
 		const nextMock = generateNextWithAssertions(makeAssertions, done);
 
-		processJwt(mockRequest, mockResponse, nextMock);
+		processJwt(req, res, nextMock);
 	});
 
 	it('populates the request with an `auth` value when a valid auth header is sent', (done) => {
-		const mockRequest = {
-			headers: { ...authHeader },
-		} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.headers = authHeader;
+
 		const makeAssertions = async () => {
-			expect(mockRequest.auth).toMatchObject({
-				exp: expect.any(Number) as number,
-				iat: expect.any(Number) as number,
+			expect(req.auth).toMatchObject({
+				exp: expectNumber(),
+				iat: expectNumber(),
 				iss: AUTH_SERVER_ISSUER,
 				aud: 'account',
 				typ: 'Bearer',
@@ -144,22 +145,22 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 		};
 		const nextMock = generateNextWithAssertions(makeAssertions, done);
 
-		processJwt(mockRequest, mockResponse, nextMock);
+		processJwt(req, res, nextMock);
 	});
 
 	it('does not call next twice if middleware throws an error after calling next', async () => {
-		const mockRequest = {} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
 		const nextMock: NextFunction = jest.fn();
 		customMiddleware.mockReset();
 		customMiddleware.mockImplementation(
-			async (req: unknown, res: unknown, next: () => unknown) => {
+			async (a: unknown, b: unknown, next: () => unknown) => {
 				next();
 				throw new Error('Something happened after calling next');
 			},
 		);
 
-		processJwt(mockRequest, mockResponse, nextMock);
+		processJwt(req, res, nextMock);
 		await allowNextToResolve();
 
 		expect(customMiddleware).toHaveBeenCalledTimes(1);
@@ -167,19 +168,19 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 	});
 
 	it('calls next if middleware throws an error before calling next', async () => {
-		const mockRequest = {} as unknown as JWTRequest;
-		const mockResponse = {} as unknown as Response;
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
 		const nextMock: NextFunction = jest.fn();
 		customMiddleware.mockReset();
 		customMiddleware.mockImplementation(async () => {
 			throw new Error('Something happened before calling next');
 		});
 
-		processJwt(mockRequest, mockResponse, nextMock);
+		processJwt(req, res, nextMock);
 		await allowNextToResolve();
 		jest.unmock('express-jwt');
 
-		expect(mockRequest.auth).toBe(undefined);
+		expect(req.auth).toBe(undefined);
 		expect(customMiddleware).toHaveBeenCalledTimes(1);
 		expect(nextMock).toHaveBeenCalledTimes(1);
 	});

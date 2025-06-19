@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { parse } from 'csv-parse';
 import { requireEnv } from 'require-env-variable';
@@ -28,7 +29,6 @@ import {
 import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
-import type { Readable } from 'stream';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
@@ -71,7 +71,11 @@ const downloadS3ObjectToTemporaryStorage = async (
 		throw new Error('S3 did not return a body');
 	}
 
-	const s3Body = s3Response.Body as Readable;
+	const s3Body = s3Response.Body;
+	if (!(s3Body instanceof Readable)) {
+		throw new Error('S3 response body is not a readable stream');
+	}
+
 	try {
 		await finished(s3Body.pipe(writeStream));
 	} catch (err) {
@@ -98,7 +102,7 @@ const loadShortCodesFromBulkUploadTaskCsv = async (
 			hasLoadedShortCodes = true;
 		}
 	});
-	return shortCodes ?? [];
+	return shortCodes;
 };
 
 const assertShortCodesReferToExistingBaseFields = async (
@@ -121,11 +125,15 @@ const assertShortCodesAreValid = async (
 	await assertShortCodesReferToExistingBaseFields(shortCodes);
 };
 
+// The meaning of "0" here is pretty explicit, especially wrapped in a named helper
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
+const isEmpty = (arr: unknown[]): boolean => arr.length === 0;
+
 const assertCsvContainsValidShortCodes = async (
 	csvPath: string,
 ): Promise<void> => {
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
-	if (shortCodes.length === 0) {
+	if (isEmpty(shortCodes)) {
 		throw new Error('No short codes detected in the first row of the CSV');
 	}
 	await assertShortCodesAreValid(shortCodes);
@@ -319,8 +327,9 @@ export const processBulkUploadTask = async (
 				applicationForm.id,
 			);
 		const csvReadStream = fs.createReadStream(bulkUploadFile.path);
+		const STARTING_ROW = 2;
 		const parser = parse({
-			from: 2,
+			from: STARTING_ROW,
 		});
 		csvReadStream.pipe(parser);
 		let recordNumber = 0;
@@ -335,7 +344,7 @@ export const processBulkUploadTask = async (
 			},
 		};
 		await parser.forEach(async (record: string[]) => {
-			recordNumber += 1;
+			recordNumber++;
 			const proposal = await createProposal(db, userAgentCreateAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: `${recordNumber}`,

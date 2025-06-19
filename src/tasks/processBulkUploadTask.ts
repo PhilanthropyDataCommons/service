@@ -62,7 +62,7 @@ const downloadS3ObjectToTemporaryStorage = async (
 			Key: key,
 			Bucket: S3_BUCKET,
 		})
-		.catch(async (err) => {
+		.catch(async (err: unknown) => {
 			logger.error('Failed to load an object from S3', { err, key });
 			await temporaryFile.cleanup();
 			throw new Error('Unable to load the s3 object');
@@ -290,7 +290,7 @@ export const processBulkUploadTask = async (
 	const bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
 		bulkUploadTask.sourceKey,
 		helpers.logger,
-	).catch(async (err) => {
+	).catch(async (err: unknown) => {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
 		await updateBulkUploadTask(
 			db,

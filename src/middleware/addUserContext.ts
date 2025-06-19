@@ -73,15 +73,15 @@ const addUserContext = (
 							(req as AuthenticatedRequest).user = user;
 							next();
 						})
-						.catch((err) => {
+						.catch((err: unknown) => {
 							next(err);
 						});
 				})
-				.catch((err) => {
+				.catch((err: unknown) => {
 					next(err);
 				});
 		})
-		.catch((err) => {
+		.catch((err: unknown) => {
 			next(err);
 		});
 };

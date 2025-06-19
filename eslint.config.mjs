@@ -25,7 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'@typescript-eslint/prefer-optional-chain': 'off',
 			'@typescript-eslint/promise-function-async': 'off',
 			'@typescript-eslint/return-await': 'off',
 			'@typescript-eslint/strict-boolean-expressions': 'off',

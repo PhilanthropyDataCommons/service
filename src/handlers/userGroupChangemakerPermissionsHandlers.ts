@@ -18,7 +18,9 @@ const deleteUserGroupChangemakerPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const { keycloakOrganizationId, changemakerId, permission } = req.params;
+	const {
+		params: { keycloakOrganizationId, changemakerId, permission },
+	} = req;
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
 			'Invalid keycloakOrganizationId parameter.',
@@ -60,7 +62,9 @@ const putUserGroupChangemakerPermission = async (
 		return;
 	}
 
-	const { keycloakOrganizationId, changemakerId, permission } = req.params;
+	const {
+		params: { keycloakOrganizationId, changemakerId, permission },
+	} = req;
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(

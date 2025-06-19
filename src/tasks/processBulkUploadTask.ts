@@ -71,7 +71,7 @@ const downloadS3ObjectToTemporaryStorage = async (
 		throw new Error('S3 did not return a body');
 	}
 
-	const s3Body = s3Response.Body;
+	const { Body: s3Body } = s3Response;
 	if (!(s3Body instanceof Readable)) {
 		throw new Error('S3 response body is not a readable stream');
 	}
@@ -359,8 +359,10 @@ export const processBulkUploadTask = async (
 				},
 			);
 
-			const changemakerName = record[changemakerNameIndex];
-			const changemakerTaxId = record[changemakerTaxIdIndex];
+			const {
+				[changemakerNameIndex]: changemakerName,
+				[changemakerTaxIdIndex]: changemakerTaxId,
+			} = record;
 			if (changemakerTaxId !== undefined) {
 				const changemaker = await createOrLoadChangemaker(
 					taskRunnerAuthContext,
@@ -381,7 +383,7 @@ export const processBulkUploadTask = async (
 
 			await allNoLeaks(
 				record.map<Promise<ProposalFieldValue>>(async (fieldValue, index) => {
-					const applicationFormField = applicationFormFields[index];
+					const { [index]: applicationFormField } = applicationFormFields;
 					if (applicationFormField === undefined) {
 						throw new Error(
 							'There is no form field associated with this column',
@@ -409,7 +411,7 @@ export const processBulkUploadTask = async (
 
 	try {
 		const fileStats = await fs.promises.stat(bulkUploadFile.path);
-		const fileSize = fileStats.size;
+		const { size: fileSize } = fileStats;
 		await updateBulkUploadTask(db, null, { fileSize }, bulkUploadTask.id);
 	} catch (err) {
 		helpers.logger.warn(

@@ -8,7 +8,7 @@ export class DatabaseError extends Error {
 		tinyPgError: TinyPgErrorWithQueryContext,
 	) {
 		super(message);
-		this.name = this.constructor.name;
+		this.name = 'DatabaseError';
 		this.tinyPgError = tinyPgError;
 	}
 }

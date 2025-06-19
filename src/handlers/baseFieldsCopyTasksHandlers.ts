@@ -26,14 +26,15 @@ const postBaseFieldsCopyTask = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	if (!isWritableBaseFieldsCopyTask(req.body)) {
+	const body = req.body as unknown;
+	if (!isWritableBaseFieldsCopyTask(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableBaseFieldsCopyTask.errors ?? [],
 		);
 	}
 
-	const { pdcApiUrl } = req.body;
+	const { pdcApiUrl } = body;
 	const baseFieldsCopyTask = await createBaseFieldsCopyTask(db, req, {
 		pdcApiUrl,
 		status: TaskStatus.PENDING,

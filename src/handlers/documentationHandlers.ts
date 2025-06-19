@@ -17,7 +17,7 @@ const getExpandedDocumentation = async (
 	relativeFilePath: string,
 ): Promise<string> => {
 	const { [relativeFilePath]: cachedValue } = expandedDocumentationCache;
-	if (cachedValue) {
+	if (cachedValue !== undefined) {
 		return cachedValue;
 	}
 	const expandedContent =

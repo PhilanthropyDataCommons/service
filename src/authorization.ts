@@ -6,7 +6,7 @@ const authContextHasChangemakerPermission = (
 	permission: Permission,
 ): boolean =>
 	auth.role.isAdministrator ||
-	!!auth.user.permissions.changemaker[changemakerId]?.includes(permission);
+	(auth.user.permissions.changemaker[changemakerId] ?? []).includes(permission);
 
 const authContextHasDataProviderPermission = (
 	auth: AuthContext,
@@ -14,7 +14,7 @@ const authContextHasDataProviderPermission = (
 	permission: Permission,
 ): boolean =>
 	auth.role.isAdministrator ||
-	!!auth.user.permissions.dataProvider[dataProviderShortCode]?.includes(
+	(auth.user.permissions.dataProvider[dataProviderShortCode] ?? []).includes(
 		permission,
 	);
 
@@ -24,7 +24,7 @@ const authContextHasFunderPermission = (
 	permission: Permission,
 ): boolean =>
 	auth.role.isAdministrator ||
-	!!auth.user.permissions.funder[funderShortCode]?.includes(permission);
+	(auth.user.permissions.funder[funderShortCode] ?? []).includes(permission);
 
 export {
 	authContextHasChangemakerPermission,

@@ -302,7 +302,7 @@ export const processBulkUploadTask = async (
 		);
 	});
 
-	if (!bulkUploadFile) {
+	if (bulkUploadFile === undefined) {
 		return;
 	}
 

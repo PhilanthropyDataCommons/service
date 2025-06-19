@@ -34,7 +34,7 @@ const isPhoneNumberString = (value: string): boolean =>
 const isCurrencyWithCodeString = (value: string): boolean => {
 	const [currency, code] = value.split(' ');
 
-	if (!currency || !code) {
+	if (currency === undefined || code === undefined) {
 		return false;
 	}
 	const currencyValidatorFields = {

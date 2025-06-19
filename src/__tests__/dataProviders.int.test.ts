@@ -113,7 +113,10 @@ describe('/dataProviders', () => {
 				.put('/dataProviders/firework')
 				.type('application/json')
 				.set(adminUserAuthHeader)
-				.send({ name: '🎆' })
+				.send({
+					name: '🎆',
+					keycloakOrganizationId: null,
+				})
 				.expect(201);
 			const after = await loadTableMetrics('data_providers');
 			expect(result.body).toStrictEqual({
@@ -130,7 +133,10 @@ describe('/dataProviders', () => {
 				.put('/dataProviders/Firework_-foo42')
 				.type('application/json')
 				.set(adminUserAuthHeader)
-				.send({ name: '🎆' })
+				.send({
+					name: '🎆',
+					keycloakOrganizationId: null,
+				})
 				.expect(201);
 		});
 
@@ -180,7 +186,22 @@ describe('/dataProviders', () => {
 				.put('/dataProviders/foo')
 				.type('application/json')
 				.set(adminUserAuthHeader)
-				.send({ noTitleHere: '👎' })
+				.send({ keycloakOrganizationId: null })
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('returns 400 bad request when no keycloakOrganizationId is sent', async () => {
+			const result = await agent
+				.put('/dataProviders/foo')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					name: '🎆',
+				})
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',

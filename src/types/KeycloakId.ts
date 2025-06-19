@@ -29,12 +29,8 @@ const stringToKeycloakId = (s: string): KeycloakId => {
 	return keycloakIdIsomorphism.wrap(s);
 };
 
-const keycloakIdToString = (
-	keycloakId: KeycloakId | null | undefined,
-): string | null =>
-	keycloakId === null || keycloakId === undefined
-		? null
-		: keycloakIdIsomorphism.unwrap(keycloakId);
+const keycloakIdToString = (keycloakId: KeycloakId | null): string | null =>
+	keycloakId === null ? null : keycloakIdIsomorphism.unwrap(keycloakId);
 
 // In a future version of TypeScript we hope to be able to benefit from conditional return types
 // so that we can just have a single function which will, when passed null, return null and when passed

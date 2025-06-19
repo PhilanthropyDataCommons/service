@@ -8,10 +8,7 @@ import type { ShortCode } from './ShortCode';
 interface Funder {
 	readonly shortCode: ShortCode;
 	name: string;
-	// We do not really want "undefined" here, only null. See
-	// https://github.com/ajv-validator/ajv/issues/2283 and/or
-	// https://github.com/ajv-validator/ajv/issues/2163.
-	keycloakOrganizationId: KeycloakId | null | undefined;
+	keycloakOrganizationId: KeycloakId | null;
 	readonly createdAt: string;
 }
 
@@ -27,7 +24,10 @@ const writableFunderSchema: JSONSchemaType<WritableFunder> = {
 		},
 		keycloakOrganizationId: {
 			...keycloakIdSchema,
-			nullable: true,
+			// This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
+			// See: https://github.com/ajv-validator/ajv/issues/2163
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+			nullable: true as false,
 		},
 	},
 	required: ['name'],

@@ -133,7 +133,7 @@ export const copyBaseFields = async (
 		);
 	});
 
-	if (!remoteBaseFields) {
+	if (remoteBaseFields === undefined) {
 		return;
 	}
 

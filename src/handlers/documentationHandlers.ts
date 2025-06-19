@@ -16,7 +16,7 @@ const expandedDocumentationCache: Record<string, string> = {};
 const getExpandedDocumentation = async (
 	relativeFilePath: string,
 ): Promise<string> => {
-	const cachedValue = expandedDocumentationCache[relativeFilePath];
+	const { [relativeFilePath]: cachedValue } = expandedDocumentationCache;
 	if (cachedValue) {
 		return cachedValue;
 	}

@@ -10,7 +10,7 @@ export class InputConflictError extends Error {
 
 	public constructor(message: string, details: ConflictErrorDetails) {
 		super(message);
-		this.name = this.constructor.name;
+		this.name = 'InputConflictError';
 		this.details = details;
 	}
 }

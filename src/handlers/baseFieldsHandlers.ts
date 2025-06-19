@@ -38,14 +38,18 @@ const putBaseField = async (
 	req: Request<{ baseFieldShortCode: string }>,
 	res: Response,
 ): Promise<void> => {
-	const { baseFieldShortCode } = req.params;
+	const {
+		params: { baseFieldShortCode },
+	} = req;
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
 			'Invalid short code parameter.',
 			isShortCode.errors ?? [],
 		);
 	}
-	if (!isWritableBaseField(req.body)) {
+
+	const body = req.body as unknown;
+	if (!isWritableBaseField(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableBaseField.errors ?? [],
@@ -59,7 +63,7 @@ const putBaseField = async (
 		category,
 		valueRelevanceHours,
 		sensitivityClassification,
-	} = req.body;
+	} = body;
 	const baseField = await createOrUpdateBaseField(db, null, {
 		label,
 		description,
@@ -79,7 +83,9 @@ const getBaseFieldLocalizationsByBaseFieldShortCode = async (
 	req: Request<{ baseFieldShortCode: ShortCode }>,
 	res: Response,
 ): Promise<void> => {
-	const { baseFieldShortCode } = req.params;
+	const {
+		params: { baseFieldShortCode },
+	} = req;
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
 			'Invalid short code parameter.',
@@ -107,7 +113,9 @@ const putBaseFieldLocalization = async (
 	req: Request<{ baseFieldShortCode: ShortCode; language: string }>,
 	res: Response,
 ): Promise<void> => {
-	const { baseFieldShortCode, language } = req.params;
+	const {
+		params: { baseFieldShortCode, language },
+	} = req;
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
 			'Invalid shortcode parameter.',
@@ -122,13 +130,14 @@ const putBaseFieldLocalization = async (
 		);
 	}
 
-	if (!isWritableBaseFieldLocalization(req.body)) {
+	const body = req.body as unknown;
+	if (!isWritableBaseFieldLocalization(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableBaseFieldLocalization.errors ?? [],
 		);
 	}
-	const { label, description } = req.body;
+	const { label, description } = body;
 	await assertBaseFieldExists(baseFieldShortCode);
 	const baseFieldLocalization = await createOrUpdateBaseFieldLocalization(
 		db,

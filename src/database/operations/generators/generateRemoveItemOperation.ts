@@ -46,7 +46,9 @@ const generateRemoveItemOperation =
 		);
 
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
-		const [wrappedRemovedObject] = result.rows;
+		const {
+			rows: [wrappedRemovedObject],
+		} = result;
 		if (wrappedRemovedObject === undefined) {
 			throw new NotFoundError(
 				`The item did not exist and could not be deleted`,

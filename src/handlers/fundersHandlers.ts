@@ -28,7 +28,9 @@ const getFunders = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getFunder = async (req: Request, res: Response): Promise<void> => {
-	const { funderShortCode } = req.params;
+	const {
+		params: { funderShortCode },
+	} = req;
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(
 			'Invalid short code.',
@@ -46,21 +48,25 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const shortCode = req.params.funderShortCode;
+	const {
+		params: { funderShortCode: shortCode },
+	} = req;
 	if (!isShortCode(shortCode)) {
 		throw new InputValidationError(
 			'Invalid short code.',
 			isShortCode.errors ?? [],
 		);
 	}
-	if (!isWritableFunder(req.body)) {
+
+	const body = req.body as unknown;
+	if (!isWritableFunder(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableFunder.errors ?? [],
 		);
 	}
-	const { name, keycloakOrganizationId } = req.body;
 
+	const { name, keycloakOrganizationId } = body;
 	const funder = await createOrUpdateFunder(db, null, {
 		shortCode,
 		name,

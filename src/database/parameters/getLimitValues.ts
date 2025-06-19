@@ -21,7 +21,7 @@ export const getLimitValues = (
 		);
 	}
 	const zeroIndexedPage = apiPageToZeroIndexedPage(paginationParameters.page);
-	const limit = paginationParameters.count;
+	const { count: limit } = paginationParameters;
 	const offset = paginationParameters.count * zeroIndexedPage;
 	return {
 		limit,

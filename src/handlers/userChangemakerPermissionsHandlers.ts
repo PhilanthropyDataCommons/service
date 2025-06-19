@@ -18,7 +18,9 @@ const deleteUserChangemakerPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const { userKeycloakUserId, changemakerId, permission } = req.params;
+	const {
+		params: { userKeycloakUserId, changemakerId, permission },
+	} = req;
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(
 			'Invalid userKeycloakUserId parameter.',
@@ -59,7 +61,9 @@ const putUserChangemakerPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const { userKeycloakUserId, changemakerId, permission } = req.params;
+	const {
+		params: { userKeycloakUserId, changemakerId, permission },
+	} = req;
 
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(

@@ -28,7 +28,9 @@ const requireDataProviderPermission =
 			next();
 			return;
 		}
-		const { dataProviderShortCode } = req.params;
+		const {
+			params: { dataProviderShortCode },
+		} = req;
 		if (!isShortCode(dataProviderShortCode)) {
 			next(
 				new InputValidationError(

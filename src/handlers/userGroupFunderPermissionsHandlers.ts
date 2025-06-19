@@ -19,7 +19,9 @@ const deleteUserGroupFunderPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const { keycloakOrganizationId, funderShortCode, permission } = req.params;
+	const {
+		params: { keycloakOrganizationId, funderShortCode, permission },
+	} = req;
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
 			'Invalid keycloakOrganizationId parameter.',
@@ -60,7 +62,9 @@ const putUserGroupFunderPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const { keycloakOrganizationId, funderShortCode, permission } = req.params;
+	const {
+		params: { keycloakOrganizationId, funderShortCode, permission },
+	} = req;
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(

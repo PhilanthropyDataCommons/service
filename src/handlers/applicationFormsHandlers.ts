@@ -54,7 +54,9 @@ const getApplicationForm = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const { applicationFormId } = req.params;
+	const {
+		params: { applicationFormId },
+	} = req;
 	if (!isId(applicationFormId)) {
 		throw new InputValidationError('Invalid request.', isId.errors ?? []);
 	}
@@ -74,14 +76,15 @@ const postApplicationForms = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	if (!isWritableApplicationFormWithFields(req.body)) {
+	const body = req.body as unknown;
+	if (!isWritableApplicationFormWithFields(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableApplicationFormWithFields.errors ?? [],
 		);
 	}
-	const { fields, opportunityId } = req.body;
 
+	const { fields, opportunityId } = body;
 	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (

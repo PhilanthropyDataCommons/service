@@ -34,15 +34,16 @@ const postBulkUploadTask = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	if (!isWritableBulkUploadTask(req.body)) {
+
+	const body = req.body as unknown;
+	if (!isWritableBulkUploadTask(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableBulkUploadTask.errors ?? [],
 		);
 	}
 
-	const { sourceId, funderShortCode, fileName, sourceKey } = req.body;
-
+	const { sourceId, funderShortCode, fileName, sourceKey } = body;
 	if (!authContextHasFunderPermission(req, funderShortCode, Permission.EDIT)) {
 		throw new UnprocessableEntityError(
 			'You do not have write permissions on a funder with the specified short code.',

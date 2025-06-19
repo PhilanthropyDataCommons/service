@@ -93,7 +93,9 @@ const getSources = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getSource = async (req: Request, res: Response): Promise<void> => {
-	const { sourceId } = req.params;
+	const {
+		params: { sourceId },
+	} = req;
 	if (!isId(sourceId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
@@ -105,7 +107,9 @@ const getSource = async (req: Request, res: Response): Promise<void> => {
 };
 
 const deleteSource = async (req: Request, res: Response): Promise<void> => {
-	const { sourceId } = req.params;
+	const {
+		params: { sourceId },
+	} = req;
 	if (!isId(sourceId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}

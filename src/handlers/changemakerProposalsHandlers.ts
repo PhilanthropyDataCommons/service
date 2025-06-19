@@ -60,14 +60,16 @@ const postChangemakerProposal = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
 	}
-	if (!isWritableChangemakerProposal(req.body)) {
+
+	const body = req.body as unknown;
+	if (!isWritableChangemakerProposal(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableChangemakerProposal.errors ?? [],
 		);
 	}
-	const { proposalId, changemakerId } = req.body;
 
+	const { proposalId, changemakerId } = body;
 	try {
 		const proposal = await loadProposal(db, req, proposalId);
 		const opportunity = await loadOpportunity(db, req, proposal.opportunityId);

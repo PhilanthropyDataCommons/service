@@ -19,7 +19,9 @@ const deleteUserFunderPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const { userKeycloakUserId, funderShortCode, permission } = req.params;
+	const {
+		params: { userKeycloakUserId, funderShortCode, permission },
+	} = req;
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(
 			'Invalid userKeycloakUserId parameter.',
@@ -60,7 +62,9 @@ const putUserFunderPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const { userKeycloakUserId, funderShortCode, permission } = req.params;
+	const {
+		params: { userKeycloakUserId, funderShortCode, permission },
+	} = req;
 
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(

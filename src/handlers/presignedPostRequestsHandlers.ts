@@ -16,7 +16,7 @@ const generatePresignedPost = async (
 	fileType: string,
 	fileSize: number,
 ): Promise<PresignedPost> =>
-	createPresignedPost(s3Client, {
+	await createPresignedPost(s3Client, {
 		Bucket: S3_BUCKET,
 		Key: `unprocessed/${uuidv4()}`,
 		Expires: PRESIGNED_POST_EXPIRATION_SECONDS,

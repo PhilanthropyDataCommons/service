@@ -73,7 +73,7 @@ const createTestBulkUploadTask = async (
 		sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
 		status: TaskStatus.PENDING,
 	};
-	return createBulkUploadTask(db, authContext, {
+	return await createBulkUploadTask(db, authContext, {
 		...defaultValues,
 		...overrideValues,
 	});

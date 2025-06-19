@@ -165,7 +165,7 @@ const assertBulkUploadTaskCsvIsValid = async (
 const createOpportunityForBulkUploadTask = async (
 	bulkUploadTask: BulkUploadTask,
 ): Promise<Opportunity> =>
-	createOpportunity(db, null, {
+	await createOpportunity(db, null, {
 		title: `Bulk Upload (${bulkUploadTask.createdAt})`,
 		funderShortCode: bulkUploadTask.funderShortCode,
 	});
@@ -215,7 +215,7 @@ const createOrLoadChangemaker = async (
 		return await loadChangemakerByTaxId(db, authContext, writeValues.taxId);
 	} catch {
 		if (writeValues.name !== undefined) {
-			return createChangemaker(db, null, {
+			return await createChangemaker(db, null, {
 				...writeValues,
 				name: writeValues.name, // This looks silly, but TypeScript isn't guarding `writeValues`, just `writeValues.name`.
 			});
@@ -393,7 +393,7 @@ export const processBulkUploadTask = async (
 						fieldValue,
 						applicationFormField.baseField.dataType,
 					);
-					return createProposalFieldValue(db, null, {
+					return await createProposalFieldValue(db, null, {
 						proposalVersionId: proposalVersion.id,
 						applicationFormFieldId: applicationFormField.id,
 						value: fieldValue,

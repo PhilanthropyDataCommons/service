@@ -53,17 +53,18 @@ const addUserContext = (
 	})
 		.then(() => {
 			const createEphemeralUserGroupAssociationPromises =
-				keycloakOrganizationIds.map(async (keycloakOrganizationId) =>
-					createEphemeralUserGroupAssociation(db, null, {
-						userKeycloakUserId: keycloakUserId,
-						userGroupKeycloakOrganizationId: keycloakOrganizationId,
-						notAfter: new Date(
-							Math.max(
-								jwtExpiration,
-								MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS,
-							) * MS_PER_SECOND,
-						).toISOString(),
-					}),
+				keycloakOrganizationIds.map(
+					async (keycloakOrganizationId) =>
+						await createEphemeralUserGroupAssociation(db, null, {
+							userKeycloakUserId: keycloakUserId,
+							userGroupKeycloakOrganizationId: keycloakOrganizationId,
+							notAfter: new Date(
+								Math.max(
+									jwtExpiration,
+									MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS,
+								) * MS_PER_SECOND,
+							).toISOString(),
+						}),
 				);
 			Promise.all(createEphemeralUserGroupAssociationPromises)
 				.then(() => {

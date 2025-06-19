@@ -101,11 +101,12 @@ const postApplicationForms = async (
 				opportunityId,
 			});
 			const applicationFormFields = await Promise.all(
-				fields.map(async (field) =>
-					createApplicationFormField(transactionDb, null, {
-						...field,
-						applicationFormId: applicationForm.id,
-					}),
+				fields.map(
+					async (field) =>
+						await createApplicationFormField(transactionDb, null, {
+							...field,
+							applicationFormId: applicationForm.id,
+						}),
 				),
 			);
 			return {

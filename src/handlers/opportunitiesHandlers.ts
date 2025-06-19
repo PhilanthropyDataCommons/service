@@ -39,7 +39,9 @@ const getOpportunity = async (req: Request, res: Response): Promise<void> => {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
 	}
-	const { opportunityId } = req.params;
+	const {
+		params: { opportunityId },
+	} = req;
 	if (!isId(opportunityId)) {
 		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}

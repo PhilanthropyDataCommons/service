@@ -33,7 +33,9 @@ const getDataProviders = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getDataProvider = async (req: Request, res: Response): Promise<void> => {
-	const { dataProviderShortCode } = req.params;
+	const {
+		params: { dataProviderShortCode },
+	} = req;
 	if (!isShortCode(dataProviderShortCode)) {
 		throw new InputValidationError(
 			'Invalid short code.',
@@ -51,20 +53,24 @@ const putDataProvider = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const shortCode = req.params.dataProviderShortCode;
+	const {
+		params: { dataProviderShortCode: shortCode },
+	} = req;
 	if (!isShortCode(shortCode)) {
 		throw new InputValidationError(
 			'Invalid short code.',
 			isShortCode.errors ?? [],
 		);
 	}
-	if (!isWritableDataProvider(req.body)) {
+
+	const body = req.body as unknown;
+	if (!isWritableDataProvider(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableDataProvider.errors ?? [],
 		);
 	}
-	const { name, keycloakOrganizationId } = req.body;
+	const { name, keycloakOrganizationId } = body;
 	const dataProvider = await createOrUpdateDataProvider(db, null, {
 		shortCode,
 		name,

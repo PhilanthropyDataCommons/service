@@ -103,7 +103,9 @@ const postPlatformProviderResponse = (
 		req.body,
 	)
 		.then((opportunitiesQueryResult) => {
-			const [platformProviderResponse] = opportunitiesQueryResult.rows;
+			const {
+				rows: [platformProviderResponse],
+			} = opportunitiesQueryResult;
 			res
 				.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 				.contentType('application/json')

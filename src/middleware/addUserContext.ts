@@ -53,7 +53,7 @@ const addUserContext = (
 	})
 		.then(() => {
 			const createEphemeralUserGroupAssociationPromises =
-				keycloakOrganizationIds.map((keycloakOrganizationId) =>
+				keycloakOrganizationIds.map(async (keycloakOrganizationId) =>
 					createEphemeralUserGroupAssociation(db, null, {
 						userKeycloakUserId: keycloakUserId,
 						userGroupKeycloakOrganizationId: keycloakOrganizationId,

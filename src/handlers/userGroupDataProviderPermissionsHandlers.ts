@@ -19,8 +19,9 @@ const deleteUserGroupDataProviderPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const { keycloakOrganizationId, dataProviderShortCode, permission } =
-		req.params;
+	const {
+		params: { keycloakOrganizationId, dataProviderShortCode, permission },
+	} = req;
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
 			'Invalid keycloakOrganizationId parameter.',
@@ -61,8 +62,9 @@ const putUserGroupDataProviderPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const { keycloakOrganizationId, dataProviderShortCode, permission } =
-		req.params;
+	const {
+		params: { keycloakOrganizationId, dataProviderShortCode, permission },
+	} = req;
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(

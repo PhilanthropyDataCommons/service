@@ -28,7 +28,9 @@ const requireChangemakerPermission =
 			next();
 			return;
 		}
-		const { changemakerId } = req.params;
+		const {
+			params: { changemakerId },
+		} = req;
 		if (!isId(changemakerId)) {
 			next(
 				new InputValidationError('Invalid changemakerId.', isId.errors ?? []),

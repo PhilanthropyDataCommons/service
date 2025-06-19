@@ -33,7 +33,7 @@ export class NotFoundError extends Error {
 		options?: object,
 	) {
 		super(message, options);
-		this.name = this.constructor.name;
+		this.name = 'NotFoundError';
 		this.details = details;
 	}
 }

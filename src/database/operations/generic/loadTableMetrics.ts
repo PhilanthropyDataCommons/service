@@ -12,7 +12,9 @@ export const loadTableMetrics = async (
     FROM ${tableName};
   `);
 
-	const [metrics] = metricsQueryResult.rows;
+	const {
+		rows: [metrics],
+	} = metricsQueryResult;
 	if (metrics === undefined) {
 		throw new Error(
 			`Something went wrong collecting table metrics for ${tableName}`,

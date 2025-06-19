@@ -121,7 +121,7 @@ export const copyBaseFields = async (
 	const remoteBaseFields = await fetchBaseFieldsFromRemote(
 		baseFieldsCopyTask.pdcApiUrl,
 		helpers.logger,
-	).catch(async (err) => {
+	).catch(async (err: unknown) => {
 		helpers.logger.warn('Fetching data from remote instance failed', { err });
 		await updateBaseFieldsCopyTask(
 			db,
@@ -133,7 +133,7 @@ export const copyBaseFields = async (
 		);
 	});
 
-	if (!remoteBaseFields) {
+	if (remoteBaseFields === undefined) {
 		return;
 	}
 

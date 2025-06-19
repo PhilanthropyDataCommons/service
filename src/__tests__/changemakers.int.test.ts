@@ -95,12 +95,10 @@ const setupTestContext = async () => {
 		name: 'Changemaker 5387',
 		keycloakOrganizationId: '8b15d276-be48-11ef-a061-5b4a50e82d50',
 	});
-	const secondChangemakerSourceId = (
-		await createSource(db, null, {
-			changemakerId: secondChangemaker.id,
-			label: `${secondChangemaker.name} source`,
-		})
-	).id;
+	const { id: secondChangemakerSourceId } = await createSource(db, null, {
+		changemakerId: secondChangemaker.id,
+		label: `${secondChangemaker.name} source`,
+	});
 	const firstFunder = await createOrUpdateFunder(db, null, {
 		shortCode: 'funder_5393',
 		name: 'Funder 5393',
@@ -110,12 +108,10 @@ const setupTestContext = async () => {
 		title: `${firstFunder.name} opportunity`,
 		funderShortCode: firstFunder.shortCode,
 	});
-	const firstFunderSourceId = (
-		await createSource(db, null, {
-			funderShortCode: firstFunder.shortCode,
-			label: `${firstFunder.name} source`,
-		})
-	).id;
+	const { id: firstFunderSourceId } = await createSource(db, null, {
+		funderShortCode: firstFunder.shortCode,
+		label: `${firstFunder.name} source`,
+	});
 	const firstDataProvider = await createOrUpdateDataProvider(db, null, {
 		shortCode: 'data_provider_5431',
 		name: 'Data Platform Provider 5431',
@@ -126,18 +122,14 @@ const setupTestContext = async () => {
 		name: 'Data Platform Provider 5477',
 		keycloakOrganizationId: null,
 	});
-	const firstDataProviderSourceId = (
-		await createSource(db, null, {
-			dataProviderShortCode: firstDataProvider.shortCode,
-			label: `${firstDataProvider.name} source`,
-		})
-	).id;
-	const secondDataProviderSourceId = (
-		await createSource(db, null, {
-			dataProviderShortCode: secondDataProvider.shortCode,
-			label: `${secondDataProvider.name} source`,
-		})
-	).id;
+	const { id: firstDataProviderSourceId } = await createSource(db, null, {
+		dataProviderShortCode: firstDataProvider.shortCode,
+		label: `${firstDataProvider.name} source`,
+	});
+	const { id: secondDataProviderSourceId } = await createSource(db, null, {
+		dataProviderShortCode: secondDataProvider.shortCode,
+		label: `${secondDataProvider.name} source`,
+	});
 
 	return {
 		systemSource,
@@ -433,25 +425,29 @@ describe('/changemakers', () => {
 					systemSource,
 				} = await setupTestContext();
 				// Associate a base field associated with one opportunity/org, and add three responses.
-				const baseFieldShortCode = baseFieldEmail.shortCode;
-				const changemakerId = firstChangemaker.id;
-				const opportunityId = firstFunderOpportunity.id;
-				const proposalId = (
-					await createProposal(db, systemUserAuthContext, {
+				const { shortCode: baseFieldShortCode } = baseFieldEmail;
+				const { id: changemakerId } = firstChangemaker;
+				const { id: opportunityId } = firstFunderOpportunity;
+				const { id: proposalId } = await createProposal(
+					db,
+					systemUserAuthContext,
+					{
 						opportunityId,
 						externalId: 'Proposal',
-					})
-				).id;
+					},
+				);
 				await createChangemakerProposal(db, null, {
 					changemakerId,
 					proposalId,
 				});
 				// I need 3 application form fields here. May as well make them use distinct forms too.
-				const applicationFormIdEarliest = (
-					await createApplicationForm(db, null, {
+				const { id: applicationFormIdEarliest } = await createApplicationForm(
+					db,
+					null,
+					{
 						opportunityId,
-					})
-				).id;
+					},
+				);
 				// Older field that is valid
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
@@ -474,11 +470,10 @@ describe('/changemakers', () => {
 					isValid: true,
 					goodAsOf: null,
 				});
-				const applicationFormIdLatestValid = (
+				const { id: applicationFormIdLatestValid } =
 					await createApplicationForm(db, null, {
 						opportunityId,
-					})
-				).id;
+					});
 				const latestValidValue = await createProposalFieldValue(db, null, {
 					proposalVersionId: (
 						await createProposalVersion(db, systemUserAuthContext, {
@@ -500,11 +495,13 @@ describe('/changemakers', () => {
 					isValid: true,
 					goodAsOf: null,
 				});
-				const applicationFormIdLatest = (
-					await createApplicationForm(db, null, {
+				const { id: applicationFormIdLatest } = await createApplicationForm(
+					db,
+					null,
+					{
 						opportunityId,
-					})
-				).id;
+					},
+				);
 				// Latest value but invalid
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
@@ -554,22 +551,23 @@ describe('/changemakers', () => {
 					systemUserAuthContext,
 				} = await setupTestContext();
 
-				const baseFieldShortCode = baseFieldPhone.shortCode;
-				const proposalId = (
-					await createProposal(db, systemUserAuthContext, {
+				const { shortCode: baseFieldShortCode } = baseFieldPhone;
+				const { id: proposalId } = await createProposal(
+					db,
+					systemUserAuthContext,
+					{
 						opportunityId: opportunity.id,
 						externalId: `Proposal to ${opportunity.title}`,
-					})
-				).id;
+					},
+				);
 				await createChangemakerProposal(db, null, {
 					changemakerId: changemaker.id,
 					proposalId,
 				});
-				const applicationFormIdChangemakerEarliest = (
+				const { id: applicationFormIdChangemakerEarliest } =
 					await createApplicationForm(db, null, {
 						opportunityId: opportunity.id,
-					})
-				).id;
+					});
 				// Set up older field value that is from the changemaker. We'll expect this to be returned.
 				const changemakerEarliestValue = await createProposalFieldValue(
 					db,
@@ -596,11 +594,10 @@ describe('/changemakers', () => {
 						goodAsOf: null,
 					},
 				);
-				const applicationFormIdFunderLatest = (
+				const { id: applicationFormIdFunderLatest } =
 					await createApplicationForm(db, null, {
 						opportunityId: opportunity.id,
-					})
-				).id;
+					});
 				// Set up newer field value that is from the funder.
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
@@ -646,22 +643,23 @@ describe('/changemakers', () => {
 					systemUserAuthContext,
 				} = await setupTestContext();
 
-				const baseFieldShortCode = baseFieldPhone.shortCode;
-				const proposalId = (
-					await createProposal(db, systemUserAuthContext, {
+				const { shortCode: baseFieldShortCode } = baseFieldPhone;
+				const { id: proposalId } = await createProposal(
+					db,
+					systemUserAuthContext,
+					{
 						opportunityId: opportunity.id,
 						externalId: `Another proposal to ${opportunity.title}`,
-					})
-				).id;
+					},
+				);
 				await createChangemakerProposal(db, null, {
 					changemakerId: changemaker.id,
 					proposalId,
 				});
-				const applicationFormIdFunderEarliest = (
+				const { id: applicationFormIdFunderEarliest } =
 					await createApplicationForm(db, null, {
 						opportunityId: opportunity.id,
-					})
-				).id;
+					});
 				// Set up older field value that is from the funder. We'll expect this to be returned.
 				const funderEarliestValue = await createProposalFieldValue(db, null, {
 					proposalVersionId: (
@@ -684,11 +682,10 @@ describe('/changemakers', () => {
 					isValid: true,
 					goodAsOf: null,
 				});
-				const applicationFormIdDataProviderLatest = (
+				const { id: applicationFormIdDataProviderLatest } =
 					await createApplicationForm(db, null, {
 						opportunityId: opportunity.id,
-					})
-				).id;
+					});
 				// Set up newer field value that is from the data platform provider.
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
@@ -736,21 +733,22 @@ describe('/changemakers', () => {
 
 				// Set up data platform provider sources.
 				// Associate one opportunity, one changemaker, and two responses with a base field.
-				const proposalId = (
-					await createProposal(db, systemUserAuthContext, {
+				const { id: proposalId } = await createProposal(
+					db,
+					systemUserAuthContext,
+					{
 						opportunityId: firstFunderOpportunity.id,
 						externalId: `Yet another proposal to ${firstFunderOpportunity.title}`,
-					})
-				).id;
+					},
+				);
 				await createChangemakerProposal(db, null, {
 					changemakerId: changemaker.id,
 					proposalId,
 				});
-				const applicationFormIdDataProviderEarliest = (
+				const { id: applicationFormIdDataProviderEarliest } =
 					await createApplicationForm(db, null, {
 						opportunityId: firstFunderOpportunity.id,
-					})
-				).id;
+					});
 				// Set up older field value.
 				await createProposalFieldValue(db, null, {
 					proposalVersionId: (
@@ -773,11 +771,10 @@ describe('/changemakers', () => {
 					isValid: true,
 					goodAsOf: null,
 				});
-				const applicationFormIdDataProviderLatest = (
+				const { id: applicationFormIdDataProviderLatest } =
 					await createApplicationForm(db, null, {
 						opportunityId: firstFunderOpportunity.id,
-					})
-				).id;
+					});
 				// Set up newer field value.
 				const dataProviderNewestValue = await createProposalFieldValue(
 					db,

@@ -37,7 +37,7 @@ const createTestBaseFieldsCopyTask = async (
 		status: TaskStatus.PENDING,
 		statusUpdatedAt: new Date(Date.now()).toISOString(),
 	};
-	return createBaseFieldsCopyTask(db, authContext, {
+	return await createBaseFieldsCopyTask(db, authContext, {
 		...defaultValues,
 		...overrideValues,
 	});

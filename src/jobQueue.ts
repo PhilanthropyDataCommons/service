@@ -49,22 +49,23 @@ export const startJobQueue = async (): Promise<void> => {
 			copyBaseFields,
 		},
 	});
-	runner.promise.catch((err) => {
+	runner.promise.catch((err: unknown) => {
 		logger.error(err, 'The queue worker failed.');
 	});
 };
 
-export const runJobQueueMigrations = async (): Promise<void> =>
-	runMigrations({
+export const runJobQueueMigrations = async (): Promise<void> => {
+	await runMigrations({
 		logger: jobQueueLogger,
 		pgPool: db.pool,
 	});
+};
 
 export const addJob = async (
 	jobType: JobType,
 	payload: unknown,
 ): Promise<Job> =>
-	quickAddJob(
+	await quickAddJob(
 		{
 			logger: jobQueueLogger,
 			pgPool: db.pool,
@@ -75,8 +76,8 @@ export const addJob = async (
 
 export const addProcessBulkUploadJob = async (
 	payload: ProcessBulkUploadJobPayload,
-): Promise<Job> => addJob(JobType.PROCESS_BULK_UPLOAD, payload);
+): Promise<Job> => await addJob(JobType.PROCESS_BULK_UPLOAD, payload);
 
 export const addCopyBaseFieldsJob = async (
 	payload: CopyBaseFieldsJobPayload,
-): Promise<Job> => addJob(JobType.COPY_BASE_FIELDS, payload);
+): Promise<Job> => await addJob(JobType.COPY_BASE_FIELDS, payload);

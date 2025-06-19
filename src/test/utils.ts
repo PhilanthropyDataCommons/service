@@ -6,8 +6,9 @@ import type { AuthContext, KeycloakId, User } from '../types';
 // send another call to setImmediate to make sure previous calls to setImmediate have made it
 // through the event loop. Otherwise jest misses the call (it hasn't happened yet). Kudos:
 // https://stackoverflow.com/questions/41792927/jest-tests-cant-fail-within-setimmediate-or-process-nexttick-callback#answer-59604256
-export const allowNextToResolve = async (): Promise<void> =>
-	new Promise(setImmediate);
+export const allowNextToResolve = async (): Promise<void> => {
+	await new Promise(setImmediate);
+};
 
 export const generateNextWithAssertions = (
 	runAssertions: (err?: unknown) => Promise<void>,
@@ -21,12 +22,12 @@ export const getTestUserKeycloakUserId = (): KeycloakId =>
 	stringToKeycloakId('11111111-1111-1111-1111-111111111111'); // This value is not a reference, it's just a static GUID
 
 export const createTestUser = async (): Promise<User> =>
-	createOrUpdateUser(db, null, {
+	await createOrUpdateUser(db, null, {
 		keycloakUserId: getTestUserKeycloakUserId(),
 	});
 
 export const loadTestUser = async (): Promise<User> =>
-	loadUserByKeycloakUserId(db, null, getTestUserKeycloakUserId());
+	await loadUserByKeycloakUserId(db, null, getTestUserKeycloakUserId());
 
 export const getAuthContext = (
 	user: User,

@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import { migrate as pgMigrate } from 'postgres-schema-migrations';
 import { runJobQueueMigrations } from '../jobQueue';
 import { getLogger } from '../logger';

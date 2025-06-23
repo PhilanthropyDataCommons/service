@@ -1,6 +1,6 @@
-import fs from 'fs';
-import { Readable } from 'stream';
-import { finished } from 'stream/promises';
+import fs from 'node:fs';
+import { Readable } from 'node:stream';
+import { finished } from 'node:stream/promises';
 import { parse } from 'csv-parse';
 import { requireEnv } from 'require-env-variable';
 import tmp from 'tmp-promise';

@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { issuer } from '../../auth/jwtOptions';
 import { documentationHandlers } from '../documentationHandlers';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';

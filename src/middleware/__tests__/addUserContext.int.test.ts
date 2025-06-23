@@ -148,9 +148,10 @@ describe('addUserContext', () => {
 					expect(userCount).toEqual(baselineUserCount);
 					expect(req.user).toBe(undefined);
 					expect(err).toBeInstanceOf(InputValidationError);
-					// We just validated that err is an InputValidationError
-					// but eslint doesn't recognize that fact.
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+					/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+					 * We just validated that err is an InputValidationError
+					 * but eslint doesn't recognize that fact.
+					 */
 					expect((err as InputValidationError).message).toEqual(
 						'auth subject must be a valid keycloak user id',
 					);

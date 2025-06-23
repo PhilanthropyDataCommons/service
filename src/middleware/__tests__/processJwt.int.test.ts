@@ -25,15 +25,15 @@ jest.mock('express-jwt', () => ({
 				// will default to the actual middleware, BUT if a test has defined a mock implementation it
 				// should use the mock middleware instead.
 				if (customMiddleware.getMockImplementation() === undefined) {
-					// It's not clear to me why jest isn't properly typing
-					// these values, but this seems like a jest problem not an us problem.
-					/* eslint-disable @typescript-eslint/no-unsafe-call */
-					/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+					//
+					/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access --
+					 * It's not clear to me why jest isn't properly typing
+					 * these values, but this seems like a jest problem not an us problem.
+					 */
 					return jest
 						.requireActual('express-jwt')
 						.expressjwt(...expressJwtArgs)(...middlewareArgs) as unknown;
-					/* eslint-enable @typescript-eslint/no-unsafe-member-access */
-					/* eslint-enable @typescript-eslint/no-unsafe-call */
+					/* eslint-enable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
 				}
 				return customMiddleware(...middlewareArgs) as unknown;
 			},
@@ -117,8 +117,9 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 		req.headers = badJwt;
 		const makeAssertions = async (err: unknown) => {
 			expect(err).toBeInstanceOf(Error);
-			// We just validated that err is an Error, but eslint doesn't recognize that fact.
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+			/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+			 * We just validated that err is an Error, but eslint doesn't recognize that fact.
+			 */
 			expect((err as Error).message).toBe('invalid signature');
 			expect(req.auth).toBe(undefined);
 		};

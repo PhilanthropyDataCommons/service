@@ -131,14 +131,16 @@ const getDetailsForError = (error: unknown): unknown[] => {
 	return [error];
 };
 
-// Express requires us to have four parameters or else it doesn't know this is
-// intended to be an error handler; this is why we must include `next` even though
-// it isn't actually used.
 export const errorHandler = (
 	err: unknown,
 	req: Request,
 	res: Response,
-	next: NextFunction, // eslint-disable-line @typescript-eslint/no-unused-vars
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars --
+	 * Express requires us to have four parameters or else it doesn't know this is
+	 * intended to be an error handler; this is why we must include `next` even though
+	 * it isn't actually used.
+	 */
+	next: NextFunction,
 ): void => {
 	logger.trace(req.body);
 	const wrappedError = isTinyPgErrorWithQueryContext(err)

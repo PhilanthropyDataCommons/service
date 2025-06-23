@@ -10,11 +10,12 @@ type KeycloakId = Newtype<{ readonly KeycloakId: unique symbol }, Uuid>;
 
 const keycloakIdIsomorphism = createNewtypeIsomorphism<KeycloakId>();
 
-// JSONSchemaType is trying to take the Newytype (KeycloakId) at face value,
-// including the phantom attributes that make a Newtype what it is.
-// This is not accurate / does not reflect runtime values (kecloakIds are uuids)
-// and so we need to make this otherwise unsafe cast.
-// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+ * JSONSchemaType is trying to take the Newytype (KeycloakId) at face value,
+ * including the phantom attributes that make a Newtype what it is.
+ * This is not accurate / does not reflect runtime values (kecloakIds are uuids)
+ * and so we need to make this otherwise unsafe cast.
+ */
 const keycloakIdSchema = uuidSchema as JSONSchemaType<KeycloakId>;
 
 const isKeycloakId = ajv.compile(keycloakIdSchema);

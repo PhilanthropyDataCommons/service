@@ -25,7 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'eslint-comments/require-description': 'off',
 			'import/first': 'off',
 			'max-lines': 'off',
 			'max-nested-callbacks': 'off',

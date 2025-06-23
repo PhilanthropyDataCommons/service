@@ -125,8 +125,9 @@ const assertShortCodesAreValid = async (
 	await assertShortCodesReferToExistingBaseFields(shortCodes);
 };
 
-// The meaning of "0" here is pretty explicit, especially wrapped in a named helper
-// eslint-disable-next-line @typescript-eslint/no-magic-numbers
+/* eslint-disable-next-line @typescript-eslint/no-magic-numbers --
+ * The meaning of "0" here is pretty explicit, especially wrapped in a named helper
+ */
 const isEmpty = (arr: unknown[]): boolean => arr.length === 0;
 
 const assertCsvContainsValidShortCodes = async (

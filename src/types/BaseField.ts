@@ -70,9 +70,10 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 		valueRelevanceHours: {
 			type: 'number',
 			minimum: 0,
-			// This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
-			// See: https://github.com/ajv-validator/ajv/issues/2163
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+			/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+			 * This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
+			 * See: https://github.com/ajv-validator/ajv/issues/2163
+			 */
 			nullable: true as false,
 		},
 		sensitivityClassification: {
@@ -129,9 +130,10 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 		valueRelevanceHours: {
 			type: 'number',
 			minimum: 0,
-			// This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
-			// See: https://github.com/ajv-validator/ajv/issues/2163
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+			/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+			 * This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
+			 * See: https://github.com/ajv-validator/ajv/issues/2163
+			 */
 			nullable: true as false,
 		},
 		sensitivityClassification: {

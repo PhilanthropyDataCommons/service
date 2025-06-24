@@ -363,12 +363,14 @@ describe('/proposalVersions', () => {
 				baseFieldShortCode: 'firstName',
 				position: 1,
 				label: 'First Name',
+				instructions: 'Please enter the first name of the applicant.',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldShortCode: 'lastName',
 				position: 2,
 				label: 'Last Name',
+				instructions: 'Please enter the last name of the applicant.',
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			const result = await request(app)
@@ -461,6 +463,7 @@ describe('/proposalVersions', () => {
 					baseFieldShortCode: forbiddenBaseField.shortCode,
 					position: 1,
 					label: 'Forbidden Field',
+					instructions: 'This field should not be used in proposal versions',
 				},
 			);
 			const proposalVersion = await createProposalVersion(
@@ -801,12 +804,14 @@ describe('/proposalVersions', () => {
 				baseFieldShortCode: 'firstName',
 				position: 1,
 				label: 'First Name',
+				instructions: 'Please enter the first name of the applicant.',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldShortCode: 'lastName',
 				position: 2,
 				label: 'Last Name',
+				instructions: 'Please enter the last name of the applicant.',
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);

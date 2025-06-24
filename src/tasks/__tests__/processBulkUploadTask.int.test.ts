@@ -525,6 +525,7 @@ describe('processBulkUploadTask', () => {
 										baseFieldShortCode: 'proposal_submitter_email',
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
+										instructions: '',
 										label: 'Proposal Submitter Email',
 										position: 0,
 									},
@@ -555,6 +556,8 @@ describe('processBulkUploadTask', () => {
 										baseFieldShortCode: 'organization_name',
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
+										instructions: '',
+
 										label: 'Organization Name',
 										position: 1,
 									},
@@ -607,6 +610,8 @@ describe('processBulkUploadTask', () => {
 										baseFieldShortCode: 'proposal_submitter_email',
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
+										instructions: '',
+
 										label: 'Proposal Submitter Email',
 										position: 0,
 									},
@@ -637,6 +642,8 @@ describe('processBulkUploadTask', () => {
 										baseFieldShortCode: 'organization_name',
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
+										instructions: '',
+
 										label: 'Organization Name',
 										position: 1,
 									},

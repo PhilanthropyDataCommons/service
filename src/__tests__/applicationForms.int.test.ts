@@ -202,24 +202,28 @@ describe('/applicationForms', () => {
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Anni Worki',
+				instructions: 'Please enter the number of years of work.',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 3,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Org Nomen',
+				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 2,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
+				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 2,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
+				instructions: 'Please enter the number of years of work.',
 			});
 			const result = await request(app)
 				.get('/applicationForms/2')
@@ -290,12 +294,14 @@ describe('/applicationForms', () => {
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
+				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
+				instructions: 'Please enter the number of years of work.',
 			});
 			const result = await request(app)
 				.get('/applicationForms/1')
@@ -320,6 +326,7 @@ describe('/applicationForms', () => {
 						},
 						position: 1,
 						label: 'Duration of work in years',
+						instructions: 'Please enter the number of years of work.',
 						createdAt: expectTimestamp(),
 					},
 					{
@@ -334,6 +341,7 @@ describe('/applicationForms', () => {
 						},
 						position: 2,
 						label: 'Name of Organization',
+						instructions: 'Please enter the name of the organization.',
 						createdAt: expectTimestamp(),
 					},
 				],
@@ -365,6 +373,7 @@ describe('/applicationForms', () => {
 				baseFieldShortCode: forbiddenBaseField.shortCode,
 				position: 1,
 				label: 'Anni Worki',
+				instructions: 'Please enter the number of years of work.',
 			});
 			await createOrUpdateBaseField(db, null, {
 				...forbiddenBaseField,
@@ -412,12 +421,14 @@ describe('/applicationForms', () => {
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
+				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
+				instructions: 'Please enter the number of years of work.',
 			});
 			await request(app).get('/applicationForms/1').set(authHeader).expect(404);
 		});
@@ -560,6 +571,7 @@ describe('/applicationForms', () => {
 							baseFieldShortCode: 'organizationName',
 							position: 1,
 							label: 'Organization Name',
+							instructions: 'Please enter the name of the organization.',
 						},
 					],
 				})
@@ -578,6 +590,7 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp(),
 						id: 1,
 						label: 'Organization Name',
+						instructions: 'Please enter the name of the organization.',
 						position: 1,
 					},
 				],

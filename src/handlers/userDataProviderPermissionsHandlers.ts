@@ -19,7 +19,9 @@ const deleteUserDataProviderPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const { userKeycloakUserId, dataProviderShortCode, permission } = req.params;
+	const {
+		params: { userKeycloakUserId, dataProviderShortCode, permission },
+	} = req;
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(
 			'Invalid userKeycloakUserId parameter.',
@@ -60,7 +62,9 @@ const putUserDataProviderPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const { userKeycloakUserId, dataProviderShortCode, permission } = req.params;
+	const {
+		params: { userKeycloakUserId, dataProviderShortCode, permission },
+	} = req;
 
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(

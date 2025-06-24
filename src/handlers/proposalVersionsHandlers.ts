@@ -48,7 +48,7 @@ const assertApplicationFormExistsForProposal = async (
 	});
 
 	const proposal = await loadProposal(db, authContext, proposalId).catch(
-		(err) => {
+		(err: unknown) => {
 			if (err instanceof NotFoundError) {
 				throw new InputConflictError(
 					`The specified Proposal does not exist (${proposalId}).`,
@@ -125,15 +125,16 @@ const postProposalVersion = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	if (!isWritableProposalVersionWithFieldValues(req.body)) {
+
+	const body = req.body as unknown;
+	if (!isWritableProposalVersionWithFieldValues(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableProposalVersionWithFieldValues.errors ?? [],
 		);
 	}
 
-	const { sourceId, fieldValues, proposalId, applicationFormId } = req.body;
-
+	const { sourceId, fieldValues, proposalId, applicationFormId } = body;
 	try {
 		const proposal = await loadProposal(db, req, proposalId);
 		const opportunity = await loadOpportunity(db, req, proposal.opportunityId);
@@ -222,7 +223,10 @@ const getProposalVersion = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const { proposalVersionId } = req.params;
+
+	const {
+		params: { proposalVersionId },
+	} = req;
 	if (!isId(proposalVersionId)) {
 		throw new InputValidationError(
 			'Invalid query parameter.',

@@ -28,7 +28,9 @@ const requireFunderPermission =
 			next();
 			return;
 		}
-		const { funderShortCode } = req.params;
+		const {
+			params: { funderShortCode },
+		} = req;
 		if (!isShortCode(funderShortCode)) {
 			next(
 				new InputValidationError(

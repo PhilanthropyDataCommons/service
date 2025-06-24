@@ -25,14 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'@typescript-eslint/non-nullable-type-assertion-style': 'off',
-			'@typescript-eslint/prefer-destructuring': 'off',
-			'@typescript-eslint/prefer-optional-chain': 'off',
-			'@typescript-eslint/promise-function-async': 'off',
-			'@typescript-eslint/return-await': 'off',
-			'@typescript-eslint/strict-boolean-expressions': 'off',
-			'@typescript-eslint/use-unknown-in-catch-callback-variable': 'off',
-			'eslint-comments/require-description': 'off',
 			'import/first': 'off',
 			'max-lines': 'off',
 			'max-nested-callbacks': 'off',

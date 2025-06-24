@@ -21,8 +21,9 @@ describe('requireAuthentication', () => {
 		req.user = getMockedUser();
 		const nextMock = jest.fn((error) => {
 			expect(error).toBeInstanceOf(UnauthorizedError);
-			// We have validated that error is an UnauthorizedError, but eslint doesn't recognize that fact.
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+			/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+			 * We have validated that error is an UnauthorizedError, but eslint doesn't recognize that fact.
+			 */
 			expect((error as UnauthorizedError).message).toEqual(
 				'Your account must have the administrator role.',
 			);
@@ -40,8 +41,9 @@ describe('requireAuthentication', () => {
 		};
 		const nextMock = jest.fn((error) => {
 			expect(error).toBeInstanceOf(UnauthorizedError);
-			// We have validated that error is an UnauthorizedError, but eslint doesn't recognize that fact.
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+			/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+			 * We have validated that error is an UnauthorizedError, but eslint doesn't recognize that fact.
+			 */
 			expect((error as UnauthorizedError).message).toEqual(
 				'Your account must have the administrator role.',
 			);

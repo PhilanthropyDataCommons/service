@@ -61,7 +61,9 @@ const getChangemakers = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getChangemaker = async (req: Request, res: Response): Promise<void> => {
-	const { changemakerId } = req.params;
+	const {
+		params: { changemakerId },
+	} = req;
 	if (!isId(changemakerId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
@@ -82,7 +84,9 @@ const patchChangemaker = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const { changemakerId } = req.params;
+	const {
+		params: { changemakerId },
+	} = req;
 	if (!isId(changemakerId)) {
 		throw new InputValidationError(
 			'Invalid request parameter.',
@@ -136,7 +140,9 @@ const putChangemakerFiscalSponsor = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 		return;
 	}
-	const { changemakerId, fiscalSponsorChangemakerId } = req.params;
+	const {
+		params: { changemakerId, fiscalSponsorChangemakerId },
+	} = req;
 	if (!isId(changemakerId)) {
 		throw new InputValidationError(
 			'Invalid changemakerId parameter.',
@@ -164,7 +170,9 @@ const deleteChangemakerFiscalSponsor = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const { changemakerId, fiscalSponsorChangemakerId } = req.params;
+	const {
+		params: { changemakerId, fiscalSponsorChangemakerId },
+	} = req;
 	if (!isId(changemakerId)) {
 		throw new InputValidationError(
 			'Invalid changemakerId parameter.',

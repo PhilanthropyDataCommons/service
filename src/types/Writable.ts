@@ -1,3 +1,10 @@
+/* eslint-disable eslint-comments/require-description --
+ * The work required to thoughtfully comment on each of these disables at this point is probably
+ * similar to the work required to potentially refactor in a way that would remove the need to disable
+ * the rule in the first place.
+ * This represents known technical debt that we will address in the future.
+ * See issue https://github.com/PhilanthropyDataCommons/service/issues/1730
+ */
 // This is a utility type definition and needs some weird / wonky types, so we need our linter to chill out
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */

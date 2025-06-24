@@ -62,7 +62,7 @@ const downloadS3ObjectToTemporaryStorage = async (
 			Key: key,
 			Bucket: S3_BUCKET,
 		})
-		.catch(async (err) => {
+		.catch(async (err: unknown) => {
 			logger.error('Failed to load an object from S3', { err, key });
 			await temporaryFile.cleanup();
 			throw new Error('Unable to load the s3 object');
@@ -71,7 +71,7 @@ const downloadS3ObjectToTemporaryStorage = async (
 		throw new Error('S3 did not return a body');
 	}
 
-	const s3Body = s3Response.Body;
+	const { Body: s3Body } = s3Response;
 	if (!(s3Body instanceof Readable)) {
 		throw new Error('S3 response body is not a readable stream');
 	}
@@ -125,8 +125,9 @@ const assertShortCodesAreValid = async (
 	await assertShortCodesReferToExistingBaseFields(shortCodes);
 };
 
-// The meaning of "0" here is pretty explicit, especially wrapped in a named helper
-// eslint-disable-next-line @typescript-eslint/no-magic-numbers
+/* eslint-disable-next-line @typescript-eslint/no-magic-numbers --
+ * The meaning of "0" here is pretty explicit, especially wrapped in a named helper
+ */
 const isEmpty = (arr: unknown[]): boolean => arr.length === 0;
 
 const assertCsvContainsValidShortCodes = async (
@@ -165,7 +166,7 @@ const assertBulkUploadTaskCsvIsValid = async (
 const createOpportunityForBulkUploadTask = async (
 	bulkUploadTask: BulkUploadTask,
 ): Promise<Opportunity> =>
-	createOpportunity(db, null, {
+	await createOpportunity(db, null, {
 		title: `Bulk Upload (${bulkUploadTask.createdAt})`,
 		funderShortCode: bulkUploadTask.funderShortCode,
 	});
@@ -215,7 +216,7 @@ const createOrLoadChangemaker = async (
 		return await loadChangemakerByTaxId(db, authContext, writeValues.taxId);
 	} catch {
 		if (writeValues.name !== undefined) {
-			return createChangemaker(db, null, {
+			return await createChangemaker(db, null, {
 				...writeValues,
 				name: writeValues.name, // This looks silly, but TypeScript isn't guarding `writeValues`, just `writeValues.name`.
 			});
@@ -290,7 +291,7 @@ export const processBulkUploadTask = async (
 	const bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
 		bulkUploadTask.sourceKey,
 		helpers.logger,
-	).catch(async (err) => {
+	).catch(async (err: unknown) => {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
 		await updateBulkUploadTask(
 			db,
@@ -302,7 +303,7 @@ export const processBulkUploadTask = async (
 		);
 	});
 
-	if (!bulkUploadFile) {
+	if (bulkUploadFile === undefined) {
 		return;
 	}
 
@@ -359,8 +360,10 @@ export const processBulkUploadTask = async (
 				},
 			);
 
-			const changemakerName = record[changemakerNameIndex];
-			const changemakerTaxId = record[changemakerTaxIdIndex];
+			const {
+				[changemakerNameIndex]: changemakerName,
+				[changemakerTaxIdIndex]: changemakerTaxId,
+			} = record;
 			if (changemakerTaxId !== undefined) {
 				const changemaker = await createOrLoadChangemaker(
 					taskRunnerAuthContext,
@@ -381,7 +384,7 @@ export const processBulkUploadTask = async (
 
 			await allNoLeaks(
 				record.map<Promise<ProposalFieldValue>>(async (fieldValue, index) => {
-					const applicationFormField = applicationFormFields[index];
+					const { [index]: applicationFormField } = applicationFormFields;
 					if (applicationFormField === undefined) {
 						throw new Error(
 							'There is no form field associated with this column',
@@ -391,7 +394,7 @@ export const processBulkUploadTask = async (
 						fieldValue,
 						applicationFormField.baseField.dataType,
 					);
-					return createProposalFieldValue(db, null, {
+					return await createProposalFieldValue(db, null, {
 						proposalVersionId: proposalVersion.id,
 						applicationFormFieldId: applicationFormField.id,
 						value: fieldValue,
@@ -409,7 +412,7 @@ export const processBulkUploadTask = async (
 
 	try {
 		const fileStats = await fs.promises.stat(bulkUploadFile.path);
-		const fileSize = fileStats.size;
+		const { size: fileSize } = fileStats;
 		await updateBulkUploadTask(db, null, { fileSize }, bulkUploadTask.id);
 	} catch (err) {
 		helpers.logger.warn(

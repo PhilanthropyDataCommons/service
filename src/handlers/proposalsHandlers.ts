@@ -53,7 +53,10 @@ const getProposal = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const { proposalId } = req.params;
+
+	const {
+		params: { proposalId },
+	} = req;
 	if (!isId(proposalId)) {
 		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}
@@ -68,15 +71,16 @@ const postProposal = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	if (!isWritableProposal(req.body)) {
+
+	const body = req.body as unknown;
+	if (!isWritableProposal(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableProposal.errors ?? [],
 		);
 	}
 
-	const { externalId, opportunityId } = req.body;
-
+	const { externalId, opportunityId } = body;
 	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (

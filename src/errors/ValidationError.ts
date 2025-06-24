@@ -7,7 +7,7 @@ export class ValidationError extends Error {
 
 	public constructor(message: string, errors: ErrorObject[]) {
 		super(message);
-		this.name = this.constructor.name;
+		this.name = 'ValidationError';
 		this.errors = errors;
 	}
 }

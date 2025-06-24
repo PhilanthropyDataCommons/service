@@ -14,8 +14,9 @@ describe('requireAuthentication', () => {
 		await allowNextToResolve();
 
 		expect(nextMock).toHaveBeenCalled();
-		// We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
-		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+		/* eslint-disable @typescript-eslint/no-unsafe-member-access --
+		 * We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
+		 */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
 			'No authorization token was found.',
@@ -33,8 +34,9 @@ describe('requireAuthentication', () => {
 		await allowNextToResolve();
 
 		expect(nextMock).toHaveBeenCalled();
-		// We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
-		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+		/* eslint-disable @typescript-eslint/no-unsafe-member-access --
+		 * We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
+		 */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
 			'The authentication token must have a non-empty value for `auth.sub`.',
@@ -54,8 +56,9 @@ describe('requireAuthentication', () => {
 		await allowNextToResolve();
 
 		expect(nextMock).toHaveBeenCalled();
-		// We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
-		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+		/* eslint-disable @typescript-eslint/no-unsafe-member-access --
+		 * We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
+		 */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
 			'The authentication token must have a non-empty value for `auth.sub`.',
@@ -74,8 +77,9 @@ describe('requireAuthentication', () => {
 		await allowNextToResolve();
 
 		expect(nextMock).toHaveBeenCalled();
-		// We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
-		/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+		/* eslint-disable @typescript-eslint/no-unsafe-member-access --
+		 * We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
+		 */
 		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
 		expect(nextMock.mock.calls[0][0].message).toEqual(
 			'The request lacks an AuthContext.',

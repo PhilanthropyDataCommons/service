@@ -21,7 +21,7 @@ import {
 } from '../test/mockJwt';
 
 const createTestBaseField = async () =>
-	createOrUpdateBaseField(db, null, {
+	await createOrUpdateBaseField(db, null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
 		shortCode: 'summary',

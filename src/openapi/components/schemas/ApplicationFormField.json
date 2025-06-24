@@ -31,6 +31,11 @@
 			"type": "string",
 			"example": "Your First Name"
 		},
+		"instructions": {
+			"type": ["string", "null"],
+			"example": "Please enter the first name of the applicant.",
+			"description": "Explicit instructions for the user to fill information into the form field."
+		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",
@@ -44,6 +49,7 @@
 		"baseField",
 		"position",
 		"label",
-		"createdAt"
+		"createdAt",
+		"instructions"
 	]
 }

@@ -51,6 +51,7 @@ describe('/proposal_field_value_to_json', () => {
 				baseFieldShortCode: forbiddenBaseField.shortCode,
 				position: 1,
 				label: 'Forbidden Field',
+				instructions: 'This field should not be used in proposal versions',
 			},
 		);
 		const proposalVersion = await createProposalVersion(

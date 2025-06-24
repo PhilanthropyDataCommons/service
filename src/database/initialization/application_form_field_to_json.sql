@@ -19,6 +19,7 @@ BEGIN
     'baseField', base_field_json,
     'position', application_form_field.position,
     'label', application_form_field.label,
+    'instructions', application_form_field.instructions,
     'createdAt', application_form_field.created_at
   );
 END;

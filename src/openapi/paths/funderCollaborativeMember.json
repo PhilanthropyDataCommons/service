@@ -55,8 +55,8 @@
 		],
 		"parameters": [
 			{
-				"name": "funderShortCode",
-				"description": "The short code of a funder.",
+				"name": "funderCollaborativeShortCode",
+				"description": "The short code of a funder collaborative.",
 				"in": "path",
 				"required": true,
 				"schema": {
@@ -65,7 +65,7 @@
 			},
 			{
 				"name": "memberShortCode",
-				"description": "The short code of a member.",
+				"description": "The short code of the member funder to the collaborative.",
 				"in": "path",
 				"required": true,
 				"schema": {

@@ -10,6 +10,7 @@ interface ApplicationFormField {
 	readonly baseField: BaseField;
 	position: number;
 	label: string;
+	instructions: string;
 	readonly createdAt: string;
 }
 
@@ -33,8 +34,11 @@ const writableApplicationFormFieldWithApplicationContextSchema: JSONSchemaType<W
 			label: {
 				type: 'string',
 			},
+			instructions: {
+				type: 'string',
+			},
 		},
-		required: ['baseFieldShortCode', 'position', 'label'],
+		required: ['baseFieldShortCode', 'position', 'label', 'instructions'],
 	};
 
 export {

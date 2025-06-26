@@ -27,6 +27,12 @@ BEGIN
 		WHERE ephemeral_user_group_associations.user_keycloak_user_id = has_funder_permission.user_keycloak_user_id
 			AND user_group_funder_permissions.funder_short_code = has_funder_permission.funder_short_code
 			AND user_group_funder_permissions.permission = has_funder_permission.permission
+	) OR EXISTS (
+		SELECT 1
+		FROM user_funder_permissions
+		JOIN funder_collaborative_members ON funder_collaborative_members.member_short_code = user_funder_permissions.funder_short_code
+		WHERE funder_collaborative_members.member_short_code = user_funder_permissions.funder_short_code
+			AND funder_collaborative_members.funder_collaborative_short_code = has_funder_permission.funder_short_code
 	) INTO has_permission;
 
 	RETURN has_permission;

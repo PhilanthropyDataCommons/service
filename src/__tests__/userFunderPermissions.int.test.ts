@@ -25,6 +25,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await request(app)
 				.put(
@@ -40,6 +41,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 
 			await request(app)
@@ -89,6 +91,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 
 			const response = await request(app)
@@ -114,6 +117,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -145,6 +149,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -176,6 +181,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await request(app)
 				.delete(
@@ -191,6 +197,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await request(app)
 				.delete(
@@ -237,6 +244,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await request(app)
 				.delete(
@@ -254,6 +262,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -283,6 +292,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -328,6 +338,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 				shortCode: 'ExampleInc',
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,

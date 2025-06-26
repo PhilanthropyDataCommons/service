@@ -27,11 +27,13 @@ describe('/funders', () => {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateFunder(db, null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 
 			const response = await agent.get('/funders').set(authHeader).expect(200);
@@ -42,12 +44,14 @@ describe('/funders', () => {
 						createdAt: expectTimestamp(),
 						name: 'The Foundation Foundation',
 						keycloakOrganizationId: null,
+						isCollaborative: false,
 					},
 					{
 						shortCode: 'theFundFund',
 						createdAt: expectTimestamp(),
 						name: 'The Fund Fund',
 						keycloakOrganizationId: null,
+						isCollaborative: false,
 					},
 					systemFunder,
 				],
@@ -66,11 +70,13 @@ describe('/funders', () => {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await createOrUpdateFunder(db, null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
+				isCollaborative: false,
 			});
 
 			const response = await agent
@@ -82,6 +88,7 @@ describe('/funders', () => {
 				createdAt: expectTimestamp(),
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
+				isCollaborative: false,
 			});
 		});
 
@@ -90,6 +97,7 @@ describe('/funders', () => {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			await agent.get('/funders/foo').set(authHeader).expect(404);
 		});
@@ -110,13 +118,14 @@ describe('/funders', () => {
 				.put('/funders/firework')
 				.type('application/json')
 				.set(adminUserAuthHeader)
-				.send({ name: '🎆' })
+				.send({ name: '🎆', isCollaborative: false })
 				.expect(201);
 			const after = await loadTableMetrics('funders');
 			expect(result.body).toMatchObject({
 				shortCode: 'firework',
 				name: '🎆',
 				createdAt: expectTimestamp(),
+				isCollaborative: false,
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -126,7 +135,7 @@ describe('/funders', () => {
 				.put('/funders/Firework_-foo42')
 				.type('application/json')
 				.set(adminUserAuthHeader)
-				.send({ name: '🎆' })
+				.send({ name: '🎆', isCollaborative: false })
 				.expect(201);
 		});
 
@@ -135,18 +144,20 @@ describe('/funders', () => {
 				shortCode: 'firework',
 				name: 'boring text-based firework',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			const anotherFunderBefore = await createOrUpdateFunder(db, null, {
 				shortCode: 'anotherFirework',
 				name: 'another boring text based firework',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			const before = await loadTableMetrics('data_providers');
 			const result = await agent
 				.put('/funders/firework')
 				.type('application/json')
 				.set(adminUserAuthHeader)
-				.send({ name: '🎆' })
+				.send({ name: '🎆', isCollaborative: false })
 				.expect(201);
 			const after = await loadTableMetrics('data_providers');
 			const anotherFunderAfter = await loadFunder(db, null, 'anotherFirework');
@@ -155,6 +166,7 @@ describe('/funders', () => {
 				name: '🎆',
 				keycloakOrganizationId: null,
 				createdAt: expectTimestamp(),
+				isCollaborative: false,
 			});
 			expect(after.count).toEqual(before.count);
 			expect(anotherFunderAfter).toEqual(anotherFunderBefore);

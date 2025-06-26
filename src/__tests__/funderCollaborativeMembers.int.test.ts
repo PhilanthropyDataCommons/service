@@ -5,6 +5,7 @@ import {
 	createFunderCollaborativeMember,
 	loadTableMetrics,
 	createOrUpdateFunder,
+	createOrUpdateUserFunderPermission,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
@@ -12,20 +13,19 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
+import { keycloakIdToString, Permission } from '../types';
 
 const agent = request.agent(app);
 
 const createTestFunders = async ({
 	theFundFund,
 	theFoundationFoundation,
-	theFundersWhoFund,
 	theFundingFathers,
 	theFunnyFunders,
 	theFungibleFund,
 }: {
 	theFundFund: boolean;
 	theFoundationFoundation: boolean;
-	theFundersWhoFund: boolean;
 	theFundingFathers: boolean;
 	theFunnyFunders: boolean;
 	theFungibleFund: boolean;
@@ -41,12 +41,6 @@ const createTestFunders = async ({
 		name: 'The Foundation Foundation',
 		keycloakOrganizationId: null,
 		isCollaborative: theFoundationFoundation,
-	});
-	await createOrUpdateFunder(db, null, {
-		shortCode: 'theFundersWhoFund',
-		name: 'The Funders Who Fund',
-		keycloakOrganizationId: null,
-		isCollaborative: theFundersWhoFund,
 	});
 	await createOrUpdateFunder(db, null, {
 		shortCode: 'theFundingFathers',
@@ -90,11 +84,7 @@ describe('/funderCollaborativeMembers', () => {
 				memberShortCode: 'theFoundationFoundation',
 			});
 			await createFunderCollaborativeMember(db, testUserAuthContext, {
-				funderCollaborativeShortCode: 'theFoundationFoundation',
-				memberShortCode: 'theFundersWhoFund',
-			});
-			await createFunderCollaborativeMember(db, testUserAuthContext, {
-				funderCollaborativeShortCode: 'theFundersWhoFund',
+				funderCollaborativeShortCode: 'theFundFund',
 				memberShortCode: 'theFundingFathers',
 			});
 			const response = await agent
@@ -104,14 +94,8 @@ describe('/funderCollaborativeMembers', () => {
 			expect(response.body).toEqual({
 				entries: [
 					{
-						funderCollaborativeShortCode: 'theFundersWhoFund',
+						funderCollaborativeShortCode: 'theFundFund',
 						memberShortCode: 'theFundingFathers',
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
-					},
-					{
-						funderCollaborativeShortCode: 'theFoundationFoundation',
-						memberShortCode: 'theFundersWhoFund',
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
@@ -122,7 +106,7 @@ describe('/funderCollaborativeMembers', () => {
 						createdBy: testUser.keycloakUserId,
 					},
 				],
-				total: 3,
+				total: 2,
 			});
 		});
 	});
@@ -185,8 +169,10 @@ describe('/funderCollaborativeMembers', () => {
 				.expect(401);
 		});
 
-		it('creates and returns exactly one funder collaborative member', async () => {
+		it('creates and returns exactly one funder collaborative member, which gives the user permission to manage the collaborative funder', async () => {
 			const adminUser = await loadTestUser();
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			await createTestFunders({
 				theFundFund: false,
 				theFoundationFoundation: true,
@@ -194,15 +180,39 @@ describe('/funderCollaborativeMembers', () => {
 				theFunnyFunders: false,
 				theFungibleFund: false,
 			});
-			const response = await agent
-				.post('/funderCollaborativeMembers/theFundFund/theFoundationFoundation')
+
+			await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: 'theFundFund',
+				permission: Permission.MANAGE,
+			});
+
+			const postFunderCollaborativeMemberResponse = await agent
+				.post('/funderCollaborativeMembers/theFoundationFoundation/theFundFund')
 				.set(adminUserAuthHeader)
 				.expect(201);
-			expect(response.body).toMatchObject({
-				funderCollaborativeShortCode: 'theFundFund',
-				memberShortCode: 'theFoundationFoundation',
+
+			expect(postFunderCollaborativeMemberResponse.body).toMatchObject({
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				memberShortCode: 'theFundFund',
 				createdAt: expectTimestamp(),
 				createdBy: adminUser.keycloakUserId,
+			});
+
+			const putUserFunderPermissionResponse = await request(app)
+				.put(
+					`/users/${keycloakIdToString(testUser.keycloakUserId)}/funders/theFoundationFoundation/permissions/${Permission.EDIT}`,
+				)
+				.set(authHeader)
+				.send({})
+				.expect(201);
+
+			expect(putUserFunderPermissionResponse.body).toEqual({
+				funderShortCode: 'theFoundationFoundation',
+				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
+				permission: Permission.EDIT,
+				userKeycloakUserId: testUser.keycloakUserId,
 			});
 		});
 
@@ -210,7 +220,6 @@ describe('/funderCollaborativeMembers', () => {
 			await createTestFunders({
 				theFundFund: false,
 				theFoundationFoundation: false,
-				theFundersWhoFund: false,
 				theFundingFathers: false,
 				theFunnyFunders: false,
 				theFungibleFund: false,

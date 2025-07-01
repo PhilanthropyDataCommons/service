@@ -72,7 +72,7 @@ PDC interprets this as "Grant the user `9f16a4e6-acfe-4048-82dd-d8a2d14effd0`
 
 Groups of PDC users are managed within Keycloak via the [Keycloak organizations]
 capability. Like Keycloak users, Keycloak organizations are identified by UUID.
-Assuming the (OAuth) Client used to log in requests the `organization:*` scope,
+Assuming the (OAuth) Client used to log in requests the `organizations` scope,
 group membership is shown within a user's JWT in the `organizations` section.
 For the PDC UI and OpenAPI documentation that scope is configured by default.
 
@@ -87,7 +87,7 @@ For example, here is the relevant portion of a decoded JWT:
 ```
 
 Users can see their Keycloak organizations by decoding their JWTs (again,
-assuming the client they used to log in requests the `organization:*` scope), or
+assuming the client they used to log in requests the `organizations` scope), or
 by logging into the account management interface e.g. URL `realms/pdc/account`.
 
 Administrators of the PDC Keycloak realm can see organizations, respective

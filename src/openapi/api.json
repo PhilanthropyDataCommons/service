@@ -239,10 +239,19 @@
 		"/funders/{funderShortCode}": {
 			"$ref": "./paths/funder.json"
 		},
-		"/funderCollaborativeMembers": {
+		"/funders/{funderShortCode}/invitations/sent": {
+			"$ref": "./paths/funderCollaborativeInvitationsSent.json"
+		},
+		"/funders/{funderShortCode}/invitations/received": {
+			"$ref": "./paths/funderCollaborativeInvitationsReceived.json"
+		},
+		"/funders/{funderShortCode}/invitations/received/{invitedFunderShortCode}": {
+			"$ref": "./paths/funderCollaborativeInvitationReceived.json"
+		},
+		"/funders/{funderShortCode}/members": {
 			"$ref": "./paths/funderCollaborativeMembers.json"
 		},
-		"/funderCollaborativeMembers/{funderCollaborativeShortCode}/{memberShortCode}": {
+		"/funders/{funderShortCode}/members/{memberFunderShortCode}": {
 			"$ref": "./paths/funderCollaborativeMember.json"
 		},
 		"/baseFields/{baseFieldShortCode}/localizations": {

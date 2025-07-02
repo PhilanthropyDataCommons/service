@@ -13,6 +13,7 @@ as expected. It is intended to remind, not to detail setup of each item.
 - [ ] SMS Authentication step in Browser authn flow has an alias
 - [ ] SMS Authentication step also has SenderId "Philanthropy Data Commons"
 - [ ] Custom Login theme enabled (realm Themes)
+- [ ] Custom Email theme enabled (realm Themes)
 - [ ] Use `pdc-` prefix on custom clients to distinguish from built-in clients
 - [ ] `pdc-openapi-docs` client (service API docs use this)
 - [ ] `pdc-admin` group

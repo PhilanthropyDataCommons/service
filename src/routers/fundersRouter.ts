@@ -1,7 +1,12 @@
 import express from 'express';
 import { fundersHandlers } from '../handlers/fundersHandlers';
 import { funderCollaborativeMembersHandlers } from '../handlers/funderCollaborativeMembersHandlers';
-import { requireAdministratorRole, requireAuthentication, requireFunderPermission } from '../middleware';
+import { funderCollaborativeInvitationsHandlers } from '../handlers/funderCollaborativeInvitationsHandlers';
+import {
+	requireAdministratorRole,
+	requireAuthentication,
+	requireFunderPermission,
+} from '../middleware';
 import { Permission } from '../types';
 
 const fundersRouter = express.Router();
@@ -44,4 +49,27 @@ fundersRouter.delete(
 	funderCollaborativeMembersHandlers.deleteFunderCollaborativeMember,
 );
 
+fundersRouter.post(
+	'/:funderShortCode/invitations/sent/:invitedFunderShortCode',
+	requireFunderPermission(Permission.MANAGE),
+	funderCollaborativeInvitationsHandlers.postFunderCollaborativeInvitation,
+);
+
+fundersRouter.get(
+	'/:funderShortCode/invitations/sent',
+	requireFunderPermission(Permission.MANAGE),
+	funderCollaborativeInvitationsHandlers.getSentFunderCollaborativeInvitations,
+);
+
+fundersRouter.get(
+	'/:funderShortCode/invitations/received',
+	requireFunderPermission(Permission.MANAGE),
+	funderCollaborativeInvitationsHandlers.getRecievedFunderCollaborativeInvitations,
+);
+
+fundersRouter.patch(
+	'/:funderShortCode/invitations/received/:invitedFunderShortCode',
+	requireFunderPermission(Permission.MANAGE),
+	funderCollaborativeInvitationsHandlers.patchFunderCollaborativeInvitation,
+);
 export { fundersRouter };

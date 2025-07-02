@@ -15,6 +15,7 @@ export * from './EphemeralUserGroupAssociation';
 export * from './express/AuthenticatedRequest';
 export * from './FiscalSponsorship';
 export * from './Funder';
+export * from './FunderCollaborativeInvitation';
 export * from './FunderCollaborativeMember';
 export * from './Id';
 export * from './JsonObject';

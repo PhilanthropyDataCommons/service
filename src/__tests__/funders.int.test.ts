@@ -7,6 +7,10 @@ import {
 	loadTableMetrics,
 	loadSystemFunder,
 	createOrUpdateFunderCollaborativeMember,
+	loadSystemUser,
+	createOrUpdateUserFunderPermission,
+	createFunderCollaborativeInvitation,
+	loadFunderCollaborativeMember,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
@@ -14,6 +18,7 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
+import { FunderCollaborativeInvitationStatus, Permission } from '../types';
 
 const createTestFunders = async ({
 	theFundFund,
@@ -568,6 +573,627 @@ describe('/funders', () => {
 					details: expectArray(),
 				});
 			});
+		});
+	});
+	describe('POST /:shortCode/invitations/sent/:invitedFunderShortCode', () => {
+		it('requires authentication', async () => {
+			await createTestFunders({
+				theFundFund: true,
+				theFoundationFoundation: false,
+				theFundersWhoFund: false,
+				theFundingFathers: false,
+				theFunnyFunders: false,
+				theFungibleFund: false,
+			});
+			await agent
+				.post('/funders/theFundFund/invitations/sent/theFoundationFoundation')
+				.expect(401);
+		});
+
+		it('throws a 400 error if the funder collaborative short code is invalid', async () => {
+			await agent
+				.post('/funders/!!!!!!!/invitations/sent/theFoundationFoundation')
+				.set(adminUserAuthHeader)
+				.expect(400);
+		});
+		it('throws a 400 error if the invited funder short code is invalid', async () => {
+			await agent
+				.post('/funders/theFundFund/invitations/sent/!!!!!!!')
+				.set(adminUserAuthHeader)
+				.expect(400);
+		});
+
+		it('requires MANAGE permission on the funder', async () => {
+			await createOrUpdateFunder(db, null, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+				keycloakOrganizationId: null,
+				isCollaborative: true,
+			});
+			await createOrUpdateFunder(db, null, {
+				shortCode: 'theFoundationFoundation',
+				name: 'The Foundation Foundation',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+
+			const result = await agent
+				.post('/funders/theFundFund/invitations/sent/theFoundationFoundation')
+				.type('application/json')
+				.send({})
+				.set(authHeader)
+				.expect(401);
+
+			expect(result.body).toMatchObject({
+				message:
+					'Authenticated user does not have permission to perform this action.',
+				details: expectArray(),
+			});
+		});
+
+		it('creates an invitation to a non-collaborative funder from a collaborative funder, and returns it', async () => {
+			const testUser = await loadTestUser();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+
+			await createTestFunders({
+				theFundFund: false,
+				theFoundationFoundation: true,
+				theFundersWhoFund: false,
+				theFundingFathers: false,
+				theFunnyFunders: false,
+				theFungibleFund: false,
+			});
+
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: 'theFoundationFoundation',
+				permission: Permission.MANAGE,
+			});
+
+			const result = await agent
+				.post('/funders/theFoundationFoundation/invitations/sent/theFundFund')
+				.type('application/json')
+				.send({})
+				.set(authHeader)
+				.expect(201);
+			expect(result.body).toMatchObject({
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				invitedFunderShortCode: 'theFundFund',
+				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+				createdAt: expectTimestamp(),
+			});
+		});
+		it('returns a 400 error when the source funder is not collaborative', async () => {
+			await createTestFunders({
+				theFundFund: false,
+				theFoundationFoundation: false,
+				theFundersWhoFund: false,
+				theFundingFathers: false,
+				theFunnyFunders: false,
+				theFungibleFund: false,
+			});
+			const result = await agent
+				.post('/funders/theFundFund/invitations/sent/theFoundationFoundation')
+				.type('application/json')
+				.send({})
+				.set(adminUserAuthHeader)
+				.expect(400);
+
+			expect(result.body).toMatchObject({
+				message: 'A constraint was violated.',
+				details: expectArray(),
+			});
+		});
+		it('returns a 400 bad request error when the invited funder is collaborative', async () => {
+			await createTestFunders({
+				theFundFund: true,
+				theFoundationFoundation: true,
+				theFundersWhoFund: false,
+				theFundingFathers: true,
+				theFunnyFunders: false,
+				theFungibleFund: false,
+			});
+			const result = await agent
+				.post('/funders/theFundFund/invitations/sent/theFoundationFoundation')
+				.type('application/json')
+				.send({})
+				.set(adminUserAuthHeader)
+				.expect(400);
+
+			expect(result.body).toMatchObject({
+				message: 'A constraint was violated.',
+				details: expectArray(),
+			});
+		});
+	});
+
+	describe('GET /:shortCode/invitations/sent', () => {
+		it('requires authentication', async () => {
+			await agent.get('/funders/foo/invitations/sent').expect(401);
+		});
+
+		it('throws a 400 error if the funder short code is invalid', async () => {
+			await agent
+				.get('/funders/!!!!!!!/invitations/sent')
+				.set(adminUserAuthHeader)
+				.expect(400);
+		});
+
+		it('requires MANAGE permission on the funder', async () => {
+			await createOrUpdateFunder(db, null, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+				keycloakOrganizationId: null,
+				isCollaborative: true,
+			});
+
+			const result = await agent
+				.get('/funders/theFundFund/invitations/sent')
+				.type('application/json')
+				.set(authHeader)
+				.expect(401);
+
+			expect(result.body).toMatchObject({
+				message:
+					'Authenticated user does not have permission to perform this action.',
+				details: expectArray(),
+			});
+		});
+
+		it('returns all (and only) invitations sent by the funder when the user has MANAGE permission on the funder', async () => {
+			const testUser = await loadTestUser();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+
+			await createTestFunders({
+				theFundFund: true,
+				theFoundationFoundation: true,
+				theFundersWhoFund: false,
+				theFundingFathers: false,
+				theFunnyFunders: false,
+				theFungibleFund: false,
+			});
+
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: 'theFundFund',
+				permission: Permission.MANAGE,
+			});
+
+			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: 'theFundFund',
+				invitedFunderShortCode: 'theFundingFathers',
+				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+			});
+			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				invitedFunderShortCode: 'theFunnyFunders',
+				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+			});
+			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: 'theFundFund',
+				invitedFunderShortCode: 'theFunnyFunders',
+				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+			});
+
+			const result = await agent
+				.get('/funders/theFundFund/invitations/sent')
+				.type('application/json')
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.body).toMatchObject({
+				entries: [
+					{
+						funderCollaborativeShortCode: 'theFundFund',
+						invitedFunderShortCode: 'theFunnyFunders',
+						invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+						createdAt: expectTimestamp(),
+					},
+					{
+						funderCollaborativeShortCode: 'theFundFund',
+						invitedFunderShortCode: 'theFundingFathers',
+						invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+						createdAt: expectTimestamp(),
+					},
+				],
+				total: 3,
+			});
+		});
+	});
+
+	describe('GET /:shortCode/invitations/received', () => {
+		it('requires authentication', async () => {
+			await agent.get('/funders/foo/invitations/received').expect(401);
+		});
+
+		it('throws a 400 error if the funder short code is invalid', async () => {
+			await agent
+				.get('/funders/!!!!!!!/invitations/received')
+				.set(adminUserAuthHeader)
+				.expect(400);
+		});
+
+		it('requires MANAGE permission on the funder', async () => {
+			await createOrUpdateFunder(db, null, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+				keycloakOrganizationId: null,
+				isCollaborative: true,
+			});
+
+			const result = await agent
+				.get('/funders/theFundFund/invitations/received')
+				.type('application/json')
+				.set(authHeader)
+				.expect(401);
+
+			expect(result.body).toMatchObject({
+				message:
+					'Authenticated user does not have permission to perform this action.',
+				details: expectArray(),
+			});
+		});
+
+		it('returns all (and only) invitations received by the funder when the user has MANAGE permission on the funder', async () => {
+			const testUser = await loadTestUser();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+
+			await createTestFunders({
+				theFundFund: false,
+				theFoundationFoundation: true,
+				theFundersWhoFund: false,
+				theFundingFathers: false,
+				theFunnyFunders: false,
+				theFungibleFund: true,
+			});
+
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: 'theFundFund',
+				permission: Permission.MANAGE,
+			});
+
+			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				invitedFunderShortCode: 'theFundFund',
+				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+			});
+
+			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				invitedFunderShortCode: 'theFunnyFunders',
+				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+			});
+
+			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: 'theFungibleFund',
+				invitedFunderShortCode: 'theFundFund',
+				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+			});
+
+			const result = await agent
+				.get('/funders/theFundFund/invitations/received')
+				.type('application/json')
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.body).toMatchObject({
+				entries: [
+					{
+						funderCollaborativeShortCode: 'theFungibleFund',
+						invitedFunderShortCode: 'theFundFund',
+						invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+						createdAt: expectTimestamp(),
+					},
+					{
+						funderCollaborativeShortCode: 'theFoundationFoundation',
+						invitedFunderShortCode: 'theFundFund',
+						invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+						createdAt: expectTimestamp(),
+					},
+				],
+				total: 3,
+			});
+		});
+	});
+	describe('PATCH /:shortCode/invitations/received/:invitationShortCode', () => {
+		it('requires authentication', async () => {
+			await agent.patch('/funders/foo/invitations/received/bar').expect(401);
+		});
+
+		it('throws a 400 error if the funder short code is invalid', async () => {
+			await agent
+				.patch('/funders/!!!!!!!/invitations/received/theFoundationFoundation')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					invitationStatus: FunderCollaborativeInvitationStatus.ACCEPTED,
+				})
+				.expect(400);
+		});
+
+		it('throws a 400 error if the invited funder short code is invalid', async () => {
+			await agent
+				.patch('/funders/theFundFund/invitations/received/!!!!!!!')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					invitationStatus: FunderCollaborativeInvitationStatus.ACCEPTED,
+				})
+				.expect(400);
+		});
+
+		it('requires MANAGE permission on the invited funder', async () => {
+			await createOrUpdateFunder(db, null, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+				keycloakOrganizationId: null,
+				isCollaborative: true,
+			});
+
+			await agent
+				.patch('/funders/theFundFund/invitations/received/bar')
+				.type('application/json')
+				.set(authHeader)
+				.expect(401);
+		});
+
+		it('successfully updates the invitation status to accepted, and creates a funder collaborative member', async () => {
+			const testUser = await loadTestUser();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+
+			await createTestFunders({
+				theFundFund: false,
+				theFoundationFoundation: true,
+				theFundersWhoFund: false,
+				theFundingFathers: false,
+				theFunnyFunders: false,
+				theFungibleFund: false,
+			});
+
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: 'theFundFund',
+				permission: Permission.MANAGE,
+			});
+
+			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				invitedFunderShortCode: 'theFundFund',
+				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+			});
+
+			const result = await agent
+				.patch(
+					'/funders/theFundFund/invitations/received/theFoundationFoundation',
+				)
+				.type('application/json')
+				.send({
+					invitationStatus: FunderCollaborativeInvitationStatus.ACCEPTED,
+				})
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.body).toMatchObject({
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				invitedFunderShortCode: 'theFundFund',
+				invitationStatus: FunderCollaborativeInvitationStatus.ACCEPTED,
+				createdAt: expectTimestamp(),
+			});
+
+			const generatedFunderCollaborativeMember =
+				await loadFunderCollaborativeMember(
+					db,
+					null,
+					'theFoundationFoundation',
+					'theFundFund',
+				);
+
+			expect(generatedFunderCollaborativeMember).toMatchObject({
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				memberFunderShortCode: 'theFundFund',
+				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
+			});
+		});
+		it('successfully updates the invitation status to rejected, and does not create a funder collaborative member', async () => {
+			const testUser = await loadTestUser();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+
+			await createTestFunders({
+				theFundFund: false,
+				theFoundationFoundation: true,
+				theFundersWhoFund: false,
+				theFundingFathers: false,
+				theFunnyFunders: false,
+				theFungibleFund: true,
+			});
+
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: 'theFundFund',
+				permission: Permission.MANAGE,
+			});
+
+			await createOrUpdateFunderCollaborativeMember(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				memberFunderShortCode: 'theFundingFathers',
+			});
+
+			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				invitedFunderShortCode: 'theFundFund',
+				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+			});
+
+			const result = await agent
+				.patch(
+					'/funders/theFundFund/invitations/received/theFoundationFoundation',
+				)
+				.type('application/json')
+				.send({
+					invitationStatus: FunderCollaborativeInvitationStatus.REJECTED,
+				})
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.body).toMatchObject({
+				funderCollaborativeShortCode: 'theFoundationFoundation',
+				invitedFunderShortCode: 'theFundFund',
+				invitationStatus: FunderCollaborativeInvitationStatus.REJECTED,
+				createdAt: expectTimestamp(),
+			});
+
+			const tableMetrics = await loadTableMetrics(
+				'funder_collaborative_invitations',
+			);
+			expect(tableMetrics.count).toEqual(1);
+		});
+	});
+	it('throws a 400 error if the invitation status is updated after it has been accepted', async () => {
+		const testUser = await loadTestUser();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+
+		await createTestFunders({
+			theFundFund: false,
+			theFoundationFoundation: true,
+			theFundersWhoFund: false,
+			theFundingFathers: false,
+			theFunnyFunders: false,
+			theFungibleFund: true,
+		});
+
+		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+			userKeycloakUserId: testUser.keycloakUserId,
+			funderShortCode: 'theFundFund',
+			permission: Permission.MANAGE,
+		});
+
+		await createOrUpdateFunderCollaborativeMember(db, systemUserAuthContext, {
+			funderCollaborativeShortCode: 'theFoundationFoundation',
+			memberFunderShortCode: 'theFundingFathers',
+		});
+
+		await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+			funderCollaborativeShortCode: 'theFoundationFoundation',
+			invitedFunderShortCode: 'theFundFund',
+			invitationStatus: FunderCollaborativeInvitationStatus.ACCEPTED,
+		});
+
+		const result = await agent
+			.patch(
+				'/funders/theFundFund/invitations/received/theFoundationFoundation',
+			)
+			.type('application/json')
+			.send({
+				invitationStatus: FunderCollaborativeInvitationStatus.REJECTED,
+			})
+			.set(authHeader)
+			.expect(400);
+
+		expect(result.body).toMatchObject({
+			name: 'DatabaseError',
+			details: expectArray(),
+		});
+	});
+	it('throws a 400 error if the invitation status is updated after it has rejected', async () => {
+		const testUser = await loadTestUser();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+
+		await createTestFunders({
+			theFundFund: false,
+			theFoundationFoundation: true,
+			theFundersWhoFund: false,
+			theFundingFathers: false,
+			theFunnyFunders: false,
+			theFungibleFund: true,
+		});
+
+		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+			userKeycloakUserId: testUser.keycloakUserId,
+			funderShortCode: 'theFundFund',
+			permission: Permission.MANAGE,
+		});
+
+		await createOrUpdateFunderCollaborativeMember(db, systemUserAuthContext, {
+			funderCollaborativeShortCode: 'theFoundationFoundation',
+			memberFunderShortCode: 'theFundingFathers',
+		});
+
+		await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+			funderCollaborativeShortCode: 'theFoundationFoundation',
+			invitedFunderShortCode: 'theFundFund',
+			invitationStatus: FunderCollaborativeInvitationStatus.REJECTED,
+		});
+
+		const result = await agent
+			.patch(
+				'/funders/theFundFund/invitations/received/theFoundationFoundation',
+			)
+			.type('application/json')
+			.send({
+				invitationStatus: FunderCollaborativeInvitationStatus.ACCEPTED,
+			})
+			.set(authHeader)
+			.expect(400);
+
+		expect(result.body).toMatchObject({
+			name: 'DatabaseError',
+			details: expectArray(),
+		});
+	});
+	it('throws a 400 error if the invitation status is updated to an invalid value', async () => {
+		const testUser = await loadTestUser();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+
+		await createTestFunders({
+			theFundFund: false,
+			theFoundationFoundation: true,
+			theFundersWhoFund: false,
+			theFundingFathers: false,
+			theFunnyFunders: false,
+			theFungibleFund: true,
+		});
+
+		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+			userKeycloakUserId: testUser.keycloakUserId,
+			funderShortCode: 'theFundFund',
+			permission: Permission.MANAGE,
+		});
+
+		await createOrUpdateFunderCollaborativeMember(db, systemUserAuthContext, {
+			funderCollaborativeShortCode: 'theFoundationFoundation',
+			memberFunderShortCode: 'theFundingFathers',
+		});
+
+		await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+			funderCollaborativeShortCode: 'theFoundationFoundation',
+			invitedFunderShortCode: 'theFundFund',
+			invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+		});
+
+		const result = await agent
+			.patch(
+				'/funders/theFundFund/invitations/received/theFoundationFoundation',
+			)
+			.type('application/json')
+			.send({
+				invitationStatus: 'invalid status',
+			})
+			.set(authHeader)
+			.expect(400);
+
+		expect(result.body).toMatchObject({
+			name: 'InputValidationError',
+			details: expectArray(),
 		});
 	});
 });

@@ -1,0 +1,74 @@
+{
+	"patch": {
+		"operationId": "updateFunderCollaborativeInvitation",
+		"summary": "Updates a funder collaborative invitation.",
+		"tags": ["Funder Collaborative Invitations"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "funderShortCode",
+				"description": "The short code of the funder that has been given an invitation.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			},
+			{
+				"name": "invitationShortCode",
+				"description": "The short code of the funder that has sent the invitation.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"invitationStatus": {
+					"schema": {
+						"$ref": "../components/schemas/FunderCollaborativeInvitation.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new funder collaborative member that was created.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/FunderCollaborativeMember.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"description": "The request body is invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

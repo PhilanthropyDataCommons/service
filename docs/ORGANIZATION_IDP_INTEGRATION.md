@@ -30,24 +30,26 @@ PDC Keycloak with the external IdP.
 
 5. Click "Next."
 6. Add "App Name" of "Philanthropy Data Commons."
-7. Click "Next."
-8. Paste the Single sign-on URL endpoint provided by the PDC team, similar to
-   "https://example.org/realms/pdc/broker/okta-saml-foundation/endpoint"
-   into Okta's "Single sign-on URL"
-9. Paste the SP Entity ID URL provided by the PDC team, similar to
-   "https://example.org/realms/pdc" into Okta's "Audience URI (SP Entity ID)"
-   field.
-10. Set the "Name ID format" to "EmailAddress."
-11. Set the "Application username" to "Email."
-12. Add Attribute Statements:
+7. If you wish to add a logo, one may be found on the [PDC website](https://philanthropydatacommons.org/).
+8. Check "Do not display application icon to users" under "App visibility" to avoid erroneous IdP-initiated login attempts. Users begin the login flow from PDC Apps, not from the Okta IdP.
+9. Click "Next."
+10. Paste the Single sign-on URL endpoint provided by the PDC team, similar to
+    "https://example.org/realms/pdc/broker/okta-saml-foundation/endpoint"
+    into Okta's "Single sign-on URL"
+11. Paste the SP Entity ID URL provided by the PDC team, similar to
+    "https://example.org/realms/pdc" into Okta's "Audience URI (SP Entity ID)"
+    field.
+12. Set the "Name ID format" to "EmailAddress."
+13. Set the "Application username" to "Email."
+14. Add Attribute Statements:
     - Map "firstName", "Basic" to "user.FirstName"
     - Map "lastName", "Basic" to "user.LastName"
 
     ![Attribute Statements map](images/okta_attribute_statements.png)
 
-13. Click "Next."
-14. Click "Finish."
-15. Send Okta's SAML "Metadata URL" to the PDC team.
+15. Click "Next."
+16. Click "Finish."
+17. Send Okta's SAML "Metadata URL" to the PDC team.
 
     ![SAML Metadata URL](images/okta_metadata_url.png)
 

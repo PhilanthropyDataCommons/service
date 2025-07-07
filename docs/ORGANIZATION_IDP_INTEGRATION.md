@@ -41,9 +41,9 @@ PDC Keycloak with the external IdP.
     field.
 12. Set the "Name ID format" to "EmailAddress."
 13. Set the "Application username" to "Email."
-14. Add Attribute Statements:
-    - Map "firstName", "Basic" to "user.FirstName"
-    - Map "lastName", "Basic" to "user.LastName"
+14. Add Attribute Statements (case sensitive, use the dropdown for each Value):
+    - Map "firstName", "Basic" to "user.firstName"
+    - Map "lastName", "Basic" to "user.lastName"
 
     ![Attribute Statements map](images/okta_attribute_statements.png)
 

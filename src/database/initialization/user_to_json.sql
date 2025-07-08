@@ -104,6 +104,17 @@ BEGIN
           WHERE ephemeral_user_group_associations.user_keycloak_user_id = "user".keycloak_user_id
             AND NOT is_expired(ephemeral_user_group_associations.not_after)
         )
+				UNION
+				(
+					SELECT
+					  funder_collaborative_members.funder_collaborative_short_code AS funder_short_code,
+					  user_funder_permissions.permission AS permission
+					FROM user_funder_permissions
+					JOIN funder_collaborative_members
+						ON funder_collaborative_members.member_short_code = user_funder_permissions.funder_short_code
+					WHERE funder_collaborative_members.member_short_code = user_funder_permissions.funder_short_code
+           AND NOT is_expired(user_funder_permissions.not_after)
+				)
       ) as combined_funder_permissions
       GROUP BY combined_funder_permissions.funder_short_code
     ) AS aggregated_combined_funder_permissions

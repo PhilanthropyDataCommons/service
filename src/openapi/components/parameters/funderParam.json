@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"type": "string"
+	},
+	"in": "query",
+	"name": "funder",
+	"required": false,
+	"description": "A reference (shortCode) to an existing funder entity."
+}

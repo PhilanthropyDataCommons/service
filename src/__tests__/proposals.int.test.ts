@@ -192,9 +192,68 @@ describe('/proposals', () => {
 			});
 		});
 
+		it('returns a subset of proposals present in the database when a funder filter is provided', async () => {
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createOrUpdateFunder(db, null, {
+				name: 'Test Funder',
+				shortCode: 'testFunder',
+				keycloakOrganizationId: null,
+			});
+			const systemFunder = await loadSystemFunder(db, null);
+			await createTestBaseFields();
+
+			const systemOpportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const testFunderOpportunity = await createOpportunity(db, null, {
+				title: '🌊',
+				funderShortCode: testFunder.shortCode,
+			});
+
+			await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: systemOpportunity.id,
+			});
+			const testFunderProposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-2',
+				opportunityId: testFunderOpportunity.id,
+			});
+			const response = await request(app)
+				.get(`/proposals?funder=${testFunder.shortCode}`)
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+
+			expect(response.body).toStrictEqual({
+				total: 2,
+				entries: [
+					{
+						id: testFunderProposal.id,
+						externalId: 'proposal-2',
+						opportunityId: testFunderOpportunity.id,
+						createdAt: expectTimestamp(),
+						createdBy: testUser.keycloakUserId,
+						versions: [],
+					},
+				],
+			});
+		});
+
 		it('returns a 400 error if an invalid changemaker filter is provided', async () => {
 			const response = await request(app)
 				.get(`/proposals?changemaker=foo`)
+				.set(authHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({
+				name: 'InputValidationError',
+				message: expectString(),
+			});
+		});
+
+		it('returns a 400 error if an invalid funder filter is provided', async () => {
+			const response = await request(app)
+				.get(`/proposals?funder=😀`)
 				.set(authHeader)
 				.expect(400);
 			expect(response.body).toMatchObject({

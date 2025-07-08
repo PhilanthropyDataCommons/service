@@ -19,6 +19,7 @@ import {
 	extractChangemakerParameters,
 	extractPaginationParameters,
 	extractSearchParameters,
+	extractFunderParameters,
 } from '../queryParameters';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
@@ -31,6 +32,7 @@ const getProposals = async (req: Request, res: Response): Promise<void> => {
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { search } = extractSearchParameters(req);
 	const { changemakerId } = extractChangemakerParameters(req);
+	const { funderShortCode } = extractFunderParameters(req);
 	const { createdBy } = extractCreatedByParameters(req);
 
 	const proposalBundle = await loadProposalBundle(
@@ -38,6 +40,7 @@ const getProposals = async (req: Request, res: Response): Promise<void> => {
 		req,
 		createdBy,
 		changemakerId,
+		funderShortCode,
 		search,
 		limit,
 		offset,

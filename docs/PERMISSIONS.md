@@ -23,11 +23,12 @@ and how to perform most of these steps follow in this document.
 1. Funder bulk uploads changemakers and corresponding changemaker proposals.
 2. One of the above changemakers requests access to the PDC.
 3. PDC admin adds Keycloak organization for changemaker.
-4. PDC admin adds Keycloak users (if needed) for changemaker.
-5. PDC admin sets Keycloak organization membership (if needed) for changemaker.
-6. PDC admin links the new Keycloak organization to PDC service using its UUID.
-7. PDC admin grants `manage` permission to changemaker using PDC service.
-8. Changemaker may grant additional permissions using PDC service.
+4. PDC admin [integrates the changemaker's IdP] or adds/updates users directly.
+5. PDC admin links the new Keycloak organization to PDC service using its UUID.
+6. PDC admin grants `manage` permission to changemaker using PDC service.
+7. Changemaker may grant additional permissions using PDC service.
+
+[integrates the changemaker's IdP]: ./ORGANIZATION_IDP_INTEGRATION.md
 
 ## Users and Their Keycloak UUIDs
 

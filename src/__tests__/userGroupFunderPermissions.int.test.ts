@@ -34,7 +34,6 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 						funder.keycloakOrganizationId,
 					)}/funders/${funder.shortCode}/permissions/${Permission.MANAGE}`,
 				)
-				.send({})
 				.expect(401);
 		});
 
@@ -51,7 +50,6 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 					)}/funders/${funder.shortCode}/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeader)
-				.send({})
 				.expect(401);
 		});
 
@@ -61,7 +59,6 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 					`/userGroups/notaguid/funders/ExampleInc/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
-				.send({})
 				.expect(400);
 		});
 
@@ -97,7 +94,6 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 					)}/funders/${funder.shortCode}/permissions/notAPermission`,
 				)
 				.set(authHeaderWithAdminRole)
-				.send({})
 				.expect(400);
 		});
 
@@ -116,7 +112,6 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 					)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
-				.send({})
 				.expect(201);
 			expect(response.body).toEqual({
 				funderShortCode: funder.shortCode,

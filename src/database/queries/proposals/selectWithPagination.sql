@@ -1,5 +1,7 @@
 SELECT proposal_to_json(proposals.*) AS object
 FROM proposals
+	INNER JOIN opportunities
+		ON proposals.opportunity_id = opportunities.id
 	LEFT JOIN proposal_versions ON proposals.id = proposal_versions.proposal_id
 	LEFT JOIN
 		proposal_field_values
@@ -41,18 +43,18 @@ WHERE
 		ELSE
 			changemakers_proposals.changemaker_id = :changemakerId
 	END
+	AND CASE
+		WHEN :funderShortCode::short_code_t IS NULL THEN
+			TRUE
+		ELSE
+			opportunities.funder_short_code = :funderShortCode
+	END
 	AND (
-		EXISTS (
-			SELECT 1
-			FROM opportunities
-			WHERE
-				opportunities.id = proposals.opportunity_id
-				AND has_funder_permission(
-					:authContextKeycloakUserId,
-					:authContextIsAdministrator,
-					opportunities.funder_short_code,
-					'view'
-				)
+		has_funder_permission(
+			:authContextKeycloakUserId,
+			:authContextIsAdministrator,
+			opportunities.funder_short_code,
+			'view'
 		)
 		OR EXISTS (
 			SELECT 1

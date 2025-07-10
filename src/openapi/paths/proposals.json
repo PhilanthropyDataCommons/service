@@ -13,6 +13,7 @@
 			{ "$ref": "../components/parameters/countParam.json" },
 			{ "$ref": "../components/parameters/searchParam.json" },
 			{ "$ref": "../components/parameters/changemakerParam.json" },
+			{ "$ref": "../components/parameters/funderParam.json" },
 			{ "$ref": "../components/parameters/createdByParam.json" }
 		],
 		"responses": {

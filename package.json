@@ -69,7 +69,7 @@
 		"eslint-config-prettier": "^10.1.5",
 		"eslint-import-resolver-typescript": "^4.4.4",
 		"eslint-plugin-sort-exports": "^0.9.1",
-		"expect-type": "^1.2.1",
+		"expect-type": "^1.2.2",
 		"jest": "^30.0.3",
 		"jsonwebtoken": "^9.0.2",
 		"mock-jwks": "^1.0.10",

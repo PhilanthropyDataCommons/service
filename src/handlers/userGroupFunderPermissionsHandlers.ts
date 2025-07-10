@@ -13,6 +13,7 @@ import {
 	isWritableUserGroupFunderPermission,
 } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
+import { isBodyEmpty } from '../types/Empty';
 import type { Request, Response } from 'express';
 
 const deleteUserGroupFunderPermission = async (
@@ -85,14 +86,9 @@ const putUserGroupFunderPermission = async (
 		);
 	}
 
-	if (
-		req.body !== undefined &&
-		req.body !== null &&
-		req.body !== '' &&
-		!isWritableUserGroupFunderPermission(req.body)
-	) {
+	if (!isBodyEmpty(req)) {
 		throw new InputValidationError(
-			'Invalid request body.',
+			'Invalid request body. The body should be empty (all parameters are in the URL).',
 			isWritableUserGroupFunderPermission.errors ?? [],
 		);
 	}

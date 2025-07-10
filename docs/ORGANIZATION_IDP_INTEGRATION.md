@@ -8,6 +8,19 @@ Keycloak and PDC handle authorization within PDC.
 
 This guide lists specific steps to integrate specific IdPs with PDC Keycloak.
 
+For organizations without their own IdP, the PDC administrators can either
+manage a Keycloak organization on their behalf (for smaller organizations) or
+add a separate realm as an "external" IdP (for larger organizations). In the
+latter case, the integration should be configured to allow an organization
+member to manage user membership in that realm as if it were the organization's
+own IdP. With a separate realm, the users will be "unmanaged" in the new realm
+and "managed" in the `pdc` realm. As of this writing, these two options are
+available in lieu of a future Keycloak release that includes Fine-Grained Admin
+Permissions (FGAP) for the Keycloak organizations capability. When FGAP is
+available for Keycloak organizations, the organization in the `pdc` realm should
+be configured to allow an organization member to administer its organization,
+and this should obsolete the first two options above.
+
 ## External Identity Providers
 
 Before integrating, the PDC team needs to name an identifying alias for each

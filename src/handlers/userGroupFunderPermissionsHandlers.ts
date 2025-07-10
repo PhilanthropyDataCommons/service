@@ -84,7 +84,13 @@ const putUserGroupFunderPermission = async (
 			isPermission.errors ?? [],
 		);
 	}
-	if (!isWritableUserGroupFunderPermission(req.body)) {
+
+	if (
+		req.body !== undefined &&
+		req.body !== null &&
+		req.body !== '' &&
+		!isWritableUserGroupFunderPermission(req.body)
+	) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableUserGroupFunderPermission.errors ?? [],

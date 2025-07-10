@@ -116,7 +116,6 @@ describe('/userGroups/funders/:funderShortcode/permissions/:permission', () => {
 					)}/funders/${funder.shortCode}/permissions/${Permission.EDIT}`,
 				)
 				.set(authHeaderWithAdminRole)
-				.send({})
 				.expect(201);
 			expect(response.body).toEqual({
 				funderShortCode: funder.shortCode,

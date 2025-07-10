@@ -192,6 +192,7 @@ const createApplicationFormFieldsForBulkUploadTask = async (
 				baseFieldShortCode: baseField.shortCode,
 				position: index,
 				label: baseField.label,
+				instructions: null,
 			});
 			return applicationFormField;
 		}),

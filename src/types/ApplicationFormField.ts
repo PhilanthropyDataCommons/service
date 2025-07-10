@@ -10,6 +10,7 @@ interface ApplicationFormField {
 	readonly baseField: BaseField;
 	position: number;
 	label: string;
+	instructions: string | null;
 	readonly createdAt: string;
 }
 
@@ -33,8 +34,16 @@ const writableApplicationFormFieldWithApplicationContextSchema: JSONSchemaType<W
 			label: {
 				type: 'string',
 			},
+			instructions: {
+				type: 'string',
+				/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+				 * This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
+				 * See: https://github.com/ajv-validator/ajv/issues/2163
+				 */
+				nullable: true as false,
+			},
 		},
-		required: ['baseFieldShortCode', 'position', 'label'],
+		required: ['baseFieldShortCode', 'position', 'label', 'instructions'],
 	};
 
 export {

@@ -10,7 +10,13 @@ const createApplicationFormField = generateCreateOrUpdateItemOperation<
 	[]
 >(
 	'applicationFormFields.insertOne',
-	['applicationFormId', 'baseFieldShortCode', 'position', 'label'],
+	[
+		'applicationFormId',
+		'baseFieldShortCode',
+		'position',
+		'label',
+		'instructions',
+	],
 	[],
 );
 

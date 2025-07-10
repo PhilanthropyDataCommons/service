@@ -463,6 +463,8 @@ describe('/changemakers', () => {
 							applicationFormId: applicationFormIdEarliest,
 							baseFieldShortCode,
 							position: 5279,
+							instructions:
+								'Please enter the email address of the organization.',
 						})
 					).id,
 					position: 5297,
@@ -488,6 +490,8 @@ describe('/changemakers', () => {
 							applicationFormId: applicationFormIdLatestValid,
 							baseFieldShortCode,
 							position: 5347,
+							instructions:
+								'Please enter the email address of the organization.',
 						})
 					).id,
 					position: 5381,
@@ -517,6 +521,8 @@ describe('/changemakers', () => {
 							applicationFormId: applicationFormIdLatest,
 							baseFieldShortCode,
 							position: 5209,
+							instructions:
+								'Please enter the email address of the organization.',
 						})
 					).id,
 					position: 5231,
@@ -586,6 +592,8 @@ describe('/changemakers', () => {
 								applicationFormId: applicationFormIdChangemakerEarliest,
 								baseFieldShortCode,
 								position: 5407,
+								instructions:
+									'Please enter the phone number of the organization.',
 							})
 						).id,
 						position: 5413,
@@ -613,6 +621,8 @@ describe('/changemakers', () => {
 							applicationFormId: applicationFormIdFunderLatest,
 							baseFieldShortCode,
 							position: 5417,
+							instructions:
+								'Please enter the phone number of the organization.',
 						})
 					).id,
 					position: 5419,
@@ -675,6 +685,8 @@ describe('/changemakers', () => {
 							applicationFormId: applicationFormIdFunderEarliest,
 							baseFieldShortCode,
 							position: 5437,
+							instructions:
+								'Please enter the phone number of the organization.',
 						})
 					).id,
 					position: 5441,
@@ -701,6 +713,8 @@ describe('/changemakers', () => {
 							applicationFormId: applicationFormIdDataProviderLatest,
 							baseFieldShortCode,
 							position: 5443,
+							instructions:
+								'Please enter the phone number of the organization.',
 						})
 					).id,
 					position: 5449,
@@ -764,6 +778,7 @@ describe('/changemakers', () => {
 							applicationFormId: applicationFormIdDataProviderEarliest,
 							baseFieldShortCode: baseFieldWebsite.shortCode,
 							position: 5479,
+							instructions: 'Please enter the website of the organization.',
 						})
 					).id,
 					position: 5483,
@@ -793,6 +808,7 @@ describe('/changemakers', () => {
 								applicationFormId: applicationFormIdDataProviderLatest,
 								baseFieldShortCode: baseFieldWebsite.shortCode,
 								position: 5501,
+								instructions: 'Please enter the website of the organization.',
 							})
 						).id,
 						position: 5503,
@@ -852,6 +868,7 @@ describe('/changemakers', () => {
 						applicationFormId: applicationForm.id,
 						baseFieldShortCode: forbiddenBaseField.shortCode,
 						position: 1,
+						instructions: 'Please enter the forbidden field.',
 					},
 				);
 				const proposalVersion = await createProposalVersion(

@@ -9,4 +9,4 @@ RETURNING
 	user_group_changemaker_permission_to_json(
 		user_group_changemaker_permissions
 	)
-	AS object;
+		AS object;

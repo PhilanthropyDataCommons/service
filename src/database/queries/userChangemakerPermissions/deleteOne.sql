@@ -7,4 +7,4 @@ WHERE
 	AND NOT is_expired(not_after)
 RETURNING
 	user_changemaker_permission_to_json(user_changemaker_permissions)
-	AS object;
+		AS object;

@@ -9,4 +9,4 @@ RETURNING
 	user_group_data_provider_permission_to_json(
 		user_group_data_provider_permissions
 	)
-	AS object;
+		AS object;

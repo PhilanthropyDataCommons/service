@@ -7,4 +7,4 @@ WHERE
 	AND NOT is_expired(not_after)
 RETURNING
 	user_data_provider_permission_to_json(user_data_provider_permissions)
-	AS object;
+		AS object;

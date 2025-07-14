@@ -209,3 +209,21 @@ funder, data provider, or other changemaker entirely.
 - Allows users to view proposals associated with the funder's opportunities
 - Allows users to view proposal versions associated with the funder's opportunities
 - Allows users to view the funder's opportunities
+
+### Opportunity
+
+#### Edit
+
+This permission exists but has not yet been implemented to provide additional access.
+
+#### Manage
+
+This permission exists but has not yet been implemented to provide additional access.
+
+#### View
+
+This permission exists but has not yet been implemented to provide additional access.
+
+#### Create Proposal
+
+This permission exists but has not yet been implemented to provide additional access.

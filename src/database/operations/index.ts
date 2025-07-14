@@ -22,4 +22,6 @@ export * from './userFunderPermissions';
 export * from './userGroupChangemakerPermissions';
 export * from './userGroupDataProviderPermissions';
 export * from './userGroupFunderPermissions';
+export * from './userGroupOpportunityPermissions';
+export * from './userOpportunityPermissions';
 export * from './users';

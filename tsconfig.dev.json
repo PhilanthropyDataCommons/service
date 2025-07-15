@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"noEmit": true,
 		"resolveJsonModule": true,
-		"noUncheckedIndexedAccess": true
+		"noUncheckedIndexedAccess": true,
+		"isolatedModules": true
 	},
 	"include": ["src"]
 }

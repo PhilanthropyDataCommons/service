@@ -1,3 +1,7 @@
+if (process.env.TEST_LOG_LEVEL !== undefined) {
+	process.env.LOG_LEVEL = process.env.TEST_LOG_LEVEL;
+}
+
 module.exports = {
 	globals: {
 		'ts-jest': {

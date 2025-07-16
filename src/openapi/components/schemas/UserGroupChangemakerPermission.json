@@ -25,5 +25,11 @@
 			"readOnly": true
 		}
 	},
-	"required": ["id", "createdAt"]
+	"required": [
+		"id",
+		"changemakerId",
+		"keycloakOrganizationId",
+		"createdBy",
+		"createdAt"
+	]
 }

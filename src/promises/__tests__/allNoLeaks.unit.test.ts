@@ -1,14 +1,12 @@
+import { setTimeout } from 'node:timers/promises';
 import { fail } from 'node:assert';
 import { allNoLeaks } from '../allNoLeaks';
 
 describe('allNoLeaks', () => {
 	it('should throw an error after companion long-duration `Promise` completes', async () => {
 		let longTaskCompleted = false;
-		const longTask = new Promise<void>((resolve) => {
-			setTimeout(() => {
-				longTaskCompleted = true;
-				resolve();
-			}, 50);
+		const longTask = setTimeout(50).then(() => {
+			longTaskCompleted = true;
 		});
 		const errorMessageToThrow = "errored, y'all!";
 		const errorTask = Promise.reject(new Error(errorMessageToThrow));

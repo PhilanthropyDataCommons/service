@@ -1,3 +1,4 @@
+import { setImmediate } from 'node:timers/promises';
 import { db, createOrUpdateUser, loadUserByKeycloakUserId } from '../database';
 import { stringToKeycloakId } from '../types';
 import type { AuthContext, KeycloakId, User } from '../types';
@@ -7,7 +8,7 @@ import type { AuthContext, KeycloakId, User } from '../types';
 // through the event loop. Otherwise jest misses the call (it hasn't happened yet). Kudos:
 // https://stackoverflow.com/questions/41792927/jest-tests-cant-fail-within-setimmediate-or-process-nexttick-callback#answer-59604256
 export const allowNextToResolve = async (): Promise<void> => {
-	await new Promise(setImmediate);
+	await setImmediate();
 };
 
 export const generateNextWithAssertions = (

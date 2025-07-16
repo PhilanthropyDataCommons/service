@@ -45,6 +45,8 @@ export default defineConfig([
 					ignoreEnums: true,
 				},
 			],
+
+			// Unlike some code bases we explicitly do not want to use default exports.
 			'import/prefer-default-export': 'off',
 			'import/no-default-export': 'error',
 

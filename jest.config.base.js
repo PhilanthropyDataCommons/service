@@ -1,8 +1,15 @@
+if (process.env.TEST_LOG_LEVEL !== undefined) {
+	process.env.LOG_LEVEL = process.env.TEST_LOG_LEVEL;
+}
+
 module.exports = {
-	globals: {
-		'ts-jest': {
-			tsconfig: 'tsconfig.dev.json',
-		},
+	transform: {
+		'^.+\\.tsx?$': [
+			'ts-jest',
+			{
+				tsconfig: 'tsconfig.dev.json',
+			},
+		],
 	},
 	collectCoverageFrom: ['src/**/*.ts', '!src/**/*.test.*'],
 	preset: 'ts-jest',

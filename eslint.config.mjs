@@ -65,17 +65,6 @@ export default defineConfig([
 				},
 			],
 
-			'import/no-extraneous-dependencies': [
-				'error',
-				{
-					devDependencies: [
-						'src/test/*.{ts,js}',
-						'src/**/__tests__/*.{ts,js}',
-						'src/**/*.test.*.{ts,js}',
-					],
-				},
-			],
-
 			'@typescript-eslint/require-await': 'off',
 
 			'@typescript-eslint/no-unused-vars': [

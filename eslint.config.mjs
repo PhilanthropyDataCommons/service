@@ -25,7 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'max-nested-callbacks': 'off',
 			'n/no-path-concat': 'off',
 			'no-unreachable': 'off',
 			'promise/avoid-new': 'off',
@@ -142,6 +141,9 @@ export default defineConfig([
 			// We could refactor, potentially, but even then I imagine that a line limit is not
 			// going to be useful in this context.
 			'max-lines': 'off',
+
+			// Tests are already 2-3 levels deep in nested callbacks, so we update this rule to 5 instead of 3.
+			'max-nested-callbacks': ['error', 5],
 		},
 	},
 ]);

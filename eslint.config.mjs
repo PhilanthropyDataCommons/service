@@ -25,7 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'import/first': 'off',
 			'max-lines': 'off',
 			'max-nested-callbacks': 'off',
 			'n/no-path-concat': 'off',
@@ -134,6 +133,11 @@ export default defineConfig([
 
 			// Tests use hard coded numbers in lots of places, and that's OK for now.
 			'@typescript-eslint/no-magic-numbers': 'off',
+
+			// Jest hoists mock statements, so sometimes we need to define mock functions
+			// that are used in mocks BEFORE the import block.  There may be a better
+			// approach to this, but for now it is how we do it and so the rule must go.
+			'import/first': 'off',
 		},
 	},
 ]);

@@ -25,7 +25,6 @@ export default defineConfig([
 		// These are new love rules that we weren't following.  Disabling them here lets
 		// us re-enable them one-by-one alongside any necessary code changes.
 		rules: {
-			'max-lines': 'off',
 			'max-nested-callbacks': 'off',
 			'n/no-path-concat': 'off',
 			'no-unreachable': 'off',
@@ -138,6 +137,11 @@ export default defineConfig([
 			// that are used in mocks BEFORE the import block.  There may be a better
 			// approach to this, but for now it is how we do it and so the rule must go.
 			'import/first': 'off',
+
+			// The way we organize tests our test files can be very long since we're comprehensive.
+			// We could refactor, potentially, but even then I imagine that a line limit is not
+			// going to be useful in this context.
+			'max-lines': 'off',
 		},
 	},
 ]);

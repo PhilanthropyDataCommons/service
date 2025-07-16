@@ -238,6 +238,10 @@ const loadTaskRunnerAuthContext = async (): Promise<AuthContext> => ({
 	},
 });
 
+/* eslint-disable-next-line complexity --
+ * This function is, without a doubt, too complex. It's so complex that fixing it requires its own issue:
+ * https://github.com/PhilanthropyDataCommons/service/issues/1787
+ */
 export const processBulkUploadTask = async (
 	payload: unknown,
 	helpers: JobHelpers,

@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { isCopyBaseFieldsJobPayload, TaskStatus, isBaseField } from '../types';
 import { db } from '../database/db';
 import {
@@ -27,7 +26,7 @@ export const fetchBaseFieldsFromRemote = async (
 			);
 		}
 
-		const data = (await response.json()) as unknown;
+		const data = await response.json();
 
 		if (!Array.isArray(data) || !data.every((item) => isBaseField(item))) {
 			logger.error('Invalid basefield data received from remote PDC instance', {

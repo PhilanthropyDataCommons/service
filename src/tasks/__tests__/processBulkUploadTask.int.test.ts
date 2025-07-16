@@ -1,3 +1,4 @@
+import path from 'node:path';
 import nock from 'nock';
 import { requireEnv } from 'require-env-variable';
 import {
@@ -163,7 +164,12 @@ describe('processBulkUploadTask', () => {
 		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'validCsvTemplate.csv',
+			),
 		);
 		await processBulkUploadTask(
 			{
@@ -185,7 +191,12 @@ describe('processBulkUploadTask', () => {
 		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'validCsvTemplate.csv',
+			),
 		);
 		await processBulkUploadTask(
 			{
@@ -207,7 +218,12 @@ describe('processBulkUploadTask', () => {
 		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'validCsvTemplate.csv',
+			),
 		);
 		await processBulkUploadTask(
 			{
@@ -260,7 +276,12 @@ describe('processBulkUploadTask', () => {
 		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'validCsvTemplate.csv',
+			),
 		);
 
 		await processBulkUploadTask(
@@ -294,7 +315,12 @@ describe('processBulkUploadTask', () => {
 		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'validCsvTemplate.csv',
+			),
 		);
 
 		await processBulkUploadTask(
@@ -323,7 +349,12 @@ describe('processBulkUploadTask', () => {
 		);
 		await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/invalidShortCode.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'invalidShortCode.csv',
+			),
 		);
 		await processBulkUploadTask(
 			{
@@ -353,7 +384,12 @@ describe('processBulkUploadTask', () => {
 		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/invalidShortCode.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'invalidShortCode.csv',
+			),
 		);
 		await processBulkUploadTask(
 			{
@@ -377,7 +413,7 @@ describe('processBulkUploadTask', () => {
 		);
 		await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/empty.csv`,
+			path.join(__dirname, 'fixtures', 'processBulkUploadTask', 'empty.csv'),
 		);
 
 		await processBulkUploadTask(
@@ -409,7 +445,12 @@ describe('processBulkUploadTask', () => {
 		);
 		await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'validCsvTemplate.csv',
+			),
 		);
 		expect(bulkUploadTask.fileSize).toBe(null);
 
@@ -444,7 +485,12 @@ describe('processBulkUploadTask', () => {
 		);
 		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplate.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'validCsvTemplate.csv',
+			),
 		);
 
 		await processBulkUploadTask(
@@ -710,7 +756,12 @@ describe('processBulkUploadTask', () => {
 		);
 		await mockS3ResponsesForBulkUploadTaskProcessing(
 			bulkUploadTask,
-			`${__dirname}/fixtures/processBulkUploadTask/validCsvTemplateWithChangemakers.csv`,
+			path.join(
+				__dirname,
+				'fixtures',
+				'processBulkUploadTask',
+				'validCsvTemplateWithChangemakers.csv',
+			),
 		);
 
 		await processBulkUploadTask(

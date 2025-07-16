@@ -45,9 +45,6 @@ export default defineConfig([
 				...globals.jest,
 			},
 
-			ecmaVersion: 5,
-			sourceType: 'commonjs',
-
 			parserOptions: {
 				project: './tsconfig.dev.json',
 			},

@@ -28,7 +28,7 @@
 	"required": [
 		"id",
 		"dataProviderShortCode",
-		"userKeycloakUserId",
+		"keycloakOrganizationId",
 		"createdBy",
 		"createdAt"
 	]

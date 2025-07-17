@@ -96,7 +96,7 @@ const loadShortCodesFromBulkUploadTaskCsv = async (
 		// See https://github.com/adaltas/node-csv/issues/410
 		parse(),
 	);
-	await parser.forEach(async (record: string[]) => {
+	await parser.forEach((record: string[]) => {
 		if (!hasLoadedShortCodes) {
 			shortCodes = record;
 			hasLoadedShortCodes = true;

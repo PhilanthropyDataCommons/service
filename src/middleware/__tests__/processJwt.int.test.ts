@@ -20,7 +20,7 @@ const { AUTH_SERVER_ISSUER } = requireEnv('AUTH_SERVER_ISSUER');
 jest.mock('express-jwt', () => ({
 	expressjwt: jest.fn(
 		(...expressJwtArgs: unknown[]) =>
-			async (...middlewareArgs: unknown[]) => {
+			(...middlewareArgs: unknown[]) => {
 				// This is complicated, but basically we want expressjwt to return a middleware generator that
 				// will default to the actual middleware, BUT if a test has defined a mock implementation it
 				// should use the mock middleware instead.
@@ -44,7 +44,7 @@ describe('processJwt', () => {
 	it('does NOT populate an auth value when no auth header is sent', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
-		const makeAssertions = async () => {
+		const makeAssertions = () => {
 			expect(req.auth).toBe(undefined);
 		};
 		const nextMock = generateNextWithAssertions(makeAssertions, done);
@@ -59,7 +59,7 @@ describe('processJwt', () => {
 			iss: 'NotTheCorrectIssuer',
 		});
 		req.headers = mockJwt;
-		const makeAssertions = async (err: unknown) => {
+		const makeAssertions = (err: unknown) => {
 			expect(err).toBeInstanceOf(Error);
 			expect(req.auth).toBe(undefined);
 		};
@@ -115,7 +115,7 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 			jwt.sign(payload, badPrivateKey, { algorithm: 'RS256' }),
 		);
 		req.headers = badJwt;
-		const makeAssertions = async (err: unknown) => {
+		const makeAssertions = (err: unknown) => {
 			expect(err).toBeInstanceOf(Error);
 			/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
 			 * We just validated that err is an Error, but eslint doesn't recognize that fact.
@@ -133,7 +133,7 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 		const res = getMockResponse();
 		req.headers = authHeader;
 
-		const makeAssertions = async () => {
+		const makeAssertions = () => {
 			expect(req.auth).toMatchObject({
 				exp: expectNumber(),
 				iat: expectNumber(),
@@ -155,6 +155,9 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 		const nextMock: NextFunction = jest.fn();
 		customMiddleware.mockReset();
 		customMiddleware.mockImplementation(
+			/* eslint-disable-next-line @typescript-eslint/require-await --
+			 * This is a mock implementation that simulates an async middleware
+			 */
 			async (a: unknown, b: unknown, next: () => unknown) => {
 				next();
 				throw new Error('Something happened after calling next');
@@ -173,6 +176,10 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 		const res = getMockResponse();
 		const nextMock: NextFunction = jest.fn();
 		customMiddleware.mockReset();
+
+		/* eslint-disable-next-line @typescript-eslint/require-await --
+		 * This is a mock implementation that simulates an async middleware
+		 */
 		customMiddleware.mockImplementation(async () => {
 			throw new Error('Something happened before calling next');
 		});

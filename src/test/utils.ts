@@ -12,11 +12,17 @@ export const allowNextToResolve = async (): Promise<void> => {
 };
 
 export const generateNextWithAssertions = (
-	runAssertions: (err?: unknown) => Promise<void>,
+	runAssertions: (err?: unknown) => void | Promise<void>,
 	done: (value?: unknown) => unknown,
 ): jest.Mock =>
-	jest.fn((err?) => {
-		runAssertions(err).then(done).catch(done);
+	jest.fn(async (err?) => {
+		try {
+			await Promise.resolve(runAssertions(err));
+		} catch (thrownError) {
+			done(thrownError);
+			return;
+		}
+		done();
 	});
 
 export const getTestUserKeycloakUserId = (): KeycloakId =>

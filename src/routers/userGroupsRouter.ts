@@ -3,11 +3,13 @@ import { userGroupChangemakerPermissionsHandlers } from '../handlers/userGroupCh
 import { userGroupFunderPermissionsHandlers } from '../handlers/userGroupFunderPermissionsHandlers';
 import { userGroupDataProviderPermissionsHandlers } from '../handlers/userGroupDataProviderPermissionsHandlers';
 import {
+	requireAdministratorRole,
 	requireChangemakerPermission,
 	requireDataProviderPermission,
 	requireFunderPermission,
 } from '../middleware';
 import { Permission } from '../types';
+import { userGroupOpportunityPermissionsHandlers } from '../handlers/userGroupOpportunityPermissionsHandlers';
 
 const userGroupsRouter = express.Router();
 
@@ -40,6 +42,16 @@ userGroupsRouter.delete(
 	'/:keycloakOrganizationId/funders/:funderShortCode/permissions/:permission',
 	requireFunderPermission(Permission.MANAGE),
 	userGroupFunderPermissionsHandlers.deleteUserGroupFunderPermission,
+);
+userGroupsRouter.put(
+	'/:keycloakOrganizationId/opportunities/:opportunityId/permissions/:opportunityPermission',
+	requireAdministratorRole,
+	userGroupOpportunityPermissionsHandlers.putUserGroupOpportunityPermission,
+);
+userGroupsRouter.delete(
+	'/:keycloakOrganizationId/opportunities/:opportunityId/permissions/:opportunityPermission',
+	requireAdministratorRole,
+	userGroupOpportunityPermissionsHandlers.deleteUserGroupOpportunityPermission,
 );
 
 export { userGroupsRouter };

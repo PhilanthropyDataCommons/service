@@ -28,7 +28,7 @@
 	"required": [
 		"permission",
 		"funderShortCode",
-		"userKeycloakUserId",
+		"keycloakOrganizationId",
 		"createdBy",
 		"createdAt"
 	]

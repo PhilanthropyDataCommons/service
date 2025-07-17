@@ -1,15 +1,15 @@
 {
 	"type": "object",
 	"properties": {
-		"permission": {
-			"$ref": "./Permission.json",
+		"opportunityPermission": {
+			"$ref": "./OpportunityPermission.json",
 			"readOnly": true
 		},
-		"dataProviderShortCode": {
-			"$ref": "./shortCode.json",
+		"opportunityId": {
+			"$ref": "./id.json",
 			"readOnly": true
 		},
-		"keycloakOrganizationId": {
+		"userKeycloakUserId": {
 			"type": "string",
 			"format": "uuid",
 			"readOnly": true
@@ -26,9 +26,9 @@
 		}
 	},
 	"required": [
-		"id",
-		"dataProviderShortCode",
-		"keycloakOrganizationId",
+		"opportunityPermission",
+		"opportunityId",
+		"userKeycloakUserId",
 		"createdBy",
 		"createdAt"
 	]

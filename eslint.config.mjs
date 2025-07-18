@@ -22,19 +22,6 @@ export default defineConfig([
 	},
 	prettier,
 	{
-		// These are new love rules that we weren't following.  Disabling them here lets
-		// us re-enable them one-by-one alongside any necessary code changes.
-		rules: {
-			'import/first': 'off',
-			'max-lines': 'off',
-			'max-nested-callbacks': 'off',
-			'n/no-path-concat': 'off',
-			'no-unreachable': 'off',
-			'promise/avoid-new': 'off',
-			complexity: 'off',
-		},
-	},
-	{
 		plugins: {
 			'sort-exports': sortExports,
 		},
@@ -44,9 +31,6 @@ export default defineConfig([
 				...globals.node,
 				...globals.jest,
 			},
-
-			ecmaVersion: 5,
-			sourceType: 'commonjs',
 
 			parserOptions: {
 				project: './tsconfig.dev.json',
@@ -61,9 +45,10 @@ export default defineConfig([
 					ignoreEnums: true,
 				},
 			],
+
+			// Unlike some code bases we explicitly do not want to use default exports.
 			'import/prefer-default-export': 'off',
 			'import/no-default-export': 'error',
-			'@typescript-eslint/prefer-readonly-parameter-types': 'off',
 
 			'import/order': [
 				'error',
@@ -81,19 +66,6 @@ export default defineConfig([
 					'newlines-between': 'never',
 				},
 			],
-
-			'import/no-extraneous-dependencies': [
-				'error',
-				{
-					devDependencies: [
-						'src/test/*.{ts,js}',
-						'src/**/__tests__/*.{ts,js}',
-						'src/**/*.test.*.{ts,js}',
-					],
-				},
-			],
-
-			'@typescript-eslint/require-await': 'off',
 
 			'@typescript-eslint/no-unused-vars': [
 				'error',
@@ -137,6 +109,19 @@ export default defineConfig([
 
 			// Tests use hard coded numbers in lots of places, and that's OK for now.
 			'@typescript-eslint/no-magic-numbers': 'off',
+
+			// Jest hoists mock statements, so sometimes we need to define mock functions
+			// that are used in mocks BEFORE the import block.  There may be a better
+			// approach to this, but for now it is how we do it and so the rule must go.
+			'import/first': 'off',
+
+			// The way we organize tests our test files can be very long since we're comprehensive.
+			// We could refactor, potentially, but even then I imagine that a line limit is not
+			// going to be useful in this context.
+			'max-lines': 'off',
+
+			// Tests are already 2-3 levels deep in nested callbacks, so we update this rule to 5 instead of 3.
+			'max-nested-callbacks': ['error', 5],
 		},
 	},
 ]);

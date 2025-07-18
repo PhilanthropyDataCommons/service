@@ -138,7 +138,6 @@ const putChangemakerFiscalSponsor = async (
 ): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
-		return;
 	}
 	const {
 		params: { changemakerId, fiscalSponsorChangemakerId },

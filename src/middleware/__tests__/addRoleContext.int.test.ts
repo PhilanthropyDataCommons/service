@@ -13,7 +13,7 @@ describe('addRoleContext', () => {
 			},
 		};
 
-		const runAssertions = async (err: unknown) => {
+		const runAssertions = (err: unknown) => {
 			expect(err).toBe(undefined);
 			expect(req.role?.isAdministrator).toBe(true);
 		};
@@ -31,7 +31,7 @@ describe('addRoleContext', () => {
 			},
 		};
 
-		const runAssertions = async (err: unknown) => {
+		const runAssertions = (err: unknown) => {
 			expect(err).toBe(undefined);
 			expect(req.role?.isAdministrator).toBe(false);
 		};

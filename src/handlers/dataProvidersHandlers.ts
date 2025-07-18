@@ -15,7 +15,6 @@ import type { Request, Response } from 'express';
 const getDataProviders = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
-		return;
 	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);

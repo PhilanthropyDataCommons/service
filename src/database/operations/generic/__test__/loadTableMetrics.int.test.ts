@@ -12,11 +12,13 @@ describe('loadTableMetrics', () => {
 	});
 
 	it('Should throw an error if no metrics were returned by the database', async () => {
-		jest.spyOn(db, 'query').mockImplementationOnce(async () => ({
-			rows: [],
-			command: '',
-			row_count: 0,
-		}));
+		jest.spyOn(db, 'query').mockReturnValueOnce(
+			Promise.resolve({
+				rows: [],
+				command: '',
+				row_count: 0,
+			}),
+		);
 
 		await expect(loadTableMetrics('changemakers')).rejects.toThrow(
 			'Something went wrong collecting table metrics for changemakers',

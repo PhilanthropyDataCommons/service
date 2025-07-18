@@ -56,45 +56,50 @@ const getNameForError = (error: unknown): string => {
 	return 'UnknownError';
 };
 
+const getHttpStatusCodeFromDatabaseError = (error: DatabaseError): number => {
+	const {
+		tinyPgError: {
+			queryContext: {
+				error: { code },
+			},
+		},
+	} = error;
+	return getHttpStatusCodeForDatabaseErrorCode(code);
+};
+
+const isJwksRsaRateLimitError = (error: unknown): boolean =>
+	typeof error === 'string' &&
+	error.includes('exceeds maximum tokens per interval');
+
 const getHttpStatusCodeForError = (error: unknown): number => {
 	if (error instanceof DatabaseError) {
-		const {
-			tinyPgError: {
-				queryContext: {
-					error: { code: errorCode },
-				},
-			},
-		} = error;
-		return getHttpStatusCodeForDatabaseErrorCode(errorCode);
+		return getHttpStatusCodeFromDatabaseError(error);
 	}
-	if (error instanceof InternalValidationError) {
-		return HTTP_STATUS.SERVER_ERROR.INTERNAL_SERVER_ERROR;
-	}
-	if (error instanceof InputValidationError) {
-		return HTTP_STATUS.CLIENT_ERROR.BAD_REQUEST;
-	}
-	if (error instanceof InputConflictError) {
-		return HTTP_STATUS.CLIENT_ERROR.CONFLICT;
-	}
-	if (error instanceof UnauthorizedError) {
-		return HTTP_STATUS.CLIENT_ERROR.UNAUTHORIZED;
-	}
-	if (error instanceof JwtUnauthorizedError) {
-		return HTTP_STATUS.CLIENT_ERROR.UNAUTHORIZED;
-	}
-	if (error instanceof NotFoundError) {
-		return HTTP_STATUS.CLIENT_ERROR.NOT_FOUND;
-	}
-	if (error instanceof UnprocessableEntityError) {
-		return HTTP_STATUS.CLIENT_ERROR.UNPROCESSABLE_CONTENT;
-	}
-	// In the `jwks-rsa` library, when a rate limit is exceeded a string error gets thrown.
-	if (
-		typeof error === 'string' &&
-		error.includes('exceeds maximum tokens per interval')
-	) {
+
+	if (isJwksRsaRateLimitError(error)) {
 		return HTTP_STATUS.SERVER_ERROR.SERVICE_UNAVAILABLE;
 	}
+
+	if (error instanceof Error) {
+		switch (error.constructor) {
+			case InternalValidationError:
+				return HTTP_STATUS.SERVER_ERROR.INTERNAL_SERVER_ERROR;
+			case InputValidationError:
+				return HTTP_STATUS.CLIENT_ERROR.BAD_REQUEST;
+			case InputConflictError:
+				return HTTP_STATUS.CLIENT_ERROR.CONFLICT;
+			case UnauthorizedError:
+			case JwtUnauthorizedError:
+				return HTTP_STATUS.CLIENT_ERROR.UNAUTHORIZED;
+			case NotFoundError:
+				return HTTP_STATUS.CLIENT_ERROR.NOT_FOUND;
+			case UnprocessableEntityError:
+				return HTTP_STATUS.CLIENT_ERROR.UNPROCESSABLE_CONTENT;
+			default:
+				return HTTP_STATUS.SERVER_ERROR.INTERNAL_SERVER_ERROR;
+		}
+	}
+
 	return HTTP_STATUS.SERVER_ERROR.INTERNAL_SERVER_ERROR;
 };
 

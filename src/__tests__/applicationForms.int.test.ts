@@ -808,21 +808,21 @@ describe('/applicationForms', () => {
 			await createTestBaseFields();
 			jest
 				.spyOn(db, 'sql')
-				.mockImplementationOnce(async () => ({
-					command: '',
-					row_count: 1,
-					rows: [
-						{
-							id: 1,
-							opportunityId: 1,
-							version: 1,
-							createdAt: new Date(),
-						},
-					],
-				}))
-				.mockImplementationOnce(async () => {
-					throw new Error('This is unexpected');
-				});
+				.mockReturnValueOnce(
+					Promise.resolve({
+						command: '',
+						row_count: 1,
+						rows: [
+							{
+								id: 1,
+								opportunityId: 1,
+								version: 1,
+								createdAt: new Date(),
+							},
+						],
+					}),
+				)
+				.mockReturnValueOnce(Promise.reject(new Error('This is unexpected')));
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')

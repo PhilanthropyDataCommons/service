@@ -13,7 +13,7 @@ describe('test/utils.ts', () => {
 					done();
 				}
 			});
-			const runAssertions = async () => {
+			const runAssertions = () => {
 				throw errorToThrow;
 			};
 			const mockedNext = generateNextWithAssertions(runAssertions, mockedDone);
@@ -28,7 +28,7 @@ describe('test/utils.ts', () => {
 					done(err);
 				}
 			});
-			const runAssertions = async () => {
+			const runAssertions = () => {
 				expect(true).toBe(true);
 			};
 			const mockedNext = generateNextWithAssertions(runAssertions, mockedDone);
@@ -44,7 +44,7 @@ describe('test/utils.ts', () => {
 					done();
 				}
 			});
-			const runAssertions = async () => {
+			const runAssertions = () => {
 				expect(true).toBe(false);
 			};
 			const mockedNext = generateNextWithAssertions(runAssertions, mockedDone);

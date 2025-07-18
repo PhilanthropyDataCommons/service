@@ -58,7 +58,6 @@ const postChangemakerProposal = async (
 ): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
-		return;
 	}
 
 	const body = req.body as unknown;

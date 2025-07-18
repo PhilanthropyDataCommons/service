@@ -37,7 +37,6 @@ const getOpportunities = async (req: Request, res: Response): Promise<void> => {
 const getOpportunity = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
-		return;
 	}
 	const {
 		params: { opportunityId },

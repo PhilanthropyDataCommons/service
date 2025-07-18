@@ -13,8 +13,6 @@ import {
 	loadSystemUser,
 	loadTableMetrics,
 	removeUserChangemakerPermission,
-	createOpportunity,
-	createOrUpdateUserOpportunityPermission,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectTimestamp } from '../test/asymettricMatchers';
@@ -22,12 +20,7 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import {
-	keycloakIdToString,
-	stringToKeycloakId,
-	Permission,
-	OpportunityPermission,
-} from '../types';
+import { keycloakIdToString, stringToKeycloakId, Permission } from '../types';
 
 const createAdditionalTestUser = async () =>
 	await createOrUpdateUser(db, null, {
@@ -58,7 +51,6 @@ describe('/users', () => {
 							changemaker: {},
 							dataProvider: {},
 							funder: {},
-							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -85,10 +77,6 @@ describe('/users', () => {
 				taxId: '12-3456789',
 				keycloakOrganizationId: null,
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Test Opportunity',
-				funderShortCode: funder.shortCode,
-			});
 			await createOrUpdateUserDataProviderPermission(
 				db,
 				systemUserAuthContext,
@@ -107,11 +95,6 @@ describe('/users', () => {
 				userKeycloakUserId: testUser.keycloakUserId,
 				permission: Permission.VIEW,
 				changemakerId: changemaker.id,
-			});
-			await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				opportunityId: opportunity.id,
-				opportunityPermission: OpportunityPermission.CREATE_PROPOSAL,
 			});
 			const { count: userCount } = await loadTableMetrics('users');
 
@@ -133,9 +116,6 @@ describe('/users', () => {
 							},
 							funder: {
 								testFunder: [Permission.EDIT],
-							},
-							opportunity: {
-								[opportunity.id]: [OpportunityPermission.CREATE_PROPOSAL],
 							},
 						},
 						createdAt: expectTimestamp(),
@@ -180,7 +160,6 @@ describe('/users', () => {
 							changemaker: {},
 							dataProvider: {},
 							funder: {},
-							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -254,7 +233,6 @@ describe('/users', () => {
 							changemaker: {},
 							dataProvider: {},
 							funder: {},
-							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -264,7 +242,6 @@ describe('/users', () => {
 							changemaker: {},
 							dataProvider: {},
 							funder: {},
-							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -274,7 +251,6 @@ describe('/users', () => {
 							changemaker: {},
 							dataProvider: {},
 							funder: {},
-							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -284,7 +260,6 @@ describe('/users', () => {
 							changemaker: {},
 							dataProvider: {},
 							funder: {},
-							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -294,7 +269,6 @@ describe('/users', () => {
 							changemaker: {},
 							dataProvider: {},
 							funder: {},
-							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
 					},

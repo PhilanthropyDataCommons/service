@@ -1,11 +1,9 @@
 import { keycloakIdSchema } from './KeycloakId';
 import { permissionSchema } from './Permission';
-import { opportunityPermissionSchema } from './OpportunityPermission';
 import type { KeycloakId } from './KeycloakId';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { Permission } from './Permission';
-import type { OpportunityPermission } from './OpportunityPermission';
 
 interface User {
 	keycloakUserId: KeycloakId;
@@ -13,7 +11,6 @@ interface User {
 		changemaker: Record<string, Permission[]>;
 		dataProvider: Record<string, Permission[]>;
 		funder: Record<string, Permission[]>;
-		opportunity: Record<string, OpportunityPermission[]>;
 	};
 	readonly createdAt: string;
 }
@@ -49,16 +46,8 @@ const userSchema: JSONSchemaType<User> = {
 					},
 					required: [],
 				},
-				opportunity: {
-					type: 'object',
-					additionalProperties: {
-						type: 'array',
-						items: opportunityPermissionSchema,
-					},
-					required: [],
-				},
 			},
-			required: ['changemaker', 'dataProvider', 'funder', 'opportunity'],
+			required: ['changemaker', 'dataProvider', 'funder'],
 		},
 		createdAt: {
 			type: 'string',

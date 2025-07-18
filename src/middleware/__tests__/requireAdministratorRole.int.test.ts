@@ -11,6 +11,7 @@ const getMockedUser = (): User => ({
 		changemaker: {},
 		dataProvider: {},
 		funder: {},
+		opportunity: {},
 	},
 });
 

@@ -19,6 +19,7 @@ import {
 	createOrUpdateUserFunderPermission,
 	createOrUpdateFunder,
 	createOrUpdateUserChangemakerPermission,
+	createOrUpdateUserOpportunityPermission,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -37,6 +38,7 @@ import {
 	BaseFieldSensitivityClassification,
 	keycloakIdToString,
 	Permission,
+	OpportunityPermission,
 } from '../types';
 
 const createTestBaseFields = async () => {
@@ -1581,6 +1583,66 @@ describe('/proposals', () => {
 				id: 1,
 				externalId: 'proposal123',
 				opportunityId: 1,
+				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
+			});
+			expect(after.count).toEqual(before.count + 1);
+		});
+
+		it('returns 422 if the user does not have permission', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const before = await loadTableMetrics('proposals');
+			await request(app)
+				.post('/proposals')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					externalId: 'proposal123',
+					opportunityId: opportunity.id,
+				})
+				.expect(422);
+			const after = await loadTableMetrics('proposals');
+			expect(after.count).toEqual(before.count);
+		});
+
+		it('creates exactly one proposal when the user has create_proposal and view permissions on the opportunity', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: '🔥',
+				funderShortCode: systemFunder.shortCode,
+			});
+			await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				opportunityId: opportunity.id,
+				opportunityPermission: OpportunityPermission.CREATE_PROPOSAL,
+			});
+			await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				opportunityId: opportunity.id,
+				opportunityPermission: OpportunityPermission.VIEW,
+			});
+			const before = await loadTableMetrics('proposals');
+			const result = await request(app)
+				.post('/proposals')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					externalId: 'proposal123',
+					opportunityId: opportunity.id,
+				})
+				.expect(201);
+			const after = await loadTableMetrics('proposals');
+			expect(result.body).toMatchObject({
+				id: 1,
+				externalId: 'proposal123',
+				opportunityId: opportunity.id,
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 			});

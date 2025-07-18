@@ -109,6 +109,28 @@ with the insertion of group steps and appendage of access policy steps).
 
 ### Okta Configuration using SAML 2.0
 
+#### Save the current PDC keys in a PEM file
+
+1. Visit the PDC Keycloak SAML configuration URL, similar to
+   `https://example.org/realms/pdc/protocol/saml/descriptor`
+2. Within the XML document presented, copy and paste each PEM-encoded value
+   under "<md:KeyDescriptor use='signing'>...<ds:X509Certificate>", similar to
+   `MIIC...=`, into a single (new) text file.
+3. Surround each of the values from above with PEM headers and footers, namely
+   `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`, each on their
+   own lines.
+4. Line-wrap each of the values from above at 64 characters, according to
+   https://www.rfc-editor.org/rfc/rfc7468.html#page-5
+5. Save the new file with a `.crt` extension, such as `pdc_signing_keys.crt`.
+
+This file will be used below to configure signature validation. When using SAML
+with Okta, there is no option to dynamically fetch these keys. So when PDC keys
+are updated, the integration will not work until re-uploading the PDC keys. Thus
+[OIDC is preferred](#Okta Configuration using OIDC (preferred over SAML)) when
+using Okta.
+
+#### Configure Okta App Integration
+
 1. Log in to the admin area to Start a SAML App Integration (these steps follow
    https://help.okta.com/en-us/content/topics/apps/apps_app_integration_wizard_saml.htm
    )
@@ -136,15 +158,19 @@ with the insertion of group steps and appendage of access policy steps).
     field
 12. Set the "Name ID format" to `EmailAddress`
 13. Set the "Application username" to `Email`
-14. Add Attribute Statements (case sensitive, use the dropdown for each Value):
+14. Expand "Show Advanced Settings"
+15. Ensure both "Response" and "Assertion Signature" are `Signed`
+16. Add a "Signature Certificate" PEM file by clicking "Browse files...",
+    created [above](#Save the current PDC keys in a PEM file)
+17. Add Attribute Statements (case sensitive, use the dropdown for each Value):
     - Map `firstName`, `Basic` to `user.firstName`
     - Map `lastName`, `Basic` to `user.lastName`
 
     ![Attribute Statements map](images/okta_attribute_statements.png)
 
-15. Click "Next"
-16. Click "Finish"
-17. Send Okta's SAML "Metadata URL" value to the PDC team.
+18. Click "Next"
+19. Click "Finish"
+20. Send Okta's SAML "Metadata URL" value to the PDC team.
 
     ![SAML Metadata URL](images/okta_metadata_url.png)
 

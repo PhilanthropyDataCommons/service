@@ -7,6 +7,7 @@ DECLARE
   user_changemaker_permissions_json JSONB := NULL::JSONB;
   user_funder_permissions_json JSONB := NULL::JSONB;
   user_data_provider_permissions_json JSONB := NULL::JSONB;
+  user_opportunity_permissions_json JSONB := NULL::JSONB;
 BEGIN
   user_changemaker_permissions_json := (
     SELECT jsonb_object_agg(
@@ -109,10 +110,45 @@ BEGIN
     ) AS aggregated_combined_funder_permissions
   );
 
+  user_opportunity_permissions_json := (
+    SELECT jsonb_object_agg(
+      aggregated_combined_opportunity_permissions.opportunity_id,
+      aggregated_combined_opportunity_permissions.opportunity_permissions
+    )
+    FROM (
+      SELECT
+        combined_opportunity_permissions.opportunity_id,
+        jsonb_agg(combined_opportunity_permissions.opportunity_permission) AS opportunity_permissions
+      FROM (
+        (
+          SELECT
+            user_opportunity_permissions.opportunity_id AS opportunity_id,
+            user_opportunity_permissions.opportunity_permission AS opportunity_permission
+          FROM user_opportunity_permissions
+          WHERE user_opportunity_permissions.user_keycloak_user_id = "user".keycloak_user_id
+            AND NOT is_expired(user_opportunity_permissions.not_after)
+        )
+        UNION
+        (
+          SELECT
+            user_group_opportunity_permissions.opportunity_id AS opportunity_id,
+            user_group_opportunity_permissions.opportunity_permission AS opportunity_permission
+          FROM ephemeral_user_group_associations
+          JOIN user_group_opportunity_permissions
+            ON ephemeral_user_group_associations.user_group_keycloak_organization_id = user_group_opportunity_permissions.keycloak_organization_id
+          WHERE ephemeral_user_group_associations.user_keycloak_user_id = "user".keycloak_user_id
+            AND NOT is_expired(ephemeral_user_group_associations.not_after)
+        )
+      ) as combined_opportunity_permissions
+      GROUP BY combined_opportunity_permissions.opportunity_id
+    ) AS aggregated_combined_opportunity_permissions
+  );
+
   permissions_json := jsonb_build_object(
     'changemaker', COALESCE(user_changemaker_permissions_json, '{}'),
     'dataProvider', COALESCE(user_data_provider_permissions_json, '{}'),
-    'funder', COALESCE(user_funder_permissions_json, '{}')
+    'funder', COALESCE(user_funder_permissions_json, '{}'),
+    'opportunity', COALESCE(user_opportunity_permissions_json, '{}')
   );
 
   RETURN jsonb_build_object(

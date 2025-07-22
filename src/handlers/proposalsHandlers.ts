@@ -7,7 +7,13 @@ import {
 	loadProposalBundle,
 	loadOpportunity,
 } from '../database';
-import { isId, isAuthContext, isWritableProposal, Permission } from '../types';
+import {
+	isId,
+	isAuthContext,
+	isWritableProposal,
+	Permission,
+	OpportunityPermission,
+} from '../types';
 import {
 	FailedMiddlewareError,
 	InputValidationError,
@@ -21,7 +27,10 @@ import {
 	extractSearchParameters,
 	extractFunderParameters,
 } from '../queryParameters';
-import { authContextHasFunderPermission } from '../authorization';
+import {
+	authContextHasFunderPermission,
+	authContextHasOpportunityPermission,
+} from '../authorization';
 import type { Request, Response } from 'express';
 
 const getProposals = async (req: Request, res: Response): Promise<void> => {
@@ -91,10 +100,15 @@ const postProposal = async (req: Request, res: Response): Promise<void> => {
 				req,
 				opportunity.funderShortCode,
 				Permission.EDIT,
+			) &&
+			!authContextHasOpportunityPermission(
+				req,
+				opportunity.id,
+				OpportunityPermission.CREATE_PROPOSAL,
 			)
 		) {
 			throw new UnprocessableEntityError(
-				'You do not have write permissions on the funder associated with this opportunity.',
+				'You do not have permission to create a proposal for this opportunity.',
 			);
 		}
 		const proposal = await createProposal(db, req, {

@@ -7,5 +7,11 @@ WHERE
 		funder_short_code,
 		'view'
 	)
+	OR has_opportunity_permission(
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator,
+		id,
+		'view'
+	)
 ORDER BY id
 LIMIT :limit OFFSET :offset;

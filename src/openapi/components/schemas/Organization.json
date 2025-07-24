@@ -1,0 +1,22 @@
+{
+	"type": "object",
+	"description": "Up to three entities related to roles played by an organization, as registered in the PDC: a changemaker role, a data provider role, and/or a funder role.",
+	"properties": {
+		"changemaker": {
+			"$ref": "./ShallowChangemaker.json",
+			"readOnly": true,
+			"nullable": true
+		},
+		"dataProvider": {
+			"$ref": "./DataProvider.json",
+			"readOnly": true,
+			"nullable": true
+		},
+		"funder": {
+			"$ref": "./DataProvider.json",
+			"readOnly": true,
+			"nullable": true
+		}
+	},
+	"required": ["changemaker", "dataProvider", "funder"]
+}

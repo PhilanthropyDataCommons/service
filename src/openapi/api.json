@@ -119,6 +119,9 @@
 			"OpportunityBundle": {
 				"$ref": "./components/schemas/OpportunityBundle.json"
 			},
+			"Organization": {
+				"$ref": "./components/schemas/Organization.json"
+			},
 			"PlatformProviderResponse": {
 				"$ref": "./components/schemas/PlatformProviderResponse.json"
 			},
@@ -247,6 +250,9 @@
 		},
 		"/opportunities/{opportunityId}": {
 			"$ref": "./paths/opportunity.json"
+		},
+		"/organizations/{keycloakOrganizationId}": {
+			"$ref": "./paths/organization.json"
 		},
 		"/platformProviderResponses": {
 			"$ref": "./paths/platformProviderResponses.json"

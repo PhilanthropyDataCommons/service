@@ -13,11 +13,11 @@ const getOrganization = async (req: Request, res: Response): Promise<void> => {
 	}
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
-			'Invalid Keycloak Organization UUID.',
+			'Invalid keycloakOrganizationId.',
 			isId.errors ?? [],
 		);
 	}
-	const organization = await loadOrganization(db, null, keycloakOrganizationId);
+	const organization = await loadOrganization(db, req, keycloakOrganizationId);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')

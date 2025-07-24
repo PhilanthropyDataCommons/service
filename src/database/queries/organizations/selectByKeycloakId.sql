@@ -1,1 +1,5 @@
-SELECT organization_to_json(:keycloakOrganizationId) AS object;
+SELECT organization_to_json(
+	:keycloakOrganizationId,
+	:authContextKeycloakUserId,
+	:authContextIsAdministrator
+) AS object;

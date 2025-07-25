@@ -89,6 +89,7 @@ describe('/proposals', () => {
 				name: 'Visible Funder',
 				shortCode: 'visibleFunder',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			const visibleChangemaker = await createChangemaker(db, null, {
 				name: 'Visible Changemaker',
@@ -201,6 +202,7 @@ describe('/proposals', () => {
 				name: 'Test Funder',
 				shortCode: 'testFunder',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			const systemFunder = await loadSystemFunder(db, null);
 			await createTestBaseFields();

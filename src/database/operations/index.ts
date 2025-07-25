@@ -12,6 +12,7 @@ export * from './fiscalSponsorships';
 export * from './funders';
 export * from './generic';
 export * from './opportunities';
+export * from './organizations';
 export * from './proposalFieldValues';
 export * from './proposals';
 export * from './proposalVersions';

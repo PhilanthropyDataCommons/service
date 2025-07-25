@@ -22,6 +22,7 @@ export * from './KeycloakId';
 export * from './Language';
 export * from './Opportunity';
 export * from './OpportunityPermission';
+export * from './Organization';
 export * from './PaginationParameters';
 export * from './PaginationParametersQuery';
 export * from './Permission';

@@ -12,6 +12,7 @@ const getMockJwks = (jwksPath = '/protocol/openid-connect/certs'): JWKSMock =>
 const mockJwks = getMockJwks();
 
 const AN_ARBITRARILY_LONG_TIME = 1000000;
+const mockOrgId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
 
 const getMockJwt = (
 	settings: {
@@ -33,7 +34,7 @@ const getMockJwt = (
 		typ: 'Bearer',
 		azp: 'pdc-service',
 		organizations: settings.organizations ?? {
-			fooOrganization: { id: '47d406ad-5e50-42d4-88f1-f87947a3e314' },
+			fooOrganization: { id: mockOrgId },
 		},
 		realm_access: {
 			roles: settings.roles ?? ['default-roles-pdc'],
@@ -58,6 +59,7 @@ export {
 	mockJwt,
 	mockJwtWithoutSub,
 	mockJwtWithAdminRole,
+	mockOrgId,
 	getMockJwt,
 	getMockJwks,
 };

@@ -49,15 +49,15 @@ const generateLoadItemOperation =
 		const {
 			rows: [wrappedObject],
 		} = result;
-		if (wrappedObject === undefined) {
-			throw new NotFoundError(`Entity not found`, {
-				entityType,
-				lookupValues: queryParameters,
-			});
-		} else {
+		if (wrappedObject?.object !== undefined && wrappedObject.object !== null) {
 			await createServiceQueryAuditLog(db, authContext, {
 				queryName,
 				queryParameters,
+			});
+		} else {
+			throw new NotFoundError(`Entity not found`, {
+				entityType,
+				lookupValues: queryParameters,
 			});
 		}
 		return wrappedObject.object;

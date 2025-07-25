@@ -1,0 +1,39 @@
+{
+	"get": {
+		"operationId": "getOrganizationByKeycloakId",
+		"summary": "Gets a specific organization's related entities by PDC Keycloak Organization UUID.",
+		"tags": ["Organizations"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "keycloakOrganizationId",
+				"description": "The PDC Keycloak-generated UIID of an organization.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string",
+					"format": "uuid"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The Organization's related entities, including their PDC service-generated IDs or short codes.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Organization.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

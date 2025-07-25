@@ -275,6 +275,9 @@
 		"/users/{userKeycloakUserId}/dataProviders/{dataProviderShortCode}/permissions/{permission}": {
 			"$ref": "./paths/userDataProviderPermission.json"
 		},
+		"/users/{userKeycloakUserId}/opportunities/{opportunityId}/permissions/{opportunityPermission}": {
+			"$ref": "./paths/userOpportunityPermission.json"
+		},
 		"/userGroups/{keycloakOrganizationId}/changemakers/{changemakerId}/permissions/{permission}": {
 			"$ref": "./paths/userGroupChangemakerPermission.json"
 		},
@@ -283,6 +286,9 @@
 		},
 		"/userGroups/{keycloakOrganizationId}/dataProviders/{dataProviderShortCode}/permissions/{permission}": {
 			"$ref": "./paths/userGroupDataProviderPermission.json"
+		},
+		"/userGroups/{keycloakOrganizationId}/opportunities/{opportunityId}/permissions/{opportunityPermission}": {
+			"$ref": "./paths/userGroupOpportunityPermission.json"
 		}
 	}
 }

@@ -50,3 +50,16 @@ jobs:
         run: |
           set -eo pipefail
           curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ env.TOKEN }}" --url "${{ env.URL }}" -d '{ "force_build": true }' | jq -e .deployment.id
+  deploy-to-sandbox-env:
+    runs-on: ubuntu-latest
+    environment: Sandbox
+    name: Deploy to Sandbox environment
+    env:
+      TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      URL: ${{ vars.DEPLOYMENT_URL }}
+    needs: deploy-to-test-env
+    steps:
+      - name: Deploy to Digital Ocean Sandbox environment
+        run: |
+          set -eo pipefail
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ env.TOKEN }}" --url "${{ env.URL }}" -d '{ "force_build": true }' | jq -e .deployment.id

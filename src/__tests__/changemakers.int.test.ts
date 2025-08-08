@@ -103,6 +103,7 @@ const setupTestContext = async () => {
 		shortCode: 'funder_5393',
 		name: 'Funder 5393',
 		keycloakOrganizationId: null,
+		isCollaborative: false,
 	});
 	const firstFunderOpportunity = await createOpportunity(db, null, {
 		title: `${firstFunder.name} opportunity`,

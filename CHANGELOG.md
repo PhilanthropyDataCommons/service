@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The required fields associated with `UserGroupChangemakerPermission`, `UserGroupDataProviderPermission`, and `UserGroupFunderPermission` are now correctly documented.
 - The various opportunity permission endpoints are now correctly documented.
 
+## 0.22.0 2025-07-22
+
+- Funders now have a `isCollaborative` attribute.
+- Added `FunderCollaborativeMember` entity type to represent collaborators on Funders, which extend funder permissions to other funder collaborators.
+- Added `FunderCollaborativeInvitation` entity type to represent invitations to collaborate on a funder.
+
 ## 0.21.0 2025-07-16
 
 ### Added

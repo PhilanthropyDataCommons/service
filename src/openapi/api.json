@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for changemakers seeking grants.",
-		"version": "0.21.0",
+		"version": "0.22.0",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -64,6 +64,9 @@
 			},
 			"Funder": {
 				"$ref": "./components/schemas/Funder.json"
+			},
+			"FunderCollaborativeMember": {
+				"$ref": "./components/schemas/FunderCollaborativeMember.json"
 			},
 			"ShallowChangemaker": {
 				"$ref": "./components/schemas/ShallowChangemaker.json"
@@ -238,6 +241,24 @@
 		},
 		"/funders/{funderShortCode}": {
 			"$ref": "./paths/funder.json"
+		},
+		"/funders/{funderCollaborativeShortCode}/members": {
+			"$ref": "./paths/funderCollaborativeMembers.json"
+		},
+		"/funders/{funderCollaborativeShortCode}/members/{memberFunderShortCode}": {
+			"$ref": "./paths/funderCollaborativeMember.json"
+		},
+		"/funders/{funderCollaborativeShortCode}/invitations/sent": {
+			"$ref": "./paths/funderCollaborativeInvitationsSent.json"
+		},
+		"/funders/{funderCollaborativeShortCode}/invitations/sent/{invitedFunderShortCode}": {
+			"$ref": "./paths/funderCollaborativeInvitationSent.json"
+		},
+		"/funders/{invitedFunderShortCode}/invitations/received": {
+			"$ref": "./paths/funderCollaborativeInvitationsReceived.json"
+		},
+		"/funders/{invitedFunderShortCode}/invitations/received/{funderCollaborativeShortCode}": {
+			"$ref": "./paths/funderCollaborativeInvitationReceived.json"
 		},
 		"/baseFields/{baseFieldShortCode}/localizations": {
 			"$ref": "./paths/baseFieldLocalizations.json"

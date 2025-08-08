@@ -1,0 +1,60 @@
+{
+	"post": {
+		"operationId": "createFunderCollaborativeInvitation",
+		"summary": "Creates a new funder collaborative invitation.",
+		"tags": ["Funder Collaborative Invitations"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "funderCollaborativeShortCode",
+				"description": "The short code of the source collaborative funder.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			},
+			{
+				"name": "invitedFunderShortCode",
+				"description": "The short code of the invited funder.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/EmptyObject.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The funder collaborative invitation.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/FunderCollaborativeInvitation.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			}
+		}
+	}
+}

@@ -1,0 +1,34 @@
+{
+	"type": "object",
+	"properties": {
+		"funderCollaborativeShortCode": {
+			"$ref": "./shortCode.json",
+			"readOnly": true
+		},
+		"invitedFunderShortCode": {
+			"$ref": "./shortCode.json",
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"invitationStatus": {
+			"type": "string",
+			"enum": ["pending", "accepted", "rejected"]
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that created this funder collaborative member",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		}
+	},
+	"required": [
+		"funderCollaborativeShortCode",
+		"invitedFunderShortCode",
+		"createdAt",
+		"createdBy"
+	]
+}

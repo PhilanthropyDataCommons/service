@@ -79,6 +79,7 @@ describe('/users', () => {
 				name: 'Test Funder',
 				shortCode: 'testFunder',
 				keycloakOrganizationId: null,
+				isCollaborative: false,
 			});
 			const changemaker = await createChangemaker(db, null, {
 				name: 'Test Changemaker',

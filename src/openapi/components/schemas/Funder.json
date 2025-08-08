@@ -16,7 +16,11 @@
 			"type": "string",
 			"format": "date-time",
 			"readOnly": true
+		},
+		"isCollaborative": {
+			"type": "boolean",
+			"default": false
 		}
 	},
-	"required": ["id", "name", "createdAt"]
+	"required": ["id", "name", "createdAt", "isCollaborative"]
 }

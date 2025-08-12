@@ -39,6 +39,16 @@
 				}
 			}
 		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/EmptyObject.json"
+					}
+				}
+			}
+		},
 		"responses": {
 			"201": {
 				"description": "The resulting permission.",

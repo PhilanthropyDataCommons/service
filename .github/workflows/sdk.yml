@@ -14,11 +14,11 @@ jobs:
       npm_token_exists: ${{ secrets.NPM_TOKEN != '' }}
     steps:
       - name: Check out our code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: 'service'
       - name: Check out sdk generators
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: 'PhilanthropyDataCommons/sdk'
           path: 'sdk'

@@ -26,7 +26,7 @@
 		}
 	},
 	"required": [
-		"id",
+		"permission",
 		"dataProviderShortCode",
 		"userKeycloakUserId",
 		"createdBy",

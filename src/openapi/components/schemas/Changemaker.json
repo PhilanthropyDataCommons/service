@@ -34,14 +34,7 @@
 					"readOnly": true
 				}
 			},
-			"required": [
-				"id",
-				"taxId",
-				"name",
-				"createdAt",
-				"fields",
-				"fiscalSponsors"
-			]
+			"required": ["fields", "fiscalSponsors"]
 		}
 	]
 }

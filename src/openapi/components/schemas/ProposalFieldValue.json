@@ -49,7 +49,7 @@
 		"applicationFormField",
 		"position",
 		"value",
-		"goodasOf",
+		"goodAsOf",
 		"isValid",
 		"createdAt"
 	]

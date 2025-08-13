@@ -11,7 +11,7 @@
 		"parameters": [
 			{
 				"name": "keycloakOrganizationId",
-				"description": "The PDC Keycloak-generated UIID of an organization.",
+				"description": "The PDC Keycloak-generated UUID of an organization.",
 				"in": "path",
 				"required": true,
 				"schema": {

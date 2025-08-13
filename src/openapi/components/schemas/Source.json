@@ -13,10 +13,6 @@
 					"description": "A description of the dataset from the changemaker, funder, or data provider that adds the data to the PDC.",
 					"example": "The 2025 Survey of Changemakers by the Good Foundation"
 				},
-				"relatedEntityId": {
-					"type": "integer",
-					"description": "The changemaker, funder, or data provider that adds data to the PDC."
-				},
 				"createdAt": {
 					"type": "string",
 					"format": "date-time",

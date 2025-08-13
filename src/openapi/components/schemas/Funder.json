@@ -22,5 +22,5 @@
 			"default": false
 		}
 	},
-	"required": ["id", "name", "createdAt", "isCollaborative"]
+	"required": ["shortCode", "name", "createdAt", "isCollaborative"]
 }

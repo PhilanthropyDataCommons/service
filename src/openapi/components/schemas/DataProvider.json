@@ -18,5 +18,5 @@
 			"readOnly": true
 		}
 	},
-	"required": ["id", "name", "createdAt"]
+	"required": ["shortCode", "name", "keycloakOrganizationId", "createdAt"]
 }

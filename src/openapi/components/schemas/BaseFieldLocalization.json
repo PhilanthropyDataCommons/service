@@ -23,5 +23,5 @@
 			"format": "date-time"
 		}
 	},
-	"required": ["baseFieldShortCode", "language", "localization", "label"]
+	"required": ["baseFieldShortCode", "language", "label", "description"]
 }

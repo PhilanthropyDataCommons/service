@@ -24,7 +24,7 @@ describe('documentationHandlers', () => {
 				.mockResolvedValue('{ "foo": "{{AUTH_ISSUER}}" }');
 			const req = getMockRequest();
 			const res = getMockResponse();
-			await documentationHandlers.getRootApiSpec(req, res);
+			await documentationHandlers.getAuthApiSpec(req, res);
 			expect(res.send).toHaveBeenCalledWith(`{ "foo": "${issuer}" }`);
 		});
 	});

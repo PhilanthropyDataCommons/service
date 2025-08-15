@@ -136,7 +136,7 @@ describe('/changemakerProposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -179,6 +179,7 @@ describe('/changemakerProposals', () => {
 						proposal: {
 							id: 2,
 							opportunityId: 1,
+							opportunity,
 							externalId: '2',
 							versions: [],
 							createdAt: expectTimestamp(),
@@ -202,6 +203,7 @@ describe('/changemakerProposals', () => {
 						proposal: {
 							id: 1,
 							opportunityId: 1,
+							opportunity,
 							externalId: '1',
 							versions: [],
 							createdAt: expectTimestamp(),
@@ -218,7 +220,7 @@ describe('/changemakerProposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -261,6 +263,7 @@ describe('/changemakerProposals', () => {
 						proposal: {
 							id: 1,
 							opportunityId: 1,
+							opportunity,
 							externalId: '1',
 							versions: [],
 							createdAt: expectTimestamp(),
@@ -291,7 +294,7 @@ describe('/changemakerProposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -328,6 +331,7 @@ describe('/changemakerProposals', () => {
 				proposal: {
 					id: 1,
 					opportunityId: 1,
+					opportunity,
 					externalId: '1',
 					versions: [],
 					createdAt: expectTimestamp(),
@@ -354,7 +358,7 @@ describe('/changemakerProposals', () => {
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
 			});
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -390,6 +394,7 @@ describe('/changemakerProposals', () => {
 				proposal: {
 					id: 1,
 					opportunityId: 1,
+					opportunity,
 					externalId: '1',
 					versions: [],
 					createdAt: expectTimestamp(),

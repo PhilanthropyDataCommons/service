@@ -153,7 +153,7 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -187,6 +187,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
+						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
@@ -236,6 +237,7 @@ describe('/proposals', () => {
 						id: testFunderProposal.id,
 						externalId: 'proposal-2',
 						opportunityId: testFunderOpportunity.id,
+						opportunity: testFunderOpportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
@@ -281,7 +283,7 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -343,6 +345,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
+						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [
@@ -470,7 +473,7 @@ describe('/proposals', () => {
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -495,6 +498,7 @@ describe('/proposals', () => {
 						id: 2,
 						externalId: 'proposal-2',
 						opportunityId: 1,
+						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: anotherUser.keycloakUserId,
 						versions: [],
@@ -503,6 +507,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
+						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
@@ -519,7 +524,7 @@ describe('/proposals', () => {
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -546,6 +551,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
+						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
@@ -562,7 +568,7 @@ describe('/proposals', () => {
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -587,6 +593,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-1',
 						opportunityId: 1,
+						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
@@ -602,7 +609,7 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: 'Grand opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -663,6 +670,7 @@ describe('/proposals', () => {
 						id: 1,
 						externalId: 'proposal-4999',
 						opportunityId: 1,
+						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [
@@ -721,7 +729,7 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -748,6 +756,7 @@ describe('/proposals', () => {
 						id: 15,
 						externalId: 'proposal-15',
 						opportunityId: 1,
+						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -756,6 +765,7 @@ describe('/proposals', () => {
 						id: 14,
 						externalId: 'proposal-14',
 						opportunityId: 1,
+						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -764,6 +774,7 @@ describe('/proposals', () => {
 						id: 13,
 						externalId: 'proposal-13',
 						opportunityId: 1,
+						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -772,6 +783,7 @@ describe('/proposals', () => {
 						id: 12,
 						externalId: 'proposal-12',
 						opportunityId: 1,
+						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -780,6 +792,7 @@ describe('/proposals', () => {
 						id: 11,
 						externalId: 'proposal-11',
 						opportunityId: 1,
+						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -874,7 +887,7 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '⛰️',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -897,6 +910,7 @@ describe('/proposals', () => {
 				externalId: 'proposal-2',
 				versions: [],
 				opportunityId: 1,
+				opportunity,
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 			});
@@ -906,7 +920,7 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🌎',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -983,6 +997,7 @@ describe('/proposals', () => {
 			expect(response.body).toEqual({
 				id: 1,
 				opportunityId: 1,
+				opportunity,
 				externalId: 'proposal-2525-01-04T00Z',
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
@@ -1149,7 +1164,7 @@ describe('/proposals', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createTestBaseFields();
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🌎',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -1224,6 +1239,7 @@ describe('/proposals', () => {
 			expect(response.body).toEqual({
 				id: 1,
 				opportunityId: 1,
+				opportunity,
 				externalId: 'proposal-2525-01-04T00Z',
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
@@ -1400,7 +1416,7 @@ describe('/proposals', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🌎',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -1462,6 +1478,7 @@ describe('/proposals', () => {
 			expect(response.body).toEqual({
 				id: 1,
 				opportunityId: 1,
+				opportunity,
 				externalId: 'proposal-2525-01-04T00Z',
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,

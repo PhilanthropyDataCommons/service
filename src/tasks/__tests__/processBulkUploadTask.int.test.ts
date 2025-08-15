@@ -547,6 +547,7 @@ describe('processBulkUploadTask', () => {
 					externalId: '2',
 					id: 2,
 					opportunityId: 1,
+					opportunity,
 					versions: [
 						{
 							applicationFormId: 1,
@@ -631,6 +632,7 @@ describe('processBulkUploadTask', () => {
 					externalId: '1',
 					id: 1,
 					opportunityId: 1,
+					opportunity: expectObject(),
 					versions: [
 						{
 							applicationFormId: 1,

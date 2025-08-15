@@ -3,10 +3,12 @@ import type { JSONSchemaType } from 'ajv';
 import type { ProposalVersion } from './ProposalVersion';
 import type { Writable } from './Writable';
 import type { KeycloakId } from './KeycloakId';
+import type { Opportunity } from './Opportunity';
 
 interface Proposal {
 	readonly id: number;
 	opportunityId: number;
+	readonly opportunity: Opportunity;
 	externalId: string;
 	readonly versions: ProposalVersion[];
 	readonly createdAt: string;

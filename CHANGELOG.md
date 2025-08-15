@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.22.1 2025-08-15
+
+### Added
+
+- `Proposal` entities now include deep `Opportunity` data.
+
 ### Fixed
 
 - The required fields associated with `UserGroupChangemakerPermission`, `UserGroupDataProviderPermission`, and `UserGroupFunderPermission` are now correctly documented.

@@ -38,6 +38,7 @@ jobs:
           set -eo pipefail
           curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ env.TOKEN }}" --url "${{ env.URL }}" -d '{ "force_build": true }' | jq -e .deployment.id
   deploy-to-production-env:
+    # This environment is soon to become the "Demo" environment and "Production-2025" production.
     runs-on: ubuntu-latest
     environment: Production
     name: Deploy to Production environment
@@ -54,6 +55,19 @@ jobs:
     runs-on: ubuntu-latest
     environment: Sandbox
     name: Deploy to Sandbox environment
+    env:
+      TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      URL: ${{ vars.DEPLOYMENT_URL }}
+    needs: deploy-to-test-env
+    steps:
+      - name: Deploy to Digital Ocean Sandbox environment
+        run: |
+          set -eo pipefail
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${{ env.TOKEN }}" --url "${{ env.URL }}" -d '{ "force_build": true }' | jq -e .deployment.id
+  deploy-to-production-2025-env:
+    runs-on: ubuntu-latest
+    environment: Production-2025
+    name: Deploy to Production-2025 environment
     env:
       TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
       URL: ${{ vars.DEPLOYMENT_URL }}

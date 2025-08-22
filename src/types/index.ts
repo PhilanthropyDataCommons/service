@@ -13,6 +13,7 @@ export * from './CopyBaseFieldsJobPayload';
 export * from './DataProvider';
 export * from './EphemeralUserGroupAssociation';
 export * from './express/AuthenticatedRequest';
+export * from './File';
 export * from './FiscalSponsorship';
 export * from './Funder';
 export * from './FunderCollaborativeInvitation';

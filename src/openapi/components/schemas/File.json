@@ -1,0 +1,33 @@
+{
+	"type": "object",
+	"properties": {
+		"guid": {
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true,
+			"example": "12345678-1234-4567-8901-123456789012"
+		},
+		"mimeType": {
+			"type": "string",
+			"example": "application/pdf"
+		},
+		"size": {
+			"type": "integer",
+			"minimum": 0,
+			"example": 1024
+		},
+		"createdBy": {
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true,
+			"example": "87654321-4321-4567-8901-210987654321"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true,
+			"example": "2023-10-01T12:00:00.000Z"
+		}
+	},
+	"required": ["guid", "mimeType", "size", "createdBy", "createdAt"]
+}

@@ -1,3 +1,5 @@
+import type { Uuid } from '../types';
+
 interface NotFoundErrorDetailsWithShortCode {
 	entityType: string;
 	entityShortCode: string;
@@ -6,6 +8,11 @@ interface NotFoundErrorDetailsWithShortCode {
 interface NotFoundErrorDetailsWithId {
 	entityType: string;
 	entityId: number;
+}
+
+interface NotFoundErrorDetailsWithUuid {
+	entityType: string;
+	entityUuid: Uuid;
 }
 
 interface NotFoundErrorDetailsWithComplexPrimaryKey {
@@ -21,6 +28,7 @@ interface NotFoundErrorDetailsWithLookupValues {
 type NotFoundErrorDetails =
 	| NotFoundErrorDetailsWithShortCode
 	| NotFoundErrorDetailsWithId
+	| NotFoundErrorDetailsWithUuid
 	| NotFoundErrorDetailsWithComplexPrimaryKey
 	| NotFoundErrorDetailsWithLookupValues;
 

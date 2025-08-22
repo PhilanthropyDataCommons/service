@@ -4,7 +4,7 @@
  * These helpers allow us to map that to `unknown` which is type safe and also
  * greatly pleases the linter.
  */
-import { ISO_TIMESTAMP_PATTERN } from '../constants';
+import { ISO_TIMESTAMP_PATTERN, UUID_PATTERN } from '../constants';
 
 const expectArray = (): unknown => expect.any(Array);
 
@@ -22,10 +22,13 @@ const expectString = (): unknown => expect.any(String);
 const expectTimestamp = (): unknown =>
 	expect.stringMatching(ISO_TIMESTAMP_PATTERN);
 
+const expectUuid = (): unknown => expect.stringMatching(UUID_PATTERN);
+
 export {
 	expectArray,
 	expectArrayContaining,
 	expectDate,
+	expectUuid,
 	expectNumber,
 	expectObject,
 	expectString,

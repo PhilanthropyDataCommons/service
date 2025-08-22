@@ -1,0 +1,51 @@
+{
+	"post": {
+		"summary": "Create a new file record",
+		"description": "Creates a new file record that can be used to generate presigned upload URLs",
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"type": "object",
+						"properties": {
+							"mimeType": {
+								"type": "string",
+								"example": "application/pdf"
+							},
+							"size": {
+								"type": "integer",
+								"minimum": 0,
+								"example": 1024
+							}
+						},
+						"required": ["mimeType", "size"]
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "File record created successfully",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/File.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			}
+		}
+	}
+}

@@ -8,6 +8,7 @@ export * from './changemakerProposals';
 export * from './changemakers';
 export * from './dataProviders';
 export * from './ephemeralUserGroupAssociations';
+export * from './files';
 export * from './fiscalSponsorships';
 export * from './funderCollaborativeInvitations';
 export * from './funderCollaborativeMembers';

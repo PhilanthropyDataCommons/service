@@ -1,10 +1,11 @@
 import { ajv } from '../ajv';
+import { uuidSchema } from './Uuid';
 import type { JSONSchemaType } from 'ajv';
 import type { PresignedPost } from '@aws-sdk/s3-presigned-post';
+import type { Uuid } from './Uuid';
 
 export interface PresignedPostRequest {
-	fileType: string;
-	fileSize: number;
+	fileUuid: Uuid;
 	presignedPost: PresignedPost;
 }
 
@@ -13,56 +14,15 @@ export type PresignedPostRequestWrite = Omit<
 	'presignedPost'
 >;
 
-export const presignedPostRequestSchema: JSONSchemaType<PresignedPostRequest> =
-	{
-		type: 'object',
-		properties: {
-			fileType: {
-				type: 'string',
-			},
-			fileSize: {
-				type: 'integer',
-				minimum: 0,
-			},
-			presignedPost: {
-				type: 'object',
-				properties: {
-					url: {
-						type: 'string',
-					},
-					fields: {
-						type: 'object',
-						properties: {
-							key: {
-								type: 'string',
-							},
-						},
-						required: ['key'],
-					},
-				},
-				required: ['url', 'fields'],
-			},
-		},
-		required: ['fileType', 'fileSize'],
-	};
-
 export const presignedPostRequestWriteSchema: JSONSchemaType<PresignedPostRequestWrite> =
 	{
 		type: 'object',
 		properties: {
-			fileType: {
-				type: 'string',
-			},
-			fileSize: {
-				type: 'integer',
-				minimum: 0,
-			},
+			fileUuid: uuidSchema,
 		},
-		required: ['fileType', 'fileSize'],
+		required: ['fileUuid'],
 	};
 
-export const isPresignedPostRequest = ajv.compile(presignedPostRequestSchema);
-
 export const isPresignedPostRequestWrite = ajv.compile(
-	presignedPostRequestSchema,
+	presignedPostRequestWriteSchema,
 );

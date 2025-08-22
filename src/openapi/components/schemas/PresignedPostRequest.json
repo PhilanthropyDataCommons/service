@@ -1,19 +1,15 @@
 {
 	"type": "object",
 	"properties": {
-		"fileType": {
+		"fileUuid": {
 			"type": "string",
-			"example": "application/octet-stream"
-		},
-		"fileSize": {
-			"type": "integer",
-			"minimum": 0,
-			"example": 512
+			"format": "uuid",
+			"example": "12345678-1234-4567-8901-123456789012"
 		},
 		"presignedPost": {
 			"$ref": "./PresignedPost.json",
 			"readOnly": true
 		}
 	},
-	"required": ["fileType", "fileSize", "presignedPost"]
+	"required": ["fileUuid", "presignedPost"]
 }

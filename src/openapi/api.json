@@ -80,9 +80,6 @@
 			"ChangemakerProposal": {
 				"$ref": "./components/schemas/ChangemakerProposal.json"
 			},
-			"PresignedPostRequest": {
-				"$ref": "./components/schemas/PresignedPostRequest.json"
-			},
 			"PresignedPost": {
 				"$ref": "./components/schemas/PresignedPost.json"
 			},
@@ -145,6 +142,9 @@
 			},
 			"ChangemakerProposalBundle": {
 				"$ref": "./components/schemas/ChangemakerProposalBundle.json"
+			},
+			"File": {
+				"$ref": "./components/schemas/File.json"
 			},
 			"ProposalBundle": {
 				"$ref": "./components/schemas/ProposalBundle.json"
@@ -209,9 +209,6 @@
 		"/changemakers/{changemakerId}/fiscalSponsors/{fiscalSponsorChangemakerId}": {
 			"$ref": "./paths/changemakerFiscalSponsor.json"
 		},
-		"/presignedPostRequests": {
-			"$ref": "./paths/presignedPostRequests.json"
-		},
 		"/proposals": {
 			"$ref": "./paths/proposals.json"
 		},
@@ -235,6 +232,9 @@
 		},
 		"/dataProviders/{dataProviderShortCode}": {
 			"$ref": "./paths/dataProvider.json"
+		},
+		"/files": {
+			"$ref": "./paths/files.json"
 		},
 		"/funders": {
 			"$ref": "./paths/funders.json"

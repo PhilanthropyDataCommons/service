@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.23 2025-08-29
+
+### Changed
+
+- `/presignedPostRequests` has been renamed to `/files` and the returned `File` entity has additional attributes.
+
 ## 0.22.1 2025-08-15
 
 ### Added

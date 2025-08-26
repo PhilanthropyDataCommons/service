@@ -15,7 +15,7 @@ import {
 	loadSystemSource,
 	loadSystemFunder,
 } from '../../database';
-import { s3Client } from '../../s3Client';
+import { s3Client } from '../../s3';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUploadTask } from '../processBulkUploadTask';
 import {

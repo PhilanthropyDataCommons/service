@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 1.0.0 2025-08-29
+
+No API changes but this change signals that 0.23.0 has become version 1.0.0.
+
 ## 0.22.1 2025-08-15
 
 ### Added

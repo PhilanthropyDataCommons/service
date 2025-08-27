@@ -1,0 +1,61 @@
+services:
+  s3:
+    image: docker.io/minio/minio:latest
+    user: ${UID:-1000}:${GID:-${UID:-1000}}
+    ports:
+      - "9001:9001"
+      - "9000:9000"
+    tmpfs:
+      - /s3/data:mode=755,uid=${UID:-1000},gid=${GID:-${UID:-1000}}
+    command: ["server", "--console-address", ":9001", "/s3/data"]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 3s
+    restart: always
+  web:
+    image: ghcr.io/philanthropydatacommons/service:latest
+    user: ${UID:-1000}:${GID:-${UID:-1000}}
+    ports:
+      - "3000:3000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - PGHOST=database
+      - PGUSER=pdc
+      - PGPASSWORD=pdc
+      - PGDATABASE=pdc
+      - PGPORT=5432
+      - AUTH_SERVER_ISSUER=http://auth:8080/realms/pdc
+      - OPENAPI_DOCS_AUTH_CLIENT_ID=pdc-openapi-docs
+      - S3_ACCESS_KEY_ID=s3key
+      - S3_ACCESS_SECRET=s3secret
+      - S3_ENDPOINT=http://s3:9000
+      - S3_PATH_STYLE=false
+      - S3_REGION=us-east-1
+      - S3_BUCKET=pdc-service
+    working_dir: /opt/philanthropy-data-commons/server
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://web:3000"]
+      interval: 10s
+    depends_on:
+      database:
+        condition: service_healthy
+      s3:
+        condition: service_healthy
+    restart: always
+  database:
+    image: docker.io/postgres:17
+    environment:
+      POSTGRES_USER: pdc
+      POSTGRES_PASSWORD: pdc
+      POSTGRES_INITDB_ARGS: "--username=pdc --allow-group-access"
+      PGDATA: /db/data
+    user: ${UID:-1000}:${GID:-${UID:-1000}}
+    shm_size: 128mb
+    tmpfs:
+      - /db/data:mode=755,uid=${UID:-1000},gid=${GID:-${UID:-1000}}
+    healthcheck:
+      test: ["CMD", "pg_isready", "--username=pdc}"]
+      interval: 7s
+    restart: always
+    command: ["postgres"]

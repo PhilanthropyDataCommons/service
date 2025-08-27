@@ -5,7 +5,7 @@ volumes:
     external: false
 services:
   # There is no great way to avoid root-owned volumes except an init container
-  # which itself runs as root then exits.
+  # which itself runs as root, sets user/group on volumes, then exits.
   init-volumes:
     image: debian:latest
     volumes:
@@ -19,8 +19,8 @@ services:
       - "9001:9001"
       - "9000:9000"
     environment:
-      MINIO_USERNAME: ${UID:-1000}
-      MINIO_GROPUNAME: ${GID:-${UID:-1000}}
+      MINIO_ROOT_USER: pdcpdcpdc
+      MINIO_ROOT_PASSWORD: pdcpdcpdc
     volumes:
       - s3:/data/s3
     command: ["server", "--console-address", ":9001", "/data/s3"]

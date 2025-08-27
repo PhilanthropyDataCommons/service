@@ -33,7 +33,7 @@ services:
         condition: service_completed_successfully
   web:
     image: ghcr.io/philanthropydatacommons/service:latest
-    user: ${UID:-1000}:${GID:-${UID:-1000}}
+    user: 902:902
     ports:
       - "3000:3000"
     environment:

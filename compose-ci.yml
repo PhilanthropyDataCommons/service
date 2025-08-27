@@ -52,7 +52,6 @@ services:
       - S3_PATH_STYLE=false
       - S3_REGION=us-east-1
       - S3_BUCKET=pdc-service
-    working_dir: /opt/philanthropy-data-commons/server
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://web:3000"]
       interval: 10s
@@ -74,7 +73,7 @@ services:
     volumes:
       - db:/data/db
     healthcheck:
-      test: ["CMD", "pg_isready", "--username=pdc}"]
+      test: ["CMD", "pg_isready", "--username=pdc"]
       interval: 7s
     restart: always
     command: ["postgres"]

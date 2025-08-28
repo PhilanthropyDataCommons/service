@@ -10,7 +10,7 @@ services:
   # command will run before the server attempts to start, whereas this way does
   # have such a guarantee.
   init-volumes:
-    image: debian:latest
+    image: docker.io/debian:latest
     volumes:
       - s3:/data/s3
       - db:/data/db
@@ -115,7 +115,7 @@ services:
       init-volumes:
         condition: service_completed_successfully
   auth:
-    image: keycloak/keycloak:latest
+    image: docker.io/keycloak/keycloak:latest
     user: ${UID:-1000}:${GID:-${UID:-1000}}
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin

@@ -6,12 +6,20 @@ volumes:
 services:
   # There is no great way to avoid root-owned volumes except an init container
   # which itself runs as root, sets user/group on volumes, then exits.
+  # I suppose it could be part of post_start, but there is no guarantee that the
+  # command will run before the server attempts to start, whereas this way does
+  # have such a guarantee.
   init-volumes:
     image: debian:latest
     volumes:
       - s3:/data/s3
       - db:/data/db
-    command: chown ${UID:-1000}:${GID:-${UID:-1000}} -R /data
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        chown ${UID:-1000}:${GID:-${UID:-1000}} -R /data/s3
+        chown 999:999 -R /data/db
   s3:
     image: docker.io/minio/minio:latest
     user: ${UID:-1000}:${GID:-${UID:-1000}}
@@ -26,7 +34,7 @@ services:
     command: ["server", "--console-address", ":9001", "/data/s3"]
     post_start:
       # Post-start hook runs right away and yet has no timing guarantee.
-      # Sleep to give the server a chance to start before running.
+      # Sleep to give the server a chance to start then add an alias and bucket.
       - command:
         - /bin/sh
         - -ec
@@ -34,8 +42,9 @@ services:
           sleep 2
           mc alias set pdc http://s3:9000/ s3key s3secret
           mc mb pdc/service
+        user: ${UID:-1000}
     healthcheck:
-      # This checks for the above-created bucket to exist.
+      # Check for the above-created bucket to exist.
       test: ["CMD", "mc", "stat", "pdc/service"]
       interval: 4s
     restart: always
@@ -44,6 +53,7 @@ services:
         condition: service_completed_successfully
   web:
     image: ghcr.io/philanthropydatacommons/service:latest
+    # The image contains user 902
     user: 902:902
     ports:
       - "3000:3000"
@@ -79,13 +89,24 @@ services:
       POSTGRES_PASSWORD: pdc
       POSTGRES_INITDB_ARGS: "--username=pdc --allow-group-access"
       PGDATA: /data/db
-    user: ${UID:-1000}:${GID:-${UID:-1000}}
+    # The image contains user 999
+    user: 999:999
     shm_size: 128mb
     volumes:
       - db:/data/db
+    post_start:
+      # Sleep to give the server a chance to start then add a Keycloak DB.
+      - command:
+        - /bin/sh
+        - -ec
+        - |
+          sleep 8
+          psql -U pdc -d postgres -c 'create database keycloak owner pdc;'
+        user: "999"
     healthcheck:
-      test: ["CMD", "pg_isready", "--username=pdc"]
-      interval: 3s
+      # Wait for the Keycloak DB to be available.
+      test: ["CMD", "psql", "-U", "pdc", "-d", "keycloak", "-c", "select 1;"]
+      interval: 15s
     restart: always
     command: ["postgres"]
     depends_on:

@@ -64,7 +64,7 @@
 		"@types/validator": "^13.15.2",
 		"copyfiles": "^2.4.1",
 		"eslint": "^9.34.0",
-		"eslint-config-love": "^121.0.0",
+		"eslint-config-love": "^122.0.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-import-resolver-typescript": "^4.4.4",
 		"eslint-plugin-sort-exports": "^0.9.1",

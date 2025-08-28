@@ -136,3 +136,13 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    post_start:
+      # Sleep to give the server a (long!) chance to start then add a Realm.
+      - command:
+        - /bin/sh
+        - -ec
+        - |
+          sleep 120
+          /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080/ --realm master --user admin --password admin
+          /opt/keycloak/bin/kcadm.sh create realms -b '{"realm":"pdc","enabled":true}'
+        user: ${UID:-1000}

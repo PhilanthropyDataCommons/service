@@ -19,14 +19,25 @@ services:
       - "9001:9001"
       - "9000:9000"
     environment:
-      MINIO_ROOT_USER: pdcpdcpdc
-      MINIO_ROOT_PASSWORD: pdcpdcpdc
+      MINIO_ROOT_USER: s3key
+      MINIO_ROOT_PASSWORD: s3secret
     volumes:
       - s3:/data/s3
     command: ["server", "--console-address", ":9001", "/data/s3"]
+    post_start:
+      # Post-start hook runs right away and yet has no timing guarantee.
+      # Sleep to give the server a chance to start before running.
+      - command:
+        - /bin/sh
+        - -ec
+        - |
+          sleep 2
+          mc alias set pdc http://s3:9000/ s3key s3secret
+          mc mb pdc/service
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
-      interval: 3s
+      # This checks for the above-created bucket to exist.
+      test: ["CMD", "mc", "stat", "pdc/service"]
+      interval: 4s
     restart: always
     depends_on:
       init-volumes:
@@ -51,7 +62,7 @@ services:
       - S3_ENDPOINT=http://s3:9000
       - S3_PATH_STYLE=false
       - S3_REGION=us-east-1
-      - S3_BUCKET=pdc-service
+      - S3_BUCKET=pdc/service
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://web:3000"]
       interval: 10s
@@ -74,7 +85,7 @@ services:
       - db:/data/db
     healthcheck:
       test: ["CMD", "pg_isready", "--username=pdc"]
-      interval: 7s
+      interval: 3s
     restart: always
     command: ["postgres"]
     depends_on:

@@ -23,7 +23,15 @@
 		},
 		"dataType": {
 			"type": "string",
-			"enum": ["string", "number", "email", "phone_number", "url", "boolean"],
+			"enum": [
+				"string",
+				"number",
+				"email",
+				"phone_number",
+				"url",
+				"boolean",
+				"file"
+			],
 			"example": "string"
 		},
 		"category": {

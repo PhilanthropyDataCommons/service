@@ -126,4 +126,18 @@ describe('field value validation against BaseFieldDataType', () => {
 			false,
 		);
 	});
+	test('validate a valid file.id as FILE', () => {
+		expect(fieldValueIsValid('123', BaseFieldDataType.FILE)).toBe(true);
+		expect(fieldValueIsValid('1', BaseFieldDataType.FILE)).toBe(true);
+		expect(fieldValueIsValid('9999', BaseFieldDataType.FILE)).toBe(true);
+	});
+	test('validate an invalid file.id as FILE', () => {
+		expect(fieldValueIsValid('0', BaseFieldDataType.FILE)).toBe(false);
+		expect(fieldValueIsValid('-1', BaseFieldDataType.FILE)).toBe(false);
+		expect(fieldValueIsValid('abc', BaseFieldDataType.FILE)).toBe(false);
+		expect(fieldValueIsValid('123.45', BaseFieldDataType.FILE)).toBe(false);
+		expect(fieldValueIsValid('123abc', BaseFieldDataType.FILE)).toBe(false);
+		expect(fieldValueIsValid(' 123 ', BaseFieldDataType.FILE)).toBe(false);
+		expect(fieldValueIsValid('', BaseFieldDataType.FILE)).toBe(false);
+	});
 });

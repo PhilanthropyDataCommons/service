@@ -11,7 +11,6 @@ module.exports = {
 			},
 		],
 	},
-	collectCoverageFrom: ['src/**/*.ts', '!src/**/*.test.*'],
 	preset: 'ts-jest',
 	globalSetup: '<rootDir>/src/test/globalSetup.ts',
 	testEnvironment: 'node',

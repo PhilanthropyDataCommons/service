@@ -65,11 +65,11 @@ services:
       - PGPASSWORD=pdc
       - PGDATABASE=pdc
       - PGPORT=5432
-      - AUTH_SERVER_ISSUER=http://auth:8080/realms/pdc
+      - AUTH_SERVER_ISSUER=http://localhost:8080/realms/pdc
       - OPENAPI_DOCS_AUTH_CLIENT_ID=pdc-openapi-docs
       - S3_ACCESS_KEY_ID=s3key
       - S3_ACCESS_SECRET=s3secret
-      - S3_ENDPOINT=http://s3:9000
+      - S3_ENDPOINT=http://localhost:9000
       - S3_PATH_STYLE=false
       - S3_REGION=us-east-1
       - S3_BUCKET=pdc/service
@@ -117,6 +117,8 @@ services:
   auth:
     image: docker.io/keycloak/keycloak:latest
     user: ${UID:-1000}:${GID:-${UID:-1000}}
+    ports:
+      - "8080:8080"
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
@@ -139,10 +141,27 @@ services:
     post_start:
       # Sleep to give the server a (long!) chance to start then add a Realm.
       - command:
-        - /bin/sh
-        - -ec
+        - /bin/bash
+        - -ecx
         - |
-          sleep 120
-          /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080/ --realm master --user admin --password admin
-          /opt/keycloak/bin/kcadm.sh create realms -b '{"realm":"pdc","enabled":true}'
+          sleep 90
+          cd /opt/keycloak/bin
+          ./kcadm.sh config credentials --server http://localhost:8080/ --realm master --user admin --password admin
+          ./kcadm.sh create realms -b '{"realm":"pdc","enabled":"true"}'
+          ./kcadm.sh create users -r pdc -s username='dev@pdc.local' -s email='dev@pdc.local' -s emailVerified='true' -s enabled='true' -i > user_id
+          ./kcadm.sh set-password -r pdc --username 'dev@pdc.local' --new-password 'password'
+          ./kcadm.sh create clients -r pdc \
+          -s clientId='pdc-openapi-docs' \
+          -s name='PDC OpenAPI Documentation' \
+          -s description='The OpenAPI documentation of the PDC API served by the back-end service implementation. These are publicly accessible but have an authorize button that uses OIDC to authenticate.' \
+          -s rootUrl='http://localhost:3000' \
+          -s redirectUris='["http://localhost:3000/*"]' \
+          -s publicClient='true' -s standardFlowEnabled='true' \
+          -s implicitFlowEnabled='false' -s directAccessGrantsEnabled='false' \
+          -s serviceAccountsEnabled='false' \
+          -s authorizationServicesEnabled='false' \
+          -s webOrigins='+'
+          ./kcadm.sh create roles -r pdc -s name='pdc-admin' -s description='PDC Users with application-level Administrative privileges.'
+          ./kcadm.sh create groups -r pdc -s name='pdc-admin' -s realmRoles='["manage-users","query-users","view-users","pdc-admin"]' -i > admin_group_id
+          ./kcadm.sh update users/$(cat user_id)/groups/$(cat admin_group_id) -r pdc -s realm pdc -s userId=$(cat user_id) -s groupId=$(cat admin_group_id) -n
         user: ${UID:-1000}

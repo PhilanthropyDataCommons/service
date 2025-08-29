@@ -65,7 +65,7 @@ services:
       - PGPASSWORD=pdc
       - PGDATABASE=pdc
       - PGPORT=5432
-      - AUTH_SERVER_ISSUER=http://localhost:8080/realms/pdc
+      - AUTH_SERVER_ISSUER=http://auth:8080/realms/pdc
       - OPENAPI_DOCS_AUTH_CLIENT_ID=pdc-openapi-docs
       - S3_ACCESS_KEY_ID=s3key
       - S3_ACCESS_SECRET=s3secret
@@ -153,15 +153,10 @@ services:
           ./kcadm.sh create clients -r pdc \
           -s clientId='pdc-openapi-docs' \
           -s name='PDC OpenAPI Documentation' \
-          -s description='The OpenAPI documentation of the PDC API served by the back-end service implementation. These are publicly accessible but have an authorize button that uses OIDC to authenticate.' \
           -s rootUrl='http://localhost:3000' \
           -s redirectUris='["http://localhost:3000/*"]' \
-          -s publicClient='true' -s standardFlowEnabled='true' \
-          -s implicitFlowEnabled='false' -s directAccessGrantsEnabled='false' \
-          -s serviceAccountsEnabled='false' \
-          -s authorizationServicesEnabled='false' \
-          -s webOrigins='+'
+          -s publicClient='true' -s standardFlowEnabled='true'
           ./kcadm.sh create roles -r pdc -s name='pdc-admin' -s description='PDC Users with application-level Administrative privileges.'
           ./kcadm.sh create groups -r pdc -s name='pdc-admin' -s realmRoles='["manage-users","query-users","view-users","pdc-admin"]' -i > admin_group_id
-          ./kcadm.sh update users/$(cat user_id)/groups/$(cat admin_group_id) -r pdc -s realm pdc -s userId=$(cat user_id) -s groupId=$(cat admin_group_id) -n
+          ./kcadm.sh update users/$(cat user_id)/groups/$(cat admin_group_id) -r pdc -s realm=pdc -s userId=$(cat user_id) -s groupId=$(cat admin_group_id) -n
         user: ${UID:-1000}

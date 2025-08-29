@@ -8,7 +8,7 @@ import {
 	s3Client,
 	S3_BULK_UPLOADS_KEY_PREFIX,
 	S3_UNPROCESSED_KEY_PREFIX,
-} from '../s3Client';
+} from '../s3';
 import { db } from '../database/db';
 import {
 	createApplicationForm,

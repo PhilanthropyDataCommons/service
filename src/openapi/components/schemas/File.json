@@ -1,0 +1,60 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true,
+			"example": 1
+		},
+		"name": {
+			"type": "string",
+			"example": "document.pdf"
+		},
+		"storageKey": {
+			"type": "string",
+			"readOnly": true
+		},
+		"mimeType": {
+			"type": "string",
+			"example": "application/pdf"
+		},
+		"size": {
+			"type": "integer",
+			"minimum": 0,
+			"example": 1024
+		},
+		"bucketName": {
+			"type": "string",
+			"readOnly": true,
+			"example": "my-s3-bucket"
+		},
+		"bucketRegion": {
+			"type": "string",
+			"readOnly": true,
+			"example": "us-east-1"
+		},
+		"createdBy": {
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true,
+			"example": "87654321-4321-4567-8901-210987654321"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true,
+			"example": "2023-10-01T12:00:00.000Z"
+		}
+	},
+	"required": [
+		"id",
+		"name",
+		"storageKey",
+		"mimeType",
+		"size",
+		"bucketName",
+		"bucketRegion",
+		"createdBy",
+		"createdAt"
+	]
+}

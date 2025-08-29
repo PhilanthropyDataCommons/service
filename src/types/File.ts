@@ -1,0 +1,51 @@
+import { ajv } from '../ajv';
+import type { Uuid } from './Uuid';
+import type { KeycloakId } from './KeycloakId';
+import type { JSONSchemaType } from 'ajv';
+import type { PresignedPost } from '@aws-sdk/s3-presigned-post';
+import type { Writable } from './Writable';
+
+interface File {
+	readonly id: number;
+	name: string;
+	readonly storageKey: Uuid;
+	mimeType: string;
+	size: number;
+	readonly bucketName: string;
+	readonly bucketRegion: string;
+	readonly presignedPost?: PresignedPost;
+	readonly createdBy: KeycloakId;
+	readonly createdAt: string;
+}
+
+type WritableFile = Writable<File>;
+
+type InternallyWritableFile = WritableFile &
+	Pick<File, 'bucketName' | 'bucketRegion'>;
+
+const writableFileSchema: JSONSchemaType<WritableFile> = {
+	type: 'object',
+	properties: {
+		name: {
+			type: 'string',
+		},
+		mimeType: {
+			type: 'string',
+		},
+		size: {
+			type: 'integer',
+			minimum: 0,
+		},
+	},
+	required: ['name', 'mimeType', 'size'],
+};
+
+const isWritableFile = ajv.compile(writableFileSchema);
+
+export {
+	type File,
+	type WritableFile,
+	type InternallyWritableFile,
+	writableFileSchema,
+	isWritableFile,
+};

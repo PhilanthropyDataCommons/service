@@ -13,6 +13,7 @@ export enum BaseFieldDataType {
 	URL = 'url',
 	BOOLEAN = 'boolean',
 	CURRENCY = 'currency',
+	FILE = 'file',
 }
 
 enum BaseFieldCategory {

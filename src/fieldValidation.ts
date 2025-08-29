@@ -24,6 +24,11 @@ const isString = ajv.compile({
 	type: 'string',
 });
 
+const isIdString = ajv.compile({
+	type: 'integer',
+	minimum: 1,
+});
+
 // The validator package has only one phone number validator function,
 // 'isMobilePhone.' but the PDC does not currently have any requirement
 // for a phone number to be a mobile number, nor does the function seem
@@ -72,6 +77,8 @@ export const fieldValueIsValid = (
 			return isBooleanString(fieldValue);
 		case BaseFieldDataType.CURRENCY:
 			return isCurrencyWithCodeString(fieldValue);
+		case BaseFieldDataType.FILE:
+			return isIdString(fieldValue);
 		default:
 			return isString(fieldValue);
 	}

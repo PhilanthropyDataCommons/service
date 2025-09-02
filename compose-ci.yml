@@ -28,21 +28,22 @@ services:
       MINIO_ROOT_PASSWORD: s3secret
     volumes:
       - s3:/data/s3
-    command: ["server", "--address", ":9300", "--console-address", ":9301", "/data/s3"]
+    command:
+      ['server', '--address', ':9300', '--console-address', ':9301', '/data/s3']
     post_start:
       # Post-start hook runs right away and yet has no timing guarantee.
       # Sleep to give the server a chance to start then add an alias and bucket.
       - command:
-        - /bin/sh
-        - -ec
-        - |
-          sleep 2
-          mc alias set pdc http://localhost:9300/ s3key s3secret
-          mc mb pdc/service
+          - /bin/sh
+          - -ec
+          - |
+            sleep 2
+            mc alias set pdc http://localhost:9300/ s3key s3secret
+            mc mb pdc/service
         user: ${UID:-1000}
     healthcheck:
       # Check for the above-created bucket to exist.
-      test: ["CMD", "mc", "stat", "pdc/service"]
+      test: ['CMD', 'mc', 'stat', 'pdc/service']
       interval: 4s
     restart: always
     depends_on:
@@ -61,16 +62,16 @@ services:
       PGPASSWORD: pdc
       PGDATABASE: pdc
       PGPORT: 5454
-      AUTH_SERVER_ISSUER: "http://localhost:8780/realms/pdc"
+      AUTH_SERVER_ISSUER: 'http://localhost:8780/realms/pdc'
       OPENAPI_DOCS_AUTH_CLIENT_ID: pdc-openapi-docs
       S3_ACCESS_KEY_ID: s3key
       S3_ACCESS_SECRET: s3secret
-      S3_ENDPOINT: "http://localhost:9300"
+      S3_ENDPOINT: 'http://localhost:9300'
       S3_PATH_STYLE: false
       S3_REGION: us-east-1
       S3_BUCKET: pdc/service
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:3030"]
+      test: ['CMD', 'curl', '--fail', 'http://localhost:3030']
       interval: 10s
     depends_on:
       pdc-databases:
@@ -86,7 +87,7 @@ services:
     environment:
       POSTGRES_USER: pdc
       POSTGRES_PASSWORD: pdc
-      POSTGRES_INITDB_ARGS: "--username=pdc --allow-group-access"
+      POSTGRES_INITDB_ARGS: '--username=pdc --allow-group-access'
       PGDATA: /data/db
     # The image contains user 999
     user: 999:999
@@ -96,18 +97,30 @@ services:
     post_start:
       # Sleep to give the server a chance to start then add a Keycloak DB.
       - command:
-        - /bin/sh
-        - -ec
-        - |
-          sleep 8
-          psql -U pdc -p 5454 -d postgres -c 'create database keycloak owner pdc;'
-        user: "999"
+          - /bin/sh
+          - -ec
+          - |
+            sleep 8
+            psql -U pdc -p 5454 -d postgres -c 'create database keycloak owner pdc;'
+        user: '999'
     healthcheck:
       # Wait for the Keycloak DB to be available.
-      test: ["CMD", "psql", "-U", "pdc", "-d", "keycloak", "-p", "5454", "-c", "select 1;"]
+      test:
+        [
+          'CMD',
+          'psql',
+          '-U',
+          'pdc',
+          '-d',
+          'keycloak',
+          '-p',
+          '5454',
+          '-c',
+          'select 1;',
+        ]
       interval: 15s
     restart: always
-    command: ["postgres", "-p", "5454"]
+    command: ['postgres', '-p', '5454']
     depends_on:
       init-volumes:
         condition: service_completed_successfully
@@ -119,7 +132,7 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: "jdbc:postgresql://localhost:5454/keycloak"
+      KC_DB_URL: 'jdbc:postgresql://localhost:5454/keycloak'
       KC_DB_USERNAME: pdc
       KC_DB_PASSWORD: pdc
       KC_HEALTH_ENABLED: true
@@ -132,7 +145,7 @@ services:
         /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
         /opt/keycloak/bin/kcadm.sh get http://localhost:9790/health
       interval: 15s
-    command: ["start-dev"]
+    command: ['start-dev']
     depends_on:
       pdc-databases:
         condition: service_healthy
@@ -140,22 +153,22 @@ services:
     post_start:
       # Sleep to give the server a (long!) chance to start then add a Realm.
       - command:
-        - /bin/bash
-        - -ecx
-        - |
-          sleep 90
-          cd /opt/keycloak/bin
-          ./kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
-          ./kcadm.sh create realms -b '{"realm":"pdc","enabled":"true"}'
-          ./kcadm.sh create users -r pdc -s username='dev@pdc.local' -s email='dev@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='local' -s lastName='developer' -i > user_id
-          ./kcadm.sh set-password -r pdc --username 'dev@pdc.local' --new-password 'password'
-          ./kcadm.sh create clients -r pdc \
-          -s clientId='pdc-openapi-docs' \
-          -s name='PDC OpenAPI Documentation' \
-          -s rootUrl='http://localhost:3030' \
-          -s redirectUris='["http://localhost:3030/*"]' \
-          -s publicClient='true' -s standardFlowEnabled='true'
-          ./kcadm.sh create roles -r pdc -s name='pdc-admin' -s description='PDC Users with application-level Administrative privileges.' -i > admin_role_id
-          ./kcadm.sh create groups -r pdc -s name='pdc-admin' -s realmRoles="[\"$(cat admin_role_id)\"]" -i > admin_group_id
-          ./kcadm.sh update users/$(cat user_id)/groups/$(cat admin_group_id) -r pdc -s realm=pdc -s userId=$(cat user_id) -s groupId=$(cat admin_group_id) -n
+          - /bin/bash
+          - -ecx
+          - |
+            sleep 90
+            cd /opt/keycloak/bin
+            ./kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
+            ./kcadm.sh create realms -b '{"realm":"pdc","enabled":"true"}'
+            ./kcadm.sh create users -r pdc -s username='dev@pdc.local' -s email='dev@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='local' -s lastName='developer' -i > user_id
+            ./kcadm.sh set-password -r pdc --username 'dev@pdc.local' --new-password 'password'
+            ./kcadm.sh create clients -r pdc \
+            -s clientId='pdc-openapi-docs' \
+            -s name='PDC OpenAPI Documentation' \
+            -s rootUrl='http://localhost:3030' \
+            -s redirectUris='["http://localhost:3030/*"]' \
+            -s publicClient='true' -s standardFlowEnabled='true'
+            ./kcadm.sh create roles -r pdc -s name='pdc-admin' -s description='PDC Users with application-level Administrative privileges.' -i > admin_role_id
+            ./kcadm.sh create groups -r pdc -s name='pdc-admin' -s realmRoles="[\"$(cat admin_role_id)\"]" -i > admin_group_id
+            ./kcadm.sh update users/$(cat user_id)/groups/$(cat admin_group_id) -r pdc -s realm=pdc -s userId=$(cat user_id) -s groupId=$(cat admin_group_id) -n
         user: ${UID:-1000}

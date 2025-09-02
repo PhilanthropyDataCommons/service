@@ -1,0 +1,41 @@
+{
+	"post": {
+		"operationId": "createFile",
+		"summary": "Create a new file",
+		"tags": ["Files"],
+		"description": "Creates a new file as well as a presigned URL for uploading the file's content.",
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/File.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "File created successfully",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/File.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			}
+		}
+	}
+}

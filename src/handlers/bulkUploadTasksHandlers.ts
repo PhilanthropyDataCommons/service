@@ -23,7 +23,7 @@ import {
 	extractPaginationParameters,
 } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
-import { S3_UNPROCESSED_KEY_PREFIX } from '../s3Client';
+import { S3_UNPROCESSED_KEY_PREFIX } from '../s3';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 

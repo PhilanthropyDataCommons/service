@@ -30,6 +30,7 @@
 				"phone_number",
 				"url",
 				"boolean",
+				"currency",
 				"file"
 			],
 			"example": "string"

@@ -152,12 +152,15 @@ services:
         condition: service_healthy
     network_mode: host
     post_start:
-      # Sleep to give the server a (long!) chance to start then add a Realm.
       - command:
           - /bin/bash
           - -ecx
           - |
-            sleep 90
+            # Sleep to give the server a chance to start then add a Realm.
+            # Thanks to https://stackoverflow.com/a/19866239 for tcp approach.
+            while ! timeout 1 bash -c 'cat < /dev/null > /dev/tcp/localhost/8780'; do sleep 10; done
+            # Avoid 'Failed to get lock on /opt/keycloak/.keycloak/kcadm.config'
+            sleep 10
             cd /opt/keycloak/bin
             ./kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
             # If we already have a plain user (which is next-to-last step), then

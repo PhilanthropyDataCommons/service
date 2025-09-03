@@ -16,7 +16,7 @@ services:
       - db:/data/db
     command:
       - /bin/sh
-      - -ec
+      - -ecx
       - |
         chown ${UID:-1000}:${GID:-${UID:-1000}} -R /data/s3
         chown 999:999 -R /data/db
@@ -35,11 +35,11 @@ services:
       # Sleep to give the server a chance to start then add an alias and bucket.
       - command:
           - /bin/sh
-          - -ec
+          - -ecx
           - |
             sleep 2
             mc alias set pdc http://localhost:9300/ s3key s3secret
-            mc mb pdc/service
+            mc mb pdc/service --ignore-existing
         user: ${UID:-1000}
     healthcheck:
       # Check for the above-created bucket to exist.
@@ -98,10 +98,11 @@ services:
       # Sleep to give the server a chance to start then add a Keycloak DB.
       - command:
           - /bin/sh
-          - -ec
+          - -ecx
           - |
             sleep 8
-            psql -U pdc -p 5454 -d postgres -c 'create database keycloak owner pdc;'
+            # The following conditionally creates the db in case of persistence
+            echo "select 'create database keycloak owner pdc' where not exists (select from pg_database where datname = 'keycloak')\gexec" | psql -U pdc -p 5454 -d postgres
         user: '999'
     healthcheck:
       # Wait for the Keycloak DB to be available.
@@ -159,17 +160,12 @@ services:
             sleep 90
             cd /opt/keycloak/bin
             ./kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
+            # If we already have a plain user (which is next-to-last step), then
+            # this script likely ran already due to volume persistence, so exit.
+            ./kcadm.sh get-roles -r pdc --uusername 'user@pdc.local' && exit 0
             ./kcadm.sh create realms -b '{"realm":"pdc","enabled":"true"}'
             ./kcadm.sh create users -r pdc -s username='dev@pdc.local' -s email='dev@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='developer' -s lastName='admin' -i > admin_user_id
             ./kcadm.sh set-password -r pdc --username 'dev@pdc.local' --new-password 'password'
-            ./kcadm.sh create users -r pdc -s username='user@pdc.local' -s email='user@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='unprivileged' -s lastName='user' -i > plain_user_id
-            ./kcadm.sh set-password -r pdc --username 'user@pdc.local' --new-password 'password'
-            ./kcadm.sh create clients -r pdc \
-            -s clientId='pdc-openapi-docs' \
-            -s name='PDC OpenAPI Documentation' \
-            -s rootUrl='http://localhost:3030' \
-            -s redirectUris='["http://localhost:3030/*"]' \
-            -s publicClient='true' -s standardFlowEnabled='true'
             ./kcadm.sh create roles -r pdc -s name='pdc-admin' -s description='PDC Users with application-level Administrative privileges.' -i > admin_role_id
             ./kcadm.sh create groups -r pdc -s name='pdc-admin' -i > admin_group_id
             ./kcadm.sh add-roles -r pdc --gname pdc-admin --rolename pdc-admin
@@ -177,4 +173,12 @@ services:
             ./kcadm.sh add-roles -r pdc --gname pdc-admin --cclientid realm-management --rolename query-users
             ./kcadm.sh add-roles -r pdc --gname pdc-admin --cclientid realm-management --rolename view-users
             ./kcadm.sh update users/$(cat admin_user_id)/groups/$(cat admin_group_id) -r pdc -s realm=pdc -s userId=$(cat admin_user_id) -s groupId=$(cat admin_group_id) -n
+            ./kcadm.sh create clients -r pdc \
+            -s clientId='pdc-openapi-docs' \
+            -s name='PDC OpenAPI Documentation' \
+            -s rootUrl='http://localhost:3030' \
+            -s redirectUris='["http://localhost:3030/*"]' \
+            -s publicClient='true' -s standardFlowEnabled='true'
+            ./kcadm.sh create users -r pdc -s username='user@pdc.local' -s email='user@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='unprivileged' -s lastName='user' -i > plain_user_id
+            ./kcadm.sh set-password -r pdc --username 'user@pdc.local' --new-password 'password'
         user: ${UID:-1000}

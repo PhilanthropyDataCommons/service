@@ -160,8 +160,10 @@ services:
             cd /opt/keycloak/bin
             ./kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
             ./kcadm.sh create realms -b '{"realm":"pdc","enabled":"true"}'
-            ./kcadm.sh create users -r pdc -s username='dev@pdc.local' -s email='dev@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='local' -s lastName='developer' -i > user_id
+            ./kcadm.sh create users -r pdc -s username='dev@pdc.local' -s email='dev@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='developer' -s lastName='admin' -i > admin_user_id
             ./kcadm.sh set-password -r pdc --username 'dev@pdc.local' --new-password 'password'
+            ./kcadm.sh create users -r pdc -s username='user@pdc.local' -s email='user@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='unprivileged' -s lastName='user' -i > plain_user_id
+            ./kcadm.sh set-password -r pdc --username 'user@pdc.local' --new-password 'password'
             ./kcadm.sh create clients -r pdc \
             -s clientId='pdc-openapi-docs' \
             -s name='PDC OpenAPI Documentation' \
@@ -169,6 +171,10 @@ services:
             -s redirectUris='["http://localhost:3030/*"]' \
             -s publicClient='true' -s standardFlowEnabled='true'
             ./kcadm.sh create roles -r pdc -s name='pdc-admin' -s description='PDC Users with application-level Administrative privileges.' -i > admin_role_id
-            ./kcadm.sh create groups -r pdc -s name='pdc-admin' -s realmRoles="[\"$(cat admin_role_id)\"]" -i > admin_group_id
-            ./kcadm.sh update users/$(cat user_id)/groups/$(cat admin_group_id) -r pdc -s realm=pdc -s userId=$(cat user_id) -s groupId=$(cat admin_group_id) -n
+            ./kcadm.sh create groups -r pdc -s name='pdc-admin' -i > admin_group_id
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin --rolename pdc-admin
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin --cclientid realm-management --rolename manage-users
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin --cclientid realm-management --rolename query-users
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin --cclientid realm-management --rolename view-users
+            ./kcadm.sh update users/$(cat admin_user_id)/groups/$(cat admin_group_id) -r pdc -s realm=pdc -s userId=$(cat admin_user_id) -s groupId=$(cat admin_group_id) -n
         user: ${UID:-1000}

@@ -23,7 +23,6 @@ import {
 	extractPaginationParameters,
 } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
-import { S3_UNPROCESSED_KEY_PREFIX } from '../s3';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
@@ -47,13 +46,6 @@ const postBulkUploadTask = async (
 	if (!authContextHasFunderPermission(req, funderShortCode, Permission.EDIT)) {
 		throw new UnprocessableEntityError(
 			'You do not have write permissions on a funder with the specified short code.',
-		);
-	}
-
-	if (!sourceKey.startsWith(`${S3_UNPROCESSED_KEY_PREFIX}/`)) {
-		throw new InputValidationError(
-			`sourceKey must be unprocessed, and begin with '${S3_UNPROCESSED_KEY_PREFIX}/'.`,
-			[],
 		);
 	}
 

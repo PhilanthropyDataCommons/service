@@ -46,5 +46,4 @@ export const generatePresignedPost = async (
 		],
 	});
 
-export const S3_UNPROCESSED_KEY_PREFIX = 'unprocessed';
 export const S3_BULK_UPLOADS_KEY_PREFIX = 'bulk-uploads';

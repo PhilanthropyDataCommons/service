@@ -43,9 +43,7 @@ import type {
 
 const { S3_BUCKET, S3_PATH_STYLE } = requireEnv('S3_BUCKET', 'S3_PATH_STYLE');
 
-const TEST_UNPROCESSED_SOURCE_KEY =
-	'unprocessed/550e8400-e29b-41d4-a716-446655440000';
-const TEST_BULK_UPLOAD_SOURCE_KEY = 'bulk-upload/1';
+const TEST_SOURCE_KEY = '550e8400-e29b-41d4-a716-446655440000';
 
 const getS3Endpoint = async () => {
 	if (s3Client.config.endpoint === undefined) {
@@ -71,7 +69,7 @@ const createTestBulkUploadTask = async (
 		fileName: 'bar.csv',
 		sourceId: systemSource.id,
 		funderShortCode: systemFunder.shortCode,
-		sourceKey: TEST_UNPROCESSED_SOURCE_KEY,
+		sourceKey: TEST_SOURCE_KEY,
 		status: TaskStatus.PENDING,
 	};
 	return await createBulkUploadTask(db, authContext, {
@@ -155,7 +153,7 @@ const mockS3ResponsesForBulkUploadTaskProcessing = async (
 
 describe('processBulkUploadTask', () => {
 	it('should attempt to access the contents of the sourceKey associated with the specified bulk upload', async () => {
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -182,7 +180,7 @@ describe('processBulkUploadTask', () => {
 
 	it('should attempt to copy the contents of the sourceKey associated with the specified bulk upload to a processed location', async () => {
 		await createTestBaseFields();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -209,7 +207,7 @@ describe('processBulkUploadTask', () => {
 
 	it('should attempt to delete the unprocessed file of the sourceKey associated with the specified bulk upload', async () => {
 		await createTestBaseFields();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -236,7 +234,7 @@ describe('processBulkUploadTask', () => {
 
 	it('should fail if the sourceKey is not accessible', async () => {
 		const testAuthContext = await getTestAuthContext();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -265,45 +263,9 @@ describe('processBulkUploadTask', () => {
 		expect(sourceRequest.isDone()).toEqual(true);
 	});
 
-	it('should not process, and fail, if the sourceKey is not in the unprocessed namespace', async () => {
-		const testAuthContext = await getTestAuthContext();
-		const sourceKey = TEST_BULK_UPLOAD_SOURCE_KEY;
-		const systemUser = await loadSystemUser(db, null);
-		const systemUserAuthContext = getAuthContext(systemUser);
-		const bulkUploadTask = await createTestBulkUploadTask(
-			systemUserAuthContext,
-			{ sourceKey },
-		);
-		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(
-				__dirname,
-				'fixtures',
-				'processBulkUploadTask',
-				'validCsvTemplate.csv',
-			),
-		);
-
-		await processBulkUploadTask(
-			{ bulkUploadId: bulkUploadTask.id },
-			getMockJobHelpers(),
-		);
-
-		const updatedBulkUpload = await loadBulkUploadTask(
-			db,
-			testAuthContext,
-			bulkUploadTask.id,
-		);
-		expect(updatedBulkUpload).toMatchObject({
-			status: TaskStatus.FAILED,
-			fileSize: null,
-		});
-		expect(requests.getRequest.isDone()).toEqual(false);
-	});
-
 	it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
 		const testAuthContext = await getTestAuthContext();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -340,7 +302,7 @@ describe('processBulkUploadTask', () => {
 	it('should fail if the csv contains an invalid short code', async () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -375,7 +337,7 @@ describe('processBulkUploadTask', () => {
 
 	it('should move the csv file to processed location if the csv contains an invalid short code', async () => {
 		await createTestBaseFields();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -404,7 +366,7 @@ describe('processBulkUploadTask', () => {
 	it('should have a proper failed state if the csv is empty', async () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -436,7 +398,7 @@ describe('processBulkUploadTask', () => {
 	it('should update the file size for the bulk upload if the sourceKey is accessible and contains a valid CSV', async () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -474,7 +436,7 @@ describe('processBulkUploadTask', () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const systemSource = await loadSystemSource(db, null);
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(
@@ -749,7 +711,7 @@ describe('processBulkUploadTask', () => {
 	it('should create changemakers and changemaker-proposal relationships', async () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
-		const sourceKey = TEST_UNPROCESSED_SOURCE_KEY;
+		const sourceKey = TEST_SOURCE_KEY;
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const bulkUploadTask = await createTestBulkUploadTask(

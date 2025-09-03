@@ -278,7 +278,7 @@ describe('/tasks/bulkUploads', () => {
 				await createBulkUploadTask(db, testUserAuthContext, {
 					sourceId: systemSource.id,
 					fileName: `bar-${i + 1}.csv`,
-					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 					status: TaskStatus.COMPLETED,
 					funderShortCode: systemFunder.shortCode,
 				});
@@ -304,8 +304,7 @@ describe('/tasks/bulkUploads', () => {
 								funder: systemFunder,
 								fileName: 'bar-15.csv',
 								fileSize: null,
-								sourceKey:
-									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
 								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
@@ -318,8 +317,7 @@ describe('/tasks/bulkUploads', () => {
 								funder: systemFunder,
 								fileName: 'bar-14.csv',
 								fileSize: null,
-								sourceKey:
-									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
 								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
@@ -332,8 +330,7 @@ describe('/tasks/bulkUploads', () => {
 								funder: systemFunder,
 								fileName: 'bar-13.csv',
 								fileSize: null,
-								sourceKey:
-									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
 								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
@@ -346,8 +343,7 @@ describe('/tasks/bulkUploads', () => {
 								funder: systemFunder,
 								fileName: 'bar-12.csv',
 								fileSize: null,
-								sourceKey:
-									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
 								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
@@ -360,8 +356,7 @@ describe('/tasks/bulkUploads', () => {
 								funder: systemFunder,
 								fileName: 'bar-11.csv',
 								fileSize: null,
-								sourceKey:
-									'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 								status: TaskStatus.COMPLETED,
 								createdAt: expectTimestamp(),
 								createdBy: testUser.keycloakUserId,
@@ -405,7 +400,7 @@ describe('/tasks/bulkUploads', () => {
 					sourceId: systemSource.id,
 					funderShortCode: systemFunder.shortCode,
 					fileName: 'foo.csv',
-					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				})
 				.expect(201);
 			const after = await loadTableMetrics('bulk_upload_tasks');
@@ -419,7 +414,7 @@ describe('/tasks/bulkUploads', () => {
 				fileSize: null,
 				funderShortCode: systemFunder.shortCode,
 				funder: systemFunder,
-				sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				status: 'pending',
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
@@ -453,7 +448,7 @@ describe('/tasks/bulkUploads', () => {
 					sourceId: systemSource.id,
 					funderShortCode: systemFunder.shortCode,
 					fileName: 'foo.csv',
-					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				})
 				.expect(422);
 			const after = await loadTableMetrics('bulk_upload_tasks');
@@ -512,7 +507,7 @@ describe('/tasks/bulkUploads', () => {
 				.send({
 					sourceId: systemSource.id,
 					fileName: 'foo.png',
-					sourceKey: 'unprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({
@@ -539,7 +534,7 @@ describe('/tasks/bulkUploads', () => {
 				.send({
 					sourceId: systemSource.id,
 					fileName: 'foo.csv',
-					sourceKey: 'notUnprocessed/96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+					sourceKey: '96dde01e5-bar',
 				})
 				.expect(400);
 			expect(result.body).toMatchObject({

@@ -4,11 +4,7 @@ import { finished } from 'node:stream/promises';
 import { parse } from 'csv-parse';
 import { requireEnv } from 'require-env-variable';
 import tmp from 'tmp-promise';
-import {
-	s3Client,
-	S3_BULK_UPLOADS_KEY_PREFIX,
-	S3_UNPROCESSED_KEY_PREFIX,
-} from '../s3';
+import { s3Client, S3_BULK_UPLOADS_KEY_PREFIX } from '../s3';
 import { db } from '../database/db';
 import {
 	createApplicationForm,
@@ -238,10 +234,6 @@ const loadTaskRunnerAuthContext = async (): Promise<AuthContext> => ({
 	},
 });
 
-/* eslint-disable-next-line complexity --
- * This function is, without a doubt, too complex. It's so complex that fixing it requires its own issue:
- * https://github.com/PhilanthropyDataCommons/service/issues/1787
- */
 export const processBulkUploadTask = async (
 	payload: unknown,
 	helpers: JobHelpers,
@@ -265,21 +257,6 @@ export const processBulkUploadTask = async (
 		helpers.logger.warn(
 			'Bulk upload cannot be processed because it is not in a PENDING state',
 			{ bulkUploadTask },
-		);
-		return;
-	}
-	if (!bulkUploadTask.sourceKey.startsWith(S3_UNPROCESSED_KEY_PREFIX)) {
-		helpers.logger.info(
-			`Bulk upload task cannot be processed because the associated sourceKey does not begin with ${S3_UNPROCESSED_KEY_PREFIX}`,
-			{ bulkUploadTask },
-		);
-		await updateBulkUploadTask(
-			db,
-			null,
-			{
-				status: TaskStatus.FAILED,
-			},
-			bulkUploadTask.id,
 		);
 		return;
 	}

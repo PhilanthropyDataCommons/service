@@ -118,21 +118,6 @@ const mockS3GetObjectReplyWithFile = async (
 		.query({ 'x-id': 'GetObject' })
 		.replyWithFile(200, filePath);
 
-const mockS3CopyObjectReply = async (sourceKey: string) =>
-	nock(await getS3Endpoint())
-		.put(getS3KeyPath(sourceKey))
-		.query({ 'x-id': 'CopyObject' })
-		.reply(
-			200,
-			'<?xml version="1.0" encoding="UTF-8"?><CopyObjectResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><LastModified>2024-01-02T19:24:50.814Z</LastModified><ETag>745905cba4f8bfd2394f34e61d035a36</ETag></CopyObjectResult>',
-		);
-
-const mockS3DeleteObjectReply = async (sourceKey: string) =>
-	nock(await getS3Endpoint())
-		.delete(getS3KeyPath(sourceKey))
-		.query({ 'x-id': 'DeleteObject' })
-		.reply(204);
-
 const mockS3ResponsesForBulkUploadTaskProcessing = async (
 	bulkUploadTask: BulkUploadTask,
 	bulkUploadFilePath: string,
@@ -141,14 +126,8 @@ const mockS3ResponsesForBulkUploadTaskProcessing = async (
 		bulkUploadTask.sourceKey,
 		bulkUploadFilePath,
 	);
-	const copyRequest = await mockS3CopyObjectReply(
-		`bulk-uploads/${bulkUploadTask.id}`,
-	);
-	const deleteRequest = await mockS3DeleteObjectReply(bulkUploadTask.sourceKey);
 	return {
 		getRequest,
-		copyRequest,
-		deleteRequest,
 	};
 };
 
@@ -177,60 +156,6 @@ describe('processBulkUploadTask', () => {
 			getMockJobHelpers(),
 		);
 		expect(requests.getRequest.isDone()).toEqual(true);
-	});
-
-	it('should attempt to copy the contents of the sourceKey associated with the specified bulk upload to a processed location', async () => {
-		await createTestBaseFields();
-		const sourceKey = TEST_SOURCE_KEY;
-		const systemUser = await loadSystemUser(db, null);
-		const systemUserAuthContext = getAuthContext(systemUser);
-		const bulkUploadTask = await createTestBulkUploadTask(
-			systemUserAuthContext,
-			{ sourceKey },
-		);
-		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(
-				__dirname,
-				'fixtures',
-				'processBulkUploadTask',
-				'validCsvTemplate.csv',
-			),
-		);
-		await processBulkUploadTask(
-			{
-				bulkUploadId: bulkUploadTask.id,
-			},
-			getMockJobHelpers(),
-		);
-		expect(requests.copyRequest.isDone()).toEqual(true);
-	});
-
-	it('should attempt to delete the unprocessed file of the sourceKey associated with the specified bulk upload', async () => {
-		await createTestBaseFields();
-		const sourceKey = TEST_SOURCE_KEY;
-		const systemUser = await loadSystemUser(db, null);
-		const systemUserAuthContext = getAuthContext(systemUser);
-		const bulkUploadTask = await createTestBulkUploadTask(
-			systemUserAuthContext,
-			{ sourceKey },
-		);
-		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(
-				__dirname,
-				'fixtures',
-				'processBulkUploadTask',
-				'validCsvTemplate.csv',
-			),
-		);
-		await processBulkUploadTask(
-			{
-				bulkUploadId: bulkUploadTask.id,
-			},
-			getMockJobHelpers(),
-		);
-		expect(requests.deleteRequest.isDone()).toEqual(true);
 	});
 
 	it('should fail if the sourceKey is not accessible', async () => {
@@ -334,34 +259,6 @@ describe('processBulkUploadTask', () => {
 			status: TaskStatus.FAILED,
 			fileSize: 97,
 		});
-	});
-
-	it('should move the csv file to processed location if the csv contains an invalid short code', async () => {
-		await createTestBaseFields();
-		const sourceKey = TEST_SOURCE_KEY;
-		const systemUser = await loadSystemUser(db, null);
-		const systemUserAuthContext = getAuthContext(systemUser);
-		const bulkUploadTask = await createTestBulkUploadTask(
-			systemUserAuthContext,
-			{ sourceKey },
-		);
-		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(
-				__dirname,
-				'fixtures',
-				'processBulkUploadTask',
-				'invalidShortCode.csv',
-			),
-		);
-		await processBulkUploadTask(
-			{
-				bulkUploadId: bulkUploadTask.id,
-			},
-			getMockJobHelpers(),
-		);
-		expect(requests.copyRequest.isDone()).toEqual(true);
-		expect(requests.deleteRequest.isDone()).toEqual(true);
 	});
 
 	it('should have a proper failed state if the csv is empty', async () => {
@@ -705,8 +602,6 @@ describe('processBulkUploadTask', () => {
 
 		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
 		expect(requests.getRequest.isDone()).toEqual(true);
-		expect(requests.copyRequest.isDone()).toEqual(true);
-		expect(requests.deleteRequest.isDone()).toEqual(true);
 	});
 
 	it('should create changemakers and changemaker-proposal relationships', async () => {

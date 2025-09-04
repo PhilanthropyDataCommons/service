@@ -4,7 +4,7 @@ import { finished } from 'node:stream/promises';
 import { parse } from 'csv-parse';
 import { requireEnv } from 'require-env-variable';
 import tmp from 'tmp-promise';
-import { getS3Client, S3_BULK_UPLOADS_KEY_PREFIX } from '../s3';
+import { getS3Client } from '../s3';
 import { db } from '../database/db';
 import {
 	createApplicationForm,
@@ -195,9 +195,6 @@ const createApplicationFormFieldsForBulkUploadTask = async (
 	);
 	return applicationFormFields;
 };
-
-const getProcessedKey = (bulkUploadTask: BulkUploadTask): string =>
-	`${S3_BULK_UPLOADS_KEY_PREFIX}/${bulkUploadTask.id}`;
 
 const getChangemakerTaxIdIndex = (columns: string[]): number =>
 	columns.indexOf(CHANGEMAKER_TAX_ID_SHORT_CODE);
@@ -393,48 +390,10 @@ export const processBulkUploadTask = async (
 	}
 
 	try {
-		const fileStats = await fs.promises.stat(bulkUploadFile.path);
-		const { size: fileSize } = fileStats;
-		await updateBulkUploadTask(db, null, { fileSize }, bulkUploadTask.id);
-	} catch (err) {
-		helpers.logger.warn(
-			`Unable to update the fileSize for bulkUploadTask ${bulkUploadTask.id}`,
-			{ err },
-		);
-	}
-
-	try {
 		await bulkUploadFile.cleanup();
 	} catch (err) {
 		helpers.logger.warn(
 			`Cleanup of a temporary file failed (${bulkUploadFile.path})`,
-			{ err },
-		);
-	}
-
-	try {
-		const copySource = `${S3_BUCKET}/${bulkUploadTask.sourceKey}`;
-		const copyDestination = getProcessedKey(bulkUploadTask);
-		await getS3Client().copyObject({
-			Bucket: S3_BUCKET,
-			CopySource: copySource,
-			Key: copyDestination,
-		});
-		await getS3Client().deleteObject({
-			Bucket: S3_BUCKET,
-			Key: bulkUploadTask.sourceKey,
-		});
-		await updateBulkUploadTask(
-			db,
-			null,
-			{
-				sourceKey: copyDestination,
-			},
-			bulkUploadTask.id,
-		);
-	} catch (err) {
-		helpers.logger.warn(
-			`Moving the bulk upload task file to final processed destination failed (${bulkUploadFile.path})`,
 			{ err },
 		);
 	}

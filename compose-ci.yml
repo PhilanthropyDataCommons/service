@@ -23,6 +23,9 @@ services:
   pdc-s3:
     image: docker.io/minio/minio:latest
     user: ${UID:-1000}:${GID:-${UID:-1000}}
+    ports:
+      - '9300:9300'
+      - '9301:9301'
     environment:
       MINIO_ROOT_USER: s3key
       MINIO_ROOT_PASSWORD: s3secret
@@ -38,7 +41,7 @@ services:
           - -ecx
           - |
             sleep 2
-            mc alias set pdc http://localhost:9300/ s3key s3secret
+            mc alias set pdc http://pdc-s3:9300/ s3key s3secret
             mc mb pdc/service --ignore-existing
         user: ${UID:-1000}
     healthcheck:
@@ -49,24 +52,25 @@ services:
     depends_on:
       init-volumes:
         condition: service_completed_successfully
-    network_mode: host
-  pdc-service:
+  pdc-api:
     image: ghcr.io/philanthropydatacommons/service:latest
     # The image contains user 902
     user: 902:902
+    ports:
+      - '3030:3030'
     environment:
       HOST: 0.0.0.0
       PORT: 3030
-      PGHOST: localhost
+      PGHOST: pdc-databases
       PGUSER: pdc
       PGPASSWORD: pdc
       PGDATABASE: pdc
       PGPORT: 5454
-      AUTH_SERVER_ISSUER: 'http://localhost:8780/realms/pdc'
+      AUTH_SERVER_ISSUER: 'http://pdc-auth:8780/realms/pdc'
       OPENAPI_DOCS_AUTH_CLIENT_ID: pdc-openapi-docs
       S3_ACCESS_KEY_ID: s3key
       S3_ACCESS_SECRET: s3secret
-      S3_ENDPOINT: 'http://localhost:9300'
+      S3_ENDPOINT: 'http://pdc-s3:9300'
       S3_PATH_STYLE: false
       S3_REGION: us-east-1
       S3_BUCKET: pdc/service
@@ -81,7 +85,26 @@ services:
       pdc-auth:
         condition: service_healthy
     restart: always
-    network_mode: host
+    post_start:
+      - command:
+          - /bin/bash
+          - -ecx
+          - |
+            while ! curl 'http://localhost:3030'; do sleep 3; done
+            # Get a JWT and use it to sync base fields.
+            curl -d 'client_id=pdc-dev-ingest' \
+            -d 'client_secret=password' \
+            -d 'grant_type=client_credentials' \
+            http://pdc-auth:8780/realms/pdc/protocol/openid-connect/token \
+            | grep access_token \
+            | sed -E 's/.*"access_token":\s*"([a-zA-Z0-9\._-]+)",.*/\1/g' \
+            | tr -d ' ' > /tmp/jwt
+            cat /tmp/jwt
+            curl -X POST http://localhost:3030/tasks/baseFieldsCopy \
+            -H 'Content-type: application/json' \
+            -H "Authorization: Bearer $(cat /tmp/jwt)" \
+            -d "{\"pdcApiUrl\": \"${PDC_SYNC_URL:-http://localhost:3030}\"}"
+        user: '999'
   pdc-databases:
     image: docker.io/postgres:17
     environment:
@@ -125,15 +148,17 @@ services:
     depends_on:
       init-volumes:
         condition: service_completed_successfully
-    network_mode: host
   pdc-auth:
     image: docker.io/keycloak/keycloak:latest
     user: ${UID:-1000}:${GID:-${UID:-1000}}
+    ports:
+      - '8780:8780'
+      - '9790:9790'
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: 'jdbc:postgresql://localhost:5454/keycloak'
+      KC_DB_URL: 'jdbc:postgresql://pdc-databases:5454/keycloak'
       KC_DB_USERNAME: pdc
       KC_DB_PASSWORD: pdc
       KC_HEALTH_ENABLED: true
@@ -150,7 +175,6 @@ services:
     depends_on:
       pdc-databases:
         condition: service_healthy
-    network_mode: host
     post_start:
       - command:
           - /bin/bash
@@ -167,21 +191,47 @@ services:
             # this script likely ran already due to volume persistence, so exit.
             ./kcadm.sh get-roles -r pdc --uusername 'user@pdc.local' && exit 0
             ./kcadm.sh create realms -b '{"realm":"pdc","enabled":"true"}'
-            ./kcadm.sh create users -r pdc -s username='dev@pdc.local' -s email='dev@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='developer' -s lastName='admin' -i > admin_user_id
-            ./kcadm.sh set-password -r pdc --username 'dev@pdc.local' --new-password 'password'
-            ./kcadm.sh create roles -r pdc -s name='pdc-admin' -s description='PDC Users with application-level Administrative privileges.' -i > admin_role_id
-            ./kcadm.sh create groups -r pdc -s name='pdc-admin' -i > admin_group_id
+            ./kcadm.sh create users -r pdc -s username='dev@pdc.local' \
+            -s email='dev@pdc.local' -s emailVerified='true' \
+            -s enabled='true' -s firstName='developer' \
+            -s lastName='admin' -i > admin_user_id
+            ./kcadm.sh set-password -r pdc \
+            --username 'dev@pdc.local' --new-password 'password'
+            ./kcadm.sh create roles -r pdc \
+            -s name='pdc-admin' \
+            -s description='PDC Users with application-level Administrative privileges.' \
+            -i > admin_role_id
+            ./kcadm.sh create groups -r pdc \
+            -s name='pdc-admin' -i > admin_group_id
             ./kcadm.sh add-roles -r pdc --gname pdc-admin --rolename pdc-admin
-            ./kcadm.sh add-roles -r pdc --gname pdc-admin --cclientid realm-management --rolename manage-users
-            ./kcadm.sh add-roles -r pdc --gname pdc-admin --cclientid realm-management --rolename query-users
-            ./kcadm.sh add-roles -r pdc --gname pdc-admin --cclientid realm-management --rolename view-users
-            ./kcadm.sh update users/$(cat admin_user_id)/groups/$(cat admin_group_id) -r pdc -s realm=pdc -s userId=$(cat admin_user_id) -s groupId=$(cat admin_group_id) -n
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin \
+            --cclientid realm-management --rolename manage-users
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin \
+            --cclientid realm-management --rolename query-users
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin \
+            --cclientid realm-management --rolename view-users
+            ./kcadm.sh update -r pdc \
+            users/$(cat admin_user_id)/groups/$(cat admin_group_id) \
+            -s realm=pdc -s userId=$(cat admin_user_id) \
+            -s groupId=$(cat admin_group_id) -n
             ./kcadm.sh create clients -r pdc \
             -s clientId='pdc-openapi-docs' \
             -s name='PDC OpenAPI Documentation' \
-            -s rootUrl='http://localhost:3030' \
-            -s redirectUris='["http://localhost:3030/*"]' \
+            -s rootUrl='http://pdc-api:3030' \
+            -s redirectUris='["http://pdc-api:3030/*"]' \
             -s publicClient='true' -s standardFlowEnabled='true'
-            ./kcadm.sh create users -r pdc -s username='user@pdc.local' -s email='user@pdc.local' -s emailVerified='true' -s enabled='true' -s firstName='unprivileged' -s lastName='user' -i > plain_user_id
-            ./kcadm.sh set-password -r pdc --username 'user@pdc.local' --new-password 'password'
+            ./kcadm.sh create clients -r pdc \
+            -s clientId='pdc-dev-ingest' \
+            -s name='Developer Ingest Client with Service Account' \
+            -s publicClient='false' -s standardFlowEnabled='false' \
+            -s implicitFlowEnabled='false' \
+            -s directAccessGrantsEnabled='false' \
+            -s serviceAccountsEnabled='true' \
+            -s secret='password'
+            ./kcadm.sh create users -r pdc \
+            -s username='user@pdc.local' -s email='user@pdc.local' \
+            -s emailVerified='true' -s enabled='true' \
+            -s firstName='unprivileged' -s lastName='user' -i > plain_user_id
+            ./kcadm.sh set-password -r pdc \
+            --username 'user@pdc.local' --new-password 'password'
         user: ${UID:-1000}

@@ -225,7 +225,9 @@ services:
             # If we already have a plain user (which is next-to-last step), then
             # this script likely ran already due to volume persistence, so exit.
             ./kcadm.sh get-roles -r pdc --uusername 'user@pdc.local' && exit 0
-            ./kcadm.sh create realms -b '{"realm":"pdc","enabled":"true"}'
+            ./kcadm.sh create realms -s realm=pdc -s enabled=true \
+            -s loginWithEmailAllowed=true -s registrationEmailAsUsername=true \
+            -s organizationsEnabled=true
             ./kcadm.sh create users -r pdc -s username='dev@pdc.local' \
             -s email='dev@pdc.local' -s emailVerified='true' \
             -s enabled='true' -s firstName='developer' \

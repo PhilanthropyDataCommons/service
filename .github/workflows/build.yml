@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v5
       - run: echo VERSION="$(git log -1 --date=unix --pretty=format:'%cd' | date --utc '+%Y%m%d')"-"$(git log -1 --pretty=format:'%h')" >> "$GITHUB_ENV"
       - name: Build with node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
       - run: npm ci

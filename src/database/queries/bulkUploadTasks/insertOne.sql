@@ -1,16 +1,14 @@
 INSERT INTO bulk_upload_tasks (
 	source_id,
 	funder_short_code,
-	file_name,
-	source_key,
+	proposals_data_file_id,
 	status,
 	created_by
 )
 VALUES (
 	:sourceId,
 	:funderShortCode,
-	:fileName,
-	:sourceKey,
+	:proposalsDataFileId,
 	:status,
 	:authContextKeycloakUserId
 )

@@ -12,6 +12,7 @@ import {
 	createOrUpdateFunder,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
+import { createTestFile } from '../test/factories';
 import {
 	expectArray,
 	expectNumber,
@@ -62,17 +63,28 @@ describe('/tasks/bulkUploads', () => {
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
 			});
+			const firstProposalsDataFile = await createTestFile(
+				db,
+				testUserAuthContext,
+			);
+			const secondProposalsDataFile = await createTestFile(
+				db,
+				testUserAuthContext,
+			);
+
+			const visibleBulkUpload = await createBulkUploadTask(
+				db,
+				testUserAuthContext,
+				{
+					sourceId: systemSource.id,
+					proposalsDataFileId: firstProposalsDataFile.id,
+					status: TaskStatus.PENDING,
+					funderShortCode: systemFunder.shortCode,
+				},
+			);
 			await createBulkUploadTask(db, testUserAuthContext, {
 				sourceId: systemSource.id,
-				fileName: 'foo.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
-				status: TaskStatus.PENDING,
-				funderShortCode: systemFunder.shortCode,
-			});
-			await createBulkUploadTask(db, testUserAuthContext, {
-				sourceId: systemSource.id,
-				fileName: 'bar.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+				proposalsDataFileId: secondProposalsDataFile.id,
 				status: TaskStatus.COMPLETED,
 				funderShortCode: anotherFunder.shortCode,
 			});
@@ -84,21 +96,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
-						entries: [
-							{
-								id: 1,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'foo.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
-								status: TaskStatus.PENDING,
-								createdAt: expectTimestamp(),
-								createdBy: testUser.keycloakUserId,
-							},
-						],
+						entries: [visibleBulkUpload],
 					});
 				});
 		});
@@ -112,20 +110,28 @@ describe('/tasks/bulkUploads', () => {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
-			await createBulkUploadTask(db, testUserAuthContext, {
-				sourceId: systemSource.id,
-				fileName: 'foo.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
-				status: TaskStatus.PENDING,
-				funderShortCode: systemFunder.shortCode,
-			});
-			await createBulkUploadTask(db, anotherUserAuthContext, {
-				sourceId: systemSource.id,
-				fileName: 'bar.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-				status: TaskStatus.COMPLETED,
-				funderShortCode: systemFunder.shortCode,
-			});
+			const firstProposal = await createTestFile(db, testUserAuthContext);
+			const secondProposal = await createTestFile(db, testUserAuthContext);
+			const firstBulkUploadTask = await createBulkUploadTask(
+				db,
+				testUserAuthContext,
+				{
+					sourceId: systemSource.id,
+					proposalsDataFileId: firstProposal.id,
+					status: TaskStatus.PENDING,
+					funderShortCode: systemFunder.shortCode,
+				},
+			);
+			const secondBulkUploadTask = await createBulkUploadTask(
+				db,
+				anotherUserAuthContext,
+				{
+					sourceId: systemSource.id,
+					proposalsDataFileId: secondProposal.id,
+					status: TaskStatus.COMPLETED,
+					funderShortCode: systemFunder.shortCode,
+				},
+			);
 
 			await request(app)
 				.get('/tasks/bulkUploads')
@@ -134,34 +140,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
-						entries: [
-							{
-								id: 2,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'bar.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp(),
-								createdBy: anotherUser.keycloakUserId,
-							},
-							{
-								id: 1,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'foo.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
-								status: TaskStatus.PENDING,
-								createdAt: expectTimestamp(),
-								createdBy: testUser.keycloakUserId,
-							},
-						],
+						entries: [secondBulkUploadTask, firstBulkUploadTask],
 					});
 				});
 		});
@@ -175,20 +154,28 @@ describe('/tasks/bulkUploads', () => {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
+			const firstProposalsFile = await createTestFile(db, testUserAuthContext);
+			const secondProposalsFile = await createTestFile(
+				db,
+				anotherUserAuthContext,
+			);
+
 			await createBulkUploadTask(db, testUserAuthContext, {
 				sourceId: systemSource.id,
-				fileName: 'foo.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
+				proposalsDataFileId: firstProposalsFile.id,
 				status: TaskStatus.PENDING,
 				funderShortCode: systemFunder.shortCode,
 			});
-			await createBulkUploadTask(db, anotherUserAuthContext, {
-				sourceId: systemSource.id,
-				fileName: 'bar.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-				status: TaskStatus.COMPLETED,
-				funderShortCode: systemFunder.shortCode,
-			});
+			const visibleBulkUploadTask = await createBulkUploadTask(
+				db,
+				anotherUserAuthContext,
+				{
+					sourceId: systemSource.id,
+					proposalsDataFileId: secondProposalsFile.id,
+					status: TaskStatus.COMPLETED,
+					funderShortCode: systemFunder.shortCode,
+				},
+			);
 
 			await request(app)
 				.get(
@@ -199,21 +186,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
-						entries: [
-							{
-								id: 2,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'bar.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp(),
-								createdBy: anotherUser.keycloakUserId,
-							},
-						],
+						entries: [visibleBulkUploadTask],
 					});
 				});
 		});
@@ -227,17 +200,24 @@ describe('/tasks/bulkUploads', () => {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
-			await createBulkUploadTask(db, testUserAuthContext, {
-				sourceId: systemSource.id,
-				fileName: 'foo.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
-				status: TaskStatus.PENDING,
-				funderShortCode: systemFunder.shortCode,
-			});
+			const firstProposalsFile = await createTestFile(db, testUserAuthContext);
+			const secondProposalsFile = await createTestFile(
+				db,
+				anotherUserAuthContext,
+			);
+			const visibleBulkUploadTask = await createBulkUploadTask(
+				db,
+				testUserAuthContext,
+				{
+					sourceId: systemSource.id,
+					proposalsDataFileId: firstProposalsFile.id,
+					status: TaskStatus.PENDING,
+					funderShortCode: systemFunder.shortCode,
+				},
+			);
 			await createBulkUploadTask(db, anotherUserAuthContext, {
 				sourceId: systemSource.id,
-				fileName: 'bar.csv',
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+				proposalsDataFileId: secondProposalsFile.id,
 				status: TaskStatus.COMPLETED,
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -249,21 +229,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect((res) => {
 					expect(res.body).toEqual({
 						total: 2,
-						entries: [
-							{
-								id: 1,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'foo.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-foo',
-								status: TaskStatus.PENDING,
-								createdAt: expectTimestamp(),
-								createdBy: testUser.keycloakUserId,
-							},
-						],
+						entries: [visibleBulkUploadTask],
 					});
 				});
 		});
@@ -273,16 +239,22 @@ describe('/tasks/bulkUploads', () => {
 			const systemFunder = await loadSystemFunder(db, null);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			await Array.from(Array(20)).reduce(async (p, _, i) => {
-				await p;
-				await createBulkUploadTask(db, testUserAuthContext, {
-					sourceId: systemSource.id,
-					fileName: `bar-${i + 1}.csv`,
-					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-					status: TaskStatus.COMPLETED,
-					funderShortCode: systemFunder.shortCode,
-				});
-			}, Promise.resolve());
+			const bulkUploadTasks = (
+				await Promise.all(
+					Array.from(Array(20)).map(async () => {
+						const proposalsDataFile = await createTestFile(
+							db,
+							testUserAuthContext,
+						);
+						return await createBulkUploadTask(db, testUserAuthContext, {
+							sourceId: systemSource.id,
+							proposalsDataFileId: proposalsDataFile.id,
+							status: TaskStatus.COMPLETED,
+							funderShortCode: systemFunder.shortCode,
+						});
+					}),
+				)
+			).sort((a, b) => a.id - b.id);
 
 			await request(app)
 				.get('/tasks/bulkUploads')
@@ -296,71 +268,11 @@ describe('/tasks/bulkUploads', () => {
 					expect(res.body).toEqual({
 						total: 20,
 						entries: [
-							{
-								id: 15,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'bar-15.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp(),
-								createdBy: testUser.keycloakUserId,
-							},
-							{
-								id: 14,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'bar-14.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp(),
-								createdBy: testUser.keycloakUserId,
-							},
-							{
-								id: 13,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'bar-13.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp(),
-								createdBy: testUser.keycloakUserId,
-							},
-							{
-								id: 12,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'bar-12.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp(),
-								createdBy: testUser.keycloakUserId,
-							},
-							{
-								id: 11,
-								sourceId: systemSource.id,
-								source: systemSource,
-								funderShortCode: systemFunder.shortCode,
-								funder: systemFunder,
-								fileName: 'bar-11.csv',
-								fileSize: null,
-								sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-								status: TaskStatus.COMPLETED,
-								createdAt: expectTimestamp(),
-								createdBy: testUser.keycloakUserId,
-							},
+							bulkUploadTasks[14],
+							bulkUploadTasks[13],
+							bulkUploadTasks[12],
+							bulkUploadTasks[11],
+							bulkUploadTasks[10],
 						],
 					});
 				});
@@ -385,11 +297,13 @@ describe('/tasks/bulkUploads', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
 			});
+			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
@@ -399,8 +313,7 @@ describe('/tasks/bulkUploads', () => {
 				.send({
 					sourceId: systemSource.id,
 					funderShortCode: systemFunder.shortCode,
-					fileName: 'foo.csv',
-					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+					proposalsDataFileId: proposalsDataFile.id,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('bulk_upload_tasks');
@@ -410,11 +323,10 @@ describe('/tasks/bulkUploads', () => {
 				id: expectNumber(),
 				sourceId: systemSource.id,
 				source: systemSource,
-				fileName: 'foo.csv',
-				fileSize: null,
 				funderShortCode: systemFunder.shortCode,
 				funder: systemFunder,
-				sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+				proposalsDataFileId: expectNumber(),
+				proposalsDataFile,
 				status: 'pending',
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
@@ -428,6 +340,8 @@ describe('/tasks/bulkUploads', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
@@ -447,8 +361,7 @@ describe('/tasks/bulkUploads', () => {
 				.send({
 					sourceId: systemSource.id,
 					funderShortCode: systemFunder.shortCode,
-					fileName: 'foo.csv',
-					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
+					proposalsDataFileId: proposalsDataFile.id,
 				})
 				.expect(422);
 			const after = await loadTableMetrics('bulk_upload_tasks');
@@ -567,6 +480,47 @@ describe('/tasks/bulkUploads', () => {
 				name: 'InputValidationError',
 				details: expectArray(),
 			});
+		});
+
+		it('returns 422 unprocessable entity when user tries to use a file they do not own for proposal data', async () => {
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+			});
+
+			const fileOwnedByAnotherUser = await createTestFile(
+				db,
+				systemUserAuthContext,
+			);
+
+			const before = await loadTableMetrics('bulk_upload_tasks');
+			const result = await request(app)
+				.post('/tasks/bulkUploads/')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					sourceId: systemSource.id,
+					funderShortCode: systemFunder.shortCode,
+					proposalsDataFileId: fileOwnedByAnotherUser.id,
+				})
+				.expect(422);
+			const after = await loadTableMetrics('bulk_upload_tasks');
+
+			expect(before.count).toEqual(0);
+			expect(result.body).toEqual({
+				details: [{ name: 'UnprocessableEntityError' }],
+				message:
+					'You must be the owner of the file specified by proposalsDataFileId.',
+				name: 'UnprocessableEntityError',
+			});
+			expect(after.count).toEqual(0);
 		});
 	});
 });

@@ -1,2 +1,3 @@
-export { createFile } from './createFile';
-export { loadFile } from './loadFile';
+export * from './createFile';
+export * from './loadFile';
+export * from './loadFileIfCreatedBy';

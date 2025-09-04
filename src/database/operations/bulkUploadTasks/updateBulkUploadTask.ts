@@ -8,10 +8,6 @@ const updateBulkUploadTask = generateCreateOrUpdateItemOperation<
 	BulkUploadTask,
 	Partial<InternallyWritableBulkUploadTask>,
 	[bulkUploadTaskId: number]
->(
-	'bulkUploadTasks.updateById',
-	['fileSize', 'sourceKey', 'status'],
-	['bulkUploadTaskId'],
-);
+>('bulkUploadTasks.updateById', ['status'], ['bulkUploadTaskId']);
 
 export { updateBulkUploadTask };

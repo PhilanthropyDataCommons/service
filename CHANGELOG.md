@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `BaseField` is now properly documented as being allowed to be type `currency`.
 
+### Changed
+
+- `BulkUploadTask` no longer stores file metadata, but instead requires a `proposalsDataFileId` attribute which references a `File.id`.
+
 ## 0.23.0 2025-08-29
 
 ### Changed

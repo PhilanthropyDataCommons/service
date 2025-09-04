@@ -4,6 +4,7 @@ import {
 	createBulkUploadTask,
 	getLimitValues,
 	loadBulkUploadTaskBundle,
+	loadFileIfCreatedBy,
 } from '../database';
 import {
 	Permission,
@@ -42,7 +43,7 @@ const postBulkUploadTask = async (
 		);
 	}
 
-	const { sourceId, funderShortCode, fileName, sourceKey } = body;
+	const { sourceId, funderShortCode, proposalsDataFileId } = body;
 	if (!authContextHasFunderPermission(req, funderShortCode, Permission.EDIT)) {
 		throw new UnprocessableEntityError(
 			'You do not have write permissions on a funder with the specified short code.',
@@ -50,11 +51,23 @@ const postBulkUploadTask = async (
 	}
 
 	try {
+		await loadFileIfCreatedBy(
+			db,
+			req,
+			proposalsDataFileId,
+			req.user.keycloakUserId,
+		);
+	} catch (error: unknown) {
+		throw new UnprocessableEntityError(
+			'You must be the owner of the file specified by proposalsDataFileId.',
+		);
+	}
+
+	try {
 		const bulkUploadTask = await createBulkUploadTask(db, req, {
 			sourceId,
 			funderShortCode,
-			fileName,
-			sourceKey,
+			proposalsDataFileId,
 			status: TaskStatus.PENDING,
 		});
 		await addProcessBulkUploadJob({

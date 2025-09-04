@@ -56,5 +56,3 @@ export const generatePresignedPost = async (
 			['content-length-range', size, size],
 		],
 	});
-
-export const S3_BULK_UPLOADS_KEY_PREFIX = 'bulk-uploads';

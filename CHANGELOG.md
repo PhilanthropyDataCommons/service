@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `File` now has an `s3BucketName` attribute as well as an `s3Bucket` attribute, and no longer has a has a `bucketName` or `bucketRegion` attribute.
+- `BulkUploadTask` no longer stores file metadata, but instead requires a `proposalsDataFileId` attribute which references a `File.id`.
 
 ## 0.23.0 2025-08-29
 

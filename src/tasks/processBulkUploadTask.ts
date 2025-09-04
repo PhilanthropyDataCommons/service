@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import { parse } from 'csv-parse';
-import { requireEnv } from 'require-env-variable';
 import tmp from 'tmp-promise';
 import { getS3Client } from '../s3';
 import { db } from '../database/db';
@@ -35,14 +34,14 @@ import type {
 	ProposalFieldValue,
 	WritableChangemaker,
 	AuthContext,
+	File,
 } from '../types';
 
-const { S3_BUCKET } = requireEnv('S3_BUCKET');
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
 const CHANGEMAKER_NAME_SHORT_CODE = 'organization_name';
 
-const downloadS3ObjectToTemporaryStorage = async (
-	key: string,
+const downloadFileDataToTemporaryStorage = async (
+	file: File,
 	logger: Logger,
 ): Promise<FileResult> => {
 	const temporaryFile = await tmp.file().catch(() => {
@@ -53,13 +52,19 @@ const downloadS3ObjectToTemporaryStorage = async (
 		autoClose: true,
 	});
 
-	const s3Response = await getS3Client()
+	const s3Response = await getS3Client({
+		region: file.s3Bucket.region,
+		endpoint: file.s3Bucket.endpoint,
+	})
 		.getObject({
-			Key: key,
-			Bucket: S3_BUCKET,
+			Key: file.storageKey,
+			Bucket: file.s3Bucket.name,
 		})
 		.catch(async (err: unknown) => {
-			logger.error('Failed to load an object from S3', { err, key });
+			logger.error('Failed to load an object from S3', {
+				err,
+				file,
+			});
 			await temporaryFile.cleanup();
 			throw new Error('Unable to load the s3 object');
 		});
@@ -267,8 +272,8 @@ export const processBulkUploadTask = async (
 		bulkUploadTask.id,
 	);
 
-	const bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
-		bulkUploadTask.sourceKey,
+	const bulkUploadFile = await downloadFileDataToTemporaryStorage(
+		bulkUploadTask.proposalsDataFile,
 		helpers.logger,
 	).catch(async (err: unknown) => {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });

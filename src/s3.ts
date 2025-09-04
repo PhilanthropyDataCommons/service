@@ -21,22 +21,27 @@ const {
 
 const PRESIGNED_POST_EXPIRATION_SECONDS = 3600; // 1 hour
 
-export const s3Client = new S3({
-	forcePathStyle: S3_PATH_STYLE === 'true',
-	endpoint: S3_ENDPOINT,
-	region: S3_REGION,
-	credentials: {
-		accessKeyId: S3_ACCESS_KEY_ID,
-		secretAccessKey: S3_ACCESS_SECRET,
-	},
-});
+const s3Clients: Record<string, S3> = {};
+
+export const getS3Client = (region = S3_REGION): S3 => {
+	s3Clients[region] ??= new S3({
+		forcePathStyle: S3_PATH_STYLE === 'true',
+		endpoint: S3_ENDPOINT,
+		region,
+		credentials: {
+			accessKeyId: S3_ACCESS_KEY_ID,
+			secretAccessKey: S3_ACCESS_SECRET,
+		},
+	});
+	return s3Clients[region];
+};
 
 export const generatePresignedPost = async (
 	key: string,
 	mimeType: string,
 	size: number,
 ): Promise<PresignedPost> =>
-	await createPresignedPost(s3Client, {
+	await createPresignedPost(getS3Client(), {
 		Bucket: S3_BUCKET,
 		Key: key,
 		Expires: PRESIGNED_POST_EXPIRATION_SECONDS,
@@ -45,5 +50,3 @@ export const generatePresignedPost = async (
 			['content-length-range', size, size],
 		],
 	});
-
-export const S3_BULK_UPLOADS_KEY_PREFIX = 'bulk-uploads';

@@ -1,5 +1,5 @@
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
-import { generatePresignedPost, s3Client } from '../s3';
+import { generatePresignedPost, getS3Client } from '../s3';
 
 jest.mock('@aws-sdk/s3-presigned-post');
 
@@ -27,7 +27,7 @@ describe('generatePresignedPost', () => {
 			1024,
 		);
 
-		expect(mockedCreatePresignedPost).toHaveBeenCalledWith(s3Client, {
+		expect(mockedCreatePresignedPost).toHaveBeenCalledWith(getS3Client(), {
 			Bucket: process.env.S3_BUCKET,
 			Key: 'test-key',
 			Expires: 3600,
@@ -53,7 +53,7 @@ describe('generatePresignedPost', () => {
 
 		await generatePresignedPost('test-key', 'text/plain', 512);
 
-		expect(mockedCreatePresignedPost).toHaveBeenCalledWith(s3Client, {
+		expect(mockedCreatePresignedPost).toHaveBeenCalledWith(getS3Client(), {
 			Bucket: process.env.S3_BUCKET,
 			Key: 'test-key',
 			Expires: 3600,
@@ -77,7 +77,7 @@ describe('generatePresignedPost', () => {
 
 		await generatePresignedPost('test-key', 'image/png', 2048);
 
-		expect(mockedCreatePresignedPost).toHaveBeenCalledWith(s3Client, {
+		expect(mockedCreatePresignedPost).toHaveBeenCalledWith(getS3Client(), {
 			Bucket: process.env.S3_BUCKET,
 			Key: 'test-key',
 			Expires: 3600,

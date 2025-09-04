@@ -4,7 +4,7 @@ import { finished } from 'node:stream/promises';
 import { parse } from 'csv-parse';
 import { requireEnv } from 'require-env-variable';
 import tmp from 'tmp-promise';
-import { s3Client, S3_BULK_UPLOADS_KEY_PREFIX } from '../s3';
+import { getS3Client, S3_BULK_UPLOADS_KEY_PREFIX } from '../s3';
 import { db } from '../database/db';
 import {
 	createApplicationForm,
@@ -53,7 +53,7 @@ const downloadS3ObjectToTemporaryStorage = async (
 		autoClose: true,
 	});
 
-	const s3Response = await s3Client
+	const s3Response = await getS3Client()
 		.getObject({
 			Key: key,
 			Bucket: S3_BUCKET,
@@ -415,12 +415,12 @@ export const processBulkUploadTask = async (
 	try {
 		const copySource = `${S3_BUCKET}/${bulkUploadTask.sourceKey}`;
 		const copyDestination = getProcessedKey(bulkUploadTask);
-		await s3Client.copyObject({
+		await getS3Client().copyObject({
 			Bucket: S3_BUCKET,
 			CopySource: copySource,
 			Key: copyDestination,
 		});
-		await s3Client.deleteObject({
+		await getS3Client().deleteObject({
 			Bucket: S3_BUCKET,
 			Key: bulkUploadTask.sourceKey,
 		});

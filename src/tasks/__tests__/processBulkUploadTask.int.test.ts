@@ -15,7 +15,7 @@ import {
 	loadSystemSource,
 	loadSystemFunder,
 } from '../../database';
-import { s3Client } from '../../s3';
+import { getS3Client } from '../../s3';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUploadTask } from '../processBulkUploadTask';
 import {
@@ -46,6 +46,7 @@ const { S3_BUCKET, S3_PATH_STYLE } = requireEnv('S3_BUCKET', 'S3_PATH_STYLE');
 const TEST_SOURCE_KEY = '550e8400-e29b-41d4-a716-446655440000';
 
 const getS3Endpoint = async () => {
+	const s3Client = getS3Client();
 	if (s3Client.config.endpoint === undefined) {
 		throw new Error('The S3 client is not configured with an endpoint');
 	}

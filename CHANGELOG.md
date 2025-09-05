@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- `BaseField` can now be of type `file`.
+
+### Fixed
+
+- `BaseField` is now properly documented as being allowed to be type `currency`.
+
 ## 0.23.0 2025-08-29
 
 ### Changed

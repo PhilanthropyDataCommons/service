@@ -1,5 +1,5 @@
 import validator from 'validator';
-import { BaseFieldDataType } from './types';
+import { BaseFieldDataType, isId } from './types';
 import { ajv } from './ajv';
 
 const isEmailString = ajv.compile({
@@ -55,6 +55,13 @@ const isCurrencyWithCodeString = (value: string): boolean => {
 	);
 };
 
+const isIdString = (value: string): boolean => {
+	if (value.trim() !== value) {
+		return false;
+	}
+	return isId(value);
+};
+
 export const fieldValueIsValid = (
 	fieldValue: string,
 	dataType: BaseFieldDataType,
@@ -72,6 +79,8 @@ export const fieldValueIsValid = (
 			return isBooleanString(fieldValue);
 		case BaseFieldDataType.CURRENCY:
 			return isCurrencyWithCodeString(fieldValue);
+		case BaseFieldDataType.FILE:
+			return isIdString(fieldValue);
 		default:
 			return isString(fieldValue);
 	}

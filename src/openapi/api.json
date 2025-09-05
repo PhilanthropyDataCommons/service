@@ -146,6 +146,9 @@
 			"File": {
 				"$ref": "./components/schemas/File.json"
 			},
+			"S3Bucket": {
+				"$ref": "./components/schemas/S3Bucket.json"
+			},
 			"ProposalBundle": {
 				"$ref": "./components/schemas/ProposalBundle.json"
 			},

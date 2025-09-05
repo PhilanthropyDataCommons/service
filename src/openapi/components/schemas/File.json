@@ -23,15 +23,14 @@
 			"minimum": 0,
 			"example": 1024
 		},
-		"bucketName": {
+		"s3BucketName": {
 			"type": "string",
 			"readOnly": true,
 			"example": "my-s3-bucket"
 		},
-		"bucketRegion": {
-			"type": "string",
-			"readOnly": true,
-			"example": "us-east-1"
+		"s3Bucket": {
+			"$ref": "./S3Bucket.json",
+			"readOnly": true
 		},
 		"createdBy": {
 			"type": "string",
@@ -52,8 +51,8 @@
 		"storageKey",
 		"mimeType",
 		"size",
-		"bucketName",
-		"bucketRegion",
+		"s3BucketName",
+		"s3Bucket",
 		"createdBy",
 		"createdAt"
 	]

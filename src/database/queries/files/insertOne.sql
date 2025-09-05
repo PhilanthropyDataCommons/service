@@ -2,16 +2,14 @@ INSERT INTO files (
 	name,
 	mime_type,
 	size,
-	bucket_name,
-	bucket_region,
+	s3_bucket_name,
 	created_by
 )
 VALUES (
 	:name,
 	:mimeType,
 	:size,
-	:bucketName,
-	:bucketRegion,
+	:s3BucketName,
 	:authContextKeycloakUserId
 )
 RETURNING file_to_json(files) AS object;

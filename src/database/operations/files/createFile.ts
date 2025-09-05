@@ -5,10 +5,6 @@ const createFile = generateCreateOrUpdateItemOperation<
 	File,
 	InternallyWritableFile,
 	[]
->(
-	'files.insertOne',
-	['name', 'mimeType', 'size', 'bucketName', 'bucketRegion'],
-	[],
-);
+>('files.insertOne', ['name', 'mimeType', 'size', 's3BucketName'], []);
 
 export { createFile };

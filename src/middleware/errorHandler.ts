@@ -148,6 +148,7 @@ export const errorHandler = (
 	next: NextFunction,
 ): void => {
 	logger.trace(req.body);
+
 	const wrappedError = isTinyPgErrorWithQueryContext(err)
 		? new DatabaseError('Error with a database operation.', err)
 		: err;

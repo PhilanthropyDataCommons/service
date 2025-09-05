@@ -19,6 +19,7 @@ export * from './organizations';
 export * from './proposalFieldValues';
 export * from './proposals';
 export * from './proposalVersions';
+export * from './s3Buckets';
 export * from './sources';
 export * from './userChangemakerPermissions';
 export * from './userDataProviderPermissions';

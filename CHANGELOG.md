@@ -10,10 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `BaseField` can now be of type `file`.
+- `S3Bucket` now exists.
 
 ### Fixed
 
 - `BaseField` is now properly documented as being allowed to be type `currency`.
+
+### Changed
+
+- `File` now has an `s3BucketName` attribute as well as an `s3Bucket` attribute, and no longer has a has a `bucketName` or `bucketRegion` attribute.
 
 ## 0.23.0 2025-08-29
 

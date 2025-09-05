@@ -21,22 +21,13 @@
 			"$ref": "./Funder.json",
 			"readOnly": true
 		},
-		"fileName": {
-			"type": "string",
-			"example": "upload.csv",
-			"pattern": "^.+\\.csv$"
+		"proposalsDataFileId": {
+			"type": "integer",
+			"example": 123
 		},
-		"fileSize": {
-			"description": "File size in bytes",
-			"type": ["integer", "null"],
-			"readOnly": true,
-			"example": 42,
-			"minimum": 0
-		},
-		"sourceKey": {
-			"type": "string",
-			"example": "550e8400-e29b-41d4-a716-446655440000",
-			"minLength": 1
+		"proposalsDataFile": {
+			"$ref": "./File.json",
+			"readOnly": true
 		},
 		"status": {
 			"type": "string",
@@ -58,8 +49,7 @@
 	"required": [
 		"id",
 		"sourceId",
-		"fileName",
-		"sourceKey",
+		"proposalsDataFileId",
 		"status",
 		"createdBy",
 		"createdAt"

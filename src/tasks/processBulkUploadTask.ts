@@ -2,9 +2,8 @@ import fs from 'node:fs';
 import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import { parse } from 'csv-parse';
-import { requireEnv } from 'require-env-variable';
 import tmp from 'tmp-promise';
-import { s3Client, S3_BULK_UPLOADS_KEY_PREFIX } from '../s3';
+import { getS3Client } from '../s3';
 import { db } from '../database/db';
 import {
 	createApplicationForm,
@@ -37,12 +36,13 @@ import type {
 	AuthContext,
 } from '../types';
 
-const { S3_BUCKET } = requireEnv('S3_BUCKET');
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
 const CHANGEMAKER_NAME_SHORT_CODE = 'organization_name';
 
 const downloadS3ObjectToTemporaryStorage = async (
-	key: string,
+	bucketRegion: string,
+	bucketName: string,
+	objectKey: string,
 	logger: Logger,
 ): Promise<FileResult> => {
 	const temporaryFile = await tmp.file().catch(() => {
@@ -53,13 +53,18 @@ const downloadS3ObjectToTemporaryStorage = async (
 		autoClose: true,
 	});
 
-	const s3Response = await s3Client
+	const s3Response = await getS3Client(bucketRegion)
 		.getObject({
-			Key: key,
-			Bucket: S3_BUCKET,
+			Key: objectKey,
+			Bucket: bucketName,
 		})
 		.catch(async (err: unknown) => {
-			logger.error('Failed to load an object from S3', { err, key });
+			logger.error('Failed to load an object from S3', {
+				err,
+				objectKey,
+				bucketName,
+				bucketRegion,
+			});
 			await temporaryFile.cleanup();
 			throw new Error('Unable to load the s3 object');
 		});
@@ -196,9 +201,6 @@ const createApplicationFormFieldsForBulkUploadTask = async (
 	return applicationFormFields;
 };
 
-const getProcessedKey = (bulkUploadTask: BulkUploadTask): string =>
-	`${S3_BULK_UPLOADS_KEY_PREFIX}/${bulkUploadTask.id}`;
-
 const getChangemakerTaxIdIndex = (columns: string[]): number =>
 	columns.indexOf(CHANGEMAKER_TAX_ID_SHORT_CODE);
 
@@ -271,7 +273,9 @@ export const processBulkUploadTask = async (
 	);
 
 	const bulkUploadFile = await downloadS3ObjectToTemporaryStorage(
-		bulkUploadTask.sourceKey,
+		bulkUploadTask.proposalsDataFile.bucketRegion,
+		bulkUploadTask.proposalsDataFile.bucketName,
+		bulkUploadTask.proposalsDataFile.storageKey,
 		helpers.logger,
 	).catch(async (err: unknown) => {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
@@ -393,48 +397,10 @@ export const processBulkUploadTask = async (
 	}
 
 	try {
-		const fileStats = await fs.promises.stat(bulkUploadFile.path);
-		const { size: fileSize } = fileStats;
-		await updateBulkUploadTask(db, null, { fileSize }, bulkUploadTask.id);
-	} catch (err) {
-		helpers.logger.warn(
-			`Unable to update the fileSize for bulkUploadTask ${bulkUploadTask.id}`,
-			{ err },
-		);
-	}
-
-	try {
 		await bulkUploadFile.cleanup();
 	} catch (err) {
 		helpers.logger.warn(
 			`Cleanup of a temporary file failed (${bulkUploadFile.path})`,
-			{ err },
-		);
-	}
-
-	try {
-		const copySource = `${S3_BUCKET}/${bulkUploadTask.sourceKey}`;
-		const copyDestination = getProcessedKey(bulkUploadTask);
-		await s3Client.copyObject({
-			Bucket: S3_BUCKET,
-			CopySource: copySource,
-			Key: copyDestination,
-		});
-		await s3Client.deleteObject({
-			Bucket: S3_BUCKET,
-			Key: bulkUploadTask.sourceKey,
-		});
-		await updateBulkUploadTask(
-			db,
-			null,
-			{
-				sourceKey: copyDestination,
-			},
-			bulkUploadTask.id,
-		);
-	} catch (err) {
-		helpers.logger.warn(
-			`Moving the bulk upload task file to final processed destination failed (${bulkUploadFile.path})`,
 			{ err },
 		);
 	}

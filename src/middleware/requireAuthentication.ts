@@ -1,5 +1,9 @@
 import { UnauthorizedError } from '../errors';
-import { hasMeaningfulAuthSub, isAuthContext } from '../types';
+import {
+	hasMeaningfulAuthName,
+	hasMeaningfulAuthSub,
+	isAuthContext,
+} from '../types';
 import type { Request, Response, NextFunction } from 'express';
 
 const requireAuthentication = (
@@ -15,6 +19,14 @@ const requireAuthentication = (
 		next(
 			new UnauthorizedError(
 				'The authentication token must have a non-empty value for `auth.sub`.',
+			),
+		);
+		return;
+	}
+	if (!hasMeaningfulAuthName(req)) {
+		next(
+			new UnauthorizedError(
+				'The authentication token must have a non-empty value for `auth.name`.',
 			),
 		);
 		return;

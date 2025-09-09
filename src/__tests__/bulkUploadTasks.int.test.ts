@@ -110,6 +110,7 @@ describe('/tasks/bulkUploads', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+				keycloakUserName: 'Joe',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			await createBulkUploadTask(db, testUserAuthContext, {
@@ -173,6 +174,7 @@ describe('/tasks/bulkUploads', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+				keycloakUserName: 'Karen',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			await createBulkUploadTask(db, testUserAuthContext, {
@@ -225,6 +227,7 @@ describe('/tasks/bulkUploads', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+				keycloakUserName: 'Larry',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			await createBulkUploadTask(db, testUserAuthContext, {

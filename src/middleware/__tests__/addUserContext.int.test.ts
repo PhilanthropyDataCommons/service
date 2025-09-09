@@ -42,6 +42,7 @@ describe('addUserContext', () => {
 		const res = getMockResponse();
 		req.auth = {
 			sub: '123e4567-e89b-12d3-a456-426614174000',
+			name: 'Olivia',
 		};
 
 		loadTableMetrics('users')
@@ -68,6 +69,7 @@ describe('addUserContext', () => {
 
 	it('creates ephemeral user group associations when organizations are provided', (done) => {
 		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
+		const mockName = 'Provolone';
 		const mockAuthExp = Math.round(new Date().getTime() / 1000) + 3600;
 		const expectedNotAfter = new Date(mockAuthExp * 1000).toISOString();
 		const myOrganizationId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
@@ -76,6 +78,7 @@ describe('addUserContext', () => {
 		const res = getMockResponse();
 		req.auth = {
 			sub: mockSub,
+			name: mockName,
 			exp: mockAuthExp,
 			organizations: {
 				myOrganization: { id: myOrganizationId },
@@ -139,6 +142,7 @@ describe('addUserContext', () => {
 		const res = getMockResponse();
 		req.auth = {
 			sub: 'this is not a UUID',
+			name: 'Qualita',
 		};
 
 		loadTableMetrics('users')
@@ -168,7 +172,9 @@ describe('addUserContext', () => {
 	it('does not create or assign a user when no keycloakUserId is provided', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
-		req.auth = {};
+		req.auth = {
+			name: 'Robert',
+		};
 
 		loadTableMetrics('users')
 			.then(({ count: baselineUserCount }) => {

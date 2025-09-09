@@ -46,6 +46,7 @@ describe('/tasks/baseFieldsCopy', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+				keycloakUserName: 'Henry',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 

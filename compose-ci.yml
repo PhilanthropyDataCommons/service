@@ -1,0 +1,281 @@
+# Exposes an instance of the PDC API with dependencies such as Keycloak
+#
+# Intended uses:
+# - Automated tests for PDC apps that call the PDC backend
+# - Local development of PDC apps that call the PDC backend
+#
+# What it does automatically:
+# 1. Creates docker volumes for databases and S3
+# 2. Creates databases and an S3 bucket
+# 3. Initializes a Keycloak from scratch with clients, users, and an admin group
+# 4. Synchronizes base fields in the PDC backend if `PDC_SYNC_URL` is in `.env`
+#
+# What you should do manually to use for local development:
+# 1. Add `hosts` entries to 127.0.0.x for `pdc-s3`, `pdc-auth`, and `pdc-api`.
+# 2. Set `PDC_SYNC_URL` in a `.env` file for base field synchronization.
+#
+# To start from scratch, deleting data from previous runs:
+# - `sudo docker compose -f compose-ci.yml down --remove-orphans --volumes`
+# - `sudo docker compose -f compose-ci.yml up --remove-orphans`
+#
+# To start while keeping data from a previous run:
+# - `sudo docker compose -f compose-ci.yml down --remove-orphans`
+# - `sudo docker compose -f compose-ci.yml up --remove-orphans`
+#
+# JSON messages from `pdc-api    |` should appear when all is ready (~1-2 mins)
+#
+# To see the API, visit http://pdc-api:3030 in a browser.
+#
+# All three users have password "password".
+# An admin user: dev@pdc.local
+# A non-admin user: user@pdc.local
+# A service account user can get tokens with clientId=pdc-dev-ingest, see below
+#
+# To get up-to-date docker images (including the PDC service image):
+# `sudo docker compose -f compose-ci.yml pull`
+volumes:
+  s3:
+    external: false
+  db:
+    external: false
+services:
+  # There is no great way to avoid root-owned volumes except an init container
+  # which itself runs as root, sets user/group on volumes, then exits.
+  # I suppose it could be part of post_start, but there is no guarantee that the
+  # command will run before the server attempts to start, whereas this way does
+  # have such a guarantee.
+  init-volumes:
+    image: docker.io/debian:latest
+    volumes:
+      - s3:/data/s3
+      - db:/data/db
+    command:
+      - /bin/sh
+      - -ecx
+      - |
+        chown ${UID:-1000}:${GID:-${UID:-1000}} -R /data/s3
+        chown 999:999 -R /data/db
+  pdc-s3:
+    image: docker.io/minio/minio:latest
+    user: ${UID:-1000}:${GID:-${UID:-1000}}
+    ports:
+      - '9300:9300'
+      - '9301:9301'
+    environment:
+      MINIO_ROOT_USER: s3key
+      MINIO_ROOT_PASSWORD: s3secret
+    volumes:
+      - s3:/data/s3
+    command:
+      ['server', '--address', ':9300', '--console-address', ':9301', '/data/s3']
+    post_start:
+      # Post-start hook runs right away and yet has no timing guarantee.
+      # Sleep to give the server a chance to start then add an alias and bucket.
+      - command:
+          - /bin/sh
+          - -ecx
+          - |
+            sleep 2
+            mc alias set pdc http://pdc-s3:9300/ s3key s3secret
+            mc mb pdc/service --ignore-existing
+        user: ${UID:-1000}
+    healthcheck:
+      # Check for the above-created bucket to exist.
+      test: ['CMD', 'mc', 'stat', 'pdc/service']
+      interval: 4s
+    restart: always
+    depends_on:
+      init-volumes:
+        condition: service_completed_successfully
+  pdc-api:
+    image: ghcr.io/philanthropydatacommons/service:latest
+    # The image contains user 902
+    user: 902:902
+    ports:
+      - '3030:3030'
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3030
+      PGHOST: pdc-databases
+      PGUSER: pdc
+      PGPASSWORD: pdc
+      PGDATABASE: pdc
+      PGPORT: 5454
+      AUTH_SERVER_ISSUER: 'http://pdc-auth:8780/realms/pdc'
+      OPENAPI_DOCS_AUTH_CLIENT_ID: pdc-openapi-docs
+      S3_ACCESS_KEY_ID: s3key
+      S3_ACCESS_SECRET: s3secret
+      S3_ENDPOINT: 'http://pdc-s3:9300'
+      S3_PATH_STYLE: false
+      S3_REGION: us-east-1
+      S3_BUCKET: pdc/service
+    healthcheck:
+      test: ['CMD', 'curl', '--fail', 'http://localhost:3030']
+      interval: 10s
+    depends_on:
+      pdc-databases:
+        condition: service_healthy
+      pdc-s3:
+        condition: service_healthy
+      pdc-auth:
+        condition: service_healthy
+    restart: always
+    # Add PDC_SYNC_URL to `.env` to have the below script sync base fields.
+    post_start:
+      - command:
+          - /bin/bash
+          - -ecx
+          - |
+            while ! curl 'http://localhost:3030'; do sleep 3; done
+            # Get a JWT and use it to sync base fields.
+            curl -d 'client_id=pdc-dev-ingest' \
+            -d 'client_secret=password' \
+            -d 'grant_type=client_credentials' \
+            http://pdc-auth:8780/realms/pdc/protocol/openid-connect/token \
+            | grep -E -o '"access_token":\s*"[a-zA-Z0-9\._-]+",' \
+            | sed -E 's/"access_token":\s*"([a-zA-Z0-9\._-]+)",/\1/g' \
+            > /tmp/jwt
+            curl -X POST http://localhost:3030/tasks/baseFieldsCopy \
+            -H 'Content-type: application/json' \
+            -H "Authorization: Bearer $(cat /tmp/jwt)" \
+            -d '{"pdcApiUrl": "'${PDC_SYNC_URL:-http://localhost:3030}'"}'
+        user: '999'
+  pdc-databases:
+    image: docker.io/postgres:17
+    environment:
+      POSTGRES_USER: pdc
+      POSTGRES_PASSWORD: pdc
+      POSTGRES_INITDB_ARGS: '--username=pdc --allow-group-access'
+      PGDATA: /data/db
+    # The image contains user 999
+    user: 999:999
+    shm_size: 128mb
+    volumes:
+      - db:/data/db
+    post_start:
+      # Sleep to give the server a chance to start then add a Keycloak DB.
+      - command:
+          - /bin/sh
+          - -ecx
+          - |
+            sleep 8
+            # The following conditionally creates the db in case of persistence
+            echo "select 'create database keycloak owner pdc' where not exists (select from pg_database where datname = 'keycloak')\gexec" | psql -U pdc -p 5454 -d postgres
+        user: '999'
+    healthcheck:
+      # Wait for the Keycloak DB to be available.
+      test:
+        [
+          'CMD',
+          'psql',
+          '-U',
+          'pdc',
+          '-d',
+          'keycloak',
+          '-p',
+          '5454',
+          '-c',
+          'select 1;',
+        ]
+      interval: 15s
+    restart: always
+    command: ['postgres', '-p', '5454']
+    depends_on:
+      init-volumes:
+        condition: service_completed_successfully
+  pdc-auth:
+    image: docker.io/keycloak/keycloak:latest
+    user: ${UID:-1000}:${GID:-${UID:-1000}}
+    ports:
+      - '8780:8780'
+      - '9790:9790'
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: 'jdbc:postgresql://pdc-databases:5454/keycloak'
+      KC_DB_USERNAME: pdc
+      KC_DB_PASSWORD: pdc
+      KC_HEALTH_ENABLED: true
+      KC_HTTP_PORT: 8780
+      KC_HTTP_MANAGEMENT_PORT: 9790
+    healthcheck:
+      test: |
+        /bin/sh
+        -ec
+        /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
+        /opt/keycloak/bin/kcadm.sh get http://localhost:9790/health
+      interval: 15s
+    command: ['start-dev']
+    depends_on:
+      pdc-databases:
+        condition: service_healthy
+    post_start:
+      - command:
+          - /bin/bash
+          - -ecx
+          - |
+            # Sleep to give the server a chance to start then add a Realm.
+            # Thanks to https://stackoverflow.com/a/19866239 for tcp approach.
+            while ! timeout 1 bash -c 'cat < /dev/null > /dev/tcp/localhost/8780'; do sleep 10; done
+            # Avoid 'Failed to get lock on /opt/keycloak/.keycloak/kcadm.config'
+            sleep 10
+            cd /opt/keycloak/bin
+            ./kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
+            # If we already have a plain user (which is next-to-last step), then
+            # this script likely ran already due to volume persistence, so exit.
+            ./kcadm.sh get-roles -r pdc --uusername 'user@pdc.local' && exit 0
+            ./kcadm.sh create realms -s realm=pdc -s enabled=true \
+            -s loginWithEmailAllowed=true -s registrationEmailAsUsername=true \
+            -s organizationsEnabled=true
+            ./kcadm.sh create users -r pdc -s username='dev@pdc.local' \
+            -s email='dev@pdc.local' -s emailVerified='true' \
+            -s enabled='true' -s firstName='developer' \
+            -s lastName='admin' -i > admin_user_id
+            ./kcadm.sh set-password -r pdc \
+            --username 'dev@pdc.local' --new-password 'password'
+            ./kcadm.sh create roles -r pdc \
+            -s name='pdc-admin' \
+            -s description='PDC Users with application-level Administrative privileges.' \
+            -i > admin_role_id
+            ./kcadm.sh create groups -r pdc \
+            -s name='pdc-admin' -i > admin_group_id
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin --rolename pdc-admin
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin \
+            --cclientid realm-management --rolename manage-users
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin \
+            --cclientid realm-management --rolename query-users
+            ./kcadm.sh add-roles -r pdc --gname pdc-admin \
+            --cclientid realm-management --rolename view-users
+            ./kcadm.sh update -r pdc \
+            users/$(cat admin_user_id)/groups/$(cat admin_group_id) \
+            -s realm=pdc -s userId=$(cat admin_user_id) \
+            -s groupId=$(cat admin_group_id) -n
+            ./kcadm.sh create clients -r pdc \
+            -s clientId='pdc-openapi-docs' \
+            -s name='PDC OpenAPI Documentation' \
+            -s rootUrl='http://pdc-api:3030' \
+            -s redirectUris='["http://pdc-api:3030/*"]' \
+            -s publicClient='true' -s standardFlowEnabled='true'
+            ./kcadm.sh create clients -r pdc \
+            -s clientId='pdc-dev-ingest' \
+            -s name='Developer Ingest Client with Service Account' \
+            -s publicClient='false' -s standardFlowEnabled='false' \
+            -s implicitFlowEnabled='false' \
+            -s directAccessGrantsEnabled='false' \
+            -s serviceAccountsEnabled='true' \
+            -s secret='password' -i > dev_client_id
+            ./kcadm.sh get \
+            realms/pdc/clients/$(cat dev_client_id)/service-account-user \
+            --fields id --format csv --noquotes > dev_service_account_id
+            ./kcadm.sh update -r pdc \
+            users/$(cat dev_service_account_id)/groups/$(cat admin_group_id) \
+            -s realm=pdc -s userId=$(cat dev_service_account_id) \
+            -s groupId=$(cat admin_group_id) -n
+            ./kcadm.sh create users -r pdc \
+            -s username='user@pdc.local' -s email='user@pdc.local' \
+            -s emailVerified='true' -s enabled='true' \
+            -s firstName='unprivileged' -s lastName='user' -i > plain_user_id
+            ./kcadm.sh set-password -r pdc \
+            --username 'user@pdc.local' --new-password 'password'
+        user: ${UID:-1000}

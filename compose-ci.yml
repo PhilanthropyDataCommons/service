@@ -10,11 +10,10 @@
 # 1. Creates docker volumes for databases and S3
 # 2. Creates databases and an S3 bucket
 # 3. Initializes a Keycloak from scratch with clients, users, and an admin group
-# 4. Synchronizes base fields in the PDC backend if `PDC_SYNC_URL` is in `.env`
+# 4. Synchronizes base fields from central PDC to the PDC backend
 #
 # What you should do manually to use for local development:
-# 1. Add `hosts` entries to 127.0.0.x for `pdc-s3`, `pdc-auth`, and `pdc-api`.
-# 2. Set `PDC_SYNC_URL` in a `.env` file for base field synchronization.
+# Add `hosts` entries to 127.0.0.x for `pdc-s3`, `pdc-auth`, and `pdc-api`.
 #
 # To start from scratch, deleting data from previous runs:
 # - `sudo docker compose -f compose-ci.yml down --remove-orphans --volumes`
@@ -35,6 +34,14 @@
 #
 # To get up-to-date docker images (including the PDC service image):
 # `sudo docker compose -f compose-ci.yml pull`
+#
+# By default, this script synchronizes base fields from the central PDC. The
+# reason for this unusual reference to a PDC instance is base fields are
+# critical data for software that calls the PDC API. If docker images have
+# already been pulled and for some reason this needs to run in an environment
+# without internet access, set `PDC_SYNC_URL=http://localhost:3030` in a `.env`
+# file next to this script, and the script will not synchronize from the central
+# PDC instance.
 volumes:
   s3:
     external: false
@@ -122,7 +129,6 @@ services:
       pdc-auth:
         condition: service_healthy
     restart: always
-    # Add PDC_SYNC_URL to `.env` to have the below script sync base fields.
     post_start:
       - command:
           - /bin/bash
@@ -140,7 +146,7 @@ services:
             curl -X POST http://localhost:3030/tasks/baseFieldsCopy \
             -H 'Content-type: application/json' \
             -H "Authorization: Bearer $(cat /tmp/jwt)" \
-            -d '{"pdcApiUrl": "'${PDC_SYNC_URL:-http://localhost:3030}'"}'
+            -d '{"pdcApiUrl": "'${PDC_SYNC_URL:-https://api.philanthropydatacommons.org}'"}'
         user: '999'
   pdc-databases:
     image: docker.io/postgres:17

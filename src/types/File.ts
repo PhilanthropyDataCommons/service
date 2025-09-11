@@ -1,5 +1,4 @@
 import { ajv } from '../ajv';
-import type { Uuid } from './Uuid';
 import type { KeycloakId } from './KeycloakId';
 import type { JSONSchemaType } from 'ajv';
 import type { PresignedPost } from '@aws-sdk/s3-presigned-post';
@@ -10,7 +9,7 @@ import type { S3Bucket } from './S3Bucket';
 interface File {
 	readonly id: Id;
 	name: string;
-	readonly storageKey: Uuid;
+	readonly storageKey: string;
 	mimeType: string;
 	size: number;
 	readonly s3BucketName: string;

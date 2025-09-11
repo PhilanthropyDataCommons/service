@@ -1,20 +1,20 @@
-const logout = (system: { specSelectors: { specJson: () => Map<string,Map<string,Map<string,Map<string,Map<string,Map<string,string>>>>>> }}) => ({
+const logout = (system: { 
+	getState: () => Map<string,Map<string,Map<string,Map<string,Map<string,Map<string,string>>>>>>,
+	specSelectors: { specJson: () => Map<string,Map<string,Map<string,Map<string,Map<string,Map<string,string>>>>>> }
+}) => ({
 	statePlugins: {
 		auth: {
 			wrapActions: {
 				logout: (originalFunction: (keys: string[]) => Map<string,object>) => (keys: string[]) => {
 					const spec = system.specSelectors.specJson();
-					const components = spec.get('components');
-					const securitySchemes = components?.get('securitySchemes');
-					const auth = securitySchemes?.get('auth');
-					const flows = auth?.get('flows');
-					const authorizationCode = flows?.get('authorizationCode');
-					const logoutUrl = authorizationCode?.get('logoutUrl');
+					const logoutUrl = spec.get('components')?.get('securitySchemes')?.get('auth')?.get('flows')?.get('authorizationCode')?.get('logoutUrl');
+					const idToken = system.getState()?.get('auth')?.get('authorized')?.get('auth')?.get('token')?.get('id_token');
 					const currentLocation = window.location.href;
+					const result = originalFunction(keys);
 					if (logoutUrl !== undefined) {
-						window.location.href = `${logoutUrl}?post_logout_redirect_uri=${currentLocation}&id_token_hint=yada`;
+						window.location.href = `${logoutUrl}?&id_token_hint=${idToken}&post_logout_redirect_uri=${currentLocation}`;
 					}
-					return originalFunction(keys);
+					return result;
 				}
 			}
 		}

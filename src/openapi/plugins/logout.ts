@@ -10,8 +10,9 @@ const logout = (system: { specSelectors: { specJson: () => Map<string,Map<string
 					const flows = auth?.get('flows');
 					const authorizationCode = flows?.get('authorizationCode');
 					const logoutUrl = authorizationCode?.get('logoutUrl');
+					const currentLocation = window.location.href;
 					if (logoutUrl !== undefined) {
-						window.location.href = logoutUrl;
+						window.location.href = `${logoutUrl}?post_logout_redirect_uri=${currentLocation}&id_token_hint=yada`;
 					}
 					return originalFunction(keys);
 				}

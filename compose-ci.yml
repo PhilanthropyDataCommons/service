@@ -4,6 +4,8 @@
 # - Automated tests for PDC apps that call the PDC backend
 # - Local development of PDC apps that call the PDC backend
 #
+# Requires Docker Compose version 2.30.0 or later (for `post_start` hooks).
+#
 # What it does automatically:
 # 1. Creates docker volumes for databases and S3
 # 2. Creates databases and an S3 bucket

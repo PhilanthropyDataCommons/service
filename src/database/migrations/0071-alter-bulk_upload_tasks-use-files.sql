@@ -1,3 +1,9 @@
+-- Change files.storage_key from uuid to text.
+-- Although we prefer the more constrained `uuid` type, the existing
+-- bulk upload data has some files stored in non-uuid-key formats.
+ALTER TABLE files
+ALTER COLUMN storage_key TYPE text;
+
 -- Add nullable file reference columns first
 ALTER TABLE bulk_upload_tasks
 ADD COLUMN proposals_data_file_id integer REFERENCES files (id)
@@ -28,7 +34,7 @@ INSERT INTO files (
 )
 SELECT
 	but.file_name,
-	but.source_key::uuid,
+	but.source_key,
 	'text/csv' AS mime_type,
 	but.file_size,
 	current_setting('app.s3_bucket') AS s3_bucket_name,
@@ -41,7 +47,7 @@ UPDATE bulk_upload_tasks
 SET proposals_data_file_id = files.id
 FROM files
 WHERE
-	bulk_upload_tasks.source_key::uuid = files.storage_key
+	bulk_upload_tasks.source_key = files.storage_key
 	AND bulk_upload_tasks.created_by = files.created_by;
 
 -- Add NOT NULL constraint on proposals_data_file_id

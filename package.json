@@ -3,10 +3,10 @@
 	"description": "The service backend for the Philanthropy Data Commons",
 	"main": "dist/index.js",
 	"scripts": {
-		"build": "npm run cleanup && npm run build:node && npm run build:assets && npm run build:openapi",
+		"build": "npm run cleanup && npm run build:openapi && npm run build:node && npm run build:assets",
 		"build:node": "tsc -p tsconfig.json",
 		"build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" \"src/public/**\" dist",
-		"build:openapi": "tsc -p src/openapi/tsconfig.json && redocly bundle \"src/openapi/api.json\" -o \"dist/openapi/api.json\"",
+		"build:openapi": "tsc -p src/openapi/plugins/tsconfig.json && redocly bundle \"src/openapi/api.json\" -o \"dist/openapi/api.json\"",
 		"cleanup": "rimraf dist",
 		"format": "npm run format:eslint && npm run format:prettier && npm run format:sqlfluff",
 		"format:eslint": "eslint ./src --fix || true",

@@ -1,8 +1,0 @@
-{
-	"extends": "../../tsconfig.json",
-	"compilerOptions": {
-		"lib": ["dom"],
-	},
-	"include": ["plugins/**/*.ts"],
-	"exclude": ["**/*.test.ts", "**/src/test"]
-}

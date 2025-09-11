@@ -1,5 +1,6 @@
 import { ajv } from '../ajv';
 import { shortCodeSchema } from './ShortCode';
+import { idSchema } from './Id';
 import type { TaskStatus } from './TaskStatus';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
@@ -7,17 +8,18 @@ import type { Source } from './Source';
 import type { KeycloakId } from './KeycloakId';
 import type { ShortCode } from './ShortCode';
 import type { Funder } from './Funder';
+import type { File } from './File';
+import type { Id } from './Id';
 
 interface BulkUploadTask {
 	readonly id: number;
-	sourceId: number;
+	sourceId: Id;
 	readonly source: Source;
-	fileName: string;
-	sourceKey: string;
+	proposalsDataFileId: Id;
+	readonly proposalsDataFile: File;
 	funderShortCode: ShortCode;
 	readonly funder: Funder;
 	readonly status: TaskStatus;
-	readonly fileSize?: number | null; // see https://github.com/ajv-validator/ajv/issues/2163
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
 }
@@ -25,27 +27,18 @@ interface BulkUploadTask {
 type WritableBulkUploadTask = Writable<BulkUploadTask>;
 
 type InternallyWritableBulkUploadTask = WritableBulkUploadTask &
-	Pick<BulkUploadTask, 'status' | 'fileSize'>;
+	Pick<BulkUploadTask, 'status'>;
 
 const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 	type: 'object',
 	properties: {
-		sourceId: {
-			type: 'integer',
-		},
-		fileName: {
-			type: 'string',
-			pattern: '^.+\\.csv$',
-		},
-		sourceKey: {
-			type: 'string',
-			minLength: 1,
-		},
+		sourceId: idSchema,
+		proposalsDataFileId: idSchema,
 		funderShortCode: {
 			...shortCodeSchema,
 		},
 	},
-	required: ['sourceId', 'fileName', 'sourceKey', 'funderShortCode'],
+	required: ['sourceId', 'proposalsDataFileId', 'funderShortCode'],
 };
 
 const isWritableBulkUploadTask = ajv.compile(writableBulkUploadTaskSchema);

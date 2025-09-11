@@ -14,6 +14,12 @@
 #
 # What you should do manually to use for local development:
 # Add `hosts` entries to 127.0.0.x for `pdc-s3`, `pdc-auth`, and `pdc-api`.
+# For example, see this command showing the relevant hosts entries on GNU/Linux:
+#
+# $ tail -n 3 /etc/hosts
+# 127.0.0.1 pdc-api
+# 127.0.0.1 pdc-auth
+# 127.0.0.1 pdc-s3
 #
 # To start from scratch, deleting data from previous runs:
 # - `sudo docker compose -f compose-ci.yml down --remove-orphans --volumes`

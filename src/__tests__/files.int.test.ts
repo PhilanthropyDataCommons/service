@@ -39,14 +39,13 @@ describe('/files', () => {
 				mimeType: 'application/pdf',
 				size: 1024,
 				storageKey: expectString(),
-				bucketName: expectString(),
-				bucketRegion: expectString(),
+				s3BucketName: process.env.S3_BUCKET,
 				createdBy: expectString(),
 				createdAt: expectTimestamp(),
 			});
 		});
 
-		it('populates bucketName and bucketRegion from environment variables', async () => {
+		it('references an s3_bucket record', async () => {
 			const result = await request(app)
 				.post('/files')
 				.type('application/json')
@@ -59,12 +58,11 @@ describe('/files', () => {
 				.expect(201);
 
 			expect(result.body).toMatchObject({
-				bucketName: process.env.S3_BUCKET,
-				bucketRegion: process.env.S3_REGION,
+				s3BucketName: process.env.S3_BUCKET,
 			});
 		});
 
-		it('ignores user-provided bucketName and bucketRegion values', async () => {
+		it('ignores user-provided s3BucketName values', async () => {
 			const result = await request(app)
 				.post('/files')
 				.type('application/json')
@@ -73,22 +71,15 @@ describe('/files', () => {
 					name: 'malicious-test.pdf',
 					mimeType: 'application/pdf',
 					size: 256,
-					bucketName: 'user-provided-bucket',
-					bucketRegion: 'user-provided-region',
+					s3BucketName: 'some-user-provided-bucket-value',
 				})
 				.expect(201);
 
-			// Should use environment variables, not user-provided values
 			expect(result.body).toMatchObject({
-				bucketName: process.env.S3_BUCKET,
-				bucketRegion: process.env.S3_REGION,
-			});
-			// Ensure each field individually rejects user input
-			expect(result.body).not.toMatchObject({
-				bucketName: 'user-provided-bucket',
+				s3BucketName: process.env.S3_BUCKET,
 			});
 			expect(result.body).not.toMatchObject({
-				bucketRegion: 'user-provided-region',
+				s3BucketName: 'some-user-provided-bucket-value',
 			});
 		});
 

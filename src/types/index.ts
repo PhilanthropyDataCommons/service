@@ -35,6 +35,7 @@ export * from './ProcessBulkUploadJobPayload';
 export * from './Proposal';
 export * from './ProposalFieldValue';
 export * from './ProposalVersion';
+export * from './S3Bucket';
 export * from './ShortCode';
 export * from './Source';
 export * from './TableMetrics';

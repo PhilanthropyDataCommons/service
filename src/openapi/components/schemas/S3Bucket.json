@@ -1,0 +1,27 @@
+{
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string",
+			"readOnly": true,
+			"example": "my-s3-bucket"
+		},
+		"region": {
+			"type": "string",
+			"readOnly": true,
+			"example": "us-east-1"
+		},
+		"endpoint": {
+			"type": "string",
+			"readOnly": true,
+			"example": "https://s3.us-east-1.amazonaws.com"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true,
+			"example": "2023-10-01T12:00:00.000Z"
+		}
+	},
+	"required": ["name", "region", "endpoint", "createdAt"]
+}

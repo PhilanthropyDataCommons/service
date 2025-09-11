@@ -4,15 +4,17 @@ import type { KeycloakId } from './KeycloakId';
 import type { JSONSchemaType } from 'ajv';
 import type { PresignedPost } from '@aws-sdk/s3-presigned-post';
 import type { Writable } from './Writable';
+import type { Id } from './Id';
+import type { S3Bucket } from './S3Bucket';
 
 interface File {
-	readonly id: number;
+	readonly id: Id;
 	name: string;
 	readonly storageKey: Uuid;
 	mimeType: string;
 	size: number;
-	readonly bucketName: string;
-	readonly bucketRegion: string;
+	readonly s3BucketName: string;
+	readonly s3Bucket: S3Bucket;
 	readonly presignedPost?: PresignedPost;
 	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
@@ -20,8 +22,7 @@ interface File {
 
 type WritableFile = Writable<File>;
 
-type InternallyWritableFile = WritableFile &
-	Pick<File, 'bucketName' | 'bucketRegion'>;
+type InternallyWritableFile = WritableFile & Pick<File, 's3BucketName'>;
 
 const writableFileSchema: JSONSchemaType<WritableFile> = {
 	type: 'object',

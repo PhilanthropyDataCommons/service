@@ -9,5 +9,5 @@
 		"noUncheckedIndexedAccess": true
 	},
 	"files": ["logout.ts"],
-	"exclude": ["**/*"]
+	"include": ["logout.ts"],
 }

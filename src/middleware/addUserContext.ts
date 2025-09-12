@@ -11,6 +11,7 @@ import {
 	isKeycloakId,
 	keycloakIdToString,
 	stringToKeycloakId,
+	getAuthNameFromRequest,
 } from '../types';
 import { getSystemUser } from '../config';
 import { InputValidationError } from '../errors';
@@ -27,6 +28,7 @@ const addUserContext = (
 	next: NextFunction,
 ): void => {
 	const keycloakUserId = getAuthSubFromRequest(req);
+	const keycloakUserName = getAuthNameFromRequest(req);
 	const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
 	const jwtExpiration = getJwtExpFromRequest(req) ?? JWT_NEVER_EXPIRES;
 	const systemUser = getSystemUser();
@@ -48,8 +50,19 @@ const addUserContext = (
 		return;
 	}
 
+	if (typeof keycloakUserName !== 'string') {
+		next(
+			new InputValidationError(
+				'auth subject must have a name',
+				isKeycloakId.errors ?? [],
+			),
+		);
+		return;
+	}
+
 	createOrUpdateUser(db, null, {
 		keycloakUserId: stringToKeycloakId(keycloakUserId),
+		keycloakUserName,
 	})
 		.then(() => {
 			const createEphemeralUserGroupAssociationPromises =

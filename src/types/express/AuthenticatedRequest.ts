@@ -14,6 +14,12 @@ interface ObjectWithAuthWithSub {
 	};
 }
 
+interface ObjectWithAuthWithName {
+	auth: {
+		name: string;
+	};
+}
+
 interface ObjectWithAuthWithExp {
 	auth: {
 		exp: number;
@@ -45,6 +51,22 @@ const objectWithAuthWithSubSchema: JSONSchemaType<ObjectWithAuthWithSub> = {
 				},
 			},
 			required: ['sub'],
+		},
+	},
+	required: ['auth'],
+};
+
+const objectWithAuthWithNameSchema: JSONSchemaType<ObjectWithAuthWithName> = {
+	type: 'object',
+	properties: {
+		auth: {
+			type: 'object',
+			properties: {
+				name: {
+					type: 'string',
+				},
+			},
+			required: ['name'],
 		},
 	},
 	required: ['auth'],
@@ -117,6 +139,8 @@ const objectWithAuthWithOrganizationsSchema: JSONSchemaType<ObjectWithAuthWithOr
 
 const hasAuthWithSub = ajv.compile(objectWithAuthWithSubSchema);
 
+const hasAuthWithName = ajv.compile(objectWithAuthWithNameSchema);
+
 const isObjectWithAuthWithExp = ajv.compile(objectWithAuthWithExpSchema);
 
 const hasAuthWithRealmAccessRoles = ajv.compile(
@@ -129,6 +153,9 @@ const isObjectWithAuthWithOrganizations = ajv.compile(
 
 const getAuthSubFromRequest = (req: Request): string | undefined =>
 	hasAuthWithSub(req) ? req.auth.sub : undefined;
+
+const getAuthNameFromRequest = (req: Request): string | undefined =>
+	hasAuthWithName(req) ? req.auth.name : undefined;
 
 const getRealmAccessRolesFromRequest = (req: Request): string[] =>
 	hasAuthWithRealmAccessRoles(req) ? req.auth.realm_access.roles : [];
@@ -148,11 +175,18 @@ const hasMeaningfulAuthSub = (req: Request): boolean => {
 	return authSub !== undefined && authSub !== '';
 };
 
+const hasMeaningfulAuthName = (req: Request): boolean => {
+	const authName = getAuthNameFromRequest(req);
+	return authName !== undefined && authName !== '';
+};
+
 export {
 	type AuthenticatedRequest,
+	getAuthNameFromRequest,
 	getAuthSubFromRequest,
 	getRealmAccessRolesFromRequest,
 	getKeycloakOrganizationIdsFromRequest,
 	getJwtExpFromRequest,
 	hasMeaningfulAuthSub,
+	hasMeaningfulAuthName,
 };

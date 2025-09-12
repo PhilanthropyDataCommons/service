@@ -7,6 +7,7 @@ DECLARE
   funder_json JSONB;
   proposals_data_file_json JSONB;
   bulk_upload_logs_json JSONB;
+  attachments_archive_file_json JSONB;
 BEGIN
   SELECT source_to_json(sources.*)
   INTO source_json
@@ -29,12 +30,19 @@ BEGIN
   WHERE bulk_upload_logs.bulk_upload_task_id = bulk_upload_task.id
   ORDER BY created_at DESC;
 
+  SELECT file_to_json(files.*)
+  INTO attachments_archive_file_json
+  FROM files
+  WHERE files.id = bulk_upload_task.attachments_archive_file_id;
+
   RETURN jsonb_build_object(
     'id', bulk_upload_task.id,
     'sourceId', bulk_upload_task.source_id,
     'source', source_json,
     'proposalsDataFileId', bulk_upload_task.proposals_data_file_id,
     'proposalsDataFile', proposals_data_file_json,
+    'attachmentsArchiveFileId', bulk_upload_task.attachments_archive_file_id,
+    'attachmentsArchiveFile', attachments_archive_file_json,
     'funderShortCode', bulk_upload_task.funder_short_code,
 		'funder', funder_json,
     'status', bulk_upload_task.status,

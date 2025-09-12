@@ -72,6 +72,7 @@ const createTestBulkUploadTask = async (
 	const defaultValues = {
 		sourceId: systemSource.id,
 		funderShortCode: systemFunder.shortCode,
+		attachmentsArchiveFileId: null,
 		status: TaskStatus.PENDING,
 	};
 	return await createBulkUploadTask(db, authContext, {

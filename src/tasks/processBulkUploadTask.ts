@@ -24,6 +24,7 @@ import {
 import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
+import type TinyPg from 'tinypg';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
@@ -208,14 +209,19 @@ const getChangemakerNameIndex = (columns: string[]): number =>
 	columns.indexOf(CHANGEMAKER_NAME_SHORT_CODE);
 
 const createOrLoadChangemaker = async (
+	localDb: TinyPg,
 	authContext: AuthContext,
 	writeValues: Omit<WritableChangemaker, 'name'> & { name?: string },
 ): Promise<Changemaker | undefined> => {
 	try {
-		return await loadChangemakerByTaxId(db, authContext, writeValues.taxId);
+		return await loadChangemakerByTaxId(
+			localDb,
+			authContext,
+			writeValues.taxId,
+		);
 	} catch {
 		if (writeValues.name !== undefined) {
-			return await createChangemaker(db, null, {
+			return await createChangemaker(localDb, null, {
 				...writeValues,
 				name: writeValues.name, // This looks silly, but TypeScript isn't guarding `writeValues`, just `writeValues.name`.
 			});
@@ -275,8 +281,11 @@ export const processBulkUploadTask = async (
 	const bulkUploadFile = await downloadFileDataToTemporaryStorage(
 		bulkUploadTask.proposalsDataFile,
 		helpers.logger,
-	).catch(async (err: unknown) => {
+	).catch((err: unknown) => {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
+	});
+
+	if (bulkUploadFile === undefined) {
 		await updateBulkUploadTask(
 			db,
 			null,
@@ -285,9 +294,6 @@ export const processBulkUploadTask = async (
 			},
 			bulkUploadTask.id,
 		);
-	});
-
-	if (bulkUploadFile === undefined) {
 		return;
 	}
 
@@ -328,66 +334,74 @@ export const processBulkUploadTask = async (
 				isAdministrator: false,
 			},
 		};
-		await parser.forEach(async (record: string[]) => {
-			recordNumber++;
-			const proposal = await createProposal(db, userAgentCreateAuthContext, {
-				opportunityId: opportunity.id,
-				externalId: `${recordNumber}`,
-			});
-			const proposalVersion = await createProposalVersion(
-				db,
-				userAgentCreateAuthContext,
-				{
-					proposalId: proposal.id,
-					applicationFormId: applicationForm.id,
-					sourceId: bulkUploadTask.sourceId,
-				},
-			);
 
-			const {
-				[changemakerNameIndex]: changemakerName,
-				[changemakerTaxIdIndex]: changemakerTaxId,
-			} = record;
-			if (changemakerTaxId !== undefined) {
-				const changemaker = await createOrLoadChangemaker(
-					taskRunnerAuthContext,
+		await db.transaction(async (transactionDb) => {
+			await parser.forEach(async (record: string[]) => {
+				recordNumber++;
+				const proposal = await createProposal(
+					transactionDb,
+					userAgentCreateAuthContext,
 					{
-						name: changemakerName,
-						taxId: changemakerTaxId,
-						keycloakOrganizationId: null,
+						opportunityId: opportunity.id,
+						externalId: `${recordNumber}`,
+					},
+				);
+				const proposalVersion = await createProposalVersion(
+					transactionDb,
+					userAgentCreateAuthContext,
+					{
+						proposalId: proposal.id,
+						applicationFormId: applicationForm.id,
+						sourceId: bulkUploadTask.sourceId,
 					},
 				);
 
-				if (changemaker !== undefined) {
-					await createChangemakerProposal(db, null, {
-						changemakerId: changemaker.id,
-						proposalId: proposal.id,
-					});
-				}
-			}
-
-			await allNoLeaks(
-				record.map<Promise<ProposalFieldValue>>(async (fieldValue, index) => {
-					const { [index]: applicationFormField } = applicationFormFields;
-					if (applicationFormField === undefined) {
-						throw new Error(
-							'There is no form field associated with this column',
-						);
-					}
-					const isValid = fieldValueIsValid(
-						fieldValue,
-						applicationFormField.baseField.dataType,
+				const {
+					[changemakerNameIndex]: changemakerName,
+					[changemakerTaxIdIndex]: changemakerTaxId,
+				} = record;
+				if (changemakerTaxId !== undefined) {
+					const changemaker = await createOrLoadChangemaker(
+						transactionDb,
+						taskRunnerAuthContext,
+						{
+							name: changemakerName,
+							taxId: changemakerTaxId,
+							keycloakOrganizationId: null,
+						},
 					);
-					return await createProposalFieldValue(db, null, {
-						proposalVersionId: proposalVersion.id,
-						applicationFormFieldId: applicationFormField.id,
-						value: fieldValue,
-						position: index,
-						isValid,
-						goodAsOf: null,
-					});
-				}),
-			);
+
+					if (changemaker !== undefined) {
+						await createChangemakerProposal(transactionDb, null, {
+							changemakerId: changemaker.id,
+							proposalId: proposal.id,
+						});
+					}
+				}
+
+				await allNoLeaks(
+					record.map<Promise<ProposalFieldValue>>(async (fieldValue, index) => {
+						const { [index]: applicationFormField } = applicationFormFields;
+						if (applicationFormField === undefined) {
+							throw new Error(
+								'There is no form field associated with this column',
+							);
+						}
+						const isValid = fieldValueIsValid(
+							fieldValue,
+							applicationFormField.baseField.dataType,
+						);
+						return await createProposalFieldValue(transactionDb, null, {
+							proposalVersionId: proposalVersion.id,
+							applicationFormFieldId: applicationFormField.id,
+							value: fieldValue,
+							position: index,
+							isValid,
+							goodAsOf: null,
+						});
+					}),
+				);
+			});
 		});
 	} catch (err) {
 		helpers.logger.info('Bulk upload has failed', { err });

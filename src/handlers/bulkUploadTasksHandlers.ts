@@ -26,6 +26,24 @@ import {
 import { addProcessBulkUploadJob } from '../jobQueue';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
+import type { AuthContext } from '../types';
+
+const validateFileOwnership = async (
+	authContext: AuthContext,
+	fileId: number,
+	errorMessage: string,
+): Promise<void> => {
+	try {
+		await loadFileIfCreatedBy(
+			db,
+			authContext,
+			fileId,
+			authContext.user.keycloakUserId,
+		);
+	} catch (error: unknown) {
+		throw new UnprocessableEntityError(errorMessage);
+	}
+};
 
 const postBulkUploadTask = async (
 	req: Request,
@@ -43,23 +61,29 @@ const postBulkUploadTask = async (
 		);
 	}
 
-	const { sourceId, funderShortCode, proposalsDataFileId } = body;
+	const {
+		sourceId,
+		funderShortCode,
+		proposalsDataFileId,
+		attachmentsArchiveFileId,
+	} = body;
 	if (!authContextHasFunderPermission(req, funderShortCode, Permission.EDIT)) {
 		throw new UnprocessableEntityError(
 			'You do not have write permissions on a funder with the specified short code.',
 		);
 	}
 
-	try {
-		await loadFileIfCreatedBy(
-			db,
+	await validateFileOwnership(
+		req,
+		proposalsDataFileId,
+		'You must be the owner of the file specified by proposalsDataFileId.',
+	);
+
+	if (attachmentsArchiveFileId !== null) {
+		await validateFileOwnership(
 			req,
-			proposalsDataFileId,
-			req.user.keycloakUserId,
-		);
-	} catch (error: unknown) {
-		throw new UnprocessableEntityError(
-			'You must be the owner of the file specified by proposalsDataFileId.',
+			attachmentsArchiveFileId,
+			'You must be the owner of the file specified by attachmentsArchiveFileId.',
 		);
 	}
 
@@ -68,6 +92,7 @@ const postBulkUploadTask = async (
 			sourceId,
 			funderShortCode,
 			proposalsDataFileId,
+			attachmentsArchiveFileId,
 			status: TaskStatus.PENDING,
 		});
 		await addProcessBulkUploadJob({

@@ -17,6 +17,8 @@ interface BulkUploadTask {
 	readonly source: Source;
 	proposalsDataFileId: Id;
 	readonly proposalsDataFile: File;
+	attachmentsArchiveFileId: Id | null;
+	readonly attachmentsArchiveFile: File | null;
 	funderShortCode: ShortCode;
 	readonly funder: Funder;
 	readonly status: TaskStatus;
@@ -34,11 +36,24 @@ const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 	properties: {
 		sourceId: idSchema,
 		proposalsDataFileId: idSchema,
+		attachmentsArchiveFileId: {
+			...idSchema,
+			/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+			 * This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
+			 * See: https://github.com/ajv-validator/ajv/issues/2163
+			 */
+			nullable: true as false,
+		},
 		funderShortCode: {
 			...shortCodeSchema,
 		},
 	},
-	required: ['sourceId', 'proposalsDataFileId', 'funderShortCode'],
+	required: [
+		'sourceId',
+		'proposalsDataFileId',
+		'attachmentsArchiveFileId',
+		'funderShortCode',
+	],
 };
 
 const isWritableBulkUploadTask = ajv.compile(writableBulkUploadTaskSchema);

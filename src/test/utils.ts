@@ -28,9 +28,12 @@ export const generateNextWithAssertions = (
 export const getTestUserKeycloakUserId = (): KeycloakId =>
 	stringToKeycloakId('11111111-1111-1111-1111-111111111111'); // This value is not a reference, it's just a static GUID
 
+export const getTestUserKeycloakUserName = (): string => 'Moe';
+
 export const createTestUser = async (): Promise<User> =>
 	await createOrUpdateUser(db, null, {
 		keycloakUserId: getTestUserKeycloakUserId(),
+		keycloakUserName: getTestUserKeycloakUserName(),
 	});
 
 export const loadTestUser = async (): Promise<User> =>

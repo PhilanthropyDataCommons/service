@@ -35,6 +35,7 @@ describe('loadUserByKeycloakUserId', () => {
 		const ephemeralExpiration = new Date(Date.now() + 3600000).toISOString();
 		const user = await createOrUpdateUser(db, null, {
 			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
+			keycloakUserName: 'Bob',
 		});
 		const changemakerKeycloakOrganizationId =
 			'b10aaea1-4558-422b-85bf-073bfc9cd05f';
@@ -216,8 +217,8 @@ describe('loadUserByKeycloakUserId', () => {
 		);
 
 		expect(populatedUser).toEqual({
+			...user,
 			createdAt: expectTimestamp(),
-			keycloakUserId: user.keycloakUserId,
 			permissions: {
 				changemaker: {
 					1: expectArrayContaining([
@@ -257,6 +258,7 @@ describe('loadUserByKeycloakUserId', () => {
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const user = await createOrUpdateUser(db, null, {
 			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
+			keycloakUserName: 'Carol',
 		});
 
 		// Associate the user with a changemaker group
@@ -343,8 +345,8 @@ describe('loadUserByKeycloakUserId', () => {
 		);
 
 		expect(populatedUser).toEqual({
+			...user,
 			createdAt: expectTimestamp(),
-			keycloakUserId: user.keycloakUserId,
 			permissions: {
 				changemaker: {},
 				dataProvider: {},

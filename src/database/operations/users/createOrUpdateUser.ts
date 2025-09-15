@@ -5,6 +5,6 @@ const createOrUpdateUser = generateCreateOrUpdateItemOperation<
 	User,
 	WritableUser,
 	[]
->('users.insertOrUpdateOne', ['keycloakUserId'], []);
+>('users.insertOrUpdateOne', ['keycloakUserId', 'keycloakUserName'], []);
 
 export { createOrUpdateUser };

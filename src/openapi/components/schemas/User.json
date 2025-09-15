@@ -5,6 +5,11 @@
 			"type": "string",
 			"example": "550e8400-e29b-41d4-a716-446655440000"
 		},
+		"keycloakUserName": {
+			"type": "string",
+			"description": "The full name of the user (described in OIDC 1.0 'name' standard claim) as of most recent logged-in service activity.",
+			"example": "John Doe"
+		},
 		"permissions": {
 			"type": "object",
 			"readOnly": true,

@@ -1,11 +1,15 @@
 import { requireAdministratorRole } from '../requireAdministratorRole';
 import { UnauthorizedError } from '../../errors';
-import { getTestUserKeycloakUserId } from '../../test/utils';
+import {
+	getTestUserKeycloakUserId,
+	getTestUserKeycloakUserName,
+} from '../../test/utils';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import type { AuthenticatedRequest, User } from '../../types';
 
 const getMockedUser = (): User => ({
 	keycloakUserId: getTestUserKeycloakUserId(),
+	keycloakUserName: getTestUserKeycloakUserName(),
 	createdAt: '',
 	permissions: {
 		changemaker: {},

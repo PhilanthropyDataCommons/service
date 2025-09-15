@@ -470,6 +470,7 @@ describe('/proposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+				keycloakUserName: 'Dave',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
@@ -521,6 +522,7 @@ describe('/proposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+				keycloakUserName: 'Erin',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
@@ -565,6 +567,7 @@ describe('/proposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+				keycloakUserName: 'Fulton',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
@@ -836,6 +839,7 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
+				keycloakUserName: 'Georgina',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);

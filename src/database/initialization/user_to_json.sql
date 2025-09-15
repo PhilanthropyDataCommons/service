@@ -153,6 +153,7 @@ BEGIN
 
   RETURN jsonb_build_object(
     'keycloakUserId', "user".keycloak_user_id,
+    'keycloakUserName', "user".keycloak_user_name,
     'permissions', permissions_json,
     'createdAt', "user".created_at
   );

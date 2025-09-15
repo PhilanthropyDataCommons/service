@@ -71,6 +71,7 @@ describe('requireAuthentication', () => {
 		const res = getMockResponse();
 		req.auth = {
 			sub: 'test@example.com',
+			name: 'Norbert',
 		};
 		const nextMock = jest.fn();
 		requireAuthentication(req, res, nextMock);
@@ -87,11 +88,12 @@ describe('requireAuthentication', () => {
 		/* eslint-enable @typescript-eslint/no-unsafe-member-access */
 	});
 
-	it('calls next when when an auth value is provided', async () => {
+	it('calls next when an auth value is provided', async () => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.auth = {
-			sub: 'test@example.com',
+			sub: 'test2@example.com',
+			name: 'Peter',
 		};
 		req.role = {
 			isAdministrator: false,

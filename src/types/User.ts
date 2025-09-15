@@ -9,6 +9,7 @@ import type { OpportunityPermission } from './OpportunityPermission';
 
 interface User {
 	keycloakUserId: KeycloakId;
+	keycloakUserName: string;
 	readonly permissions: {
 		changemaker: Record<string, Permission[]>;
 		dataProvider: Record<string, Permission[]>;
@@ -22,6 +23,9 @@ const userSchema: JSONSchemaType<User> = {
 	type: 'object',
 	properties: {
 		keycloakUserId: keycloakIdSchema,
+		keycloakUserName: {
+			type: 'string',
+		},
 		permissions: {
 			type: 'object',
 			properties: {
@@ -64,7 +68,7 @@ const userSchema: JSONSchemaType<User> = {
 			type: 'string',
 		},
 	},
-	required: ['keycloakUserId', 'permissions', 'createdAt'],
+	required: ['keycloakUserId', 'keycloakUserName', 'permissions', 'createdAt'],
 };
 
 type WritableUser = Writable<User>;

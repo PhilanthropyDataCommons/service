@@ -32,6 +32,7 @@ import {
 const createAdditionalTestUser = async () =>
 	await createOrUpdateUser(db, null, {
 		keycloakUserId: stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
+		keycloakUserName: 'Call me Ishmael',
 	});
 
 describe('/users', () => {
@@ -53,7 +54,7 @@ describe('/users', () => {
 				total: userCount,
 				entries: [
 					{
-						keycloakUserId: testUser.keycloakUserId,
+						...testUser,
 						permissions: {
 							changemaker: {},
 							dataProvider: {},
@@ -124,7 +125,7 @@ describe('/users', () => {
 				total: userCount,
 				entries: [
 					{
-						keycloakUserId: testUser.keycloakUserId,
+						...testUser,
 						permissions: {
 							changemaker: {
 								[changemaker.id]: [Permission.VIEW],
@@ -176,7 +177,7 @@ describe('/users', () => {
 				total: userCount,
 				entries: [
 					{
-						keycloakUserId: testUser.keycloakUserId,
+						...testUser,
 						permissions: {
 							changemaker: {},
 							dataProvider: {},
@@ -234,6 +235,7 @@ describe('/users', () => {
 				await p;
 				await createOrUpdateUser(db, null, {
 					keycloakUserId: uuid,
+					keycloakUserName: 'Alice',
 				});
 			}, Promise.resolve());
 			const { count: userCount } = await loadTableMetrics('users');
@@ -251,6 +253,7 @@ describe('/users', () => {
 				entries: [
 					{
 						keycloakUserId: uuids[14],
+						keycloakUserName: 'Alice',
 						permissions: {
 							changemaker: {},
 							dataProvider: {},
@@ -261,6 +264,7 @@ describe('/users', () => {
 					},
 					{
 						keycloakUserId: uuids[13],
+						keycloakUserName: 'Alice',
 						permissions: {
 							changemaker: {},
 							dataProvider: {},
@@ -271,6 +275,7 @@ describe('/users', () => {
 					},
 					{
 						keycloakUserId: uuids[12],
+						keycloakUserName: 'Alice',
 						permissions: {
 							changemaker: {},
 							dataProvider: {},
@@ -281,6 +286,7 @@ describe('/users', () => {
 					},
 					{
 						keycloakUserId: uuids[11],
+						keycloakUserName: 'Alice',
 						permissions: {
 							changemaker: {},
 							dataProvider: {},
@@ -291,6 +297,7 @@ describe('/users', () => {
 					},
 					{
 						keycloakUserId: uuids[10],
+						keycloakUserName: 'Alice',
 						permissions: {
 							changemaker: {},
 							dataProvider: {},

@@ -2,7 +2,10 @@ import createJWKSMock from 'mock-jwks';
 import { issuer } from '../auth/jwtOptions';
 import { nonNullKeycloakIdToString } from '../types';
 import { MS_PER_SECOND } from '../constants';
-import { getTestUserKeycloakUserId } from './utils';
+import {
+	getTestUserKeycloakUserId,
+	getTestUserKeycloakUserName,
+} from './utils';
 import type { JWKSMock } from 'mock-jwks';
 import type { JwtPayload } from 'jsonwebtoken';
 
@@ -39,6 +42,7 @@ const getMockJwt = (
 		realm_access: {
 			roles: settings.roles ?? ['default-roles-pdc'],
 		},
+		name: getTestUserKeycloakUserName(),
 	});
 	return { Authorization: `Bearer ${token}` };
 };

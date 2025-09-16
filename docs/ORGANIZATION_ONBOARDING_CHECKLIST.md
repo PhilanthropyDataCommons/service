@@ -21,6 +21,9 @@ Use https://auth.philanthropydatacommons.org/admin to do these steps.
   - [ ] Uncheck all other Authentication flows
   - [ ] Save, click the "Service accounts roles" tab
   - [ ] Click the link following "To manage detail and group mappings, ..."
+  - [ ] Set a First Name that includes the organization name
+  - [ ] Set a Last Name of "Service Account"
+  - [ ] Click "Save"
   - [ ] Click the "Organizations" tab
   - [ ] Join the service account user to the Keycloak organization
   - [ ] Note/copy the new service account user UUID for use below

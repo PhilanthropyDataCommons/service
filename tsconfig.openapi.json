@@ -8,6 +8,6 @@
 		"resolveJsonModule": true,
 		"noUncheckedIndexedAccess": true
 	},
-	"files": ["logout.ts"],
-	"include": ["logout.ts"],
+	"files": ["src/openapi/plugins/logout.ts"],
+	"include": ["src/openapi/plugins/logout.ts"],
 }

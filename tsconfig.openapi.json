@@ -9,5 +9,5 @@
 		"noUncheckedIndexedAccess": true
 	},
 	"files": ["src/openapi/plugins/logout.ts"],
-	"include": ["src/openapi/plugins/logout.ts"],
+	"include": ["src/openapi/plugins/logout.ts"]
 }

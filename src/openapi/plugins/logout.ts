@@ -6,14 +6,13 @@ const logout = (system: {
 		auth: {
 			wrapActions: {
 				logout: (originalFunction: (keys: string[]) => Map<string,object>) => (keys: string[]) => {
-					const { location } = window as Window;
 					const spec = system.specSelectors.specJson();
 					const logoutUrl = spec.get('components')?.get('securitySchemes')?.get('auth')?.get('flows')?.get('authorizationCode')?.get('logoutUrl');
 					const idToken = system.getState().get('auth')?.get('authorized')?.get('auth')?.get('token')?.get('id_token');
-					const currentLocation = window.location.href;
+					const { href } = window.location;
 					const result = originalFunction(keys);
 					if (logoutUrl !== undefined) {
-						location.href = `${logoutUrl}?&id_token_hint=${idToken}&post_logout_redirect_uri=${currentLocation}`;
+						location.href = `${logoutUrl}?&id_token_hint=${idToken}&post_logout_redirect_uri=${href}`;
 					}
 					return result;
 				}

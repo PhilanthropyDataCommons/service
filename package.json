@@ -5,7 +5,7 @@
 	"scripts": {
 		"build": "npm run cleanup && npm run build:openapi && npm run build:node && npm run build:assets",
 		"build:node": "tsc -p tsconfig.json",
-		"build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" \"src/public/**\" \"src/openapi/plugins/dist/*\" dist",
+		"build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" \"src/public/**\" dist",
 		"build:openapi": "tsc -p tsconfig.openapi.json && redocly bundle \"src/openapi/api.json\" -o \"dist/openapi/api.json\"",
 		"cleanup": "rimraf dist",
 		"format": "npm run format:eslint && npm run format:prettier && npm run format:sqlfluff",

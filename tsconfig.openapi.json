@@ -2,7 +2,7 @@
 	"extends": "@tsconfig/node22/tsconfig.json",
 	"compilerOptions": {
 		"lib": ["dom"],
-		"outDir": "dist",
+		"outDir": "dist/openapi/plugins",
 		"declaration": true,
 		"esModuleInterop": true,
 		"resolveJsonModule": true,

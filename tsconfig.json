@@ -8,5 +8,5 @@
 		"noUncheckedIndexedAccess": true
 	},
 	"include": ["src"],
-	"exclude": ["**/*.test.ts", "**/src/test", "src/openapi/plugins/logout.ts", "src/openapi", "**/src/openapi/**"]
+	"exclude": ["**/*.test.ts", "**/src/test", "src/openapi/plugins/logout.ts"]
 }

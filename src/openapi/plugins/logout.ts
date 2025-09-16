@@ -9,7 +9,7 @@ const logout = (system: {
 					const spec = system.specSelectors.specJson();
 					const logoutUrl = spec.get('components')?.get('securitySchemes')?.get('auth')?.get('flows')?.get('authorizationCode')?.get('logoutUrl');
 					const idToken = system.getState().get('auth')?.get('authorized')?.get('auth')?.get('token')?.get('id_token');
-					const { href } = window.location;
+					const { location: { href } } = window;
 					const result = originalFunction(keys);
 					if (logoutUrl !== undefined) {
 						location.href = `${logoutUrl}?&id_token_hint=${idToken}&post_logout_redirect_uri=${href}`;

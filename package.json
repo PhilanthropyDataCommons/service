@@ -84,8 +84,8 @@
 		"typescript-eslint": "^8.44.0"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.888.0",
-		"@aws-sdk/s3-presigned-post": "^3.888.0",
+		"@aws-sdk/client-s3": "^3.890.0",
+		"@aws-sdk/s3-presigned-post": "^3.890.0",
 		"ajv": "^8.17.1",
 		"ajv-formats": "^3.0.1",
 		"ajv-keywords": "^5.1.0",

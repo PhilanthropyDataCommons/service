@@ -1,6 +1,10 @@
 {
 	"get": {
 		"operationId": "getApplicationForms",
+		"parameters": [
+			{ "$ref": "../components/parameters/pageParam.json" },
+			{ "$ref": "../components/parameters/countParam.json" }
+		],
 		"summary": "Gets a list of application forms.",
 		"tags": ["Application Forms"],
 		"security": [

@@ -282,6 +282,8 @@ services:
             ./kcadm.sh get \
             realms/pdc/clients/$(cat dev_client_id)/service-account-user \
             --fields id --format csv --noquotes > dev_service_account_id
+            ./kcadm.sh update -r pdc users/$(cat dev_service_account_id) \
+            -s attributes='{"firstName": "Development Admin", "lastName": "Service Account"}'
             ./kcadm.sh update -r pdc \
             users/$(cat dev_service_account_id)/groups/$(cat admin_group_id) \
             -s realm=pdc -s userId=$(cat dev_service_account_id) \

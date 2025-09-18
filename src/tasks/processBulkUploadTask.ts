@@ -9,14 +9,13 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	createOpportunity,
-	createChangemaker,
 	createChangemakerProposal,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
 	loadBaseFields,
 	loadBulkUploadTask,
-	loadChangemakerByTaxId,
+	loadOrCreateChangemaker,
 	updateBulkUploadTask,
 	loadSystemUser,
 	loadUserByKeycloakUserId,
@@ -25,17 +24,14 @@ import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
 import { SINGLE_STEP } from '../constants';
-import type TinyPg from 'tinypg';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
-	ApplicationFormField,
 	BulkUploadTask,
-	Changemaker,
 	ProposalFieldValue,
-	WritableChangemaker,
 	AuthContext,
 	File,
+	WritableApplicationFormField,
 } from '../types';
 
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
@@ -165,14 +161,14 @@ const assertBulkUploadTaskCsvIsValid = async (
 	await assertCsvContainsRowsOfEqualLength(csvPath);
 };
 
-const createApplicationFormFieldsForBulkUploadTask = async (
+const generateWritableApplicationFormFields = async (
 	csvPath: string,
 	applicationFormId: number,
-): Promise<ApplicationFormField[]> => {
+): Promise<WritableApplicationFormField[]> => {
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
 	const baseFields = await loadBaseFields();
-	const applicationFormFields = await allNoLeaks(
-		shortCodes.map(async (shortCode, index) => {
+	const writableApplicationFormFields = shortCodes.map(
+		(shortCode, index): WritableApplicationFormField => {
 			const baseField = baseFields.find(
 				(candidateBaseField) => candidateBaseField.shortCode === shortCode,
 			);
@@ -181,17 +177,16 @@ const createApplicationFormFieldsForBulkUploadTask = async (
 					`No base field could be found with shortCode "${shortCode}"`,
 				);
 			}
-			const applicationFormField = await createApplicationFormField(db, null, {
+			return {
 				applicationFormId,
 				baseFieldShortCode: baseField.shortCode,
 				position: index,
 				label: baseField.label,
 				instructions: null,
-			});
-			return applicationFormField;
-		}),
+			};
+		},
 	);
-	return applicationFormFields;
+	return writableApplicationFormFields;
 };
 
 const getChangemakerTaxIdIndex = (columns: string[]): number =>
@@ -199,28 +194,6 @@ const getChangemakerTaxIdIndex = (columns: string[]): number =>
 
 const getChangemakerNameIndex = (columns: string[]): number =>
 	columns.indexOf(CHANGEMAKER_NAME_SHORT_CODE);
-
-const createOrLoadChangemaker = async (
-	localDb: TinyPg,
-	authContext: AuthContext,
-	writeValues: Omit<WritableChangemaker, 'name'> & { name?: string },
-): Promise<Changemaker | undefined> => {
-	try {
-		return await loadChangemakerByTaxId(
-			localDb,
-			authContext,
-			writeValues.taxId,
-		);
-	} catch {
-		if (writeValues.name !== undefined) {
-			return await createChangemaker(localDb, authContext, {
-				...writeValues,
-				name: writeValues.name, // This looks silly, but TypeScript isn't guarding `writeValues`, just `writeValues.name`.
-			});
-		}
-	}
-	return undefined;
-};
 
 // THIS FUNCTION IS A MONKEY PATCH
 // Really we should be passing the jwt of the calling user so that an auth context can be re-generated
@@ -316,12 +289,21 @@ export const processBulkUploadTask = async (
 		const applicationForm = await createApplicationForm(db, taskAuthContext, {
 			opportunityId: opportunity.id,
 		});
-
-		const applicationFormFields =
-			await createApplicationFormFieldsForBulkUploadTask(
+		const proposedApplicationFormFields =
+			await generateWritableApplicationFormFields(
 				bulkUploadFile.path,
 				applicationForm.id,
 			);
+		const applicationFormFields = await allNoLeaks(
+			proposedApplicationFormFields.map(
+				async (writableApplicationFormField) =>
+					await createApplicationFormField(
+						db,
+						taskAuthContext,
+						writableApplicationFormField,
+					),
+			),
+		);
 		const csvReadStream = fs.createReadStream(bulkUploadFile.path);
 		const STARTING_ROW = 2;
 		const parser = parse({
@@ -352,22 +334,19 @@ export const processBulkUploadTask = async (
 					[changemakerTaxIdIndex]: changemakerTaxId,
 				} = record;
 				if (changemakerTaxId !== undefined) {
-					const changemaker = await createOrLoadChangemaker(
+					const changemaker = await loadOrCreateChangemaker(
 						transactionDb,
 						taskAuthContext,
 						{
-							name: changemakerName,
+							name: changemakerName ?? 'Unnamed Organization',
 							taxId: changemakerTaxId,
 							keycloakOrganizationId: null,
 						},
 					);
-
-					if (changemaker !== undefined) {
-						await createChangemakerProposal(transactionDb, taskAuthContext, {
-							changemakerId: changemaker.id,
-							proposalId: proposal.id,
-						});
-					}
+					await createChangemakerProposal(transactionDb, taskAuthContext, {
+						changemakerId: changemaker.id,
+						proposalId: proposal.id,
+					});
 				}
 
 				await allNoLeaks(

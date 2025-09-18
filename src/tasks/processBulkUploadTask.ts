@@ -9,14 +9,13 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	createOpportunity,
-	createChangemaker,
 	createChangemakerProposal,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
 	loadBaseFields,
 	loadBulkUploadTask,
-	loadChangemakerByTaxId,
+	loadOrCreateChangemaker,
 	updateBulkUploadTask,
 	loadSystemUser,
 	loadUserByKeycloakUserId,
@@ -24,18 +23,14 @@ import {
 import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
-import type TinyPg from 'tinypg';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
-	ApplicationFormField,
 	BulkUploadTask,
-	Opportunity,
-	Changemaker,
 	ProposalFieldValue,
-	WritableChangemaker,
 	AuthContext,
 	File,
+	WritableApplicationFormField,
 } from '../types';
 
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
@@ -165,22 +160,14 @@ const assertBulkUploadTaskCsvIsValid = async (
 	await assertCsvContainsRowsOfEqualLength(csvPath);
 };
 
-const createOpportunityForBulkUploadTask = async (
-	bulkUploadTask: BulkUploadTask,
-): Promise<Opportunity> =>
-	await createOpportunity(db, null, {
-		title: `Bulk Upload (${bulkUploadTask.createdAt})`,
-		funderShortCode: bulkUploadTask.funderShortCode,
-	});
-
-const createApplicationFormFieldsForBulkUploadTask = async (
+const generateWritableApplicationFormFields = async (
 	csvPath: string,
 	applicationFormId: number,
-): Promise<ApplicationFormField[]> => {
+): Promise<WritableApplicationFormField[]> => {
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
 	const baseFields = await loadBaseFields();
-	const applicationFormFields = await allNoLeaks(
-		shortCodes.map(async (shortCode, index) => {
+	const writableApplicationFormFields = shortCodes.map(
+		(shortCode, index): WritableApplicationFormField => {
 			const baseField = baseFields.find(
 				(candidateBaseField) => candidateBaseField.shortCode === shortCode,
 			);
@@ -189,17 +176,16 @@ const createApplicationFormFieldsForBulkUploadTask = async (
 					`No base field could be found with shortCode "${shortCode}"`,
 				);
 			}
-			const applicationFormField = await createApplicationFormField(db, null, {
+			return {
 				applicationFormId,
 				baseFieldShortCode: baseField.shortCode,
 				position: index,
 				label: baseField.label,
 				instructions: null,
-			});
-			return applicationFormField;
-		}),
+			};
+		},
 	);
-	return applicationFormFields;
+	return writableApplicationFormFields;
 };
 
 const getChangemakerTaxIdIndex = (columns: string[]): number =>
@@ -208,37 +194,24 @@ const getChangemakerTaxIdIndex = (columns: string[]): number =>
 const getChangemakerNameIndex = (columns: string[]): number =>
 	columns.indexOf(CHANGEMAKER_NAME_SHORT_CODE);
 
-const createOrLoadChangemaker = async (
-	localDb: TinyPg,
-	authContext: AuthContext,
-	writeValues: Omit<WritableChangemaker, 'name'> & { name?: string },
-): Promise<Changemaker | undefined> => {
-	try {
-		return await loadChangemakerByTaxId(
-			localDb,
-			authContext,
-			writeValues.taxId,
-		);
-	} catch {
-		if (writeValues.name !== undefined) {
-			return await createChangemaker(localDb, null, {
-				...writeValues,
-				name: writeValues.name, // This looks silly, but TypeScript isn't guarding `writeValues`, just `writeValues.name`.
-			});
-		}
-	}
-	return undefined;
-};
-
 // THIS FUNCTION IS A MONKEY PATCH
 // Really we should be passing the jwt of the calling user so that an auth context can be re-generated
 // for the task runner.  Currently this means the task runner is functioning as an administrative system user.
 // This creates risk where a task could behave in ways with escalated privileges, although currently
 // the implementation of the bulk upload processer should be safe.
-const loadTaskRunnerAuthContext = async (): Promise<AuthContext> => ({
+const loadSystemUserAuthContext = async (): Promise<AuthContext> => ({
 	user: await loadSystemUser(db, null),
 	role: {
 		isAdministrator: true,
+	},
+});
+
+const loadTaskAuthContext = async (
+	bulkUploadTask: BulkUploadTask,
+): Promise<AuthContext> => ({
+	user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
+	role: {
+		isAdministrator: false,
 	},
 });
 
@@ -252,15 +225,17 @@ export const processBulkUploadTask = async (
 		});
 		return;
 	}
-	const taskRunnerAuthContext = await loadTaskRunnerAuthContext();
+	const systemUserAuthContext = await loadSystemUserAuthContext();
 	helpers.logger.debug(
 		`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
 	);
 	const bulkUploadTask = await loadBulkUploadTask(
 		db,
-		taskRunnerAuthContext,
+		systemUserAuthContext,
 		payload.bulkUploadId,
 	);
+
+	const taskAuthContext = await loadTaskAuthContext(bulkUploadTask);
 	if (bulkUploadTask.status !== TaskStatus.PENDING) {
 		helpers.logger.warn(
 			'Bulk upload cannot be processed because it is not in a PENDING state',
@@ -271,7 +246,7 @@ export const processBulkUploadTask = async (
 
 	await updateBulkUploadTask(
 		db,
-		null,
+		taskAuthContext,
 		{
 			status: TaskStatus.IN_PROGRESS,
 		},
@@ -288,7 +263,7 @@ export const processBulkUploadTask = async (
 	if (bulkUploadFile === undefined) {
 		await updateBulkUploadTask(
 			db,
-			null,
+			taskAuthContext,
 			{
 				status: TaskStatus.FAILED,
 			},
@@ -306,17 +281,28 @@ export const processBulkUploadTask = async (
 
 	try {
 		await assertBulkUploadTaskCsvIsValid(bulkUploadFile.path);
-		const opportunity =
-			await createOpportunityForBulkUploadTask(bulkUploadTask);
-		const applicationForm = await createApplicationForm(db, null, {
+		const opportunity = await createOpportunity(db, taskAuthContext, {
+			title: `Bulk Upload (${bulkUploadTask.createdAt})`,
+			funderShortCode: bulkUploadTask.funderShortCode,
+		});
+		const applicationForm = await createApplicationForm(db, taskAuthContext, {
 			opportunityId: opportunity.id,
 		});
-
-		const applicationFormFields =
-			await createApplicationFormFieldsForBulkUploadTask(
+		const proposedApplicationFormFields =
+			await generateWritableApplicationFormFields(
 				bulkUploadFile.path,
 				applicationForm.id,
 			);
+		const applicationFormFields = await allNoLeaks(
+			proposedApplicationFormFields.map(
+				async (writableApplicationFormField) =>
+					await createApplicationFormField(
+						db,
+						taskAuthContext,
+						writableApplicationFormField,
+					),
+			),
+		);
 		const csvReadStream = fs.createReadStream(bulkUploadFile.path);
 		const STARTING_ROW = 2;
 		const parser = parse({
@@ -325,30 +311,16 @@ export const processBulkUploadTask = async (
 		csvReadStream.pipe(parser);
 		let recordNumber = 0;
 
-		// This is a monkey patch to create an "auth context" for the sole purpose
-		// of populating `createdBy`.  This is shallow, and if we ever update our create
-		// queries to require a full auth context, this will not be sufficient.
-		const userAgentCreateAuthContext = {
-			user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
-			role: {
-				isAdministrator: false,
-			},
-		};
-
 		await db.transaction(async (transactionDb) => {
 			await parser.forEach(async (record: string[]) => {
 				recordNumber++;
-				const proposal = await createProposal(
-					transactionDb,
-					userAgentCreateAuthContext,
-					{
-						opportunityId: opportunity.id,
-						externalId: `${recordNumber}`,
-					},
-				);
+				const proposal = await createProposal(transactionDb, taskAuthContext, {
+					opportunityId: opportunity.id,
+					externalId: `${recordNumber}`,
+				});
 				const proposalVersion = await createProposalVersion(
 					transactionDb,
-					userAgentCreateAuthContext,
+					taskAuthContext,
 					{
 						proposalId: proposal.id,
 						applicationFormId: applicationForm.id,
@@ -361,22 +333,20 @@ export const processBulkUploadTask = async (
 					[changemakerTaxIdIndex]: changemakerTaxId,
 				} = record;
 				if (changemakerTaxId !== undefined) {
-					const changemaker = await createOrLoadChangemaker(
+					const changemaker = await loadOrCreateChangemaker(
 						transactionDb,
-						taskRunnerAuthContext,
+						taskAuthContext,
 						{
-							name: changemakerName,
+							name: changemakerName ?? 'Unnamed Organization',
 							taxId: changemakerTaxId,
 							keycloakOrganizationId: null,
 						},
 					);
 
-					if (changemaker !== undefined) {
-						await createChangemakerProposal(transactionDb, null, {
-							changemakerId: changemaker.id,
-							proposalId: proposal.id,
-						});
-					}
+					await createChangemakerProposal(transactionDb, taskAuthContext, {
+						changemakerId: changemaker.id,
+						proposalId: proposal.id,
+					});
 				}
 
 				await allNoLeaks(
@@ -391,14 +361,18 @@ export const processBulkUploadTask = async (
 							fieldValue,
 							applicationFormField.baseField.dataType,
 						);
-						return await createProposalFieldValue(transactionDb, null, {
-							proposalVersionId: proposalVersion.id,
-							applicationFormFieldId: applicationFormField.id,
-							value: fieldValue,
-							position: index,
-							isValid,
-							goodAsOf: null,
-						});
+						return await createProposalFieldValue(
+							transactionDb,
+							taskAuthContext,
+							{
+								proposalVersionId: proposalVersion.id,
+								applicationFormFieldId: applicationFormField.id,
+								value: fieldValue,
+								position: index,
+								isValid,
+								goodAsOf: null,
+							},
+						);
 					}),
 				);
 			});
@@ -420,7 +394,7 @@ export const processBulkUploadTask = async (
 	if (bulkUploadHasFailed) {
 		await updateBulkUploadTask(
 			db,
-			null,
+			taskAuthContext,
 			{
 				status: TaskStatus.FAILED,
 			},
@@ -429,7 +403,7 @@ export const processBulkUploadTask = async (
 	} else {
 		await updateBulkUploadTask(
 			db,
-			null,
+			taskAuthContext,
 			{
 				status: TaskStatus.COMPLETED,
 			},

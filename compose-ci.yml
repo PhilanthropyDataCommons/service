@@ -104,8 +104,8 @@ services:
         condition: service_completed_successfully
   pdc-api:
     image: ghcr.io/philanthropydatacommons/service:latest
-    # The image contains user 902
-    user: 902:902
+    # The image contains user 1002
+    user: 1002:1002
     ports:
       - '3030:3030'
     environment:

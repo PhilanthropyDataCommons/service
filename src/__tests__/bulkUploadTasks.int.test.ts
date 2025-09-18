@@ -326,6 +326,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceId: systemSource.id,
 				funderShortCode: systemFunder.shortCode,
 				proposalsDataFileId: proposalsDataFile.id,
+				attachmentsArchiveFileId: null,
 			};
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
@@ -462,6 +463,7 @@ describe('/tasks/bulkUploads', () => {
 			const testData: Omit<WritableBulkUploadTask, 'proposalsDataFileId'> = {
 				sourceId: systemSource.id,
 				funderShortCode: systemFunder.shortCode,
+				attachmentsArchiveFileId: null,
 			};
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
@@ -493,6 +495,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceId: systemSource.id,
 				funderShortCode: systemFunder.shortCode,
 				proposalsDataFileId: 'not a file id',
+				attachmentsArchiveFileId: null,
 			};
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
@@ -523,6 +526,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceId: systemSource.id,
 				funderShortCode: systemFunder.shortCode,
 				proposalsDataFileId: 'not a file id',
+				attachmentsArchiveFileId: null,
 			};
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
@@ -558,6 +562,7 @@ describe('/tasks/bulkUploads', () => {
 				sourceId: systemSource.id,
 				funderShortCode: systemFunder.shortCode,
 				proposalsDataFileId: fileOwnedByAnotherUser.id,
+				attachmentsArchiveFileId: null,
 			};
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
@@ -601,17 +606,18 @@ describe('/tasks/bulkUploads', () => {
 				anotherUserAuthContext,
 			);
 
+			const testData: WritableBulkUploadTask = {
+				sourceId: systemSource.id,
+				funderShortCode: systemFunder.shortCode,
+				proposalsDataFileId: proposalsDataFile.id,
+				attachmentsArchiveFileId: attachmentsArchiveFileOwnedByAnotherUser.id,
+			};
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
 				.post('/tasks/bulkUploads/')
 				.type('application/json')
 				.set(authHeader)
-				.send({
-					sourceId: systemSource.id,
-					funderShortCode: systemFunder.shortCode,
-					proposalsDataFileId: proposalsDataFile.id,
-					attachmentsArchiveFileId: attachmentsArchiveFileOwnedByAnotherUser.id,
-				})
+				.send(testData)
 				.expect(422);
 			const after = await loadTableMetrics('bulk_upload_tasks');
 

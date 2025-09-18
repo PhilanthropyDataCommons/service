@@ -23,7 +23,12 @@ import {
 	mockJwtWithoutSub as authHeaderWithNoSub,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { Permission, TaskStatus, keycloakIdToString } from '../types';
+import {
+	Permission,
+	TaskStatus,
+	type WritableBulkUploadTask,
+	keycloakIdToString,
+} from '../types';
 
 describe('/tasks/bulkUploads', () => {
 	describe('GET /', () => {
@@ -308,16 +313,17 @@ describe('/tasks/bulkUploads', () => {
 			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 
+			const testData: WritableBulkUploadTask = {
+				sourceId: systemSource.id,
+				funderShortCode: systemFunder.shortCode,
+				proposalsDataFileId: proposalsDataFile.id,
+			};
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
 				.post('/tasks/bulkUploads/')
 				.type('application/json')
 				.set(authHeader)
-				.send({
-					sourceId: systemSource.id,
-					funderShortCode: systemFunder.shortCode,
-					proposalsDataFileId: proposalsDataFile.id,
-				})
+				.send(testData)
 				.expect(201);
 			const after = await loadTableMetrics('bulk_upload_tasks');
 
@@ -356,16 +362,17 @@ describe('/tasks/bulkUploads', () => {
 				permission: Permission.MANAGE,
 			});
 
+			const testData: WritableBulkUploadTask = {
+				sourceId: systemSource.id,
+				funderShortCode: systemFunder.shortCode,
+				proposalsDataFileId: proposalsDataFile.id,
+			};
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
 				.post('/tasks/bulkUploads/')
 				.type('application/json')
 				.set(authHeader)
-				.send({
-					sourceId: systemSource.id,
-					funderShortCode: systemFunder.shortCode,
-					proposalsDataFileId: proposalsDataFile.id,
-				})
+				.send(testData)
 				.expect(422);
 			const after = await loadTableMetrics('bulk_upload_tasks');
 
@@ -379,7 +386,7 @@ describe('/tasks/bulkUploads', () => {
 			expect(after.count).toEqual(0);
 		});
 
-		it('returns 400 bad request when no file name is provided', async () => {
+		it('returns 400 bad request when no proposalDataFileId is provided', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
@@ -390,14 +397,47 @@ describe('/tasks/bulkUploads', () => {
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
 			});
+
+			const testData: Omit<WritableBulkUploadTask, 'proposalsDataFileId'> = {
+				sourceId: systemSource.id,
+				funderShortCode: systemFunder.shortCode,
+			};
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
-				.send({
-					sourceId: systemSource.id,
-					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-				})
+				.send(testData)
+				.expect(400);
+
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('returns 400 bad request when an invalid proposalDataFileId is provided', async () => {
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+			});
+			const testData: Omit<WritableBulkUploadTask, 'proposalsDataFileId'> & {
+				proposalsDataFileId: string;
+			} = {
+				sourceId: systemSource.id,
+				funderShortCode: systemFunder.shortCode,
+				proposalsDataFileId: 'not a file id',
+			};
+			const result = await request(app)
+				.post('/tasks/bulkUploads')
+				.type('application/json')
+				.set(authHeader)
+				.send(testData)
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
@@ -405,7 +445,7 @@ describe('/tasks/bulkUploads', () => {
 			});
 		});
 
-		it('returns 400 bad request when an invalid file name is provided', async () => {
+		it('returns 400 bad request when an invalid proposalDataFileId is provided', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
@@ -416,68 +456,18 @@ describe('/tasks/bulkUploads', () => {
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
 			});
-			const result = await request(app)
-				.post('/tasks/bulkUploads')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					sourceId: systemSource.id,
-					fileName: 'foo.png',
-					sourceKey: '96ddab90-1931-478d-8c02-a1dc80ae01e5-bar',
-				})
-				.expect(400);
-			expect(result.body).toMatchObject({
-				name: 'InputValidationError',
-				details: expectArray(),
-			});
-		});
-
-		it('returns 400 bad request when an invalid source key is provided', async () => {
-			const systemSource = await loadSystemSource(db, null);
-			const systemFunder = await loadSystemFunder(db, null);
-			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			const testData: Omit<WritableBulkUploadTask, 'proposalsDataFileId'> & {
+				proposalsDataFileId: string;
+			} = {
+				sourceId: systemSource.id,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
-			});
+				proposalsDataFileId: 'not a file id',
+			};
 			const result = await request(app)
 				.post('/tasks/bulkUploads')
 				.type('application/json')
 				.set(authHeader)
-				.send({
-					sourceId: systemSource.id,
-					fileName: 'foo.csv',
-					sourceKey: '96dde01e5-bar',
-				})
-				.expect(400);
-			expect(result.body).toMatchObject({
-				name: 'InputValidationError',
-				details: expectArray(),
-			});
-		});
-
-		it('returns 400 bad request when no source key is provided', async () => {
-			const systemSource = await loadSystemSource(db, null);
-			const systemFunder = await loadSystemFunder(db, null);
-			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
-			});
-			const result = await request(app)
-				.post('/tasks/bulkUploads')
-				.type('application/json')
-				.set(authHeader)
-				.send({
-					sourceId: systemSource.id,
-					fileName: 'foo.csv',
-				})
+				.send(testData)
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
@@ -503,16 +493,17 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 			);
 
+			const testData: WritableBulkUploadTask = {
+				sourceId: systemSource.id,
+				funderShortCode: systemFunder.shortCode,
+				proposalsDataFileId: fileOwnedByAnotherUser.id,
+			};
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
 				.post('/tasks/bulkUploads/')
 				.type('application/json')
 				.set(authHeader)
-				.send({
-					sourceId: systemSource.id,
-					funderShortCode: systemFunder.shortCode,
-					proposalsDataFileId: fileOwnedByAnotherUser.id,
-				})
+				.send(testData)
 				.expect(422);
 			const after = await loadTableMetrics('bulk_upload_tasks');
 

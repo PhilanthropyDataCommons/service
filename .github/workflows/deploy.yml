@@ -30,7 +30,7 @@ jobs:
                 "workflowFile": "sdk.yml"
               },
               {
-                "workflowFile": "build.yml"
+                "workflowFile": "docker.yml"
               }
             ]
       - name: Deploy to Digital Ocean Test environment

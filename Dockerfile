@@ -1,6 +1,7 @@
-FROM bitnami/node:22-debian-12
+FROM docker.io/node:22-bookworm-slim
 
-RUN adduser --home /opt/philanthropy-data-commons --uid 902 \
+RUN apt-get update && apt-get install -y curl
+RUN adduser --home /opt/philanthropy-data-commons --uid 1002 \
     --disabled-login web
 
 USER web

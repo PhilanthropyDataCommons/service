@@ -1,4 +1,4 @@
-FROM docker.io/node:22-bookworm-slim
+FROM docker.io/node:24-bookworm-slim
 
 RUN apt-get update && apt-get install -y curl
 RUN adduser --home /opt/philanthropy-data-commons --uid 1002 \

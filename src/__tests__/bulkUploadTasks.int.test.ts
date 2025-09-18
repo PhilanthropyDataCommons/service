@@ -607,17 +607,18 @@ describe('/tasks/bulkUploads', () => {
 				anotherUserAuthContext,
 			);
 
+			const testData: WritableBulkUploadTask = {
+				sourceId: systemSource.id,
+				funderShortCode: systemFunder.shortCode,
+				proposalsDataFileId: proposalsDataFile.id,
+				attachmentsArchiveFileId: attachmentsArchiveFileOwnedByAnotherUser.id,
+			};
 			const before = await loadTableMetrics('bulk_upload_tasks');
 			const result = await request(app)
 				.post('/tasks/bulkUploads/')
 				.type('application/json')
 				.set(authHeader)
-				.send({
-					sourceId: systemSource.id,
-					funderShortCode: systemFunder.shortCode,
-					proposalsDataFileId: proposalsDataFile.id,
-					attachmentsArchiveFileId: attachmentsArchiveFileOwnedByAnotherUser.id,
-				})
+				.send(testData)
 				.expect(422);
 			const after = await loadTableMetrics('bulk_upload_tasks');
 

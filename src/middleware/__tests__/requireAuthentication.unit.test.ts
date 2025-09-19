@@ -13,6 +13,7 @@ describe('requireAuthentication (unit)', () => {
 		req.auth = {
 			sub: '3cbe4293-3dcc-463f-8749-488e189aae5a',
 			exp: mockAuthExp,
+			role: { isAdministrator: false },
 		};
 		let argToNext: unknown = null;
 		requireAuthentication(req, res, (err: unknown) => {

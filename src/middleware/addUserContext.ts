@@ -50,16 +50,6 @@ const addUserContext = (
 		return;
 	}
 
-	if (typeof keycloakUserName !== 'string') {
-		next(
-			new InputValidationError(
-				'auth subject must have a name',
-				isKeycloakId.errors ?? [],
-			),
-		);
-		return;
-	}
-
 	createOrUpdateUser(db, null, {
 		keycloakUserId: stringToKeycloakId(keycloakUserId),
 		keycloakUserName,

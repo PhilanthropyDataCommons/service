@@ -154,8 +154,8 @@ const isObjectWithAuthWithOrganizations = ajv.compile(
 const getAuthSubFromRequest = (req: Request): string | undefined =>
 	hasAuthWithSub(req) ? req.auth.sub : undefined;
 
-const getAuthNameFromRequest = (req: Request): string | undefined =>
-	hasAuthWithName(req) ? req.auth.name : undefined;
+const getAuthNameFromRequest = (req: Request): string | null =>
+	hasAuthWithName(req) ? req.auth.name : null;
 
 const getRealmAccessRolesFromRequest = (req: Request): string[] =>
 	hasAuthWithRealmAccessRoles(req) ? req.auth.realm_access.roles : [];
@@ -175,11 +175,6 @@ const hasMeaningfulAuthSub = (req: Request): boolean => {
 	return authSub !== undefined && authSub !== '';
 };
 
-const hasMeaningfulAuthName = (req: Request): boolean => {
-	const authName = getAuthNameFromRequest(req);
-	return authName !== undefined && authName !== '';
-};
-
 export {
 	type AuthenticatedRequest,
 	getAuthNameFromRequest,
@@ -188,5 +183,4 @@ export {
 	getKeycloakOrganizationIdsFromRequest,
 	getJwtExpFromRequest,
 	hasMeaningfulAuthSub,
-	hasMeaningfulAuthName,
 };

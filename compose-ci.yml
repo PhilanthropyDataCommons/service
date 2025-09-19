@@ -48,11 +48,7 @@
 # without internet access, set `PDC_SYNC_URL=http://localhost:3030` in a `.env`
 # file next to this script, and the script will not synchronize from the central
 # PDC instance.
-volumes:
-  s3:
-    external: false
-  db:
-    external: false
+name: pdc-ci-or-dev
 services:
   # There is no great way to avoid root-owned volumes except an init container
   # which itself runs as root, sets user/group on volumes, then exits.
@@ -60,7 +56,7 @@ services:
   # command will run before the server attempts to start, whereas this way does
   # have such a guarantee.
   init-volumes:
-    image: docker.io/debian:latest
+    image: docker.io/debian:trixie
     volumes:
       - s3:/data/s3
       - db:/data/db
@@ -70,44 +66,17 @@ services:
       - |
         chown ${UID:-1000}:${GID:-${UID:-1000}} -R /data/s3
         chown 999:999 -R /data/db
-  pdc-s3:
-    image: docker.io/minio/minio:latest
-    user: ${UID:-1000}:${GID:-${UID:-1000}}
-    ports:
-      - '9300:9300'
-      - '9301:9301'
-    environment:
-      MINIO_ROOT_USER: s3key
-      MINIO_ROOT_PASSWORD: s3secret
-    volumes:
-      - s3:/data/s3
-    command:
-      ['server', '--address', ':9300', '--console-address', ':9301', '/data/s3']
-    post_start:
-      # Post-start hook runs right away and yet has no timing guarantee.
-      # Sleep to give the server a chance to start then add an alias and bucket.
-      - command:
-          - /bin/sh
-          - -ecx
-          - |
-            sleep 2
-            mc alias set pdc http://pdc-s3:9300/ s3key s3secret
-            mc mb pdc/service --ignore-existing
-        user: ${UID:-1000}
-    healthcheck:
-      # Check for the above-created bucket to exist.
-      test: ['CMD', 'mc', 'stat', 'pdc/service']
-      interval: 4s
-    restart: always
-    depends_on:
-      init-volumes:
-        condition: service_completed_successfully
   pdc-api:
+    # PDC does not tag major versions and uses latest to deploy.
+    # dclint disable-line service-image-require-explicit-tag
     image: ghcr.io/philanthropydatacommons/service:latest
-    # The image contains user 1002
-    user: 1002:1002
-    ports:
-      - '3030:3030'
+    depends_on:
+      pdc-auth:
+        condition: service_healthy
+      pdc-databases:
+        condition: service_healthy
+      pdc-s3:
+        condition: service_healthy
     environment:
       HOST: 0.0.0.0
       PORT: 3030
@@ -124,17 +93,14 @@ services:
       S3_PATH_STYLE: false
       S3_REGION: us-east-1
       S3_BUCKET: pdc/service
+    ports:
+      - '127.0.0.1:3030:3030'
+    restart: always
     healthcheck:
       test: ['CMD', 'curl', '--fail', 'http://localhost:3030']
       interval: 10s
-    depends_on:
-      pdc-databases:
-        condition: service_healthy
-      pdc-s3:
-        condition: service_healthy
-      pdc-auth:
-        condition: service_healthy
-    restart: always
+    # The image contains user 1002
+    user: 1002:1002
     post_start:
       - command:
           - /bin/bash
@@ -154,55 +120,11 @@ services:
             -H "Authorization: Bearer $(cat /tmp/jwt)" \
             -d '{"pdcApiUrl": "'${PDC_SYNC_URL:-https://api.philanthropydatacommons.org}'"}'
         user: '999'
-  pdc-databases:
-    image: docker.io/postgres:17
-    environment:
-      POSTGRES_USER: pdc
-      POSTGRES_PASSWORD: pdc
-      POSTGRES_INITDB_ARGS: '--username=pdc --allow-group-access'
-      PGDATA: /data/db
-    # The image contains user 999
-    user: 999:999
-    shm_size: 128mb
-    volumes:
-      - db:/data/db
-    post_start:
-      # Sleep to give the server a chance to start then add a Keycloak DB.
-      - command:
-          - /bin/sh
-          - -ecx
-          - |
-            sleep 8
-            # The following conditionally creates the db in case of persistence
-            echo "select 'create database keycloak owner pdc' where not exists (select from pg_database where datname = 'keycloak')\gexec" | psql -U pdc -p 5454 -d postgres
-        user: '999'
-    healthcheck:
-      # Wait for the Keycloak DB to be available.
-      test:
-        [
-          'CMD',
-          'psql',
-          '-U',
-          'pdc',
-          '-d',
-          'keycloak',
-          '-p',
-          '5454',
-          '-c',
-          'select 1;',
-        ]
-      interval: 15s
-    restart: always
-    command: ['postgres', '-p', '5454']
-    depends_on:
-      init-volumes:
-        condition: service_completed_successfully
   pdc-auth:
-    image: docker.io/keycloak/keycloak:latest
-    user: ${UID:-1000}:${GID:-${UID:-1000}}
-    ports:
-      - '8780:8780'
-      - '9790:9790'
+    image: docker.io/keycloak/keycloak:26.3
+    depends_on:
+      pdc-databases:
+        condition: service_healthy
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
@@ -213,6 +135,10 @@ services:
       KC_HEALTH_ENABLED: true
       KC_HTTP_PORT: 8780
       KC_HTTP_MANAGEMENT_PORT: 9790
+    ports:
+      - '127.0.0.1:8780:8780'
+      - '127.0.0.1:9790:9790'
+    command: ['start-dev']
     healthcheck:
       test: |
         /bin/sh
@@ -220,10 +146,7 @@ services:
         /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
         /opt/keycloak/bin/kcadm.sh get http://localhost:9790/health
       interval: 15s
-    command: ['start-dev']
-    depends_on:
-      pdc-databases:
-        condition: service_healthy
+    user: ${UID:-1000}:${GID:-${UID:-1000}}
     post_start:
       - command:
           - /bin/bash
@@ -295,3 +218,85 @@ services:
             ./kcadm.sh set-password -r pdc \
             --username 'user@pdc.local' --new-password 'password'
         user: ${UID:-1000}
+  pdc-databases:
+    image: docker.io/postgres:17
+    depends_on:
+      init-volumes:
+        condition: service_completed_successfully
+    volumes:
+      - db:/data/db
+    environment:
+      POSTGRES_USER: pdc
+      POSTGRES_PASSWORD: pdc
+      POSTGRES_INITDB_ARGS: '--username=pdc --allow-group-access'
+      PGDATA: /data/db
+    command: ['postgres', '-p', '5454']
+    restart: always
+    healthcheck:
+      # Wait for the Keycloak DB to be available.
+      test:
+        [
+          'CMD',
+          'psql',
+          '-U',
+          'pdc',
+          '-d',
+          'keycloak',
+          '-p',
+          '5454',
+          '-c',
+          'select 1;',
+        ]
+      interval: 15s
+    # The image contains user 999
+    user: 999:999
+    post_start:
+      # Sleep to give the server a chance to start then add a Keycloak DB.
+      - command:
+          - /bin/sh
+          - -ecx
+          - |
+            sleep 8
+            # The following conditionally creates the db in case of persistence
+            echo "select 'create database keycloak owner pdc' where not exists (select from pg_database where datname = 'keycloak')\gexec" | psql -U pdc -p 5454 -d postgres
+        user: '999'
+    shm_size: 128mb
+  pdc-s3:
+    # minio does not tag major versions so allow latest here.
+    # dclint disable-line service-image-require-explicit-tag
+    image: docker.io/minio/minio:latest
+    depends_on:
+      init-volumes:
+        condition: service_completed_successfully
+    volumes:
+      - s3:/data/s3
+    environment:
+      MINIO_ROOT_USER: s3key
+      MINIO_ROOT_PASSWORD: s3secret
+    ports:
+      - '127.0.0.1:9300:9300'
+      - '127.0.0.1:9301:9301'
+    command:
+      ['server', '--address', ':9300', '--console-address', ':9301', '/data/s3']
+    restart: always
+    healthcheck:
+      # Check for the above-created bucket to exist.
+      test: ['CMD', 'mc', 'stat', 'pdc/service']
+      interval: 4s
+    user: ${UID:-1000}:${GID:-${UID:-1000}}
+    post_start:
+      # Post-start hook runs right away and yet has no timing guarantee.
+      # Sleep to give the server a chance to start then add an alias and bucket.
+      - command:
+          - /bin/sh
+          - -ecx
+          - |
+            sleep 2
+            mc alias set pdc http://pdc-s3:9300/ s3key s3secret
+            mc mb pdc/service --ignore-existing
+        user: ${UID:-1000}
+volumes:
+  s3:
+    external: false
+  db:
+    external: false

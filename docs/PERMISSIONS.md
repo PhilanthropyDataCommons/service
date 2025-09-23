@@ -28,7 +28,10 @@ and how to perform most of these steps follow in this document.
 6. PDC admin grants `manage` permission to changemaker using PDC service.
 7. Changemaker may grant additional permissions using PDC service.
 
+See also a [checklist to onboard organizations].
+
 [integrates the changemaker's IdP]: ./ORGANIZATION_IDP_INTEGRATION.md
+[checklist to onboard organizations]: ./ORGANIZATION_ONBOARDING_CHECKLIST.md
 
 ## Users and Their Keycloak UUIDs
 

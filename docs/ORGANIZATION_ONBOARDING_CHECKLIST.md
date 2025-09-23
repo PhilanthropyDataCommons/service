@@ -38,6 +38,8 @@ Use https://api.philanthropydatacommons.org to do these steps.
 
 Use the organization UUID from above and follow existing naming conventions.
 
+See [permissions documentation](./PERMISSIONS.md) for how to grant permissions.
+
 - [ ] If the organization is a funder, add a funder
   - [ ] Grant the Keycloak organization `view` permission on the funder
   - [ ] Grant a human from the organization `manage` permission on this

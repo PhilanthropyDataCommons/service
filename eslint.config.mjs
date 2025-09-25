@@ -77,7 +77,6 @@ export default defineConfig([
 			// These rules were introduced by recent new rulesets and we violated them.
 			// We will enable them one-by-one alongside any necessary corrections
 			'no-plusplus': 'off',
-			'no-param-reassign': 'off',
 		},
 		settings: {
 			'import/resolver': {
@@ -127,6 +126,16 @@ export default defineConfig([
 
 			// Tests are already 2-3 levels deep in nested callbacks, so we update this rule to 5 instead of 3.
 			'max-nested-callbacks': ['error', 5],
+		},
+	},
+	{
+		files: ['**/middleware/*.ts'],
+
+		rules: {
+			// Express middleware is designed to mutate the request object by adding properties.
+			// This is the standard, expected pattern for middleware that decorates req with
+			// context like user authentication, roles, etc.
+			'no-param-reassign': ['error', { props: false }],
 		},
 	},
 ]);

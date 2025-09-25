@@ -73,6 +73,11 @@ export default defineConfig([
 					caughtErrors: 'none',
 				},
 			],
+
+			// These rules were introduced by recent new rulesets and we violated them.
+			// We will enable them one-by-one alongside any necessary corrections
+			'no-plusplus': 'off',
+			'no-param-reassign': 'off',
 		},
 		settings: {
 			'import/resolver': {

@@ -24,6 +24,7 @@ import {
 import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
+import { SINGLE_STEP } from '../constants';
 import type TinyPg from 'tinypg';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
@@ -337,7 +338,7 @@ export const processBulkUploadTask = async (
 
 		await db.transaction(async (transactionDb) => {
 			await parser.forEach(async (record: string[]) => {
-				recordNumber++;
+				recordNumber += SINGLE_STEP;
 				const proposal = await createProposal(
 					transactionDb,
 					userAgentCreateAuthContext,

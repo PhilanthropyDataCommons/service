@@ -282,37 +282,38 @@ export const processBulkUploadTask = async (
 
 	try {
 		await assertBulkUploadTaskCsvIsValid(bulkUploadFile.path);
-		const opportunity = await createOpportunity(db, taskAuthContext, {
-			title: `Bulk Upload (${bulkUploadTask.createdAt})`,
-			funderShortCode: bulkUploadTask.funderShortCode,
-		});
-		const applicationForm = await createApplicationForm(db, taskAuthContext, {
-			opportunityId: opportunity.id,
-		});
-		const proposedApplicationFormFields =
-			await generateWritableApplicationFormFields(
-				bulkUploadFile.path,
-				applicationForm.id,
-			);
-		const applicationFormFields = await allNoLeaks(
-			proposedApplicationFormFields.map(
-				async (writableApplicationFormField) =>
-					await createApplicationFormField(
-						db,
-						taskAuthContext,
-						writableApplicationFormField,
-					),
-			),
-		);
-		const csvReadStream = fs.createReadStream(bulkUploadFile.path);
-		const STARTING_ROW = 2;
-		const parser = parse({
-			from: STARTING_ROW,
-		});
-		csvReadStream.pipe(parser);
-		let recordNumber = 0;
 
 		await db.transaction(async (transactionDb) => {
+			const opportunity = await createOpportunity(transactionDb, taskAuthContext, {
+				title: `Bulk Upload (${bulkUploadTask.createdAt})`,
+				funderShortCode: bulkUploadTask.funderShortCode,
+			});
+			const applicationForm = await createApplicationForm(transactionDb, taskAuthContext, {
+				opportunityId: opportunity.id,
+			});
+			const proposedApplicationFormFields =
+				await generateWritableApplicationFormFields(
+					bulkUploadFile.path,
+					applicationForm.id,
+				);
+			const applicationFormFields = await allNoLeaks(
+				proposedApplicationFormFields.map(
+					async (writableApplicationFormField) =>
+						await createApplicationFormField(
+							transactionDb,
+							taskAuthContext,
+							writableApplicationFormField,
+						),
+				),
+			);
+			const csvReadStream = fs.createReadStream(bulkUploadFile.path);
+			const STARTING_ROW = 2;
+			const parser = parse({
+				from: STARTING_ROW,
+			});
+			csvReadStream.pipe(parser);
+			let recordNumber = 0;
+
 			await parser.forEach(async (record: string[]) => {
 				recordNumber += SINGLE_STEP;
 				const proposal = await createProposal(transactionDb, taskAuthContext, {

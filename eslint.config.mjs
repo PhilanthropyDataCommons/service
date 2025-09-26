@@ -124,4 +124,14 @@ export default defineConfig([
 			'max-nested-callbacks': ['error', 5],
 		},
 	},
+	{
+		files: ['**/middleware/*.ts'],
+
+		rules: {
+			// Express middleware is designed to mutate the request object by adding properties.
+			// This is the standard, expected pattern for middleware that decorates req with
+			// context like user authentication, roles, etc.
+			'no-param-reassign': ['error', { props: false }],
+		},
+	},
 ]);

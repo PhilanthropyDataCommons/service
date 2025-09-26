@@ -62,3 +62,12 @@ jobs:
           node-version-file: .node-version
       - run: npm ci
       - run: npm run lint:tsc
+  docker-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+      - run: npm ci
+      - run: npm run lint:docker-compose

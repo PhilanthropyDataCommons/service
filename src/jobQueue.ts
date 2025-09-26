@@ -1,4 +1,5 @@
 import { Logger, quickAddJob, run, runMigrations } from 'graphile-worker';
+import { TEN_MINUTES_IN_MS } from './constants/time';
 import { copyBaseFields, processBulkUploadTask } from './tasks';
 import { getLogger } from './logger';
 import { db } from './database/db';
@@ -11,7 +12,6 @@ import type {
 const logger = getLogger(__filename);
 
 const CONCURRENT_JOB_COUNT = 5;
-const POLL_INTERVAL_MS = 1000;
 
 enum JobType {
 	PROCESS_BULK_UPLOAD = 'processBulkUploadTask',
@@ -43,7 +43,13 @@ export const startJobQueue = async (): Promise<void> => {
 		pgPool: db.pool,
 		concurrency: CONCURRENT_JOB_COUNT,
 		noHandleSignals: false,
-		pollInterval: POLL_INTERVAL_MS,
+		/*
+		 * The poll interval is for scheduled (not on-demand) jobs combined with idle workers. See
+		 * https://worker.graphile.org/docs/faq#if-we-have-jobs-that-are-scheduled-in-the-futurefailed-will-workers-continuously-poll-to-run-those-jobs-or-will-the-listennotify-mechanism-be-used-for-that
+		 * Every poll interval times the number of workers, a SQL update statement runs.
+		 * If the need arises for frequent scheduled jobs, update this value appropriately.
+		 */
+		pollInterval: TEN_MINUTES_IN_MS,
 		taskList: {
 			processBulkUploadTask,
 			copyBaseFields,

@@ -1,10 +1,16 @@
+/* eslint-disable max-lines -- This is a big file but that's the nature of the beast for now */
 import fs from 'node:fs';
+import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import { parse } from 'csv-parse';
 import tmp from 'tmp-promise';
+import jszip from 'jszip';
+import { lookup } from 'mime-types';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getS3Client } from '../s3';
 import { db } from '../database/db';
+import { getDefaultS3Bucket } from '../config';
 import {
 	createApplicationForm,
 	createApplicationFormField,
@@ -19,8 +25,13 @@ import {
 	updateBulkUploadTask,
 	loadSystemUser,
 	loadUserByKeycloakUserId,
+	createFile,
 } from '../database/operations';
-import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
+import {
+	TaskStatus,
+	isProcessBulkUploadJobPayload,
+	BaseFieldDataType,
+} from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
 import { SINGLE_STEP } from '../constants';
@@ -216,6 +227,152 @@ const loadTaskAuthContext = async (
 	},
 });
 
+const cleanupTemporaryFileMap = async (
+	temporaryFileMap: Map<string, FileResult>,
+	logger: Logger,
+): Promise<void> => {
+	for (const [relativePath, temporaryFile] of temporaryFileMap) {
+		try {
+			await temporaryFile.cleanup();
+		} catch (err) {
+			logger.warn(
+				`Cleanup of temporary file failed (${relativePath} -> ${temporaryFile.path})`,
+				{ err },
+			);
+		}
+	}
+};
+
+const getMimeType = (filePath: string): string => {
+	const detectedMimeType = lookup(filePath);
+	if (detectedMimeType === false) {
+		return 'application/octet-stream';
+	}
+	return detectedMimeType;
+}
+
+const getFileNameFromPath = (filePath: string): string => {
+	const name = filePath.split('/').pop();
+	if (name === undefined) {
+		return filePath;
+	}
+	return name;
+}
+
+const uploadFileToS3AndCreateEntity = async (
+	temporaryFile: FileResult,
+	relativePath: string,
+	authContext: AuthContext,
+	logger: Logger,
+): Promise<File> => {
+	const { size } = await stat(temporaryFile.path);
+	const mimeType = getMimeType(relativePath);
+	const s3Bucket = getDefaultS3Bucket();
+	const fileName = getFileNameFromPath(relativePath);
+	const file = await createFile(db, authContext, {
+		name: fileName,
+		mimeType,
+		size,
+		s3BucketName: s3Bucket.name,
+	});
+
+	const fileStream = fs.createReadStream(temporaryFile.path);
+	const s3Client = getS3Client();
+	await s3Client.send(
+		new PutObjectCommand({
+			Bucket: s3Bucket.name,
+			Key: file.storageKey,
+			Body: fileStream,
+			ContentType: mimeType,
+		}),
+	);
+
+	logger.debug('Uploaded attachment file to S3 and created File entity', {
+		relativePath,
+		fileId: file.id,
+		storageKey: file.storageKey,
+	});
+
+	return file;
+};
+
+const prepareProposalAttachments = async (
+	bulkUploadTask: BulkUploadTask,
+	logger: Logger,
+): Promise<Map<string, FileResult>> => {
+	const temporaryFileMap = new Map<string, FileResult>();
+
+	if (bulkUploadTask.attachmentsArchiveFile !== null) {
+		const attachmentsArchiveFile = await downloadFileDataToTemporaryStorage(
+			bulkUploadTask.attachmentsArchiveFile,
+			logger,
+		).catch((err: unknown) => {
+			logger.warn('Download of attachments archive file from S3 failed', {
+				err,
+			});
+			throw err;
+		});
+
+		try {
+			// Read the archive file and load it with jszip
+			const attachmentsArchiveStream = fs.createReadStream(
+				attachmentsArchiveFile.path,
+			);
+			const attachmentsArchiveZip = await jszip
+				.loadAsync(attachmentsArchiveStream)
+				.catch((err: unknown) => {
+					throw new Error(
+						`Failed to parse archive as zip file: ${String(err)}`,
+					);
+				});
+
+			await allNoLeaks(
+				Object.keys(attachmentsArchiveZip.files).map(async (relativePath) => {
+					const { files: { relativePath: zipFile } } = attachmentsArchiveZip;
+					if (zipFile === undefined || zipFile.dir) {
+						return;
+					}
+
+					try {
+						const temporaryFile = await tmp.file().catch(() => {
+							throw new Error(
+								`Unable to create temporary file for ${relativePath}`,
+							);
+						});
+
+						const readStream = zipFile.nodeStream();
+						const writeStream = fs.createWriteStream(temporaryFile.path);
+						await finished(readStream.pipe(writeStream));
+
+						temporaryFileMap.set(relativePath, temporaryFile);
+					} catch (err) {
+						logger.warn(`Failed to extract file from archive`, {
+							relativePath,
+							err,
+						});
+						throw err;
+					}
+				}),
+			);
+		} catch (err) {
+			logger.warn('Failed to prepare attachments', { err });
+			throw err;
+		} finally {
+			// Clean up the downloaded archive file
+			try {
+				await attachmentsArchiveFile.cleanup();
+			} catch (err: unknown) {
+				logger.warn(
+					`Cleanup of attachments archive file failed (${attachmentsArchiveFile.path})`,
+					{ err },
+				);
+			}
+		}
+	}
+
+	return temporaryFileMap;
+};
+
 export const processBulkUploadTask = async (
 	payload: unknown,
 	helpers: JobHelpers,
@@ -264,6 +421,27 @@ export const processBulkUploadTask = async (
 	});
 
 	if (temporaryProposalsDataFile === undefined) {
+		await updateBulkUploadTask(
+			db,
+			taskAuthContext,
+			{
+				status: TaskStatus.FAILED,
+			},
+			bulkUploadTask.id,
+		);
+		return;
+	}
+
+	const temporaryProposalAttachmentFiles = await prepareProposalAttachments(
+		bulkUploadTask,
+		helpers.logger,
+	).catch((err: unknown) => {
+		helpers.logger.warn('Preparation of proposal attachments failed', {
+			err,
+		});
+	});
+
+	if (temporaryProposalAttachmentFiles === undefined) {
 		await updateBulkUploadTask(
 			db,
 			taskAuthContext,
@@ -326,6 +504,9 @@ export const processBulkUploadTask = async (
 			csvReadStream.pipe(parser);
 			let recordNumber = 0;
 
+			// Cache for uploaded files to avoid duplicates
+			const uploadedFilesCache = new Map<string, File>();
+
 			await parser.forEach(async (record: string[]) => {
 				recordNumber += SINGLE_STEP;
 				const proposal = await createProposal(transactionDb, taskAuthContext, {
@@ -370,17 +551,57 @@ export const processBulkUploadTask = async (
 								'There is no form field associated with this column',
 							);
 						}
-						const isValid = fieldValueIsValid(
+
+						DAN TO DO: actually implement all this
+
+						let processedFieldValue = fieldValue;
+						let isValid = fieldValueIsValid(
 							fieldValue,
 							applicationFormField.baseField.dataType,
 						);
+
+						// Handle file attachments
+						if (
+							applicationFormField.baseField.dataType ===
+								BaseFieldDataType.FILE &&
+							temporaryProposalAttachmentFiles.has(fieldValue)
+						) {
+							try {
+								// Check cache first to avoid duplicate uploads
+								let uploadedFile = uploadedFilesCache.get(fieldValue);
+								if (uploadedFile === undefined) {
+									const temporaryFile =
+										temporaryProposalAttachmentFiles.get(fieldValue);
+									if (temporaryFile !== undefined) {
+										uploadedFile = await uploadFileToS3AndCreateEntity(
+											temporaryFile,
+											fieldValue,
+											taskAuthContext,
+											helpers.logger,
+										);
+										// Cache the result
+										uploadedFilesCache.set(fieldValue, uploadedFile);
+									}
+								}
+								processedFieldValue = uploadedFile.id.toString();
+								isValid = true; // File upload successful means valid
+							} catch (err) {
+								helpers.logger.warn('Failed to upload attachment file', {
+									fieldValue,
+									err,
+								});
+								// Keep original field value and mark as invalid
+								isValid = false;
+							}
+						}
+
 						return await createProposalFieldValue(
 							transactionDb,
 							taskAuthContext,
 							{
 								proposalVersionId: proposalVersion.id,
 								applicationFormFieldId: applicationFormField.id,
-								value: fieldValue,
+								value: processedFieldValue,
 								position: index,
 								isValid,
 								goodAsOf: null,
@@ -402,6 +623,17 @@ export const processBulkUploadTask = async (
 			`Cleanup of a temporary file failed (${temporaryProposalsDataFile.path})`,
 			{ err },
 		);
+	}
+
+	try {
+		await cleanupTemporaryFileMap(
+			temporaryProposalAttachmentFiles,
+			helpers.logger,
+		);
+	} catch (err) {
+		helpers.logger.warn('Cleanup of temporary attachment files failed', {
+			err,
+		});
 	}
 
 	if (bulkUploadHasFailed) {

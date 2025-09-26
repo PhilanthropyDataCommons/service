@@ -254,14 +254,16 @@ export const processBulkUploadTask = async (
 		bulkUploadTask.id,
 	);
 
-	const bulkUploadFile = await downloadFileDataToTemporaryStorage(
+	const temporaryProposalsDataFile = await downloadFileDataToTemporaryStorage(
 		bulkUploadTask.proposalsDataFile,
 		helpers.logger,
 	).catch((err: unknown) => {
-		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
+		helpers.logger.warn('Download of proposals data file from S3 failed', {
+			err,
+		});
 	});
 
-	if (bulkUploadFile === undefined) {
+	if (temporaryProposalsDataFile === undefined) {
 		await updateBulkUploadTask(
 			db,
 			taskAuthContext,
@@ -275,25 +277,33 @@ export const processBulkUploadTask = async (
 
 	let bulkUploadHasFailed = false;
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(
-		bulkUploadFile.path,
+		temporaryProposalsDataFile.path,
 	);
 	const changemakerNameIndex = getChangemakerNameIndex(shortCodes);
 	const changemakerTaxIdIndex = getChangemakerTaxIdIndex(shortCodes);
 
 	try {
-		await assertBulkUploadTaskCsvIsValid(bulkUploadFile.path);
+		await assertBulkUploadTaskCsvIsValid(temporaryProposalsDataFile.path);
 
 		await db.transaction(async (transactionDb) => {
-			const opportunity = await createOpportunity(transactionDb, taskAuthContext, {
-				title: `Bulk Upload (${bulkUploadTask.createdAt})`,
-				funderShortCode: bulkUploadTask.funderShortCode,
-			});
-			const applicationForm = await createApplicationForm(transactionDb, taskAuthContext, {
-				opportunityId: opportunity.id,
-			});
+			const opportunity = await createOpportunity(
+				transactionDb,
+				taskAuthContext,
+				{
+					title: `Bulk Upload (${bulkUploadTask.createdAt})`,
+					funderShortCode: bulkUploadTask.funderShortCode,
+				},
+			);
+			const applicationForm = await createApplicationForm(
+				transactionDb,
+				taskAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
 			const proposedApplicationFormFields =
 				await generateWritableApplicationFormFields(
-					bulkUploadFile.path,
+					temporaryProposalsDataFile.path,
 					applicationForm.id,
 				);
 			const applicationFormFields = await allNoLeaks(
@@ -306,7 +316,9 @@ export const processBulkUploadTask = async (
 						),
 				),
 			);
-			const csvReadStream = fs.createReadStream(bulkUploadFile.path);
+			const csvReadStream = fs.createReadStream(
+				temporaryProposalsDataFile.path,
+			);
 			const STARTING_ROW = 2;
 			const parser = parse({
 				from: STARTING_ROW,
@@ -384,10 +396,10 @@ export const processBulkUploadTask = async (
 	}
 
 	try {
-		await bulkUploadFile.cleanup();
+		await temporaryProposalsDataFile.cleanup();
 	} catch (err) {
 		helpers.logger.warn(
-			`Cleanup of a temporary file failed (${bulkUploadFile.path})`,
+			`Cleanup of a temporary file failed (${temporaryProposalsDataFile.path})`,
 			{ err },
 		);
 	}

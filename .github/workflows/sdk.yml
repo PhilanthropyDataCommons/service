@@ -40,7 +40,7 @@ jobs:
           distribution: temurin
           java-version: 21
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
       - name: Invoke the TypeScript generator
         working-directory: sdk
         run: ./gradlew generateSwaggerCode

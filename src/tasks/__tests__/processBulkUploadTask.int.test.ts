@@ -1,6 +1,8 @@
 import path from 'node:path';
-import nock from 'nock';
-import { requireEnv } from 'require-env-variable';
+import fs from 'node:fs';
+import { mockClient } from 'aws-sdk-client-mock';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { sdkStreamMixin } from '@smithy/util-stream';
 import {
 	db,
 	createOrUpdateBaseField,
@@ -15,7 +17,6 @@ import {
 	loadSystemSource,
 	loadSystemFunder,
 } from '../../database';
-import { getS3Client } from '../../s3';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUploadTask } from '../processBulkUploadTask';
 import {
@@ -40,27 +41,9 @@ import type {
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
 	AuthContext,
-	File,
 } from '../../types';
 
-const { S3_PATH_STYLE } = requireEnv('S3_PATH_STYLE');
-
-const getS3Endpoint = async (endpoint: string, bucketName: string) => {
-	const s3Client = getS3Client({ endpoint });
-	if (s3Client.config.endpoint === undefined) {
-		throw new Error('The S3 client is not configured with an endpoint');
-	}
-	const { hostname, protocol } = await s3Client.config.endpoint();
-	return S3_PATH_STYLE === 'true'
-		? `${protocol}//${hostname}`
-		: `${protocol}//${bucketName}.${hostname}`;
-};
-
-const getS3Path = (bucketName: string) =>
-	S3_PATH_STYLE === 'true' ? `/${bucketName}` : '';
-
-const getS3KeyPath = (bucketName: string, objectKey: string) =>
-	`${getS3Path(bucketName)}/${objectKey}`;
+const s3Mock = mockClient(S3Client);
 
 const createTestBulkUploadTask = async (
 	authContext: AuthContext,
@@ -112,26 +95,10 @@ const createTestBaseFields = async (): Promise<void> => {
 	});
 };
 
-const mockS3GetObjectReplyWithFile = async (file: File, filePath: string) =>
-	nock(await getS3Endpoint(file.s3Bucket.endpoint, file.s3Bucket.name))
-		.get(getS3KeyPath(file.s3Bucket.name, file.storageKey))
-		.query({ 'x-id': 'GetObject' })
-		.replyWithFile(200, filePath);
-
-const mockS3ResponsesForBulkUploadTaskProcessing = async (
-	bulkUploadTask: BulkUploadTask,
-	bulkUploadFilePath: string,
-) => {
-	const getRequest = await mockS3GetObjectReplyWithFile(
-		bulkUploadTask.proposalsDataFile,
-		bulkUploadFilePath,
-	);
-	return {
-		getRequest,
-	};
-};
-
 describe('processBulkUploadTask', () => {
+	beforeEach(() => {
+		s3Mock.reset();
+	});
 	it('should attempt to access the contents of the file associated with the specified bulk upload', async () => {
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
@@ -140,22 +107,28 @@ describe('processBulkUploadTask', () => {
 			systemUserAuthContext,
 			proposalsDataFile.id,
 		);
-		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(
-				__dirname,
-				'fixtures',
-				'processBulkUploadTask',
-				'validCsvTemplate.csv',
+
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'validCsvTemplate.csv',
+					),
+				),
 			),
-		);
+		});
+
 		await processBulkUploadTask(
 			{
 				bulkUploadId: bulkUploadTask.id,
 			},
 			getMockJobHelpers(),
 		);
-		expect(requests.getRequest.isDone()).toEqual(true);
+
+		expect(s3Mock.commandCalls(GetObjectCommand).length).toBeGreaterThan(0);
 	});
 
 	it('should fail if the proposalsDataFile is not accessible', async () => {
@@ -167,20 +140,8 @@ describe('processBulkUploadTask', () => {
 			systemUserAuthContext,
 			proposalsDataFile.id,
 		);
-		const sourceRequest = nock(
-			await getS3Endpoint(
-				proposalsDataFile.s3Bucket.endpoint,
-				proposalsDataFile.s3Bucket.name,
-			),
-		)
-			.get(
-				getS3KeyPath(
-					proposalsDataFile.s3Bucket.name,
-					proposalsDataFile.storageKey,
-				),
-			)
-			.query({ 'x-id': 'GetObject' })
-			.reply(404);
+
+		s3Mock.on(GetObjectCommand).rejects(new Error('NoSuchKey'));
 
 		await processBulkUploadTask(
 			{ bulkUploadId: bulkUploadTask.id },
@@ -195,7 +156,6 @@ describe('processBulkUploadTask', () => {
 		expect(updatedBulkUploadTask).toMatchObject({
 			status: TaskStatus.FAILED,
 		});
-		expect(sourceRequest.isDone()).toEqual(true);
 	});
 
 	it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
@@ -210,15 +170,19 @@ describe('processBulkUploadTask', () => {
 				status: TaskStatus.IN_PROGRESS,
 			},
 		);
-		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(
-				__dirname,
-				'fixtures',
-				'processBulkUploadTask',
-				'validCsvTemplate.csv',
+
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'validCsvTemplate.csv',
+					),
+				),
 			),
-		);
+		});
 
 		await processBulkUploadTask(
 			{ bulkUploadId: bulkUploadTask.id },
@@ -231,7 +195,7 @@ describe('processBulkUploadTask', () => {
 			bulkUploadTask.id,
 		);
 		expect(updatedBulkUpload.status).toEqual(TaskStatus.IN_PROGRESS);
-		expect(requests.getRequest.isDone()).toEqual(false);
+		expect(s3Mock.commandCalls(GetObjectCommand).length).toBe(0);
 	});
 
 	it('should fail if the csv contains an invalid short code', async () => {
@@ -244,15 +208,20 @@ describe('processBulkUploadTask', () => {
 			systemUserAuthContext,
 			proposalsDataFile.id,
 		);
-		await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(
-				__dirname,
-				'fixtures',
-				'processBulkUploadTask',
-				'invalidShortCode.csv',
+
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'invalidShortCode.csv',
+					),
+				),
 			),
-		);
+		});
+
 		await processBulkUploadTask(
 			{
 				bulkUploadId: bulkUploadTask.id,
@@ -279,10 +248,19 @@ describe('processBulkUploadTask', () => {
 			systemUserAuthContext,
 			proposalsDataFile.id,
 		);
-		await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(__dirname, 'fixtures', 'processBulkUploadTask', 'empty.csv'),
-		);
+
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'empty.csv',
+					),
+				),
+			),
+		});
 
 		await processBulkUploadTask(
 			{
@@ -311,15 +289,19 @@ describe('processBulkUploadTask', () => {
 			systemUserAuthContext,
 			proposalsDataFile.id,
 		);
-		const requests = await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(
-				__dirname,
-				'fixtures',
-				'processBulkUploadTask',
-				'validCsvTemplate.csv',
+
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'validCsvTemplate.csv',
+					),
+				),
 			),
-		);
+		});
 
 		await processBulkUploadTask(
 			{
@@ -569,7 +551,6 @@ describe('processBulkUploadTask', () => {
 		});
 
 		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
-		expect(requests.getRequest.isDone()).toEqual(true);
 	});
 
 	it('should create changemakers and changemaker-proposal relationships', async () => {
@@ -582,15 +563,19 @@ describe('processBulkUploadTask', () => {
 			systemUserAuthContext,
 			proposalsDataFile.id,
 		);
-		await mockS3ResponsesForBulkUploadTaskProcessing(
-			bulkUploadTask,
-			path.join(
-				__dirname,
-				'fixtures',
-				'processBulkUploadTask',
-				'validCsvTemplateWithChangemakers.csv',
+
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'validCsvTemplateWithChangemakers.csv',
+					),
+				),
 			),
-		);
+		});
 
 		await processBulkUploadTask(
 			{

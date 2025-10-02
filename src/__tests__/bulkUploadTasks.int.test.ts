@@ -15,6 +15,7 @@ import { getAuthContext, loadTestUser } from '../test/utils';
 import { createTestFile } from '../test/factories';
 import {
 	expectArray,
+	expectArrayContaining,
 	expectNumber,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
@@ -340,6 +341,7 @@ describe('/tasks/bulkUploads', () => {
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({
 				id: expectNumber(),
+				logs: [],
 				sourceId: systemSource.id,
 				source: systemSource,
 				funderShortCode: systemFunder.shortCode,

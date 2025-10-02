@@ -1,10 +1,18 @@
+/* eslint-disable max-lines -- This is a big file but that's the nature of the beast for now
+ * See https://github.com/PhilanthropyDataCommons/service/issues/1978
+ */
 import fs from 'node:fs';
+import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import { parse } from 'csv-parse';
 import tmp from 'tmp-promise';
+import { async as AsyncZip } from 'node-stream-zip';
+import { lookup } from 'mime-types';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getS3Client } from '../s3';
 import { db } from '../database/db';
+import { getDefaultS3Bucket } from '../config';
 import {
 	createApplicationForm,
 	createApplicationFormField,
@@ -19,13 +27,19 @@ import {
 	updateBulkUploadTask,
 	loadSystemUser,
 	loadUserByKeycloakUserId,
+	createFile,
 } from '../database/operations';
-import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
+import {
+	TaskStatus,
+	isProcessBulkUploadJobPayload,
+	BaseFieldDataType,
+} from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
 import { SINGLE_STEP } from '../constants';
 import { createBulkUploadLog } from '../database/operations/bulkUploadLogs/createBulkUploadLog';
 import { getBulkUploadLogDetailsFromError } from './getBulkUploadLogDetailsFromError';
+import type { TinyPg } from 'tinypg';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
@@ -218,6 +232,203 @@ const loadTaskAuthContext = async (
 	},
 });
 
+const cleanupTemporaryFileMap = async (
+	temporaryFileMap: Map<string, FileResult>,
+	logger: Logger,
+): Promise<void> => {
+	const temporaryFileEntries = Array.from(temporaryFileMap.entries());
+	await Promise.all(
+		temporaryFileEntries.map(async ([relativePath, temporaryFile]) => {
+			try {
+				await temporaryFile.cleanup();
+			} catch (err) {
+				logger.warn(
+					`Cleanup of temporary file failed (${relativePath} -> ${temporaryFile.path})`,
+					{ err },
+				);
+			}
+		}),
+	);
+};
+
+const getMimeType = (filePath: string): string => {
+	const detectedMimeType = lookup(filePath);
+	if (detectedMimeType === false) {
+		return 'application/octet-stream';
+	}
+	return detectedMimeType;
+};
+
+const getFileNameFromPath = (filePath: string): string => {
+	const name = filePath.split('/').pop();
+	if (name === undefined) {
+		return filePath;
+	}
+	return name;
+};
+
+const removeFirstPathComponent = (path: string): string => {
+	const pathComponents = path.split('/');
+	pathComponents.shift();
+	return pathComponents.join('/');
+};
+
+const uploadFileDataToS3 = async (
+	file: File,
+	fileData: FileResult,
+	relativePath: string,
+	logger: Logger,
+): Promise<File> => {
+	const fileStream = fs.createReadStream(fileData.path);
+	const s3Client = getS3Client();
+
+	try {
+		await s3Client.send(
+			new PutObjectCommand({
+				Bucket: file.s3Bucket.name,
+				Key: file.storageKey,
+				Body: fileStream,
+				ContentType: file.mimeType,
+			}),
+		);
+	} finally {
+		if (!fileStream.destroyed) {
+			fileStream.destroy();
+		}
+	}
+
+	logger.debug('Uploaded file data to S3 ', {
+		relativePath,
+		storageKey: file.storageKey,
+	});
+
+	return file;
+};
+
+const prepareProposalAttachments = async (
+	bulkUploadTask: BulkUploadTask,
+	logger: Logger,
+): Promise<Map<string, FileResult>> => {
+	const temporaryFileMap = new Map<string, FileResult>();
+
+	if (bulkUploadTask.attachmentsArchiveFile !== null) {
+		const temporaryAttachmentsArchiveFile =
+			await downloadFileDataToTemporaryStorage(
+				bulkUploadTask.attachmentsArchiveFile,
+				logger,
+			).catch((err: unknown) => {
+				logger.warn('Download of attachments archive file from S3 failed', {
+					err,
+				});
+				throw err;
+			});
+
+		try {
+			const attachmentsArchiveZip = new AsyncZip({
+				file: temporaryAttachmentsArchiveFile.path,
+			});
+			try {
+				const attachmentsArchiveEntries = await attachmentsArchiveZip
+					.entries()
+					.catch((err: unknown) => {
+						throw new Error(
+							`Failed to load the entries of attachments archive: ${String(err)}`,
+						);
+					});
+
+				await allNoLeaks(
+					Object.keys(attachmentsArchiveEntries).map(async (relativePath) => {
+						const normalizedPath = removeFirstPathComponent(relativePath);
+						const { [relativePath]: archiveEntry } = attachmentsArchiveEntries;
+						if (archiveEntry === undefined || archiveEntry.isDirectory) {
+							return;
+						}
+
+						try {
+							const temporaryFile = await tmp.file().catch(() => {
+								throw new Error(
+									`Unable to create temporary file for ${relativePath}`,
+								);
+							});
+							await attachmentsArchiveZip.extract(
+								relativePath,
+								temporaryFile.path,
+							);
+							temporaryFileMap.set(normalizedPath, temporaryFile);
+						} catch (err) {
+							logger.warn(`Failed to extract file from archive`, {
+								relativePath,
+								err,
+							});
+							throw err;
+						}
+					}),
+				);
+			} finally {
+				await attachmentsArchiveZip.close();
+			}
+		} catch (err) {
+			logger.warn('Failed to prepare attachments', { err });
+			throw err;
+		} finally {
+			try {
+				await temporaryAttachmentsArchiveFile.cleanup();
+			} catch (err: unknown) {
+				logger.warn(
+					`Cleanup of attachments archive file failed (${temporaryAttachmentsArchiveFile.path})`,
+					{ err },
+				);
+			}
+		}
+	}
+
+	return temporaryFileMap;
+};
+
+class AttachmentsManager {
+	private readonly attachmentPdcFiles = new Map<string, File>();
+
+	constructor(
+		private readonly dbConnection: TinyPg,
+		private readonly authContext: AuthContext,
+		private readonly attachmentTemporaryFiles: Map<string, FileResult>,
+		private readonly logger: Logger,
+	) {}
+
+	public async getAttachmentPdcFile(relativePath: string): Promise<File> {
+		const cachedPdcFile = this.attachmentPdcFiles.get(relativePath);
+		if (cachedPdcFile !== undefined) {
+			return cachedPdcFile;
+		}
+
+		const temporaryFile = this.attachmentTemporaryFiles.get(relativePath);
+		if (temporaryFile === undefined) {
+			throw new Error(
+				`No file found for attachment with path "${relativePath}"`,
+			);
+		}
+
+		const { size } = await stat(temporaryFile.path);
+		const mimeType = getMimeType(relativePath);
+		const s3Bucket = getDefaultS3Bucket();
+		const fileName = getFileNameFromPath(relativePath);
+		const file = await createFile(this.dbConnection, this.authContext, {
+			name: fileName,
+			mimeType,
+			size,
+			s3BucketName: s3Bucket.name,
+		});
+
+		await uploadFileDataToS3(file, temporaryFile, relativePath, this.logger);
+		this.attachmentPdcFiles.set(relativePath, file);
+		return file;
+	}
+
+	public cleanup(): void {
+		this.attachmentPdcFiles.clear();
+	}
+}
+
 export const processBulkUploadTask = async (
 	payload: unknown,
 	helpers: JobHelpers,
@@ -280,6 +491,27 @@ export const processBulkUploadTask = async (
 		return;
 	}
 
+	const temporaryProposalAttachmentFiles = await prepareProposalAttachments(
+		bulkUploadTask,
+		helpers.logger,
+	).catch((err: unknown) => {
+		helpers.logger.warn('Preparation of proposal attachments failed', {
+			err,
+		});
+	});
+
+	if (temporaryProposalAttachmentFiles === undefined) {
+		await updateBulkUploadTask(
+			db,
+			taskAuthContext,
+			{
+				status: TaskStatus.FAILED,
+			},
+			bulkUploadTask.id,
+		);
+		return;
+	}
+
 	let bulkUploadHasFailed = false;
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(
 		temporaryProposalsDataFile.path,
@@ -291,6 +523,12 @@ export const processBulkUploadTask = async (
 		await assertBulkUploadTaskCsvIsValid(temporaryProposalsDataFile.path);
 
 		await db.transaction(async (transactionDb) => {
+			const attachmentsManager = new AttachmentsManager(
+				transactionDb,
+				taskAuthContext,
+				temporaryProposalAttachmentFiles,
+				helpers.logger,
+			);
 			const opportunity = await createOpportunity(
 				transactionDb,
 				taskAuthContext,
@@ -375,17 +613,32 @@ export const processBulkUploadTask = async (
 								'There is no form field associated with this column',
 							);
 						}
-						const isValid = fieldValueIsValid(
+
+						let processedFieldValue = fieldValue;
+						let isValid = fieldValueIsValid(
 							fieldValue,
 							applicationFormField.baseField.dataType,
 						);
+
+						// File attachments are the one unique case where we need to convert the bulk upload value
+						// into a PDC File ID.  The value in the CSV is the relative path of the file within the
+						// attachments archive.
+						if (
+							applicationFormField.baseField.dataType === BaseFieldDataType.FILE
+						) {
+							const pdcFile =
+								await attachmentsManager.getAttachmentPdcFile(fieldValue);
+							processedFieldValue = pdcFile.id.toString();
+							isValid = true;
+						}
+
 						return await createProposalFieldValue(
 							transactionDb,
 							taskAuthContext,
 							{
 								proposalVersionId: proposalVersion.id,
 								applicationFormFieldId: applicationFormField.id,
-								value: fieldValue,
+								value: processedFieldValue,
 								position: index,
 								isValid,
 								goodAsOf: null,
@@ -417,6 +670,17 @@ export const processBulkUploadTask = async (
 			details: getBulkUploadLogDetailsFromError(
 				new Error(message, { cause: err }),
 			),
+		});
+	}
+
+	try {
+		await cleanupTemporaryFileMap(
+			temporaryProposalAttachmentFiles,
+			helpers.logger,
+		);
+	} catch (err) {
+		helpers.logger.warn('Cleanup of temporary attachment files failed', {
+			err,
 		});
 	}
 

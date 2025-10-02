@@ -16,6 +16,7 @@ import {
 	loadOpportunityBundle,
 	loadSystemSource,
 	loadSystemFunder,
+	loadFileBundle,
 } from '../../database';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUploadTask } from '../processBulkUploadTask';
@@ -89,6 +90,15 @@ const createTestBaseFields = async (): Promise<void> => {
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_tax_id',
 		dataType: BaseFieldDataType.STRING,
+		category: BaseFieldCategory.ORGANIZATION,
+		valueRelevanceHours: null,
+		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
+	});
+	await createOrUpdateBaseField(db, null, {
+		label: 'Favorite File',
+		description: 'Just a file we want to attach.',
+		shortCode: 'favorite_file',
+		dataType: BaseFieldDataType.FILE,
 		category: BaseFieldCategory.ORGANIZATION,
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
@@ -289,23 +299,47 @@ describe('processBulkUploadTask', () => {
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const attachmentsArchiveFile = await createTestFile(
+			db,
+			systemUserAuthContext,
+		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
+			{
+				attachmentsArchiveFileId: attachmentsArchiveFile.id,
+			},
 		);
 
-		s3Mock.on(GetObjectCommand).resolves({
-			Body: sdkStreamMixin(
-				fs.createReadStream(
-					path.join(
-						__dirname,
-						'fixtures',
-						'processBulkUploadTask',
-						'validCsvTemplate.csv',
+		s3Mock
+			.on(GetObjectCommand, { Key: proposalsDataFile.storageKey })
+			.resolves({
+				Body: sdkStreamMixin(
+					fs.createReadStream(
+						path.join(
+							__dirname,
+							'fixtures',
+							'processBulkUploadTask',
+							'validCsvTemplateWithFile.csv',
+						),
 					),
 				),
-			),
-		});
+			});
+
+		s3Mock
+			.on(GetObjectCommand, { Key: attachmentsArchiveFile.storageKey })
+			.resolves({
+				Body: sdkStreamMixin(
+					fs.createReadStream(
+						path.join(
+							__dirname,
+							'fixtures',
+							'processBulkUploadTask',
+							'attachments.zip',
+						),
+					),
+				),
+			});
 
 		await processBulkUploadTask(
 			{
@@ -313,6 +347,22 @@ describe('processBulkUploadTask', () => {
 			},
 			getMockJobHelpers(),
 		);
+
+		expect(s3Mock.commandCalls(GetObjectCommand).length).toEqual(2);
+
+		const fileBundle = await loadFileBundle(
+			db,
+			testAuthContext,
+			systemUser.keycloakUserId,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		const oneTxtFile = fileBundle.entries.find((f) => f.name === 'one.txt');
+		const twoTxtFile = fileBundle.entries.find((f) => f.name === 'two.txt');
+		if (oneTxtFile === undefined || twoTxtFile === undefined) {
+			throw new Error('The attachment files were not created');
+		}
+
 		const updatedBulkUploadTask = await loadBulkUploadTask(
 			db,
 			testAuthContext,
@@ -431,6 +481,37 @@ describe('processBulkUploadTask', () => {
 									proposalVersionId: 2,
 									value: 'Bar Inc.',
 								},
+								{
+									applicationFormField: {
+										applicationFormId: 1,
+										baseField: {
+											createdAt: expectTimestamp(),
+											dataType: 'file',
+											description: 'Just a file we want to attach.',
+											label: 'Favorite File',
+											category: 'organization',
+											valueRelevanceHours: null,
+											sensitivityClassification:
+												BaseFieldSensitivityClassification.RESTRICTED,
+											shortCode: 'favorite_file',
+											localizations: {},
+										},
+										baseFieldShortCode: 'favorite_file',
+										createdAt: expectTimestamp(),
+										id: expectNumber(),
+										instructions: null,
+										label: 'Favorite File',
+										position: 2,
+									},
+									applicationFormFieldId: expectNumber(),
+									createdAt: expectTimestamp(),
+									id: expectNumber(),
+									isValid: true,
+									goodAsOf: null,
+									position: 2,
+									proposalVersionId: 2,
+									value: twoTxtFile.id.toString(),
+								},
 							],
 							id: 2,
 							proposalId: 2,
@@ -515,6 +596,37 @@ describe('processBulkUploadTask', () => {
 									position: 1,
 									proposalVersionId: 1,
 									value: 'Foo LLC.',
+								},
+								{
+									applicationFormField: {
+										applicationFormId: 1,
+										baseField: {
+											createdAt: expectTimestamp(),
+											dataType: 'file',
+											description: 'Just a file we want to attach.',
+											label: 'Favorite File',
+											category: 'organization',
+											valueRelevanceHours: null,
+											sensitivityClassification:
+												BaseFieldSensitivityClassification.RESTRICTED,
+											shortCode: 'favorite_file',
+											localizations: {},
+										},
+										baseFieldShortCode: 'favorite_file',
+										createdAt: expectTimestamp(),
+										id: expectNumber(),
+										instructions: null,
+										label: 'Favorite File',
+										position: 2,
+									},
+									applicationFormFieldId: expectNumber(),
+									createdAt: expectTimestamp(),
+									id: expectNumber(),
+									isValid: true,
+									goodAsOf: null,
+									position: 2,
+									proposalVersionId: 1,
+									value: oneTxtFile.id.toString(),
 								},
 							],
 							id: 1,

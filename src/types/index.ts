@@ -4,6 +4,7 @@ export * from './AuthContext';
 export * from './BaseField';
 export * from './BaseFieldLocalization';
 export * from './BaseFieldsCopyTask';
+export * from './BulkUploadLog';
 export * from './BulkUploadTask';
 export * from './Bundle';
 export * from './Changemaker';

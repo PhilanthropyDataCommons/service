@@ -1,6 +1,7 @@
 import { ajv } from '../ajv';
 import { shortCodeSchema } from './ShortCode';
 import { idSchema } from './Id';
+import type { BulkUploadLog } from './BulkUploadLog';
 import type { TaskStatus } from './TaskStatus';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
@@ -22,6 +23,7 @@ interface BulkUploadTask {
 	readonly status: TaskStatus;
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
+	readonly logs: BulkUploadLog[];
 }
 
 type WritableBulkUploadTask = Writable<BulkUploadTask>;

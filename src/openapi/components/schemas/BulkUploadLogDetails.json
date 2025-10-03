@@ -1,0 +1,23 @@
+{
+	"type": "object",
+	"description": "An object containing a message and optionally two more parameters",
+	"properties": {
+		"message": {
+			"description": "A message suitable for presentation to end users.",
+			"type": "string",
+			"readOnly": true
+		},
+		"name": {
+			"description": "A name when available.",
+			"type": "string",
+			"readOnly": true
+		},
+		"cause": {
+			"description": "A cause when available, another one of these objects.",
+			"type": "object",
+			"readOnly": true
+		}
+	},
+	"required": ["message"],
+	"additionalProperties": false
+}

@@ -1,0 +1,30 @@
+{
+	"type": "object",
+	"properties": {
+		"bulkUploadTaskId": {
+			"type": "integer",
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"isError": {
+			"description": "True when this entry represents an error explaining a failed bulk upload.",
+			"type": "boolean",
+			"readOnly": true
+		},
+		"details": {
+			"type": "object",
+			"properties": {
+				"entries": {
+					"$ref": "./BulkUploadLogDetails.json"
+				}
+			},
+			"readOnly": true
+		}
+	},
+	"required": ["bulkUploadTaskId", "createdAt", "isError", "details"],
+	"additionalProperties": false
+}

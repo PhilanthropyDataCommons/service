@@ -8,6 +8,7 @@ import { db } from '../database/db';
 import {
 	createApplicationForm,
 	createApplicationFormField,
+	createBulkUploadLog,
 	createOpportunity,
 	createChangemaker,
 	createChangemakerProposal,
@@ -25,7 +26,6 @@ import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
 import { SINGLE_STEP } from '../constants';
-import { createBulkUploadLog } from '../database/operations/bulkUploadLogs/createBulkUploadLog';
 import { getBulkUploadLogDetailsFromError } from './getBulkUploadLogDetailsFromError';
 import type TinyPg from 'tinypg';
 import type { JobHelpers, Logger } from 'graphile-worker';

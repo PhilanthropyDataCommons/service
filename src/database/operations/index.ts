@@ -3,6 +3,7 @@ export * from './applicationForms';
 export * from './baseFieldLocalization';
 export * from './baseFields';
 export * from './baseFieldsCopyTasks';
+export * from './bulkUploadLogs';
 export * from './bulkUploadTasks';
 export * from './changemakerProposals';
 export * from './changemakers';

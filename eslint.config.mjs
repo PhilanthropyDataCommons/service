@@ -16,7 +16,7 @@ export default defineConfig([
 		...love,
 		languageOptions: {
 			parserOptions: {
-				project: './tsconfig.dev.json',
+				project: ['./tsconfig.dev.json', './tsconfig.openapi.json'],
 			},
 		},
 	},
@@ -33,7 +33,7 @@ export default defineConfig([
 			},
 
 			parserOptions: {
-				project: './tsconfig.dev.json',
+				project: ['./tsconfig.dev.json', './tsconfig.openapi.json'],
 			},
 		},
 
@@ -78,7 +78,7 @@ export default defineConfig([
 			'import/resolver': {
 				typescript: {
 					alwaysTryTypes: true,
-					project: './tsconfig.dev.json',
+					project: ['./tsconfig.dev.json', './tsconfig.openapi.json'],
 				},
 				node: true,
 			},

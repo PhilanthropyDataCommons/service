@@ -1,44 +1,53 @@
+/* eslint-disable max-lines -- This is a big file but that's the nature of the beast for now
+ * See https://github.com/PhilanthropyDataCommons/service/issues/1978
+ */
 import fs from 'node:fs';
+import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import { parse } from 'csv-parse';
 import tmp from 'tmp-promise';
+import { async as AsyncZip } from 'node-stream-zip';
+import { lookup } from 'mime-types';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getS3Client } from '../s3';
 import { db } from '../database/db';
+import { getDefaultS3Bucket } from '../config';
 import {
 	createApplicationForm,
 	createApplicationFormField,
 	createOpportunity,
-	createChangemaker,
 	createChangemakerProposal,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
 	loadBaseFields,
 	loadBulkUploadTask,
-	loadChangemakerByTaxId,
+	loadOrCreateChangemaker,
 	updateBulkUploadTask,
 	loadSystemUser,
 	loadUserByKeycloakUserId,
+	createFile,
 } from '../database/operations';
-import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
+import {
+	TaskStatus,
+	isProcessBulkUploadJobPayload,
+	BaseFieldDataType,
+} from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
 import { SINGLE_STEP } from '../constants';
 import { createBulkUploadLog } from '../database/operations/bulkUploadLogs/createBulkUploadLog';
 import { getBulkUploadLogDetailsFromError } from './getBulkUploadLogDetailsFromError';
-import type TinyPg from 'tinypg';
+import type { TinyPg } from 'tinypg';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
-	ApplicationFormField,
 	BulkUploadTask,
-	Opportunity,
-	Changemaker,
 	ProposalFieldValue,
-	WritableChangemaker,
 	AuthContext,
 	File,
+	WritableApplicationFormField,
 } from '../types';
 
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
@@ -168,22 +177,14 @@ const assertBulkUploadTaskCsvIsValid = async (
 	await assertCsvContainsRowsOfEqualLength(csvPath);
 };
 
-const createOpportunityForBulkUploadTask = async (
-	bulkUploadTask: BulkUploadTask,
-): Promise<Opportunity> =>
-	await createOpportunity(db, null, {
-		title: `Bulk Upload (${bulkUploadTask.createdAt})`,
-		funderShortCode: bulkUploadTask.funderShortCode,
-	});
-
-const createApplicationFormFieldsForBulkUploadTask = async (
+const generateWritableApplicationFormFields = async (
 	csvPath: string,
 	applicationFormId: number,
-): Promise<ApplicationFormField[]> => {
+): Promise<WritableApplicationFormField[]> => {
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
 	const baseFields = await loadBaseFields();
-	const applicationFormFields = await allNoLeaks(
-		shortCodes.map(async (shortCode, index) => {
+	const writableApplicationFormFields = shortCodes.map(
+		(shortCode, index): WritableApplicationFormField => {
 			const baseField = baseFields.find(
 				(candidateBaseField) => candidateBaseField.shortCode === shortCode,
 			);
@@ -192,17 +193,16 @@ const createApplicationFormFieldsForBulkUploadTask = async (
 					`No base field could be found with shortCode "${shortCode}"`,
 				);
 			}
-			const applicationFormField = await createApplicationFormField(db, null, {
+			return {
 				applicationFormId,
 				baseFieldShortCode: baseField.shortCode,
 				position: index,
 				label: baseField.label,
 				instructions: null,
-			});
-			return applicationFormField;
-		}),
+			};
+		},
 	);
-	return applicationFormFields;
+	return writableApplicationFormFields;
 };
 
 const getChangemakerTaxIdIndex = (columns: string[]): number =>
@@ -211,39 +211,223 @@ const getChangemakerTaxIdIndex = (columns: string[]): number =>
 const getChangemakerNameIndex = (columns: string[]): number =>
 	columns.indexOf(CHANGEMAKER_NAME_SHORT_CODE);
 
-const createOrLoadChangemaker = async (
-	localDb: TinyPg,
-	authContext: AuthContext,
-	writeValues: Omit<WritableChangemaker, 'name'> & { name?: string },
-): Promise<Changemaker | undefined> => {
-	try {
-		return await loadChangemakerByTaxId(
-			localDb,
-			authContext,
-			writeValues.taxId,
-		);
-	} catch {
-		if (writeValues.name !== undefined) {
-			return await createChangemaker(localDb, null, {
-				...writeValues,
-				name: writeValues.name, // This looks silly, but TypeScript isn't guarding `writeValues`, just `writeValues.name`.
-			});
-		}
-	}
-	return undefined;
-};
-
 // THIS FUNCTION IS A MONKEY PATCH
 // Really we should be passing the jwt of the calling user so that an auth context can be re-generated
 // for the task runner.  Currently this means the task runner is functioning as an administrative system user.
 // This creates risk where a task could behave in ways with escalated privileges, although currently
 // the implementation of the bulk upload processer should be safe.
-const loadTaskRunnerAuthContext = async (): Promise<AuthContext> => ({
+const loadSystemUserAuthContext = async (): Promise<AuthContext> => ({
 	user: await loadSystemUser(db, null),
 	role: {
 		isAdministrator: true,
 	},
 });
+
+const loadTaskAuthContext = async (
+	bulkUploadTask: BulkUploadTask,
+): Promise<AuthContext> => ({
+	user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
+	role: {
+		isAdministrator: false,
+	},
+});
+
+const cleanupTemporaryFileMap = async (
+	temporaryFileMap: Map<string, FileResult>,
+	logger: Logger,
+): Promise<void> => {
+	const temporaryFileEntries = Array.from(temporaryFileMap.entries());
+	await Promise.all(
+		temporaryFileEntries.map(async ([relativePath, temporaryFile]) => {
+			try {
+				await temporaryFile.cleanup();
+			} catch (err) {
+				logger.warn(
+					`Cleanup of temporary file failed (${relativePath} -> ${temporaryFile.path})`,
+					{ err },
+				);
+			}
+		}),
+	);
+};
+
+const getMimeType = (filePath: string): string => {
+	const detectedMimeType = lookup(filePath);
+	if (detectedMimeType === false) {
+		return 'application/octet-stream';
+	}
+	return detectedMimeType;
+};
+
+const getFileNameFromPath = (filePath: string): string => {
+	const name = filePath.split('/').pop();
+	if (name === undefined) {
+		return filePath;
+	}
+	return name;
+};
+
+const removeFirstPathComponent = (path: string): string => {
+	const pathComponents = path.split('/');
+	pathComponents.shift();
+	return pathComponents.join('/');
+};
+
+const uploadFileDataToS3 = async (
+	file: File,
+	fileData: FileResult,
+	relativePath: string,
+	logger: Logger,
+): Promise<File> => {
+	const fileStream = fs.createReadStream(fileData.path);
+	const s3Client = getS3Client();
+
+	try {
+		await s3Client.send(
+			new PutObjectCommand({
+				Bucket: file.s3Bucket.name,
+				Key: file.storageKey,
+				Body: fileStream,
+				ContentType: file.mimeType,
+			}),
+		);
+	} finally {
+		if (!fileStream.destroyed) {
+			fileStream.destroy();
+		}
+	}
+
+	logger.debug('Uploaded file data to S3 ', {
+		relativePath,
+		storageKey: file.storageKey,
+	});
+
+	return file;
+};
+
+const prepareProposalAttachments = async (
+	bulkUploadTask: BulkUploadTask,
+	logger: Logger,
+): Promise<Map<string, FileResult>> => {
+	const temporaryFileMap = new Map<string, FileResult>();
+
+	if (bulkUploadTask.attachmentsArchiveFile !== null) {
+		const temporaryAttachmentsArchiveFile =
+			await downloadFileDataToTemporaryStorage(
+				bulkUploadTask.attachmentsArchiveFile,
+				logger,
+			).catch((err: unknown) => {
+				logger.warn('Download of attachments archive file from S3 failed', {
+					err,
+				});
+				throw err;
+			});
+
+		try {
+			const attachmentsArchiveZip = new AsyncZip({
+				file: temporaryAttachmentsArchiveFile.path,
+			});
+			try {
+				const attachmentsArchiveEntries = await attachmentsArchiveZip
+					.entries()
+					.catch((err: unknown) => {
+						throw new Error(
+							`Failed to load the entries of attachments archive: ${String(err)}`,
+						);
+					});
+
+				await allNoLeaks(
+					Object.keys(attachmentsArchiveEntries).map(async (relativePath) => {
+						const normalizedPath = removeFirstPathComponent(relativePath);
+						const { [relativePath]: archiveEntry } = attachmentsArchiveEntries;
+						if (archiveEntry === undefined || archiveEntry.isDirectory) {
+							return;
+						}
+
+						try {
+							const temporaryFile = await tmp.file().catch(() => {
+								throw new Error(
+									`Unable to create temporary file for ${relativePath}`,
+								);
+							});
+							await attachmentsArchiveZip.extract(
+								relativePath,
+								temporaryFile.path,
+							);
+							temporaryFileMap.set(normalizedPath, temporaryFile);
+						} catch (err) {
+							logger.warn(`Failed to extract file from archive`, {
+								relativePath,
+								err,
+							});
+							throw err;
+						}
+					}),
+				);
+			} finally {
+				await attachmentsArchiveZip.close();
+			}
+		} catch (err) {
+			logger.warn('Failed to prepare attachments', { err });
+			throw err;
+		} finally {
+			try {
+				await temporaryAttachmentsArchiveFile.cleanup();
+			} catch (err: unknown) {
+				logger.warn(
+					`Cleanup of attachments archive file failed (${temporaryAttachmentsArchiveFile.path})`,
+					{ err },
+				);
+			}
+		}
+	}
+
+	return temporaryFileMap;
+};
+
+class AttachmentsManager {
+	private readonly attachmentPdcFiles = new Map<string, File>();
+
+	constructor(
+		private readonly dbConnection: TinyPg,
+		private readonly authContext: AuthContext,
+		private readonly attachmentTemporaryFiles: Map<string, FileResult>,
+		private readonly logger: Logger,
+	) {}
+
+	public async getAttachmentPdcFile(relativePath: string): Promise<File> {
+		const cachedPdcFile = this.attachmentPdcFiles.get(relativePath);
+		if (cachedPdcFile !== undefined) {
+			return cachedPdcFile;
+		}
+
+		const temporaryFile = this.attachmentTemporaryFiles.get(relativePath);
+		if (temporaryFile === undefined) {
+			throw new Error(
+				`No file found for attachment with path "${relativePath}"`,
+			);
+		}
+
+		const { size } = await stat(temporaryFile.path);
+		const mimeType = getMimeType(relativePath);
+		const s3Bucket = getDefaultS3Bucket();
+		const fileName = getFileNameFromPath(relativePath);
+		const file = await createFile(this.dbConnection, this.authContext, {
+			name: fileName,
+			mimeType,
+			size,
+			s3BucketName: s3Bucket.name,
+		});
+
+		await uploadFileDataToS3(file, temporaryFile, relativePath, this.logger);
+		this.attachmentPdcFiles.set(relativePath, file);
+		return file;
+	}
+
+	public cleanup(): void {
+		this.attachmentPdcFiles.clear();
+	}
+}
 
 export const processBulkUploadTask = async (
 	payload: unknown,
@@ -255,15 +439,17 @@ export const processBulkUploadTask = async (
 		});
 		return;
 	}
-	const taskRunnerAuthContext = await loadTaskRunnerAuthContext();
+	const systemUserAuthContext = await loadSystemUserAuthContext();
 	helpers.logger.debug(
 		`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
 	);
 	const bulkUploadTask = await loadBulkUploadTask(
 		db,
-		taskRunnerAuthContext,
+		systemUserAuthContext,
 		payload.bulkUploadId,
 	);
+
+	const taskAuthContext = await loadTaskAuthContext(bulkUploadTask);
 	if (bulkUploadTask.status !== TaskStatus.PENDING) {
 		helpers.logger.warn(
 			'Bulk upload cannot be processed because it is not in a PENDING state',
@@ -274,29 +460,50 @@ export const processBulkUploadTask = async (
 
 	await updateBulkUploadTask(
 		db,
-		null,
+		taskAuthContext,
 		{
 			status: TaskStatus.IN_PROGRESS,
 		},
 		bulkUploadTask.id,
 	);
 
-	const bulkUploadFile = await downloadFileDataToTemporaryStorage(
+	const temporaryProposalsDataFile = await downloadFileDataToTemporaryStorage(
 		bulkUploadTask.proposalsDataFile,
 		helpers.logger,
 	).catch(async (err: unknown) => {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
-		await createBulkUploadLog(db, taskRunnerAuthContext, {
+		await createBulkUploadLog(db, taskAuthContext, {
 			bulkUploadTaskId: bulkUploadTask.id,
 			isError: true,
 			details: getBulkUploadLogDetailsFromError(err),
 		});
 	});
 
-	if (bulkUploadFile === undefined) {
+	if (temporaryProposalsDataFile === undefined) {
 		await updateBulkUploadTask(
 			db,
-			null,
+			taskAuthContext,
+			{
+				status: TaskStatus.FAILED,
+			},
+			bulkUploadTask.id,
+		);
+		return;
+	}
+
+	const temporaryProposalAttachmentFiles = await prepareProposalAttachments(
+		bulkUploadTask,
+		helpers.logger,
+	).catch((err: unknown) => {
+		helpers.logger.warn('Preparation of proposal attachments failed', {
+			err,
+		});
+	});
+
+	if (temporaryProposalAttachmentFiles === undefined) {
+		await updateBulkUploadTask(
+			db,
+			taskAuthContext,
 			{
 				status: TaskStatus.FAILED,
 			},
@@ -307,56 +514,70 @@ export const processBulkUploadTask = async (
 
 	let bulkUploadHasFailed = false;
 	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(
-		bulkUploadFile.path,
+		temporaryProposalsDataFile.path,
 	);
 	const changemakerNameIndex = getChangemakerNameIndex(shortCodes);
 	const changemakerTaxIdIndex = getChangemakerTaxIdIndex(shortCodes);
 
 	try {
-		await assertBulkUploadTaskCsvIsValid(bulkUploadFile.path);
-		const opportunity =
-			await createOpportunityForBulkUploadTask(bulkUploadTask);
-		const applicationForm = await createApplicationForm(db, null, {
-			opportunityId: opportunity.id,
-		});
-
-		const applicationFormFields =
-			await createApplicationFormFieldsForBulkUploadTask(
-				bulkUploadFile.path,
-				applicationForm.id,
-			);
-		const csvReadStream = fs.createReadStream(bulkUploadFile.path);
-		const STARTING_ROW = 2;
-		const parser = parse({
-			from: STARTING_ROW,
-		});
-		csvReadStream.pipe(parser);
-		let recordNumber = 0;
-
-		// This is a monkey patch to create an "auth context" for the sole purpose
-		// of populating `createdBy`.  This is shallow, and if we ever update our create
-		// queries to require a full auth context, this will not be sufficient.
-		const userAgentCreateAuthContext = {
-			user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
-			role: {
-				isAdministrator: false,
-			},
-		};
+		await assertBulkUploadTaskCsvIsValid(temporaryProposalsDataFile.path);
 
 		await db.transaction(async (transactionDb) => {
+			const attachmentsManager = new AttachmentsManager(
+				transactionDb,
+				taskAuthContext,
+				temporaryProposalAttachmentFiles,
+				helpers.logger,
+			);
+			const opportunity = await createOpportunity(
+				transactionDb,
+				taskAuthContext,
+				{
+					title: `Bulk Upload (${bulkUploadTask.createdAt})`,
+					funderShortCode: bulkUploadTask.funderShortCode,
+				},
+			);
+			const applicationForm = await createApplicationForm(
+				transactionDb,
+				taskAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+			const proposedApplicationFormFields =
+				await generateWritableApplicationFormFields(
+					temporaryProposalsDataFile.path,
+					applicationForm.id,
+				);
+			const applicationFormFields = await allNoLeaks(
+				proposedApplicationFormFields.map(
+					async (writableApplicationFormField) =>
+						await createApplicationFormField(
+							transactionDb,
+							taskAuthContext,
+							writableApplicationFormField,
+						),
+				),
+			);
+			const csvReadStream = fs.createReadStream(
+				temporaryProposalsDataFile.path,
+			);
+			const STARTING_ROW = 2;
+			const parser = parse({
+				from: STARTING_ROW,
+			});
+			csvReadStream.pipe(parser);
+			let recordNumber = 0;
+
 			await parser.forEach(async (record: string[]) => {
 				recordNumber += SINGLE_STEP;
-				const proposal = await createProposal(
-					transactionDb,
-					userAgentCreateAuthContext,
-					{
-						opportunityId: opportunity.id,
-						externalId: `${recordNumber}`,
-					},
-				);
+				const proposal = await createProposal(transactionDb, taskAuthContext, {
+					opportunityId: opportunity.id,
+					externalId: `${recordNumber}`,
+				});
 				const proposalVersion = await createProposalVersion(
 					transactionDb,
-					userAgentCreateAuthContext,
+					taskAuthContext,
 					{
 						proposalId: proposal.id,
 						applicationFormId: applicationForm.id,
@@ -369,22 +590,19 @@ export const processBulkUploadTask = async (
 					[changemakerTaxIdIndex]: changemakerTaxId,
 				} = record;
 				if (changemakerTaxId !== undefined) {
-					const changemaker = await createOrLoadChangemaker(
+					const changemaker = await loadOrCreateChangemaker(
 						transactionDb,
-						taskRunnerAuthContext,
+						taskAuthContext,
 						{
-							name: changemakerName,
+							name: changemakerName ?? 'Unnamed Organization',
 							taxId: changemakerTaxId,
 							keycloakOrganizationId: null,
 						},
 					);
-
-					if (changemaker !== undefined) {
-						await createChangemakerProposal(transactionDb, null, {
-							changemakerId: changemaker.id,
-							proposalId: proposal.id,
-						});
-					}
+					await createChangemakerProposal(transactionDb, taskAuthContext, {
+						changemakerId: changemaker.id,
+						proposalId: proposal.id,
+					});
 				}
 
 				await allNoLeaks(
@@ -395,25 +613,44 @@ export const processBulkUploadTask = async (
 								'There is no form field associated with this column',
 							);
 						}
-						const isValid = fieldValueIsValid(
+
+						let processedFieldValue = fieldValue;
+						let isValid = fieldValueIsValid(
 							fieldValue,
 							applicationFormField.baseField.dataType,
 						);
-						return await createProposalFieldValue(transactionDb, null, {
-							proposalVersionId: proposalVersion.id,
-							applicationFormFieldId: applicationFormField.id,
-							value: fieldValue,
-							position: index,
-							isValid,
-							goodAsOf: null,
-						});
+
+						// File attachments are the one unique case where we need to convert the bulk upload value
+						// into a PDC File ID.  The value in the CSV is the relative path of the file within the
+						// attachments archive.
+						if (
+							applicationFormField.baseField.dataType === BaseFieldDataType.FILE
+						) {
+							const pdcFile =
+								await attachmentsManager.getAttachmentPdcFile(fieldValue);
+							processedFieldValue = pdcFile.id.toString();
+							isValid = true;
+						}
+
+						return await createProposalFieldValue(
+							transactionDb,
+							taskAuthContext,
+							{
+								proposalVersionId: proposalVersion.id,
+								applicationFormFieldId: applicationFormField.id,
+								value: processedFieldValue,
+								position: index,
+								isValid,
+								goodAsOf: null,
+							},
+						);
 					}),
 				);
 			});
 		});
 	} catch (err) {
 		helpers.logger.info('Bulk upload has failed', { err });
-		await createBulkUploadLog(db, taskRunnerAuthContext, {
+		await createBulkUploadLog(db, taskAuthContext, {
 			bulkUploadTaskId: bulkUploadTask.id,
 			isError: true,
 			details: getBulkUploadLogDetailsFromError(err),
@@ -422,11 +659,11 @@ export const processBulkUploadTask = async (
 	}
 
 	try {
-		await bulkUploadFile.cleanup();
+		await temporaryProposalsDataFile.cleanup();
 	} catch (err) {
-		const message = `Cleanup of a temporary file failed (${bulkUploadFile.path})`;
+		const message = `Cleanup of a temporary file failed (${temporaryProposalsDataFile.path})`;
 		helpers.logger.warn(message, { err });
-		await createBulkUploadLog(db, taskRunnerAuthContext, {
+		await createBulkUploadLog(db, taskAuthContext, {
 			bulkUploadTaskId: bulkUploadTask.id,
 			// `isError` is intended for UIs to find an explanation for bulk upload failure. Not this.
 			isError: false,
@@ -436,10 +673,21 @@ export const processBulkUploadTask = async (
 		});
 	}
 
+	try {
+		await cleanupTemporaryFileMap(
+			temporaryProposalAttachmentFiles,
+			helpers.logger,
+		);
+	} catch (err) {
+		helpers.logger.warn('Cleanup of temporary attachment files failed', {
+			err,
+		});
+	}
+
 	if (bulkUploadHasFailed) {
 		await updateBulkUploadTask(
 			db,
-			null,
+			taskAuthContext,
 			{
 				status: TaskStatus.FAILED,
 			},
@@ -448,7 +696,7 @@ export const processBulkUploadTask = async (
 	} else {
 		await updateBulkUploadTask(
 			db,
-			null,
+			taskAuthContext,
 			{
 				status: TaskStatus.COMPLETED,
 			},

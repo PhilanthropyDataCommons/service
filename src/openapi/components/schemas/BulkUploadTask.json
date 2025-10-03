@@ -44,6 +44,15 @@
 			"type": "string",
 			"format": "date-time",
 			"readOnly": true
+		},
+		"logs": {
+			"type": "array",
+			"properties": {
+				"entries": {
+					"$ref": "./BulkUploadLog.json"
+				}
+			},
+			"readOnly": true
 		}
 	},
 	"required": [
@@ -52,6 +61,7 @@
 		"proposalsDataFileId",
 		"status",
 		"createdBy",
-		"createdAt"
+		"createdAt",
+		"logs"
 	]
 }

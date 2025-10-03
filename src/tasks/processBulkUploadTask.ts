@@ -25,6 +25,8 @@ import { TaskStatus, isProcessBulkUploadJobPayload } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
 import { SINGLE_STEP } from '../constants';
+import { createBulkUploadLog } from '../database/operations/bulkUploadLogs/createBulkUploadLog';
+import { getBulkUploadLogDetailsFromError } from './getBulkUploadLogDetailsFromError';
 import type TinyPg from 'tinypg';
 import type { JobHelpers, Logger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
@@ -46,8 +48,8 @@ const downloadFileDataToTemporaryStorage = async (
 	file: File,
 	logger: Logger,
 ): Promise<FileResult> => {
-	const temporaryFile = await tmp.file().catch(() => {
-		throw new Error('Unable to create a temporary file');
+	const temporaryFile = await tmp.file().catch((err: unknown) => {
+		throw new Error('Unable to create a temporary file', { cause: err });
 	});
 
 	const writeStream = fs.createWriteStream(temporaryFile.path, {
@@ -68,7 +70,7 @@ const downloadFileDataToTemporaryStorage = async (
 				file,
 			});
 			await temporaryFile.cleanup();
-			throw new Error('Unable to load the s3 object');
+			throw new Error('Failed to download an object from S3', { cause: err });
 		});
 	if (s3Response.Body === undefined) {
 		throw new Error('S3 did not return a body');
@@ -282,8 +284,13 @@ export const processBulkUploadTask = async (
 	const bulkUploadFile = await downloadFileDataToTemporaryStorage(
 		bulkUploadTask.proposalsDataFile,
 		helpers.logger,
-	).catch((err: unknown) => {
+	).catch(async (err: unknown) => {
 		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
+		await createBulkUploadLog(db, taskRunnerAuthContext, {
+			bulkUploadTaskId: bulkUploadTask.id,
+			isError: true,
+			details: getBulkUploadLogDetailsFromError(err),
+		});
 	});
 
 	if (bulkUploadFile === undefined) {
@@ -406,16 +413,27 @@ export const processBulkUploadTask = async (
 		});
 	} catch (err) {
 		helpers.logger.info('Bulk upload has failed', { err });
+		await createBulkUploadLog(db, taskRunnerAuthContext, {
+			bulkUploadTaskId: bulkUploadTask.id,
+			isError: true,
+			details: getBulkUploadLogDetailsFromError(err),
+		});
 		bulkUploadHasFailed = true;
 	}
 
 	try {
 		await bulkUploadFile.cleanup();
 	} catch (err) {
-		helpers.logger.warn(
-			`Cleanup of a temporary file failed (${bulkUploadFile.path})`,
-			{ err },
-		);
+		const message = `Cleanup of a temporary file failed (${bulkUploadFile.path})`;
+		helpers.logger.warn(message, { err });
+		await createBulkUploadLog(db, taskRunnerAuthContext, {
+			bulkUploadTaskId: bulkUploadTask.id,
+			// `isError` is intended for UIs to find an explanation for bulk upload failure. Not this.
+			isError: false,
+			details: getBulkUploadLogDetailsFromError(
+				new Error(message, { cause: err }),
+			),
+		});
 	}
 
 	if (bulkUploadHasFailed) {

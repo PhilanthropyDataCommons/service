@@ -6,6 +6,7 @@ DECLARE
   source_json JSONB;
   funder_json JSONB;
   proposals_data_file_json JSONB;
+  bulk_upload_logs_json JSONB;
 BEGIN
   SELECT source_to_json(sources.*)
   INTO source_json
@@ -22,6 +23,12 @@ BEGIN
   FROM files
   WHERE files.id = bulk_upload_task.proposals_data_file_id;
 
+  SELECT jsonb_build_array(bulk_upload_log_to_json(bulk_upload_logs.*))
+  INTO bulk_upload_logs_json
+  FROM bulk_upload_logs
+  WHERE bulk_upload_logs.bulk_upload_task_id = bulk_upload_task.id
+  ORDER BY created_at DESC;
+
   RETURN jsonb_build_object(
     'id', bulk_upload_task.id,
     'sourceId', bulk_upload_task.source_id,
@@ -32,7 +39,8 @@ BEGIN
 		'funder', funder_json,
     'status', bulk_upload_task.status,
     'createdBy', bulk_upload_task.created_by,
-    'createdAt', to_json(bulk_upload_task.created_at)::jsonb
+    'createdAt', to_json(bulk_upload_task.created_at)::jsonb,
+    'logs', COALESCE(bulk_upload_logs_json, '[]'::jsonb)
   );
 END;
 $$ LANGUAGE plpgsql;

@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for changemakers seeking grants.",
-		"version": "0.24.0",
+		"version": "0.25.0",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -49,6 +49,12 @@
 			},
 			"BulkUploadTaskBundle": {
 				"$ref": "./components/schemas/BulkUploadTaskBundle.json"
+			},
+			"BulkUploadTaskLog": {
+				"$ref": "./components/schemas/BulkUploadLog.json"
+			},
+			"BulkUploadTaskLogDetails": {
+				"$ref": "./components/schemas/BulkUploadLogDetails.json"
 			},
 			"keycloakOrganizationId": {
 				"$ref": "./components/schemas/keycloakOrganizationId.json"

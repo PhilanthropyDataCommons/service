@@ -155,6 +155,8 @@ describe('processBulkUploadTask', () => {
 		expect(updatedBulkUploadTask).toMatchObject({
 			status: TaskStatus.FAILED,
 		});
+		expect(updatedBulkUploadTask).toHaveProperty('logs');
+		expect(updatedBulkUploadTask.logs.length).toBeGreaterThan(0);
 	});
 
 	it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
@@ -235,6 +237,8 @@ describe('processBulkUploadTask', () => {
 		expect(updatedBulkUploadTask).toMatchObject({
 			status: TaskStatus.FAILED,
 		});
+		expect(updatedBulkUploadTask).toHaveProperty('logs');
+		expect(updatedBulkUploadTask.logs.length).toBeGreaterThan(0);
 	});
 
 	it('should have a proper failed state if the csv is empty', async () => {

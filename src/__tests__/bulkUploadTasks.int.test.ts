@@ -339,6 +339,7 @@ describe('/tasks/bulkUploads', () => {
 				status: 'pending',
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
+				logs: [],
 			});
 			expect(after.count).toEqual(1);
 		});

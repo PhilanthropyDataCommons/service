@@ -7,20 +7,23 @@ import {
 	updateBaseFieldsCopyTask,
 } from '../database/operations';
 import type { BaseField } from '../types';
-import type { JobHelpers, Logger } from 'graphile-worker';
+import type { JobHelpers, Logger as GraphileLogger } from 'graphile-worker';
 
 export const fetchBaseFieldsFromRemote = async (
 	pdcApiUrl: string,
-	logger: Logger,
+	graphileLogger: GraphileLogger,
 ): Promise<BaseField[]> => {
 	try {
 		const response = await fetch(`${pdcApiUrl}/baseFields`);
 
 		if (!response.ok) {
-			logger.error('Failed to fetch base fields from remote PDC instance', {
-				status: response.status,
-				statusText: response.statusText,
-			});
+			graphileLogger.error(
+				'Failed to fetch base fields from remote PDC instance',
+				{
+					status: response.status,
+					statusText: response.statusText,
+				},
+			);
 			throw new Error(
 				`Failed to fetch base fields: ${response.status} ${response.statusText}`,
 			);
@@ -29,17 +32,23 @@ export const fetchBaseFieldsFromRemote = async (
 		const data = await response.json();
 
 		if (!Array.isArray(data) || !data.every((item) => isBaseField(item))) {
-			logger.error('Invalid basefield data received from remote PDC instance', {
-				data,
-			});
+			graphileLogger.error(
+				'Invalid basefield data received from remote PDC instance',
+				{
+					data,
+				},
+			);
 			throw new Error('Invalid data received from remote PDC instance');
 		}
 
 		return data;
 	} catch (err) {
-		logger.error('Error fetching base fields from remote PDC instance', {
-			err,
-		});
+		graphileLogger.error(
+			'Error fetching base fields from remote PDC instance',
+			{
+				err,
+			},
+		);
 		throw new Error('An error occurred while fetching base fields', {
 			cause: err,
 		});
@@ -83,13 +92,14 @@ export const copyBaseFields = async (
 	payload: unknown,
 	helpers: JobHelpers,
 ): Promise<void> => {
+	const { logger: graphileLogger } = helpers;
 	if (!isCopyBaseFieldsJobPayload(payload)) {
-		helpers.logger.error('Malformed basefields copy job payload', {
+		graphileLogger.error('Malformed basefields copy job payload', {
 			errors: isCopyBaseFieldsJobPayload.errors ?? [],
 		});
 		return;
 	}
-	helpers.logger.debug(
+	graphileLogger.debug(
 		`Started BasefieldsCopy Job for BaseFieldsCopyTask ID ${payload.baseFieldsCopyTaskId}`,
 	);
 	const baseFieldsCopyTask = await loadBaseFieldsCopyTask(
@@ -99,7 +109,7 @@ export const copyBaseFields = async (
 	);
 
 	if (baseFieldsCopyTask.status !== TaskStatus.PENDING) {
-		helpers.logger.warn(
+		graphileLogger.warn(
 			'Basefields Copy cannot be processed because it is not in a PENDING state',
 			{ baseFieldsCopyTask },
 		);
@@ -119,9 +129,9 @@ export const copyBaseFields = async (
 
 	const remoteBaseFields = await fetchBaseFieldsFromRemote(
 		baseFieldsCopyTask.pdcApiUrl,
-		helpers.logger,
+		graphileLogger,
 	).catch(async (err: unknown) => {
-		helpers.logger.warn('Fetching data from remote instance failed', { err });
+		graphileLogger.warn('Fetching data from remote instance failed', { err });
 		await updateBaseFieldsCopyTask(
 			db,
 			null,
@@ -143,7 +153,7 @@ export const copyBaseFields = async (
 			}),
 		);
 	} catch (err) {
-		helpers.logger.info('Basefields copy has failed', { err });
+		graphileLogger.info('Basefields copy has failed', { err });
 		taskFailed = true;
 	}
 

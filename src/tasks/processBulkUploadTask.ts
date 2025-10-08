@@ -28,7 +28,7 @@ import { allNoLeaks } from '../promises';
 import { SINGLE_STEP } from '../constants';
 import { getBulkUploadLogDetailsFromError } from './getBulkUploadLogDetailsFromError';
 import type TinyPg from 'tinypg';
-import type { JobHelpers, Logger } from 'graphile-worker';
+import type { JobHelpers, Logger as GraphileLogger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
 	ApplicationFormField,
@@ -46,7 +46,7 @@ const CHANGEMAKER_NAME_SHORT_CODE = 'organization_name';
 
 const downloadFileDataToTemporaryStorage = async (
 	file: File,
-	logger: Logger,
+	graphileLogger: GraphileLogger,
 ): Promise<FileResult> => {
 	const temporaryFile = await tmp.file().catch((err: unknown) => {
 		throw new Error('Unable to create a temporary file', { cause: err });
@@ -65,7 +65,7 @@ const downloadFileDataToTemporaryStorage = async (
 			Bucket: file.s3Bucket.name,
 		})
 		.catch(async (err: unknown) => {
-			logger.error('Failed to load an object from S3', {
+			graphileLogger.error('Failed to load an object from S3', {
 				err,
 				file,
 			});
@@ -249,14 +249,15 @@ export const processBulkUploadTask = async (
 	payload: unknown,
 	helpers: JobHelpers,
 ): Promise<void> => {
+	const { logger: graphileLogger } = helpers;
 	if (!isProcessBulkUploadJobPayload(payload)) {
-		helpers.logger.error('Malformed bulk upload job payload', {
+		graphileLogger.error('Malformed bulk upload job payload', {
 			errors: isProcessBulkUploadJobPayload.errors ?? [],
 		});
 		return;
 	}
 	const taskRunnerAuthContext = await loadTaskRunnerAuthContext();
-	helpers.logger.debug(
+	graphileLogger.debug(
 		`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
 	);
 	const bulkUploadTask = await loadBulkUploadTask(
@@ -265,7 +266,7 @@ export const processBulkUploadTask = async (
 		payload.bulkUploadId,
 	);
 	if (bulkUploadTask.status !== TaskStatus.PENDING) {
-		helpers.logger.warn(
+		graphileLogger.warn(
 			'Bulk upload cannot be processed because it is not in a PENDING state',
 			{ bulkUploadTask },
 		);
@@ -283,9 +284,9 @@ export const processBulkUploadTask = async (
 
 	const bulkUploadFile = await downloadFileDataToTemporaryStorage(
 		bulkUploadTask.proposalsDataFile,
-		helpers.logger,
+		graphileLogger,
 	).catch(async (err: unknown) => {
-		helpers.logger.warn('Download of bulk upload file from S3 failed', { err });
+		graphileLogger.warn('Download of bulk upload file from S3 failed', { err });
 		await createBulkUploadLog(db, taskRunnerAuthContext, {
 			bulkUploadTaskId: bulkUploadTask.id,
 			isError: true,
@@ -412,7 +413,7 @@ export const processBulkUploadTask = async (
 			});
 		});
 	} catch (err) {
-		helpers.logger.info('Bulk upload has failed', { err });
+		graphileLogger.info('Bulk upload has failed', { err });
 		await createBulkUploadLog(db, taskRunnerAuthContext, {
 			bulkUploadTaskId: bulkUploadTask.id,
 			isError: true,
@@ -425,7 +426,7 @@ export const processBulkUploadTask = async (
 		await bulkUploadFile.cleanup();
 	} catch (err) {
 		const message = `Cleanup of a temporary file failed (${bulkUploadFile.path})`;
-		helpers.logger.warn(message, { err });
+		graphileLogger.warn(message, { err });
 		await createBulkUploadLog(db, taskRunnerAuthContext, {
 			bulkUploadTaskId: bulkUploadTask.id,
 			// `isError` is intended for UIs to find an explanation for bulk upload failure. Not this.

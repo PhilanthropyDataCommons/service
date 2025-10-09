@@ -68,7 +68,7 @@
 		"copyfiles": "^2.4.1",
 		"dclint": "^3.1.0",
 		"eslint": "^9.37.0",
-		"eslint-config-love": "^130.0.0",
+		"eslint-config-love": "^133.0.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-import-resolver-typescript": "^4.4.4",
 		"eslint-plugin-sort-exports": "^0.9.1",

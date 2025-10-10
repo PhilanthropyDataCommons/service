@@ -1,2 +1,2 @@
-export * from './adaptFilters';
+export * from './expandFilters';
 export * from './getLimitValues';

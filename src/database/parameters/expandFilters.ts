@@ -46,6 +46,7 @@ export const expandBaseFieldSensitivityParameter = (
 			(value): value is BaseFieldSensitivityClassification => value !== null,
 		);
 
+	// Is .errors scoped correctly? Do I have a private copy here? Are all the errors here?
 	if (isBaseFieldSensitivityClassification.errors !== undefined) {
 		throw new InputValidationError(
 			'Invalid BaseFieldSensitivityClassification values found',

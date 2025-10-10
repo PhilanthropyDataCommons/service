@@ -1,13 +1,13 @@
 import { db } from '../../db';
-import { BaseFieldSensitivityClassification } from '../../../types';
+import { BaseFieldSensitivityClassification as Sensitivity } from '../../../types';
 import type { ExpandedParameterFilter } from '../../parameters';
 import type { BaseField, JsonResultSet } from '../../../types';
 
 export const loadBaseFields = async (
-	sensitivityFilter: ExpandedParameterFilter<BaseFieldSensitivityClassification> = {
+	sensitivityFilter: ExpandedParameterFilter<Sensitivity> = {
 		name: 'Do we even need this?',
 		isNegated: false,
-		list: Object.values(BaseFieldSensitivityClassification),
+		list: Object.values(Sensitivity).filter((c) => c !== Sensitivity.FORBIDDEN),
 	},
 ): Promise<BaseField[]> =>
 	(

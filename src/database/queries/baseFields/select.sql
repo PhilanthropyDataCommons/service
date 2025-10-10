@@ -5,7 +5,14 @@ WHERE
 		WHEN :sensitivityClassification::sensitivity_classification [] IS NULL
 		THEN TRUE
 		ELSE
-			sensitivity_classification = any(
-				:sensitivityClassification::sensitivity_classification []
-			)
+			CASE
+				WHEN :isNegated THEN
+					NOT (sensitivity_classification = any(
+						:sensitivityClassification::sensitivity_classification []
+					))
+				ELSE
+					sensitivity_classification = any(
+						:sensitivityClassification::sensitivity_classification []
+					)
+			END
 	END;

@@ -3,7 +3,7 @@ import { BaseFieldSensitivityClassification } from '../../../types';
 import type { BaseField, JsonResultSet } from '../../../types';
 
 export const loadBaseFields = async (
-	sensitivityClassification: string[] = Object.values(
+	sensitivityClassification: BaseFieldSensitivityClassification[] = Object.values(
 		BaseFieldSensitivityClassification,
 	),
 ): Promise<BaseField[]> =>

@@ -29,6 +29,27 @@
 			"$ref": "./File.json",
 			"readOnly": true
 		},
+		"attachmentsArchiveFileId": {
+			"oneOf": [
+				{
+					"$ref": "./id.json"
+				},
+				{
+					"type": "null"
+				}
+			]
+		},
+		"attachmentsArchiveFile": {
+			"oneOf": [
+				{
+					"$ref": "./File.json"
+				},
+				{
+					"type": "null"
+				}
+			],
+			"readOnly": true
+		},
 		"status": {
 			"type": "string",
 			"readOnly": true,

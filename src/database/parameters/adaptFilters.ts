@@ -6,13 +6,12 @@ import { InputValidationError } from '../../errors';
 
 /**
  * An expanded version of a simple Query Parameter supporting a list of values and negation.
- * Negation will only work across the full list, not on each element. Three parameters for postgres
+ * Negation will only work across the full list, not on each element. Two parameters for postgres
  * are herein contained in order to support this flexibility.
  *
  * TODO: can we have something akin to `E extends enum`? Enum isn't a class or type.
  */
 export interface ExpandedParameterFilter<E> {
-	name: string;
 	isNegated: boolean;
 	list: E[];
 }
@@ -23,15 +22,13 @@ export interface ExpandedParameterFilter<E> {
  * @returns an ExpandedParameterFilter for PostgreSQL.
  * @throws Error when a comma-delimited string in value is not a BaseFieldSensivityClassification.
  */
-export const expandBaseFieldSensitivityParameter = (parameter: {
-	name: string;
-	value: string;
-}): ExpandedParameterFilter<BaseFieldSensitivityClassification> => {
+export const expandBaseFieldSensitivityParameter = (
+	value: string,
+): ExpandedParameterFilter<BaseFieldSensitivityClassification> => {
 	const FIRST_INDEX = 0;
 	const INDEX_AFTER_ONE_CHAR = 1;
-	const { name } = parameter;
-	const isNegated = parameter.value.startsWith('!');
-	const rawList = parameter.value.split(',');
+	const isNegated = value.startsWith('!');
+	const rawList = value.split(',');
 	if (isNegated && rawList[FIRST_INDEX] !== undefined) {
 		rawList[FIRST_INDEX] = rawList[FIRST_INDEX].substring(INDEX_AFTER_ONE_CHAR);
 	}
@@ -57,7 +54,6 @@ export const expandBaseFieldSensitivityParameter = (parameter: {
 	}
 
 	return {
-		name,
 		isNegated,
 		list,
 	};

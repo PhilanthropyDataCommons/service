@@ -5,7 +5,6 @@ import type { BaseField, JsonResultSet } from '../../../types';
 
 export const loadBaseFields = async (
 	sensitivityFilter: ExpandedParameterFilter<Sensitivity> = {
-		name: 'Do we even need this?',
 		isNegated: false,
 		list: Object.values(Sensitivity).filter((c) => c !== Sensitivity.FORBIDDEN),
 	},

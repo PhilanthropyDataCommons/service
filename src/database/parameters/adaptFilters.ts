@@ -2,6 +2,7 @@ import {
 	type BaseFieldSensitivityClassification,
 	isBaseFieldSensitivityClassification,
 } from '../../types';
+import { InputValidationError } from '../../errors';
 
 /**
  * An expanded version of a simple Query Parameter supporting a list of values and negation.
@@ -27,7 +28,6 @@ export const expandBaseFieldSensitivityParameter = (parameter: {
 	value: string;
 }): ExpandedParameterFilter<BaseFieldSensitivityClassification> => {
 	const FIRST_INDEX = 0;
-	const ZERO_ELEMENTS = 0;
 	const INDEX_AFTER_ONE_CHAR = 1;
 	const { name } = parameter;
 	const isNegated = parameter.value.startsWith('!');
@@ -37,25 +37,23 @@ export const expandBaseFieldSensitivityParameter = (parameter: {
 	}
 
 	// Filter out values that are not actually BaseFieldSensitivityClassification
-	const errors: Error[] = [];
 	const list = rawList
 		.map((s: string): BaseFieldSensitivityClassification | null => {
 			const normalized = s.trim().toLowerCase();
 			if (isBaseFieldSensitivityClassification(normalized)) {
 				return normalized;
 			}
-			errors.push(
-				new Error(`${s} is not a BaseFieldSensitivityClassification`),
-			);
 			return null;
 		})
 		.filter(
 			(value): value is BaseFieldSensitivityClassification => value !== null,
 		);
 
-	// TODO: See if we can use AJV and InputValidationError here.
-	if (errors.length > ZERO_ELEMENTS) {
-		throw new Error(`Invalid values: ${JSON.stringify(errors)}`);
+	if (isBaseFieldSensitivityClassification.errors !== undefined) {
+		throw new InputValidationError(
+			'Invalid BaseFieldSensitivityClassification values found',
+			isBaseFieldSensitivityClassification.errors ?? [],
+		);
 	}
 
 	return {

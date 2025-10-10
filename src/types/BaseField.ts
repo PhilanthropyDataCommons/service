@@ -47,6 +47,11 @@ interface BaseField {
 	readonly localizations: Record<string, BaseFieldLocalization>;
 	readonly createdAt: string;
 }
+const baseFieldSensitivityClassificationSchema: JSONSchemaType<BaseFieldSensitivityClassification> =
+	{
+		type: 'string',
+		enum: Object.values(BaseFieldSensitivityClassification),
+	};
 
 const baseFieldSchema: JSONSchemaType<BaseField> = {
 	type: 'object',
@@ -77,6 +82,8 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 			 */
 			nullable: true as false,
 		},
+		// TODO: would be nice to re-use the baseFieldSensitivityClassificationSchema above
+		// Just need to figure out the magic syntax.
 		sensitivityClassification: {
 			type: 'string',
 			enum: Object.values(BaseFieldSensitivityClassification),
@@ -137,6 +144,8 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 			 */
 			nullable: true as false,
 		},
+		// TODO: would be nice to re-use the baseFieldSensitivityClassificationSchema above
+		// Just need to figure out the magic syntax.
 		sensitivityClassification: {
 			type: 'string',
 			enum: Object.values(BaseFieldSensitivityClassification),
@@ -154,19 +163,9 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 
-/**
- * Type guard to tell if a given string is a member of enum BaseFieldSensitivityClassification
- * @param str The string to test
- * @returns true when the string is found as a value in the enum
- */
-function isBaseFieldSensitivityClassification(
-	str: string,
-): str is BaseFieldSensitivityClassification {
-	const enumValues = Object.values(
-		BaseFieldSensitivityClassification,
-	) as string[];
-	return enumValues.includes(str);
-}
+const isBaseFieldSensitivityClassification = ajv.compile(
+	baseFieldSensitivityClassificationSchema,
+);
 
 export {
 	type BaseField,

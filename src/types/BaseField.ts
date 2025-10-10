@@ -154,12 +154,27 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 
+/**
+ * Type guard to tell if a given string is a member of enum BaseFieldSensitivityClassification
+ * @param str The string to test
+ * @returns true when the string is found as a value in the enum
+ */
+function isBaseFieldSensitivityClassification(
+	str: string,
+): str is BaseFieldSensitivityClassification {
+	const enumValues = Object.values(
+		BaseFieldSensitivityClassification,
+	) as string[];
+	return enumValues.includes(str);
+}
+
 export {
 	type BaseField,
 	BaseFieldSensitivityClassification,
 	BaseFieldCategory,
 	baseFieldSchema,
 	isBaseField,
+	isBaseFieldSensitivityClassification,
 	type InternallyWritableBaseField,
 	type WritableBaseField,
 	isWritableBaseField,

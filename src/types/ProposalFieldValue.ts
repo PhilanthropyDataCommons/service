@@ -1,5 +1,6 @@
 import type { JSONSchemaType } from 'ajv';
 import type { ApplicationFormField } from './ApplicationFormField';
+import type { File } from './File';
 import type { Writable } from './Writable';
 
 interface ProposalFieldValue {
@@ -8,6 +9,7 @@ interface ProposalFieldValue {
 	applicationFormFieldId: number;
 	position: number;
 	value: string;
+	readonly file?: File;
 	goodAsOf: string | null;
 	readonly createdAt: string;
 	readonly applicationFormField: ApplicationFormField;

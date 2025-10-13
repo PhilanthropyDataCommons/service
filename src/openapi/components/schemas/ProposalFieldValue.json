@@ -27,6 +27,11 @@
 			"type": "string",
 			"example": "Some arbitrary value"
 		},
+		"file": {
+			"oneOf": [{ "$ref": "./File.json" }, { "type": "null" }],
+			"readOnly": true,
+			"description": "For file fields, this contains the File object if the file was created by the same user as the proposal version and the value is a valid file ID. Otherwise this property is null or omitted."
+		},
 		"goodAsOf": {
 			"type": ["string", "null"],
 			"format": "date-time"

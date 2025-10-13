@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.25.1 2025-10-17
+
+### Added
+
+- `ProposalFieldValue` now includes a `file` attribute if the field value references a valid `File`.
+
 ## 0.25.1 2025-10-10
 
 ### Added

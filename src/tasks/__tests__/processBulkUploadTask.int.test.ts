@@ -449,6 +449,7 @@ describe('processBulkUploadTask', () => {
 									position: 0,
 									proposalVersionId: 2,
 									value: 'foo@example.com',
+									file: null,
 								},
 								{
 									applicationFormField: {
@@ -480,6 +481,7 @@ describe('processBulkUploadTask', () => {
 									position: 1,
 									proposalVersionId: 2,
 									value: 'Bar Inc.',
+									file: null,
 								},
 								{
 									applicationFormField: {
@@ -511,6 +513,7 @@ describe('processBulkUploadTask', () => {
 									position: 2,
 									proposalVersionId: 2,
 									value: twoTxtFile.id.toString(),
+									file: twoTxtFile,
 								},
 							],
 							id: 2,
@@ -565,6 +568,7 @@ describe('processBulkUploadTask', () => {
 									position: 0,
 									proposalVersionId: 1,
 									value: 'foo@example.com',
+									file: null,
 								},
 								{
 									applicationFormField: {
@@ -596,6 +600,7 @@ describe('processBulkUploadTask', () => {
 									position: 1,
 									proposalVersionId: 1,
 									value: 'Foo LLC.',
+									file: null,
 								},
 								{
 									applicationFormField: {
@@ -627,6 +632,7 @@ describe('processBulkUploadTask', () => {
 									position: 2,
 									proposalVersionId: 1,
 									value: oneTxtFile.id.toString(),
+									file: oneTxtFile,
 								},
 							],
 							id: 1,

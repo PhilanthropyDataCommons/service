@@ -7,6 +7,10 @@ RETURNS jsonb AS $$
 DECLARE
 	is_forbidden BOOLEAN;
 	application_form_field_json JSONB;
+	base_field_data_type TEXT;
+	file_json JSONB;
+	value_json JSONB;
+	file_id INTEGER;
 BEGIN
 	SELECT EXISTS (
 		SELECT 1
@@ -26,6 +30,38 @@ BEGIN
 	FROM application_form_fields
 	WHERE application_form_fields.id = proposal_field_value.application_form_field_id;
 
+	-- Get the base field data type
+	SELECT base_fields.data_type
+	INTO base_field_data_type
+	FROM application_form_fields
+	JOIN base_fields ON application_form_fields.base_field_short_code = base_fields.short_code
+	WHERE application_form_fields.id = proposal_field_value.application_form_field_id;
+
+	-- Load a file if (1) this is a file field, (2) the value is a valid file ID
+	-- and (3) the file is owned by the same user who created the proposal version
+	IF base_field_data_type = 'file' THEN
+		BEGIN
+			-- Cast the value to an integer so we can use it to look up the file later
+			file_id := (proposal_field_value.value)::INTEGER;
+		EXCEPTION
+			-- This will *only* catch cases when the text isn't a valid integer, which
+			-- we want to gracefully treat as simply having no file.  file_id is already
+			-- null, but I figure setting it here makes the intent as clear as possible.
+			WHEN invalid_text_representation THEN
+				file_id := NULL;
+		END;
+
+		IF file_id IS NOT NULL THEN
+			SELECT file_to_json(files.*)
+			INTO file_json
+			FROM files
+			JOIN proposal_versions ON proposal_versions.id = proposal_field_value.proposal_version_id
+			WHERE files.id = file_id
+				AND files.created_by = proposal_versions.created_by;
+		END IF;
+	END IF;
+
+	-- Build the JSON object with file property (jsonb_strip_nulls removes the file key if it's null)
 	RETURN jsonb_build_object(
 		'id', proposal_field_value.id,
 		'proposalVersionId', proposal_field_value.proposal_version_id,
@@ -33,6 +69,7 @@ BEGIN
 		'applicationFormField', application_form_field_json,
 		'position', proposal_field_value.position,
 		'value', proposal_field_value.value,
+		'file', file_json,
 		'goodAsOf', proposal_field_value.good_as_of,
 		'isValid', proposal_field_value.is_valid,
 		'createdAt', proposal_field_value.created_at

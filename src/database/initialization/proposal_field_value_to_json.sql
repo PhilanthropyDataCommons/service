@@ -7,6 +7,9 @@ RETURNS jsonb AS $$
 DECLARE
 	is_forbidden BOOLEAN;
 	application_form_field_json JSONB;
+	base_field_data_type TEXT;
+	file_json JSONB;
+	value_json JSONB;
 BEGIN
 	SELECT EXISTS (
 		SELECT 1
@@ -26,6 +29,30 @@ BEGIN
 	FROM application_form_fields
 	WHERE application_form_fields.id = proposal_field_value.application_form_field_id;
 
+	-- Get the base field data type
+	SELECT base_fields.data_type
+	INTO base_field_data_type
+	FROM application_form_fields
+	JOIN base_fields ON application_form_fields.base_field_short_code = base_fields.short_code
+	WHERE application_form_fields.id = proposal_field_value.application_form_field_id;
+
+	-- Try to get the file if this is a file field and the value is a valid file ID
+	-- and if the file is owned by the same user who created the proposal version
+	IF base_field_data_type = 'file' THEN
+		BEGIN
+			SELECT file_to_json(files.*)
+			INTO file_json
+			FROM files
+			JOIN proposal_versions ON proposal_versions.id = proposal_field_value.proposal_version_id
+			WHERE files.id = (proposal_field_value.value)::INTEGER
+				AND files.created_by = proposal_versions.created_by;
+		EXCEPTION
+		  -- If the value isn't an integer we shouldn't error, we just don't match it to a file.
+			WHEN invalid_text_representation THEN NULL;
+		END;
+	END IF;
+
+	-- Build the JSON object with file property (jsonb_strip_nulls removes the file key if it's null)
 	RETURN jsonb_build_object(
 		'id', proposal_field_value.id,
 		'proposalVersionId', proposal_field_value.proposal_version_id,
@@ -33,6 +60,7 @@ BEGIN
 		'applicationFormField', application_form_field_json,
 		'position', proposal_field_value.position,
 		'value', proposal_field_value.value,
+		'file', file_json,
 		'goodAsOf', proposal_field_value.good_as_of,
 		'isValid', proposal_field_value.is_valid,
 		'createdAt', proposal_field_value.created_at

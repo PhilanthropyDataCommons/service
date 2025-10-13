@@ -1,17 +1,11 @@
-import { requireEnv } from 'require-env-variable';
 import { HTTP_STATUS } from '../constants';
 import { isAuthContext, isWritableFile } from '../types';
-import { createFile, loadOrCreateS3Bucket } from '../database/operations';
+import { createFile } from '../database/operations';
 import { db } from '../database';
 import { InputValidationError, FailedMiddlewareError } from '../errors';
 import { generatePresignedPost } from '../s3';
+import { getDefaultS3Bucket } from '../config';
 import type { Request, Response } from 'express';
-
-const { S3_BUCKET, S3_REGION, S3_ENDPOINT } = requireEnv(
-	'S3_BUCKET',
-	'S3_REGION',
-	'S3_ENDPOINT',
-);
 
 const postFile = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
@@ -27,11 +21,7 @@ const postFile = async (req: Request, res: Response): Promise<void> => {
 	}
 
 	const { name, mimeType, size } = body;
-	const s3Bucket = await loadOrCreateS3Bucket(db, req, {
-		name: S3_BUCKET,
-		region: S3_REGION,
-		endpoint: S3_ENDPOINT,
-	});
+	const s3Bucket = getDefaultS3Bucket();
 
 	const file = await createFile(db, req, {
 		name,

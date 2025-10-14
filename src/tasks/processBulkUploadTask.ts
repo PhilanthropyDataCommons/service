@@ -523,13 +523,14 @@ export const processBulkUploadTask = async (
 	}
 
 	let bulkUploadHasFailed = false;
-	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(
-		temporaryProposalsDataFile.path,
-	);
-	const changemakerNameIndex = getChangemakerNameIndex(shortCodes);
-	const changemakerTaxIdIndex = getChangemakerTaxIdIndex(shortCodes);
 
 	try {
+		const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(
+			temporaryProposalsDataFile.path,
+		);
+		const changemakerNameIndex = getChangemakerNameIndex(shortCodes);
+		const changemakerTaxIdIndex = getChangemakerTaxIdIndex(shortCodes);
+
 		await assertBulkUploadTaskCsvIsValid(temporaryProposalsDataFile.path);
 
 		await db.transaction(async (transactionDb) => {

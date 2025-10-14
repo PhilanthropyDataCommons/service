@@ -23,7 +23,7 @@ jobs:
           repository: 'PhilanthropyDataCommons/sdk'
           path: 'sdk'
       - name: Setup Node for API building
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version-file: service/.node-version
       - name: Install dependencies for API building

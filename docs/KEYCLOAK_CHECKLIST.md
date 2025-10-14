@@ -18,9 +18,19 @@ as expected. It is intended to remind, not to detail setup of each item.
 - [ ] `pdc-openapi-docs` client (service API docs use this)
 - [ ] `pdc-admin` group
 - [ ] `pdc-admin` role assigned to `pdc-admin` group
-- [ ] `realm-management` `manage-users` role assigned to `pdc-admin` group
-- [ ] `realm-management` `view-users` role assigned to `pdc-admin` group
-- [ ] `realm-management` `query-users` role assigned to `pdc-admin` group
+- [ ] The following (Client) roles assigned to the `pdc-admin` group:
+  - [ ] `realm-management` `manage-users`
+  - [ ] `realm-management` `view-users`
+  - [ ] `realm-management` `query-users`
+  - [ ] `realm-management` `query-groups`
+  - [ ] `realm-management` `view-clients`
+  - [ ] `realm-management` `create-client`
+  - [ ] `realm-management` `manage-clients`
+  - [ ] `realm-management` `query-clients`
+  - [ ] `realm-management` `view-identity-providers`
+  - [ ] `realm-management` `manage-identity-providers`
+  - [ ] `realm-management` `view-realm`
+  - [ ] `realm-management` `view-events`
 - [ ] At least one user assigned to `pdc-admin` group
 - [ ] Organizations enabled
 - [ ] Admin Permissions enabled in realm (aka Fine-grained Admin Permissions)

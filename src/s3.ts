@@ -1,6 +1,8 @@
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
-import { S3, type S3ClientConfig } from '@aws-sdk/client-s3';
+import { S3, type S3ClientConfig, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { requireEnv } from 'require-env-variable';
+import { ONE_DAY_IN_SECONDS } from './constants';
 import type { PresignedPost } from '@aws-sdk/s3-presigned-post';
 
 const {
@@ -20,6 +22,7 @@ const {
 );
 
 const PRESIGNED_POST_EXPIRATION_SECONDS = 3600; // 1 hour
+const PRESIGNED_DOWNLOAD_URL_EXPIRATION_SECONDS = ONE_DAY_IN_SECONDS;
 
 const s3Clients: Record<string, S3> = {};
 
@@ -56,3 +59,19 @@ export const generatePresignedPost = async (
 			['content-length-range', size, size],
 		],
 	});
+
+export const generatePresignedDownloadUrl = async (
+	storageKey: string,
+	bucketName?: string,
+): Promise<string> => {
+	const command = new GetObjectCommand({
+		Bucket: bucketName ?? S3_BUCKET,
+		Key: storageKey,
+	});
+
+	const url = await getSignedUrl(getS3Client(), command, {
+		expiresIn: PRESIGNED_DOWNLOAD_URL_EXPIRATION_SECONDS,
+	});
+
+	return url;
+};

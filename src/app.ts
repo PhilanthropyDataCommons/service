@@ -4,6 +4,7 @@ import pinoHttp from 'pino-http';
 import cors from 'cors';
 import { rootRouter } from './routers';
 import {
+	addFileDownloadUrls,
 	errorHandler,
 	processJwt,
 	addUserContext,
@@ -24,6 +25,7 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(addFileDownloadUrls);
 app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use('/', rootRouter);
 app.use(errorHandler);

@@ -1,6 +1,7 @@
 import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
 import love from 'eslint-config-love';
+import pino from 'eslint-plugin-pino';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
 
@@ -18,6 +19,14 @@ export default defineConfig([
 			parserOptions: {
 				project: './tsconfig.dev.json',
 			},
+		},
+	},
+	{
+		plugins: {
+			pino: pino,
+		},
+		rules: {
+			'pino/correct-args-position': 'error',
 		},
 	},
 	prettier,

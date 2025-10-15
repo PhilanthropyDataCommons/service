@@ -9,7 +9,10 @@ import type { OpportunityPermission } from './OpportunityPermission';
 
 interface User {
 	keycloakUserId: KeycloakId;
-	keycloakUserName: string;
+	// We do not really want "undefined" here, only null. See
+	// https://github.com/ajv-validator/ajv/issues/2283 and/or
+	// https://github.com/ajv-validator/ajv/issues/2163.
+	keycloakUserName: string | null | undefined;
 	readonly permissions: {
 		changemaker: Record<string, Permission[]>;
 		dataProvider: Record<string, Permission[]>;
@@ -25,6 +28,7 @@ const userSchema: JSONSchemaType<User> = {
 		keycloakUserId: keycloakIdSchema,
 		keycloakUserName: {
 			type: 'string',
+			nullable: true,
 		},
 		permissions: {
 			type: 'object',
@@ -68,7 +72,7 @@ const userSchema: JSONSchemaType<User> = {
 			type: 'string',
 		},
 	},
-	required: ['keycloakUserId', 'keycloakUserName', 'permissions', 'createdAt'],
+	required: ['keycloakUserId', 'createdAt'],
 };
 
 type WritableUser = Writable<User>;

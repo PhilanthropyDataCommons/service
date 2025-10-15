@@ -72,6 +72,7 @@
 		"eslint-config-love": "^133.0.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-import-resolver-typescript": "^4.4.4",
+		"eslint-plugin-pino": "^1.0.3",
 		"eslint-plugin-sort-exports": "^0.9.1",
 		"expect-type": "^1.2.2",
 		"jest": "^30.2.0",

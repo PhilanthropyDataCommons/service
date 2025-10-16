@@ -8,9 +8,14 @@
 				"auth": []
 			}
 		],
+		"parameters": [
+			{
+				"$ref": "../components/parameters/baseFieldSensitivityClassificationParam.json"
+			}
+		],
 		"responses": {
 			"200": {
-				"description": "All base fields currently registered in the PDC.",
+				"description": "Base fields currently registered in the PDC. By default, omits 'forbidden' fields.",
 				"content": {
 					"application/json": {
 						"schema": {

@@ -3,6 +3,7 @@ import {
 	isBaseFieldSensitivityClassification,
 } from '../../types';
 import { InputValidationError } from '../../errors';
+import type { ErrorObject } from 'ajv/dist/types';
 
 /**
  * An expanded version of a simple Query Parameter supporting a list of values and negation.
@@ -25,13 +26,16 @@ export interface ExpandedParameterFilter<E> {
 export const expandBaseFieldSensitivityParameter = (
 	value: string,
 ): ExpandedParameterFilter<BaseFieldSensitivityClassification> => {
+	const ZERO_ELEMENTS = 0;
 	const FIRST_INDEX = 0;
 	const INDEX_AFTER_ONE_CHAR = 1;
 	const isNegated = value.startsWith('!');
+	// TODO: use a more JSON-ish syntax, e.g. `![public]` and `[public]` or something like that.
 	const rawList = value.split(',');
 	if (isNegated && rawList[FIRST_INDEX] !== undefined) {
 		rawList[FIRST_INDEX] = rawList[FIRST_INDEX].substring(INDEX_AFTER_ONE_CHAR);
 	}
+	const errors: ErrorObject[] = [];
 
 	// Filter out values that are not actually BaseFieldSensitivityClassification
 	const list = rawList
@@ -40,17 +44,22 @@ export const expandBaseFieldSensitivityParameter = (
 			if (isBaseFieldSensitivityClassification(normalized)) {
 				return normalized;
 			}
+			if (
+				isBaseFieldSensitivityClassification.errors !== undefined &&
+				isBaseFieldSensitivityClassification.errors !== null
+			) {
+				isBaseFieldSensitivityClassification.errors.map((e) => errors.push(e));
+			}
 			return null;
 		})
 		.filter(
 			(value): value is BaseFieldSensitivityClassification => value !== null,
 		);
 
-	// Is .errors scoped correctly? Do I have a private copy here? Are all the errors here?
-	if (isBaseFieldSensitivityClassification.errors !== undefined) {
+	if (errors.length > ZERO_ELEMENTS) {
 		throw new InputValidationError(
-			'Invalid BaseFieldSensitivityClassification values found',
-			isBaseFieldSensitivityClassification.errors ?? [],
+			'Invalid BaseFieldSensitivityClassification value(s) found',
+			errors,
 		);
 	}
 

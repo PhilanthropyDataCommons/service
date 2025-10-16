@@ -1,20 +1,23 @@
-import { InputValidationError } from '../errors';
-import { BaseFieldSensitivityClassification, isPaginationParametersQuery } from '../types';
+import { BaseFieldSensitivityClassification } from '../types';
+import {
+	expandBaseFieldSensitivityParameter,
+	type ExpandedParameterFilter,
+} from '../database/parameters';
 import type { Request } from 'express';
 
-export const extractFilterParameter = ({
-	query,
-  paramType, // This?
-  parameterName, // Maybe?
-}: Pick<Request, 'query' | 'parameterName'>): any => {
-	if (!isPaginationParametersQuery(query)) {
-		throw new InputValidationError(
-			'Invalid pagination parameters.',
-			isPaginationParametersQuery.errors ?? [],
+export const DEFAULT_SENSITIVITY_FILTER: ExpandedParameterFilter<BaseFieldSensitivityClassification> =
+	{
+		isNegated: true,
+		list: [BaseFieldSensitivityClassification.FORBIDDEN],
+	};
+
+export const extractBaseFieldSensitivityClassificationParameters = (
+	request: Request,
+): ExpandedParameterFilter<BaseFieldSensitivityClassification> => {
+	if (typeof request.query.sensitivityClassifications === 'string') {
+		return expandBaseFieldSensitivityParameter(
+			request.query.sensitivityClassifications,
 		);
 	}
-
-	const obj = {};
-  obj[parameterName] = query.baseFieldSensitivityClassificationFilter;
-  return obj;
+	return DEFAULT_SENSITIVITY_FILTER;
 };

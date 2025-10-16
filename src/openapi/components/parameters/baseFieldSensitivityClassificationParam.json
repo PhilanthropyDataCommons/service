@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"type": "string"
+	},
+	"in": "query",
+	"name": "sensitivityClassifications",
+	"required": false,
+	"description": "A comma-separated list of sensitivity classifications, optionally negated with '!' prefix"
+}

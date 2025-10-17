@@ -23,6 +23,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 	queryName: string,
 	tableName: string,
 	parameterNames: { [K in keyof P]: string },
+	itemPostProcessor: (item: T) => T | Promise<T> = (item: T) => item,
 ) => {
 	const generatedParameterNames = [...parameterNames, 'limit', 'offset'];
 	return async (
@@ -43,7 +44,9 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 			},
 		);
 		const result = await db.sql<JsonResultSet<T>>(queryName, queryParameters);
-		const entries = result.rows.map((row) => row.object);
+		const entries = await Promise.all(
+			result.rows.map(async (row) => await itemPostProcessor(row.object)),
+		);
 		const metrics = await loadTableMetrics(tableName);
 		await createServiceQueryAuditLog(db, authContext, {
 			queryName,

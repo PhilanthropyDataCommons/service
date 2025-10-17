@@ -24,6 +24,7 @@ const generateLoadItemOperation =
 		queryName: string,
 		entityType: string,
 		parameterNames: { [K in keyof P]: string },
+		itemPostProcessor: (item: T) => T | Promise<T> = (item: T) => item,
 	) =>
 	async (
 		db: TinyPg,
@@ -60,7 +61,7 @@ const generateLoadItemOperation =
 				lookupValues: queryParameters,
 			});
 		}
-		return wrappedObject.object;
+		return await itemPostProcessor(wrappedObject.object);
 	};
 
 export { generateLoadItemOperation };

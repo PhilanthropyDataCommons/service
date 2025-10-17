@@ -27,6 +27,7 @@ const generateCreateOrUpdateItemOperation =
 		queryName: string,
 		saveItemAttributes: Array<KeysOfUnion<I>>,
 		parameterNames: { [K in keyof P]: string },
+		itemPostProcessor: (item: T) => T | Promise<T> = (item: T) => item,
 	) =>
 	async (
 		db: TinyPg,
@@ -76,7 +77,7 @@ const generateCreateOrUpdateItemOperation =
 				queryParameters,
 			});
 		}
-		return wrappedObject.object;
+		return await itemPostProcessor(wrappedObject.object);
 	};
 
 export { generateCreateOrUpdateItemOperation };

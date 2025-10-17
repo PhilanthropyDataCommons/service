@@ -24,6 +24,7 @@ const generateRemoveItemOperation =
 		queryName: string,
 		entityType: string,
 		parameterNames: { [K in keyof P]: string },
+		itemPostProcessor: (item: T) => T | Promise<T> = (item: T) => item,
 	) =>
 	async (
 		db: TinyPg,
@@ -63,7 +64,7 @@ const generateRemoveItemOperation =
 				queryParameters,
 			});
 		}
-		return wrappedRemovedObject.object;
+		return await itemPostProcessor(wrappedRemovedObject.object);
 	};
 
 export { generateRemoveItemOperation };

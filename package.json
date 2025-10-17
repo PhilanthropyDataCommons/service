@@ -59,7 +59,7 @@
 		"@types/express": "^5.0.3",
 		"@types/jest": "^30.0.0",
 		"@types/language-tags": "^1.0.4",
-		"@types/node": "^24.8.0",
+		"@types/node": "^24.8.1",
 		"@types/pg": "^8.15.5",
 		"@types/supertest": "^6.0.3",
 		"@types/swagger-ui-express": "^4.1.8",

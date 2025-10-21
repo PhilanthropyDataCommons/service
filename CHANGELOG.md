@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- `File` is now properly documented as potentially having a `presignedPost` attribute.
+
 ## 0.25.2 2025-10-21
 
 ### Added

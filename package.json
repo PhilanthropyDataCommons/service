@@ -50,7 +50,7 @@
 	},
 	"type": "commonjs",
 	"devDependencies": {
-		"@eslint/js": "^9.37.0",
+		"@eslint/js": "^9.38.0",
 		"@jest/globals": "^30.2.0",
 		"@redocly/cli": "^2.7.0",
 		"@smithy/util-stream": "^4.5.2",
@@ -68,7 +68,7 @@
 		"aws-sdk-client-mock": "^4.1.0",
 		"copyfiles": "^2.4.1",
 		"dclint": "^3.1.0",
-		"eslint": "^9.37.0",
+		"eslint": "^9.38.0",
 		"eslint-config-love": "^133.0.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-import-resolver-typescript": "^4.4.4",
@@ -87,7 +87,7 @@
 		"ts-jest": "^29.4.5",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.46.1"
+		"typescript-eslint": "^8.46.2"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.913.0",

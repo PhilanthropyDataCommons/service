@@ -32,6 +32,10 @@
 			"$ref": "./S3Bucket.json",
 			"readOnly": true
 		},
+		"presignedPost": {
+			"$ref": "./PresignedPost.json",
+			"readOnly": true
+		},
 		"createdBy": {
 			"type": "string",
 			"format": "uuid",

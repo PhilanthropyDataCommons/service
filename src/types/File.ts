@@ -15,6 +15,7 @@ interface File {
 	readonly s3BucketName: string;
 	readonly s3Bucket: S3Bucket;
 	readonly presignedPost?: PresignedPost;
+	readonly downloadUrl?: string;
 	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
 }

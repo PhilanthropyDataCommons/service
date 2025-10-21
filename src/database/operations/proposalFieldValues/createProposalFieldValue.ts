@@ -1,4 +1,5 @@
 import { generateCreateOrUpdateItemOperation } from '../generators';
+import { decorateWithFileDownloadUrl } from '../../../decorators/proposalFieldValue';
 import type {
 	ProposalFieldValue,
 	InternallyWritableProposalFieldValue,
@@ -19,6 +20,7 @@ const createProposalFieldValue = generateCreateOrUpdateItemOperation<
 		'goodAsOf',
 	],
 	[],
+	decorateWithFileDownloadUrl,
 );
 
 export { createProposalFieldValue };

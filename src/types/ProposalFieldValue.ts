@@ -9,7 +9,7 @@ interface ProposalFieldValue {
 	applicationFormFieldId: number;
 	position: number;
 	value: string;
-	readonly file?: File;
+	readonly file: File | null;
 	goodAsOf: string | null;
 	readonly createdAt: string;
 	readonly applicationFormField: ApplicationFormField;

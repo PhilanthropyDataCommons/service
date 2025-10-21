@@ -1,4 +1,5 @@
 import { generateLoadBundleOperation } from '../generators';
+import { decorateWithFileDownloadUrls } from '../../../decorators/proposal';
 import type { Proposal, KeycloakId, ShortCode } from '../../../types';
 
 const loadProposalBundle = generateLoadBundleOperation<
@@ -9,11 +10,11 @@ const loadProposalBundle = generateLoadBundleOperation<
 		funderShortCode: ShortCode | undefined,
 		search: string | undefined,
 	]
->('proposals.selectWithPagination', 'proposals', [
-	'createdBy',
-	'changemakerId',
-	'funderShortCode',
-	'search',
-]);
+>(
+	'proposals.selectWithPagination',
+	'proposals',
+	['createdBy', 'changemakerId', 'funderShortCode', 'search'],
+	decorateWithFileDownloadUrls,
+);
 
 export { loadProposalBundle };

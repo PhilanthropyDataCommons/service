@@ -31,7 +31,7 @@ import {
 describe('loadUserByKeycloakUserId', () => {
 	it('should populate roles correctly based on direct permissions as well as user groups permissions', async () => {
 		const systemUser = await loadSystemUser(db, null);
-		const systemUserAuthContext = getAuthContext(systemUser);
+		const systemUserAuthContext = getAuthContext(systemUser, true);
 		const ephemeralExpiration = new Date(Date.now() + 3600000).toISOString();
 		const user = await createOrUpdateUser(db, null, {
 			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
@@ -212,7 +212,7 @@ describe('loadUserByKeycloakUserId', () => {
 
 		const populatedUser = await loadUserByKeycloakUserId(
 			db,
-			null,
+			systemUserAuthContext,
 			user.keycloakUserId,
 		);
 
@@ -255,7 +255,7 @@ describe('loadUserByKeycloakUserId', () => {
 
 	it('should not populate roles for expired group associations', async () => {
 		const systemUser = await loadSystemUser(db, null);
-		const systemUserAuthContext = getAuthContext(systemUser);
+		const systemUserAuthContext = getAuthContext(systemUser, true);
 		const user = await createOrUpdateUser(db, null, {
 			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
 			keycloakUserName: 'Carol',
@@ -337,6 +337,44 @@ describe('loadUserByKeycloakUserId', () => {
 				permission: Permission.VIEW,
 			},
 		);
+
+		const populatedUser = await loadUserByKeycloakUserId(
+			db,
+			systemUserAuthContext,
+			user.keycloakUserId,
+		);
+
+		expect(populatedUser).toEqual({
+			...user,
+			createdAt: expectTimestamp(),
+			permissions: {
+				changemaker: {},
+				dataProvider: {},
+				funder: {},
+				opportunity: {},
+			},
+		});
+	});
+
+	it('should not populate roles when loaded without authorization', async () => {
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser, true);
+		const user = await createOrUpdateUser(db, null, {
+			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
+			keycloakUserName: 'Carol',
+		});
+		const changemakerKeycloakOrganizationId =
+			'b10aaea1-4558-422b-85bf-073bfc9cd05f';
+		const changemaker = await createChangemaker(db, null, {
+			keycloakOrganizationId: changemakerKeycloakOrganizationId,
+			name: 'Foo Changemaker',
+			taxId: '12-3456789',
+		});
+		await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
+			userKeycloakUserId: user.keycloakUserId,
+			changemakerId: changemaker.id,
+			permission: Permission.EDIT,
+		});
 
 		const populatedUser = await loadUserByKeycloakUserId(
 			db,

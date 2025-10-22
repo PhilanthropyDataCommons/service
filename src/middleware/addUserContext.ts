@@ -71,7 +71,14 @@ const addUserContext = (
 				);
 			Promise.all(createEphemeralUserGroupAssociationPromises)
 				.then(() => {
-					loadUserByKeycloakUserId(db, null, keycloakUserId)
+					loadUserByKeycloakUserId(
+						db,
+						{
+							user: { keycloakUserId: stringToKeycloakId(keycloakUserId) },
+							role: { isAdministrator: false },
+						},
+						keycloakUserId,
+					)
 						.then((user) => {
 							(req as AuthenticatedRequest).user = user;
 							next();

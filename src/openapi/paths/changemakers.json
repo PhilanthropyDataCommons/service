@@ -38,7 +38,7 @@
 	},
 	"post": {
 		"operationId": "addChangemaker",
-		"summary": "Adds a new changemaker.",
+		"summary": "Adds a new changemaker, Keycloak organization ID is optional.",
 		"tags": ["Changemakers"],
 		"security": [
 			{
@@ -50,7 +50,7 @@
 			"content": {
 				"application/json": {
 					"schema": {
-						"$ref": "../components/schemas/Changemaker.json"
+						"$ref": "../components/schemas/ShallowChangemaker.json"
 					}
 				}
 			}

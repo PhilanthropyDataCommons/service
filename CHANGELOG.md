@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.25.4 2025-10-22
+
+### Fixed
+
+- `POST /changemakers` OpenAPI documentation was improved.
+
 ## 0.25.3 2025-10-22
 
 ### Added

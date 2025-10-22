@@ -11,6 +11,10 @@ interface AuthContext {
 	};
 }
 
+type AuthIdentityAndRole = Pick<AuthContext, 'role'> & {
+	user: Pick<AuthContext['user'], 'keycloakUserId'>;
+};
+
 const authContextSchema: JSONSchemaType<AuthContext> = {
 	type: 'object',
 	properties: {
@@ -31,18 +35,19 @@ const authContextSchema: JSONSchemaType<AuthContext> = {
 const isAuthContext = ajv.compile(authContextSchema);
 
 const getKeycloakUserIdFromAuthContext = (
-	req: AuthContext | undefined | null,
+	req: AuthIdentityAndRole | undefined | null,
 ): KeycloakId | undefined => {
 	const keycloakUserId = req?.user.keycloakUserId;
 	return keycloakUserId;
 };
 
 const getIsAdministratorFromAuthContext = (
-	req: AuthContext | undefined | null,
+	req: AuthIdentityAndRole | undefined | null,
 ): boolean | undefined => req?.role.isAdministrator;
 
 export {
 	type AuthContext,
+	type AuthIdentityAndRole,
 	authContextSchema,
 	isAuthContext,
 	getKeycloakUserIdFromAuthContext,

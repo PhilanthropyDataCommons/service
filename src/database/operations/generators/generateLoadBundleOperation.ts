@@ -4,7 +4,11 @@ import {
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
-import type { AuthContext, Bundle, JsonResultSet } from '../../../types';
+import type {
+	AuthIdentityAndRole,
+	Bundle,
+	JsonResultSet,
+} from '../../../types';
 import type TinyPg from 'tinypg';
 
 /**
@@ -28,7 +32,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 	const generatedParameterNames = [...parameterNames, 'limit', 'offset'];
 	return async (
 		db: TinyPg,
-		authContext: AuthContext | null,
+		authContext: AuthIdentityAndRole | null,
 		...args: [...P, limit: number | undefined, offset: number | undefined]
 	): Promise<Bundle<T>> => {
 		const queryParameters = generatedParameterNames.reduce(

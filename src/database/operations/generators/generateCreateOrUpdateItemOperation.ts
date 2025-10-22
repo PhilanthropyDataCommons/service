@@ -4,7 +4,7 @@ import {
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
-import type { AuthContext, JsonResultSet } from '../../../types';
+import type { AuthIdentityAndRole, JsonResultSet } from '../../../types';
 import type TinyPg from 'tinypg';
 
 // This may seem silly but it is necessary to get all keys of all
@@ -31,7 +31,7 @@ const generateCreateOrUpdateItemOperation =
 	) =>
 	async (
 		db: TinyPg,
-		authContext: AuthContext | null,
+		authContext: AuthIdentityAndRole | null,
 		createValues: I,
 		...args: [...P]
 	): Promise<T> => {

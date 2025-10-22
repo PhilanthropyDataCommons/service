@@ -4,7 +4,7 @@ import {
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
-import type { AuthContext, JsonResultSet } from '../../../types';
+import type { AuthIdentityAndRole, JsonResultSet } from '../../../types';
 import type TinyPg from 'tinypg';
 
 /**
@@ -28,7 +28,7 @@ const generateRemoveItemOperation =
 	) =>
 	async (
 		db: TinyPg,
-		authContext: AuthContext | null,
+		authContext: AuthIdentityAndRole | null,
 		...args: [...P]
 	): Promise<T> => {
 		const authContextKeycloakUserId =

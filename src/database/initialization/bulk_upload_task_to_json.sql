@@ -1,6 +1,10 @@
 SELECT drop_function('bulk_upload_task_to_json');
 
-CREATE FUNCTION bulk_upload_task_to_json(bulk_upload_task bulk_upload_tasks)
+CREATE FUNCTION bulk_upload_task_to_json(
+	bulk_upload_task bulk_upload_tasks,
+	auth_context_keycloak_user_id uuid,
+	auth_context_is_administrator boolean
+)
 RETURNS jsonb AS $$
 DECLARE
   source_json JSONB;
@@ -8,6 +12,7 @@ DECLARE
   proposals_data_file_json JSONB;
   bulk_upload_logs_json JSONB;
   attachments_archive_file_json JSONB;
+  created_by_user_json JSONB;
 BEGIN
   SELECT source_to_json(sources.*)
   INTO source_json
@@ -35,6 +40,11 @@ BEGIN
   FROM files
   WHERE files.id = bulk_upload_task.attachments_archive_file_id;
 
+  SELECT user_to_json(users.*, auth_context_keycloak_user_id, auth_context_is_administrator)
+  INTO created_by_user_json
+  FROM users
+  WHERE users.keycloak_user_id = bulk_upload_task.created_by;
+
   RETURN jsonb_build_object(
     'id', bulk_upload_task.id,
     'sourceId', bulk_upload_task.source_id,
@@ -47,6 +57,7 @@ BEGIN
 		'funder', funder_json,
     'status', bulk_upload_task.status,
     'createdBy', bulk_upload_task.created_by,
+    'createdByUser', created_by_user_json,
     'createdAt', to_json(bulk_upload_task.created_at)::jsonb,
     'logs', COALESCE(bulk_upload_logs_json, '[]'::jsonb)
   );

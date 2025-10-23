@@ -14,4 +14,9 @@ VALUES (
 	:status,
 	:authContextKeycloakUserId
 )
-RETURNING bulk_upload_task_to_json(bulk_upload_tasks) AS object;
+RETURNING
+	bulk_upload_task_to_json(
+		bulk_upload_tasks,
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator
+	) AS object;

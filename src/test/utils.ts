@@ -36,8 +36,17 @@ export const createTestUser = async (): Promise<User> =>
 		keycloakUserName: getTestUserKeycloakUserName(),
 	});
 
-export const loadTestUser = async (): Promise<User> =>
-	await loadUserByKeycloakUserId(db, null, getTestUserKeycloakUserId());
+export const loadTestUser = async (): Promise<User> => {
+	const testUserKeycloakUserId = getTestUserKeycloakUserId();
+	return await loadUserByKeycloakUserId(
+		db,
+		{
+			user: { keycloakUserId: testUserKeycloakUserId },
+			role: { isAdministrator: false },
+		},
+		testUserKeycloakUserId,
+	);
+};
 
 export const getAuthContext = (
 	user: User,

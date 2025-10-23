@@ -336,6 +336,7 @@ describe('/tasks/bulkUploads', () => {
 				.send(testData)
 				.expect(201);
 			const after = await loadTableMetrics('bulk_upload_tasks');
+			const expectedCreatedByUser = await loadTestUser();
 
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({
@@ -352,6 +353,7 @@ describe('/tasks/bulkUploads', () => {
 				status: 'pending',
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
+				createdByUser: expectedCreatedByUser,
 			});
 			expect(after.count).toEqual(1);
 		});
@@ -387,6 +389,7 @@ describe('/tasks/bulkUploads', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics('bulk_upload_tasks');
+			const expectedCreatedByUser = await loadTestUser();
 
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({
@@ -402,6 +405,7 @@ describe('/tasks/bulkUploads', () => {
 				status: 'pending',
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
+				createdByUser: expectedCreatedByUser,
 				logs: [],
 			});
 			expect(after.count).toEqual(1);

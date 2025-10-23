@@ -1,6 +1,10 @@
 SELECT drop_function('user_to_json');
 
-CREATE FUNCTION user_to_json("user" users)
+CREATE FUNCTION user_to_json(
+	"user" users,
+	auth_context_keycloak_user_id uuid,
+	auth_context_is_administrator boolean
+)
 RETURNS jsonb AS $$
 DECLARE
   permissions_json JSONB := NULL::JSONB;
@@ -9,6 +13,8 @@ DECLARE
   user_data_provider_permissions_json JSONB := NULL::JSONB;
   user_opportunity_permissions_json JSONB := NULL::JSONB;
 BEGIN
+  -- Only include permissions if the requester is the user themselves or an administrator
+  IF auth_context_keycloak_user_id = "user".keycloak_user_id OR auth_context_is_administrator = TRUE THEN
   user_changemaker_permissions_json := (
     SELECT jsonb_object_agg(
       aggregated_combined_changemaker_permissions.changemaker_id,
@@ -143,6 +149,7 @@ BEGIN
       GROUP BY combined_opportunity_permissions.opportunity_id
     ) AS aggregated_combined_opportunity_permissions
   );
+  END IF;
 
   permissions_json := jsonb_build_object(
     'changemaker', COALESCE(user_changemaker_permissions_json, '{}'),

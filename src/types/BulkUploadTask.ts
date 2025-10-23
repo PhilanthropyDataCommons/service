@@ -11,6 +11,7 @@ import type { ShortCode } from './ShortCode';
 import type { Funder } from './Funder';
 import type { File } from './File';
 import type { Id } from './Id';
+import type { User } from './User';
 
 interface BulkUploadTask {
 	readonly id: number;
@@ -25,6 +26,7 @@ interface BulkUploadTask {
 	readonly status: TaskStatus;
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
+	readonly createdByUser: User;
 	readonly logs: BulkUploadLog[];
 }
 

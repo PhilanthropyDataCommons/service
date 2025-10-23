@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.26.0 2025-10-30
+
+### Added
+
+- `GET /baseFields` now has an optional `sensitivityClassifications` parameter.
+- `GET /baseFields` by default returns non-forbidden base fields.
+
 ## 0.25.5 2025-10-22
 
 ### Added

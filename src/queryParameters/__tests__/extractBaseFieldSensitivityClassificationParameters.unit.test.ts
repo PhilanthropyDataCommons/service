@@ -31,6 +31,20 @@ describe('extractBaseFieldSensitivityClassificationsParameter', () => {
 			],
 		});
 	});
+
+	it('should return a negated empty list when given special value "all"', () => {
+		const sensitivityParameters =
+			extractBaseFieldSensitivityClassificationsParameter({
+				query: {
+					sensitivityClassifications: 'all',
+				},
+			});
+		expect(sensitivityParameters).toStrictEqual({
+			negated: true,
+			list: [],
+		});
+	});
+
 	it('should throw an error when sensitivity classifications are not part of the enum', () => {
 		expect(() =>
 			extractBaseFieldSensitivityClassificationsParameter({

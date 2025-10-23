@@ -6,5 +6,5 @@
 	"name": "sensitivityClassifications",
 	"required": false,
 	"example": "[\"public\", \"restricted\"]",
-	"description": "A JSON array of (quoted) sensitivity classifications, optionally negated with a '!' prefix, defaults to ![\"forbidden\"]"
+	"description": "A JSON array of (quoted) sensitivity classifications, optionally negated with a '!' prefix, defaults to ![\"forbidden\"], special value \"all\" returns all."
 }

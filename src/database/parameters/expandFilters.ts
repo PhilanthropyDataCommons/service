@@ -21,11 +21,17 @@ export interface ExpandedParameterFilter<E> {
 export const expandBaseFieldSensitivityParameter = (
 	value: string,
 ): ExpandedParameterFilter<BaseFieldSensitivityClassification> => {
-	let sensitivityFilter: string = value;
+	let sensitivityFilter: string = value.trim();
+	if (sensitivityFilter === 'all') {
+		return {
+			negated: true,
+			list: [],
+		};
+	}
 	const INDEX_AFTER_ONE_CHAR = 1;
-	const negated = value.startsWith('!');
+	const negated = sensitivityFilter.startsWith('!');
 	if (negated) {
-		sensitivityFilter = value.substring(INDEX_AFTER_ONE_CHAR);
+		sensitivityFilter = sensitivityFilter.substring(INDEX_AFTER_ONE_CHAR);
 	}
 	try {
 		const list: unknown = JSON.parse(sensitivityFilter);

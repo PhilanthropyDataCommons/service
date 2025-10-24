@@ -3,6 +3,7 @@ import express from 'express';
 import { requireEnv } from 'require-env-variable';
 import swaggerUi from 'swagger-ui-express';
 import { documentationHandlers } from '../handlers/documentationHandlers';
+import { logout } from '../../dist/openapi/plugins/logout';
 import type { SwaggerUiOptions } from 'swagger-ui-express';
 
 const { OPENAPI_DOCS_AUTH_CLIENT_ID } = requireEnv(
@@ -20,6 +21,7 @@ const options: SwaggerUiOptions = {
 			scopes: ['openid', 'roles', 'profile'],
 			usePkceWithAuthorizationCodeGrant: true,
 		},
+		plugins: [logout],
 	},
 	swaggerUrl: '/openapi/api.json',
 };

@@ -47,6 +47,11 @@ interface BaseField {
 	readonly localizations: Record<string, BaseFieldLocalization>;
 	readonly createdAt: string;
 }
+export const baseFieldSensitivityClassificationSchema: JSONSchemaType<BaseFieldSensitivityClassification> =
+	{
+		type: 'string',
+		enum: Object.values(BaseFieldSensitivityClassification),
+	};
 
 const baseFieldSchema: JSONSchemaType<BaseField> = {
 	type: 'object',
@@ -77,10 +82,7 @@ const baseFieldSchema: JSONSchemaType<BaseField> = {
 			 */
 			nullable: true as false,
 		},
-		sensitivityClassification: {
-			type: 'string',
-			enum: Object.values(BaseFieldSensitivityClassification),
-		},
+		sensitivityClassification: baseFieldSensitivityClassificationSchema,
 		localizations: {
 			type: 'object',
 			additionalProperties: baseFieldLocalizationSchema,
@@ -137,10 +139,7 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 			 */
 			nullable: true as false,
 		},
-		sensitivityClassification: {
-			type: 'string',
-			enum: Object.values(BaseFieldSensitivityClassification),
-		},
+		sensitivityClassification: baseFieldSensitivityClassificationSchema,
 	},
 	required: [
 		'label',
@@ -154,12 +153,17 @@ const writableBaseFieldSchema: JSONSchemaType<WritableBaseField> = {
 
 const isWritableBaseField = ajv.compile(writableBaseFieldSchema);
 
+const isBaseFieldSensitivityClassification = ajv.compile(
+	baseFieldSensitivityClassificationSchema,
+);
+
 export {
 	type BaseField,
 	BaseFieldSensitivityClassification,
 	BaseFieldCategory,
 	baseFieldSchema,
 	isBaseField,
+	isBaseFieldSensitivityClassification,
 	type InternallyWritableBaseField,
 	type WritableBaseField,
 	isWritableBaseField,

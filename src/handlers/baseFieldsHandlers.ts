@@ -17,6 +17,7 @@ import {
 	isId,
 	isShortCode,
 } from '../types';
+import { extractBaseFieldSensitivityClassificationsParameter } from '../queryParameters/extractBaseFieldSensitivityClassificationsParameter';
 import type { Request, Response } from 'express';
 import type { ShortCode } from '../types';
 
@@ -27,7 +28,9 @@ const assertBaseFieldExists = async (
 };
 
 const getBaseFields = async (req: Request, res: Response): Promise<void> => {
-	const baseFields = await loadBaseFields();
+	const sensitivityClassificationFilter =
+		extractBaseFieldSensitivityClassificationsParameter(req);
+	const baseFields = await loadBaseFields(sensitivityClassificationFilter);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')

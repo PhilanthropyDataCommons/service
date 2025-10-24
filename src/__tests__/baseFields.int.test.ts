@@ -64,7 +64,7 @@ describe('/baseFields', () => {
 			await request(app).get('/baseFields').expect(200, []);
 		});
 
-		it('returns all base fields present in the database', async () => {
+		it('returns non-forbidden base fields present in the database by default', async () => {
 			const baseFieldOne = await createOrUpdateBaseField(db, null, {
 				label: 'First Name',
 				description: 'The first name of the applicant',
@@ -85,6 +85,15 @@ describe('/baseFields', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
+			await createOrUpdateBaseField(db, null, {
+				label: 'Sensitive Details',
+				description: 'Super inappropriate details that should not be entered.',
+				shortCode: 'forbidden_field',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
 
 			await createOrUpdateBaseFieldLocalization(db, null, {
 				baseFieldShortCode: baseFieldOne.shortCode,
@@ -101,7 +110,7 @@ describe('/baseFields', () => {
 			});
 
 			const result = await request(app).get('/baseFields').expect(200);
-			expect(result.body).toEqual([
+			expect(result.body).toStrictEqual([
 				{
 					label: 'First Name',
 					description: 'The first name of the applicant',

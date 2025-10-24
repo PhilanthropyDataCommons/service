@@ -1,4 +1,5 @@
 import pino from 'pino';
+import { createWriteStream } from 'pino-sentry';
 import type { Logger } from 'pino';
 
 /**
@@ -32,13 +33,23 @@ export const redactToPreventAuthReplay = (
 		`Unexpected authorization value from pino. path: ${JSON.stringify(path)}, type: ${typeof value}, value: ${JSON.stringify(value)}`,
 	);
 };
-
-const logger = pino({
+const { dsn } = { dsn: process.env.SENTRY_DSN };
+const sentryEnabled = dsn?.startsWith('https://') ?? false;
+const pinoOptions = {
 	level: process.env.LOG_LEVEL ?? 'info',
 	redact: {
 		paths: ['req.headers["authorization"]'],
 		censor: redactToPreventAuthReplay,
 	},
-});
+};
+
+let logger: pino.Logger;
+
+if (sentryEnabled) {
+	const sentryStream = createWriteStream({ dsn });
+	logger = pino(pinoOptions, pino.multistream([process.stdout, sentryStream]));
+} else {
+	logger = pino(pinoOptions);
+}
 
 export const getLogger = (source: string): Logger => logger.child({ source });

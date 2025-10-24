@@ -1,4 +1,5 @@
 import pino from 'pino';
+import { createWriteStream } from 'pino-sentry';
 import type { Logger } from 'pino';
 
 /**
@@ -32,13 +33,21 @@ export const redactToPreventAuthReplay = (
 		`Unexpected authorization value from pino. path: ${JSON.stringify(path)}, type: ${typeof value}, value: ${JSON.stringify(value)}`,
 	);
 };
-
+const { dsn } = { dsn: process.env.GLITCHTIP_DSN };
+const glitchTipEnabled = dsn?.startsWith('https://') ?? false;
+const glitchTipStream = createWriteStream({ dsn });
+const logStream = glitchTipEnabled ? glitchTipStream : process.stdout;
 const logger = pino({
 	level: process.env.LOG_LEVEL ?? 'info',
 	redact: {
 		paths: ['req.headers["authorization"]'],
 		censor: redactToPreventAuthReplay,
 	},
-});
+}, logStream);
+
+if (glitchTipEnabled) {
+	// TODO: tee the stream to stdout instead of replacing it
+	console.log(`Logging to DSN ${dsn}`);
+}
 
 export const getLogger = (source: string): Logger => logger.child({ source });

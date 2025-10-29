@@ -90,9 +90,9 @@
 		"typescript-eslint": "^8.46.2"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.918.0",
-		"@aws-sdk/s3-presigned-post": "^3.918.0",
-		"@aws-sdk/s3-request-presigner": "^3.918.0",
+		"@aws-sdk/client-s3": "^3.919.0",
+		"@aws-sdk/s3-presigned-post": "^3.919.0",
+		"@aws-sdk/s3-request-presigner": "^3.919.0",
 		"ajv": "^8.17.1",
 		"ajv-formats": "^3.0.1",
 		"ajv-keywords": "^5.1.0",

@@ -50,7 +50,7 @@
 	},
 	"type": "commonjs",
 	"devDependencies": {
-		"@eslint/js": "^9.38.0",
+		"@eslint/js": "^9.39.0",
 		"@jest/globals": "^30.2.0",
 		"@redocly/cli": "^2.10.0",
 		"@smithy/util-stream": "^4.5.4",
@@ -68,7 +68,7 @@
 		"aws-sdk-client-mock": "^4.1.0",
 		"copyfiles": "^2.4.1",
 		"dclint": "^3.1.0",
-		"eslint": "^9.38.0",
+		"eslint": "^9.39.0",
 		"eslint-config-love": "^133.0.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-import-resolver-typescript": "^4.4.4",

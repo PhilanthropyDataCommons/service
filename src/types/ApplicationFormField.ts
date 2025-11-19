@@ -1,3 +1,4 @@
+import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { BaseField } from './BaseField';
 import type { Writable } from './Writable';
@@ -46,9 +47,36 @@ const writableApplicationFormFieldWithApplicationContextSchema: JSONSchemaType<W
 		required: ['baseFieldShortCode', 'position', 'label', 'instructions'],
 	};
 
+type ApplicationFormFieldPatch = Partial<
+	Pick<ApplicationFormField, 'label' | 'instructions'>
+>;
+
+const applicationFormFieldPatchSchema: JSONSchemaType<ApplicationFormFieldPatch> =
+	{
+		type: 'object',
+		properties: {
+			label: {
+				type: 'string',
+				nullable: true,
+			},
+			instructions: {
+				type: 'string',
+				nullable: true,
+			},
+		},
+		additionalProperties: false,
+		minProperties: 1,
+	};
+
+const isApplicationFormFieldPatch = ajv.compile(
+	applicationFormFieldPatchSchema,
+);
+
 export {
 	type ApplicationFormField,
+	type ApplicationFormFieldPatch,
 	type WritableApplicationFormField,
 	type WritableApplicationFormFieldWithApplicationContext,
+	isApplicationFormFieldPatch,
 	writableApplicationFormFieldWithApplicationContextSchema,
 };

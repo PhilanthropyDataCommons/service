@@ -69,7 +69,7 @@
 		"copyfiles": "^2.4.1",
 		"dclint": "^3.1.0",
 		"eslint": "^9.39.1",
-		"eslint-config-love": "^133.0.0",
+		"eslint-config-love": "^134.0.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-import-resolver-typescript": "^4.4.4",
 		"eslint-plugin-pino": "^1.0.3",

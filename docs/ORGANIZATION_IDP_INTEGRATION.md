@@ -348,3 +348,18 @@ https://www.keycloak.org/docs/26.2.5/server_admin/index.html#_managing_identity_
 9. Click "Save".
 
 Test the integration (see [above](#testing-an-okta-integration)).
+
+
+## PDC Keycloak Configuration with Google Identity Provider
+
+Before integrating, the PDC team needs to name an identifying alias for each
+integrated system, for example `foundation-google-oidc` or `foundation-google-saml`,
+to be used to link PDC Keycloak with the external IdP.
+
+See also https://www.keycloak.org/docs/26.4.5/server_admin/index.html#_google
+
+1. Visit "Identity Providers"
+2. Click "Add Provider" of type "Google" If no existing providers are present
+   such that "Add Provider" is not available, click "Google" under "Social"
+3. Set the "Alias" to the descriptive, simple, unique alias named above, e.g.
+   `foundation-google-oauth`,

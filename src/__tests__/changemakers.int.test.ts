@@ -1149,6 +1149,68 @@ describe('/changemakers', () => {
 				.send({})
 				.expect(400);
 		});
+
+		it('Returns 400 validation error when taxId is set to null', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '1234567890',
+				name: 'Test Changemaker',
+				keycloakOrganizationId: null,
+			});
+			const result = await request(app)
+				.patch(`/changemakers/${changemaker.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					taxId: null,
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('Returns 400 validation error when name is set to null', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '0987654321',
+				name: 'Another Test Changemaker',
+				keycloakOrganizationId: null,
+			});
+			const result = await request(app)
+				.patch(`/changemakers/${changemaker.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					name: null,
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('Successfully sets keycloakOrganizationId to null', async () => {
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '5555555555',
+				name: 'Changemaker with org id',
+				keycloakOrganizationId: stringToKeycloakId(
+					'12345678-1234-1234-1234-123456789abc',
+				),
+			});
+			const result = await request(app)
+				.patch(`/changemakers/${changemaker.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					keycloakOrganizationId: null,
+				})
+				.expect(200);
+			expect(result.body).toStrictEqual({
+				...changemaker,
+				keycloakOrganizationId: null,
+			});
+		});
 	});
 
 	describe('PUT /:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId', () => {

@@ -1196,4 +1196,47 @@ describe('/funders', () => {
 			details: expectArray(),
 		});
 	});
+
+	it('throws a 400 error if the invitation status is set to null', async () => {
+		const testUser = await loadTestUser();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+
+		await createTestFunders({
+			theFundFund: false,
+			theFoundationFoundation: true,
+			theFundersWhoFund: false,
+			theFundingFathers: false,
+			theFunnyFunders: false,
+			theFungibleFund: true,
+		});
+
+		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+			userKeycloakUserId: testUser.keycloakUserId,
+			funderShortCode: 'theFundFund',
+			permission: Permission.MANAGE,
+		});
+
+		await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
+			funderCollaborativeShortCode: 'theFoundationFoundation',
+			invitedFunderShortCode: 'theFundFund',
+			invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
+		});
+
+		const result = await agent
+			.patch(
+				'/funders/theFundFund/invitations/received/theFoundationFoundation',
+			)
+			.type('application/json')
+			.send({
+				invitationStatus: null,
+			})
+			.set(authHeader)
+			.expect(400);
+
+		expect(result.body).toMatchObject({
+			name: 'InputValidationError',
+			details: expectArray(),
+		});
+	});
 });

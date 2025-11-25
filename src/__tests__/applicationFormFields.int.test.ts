@@ -264,6 +264,66 @@ describe('/applicationFormFields', () => {
 			});
 		});
 
+		it('successfully updates label to null', async () => {
+			const testUser = await loadTestUser();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemFunder = await loadSystemFunder(db, null);
+
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+
+			const baseField = await createOrUpdateBaseField(db, null, {
+				label: 'Organization Type',
+				shortCode: 'org_type_test_9',
+				description: 'Type of organization',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const applicationFormField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: baseField.shortCode,
+				position: 1,
+				label: 'Organization Type',
+				instructions: 'Please select your organization type',
+			});
+
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.EDIT,
+			});
+
+			const response = await request(app)
+				.patch(`/applicationFormFields/${applicationFormField.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: null,
+				})
+				.expect(200);
+
+			expect(response.body).toEqual({
+				...applicationFormField,
+				label: null,
+			});
+		});
+
 		it('returns 400 for empty request body', async () => {
 			const testUser = await loadTestUser();
 			const systemUser = await loadSystemUser(db, null);

@@ -104,6 +104,9 @@
 			"ApplicationFormField": {
 				"$ref": "./components/schemas/ApplicationFormField.json"
 			},
+			"ApplicationFormFieldPatch": {
+				"$ref": "./components/schemas/ApplicationFormFieldPatch.json"
+			},
 			"shortCode": {
 				"$ref": "./components/schemas/shortCode.json"
 			},
@@ -199,6 +202,9 @@
 		},
 		"/applicationForms/{applicationFormId}": {
 			"$ref": "./paths/applicationForm.json"
+		},
+		"/applicationFormFields/{applicationFormFieldId}": {
+			"$ref": "./paths/applicationFormField.json"
 		},
 		"/tasks/bulkUploads": {
 			"$ref": "./paths/bulkUploadTasks.json"

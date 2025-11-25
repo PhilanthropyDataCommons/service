@@ -1,5 +1,6 @@
 import express from 'express';
 import { applicationFormsRouter } from './applicationFormsRouter';
+import { applicationFormFieldsRouter } from './applicationFormFieldsRouter';
 import { baseFieldsRouter } from './baseFieldsRouter';
 import { dataProvidersRouter } from './dataProviderRouter';
 import { filesRouter } from './filesRouter';
@@ -20,6 +21,7 @@ import { userGroupsRouter } from './userGroupsRouter';
 const rootRouter = express.Router();
 
 rootRouter.use('/applicationForms', applicationFormsRouter);
+rootRouter.use('/applicationFormFields', applicationFormFieldsRouter);
 rootRouter.use('/baseFields', baseFieldsRouter);
 rootRouter.use('/tasks', tasksRouter);
 rootRouter.use('/changemakers', changemakersRouter);

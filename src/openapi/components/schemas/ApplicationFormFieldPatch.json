@@ -1,0 +1,16 @@
+{
+	"type": "object",
+	"properties": {
+		"label": {
+			"type": "string",
+			"example": "Your Organization Name"
+		},
+		"instructions": {
+			"type": ["string", "null"],
+			"example": "Please enter the full legal name of your organization.",
+			"description": "Explicit instructions for the user to fill information into the form field."
+		}
+	},
+	"minProperties": 1,
+	"required": []
+}

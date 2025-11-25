@@ -44,10 +44,18 @@ const generateCreateOrUpdateItemOperation =
 			authContextIsAdministrator,
 		};
 		const savedItemAttributeQueryParameters = saveItemAttributes.reduce(
-			(acc, attribute) => ({
-				...acc,
-				[attribute]: createValues[attribute],
-			}),
+			(acc, attribute) => {
+				const { [attribute]: value } = createValues;
+				return {
+					...acc,
+					[attribute]: value,
+
+					// tinypg / pg converts `undefined` and `null` to `NULL`; this attributes allows
+					// a query to optionally handle the two cases in different ways, e.g. in the context
+					// of a patch query with nullable fields.
+					[`${attribute}WasProvided`]: value !== undefined,
+				};
+			},
 			{},
 		);
 		const operationQueryParameters = parameterNames.reduce(

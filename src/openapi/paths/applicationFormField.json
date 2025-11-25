@@ -1,0 +1,54 @@
+{
+	"patch": {
+		"operationId": "updateApplicationFormFieldById",
+		"summary": "Updates the label and/or instructions of a specific application form field.",
+		"tags": ["Application Forms"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "applicationFormFieldId",
+				"description": "The PDC-generated ID of an application form field.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/ApplicationFormFieldPatch.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"200": {
+				"description": "The updated application form field.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ApplicationFormField.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

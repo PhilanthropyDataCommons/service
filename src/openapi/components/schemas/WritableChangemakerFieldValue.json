@@ -1,0 +1,30 @@
+{
+	"type": "object",
+	"properties": {
+		"changemakerId": {
+			"$ref": "./id.json"
+		},
+		"baseFieldShortCode": {
+			"type": "string",
+			"example": "organization_mission"
+		},
+		"sourceId": {
+			"$ref": "./id.json"
+		},
+		"value": {
+			"type": "string",
+			"example": "Supporting community development through innovative programs"
+		},
+		"goodAsOf": {
+			"type": ["string", "null"],
+			"format": "date-time"
+		}
+	},
+	"required": [
+		"changemakerId",
+		"baseFieldShortCode",
+		"sourceId",
+		"value",
+		"goodAsOf"
+	]
+}

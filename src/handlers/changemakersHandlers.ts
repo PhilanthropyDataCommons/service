@@ -66,11 +66,7 @@ const getChangemaker = async (req: Request, res: Response): Promise<void> => {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
 	const authContext = isAuthContext(req) ? req : null;
-	const changemaker = await loadChangemaker(
-		db,
-		authContext,
-		changemakerId,
-	);
+	const changemaker = await loadChangemaker(db, authContext, changemakerId);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')

@@ -185,6 +185,31 @@ will determine whether a myfoundation user can log into the PDC. If
 login procedure will be used for authentication, and if successful, the user
 will be redirected to PDC Keycloak and be granted a valid PDC session.
 
+### Google Workspace Configuration using SAML 2.0
+
+As of this writing, Google Workspace seems to support SAML 2.0 and not OIDC.
+
+
+#### NO? NOT RIGHT?
+
+1. Visit https://admin.google.com/ and search for "SSO".
+2. Click ["SSO With Sample Applications"](
+   https://admin.google.com/ac/security/ssocert)
+3. Scroll down to "IdP Metadata" and click "DOWNLOAD METADATA"
+
+#### Following an article that shows connecting an app
+
+Via https://support.google.com/a/answer/6087519?sjid=14379173059534913826-NA#zippy=%2Cstep-add-the-custom-saml-app
+
+1. Visit https://admin.google.com and log in as a super-administrator user.
+2. Visit https://admin.google.com/ac/apps/unified
+3. Click "Add App" -> "Add custom SAML app"
+4. Set "App name" to "Philanthropy Data Commons"
+5. Set "Descrption" to "Allows login to the PDC using this Google Workspace"
+6. Set "App icon" to the PDC logo
+7. Click "Download IdP metadata"
+8. 
+
 ## Keycloak Configuration
 
 Configure the PDC realm to use organizations and set up an organization.

@@ -76,7 +76,7 @@
 		"eslint-plugin-sort-exports": "^0.9.1",
 		"expect-type": "^1.2.2",
 		"jest": "^30.2.0",
-		"jsonwebtoken": "^9.0.2",
+		"jsonwebtoken": "^9.0.3",
 		"mock-jwks": "^1.0.10",
 		"nock": "^14.0.10",
 		"pino-pretty": "^13.1.3",

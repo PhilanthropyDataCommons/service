@@ -52,7 +52,7 @@
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
 		"@jest/globals": "^30.2.0",
-		"@redocly/cli": "^2.12.2",
+		"@redocly/cli": "^2.12.3",
 		"@smithy/util-stream": "^4.5.4",
 		"@tsconfig/node24": "^24.0.3",
 		"@types/cors": "^2.8.19",

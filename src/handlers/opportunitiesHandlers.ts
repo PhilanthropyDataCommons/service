@@ -18,6 +18,7 @@ import {
 	UnauthorizedError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
+import { coerceParams } from '../coercion';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
@@ -38,9 +39,7 @@ const getOpportunity = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { opportunityId },
-	} = req;
+	const { opportunityId } = coerceParams(req.params);
 	if (!isId(opportunityId)) {
 		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}

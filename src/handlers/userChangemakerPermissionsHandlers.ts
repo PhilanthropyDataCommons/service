@@ -12,15 +12,16 @@ import {
 	isWritableUserChangemakerPermission,
 } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
 const deleteUserChangemakerPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const {
-		params: { userKeycloakUserId, changemakerId, permission },
-	} = req;
+	const { userKeycloakUserId, changemakerId, permission } = coerceParams(
+		req.params,
+	);
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(
 			'Invalid userKeycloakUserId parameter.',
@@ -61,9 +62,9 @@ const putUserChangemakerPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const {
-		params: { userKeycloakUserId, changemakerId, permission },
-	} = req;
+	const { userKeycloakUserId, changemakerId, permission } = coerceParams(
+		req.params,
+	);
 
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(

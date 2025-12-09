@@ -9,6 +9,7 @@ import {
 import { isAuthContext, isWritableFunder } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
+import { coerceParams } from '../coercion';
 import { isShortCode } from '../types/ShortCode';
 import type { Request, Response } from 'express';
 
@@ -27,9 +28,7 @@ const getFunders = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getFunder = async (req: Request, res: Response): Promise<void> => {
-	const {
-		params: { funderShortCode },
-	} = req;
+	const { funderShortCode } = coerceParams(req.params);
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(
 			'Invalid short code.',
@@ -47,9 +46,7 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { funderShortCode: shortCode },
-	} = req;
+	const { funderShortCode: shortCode } = coerceParams(req.params);
 	if (!isShortCode(shortCode)) {
 		throw new InputValidationError(
 			'Invalid short code.',

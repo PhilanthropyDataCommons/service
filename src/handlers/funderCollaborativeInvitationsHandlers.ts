@@ -16,6 +16,7 @@ import {
 import { FailedMiddlewareError, InputValidationError } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { isShortCode } from '../types/ShortCode';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
 const postFunderCollaborativeInvitation = async (
@@ -25,9 +26,7 @@ const postFunderCollaborativeInvitation = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { funderShortCode, invitedFunderShortCode },
-	} = req;
+	const { funderShortCode, invitedFunderShortCode } = coerceParams(req.params);
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(
 			'Invalid funder short code.',
@@ -67,9 +66,7 @@ const getSentFunderCollaborativeInvitations = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { funderShortCode },
-	} = req;
+	const { funderShortCode } = coerceParams(req.params);
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(
 			'Invalid inviter short code.',
@@ -101,9 +98,7 @@ const getRecievedFunderCollaborativeInvitations = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { funderShortCode },
-	} = req;
+	const { funderShortCode } = coerceParams(req.params);
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(
 			'Invalid funder short code.',
@@ -136,9 +131,7 @@ const patchFunderCollaborativeInvitation = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { funderShortCode, invitedFunderShortCode },
-	} = req;
+	const { funderShortCode, invitedFunderShortCode } = coerceParams(req.params);
 
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(

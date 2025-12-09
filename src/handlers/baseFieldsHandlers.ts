@@ -10,6 +10,7 @@ import {
 	getLimitValues,
 } from '../database';
 import { extractPaginationParameters } from '../queryParameters';
+import { coerceParams } from '../coercion';
 import {
 	isValidLanguageTag,
 	isWritableBaseField,
@@ -41,9 +42,7 @@ const putBaseField = async (
 	req: Request<{ baseFieldShortCode: string }>,
 	res: Response,
 ): Promise<void> => {
-	const {
-		params: { baseFieldShortCode },
-	} = req;
+	const { baseFieldShortCode } = coerceParams(req.params);
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
 			'Invalid short code parameter.',
@@ -86,9 +85,7 @@ const getBaseFieldLocalizationsByBaseFieldShortCode = async (
 	req: Request<{ baseFieldShortCode: ShortCode }>,
 	res: Response,
 ): Promise<void> => {
-	const {
-		params: { baseFieldShortCode },
-	} = req;
+	const { baseFieldShortCode } = coerceParams(req.params);
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
 			'Invalid short code parameter.',
@@ -116,9 +113,7 @@ const putBaseFieldLocalization = async (
 	req: Request<{ baseFieldShortCode: ShortCode; language: string }>,
 	res: Response,
 ): Promise<void> => {
-	const {
-		params: { baseFieldShortCode, language },
-	} = req;
+	const { baseFieldShortCode, language } = coerceParams(req.params);
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
 			'Invalid shortcode parameter.',
@@ -126,7 +121,7 @@ const putBaseFieldLocalization = async (
 		);
 	}
 
-	if (!isValidLanguageTag(req.params.language)) {
+	if (!isValidLanguageTag(language)) {
 		throw new InputValidationError(
 			'The entity language must be a valid IETF language tag',
 			isValidLanguageTag.errors ?? [],

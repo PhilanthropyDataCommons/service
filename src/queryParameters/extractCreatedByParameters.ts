@@ -1,6 +1,7 @@
 import { ajv } from '../ajv';
 import { InputValidationError } from '../errors';
 import { keycloakIdSchema } from '../types';
+import { coerceQuery } from '../coercion';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
 import type { KeycloakId, AuthContext } from '../types';
@@ -46,7 +47,8 @@ const extractCreatedByParameters = (
 	request: Pick<Request, 'query'> & Partial<AuthContext>,
 ): CreatedByParameters => {
 	const { query } = request;
-	if (!isCreatedByQueryParameters(query)) {
+	const coercedQuery = coerceQuery(query);
+	if (!isCreatedByQueryParameters(coercedQuery)) {
 		throw new InputValidationError(
 			'Invalid createdBy parameters.',
 			isCreatedByQueryParameters.errors ?? [],
@@ -54,7 +56,9 @@ const extractCreatedByParameters = (
 	}
 
 	const createdBy =
-		query.createdBy === 'me' ? request.user?.keycloakUserId : query.createdBy;
+		coercedQuery.createdBy === 'me'
+			? request.user?.keycloakUserId
+			: coercedQuery.createdBy;
 
 	return {
 		createdBy,

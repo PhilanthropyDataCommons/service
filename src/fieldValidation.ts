@@ -12,13 +12,13 @@ const isUrlString = ajv.compile({
 	format: 'uri',
 });
 
-const isNumericString = ajv.compile({
-	type: 'number',
-});
+const isNumericString = (value: string): boolean => {
+	const num = Number(value);
+	return !isNaN(num) && isFinite(num);
+};
 
-const isBooleanString = ajv.compile({
-	type: 'boolean',
-});
+const isBooleanString = (value: string): boolean =>
+	value === 'true' || value === 'false';
 
 const isString = ajv.compile({
 	type: 'string',
@@ -59,7 +59,11 @@ const isIdString = (value: string): boolean => {
 	if (value.trim() !== value) {
 		return false;
 	}
-	return isId(value);
+	const num = Number(value);
+	if (isNaN(num) || !isFinite(num)) {
+		return false;
+	}
+	return isId(num);
 };
 
 export const fieldValueIsValid = (

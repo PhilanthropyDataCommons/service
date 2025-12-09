@@ -26,6 +26,7 @@ import {
 	extractPaginationParameters,
 	extractProposalParameters,
 } from '../queryParameters';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
 const postChangemaker = async (req: Request, res: Response): Promise<void> => {
@@ -61,9 +62,7 @@ const getChangemakers = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getChangemaker = async (req: Request, res: Response): Promise<void> => {
-	const {
-		params: { changemakerId },
-	} = req;
+	const { changemakerId } = coerceParams(req.params);
 	if (!isId(changemakerId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
@@ -84,9 +83,7 @@ const patchChangemaker = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { changemakerId },
-	} = req;
+	const { changemakerId } = coerceParams(req.params);
 	if (!isId(changemakerId)) {
 		throw new InputValidationError(
 			'Invalid request parameter.',
@@ -139,9 +136,9 @@ const putChangemakerFiscalSponsor = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { changemakerId, fiscalSponsorChangemakerId },
-	} = req;
+	const { changemakerId, fiscalSponsorChangemakerId } = coerceParams(
+		req.params,
+	);
 	if (!isId(changemakerId)) {
 		throw new InputValidationError(
 			'Invalid changemakerId parameter.',
@@ -169,9 +166,9 @@ const deleteChangemakerFiscalSponsor = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const {
-		params: { changemakerId, fiscalSponsorChangemakerId },
-	} = req;
+	const { changemakerId, fiscalSponsorChangemakerId } = coerceParams(
+		req.params,
+	);
 	if (!isId(changemakerId)) {
 		throw new InputValidationError(
 			'Invalid changemakerId parameter.',

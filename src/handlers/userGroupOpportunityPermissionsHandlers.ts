@@ -12,15 +12,15 @@ import {
 	isWritableUserGroupOpportunityPermission,
 } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
 const deleteUserGroupOpportunityPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const {
-		params: { keycloakOrganizationId, opportunityId, opportunityPermission },
-	} = req;
+	const { keycloakOrganizationId, opportunityId, opportunityPermission } =
+		coerceParams(req.params);
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
 			'Invalid keycloakOrganizationId parameter.',
@@ -61,9 +61,8 @@ const putUserGroupOpportunityPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const {
-		params: { keycloakOrganizationId, opportunityId, opportunityPermission },
-	} = req;
+	const { keycloakOrganizationId, opportunityId, opportunityPermission } =
+		coerceParams(req.params);
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(

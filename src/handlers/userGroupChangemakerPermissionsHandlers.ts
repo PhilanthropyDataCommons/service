@@ -12,15 +12,16 @@ import {
 	isWritableUserGroupChangemakerPermission,
 } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
 const deleteUserGroupChangemakerPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const {
-		params: { keycloakOrganizationId, changemakerId, permission },
-	} = req;
+	const { keycloakOrganizationId, changemakerId, permission } = coerceParams(
+		req.params,
+	);
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
 			'Invalid keycloakOrganizationId parameter.',
@@ -61,9 +62,9 @@ const putUserGroupChangemakerPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const {
-		params: { keycloakOrganizationId, changemakerId, permission },
-	} = req;
+	const { keycloakOrganizationId, changemakerId, permission } = coerceParams(
+		req.params,
+	);
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(

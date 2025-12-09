@@ -13,15 +13,16 @@ import {
 	isWritableUserGroupFunderPermission,
 } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
 const deleteUserGroupFunderPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const {
-		params: { keycloakOrganizationId, funderShortCode, permission },
-	} = req;
+	const { keycloakOrganizationId, funderShortCode, permission } = coerceParams(
+		req.params,
+	);
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(
 			'Invalid keycloakOrganizationId parameter.',
@@ -62,9 +63,9 @@ const putUserGroupFunderPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const {
-		params: { keycloakOrganizationId, funderShortCode, permission },
-	} = req;
+	const { keycloakOrganizationId, funderShortCode, permission } = coerceParams(
+		req.params,
+	);
 
 	if (!isKeycloakId(keycloakOrganizationId)) {
 		throw new InputValidationError(

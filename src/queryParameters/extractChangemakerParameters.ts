@@ -1,6 +1,7 @@
 import { ajv } from '../ajv';
 import { InputValidationError } from '../errors';
 import { idSchema } from '../types';
+import { coerceQuery } from '../coercion';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
 import type { Id } from '../types';
@@ -33,14 +34,15 @@ const extractChangemakerParameters = (
 	request: Request,
 ): ChangemakerParameters => {
 	const { query } = request;
-	if (!isChangemakerParametersQuery(query)) {
+	const coercedQuery = coerceQuery(query);
+	if (!isChangemakerParametersQuery(coercedQuery)) {
 		throw new InputValidationError(
 			'Invalid changemaker parameters.',
 			isChangemakerParametersQuery.errors ?? [],
 		);
 	}
 	return {
-		changemakerId: query.changemaker,
+		changemakerId: coercedQuery.changemaker,
 	};
 };
 

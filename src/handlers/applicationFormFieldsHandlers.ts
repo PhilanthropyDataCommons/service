@@ -18,6 +18,7 @@ import {
 	UnauthorizedError,
 } from '../errors';
 import { authContextHasFunderPermission } from '../authorization';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 import type { AuthContext } from '../types';
 
@@ -62,9 +63,7 @@ const patchApplicationFormField = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { applicationFormFieldId },
-	} = req;
+	const { applicationFormFieldId } = coerceParams(req.params);
 	if (!isId(applicationFormFieldId)) {
 		throw new InputValidationError(
 			'Invalid request parameter.',

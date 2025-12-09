@@ -13,15 +13,15 @@ import {
 	isWritableUserFunderPermission,
 } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
 const deleteUserDataProviderPermission = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
-	const {
-		params: { userKeycloakUserId, dataProviderShortCode, permission },
-	} = req;
+	const { userKeycloakUserId, dataProviderShortCode, permission } =
+		coerceParams(req.params);
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(
 			'Invalid userKeycloakUserId parameter.',
@@ -62,9 +62,8 @@ const putUserDataProviderPermission = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const {
-		params: { userKeycloakUserId, dataProviderShortCode, permission },
-	} = req;
+	const { userKeycloakUserId, dataProviderShortCode, permission } =
+		coerceParams(req.params);
 
 	if (!isKeycloakId(userKeycloakUserId)) {
 		throw new InputValidationError(

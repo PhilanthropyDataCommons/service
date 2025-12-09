@@ -14,6 +14,7 @@ import {
 	UnprocessableEntityError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
+import { coerceParams } from '../coercion';
 import {
 	authContextHasChangemakerPermission,
 	authContextHasDataProviderPermission,
@@ -93,9 +94,7 @@ const getSources = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getSource = async (req: Request, res: Response): Promise<void> => {
-	const {
-		params: { sourceId },
-	} = req;
+	const { sourceId } = coerceParams(req.params);
 	if (!isId(sourceId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
@@ -107,9 +106,7 @@ const getSource = async (req: Request, res: Response): Promise<void> => {
 };
 
 const deleteSource = async (req: Request, res: Response): Promise<void> => {
-	const {
-		params: { sourceId },
-	} = req;
+	const { sourceId } = coerceParams(req.params);
 	if (!isId(sourceId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}

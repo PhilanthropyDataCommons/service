@@ -25,6 +25,7 @@ import {
 import { fieldValueIsValid } from '../fieldValidation';
 import { authContextHasFunderPermission } from '../authorization';
 import { allNoLeaks } from '../promises';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 import type {
 	WritableProposalFieldValueWithProposalVersionContext,
@@ -224,9 +225,7 @@ const getProposalVersion = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const {
-		params: { proposalVersionId },
-	} = req;
+	const { proposalVersionId } = coerceParams(req.params);
 	if (!isId(proposalVersionId)) {
 		throw new InputValidationError(
 			'Invalid query parameter.',

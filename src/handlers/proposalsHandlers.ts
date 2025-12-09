@@ -27,6 +27,7 @@ import {
 	extractSearchParameters,
 	extractFunderParameters,
 } from '../queryParameters';
+import { coerceParams } from '../coercion';
 import {
 	authContextHasFunderPermission,
 	authContextHasOpportunityPermission,
@@ -66,9 +67,7 @@ const getProposal = async (req: Request, res: Response): Promise<void> => {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const {
-		params: { proposalId },
-	} = req;
+	const { proposalId } = coerceParams(req.params);
 	if (!isId(proposalId)) {
 		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
 	}

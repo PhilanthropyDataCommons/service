@@ -9,6 +9,7 @@ import {
 import { isAuthContext, isWritableDataProvider } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
+import { coerceParams } from '../coercion';
 import { isShortCode } from '../types/ShortCode';
 import type { Request, Response } from 'express';
 
@@ -32,9 +33,7 @@ const getDataProviders = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getDataProvider = async (req: Request, res: Response): Promise<void> => {
-	const {
-		params: { dataProviderShortCode },
-	} = req;
+	const { dataProviderShortCode } = coerceParams(req.params);
 	if (!isShortCode(dataProviderShortCode)) {
 		throw new InputValidationError(
 			'Invalid short code.',
@@ -52,9 +51,7 @@ const putDataProvider = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	const {
-		params: { dataProviderShortCode: shortCode },
-	} = req;
+	const { dataProviderShortCode: shortCode } = coerceParams(req.params);
 	if (!isShortCode(shortCode)) {
 		throw new InputValidationError(
 			'Invalid short code.',

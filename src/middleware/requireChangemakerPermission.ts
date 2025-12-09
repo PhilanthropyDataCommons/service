@@ -12,6 +12,7 @@
  *
  * If any of the checks fail, the middleware will pass an appropriate error to the next middleware.
  */
+import { coerceParams } from '../coercion';
 import { InputValidationError, UnauthorizedError } from '../errors';
 import { isAuthContext, isId } from '../types';
 import type { Permission } from '../types';
@@ -28,9 +29,7 @@ const requireChangemakerPermission =
 			next();
 			return;
 		}
-		const {
-			params: { changemakerId },
-		} = req;
+		const { changemakerId } = coerceParams(req.params);
 		if (!isId(changemakerId)) {
 			next(
 				new InputValidationError('Invalid changemakerId.', isId.errors ?? []),

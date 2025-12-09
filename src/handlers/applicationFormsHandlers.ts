@@ -22,6 +22,7 @@ import {
 	UnprocessableEntityError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
+import { coerceParams } from '../coercion';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
@@ -54,9 +55,7 @@ const getApplicationForm = async (
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 
-	const {
-		params: { applicationFormId },
-	} = req;
+	const { applicationFormId } = coerceParams(req.params);
 	if (!isId(applicationFormId)) {
 		throw new InputValidationError('Invalid request.', isId.errors ?? []);
 	}

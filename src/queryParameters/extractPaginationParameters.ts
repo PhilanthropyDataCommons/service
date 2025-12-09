@@ -1,5 +1,6 @@
 import { InputValidationError } from '../errors';
 import { isPaginationParametersQuery } from '../types';
+import { coerceQuery } from '../coercion';
 import type { Request } from 'express';
 import type { PaginationParameters } from '../types';
 
@@ -9,7 +10,8 @@ const DEFAULT_COUNT = 10;
 export const extractPaginationParameters = ({
 	query,
 }: Pick<Request, 'query'>): PaginationParameters => {
-	if (!isPaginationParametersQuery(query)) {
+	const coercedQuery = coerceQuery(query);
+	if (!isPaginationParametersQuery(coercedQuery)) {
 		throw new InputValidationError(
 			'Invalid pagination parameters.',
 			isPaginationParametersQuery.errors ?? [],
@@ -17,7 +19,7 @@ export const extractPaginationParameters = ({
 	}
 
 	return {
-		page: query._page ?? DEFAULT_PAGE,
-		count: query._count ?? DEFAULT_COUNT,
+		page: coercedQuery._page ?? DEFAULT_PAGE,
+		count: coercedQuery._count ?? DEFAULT_COUNT,
 	};
 };

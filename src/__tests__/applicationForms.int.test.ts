@@ -543,7 +543,7 @@ describe('/applicationForms', () => {
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.VIEW,
 			});
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -553,7 +553,7 @@ describe('/applicationForms', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					opportunityId: '1',
+					opportunityId: opportunity.id,
 					fields: [],
 				})
 				.expect(201);
@@ -571,7 +571,7 @@ describe('/applicationForms', () => {
 
 		it('creates exactly one application form as an administrator', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -581,7 +581,7 @@ describe('/applicationForms', () => {
 				.type('application/json')
 				.set(authHeaderWithAdminRole)
 				.send({
-					opportunityId: '1',
+					opportunityId: opportunity.id,
 					fields: [],
 				})
 				.expect(201);
@@ -611,7 +611,7 @@ describe('/applicationForms', () => {
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.MANAGE,
 			});
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -621,7 +621,7 @@ describe('/applicationForms', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({
-					opportunityId: '1',
+					opportunityId: opportunity.id,
 					fields: [],
 				})
 				.expect(401);
@@ -632,7 +632,7 @@ describe('/applicationForms', () => {
 
 		it('creates exactly the number of provided fields', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -643,7 +643,7 @@ describe('/applicationForms', () => {
 				.type('application/json')
 				.set(authHeaderWithAdminRole)
 				.send({
-					opportunityId: '1',
+					opportunityId: opportunity.id,
 					fields: [
 						{
 							baseFieldShortCode: 'organizationName',
@@ -679,22 +679,22 @@ describe('/applicationForms', () => {
 
 		it('increments version when creating a second form for an opportunity', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
 				.set(authHeaderWithAdminRole)
 				.send({
-					opportunityId: '1',
+					opportunityId: opportunity.id,
 					fields: [],
 				})
 				.expect(201);
@@ -802,7 +802,7 @@ describe('/applicationForms', () => {
 
 		it('returns 500 UnknownError if a generic Error is thrown when inserting the field', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -829,7 +829,7 @@ describe('/applicationForms', () => {
 				.type('application/json')
 				.set(authHeaderWithAdminRole)
 				.send({
-					opportunityId: '1',
+					opportunityId: opportunity.id,
 					fields: [
 						{
 							baseFieldShortCode: 'organizationName',

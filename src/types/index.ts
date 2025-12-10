@@ -9,6 +9,7 @@ export * from './BulkUploadLog';
 export * from './BulkUploadTask';
 export * from './Bundle';
 export * from './Changemaker';
+export * from './ChangemakerFieldValue';
 export * from './ChangemakerProposal';
 export * from './CheckResult';
 export * from './CopyBaseFieldsJobPayload';

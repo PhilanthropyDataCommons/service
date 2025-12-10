@@ -13,7 +13,6 @@ import {
 	isId,
 	isWritableChangemaker,
 	isAuthContext,
-	getKeycloakUserIdFromAuthContext,
 	isPartialWritableChangemaker,
 } from '../types';
 import {
@@ -66,13 +65,8 @@ const getChangemaker = async (req: Request, res: Response): Promise<void> => {
 	if (!isId(changemakerId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
-	const authContext = isAuthContext(req) ? req : undefined;
-	const changemaker = await loadChangemaker(
-		db,
-		null,
-		getKeycloakUserIdFromAuthContext(authContext),
-		changemakerId,
-	);
+	const authContext = isAuthContext(req) ? req : null;
+	const changemaker = await loadChangemaker(db, authContext, changemakerId);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')

@@ -1,11 +1,10 @@
 import { generateLoadItemOperation } from '../generators';
-import type { Changemaker, Id, KeycloakId } from '../../../types';
+import type { Changemaker, Id } from '../../../types';
 
 const loadChangemaker = generateLoadItemOperation<
 	Changemaker,
-	[authContextKeycloakUserId: KeycloakId | undefined, changemakerId: Id]
+	[changemakerId: Id]
 >('changemakers.selectById', 'Changemaker', [
-	'authContextKeycloakUserId',
 	'changemakerId',
 ]);
 

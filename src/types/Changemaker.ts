@@ -50,11 +50,19 @@ const partialWritableChangemakerSchema: JSONSchemaType<PartialWritableChangemake
 		properties: {
 			taxId: {
 				type: 'string',
-				nullable: true,
+				/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+				 * This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
+				 * See: https://github.com/ajv-validator/ajv/issues/2163
+				 */
+				nullable: false as true,
 			},
 			name: {
 				type: 'string',
-				nullable: true,
+				/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+				 * This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
+				 * See: https://github.com/ajv-validator/ajv/issues/2163
+				 */
+				nullable: false as true,
 			},
 			keycloakOrganizationId: {
 				...keycloakIdSchema,

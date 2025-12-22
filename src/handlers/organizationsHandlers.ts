@@ -2,12 +2,11 @@ import { HTTP_STATUS } from '../constants';
 import { db, loadOrganization } from '../database';
 import { isAuthContext, isId, isKeycloakId } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
+import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
 const getOrganization = async (req: Request, res: Response): Promise<void> => {
-	const {
-		params: { keycloakOrganizationId },
-	} = req;
+	const { keycloakOrganizationId } = coerceParams(req.params);
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}

@@ -3,9 +3,7 @@ import ajvKeywords from 'ajv-keywords';
 import addFormats from 'ajv-formats';
 import * as tags from 'language-tags';
 
-export const ajv = new Ajv({
-	coerceTypes: true,
-});
+export const ajv = new Ajv();
 
 ajv.addKeyword({
 	keyword: 'isValidLanguageTag',

@@ -1,6 +1,7 @@
 import { ajv } from '../ajv';
 import { InputValidationError } from '../errors';
 import { idSchema } from '../types';
+import { coerceQuery } from '../coercion';
 import type { JSONSchemaType } from 'ajv';
 import type { Request } from 'express';
 import type { Id } from '../types';
@@ -28,14 +29,15 @@ const isProposalParametersQuery = ajv.compile(proposalParametersQuerySchema);
 
 const extractProposalParameters = (request: Request): ProposalParameters => {
 	const { query } = request;
-	if (!isProposalParametersQuery(query)) {
+	const coercedQuery = coerceQuery(query);
+	if (!isProposalParametersQuery(coercedQuery)) {
 		throw new InputValidationError(
 			'Invalid proposal parameters.',
 			isProposalParametersQuery.errors ?? [],
 		);
 	}
 	return {
-		proposalId: query.proposal,
+		proposalId: coercedQuery.proposal,
 	};
 };
 

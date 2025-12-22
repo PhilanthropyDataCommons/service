@@ -161,11 +161,11 @@ describe('/proposals', () => {
 			await createTestBaseFields();
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-2',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '123-123-123',
@@ -186,7 +186,7 @@ describe('/proposals', () => {
 					{
 						id: 1,
 						externalId: 'proposal-1',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -292,14 +292,14 @@ describe('/proposals', () => {
 			await createTestBaseFields();
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-2',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
@@ -344,7 +344,7 @@ describe('/proposals', () => {
 					{
 						id: 1,
 						externalId: 'proposal-1',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -483,11 +483,11 @@ describe('/proposals', () => {
 			await createTestBaseFields();
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposal(db, anotherUserAuthContext, {
 				externalId: 'proposal-2',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			const response = await request(app)
 				.get('/proposals')
@@ -499,7 +499,7 @@ describe('/proposals', () => {
 					{
 						id: 2,
 						externalId: 'proposal-2',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: anotherUser.keycloakUserId,
@@ -508,7 +508,7 @@ describe('/proposals', () => {
 					{
 						id: 1,
 						externalId: 'proposal-1',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -535,11 +535,11 @@ describe('/proposals', () => {
 			await createTestBaseFields();
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposal(db, anotherUserAuthContext, {
 				externalId: 'proposal-2',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			const response = await request(app)
 				.get(
@@ -553,7 +553,7 @@ describe('/proposals', () => {
 					{
 						id: 1,
 						externalId: 'proposal-1',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -580,11 +580,11 @@ describe('/proposals', () => {
 			await createTestBaseFields();
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposal(db, anotherUserAuthContext, {
 				externalId: 'proposal-2',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			const response = await request(app)
 				.get(`/proposals?createdBy=me`)
@@ -596,7 +596,7 @@ describe('/proposals', () => {
 					{
 						id: 1,
 						externalId: 'proposal-1',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -621,14 +621,14 @@ describe('/proposals', () => {
 			await createTestBaseFields();
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-4999',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-5003',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
@@ -673,7 +673,7 @@ describe('/proposals', () => {
 					{
 						id: 1,
 						externalId: 'proposal-4999',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
@@ -742,7 +742,7 @@ describe('/proposals', () => {
 				await p;
 				await createProposal(db, testUserAuthContext, {
 					externalId: `proposal-${i + 1}`,
-					opportunityId: 1,
+					opportunityId: opportunity.id,
 				});
 			}, Promise.resolve());
 			const response = await request(app)
@@ -759,7 +759,7 @@ describe('/proposals', () => {
 					{
 						id: 15,
 						externalId: 'proposal-15',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
@@ -768,7 +768,7 @@ describe('/proposals', () => {
 					{
 						id: 14,
 						externalId: 'proposal-14',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
@@ -777,7 +777,7 @@ describe('/proposals', () => {
 					{
 						id: 13,
 						externalId: 'proposal-13',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
@@ -786,7 +786,7 @@ describe('/proposals', () => {
 					{
 						id: 12,
 						externalId: 'proposal-12',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
@@ -795,7 +795,7 @@ describe('/proposals', () => {
 					{
 						id: 11,
 						externalId: 'proposal-11',
-						opportunityId: 1,
+						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
 						createdAt: expectTimestamp(),
@@ -828,7 +828,7 @@ describe('/proposals', () => {
 							lookupValues: {
 								authContextIsAdministrator: false,
 								authContextKeycloakUserId: testUser.keycloakUserId,
-								proposalId: '9001',
+								proposalId: 9001,
 							},
 						},
 					},
@@ -844,13 +844,13 @@ describe('/proposals', () => {
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '⛰️',
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createProposal(db, anotherUserAuthContext, {
 				externalId: `proposal-1`,
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 
 			const response = await request(app)
@@ -868,7 +868,7 @@ describe('/proposals', () => {
 							lookupValues: {
 								authContextIsAdministrator: false,
 								authContextKeycloakUserId: testUser.keycloakUserId,
-								proposalId: '1',
+								proposalId: 1,
 							},
 						},
 					},
@@ -899,11 +899,11 @@ describe('/proposals', () => {
 
 			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-1`,
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-2`,
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 
 			const response = await request(app)
@@ -914,7 +914,7 @@ describe('/proposals', () => {
 				id: 2,
 				externalId: 'proposal-2',
 				versions: [],
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 				opportunity,
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
@@ -931,7 +931,7 @@ describe('/proposals', () => {
 			});
 			await createTestBaseFields();
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
@@ -951,7 +951,7 @@ describe('/proposals', () => {
 			const systemSource = await loadSystemSource(db, null);
 			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-2525-01-04T00Z`,
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
@@ -1001,7 +1001,7 @@ describe('/proposals', () => {
 				.expect(200);
 			expect(response.body).toEqual({
 				id: 1,
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 				opportunity,
 				externalId: 'proposal-2525-01-04T00Z',
 				createdAt: expectTimestamp(),
@@ -1178,7 +1178,7 @@ describe('/proposals', () => {
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
@@ -1197,7 +1197,7 @@ describe('/proposals', () => {
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-2525-01-04T00Z`,
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
@@ -1247,7 +1247,7 @@ describe('/proposals', () => {
 				.expect(200);
 			expect(response.body).toEqual({
 				id: 1,
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 				opportunity,
 				externalId: 'proposal-2525-01-04T00Z',
 				createdAt: expectTimestamp(),
@@ -1434,7 +1434,7 @@ describe('/proposals', () => {
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
@@ -1456,7 +1456,7 @@ describe('/proposals', () => {
 			);
 			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-2525-01-04T00Z`,
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
@@ -1490,7 +1490,7 @@ describe('/proposals', () => {
 				.expect(200);
 			expect(response.body).toEqual({
 				id: 1,
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 				opportunity,
 				externalId: 'proposal-2525-01-04T00Z',
 				createdAt: expectTimestamp(),
@@ -1560,7 +1560,7 @@ describe('/proposals', () => {
 
 		it('creates exactly one proposal when the user is an administrator', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -1572,7 +1572,7 @@ describe('/proposals', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					externalId: 'proposal123',
-					opportunityId: 1,
+					opportunityId: opportunity.id,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('proposals');
@@ -1580,7 +1580,7 @@ describe('/proposals', () => {
 			expect(result.body).toMatchObject({
 				id: 1,
 				externalId: 'proposal123',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 			});
@@ -1597,7 +1597,7 @@ describe('/proposals', () => {
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
 			});
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -1608,14 +1608,14 @@ describe('/proposals', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					externalId: 'proposal123',
-					opportunityId: 1,
+					opportunityId: opportunity.id,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('proposals');
 			expect(result.body).toMatchObject({
 				id: 1,
 				externalId: 'proposal123',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 			});

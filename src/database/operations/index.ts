@@ -5,6 +5,7 @@ export * from './baseFields';
 export * from './baseFieldsCopyTasks';
 export * from './bulkUploadLogs';
 export * from './bulkUploadTasks';
+export * from './changemakerFieldValueBatches';
 export * from './changemakerProposals';
 export * from './changemakers';
 export * from './dataProviders';

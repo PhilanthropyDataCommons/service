@@ -1,0 +1,55 @@
+{
+	"post": {
+		"operationId": "addChangemakerFieldValueBatch",
+		"summary": "Creates a new changemaker field value batch.",
+		"description": "Creates a new batch record to group changemaker field values that were imported together from an external source.",
+		"tags": ["Changemaker Field Value Batches"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/ChangemakerFieldValueBatch.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new changemaker field value batch that was created.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ChangemakerFieldValueBatch.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"409": {
+				"description": "The source does not exist.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

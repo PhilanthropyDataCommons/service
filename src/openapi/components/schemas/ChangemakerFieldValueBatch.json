@@ -1,0 +1,26 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"$ref": "./id.json",
+			"readOnly": true
+		},
+		"sourceId": {
+			"$ref": "./id.json"
+		},
+		"source": {
+			"$ref": "./Source.json",
+			"readOnly": true
+		},
+		"notes": {
+			"type": ["string", "null"],
+			"example": "Routine annual import"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": ["id", "sourceId", "source", "notes", "createdAt"]
+}

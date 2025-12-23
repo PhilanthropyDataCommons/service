@@ -9,6 +9,7 @@ import { opportunitiesRouter } from './opportunitiesRouter';
 import { organizationsRouter } from './organizationsRouter';
 import { changemakersRouter } from './changemakersRouter';
 import { changemakerProposalsRouter } from './changemakerProposalsRouter';
+import { changemakerFieldValueBatchesRouter } from './changemakerFieldValueBatchesRouter';
 import { platformProviderResponsesRouter } from './platformProviderResponsesRouter';
 import { proposalsRouter } from './proposalsRouter';
 import { proposalVersionsRouter } from './proposalVersionsRouter';
@@ -26,6 +27,10 @@ rootRouter.use('/baseFields', baseFieldsRouter);
 rootRouter.use('/tasks', tasksRouter);
 rootRouter.use('/changemakers', changemakersRouter);
 rootRouter.use('/changemakerProposals', changemakerProposalsRouter);
+rootRouter.use(
+	'/changemakerFieldValueBatches',
+	changemakerFieldValueBatchesRouter,
+);
 rootRouter.use('/dataProviders', dataProvidersRouter);
 rootRouter.use('/files', filesRouter);
 rootRouter.use('/funders', fundersRouter);

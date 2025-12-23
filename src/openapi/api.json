@@ -86,6 +86,9 @@
 			"ChangemakerProposal": {
 				"$ref": "./components/schemas/ChangemakerProposal.json"
 			},
+			"ChangemakerFieldValueBatch": {
+				"$ref": "./components/schemas/ChangemakerFieldValueBatch.json"
+			},
 			"PresignedPost": {
 				"$ref": "./components/schemas/PresignedPost.json"
 			},
@@ -223,6 +226,9 @@
 		},
 		"/changemakers/{changemakerId}/fiscalSponsors/{fiscalSponsorChangemakerId}": {
 			"$ref": "./paths/changemakerFiscalSponsor.json"
+		},
+		"/changemakerFieldValueBatches": {
+			"$ref": "./paths/changemakerFieldValueBatches.json"
 		},
 		"/proposals": {
 			"$ref": "./paths/proposals.json"

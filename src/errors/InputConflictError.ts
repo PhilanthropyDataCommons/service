@@ -1,8 +1,10 @@
 interface ConflictErrorDetails {
 	entityType: string;
-	entityId: number;
+	entityId?: number;
+	entityShortCode?: string;
 	contextEntityType?: string;
 	contextEntityId?: number;
+	contextEntityShortCode?: string;
 }
 
 export class InputConflictError extends Error {

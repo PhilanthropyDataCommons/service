@@ -1,0 +1,65 @@
+{
+	"post": {
+		"operationId": "addChangemakerFieldValue",
+		"summary": "Creates a new field value for a changemaker.",
+		"description": "Creates a new field value for an organizational base field for a given changemaker. Multiple values can exist for the same changemaker and field combination.",
+		"tags": ["Changemaker Field Values"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/ChangemakerFieldValue.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new changemaker field value that was created.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ChangemakerFieldValue.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"409": {
+				"description": "The changemaker, base field, or batch does not exist.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"422": {
+				"description": "The request body was invalid or the base field is not an organization-category field.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -3,7 +3,7 @@
 	"info": {
 		"title": "Philanthropy Data Commons API",
 		"description": "An API for a common data platform to make the process of submitting data requests to funders less burdensome for changemakers seeking grants.",
-		"version": "0.26.0",
+		"version": "0.27.0",
 		"license": {
 			"name": "GNU Affero General Public License v3.0 only",
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
@@ -85,6 +85,12 @@
 			},
 			"ChangemakerProposal": {
 				"$ref": "./components/schemas/ChangemakerProposal.json"
+			},
+			"ChangemakerFieldValueBatch": {
+				"$ref": "./components/schemas/ChangemakerFieldValueBatch.json"
+			},
+			"ChangemakerFieldValue": {
+				"$ref": "./components/schemas/ChangemakerFieldValue.json"
 			},
 			"PresignedPost": {
 				"$ref": "./components/schemas/PresignedPost.json"
@@ -223,6 +229,12 @@
 		},
 		"/changemakers/{changemakerId}/fiscalSponsors/{fiscalSponsorChangemakerId}": {
 			"$ref": "./paths/changemakerFiscalSponsor.json"
+		},
+		"/changemakerFieldValueBatches": {
+			"$ref": "./paths/changemakerFieldValueBatches.json"
+		},
+		"/changemakerFieldValues": {
+			"$ref": "./paths/changemakerFieldValues.json"
 		},
 		"/proposals": {
 			"$ref": "./paths/proposals.json"

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.27.0 2025-12-22
+
+### Added
+
+- `ChangemakerFieldValueBatch` entity type now exists to group changemaker field values that were imported together from an external source.
+- `POST /changemakerFieldValueBatches` endpoint now exists to create changemaker field value batches.
+- `ChangemakerFieldValue` entity type now exists to represent field values directly associated with changemakers.
+- `POST /changemakerFieldValues` endpoint now exists to create changemaker field values.
+
 ## 0.26.0 2025-10-30
 
 ### Added

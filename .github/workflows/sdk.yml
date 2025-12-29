@@ -7,11 +7,13 @@ on:
     branches:
       - 'main'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   typescript:
     runs-on: ubuntu-latest
-    env:
-      npm_token_exists: ${{ secrets.NPM_TOKEN != '' }}
     steps:
       - name: Check out our code
         uses: actions/checkout@v6
@@ -51,10 +53,9 @@ jobs:
         working-directory: sdk/build/typescript
         run: npm run build
       - name: Publish to NPM if there is a new version
-        if: ${{ env.npm_token_exists == 'true' }}
         uses: JS-DevTools/npm-publish@v4
         with:
           package: sdk/build/typescript
-          token: ${{ secrets.NPM_TOKEN }}
           access: public
           dry-run: ${{ github.event_name == 'pull_request' }}
+          provenance: true

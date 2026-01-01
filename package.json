@@ -111,7 +111,7 @@
 		"pino-http": "^11.0.0",
 		"postgres-schema-migrations": "^6.1.0",
 		"require-env-variable": "^4.0.2",
-		"swagger-ui-dist": "^5.30.3",
+		"swagger-ui-dist": "^5.31.0",
 		"swagger-ui-express": "^5.0.1",
 		"tinypg": "^7.0.0",
 		"tmp-promise": "^3.0.3",

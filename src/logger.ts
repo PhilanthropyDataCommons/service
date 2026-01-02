@@ -5,7 +5,10 @@ import type { Logger } from 'pino';
  * To prevent replay attacks, redact the JWT signature. This invalidates it.
  */
 const redactBearerString = (secret: string): string =>
-	secret.replace(/^(Bearer [A-Za-z0-9]*\.[A-Za-z0-9]*\.).*/, '$1[redacted]');
+	secret.replace(
+		/^(?<prefix>Bearer [A-Za-z0-9]*\.[A-Za-z0-9]*\.).*/,
+		'$<prefix>[redacted]',
+	);
 
 /**
  * This is a censor function adapter matching pino.redactOptions.censor.

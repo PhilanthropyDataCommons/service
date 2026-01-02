@@ -116,7 +116,7 @@
 		"tinypg": "^7.0.0",
 		"tmp-promise": "^3.0.3",
 		"uuid": "^11.1.0",
-		"validator": "^13.15.23"
+		"validator": "^13.15.26"
 	},
 	"overrides": {
 		"mock-jwks": {

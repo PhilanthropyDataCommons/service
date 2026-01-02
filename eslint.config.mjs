@@ -82,9 +82,6 @@ export default defineConfig([
 					caughtErrors: 'none',
 				},
 			],
-
-			// Disable broken lint rules temporarily
-			'prefer-named-capture-group': 'off',
 		},
 		settings: {
 			'import/resolver': {

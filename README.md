@@ -209,3 +209,7 @@ You can configure your local git to always ignore these commits by invoking:
 ```
 git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
+
+### LLM Agents
+
+The project includes an [`AGENTS.md`](AGENTS.md) file which provides context for LLM agents. It is intentionally written to be LLM agnostic, and we recommend creating a symbolic link to whatever your specific tooling expects.

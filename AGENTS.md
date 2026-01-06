@@ -343,6 +343,44 @@ docker build .
 - `docs/HOSTING.md` - Production deployment
 - `docs/KEYCLOAK_CHECKLIST.md` - Authentication server setup
 
+## Maintaining Documentation
+
+When making changes to the codebase, ensure that relevant documentation is kept up to date. Documentation drift leads to confusion and maintenance burden.
+
+### Entity Relationship Diagram (ERD)
+
+The ERD at `docs/ENTITY_RELATIONSHIP_DIAGRAM.md` documents the database schema using Mermaid syntax.
+
+**When to update the ERD:**
+
+- Adding new database tables (via migrations)
+- Removing or renaming database tables
+- Adding, removing, or renaming columns
+- Changing relationships between tables (foreign keys)
+- Changing primary keys or data types
+
+**What to update:**
+
+1. The Mermaid `erDiagram` block with entity definitions and relationships
+2. The narrative section if the conceptual model changes
+3. The example sections if they reference outdated concepts or terminology
+
+**Tips:**
+
+- You can connect to the local database via `psql` to inspect the current schema
+- Use `\dt` to list tables and `\d table_name` to describe table structure
+- Compare the ERD against the actual schema periodically to catch drift
+
+### Other Documentation to Keep Current
+
+| Document               | Update When                                  |
+| ---------------------- | -------------------------------------------- |
+| `docs/ARCHITECTURE.md` | Architectural changes or new system patterns |
+| `docs/GLOSSARY.md`     | Introducing new terminology or concepts      |
+| `docs/PERMISSIONS.md`  | Changing the permissions model               |
+| `README.md`            | Adding features or changing setup            |
+| `src/openapi/api.json` | Adding/modifying API endpoints               |
+
 ## Maintaining This Document
 
 This document should be kept up to date as the codebase evolves. Update it when:

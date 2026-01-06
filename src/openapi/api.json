@@ -199,30 +199,6 @@
 			},
 			"UserGroupDataProviderPermission": {
 				"$ref": "./components/schemas/UserGroupDataProviderPermission.json"
-			},
-			"PermissionVerb": {
-				"$ref": "./components/schemas/PermissionVerb.json"
-			},
-			"PermissionEntityType": {
-				"$ref": "./components/schemas/PermissionEntityType.json"
-			},
-			"UserPermissionGrant": {
-				"$ref": "./components/schemas/UserPermissionGrant.json"
-			},
-			"UserPermissionGrantBundle": {
-				"$ref": "./components/schemas/UserPermissionGrantBundle.json"
-			},
-			"WritableUserPermissionGrant": {
-				"$ref": "./components/schemas/WritableUserPermissionGrant.json"
-			},
-			"UserGroupPermissionGrant": {
-				"$ref": "./components/schemas/UserGroupPermissionGrant.json"
-			},
-			"UserGroupPermissionGrantBundle": {
-				"$ref": "./components/schemas/UserGroupPermissionGrantBundle.json"
-			},
-			"WritableUserGroupPermissionGrant": {
-				"$ref": "./components/schemas/WritableUserGroupPermissionGrant.json"
 			}
 		}
 	},
@@ -361,18 +337,6 @@
 		},
 		"/userGroups/{keycloakOrganizationId}/opportunities/{opportunityId}/permissions/{opportunityPermission}": {
 			"$ref": "./paths/userGroupOpportunityPermission.json"
-		},
-		"/users/{userKeycloakUserId}/permissions": {
-			"$ref": "./paths/userPermissionGrants.json"
-		},
-		"/users/{userKeycloakUserId}/{entityType}/{entityPk}/permissions/{permissionVerb}": {
-			"$ref": "./paths/userPermissionGrant.json"
-		},
-		"/userGroups/{keycloakOrganizationId}/permissions": {
-			"$ref": "./paths/userGroupPermissionGrants.json"
-		},
-		"/userGroups/{keycloakOrganizationId}/{entityType}/{entityPk}/permissions/{permissionVerb}": {
-			"$ref": "./paths/userGroupPermissionGrant.json"
 		}
 	}
 }

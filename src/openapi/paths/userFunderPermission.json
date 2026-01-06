@@ -2,8 +2,6 @@
 	"put": {
 		"operationId": "createOrUpdateUserFunderPermission",
 		"summary": "Creates or updates a user funder permission.",
-		"deprecated": true,
-		"description": "Deprecated: Use v2 permission grants API instead.",
 		"tags": ["Permissions"],
 		"security": [
 			{
@@ -70,8 +68,6 @@
 	"delete": {
 		"operationId": "deleteUserFunderPermission",
 		"summary": "Deletes a user-funder permission.",
-		"deprecated": true,
-		"description": "Deprecated: Use v2 permission grants API instead.",
 		"tags": ["Permissions"],
 		"security": [
 			{

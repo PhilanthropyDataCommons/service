@@ -2,8 +2,6 @@
 	"put": {
 		"operationId": "createOrUpdateUserDataProviderPermission",
 		"summary": "Creates or updates a user data provider permission.",
-		"deprecated": true,
-		"description": "Deprecated: Use v2 permission grants API instead.",
 		"tags": ["Permissions"],
 		"security": [
 			{
@@ -70,8 +68,6 @@
 	"delete": {
 		"operationId": "deleteUserDataProviderPermission",
 		"summary": "Deletes a user-data-provider permission.",
-		"deprecated": true,
-		"description": "Deprecated: Use v2 permission grants API instead.",
 		"tags": ["Permissions"],
 		"security": [
 			{

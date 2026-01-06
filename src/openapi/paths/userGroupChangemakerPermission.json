@@ -2,8 +2,6 @@
 	"put": {
 		"operationId": "createOrUpdateUserGroupChangemakerPermission",
 		"summary": "Creates or updates a userGroup-changemaker permission.",
-		"deprecated": true,
-		"description": "Deprecated: Use v2 permission grants API instead.",
 		"tags": ["Permissions"],
 		"security": [
 			{
@@ -70,8 +68,6 @@
 	"delete": {
 		"operationId": "deleteUserGroupChangemakerPermission",
 		"summary": "Deletes a userGroup-changemaker permission.",
-		"deprecated": true,
-		"description": "Deprecated: Use v2 permission grants API instead.",
 		"tags": ["Permissions"],
 		"security": [
 			{

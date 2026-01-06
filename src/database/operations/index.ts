@@ -31,7 +31,5 @@ export * from './userGroupChangemakerPermissions';
 export * from './userGroupDataProviderPermissions';
 export * from './userGroupFunderPermissions';
 export * from './userGroupOpportunityPermissions';
-export * from './userGroupPermissionGrants';
 export * from './userOpportunityPermissions';
-export * from './userPermissionGrants';
 export * from './users';

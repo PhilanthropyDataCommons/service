@@ -17,6 +17,9 @@ const expectNumber = (): unknown => expect.any(Number);
 
 const expectObject = (): unknown => expect.any(Object);
 
+const expectObjectContaining = (obj: Record<string, unknown>): unknown =>
+	expect.objectContaining(obj);
+
 const expectString = (): unknown => expect.any(String);
 
 const expectTimestamp = (): unknown =>
@@ -28,6 +31,7 @@ export {
 	expectDate,
 	expectNumber,
 	expectObject,
+	expectObjectContaining,
 	expectString,
 	expectTimestamp,
 };

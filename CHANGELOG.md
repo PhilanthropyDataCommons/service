@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `FieldValueBase` type now exists as a common base for `ProposalFieldValue` and `ChangemakerFieldValue`.
+- `Changemaker.fields` now includes `ChangemakerFieldValue` objects in addition to `ProposalFieldValue` objects, with source-based priority determining the "gold" value per base field.
 
 ### Changed
 
 - `ProposalFieldValue` and `ChangemakerFieldValue` OpenAPI schemas now use `allOf` to extend `FieldValueBase`.
+- `Changemaker.fields` OpenAPI schema now uses `oneOf` to accept either `ProposalFieldValue` or `ChangemakerFieldValue` items.
 
 ## 0.27.0 2025-12-22
 

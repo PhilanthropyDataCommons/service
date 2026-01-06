@@ -1,0 +1,109 @@
+{
+	"get": {
+		"operationId": "getPermissionGrantById",
+		"summary": "Gets a specific permission grant.",
+		"description": "Returns a permission grant by ID. Requires administrator role.",
+		"tags": ["PermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "permissionGrantId",
+				"description": "The PDC-generated ID of a permission grant.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The permission grant.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PermissionGrant.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"description": "The request was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	},
+	"delete": {
+		"operationId": "deletePermissionGrantById",
+		"summary": "Deletes a specific permission grant.",
+		"description": "Deletes a permission grant by ID. Requires administrator role.",
+		"tags": ["PermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "permissionGrantId",
+				"description": "The PDC-generated ID of a permission grant to be deleted.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"204": {
+				"description": "The permission grant was successfully deleted."
+			},
+			"400": {
+				"description": "The request was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

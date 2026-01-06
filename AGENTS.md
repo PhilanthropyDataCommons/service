@@ -146,6 +146,13 @@ Migrations and queries follow SQLFluff linting with these rules:
 - Final semicolon required
 - Migration naming: `####-{action}-{table}.sql` (e.g., `0079-create-changemaker_field_values.sql`)
 
+### OpenAPI Conventions
+
+- **Do NOT create separate "Writable" schemas** in the OpenAPI spec. The downstream SDK generator automatically creates writable types by stripping `readOnly` properties from the base schema. Adding an explicit `WritableFoo` schema causes the SDK build to fail. Instead, use the base entity schema (e.g., `PermissionGrant.json`) for both request bodies and responses, and mark server-managed fields with `"readOnly": true` in the base schema. OpenAPI tooling will exclude `readOnly` fields from request validation.
+- Schema files live in `src/openapi/components/schemas/`
+- Path files live in `src/openapi/paths/`
+- Register new schemas in `src/openapi/api.json` under `components.schemas`
+
 ### Testing
 
 - **Unit tests**: `*.unit.test.ts` - Test isolated functions
@@ -305,6 +312,8 @@ All checks must pass before merging PRs.
 1. Edit `src/openapi/api.json`
 2. Run `npm run lint:openapi` to validate
 3. Run `npm run build:openapi` to bundle
+
+**Important:** See the [OpenAPI conventions](#openapi-conventions) section for rules about schema design.
 
 ### Running Tests with Logging
 

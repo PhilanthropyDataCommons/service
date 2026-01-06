@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.30.0 2026-01-27
+
+### Added
+
+- `PermissionGrant` entity type now exists to represent permission grants that give a user or user group specific permissions on a context entity and its related entities.
+- `GET /permissionGrants` endpoint now exists to retrieve a paginated list of permission grants. Requires administrator role.
+- `POST /permissionGrants` endpoint now exists to create a new permission grant. Requires administrator role.
+- `GET /permissionGrants/{permissionGrantId}` endpoint now exists to retrieve a specific permission grant by ID. Requires administrator role.
+- `DELETE /permissionGrants/{permissionGrantId}` endpoint now exists to delete a specific permission grant by ID. Requires administrator role.
+- `PermissionGrantEntityType` schema now exists to enumerate entity types that can be referenced in permission grants.
+- `PermissionGrantVerb` schema now exists to enumerate permission verbs (`view`, `create`, `edit`, `delete`, `manage`).
+
 ## 0.29.0 2025-01-23
 
 ### Added

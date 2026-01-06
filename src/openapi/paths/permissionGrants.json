@@ -1,0 +1,96 @@
+{
+	"get": {
+		"operationId": "getPermissionGrants",
+		"summary": "Gets a list of permission grants.",
+		"description": "Returns all permission grants. Requires administrator role.",
+		"tags": ["PermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"$ref": "../components/parameters/pageParam.json"
+			},
+			{
+				"$ref": "../components/parameters/countParam.json"
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "All permission grants.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PermissionGrantBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	},
+	"post": {
+		"operationId": "createPermissionGrant",
+		"summary": "Creates a new permission grant.",
+		"description": "Creates a permission grant for a user or user group. Requires administrator role.",
+		"tags": ["PermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/PermissionGrant.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The newly created permission grant.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PermissionGrant.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"description": "The request body was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	}
+}

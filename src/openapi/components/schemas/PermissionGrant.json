@@ -1,0 +1,33 @@
+{
+	"oneOf": [
+		{ "$ref": "./ChangemakerPermissionGrant.json" },
+		{ "$ref": "./FunderPermissionGrant.json" },
+		{ "$ref": "./DataProviderPermissionGrant.json" },
+		{ "$ref": "./OpportunityPermissionGrant.json" },
+		{ "$ref": "./ProposalPermissionGrant.json" },
+		{ "$ref": "./ProposalVersionPermissionGrant.json" },
+		{ "$ref": "./ApplicationFormPermissionGrant.json" },
+		{ "$ref": "./ApplicationFormFieldPermissionGrant.json" },
+		{ "$ref": "./ProposalFieldValuePermissionGrant.json" },
+		{ "$ref": "./SourcePermissionGrant.json" },
+		{ "$ref": "./BulkUploadPermissionGrant.json" },
+		{ "$ref": "./ChangemakerFieldValuePermissionGrant.json" }
+	],
+	"discriminator": {
+		"propertyName": "contextEntityType",
+		"mapping": {
+			"changemaker": "./ChangemakerPermissionGrant.json",
+			"funder": "./FunderPermissionGrant.json",
+			"dataProvider": "./DataProviderPermissionGrant.json",
+			"opportunity": "./OpportunityPermissionGrant.json",
+			"proposal": "./ProposalPermissionGrant.json",
+			"proposalVersion": "./ProposalVersionPermissionGrant.json",
+			"applicationForm": "./ApplicationFormPermissionGrant.json",
+			"applicationFormField": "./ApplicationFormFieldPermissionGrant.json",
+			"proposalFieldValue": "./ProposalFieldValuePermissionGrant.json",
+			"source": "./SourcePermissionGrant.json",
+			"bulkUpload": "./BulkUploadPermissionGrant.json",
+			"changemakerFieldValue": "./ChangemakerFieldValuePermissionGrant.json"
+		}
+	}
+}

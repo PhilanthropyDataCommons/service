@@ -1,65 +1,37 @@
 {
-	"type": "object",
-	"properties": {
-		"id": {
-			"type": "integer",
-			"readOnly": true,
-			"example": 1
-		},
-		"changemakerId": {
-			"type": "integer",
-			"example": 123
-		},
-		"baseFieldShortCode": {
-			"type": "string",
-			"example": "organization_mission"
-		},
-		"baseField": {
-			"$ref": "./BaseField.json",
-			"readOnly": true
-		},
-		"batchId": {
-			"type": "integer",
-			"example": 456
-		},
-		"batch": {
-			"$ref": "./ChangemakerFieldValueBatch.json",
-			"readOnly": true
-		},
-		"value": {
-			"type": "string",
-			"example": "Supporting community development through innovative programs"
-		},
-		"file": {
-			"oneOf": [{ "$ref": "./File.json" }, { "type": "null" }],
-			"readOnly": true,
-			"description": "For file fields, this contains the File object if the value is a valid file ID. Otherwise this property is null or omitted."
-		},
-		"goodAsOf": {
-			"type": ["string", "null"],
-			"format": "date-time"
-		},
-		"isValid": {
-			"type": "boolean",
-			"example": true,
-			"readOnly": true
-		},
-		"createdAt": {
-			"type": "string",
-			"format": "date-time",
-			"readOnly": true
+	"allOf": [
+		{ "$ref": "./FieldValueBase.json" },
+		{
+			"type": "object",
+			"properties": {
+				"changemakerId": {
+					"type": "integer",
+					"example": 123
+				},
+				"baseFieldShortCode": {
+					"type": "string",
+					"example": "organization_mission"
+				},
+				"baseField": {
+					"$ref": "./BaseField.json",
+					"readOnly": true
+				},
+				"batchId": {
+					"type": "integer",
+					"example": 456
+				},
+				"batch": {
+					"$ref": "./ChangemakerFieldValueBatch.json",
+					"readOnly": true
+				}
+			},
+			"required": [
+				"changemakerId",
+				"baseFieldShortCode",
+				"baseField",
+				"batchId",
+				"batch"
+			]
 		}
-	},
-	"required": [
-		"id",
-		"changemakerId",
-		"baseFieldShortCode",
-		"baseField",
-		"batchId",
-		"batch",
-		"value",
-		"goodAsOf",
-		"isValid",
-		"createdAt"
 	]
 }

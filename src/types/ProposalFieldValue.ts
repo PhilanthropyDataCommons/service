@@ -1,19 +1,13 @@
 import type { JSONSchemaType } from 'ajv';
 import type { ApplicationFormField } from './ApplicationFormField';
-import type { File } from './File';
+import type { FieldValueBase } from './FieldValueBase';
 import type { Writable } from './Writable';
 
-interface ProposalFieldValue {
-	readonly id: number;
+interface ProposalFieldValue extends FieldValueBase {
 	proposalVersionId: number;
 	applicationFormFieldId: number;
 	position: number;
-	value: string;
-	readonly file: File | null;
-	goodAsOf: string | null;
-	readonly createdAt: string;
 	readonly applicationFormField: ApplicationFormField;
-	readonly isValid: boolean;
 }
 
 type WritableProposalFieldValue = Writable<ProposalFieldValue>;

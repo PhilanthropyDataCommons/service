@@ -1,0 +1,32 @@
+{
+	"type": "object",
+	"description": "Base properties shared by all field value types.",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true
+		},
+		"value": {
+			"type": "string"
+		},
+		"file": {
+			"oneOf": [{ "$ref": "./File.json" }, { "type": "null" }],
+			"readOnly": true,
+			"description": "For file fields, this contains the File object if the value is a valid file ID. Otherwise this property is null."
+		},
+		"goodAsOf": {
+			"type": ["string", "null"],
+			"format": "date-time"
+		},
+		"isValid": {
+			"type": "boolean",
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": ["id", "value", "goodAsOf", "isValid", "createdAt"]
+}

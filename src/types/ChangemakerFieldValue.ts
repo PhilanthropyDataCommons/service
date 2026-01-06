@@ -2,21 +2,15 @@ import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
 import type { BaseField } from './BaseField';
 import type { ChangemakerFieldValueBatch } from './ChangemakerFieldValueBatch';
-import type { File } from './File';
+import type { FieldValueBase } from './FieldValueBase';
 import type { Writable } from './Writable';
 
-interface ChangemakerFieldValue {
-	readonly id: number;
+interface ChangemakerFieldValue extends FieldValueBase {
 	changemakerId: number;
 	baseFieldShortCode: string;
 	batchId: number;
-	value: string;
-	readonly file: File | null;
-	goodAsOf: string | null;
-	readonly createdAt: string;
 	readonly baseField: BaseField;
 	readonly batch: ChangemakerFieldValueBatch;
-	readonly isValid: boolean;
 }
 
 type WritableChangemakerFieldValue = Writable<ChangemakerFieldValue>;

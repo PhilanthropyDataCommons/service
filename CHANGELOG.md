@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- `FieldValueBase` type now exists as a common base for `ProposalFieldValue` and `ChangemakerFieldValue`.
+
+### Changed
+
+- `ProposalFieldValue` and `ChangemakerFieldValue` OpenAPI schemas now use `allOf` to extend `FieldValueBase`.
+
 ## 0.27.0 2025-12-22
 
 ### Added

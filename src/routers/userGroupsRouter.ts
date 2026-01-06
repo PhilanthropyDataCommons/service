@@ -1,7 +1,8 @@
 import express from 'express';
 import { userGroupChangemakerPermissionsHandlers } from '../handlers/userGroupChangemakerPermissionsHandlers';
-import { userGroupFunderPermissionsHandlers } from '../handlers/userGroupFunderPermissionsHandlers';
 import { userGroupDataProviderPermissionsHandlers } from '../handlers/userGroupDataProviderPermissionsHandlers';
+import { userGroupFunderPermissionsHandlers } from '../handlers/userGroupFunderPermissionsHandlers';
+import { userGroupOpportunityPermissionsHandlers } from '../handlers/userGroupOpportunityPermissionsHandlers';
 import {
 	requireAdministratorRole,
 	requireChangemakerPermission,
@@ -9,7 +10,6 @@ import {
 	requireFunderPermission,
 } from '../middleware';
 import { Permission } from '../types';
-import { userGroupOpportunityPermissionsHandlers } from '../handlers/userGroupOpportunityPermissionsHandlers';
 
 const userGroupsRouter = express.Router();
 

@@ -1,0 +1,20 @@
+{
+	"allOf": [
+		{ "$ref": "./PermissionGrantBase.json" },
+		{
+			"type": "object",
+			"properties": {
+				"contextEntityType": {
+					"type": "string",
+					"const": "bulkUpload"
+				},
+				"bulkUploadTaskId": {
+					"type": "integer",
+					"description": "The ID of the bulk upload task.",
+					"example": 800
+				}
+			},
+			"required": ["contextEntityType", "bulkUploadTaskId"]
+		}
+	]
+}

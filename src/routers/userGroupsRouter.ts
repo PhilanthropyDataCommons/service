@@ -1,7 +1,9 @@
 import express from 'express';
 import { userGroupChangemakerPermissionsHandlers } from '../handlers/userGroupChangemakerPermissionsHandlers';
-import { userGroupFunderPermissionsHandlers } from '../handlers/userGroupFunderPermissionsHandlers';
 import { userGroupDataProviderPermissionsHandlers } from '../handlers/userGroupDataProviderPermissionsHandlers';
+import { userGroupFunderPermissionsHandlers } from '../handlers/userGroupFunderPermissionsHandlers';
+import { userGroupOpportunityPermissionsHandlers } from '../handlers/userGroupOpportunityPermissionsHandlers';
+import { userGroupPermissionGrantHandlers } from '../handlers/userGroupPermissionGrantHandlers';
 import {
 	requireAdministratorRole,
 	requireChangemakerPermission,
@@ -9,7 +11,6 @@ import {
 	requireFunderPermission,
 } from '../middleware';
 import { Permission } from '../types';
-import { userGroupOpportunityPermissionsHandlers } from '../handlers/userGroupOpportunityPermissionsHandlers';
 
 const userGroupsRouter = express.Router();
 
@@ -52,6 +53,23 @@ userGroupsRouter.delete(
 	'/:keycloakOrganizationId/opportunities/:opportunityId/permissions/:opportunityPermission',
 	requireAdministratorRole,
 	userGroupOpportunityPermissionsHandlers.deleteUserGroupOpportunityPermission,
+);
+
+// v2 Permission Grants
+userGroupsRouter.get(
+	'/:keycloakOrganizationId/permissions',
+	requireAdministratorRole,
+	userGroupPermissionGrantHandlers.getUserGroupPermissionGrants,
+);
+userGroupsRouter.put(
+	'/:keycloakOrganizationId/:entityType/:entityPk/permissions/:permissionVerb',
+	requireAdministratorRole,
+	userGroupPermissionGrantHandlers.putUserGroupPermissionGrant,
+);
+userGroupsRouter.delete(
+	'/:keycloakOrganizationId/:entityType/:entityPk/permissions/:permissionVerb',
+	requireAdministratorRole,
+	userGroupPermissionGrantHandlers.deleteUserGroupPermissionGrant,
 );
 
 export { userGroupsRouter };

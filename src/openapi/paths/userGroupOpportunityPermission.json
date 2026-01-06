@@ -2,6 +2,8 @@
 	"put": {
 		"operationId": "createOrUpdateUserGroupOpportunityPermission",
 		"summary": "Creates or updates a userGroup opportunity permission.",
+		"deprecated": true,
+		"description": "Deprecated: Use v2 permission grants API instead.",
 		"tags": ["Permissions"],
 		"security": [
 			{
@@ -67,6 +69,8 @@
 	"delete": {
 		"operationId": "deleteUserGroupOpportunityPermission",
 		"summary": "Deletes a userGroup-opportunity permission.",
+		"deprecated": true,
+		"description": "Deprecated: Use v2 permission grants API instead.",
 		"tags": ["Permissions"],
 		"security": [
 			{

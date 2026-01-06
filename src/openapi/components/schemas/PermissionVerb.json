@@ -1,0 +1,5 @@
+{
+	"type": "string",
+	"enum": ["view", "create", "edit", "delete", "manage"],
+	"description": "Permission verb for v2 permission grants"
+}

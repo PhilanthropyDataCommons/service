@@ -1,0 +1,56 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "integer",
+			"readOnly": true
+		},
+		"userKeycloakUserId": {
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		},
+		"permissionVerb": {
+			"$ref": "./PermissionVerb.json",
+			"readOnly": true
+		},
+		"rootEntityType": {
+			"$ref": "./PermissionEntityType.json",
+			"readOnly": true
+		},
+		"rootEntityPk": {
+			"type": "string",
+			"readOnly": true
+		},
+		"entities": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			}
+		},
+		"createdBy": {
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"notAfter": {
+			"type": ["string", "null"],
+			"format": "date-time"
+		}
+	},
+	"required": [
+		"id",
+		"userKeycloakUserId",
+		"permissionVerb",
+		"rootEntityType",
+		"rootEntityPk",
+		"entities",
+		"createdBy",
+		"createdAt"
+	]
+}

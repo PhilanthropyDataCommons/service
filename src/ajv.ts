@@ -13,4 +13,4 @@ ajv.addKeyword({
 });
 
 ajvKeywords(ajv, 'instanceof');
-addFormats(ajv, ['email', 'uri', 'uuid']);
+addFormats(ajv, ['date-time', 'email', 'uri', 'uuid']);

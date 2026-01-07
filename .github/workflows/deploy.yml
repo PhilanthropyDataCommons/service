@@ -14,17 +14,14 @@ jobs:
       TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
       URL: ${{ vars.DEPLOYMENT_URL }}
     steps:
-      - name: Wait for lint, test, build, and other workflows to succeed
+      - name: Wait for CI, build, and other workflows to succeed
         uses: kachick/wait-other-jobs@v3
         timeout-minutes: 24
         with:
           wait-list: |
             [
               {
-                "workflowFile": "lint.yml"
-              },
-              {
-                "workflowFile": "test.yml"
+                "workflowFile": "ci.yml"
               },
               {
                 "workflowFile": "sdk.yml"

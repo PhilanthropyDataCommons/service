@@ -25,6 +25,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+          cache: 'npm'
       - run: npm ci
       - run: npm run build
       - run: npm prune --omit=dev
@@ -59,6 +60,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+          cache: 'npm'
       - run: npm ci
       - run: npm run build
       - run: npm prune --omit=dev
@@ -70,17 +72,14 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Wait for lint, test, and other workflows to succeed
+      - name: Wait for CI and other workflows to succeed
         uses: kachick/wait-other-jobs@v3
         timeout-minutes: 24
         with:
           wait-list: |
             [
               {
-                "workflowFile": "lint.yml"
-              },
-              {
-                "workflowFile": "test.yml"
+                "workflowFile": "ci.yml"
               },
               {
                 "workflowFile": "sdk.yml"

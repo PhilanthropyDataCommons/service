@@ -108,3 +108,6 @@ dist
 
 # Python
 venv/
+
+# Test schema dumps
+.test_dumps/

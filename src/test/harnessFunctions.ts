@@ -1,24 +1,25 @@
-import { db, migrate, initializeDatabase } from '../database';
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
+import { db } from '../database';
+import { getWorkerDumpFilePath } from './goldSchemaSetup';
 
-const generateSchemaName = (workerId: string): string => `test_${workerId}`;
+const execAsync = promisify(exec);
 
-const getSchemaNameForCurrentTestWorker = (): string => {
+const getWorkerIdForCurrentTest = (): number => {
 	if (process.env.NODE_ENV !== 'test') {
 		throw new Error(
-			'You cannot get a test schema name outside of a test environment.',
+			'You cannot get a test worker ID outside of a test environment.',
 		);
 	}
 	if (process.env.JEST_WORKER_ID === undefined) {
 		throw new Error(
-			'You cannot get a test schema name if jest has not specified a worker ID.',
+			'You cannot get a test worker ID if jest has not specified a worker ID.',
 		);
 	}
-	return generateSchemaName(process.env.JEST_WORKER_ID);
+	return parseInt(process.env.JEST_WORKER_ID, 10);
 };
 
-const createSchema = async (schemaName: string): Promise<void> => {
-	await db.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName};`);
-};
+const generateSchemaName = (workerId: number): string => `test_${workerId}`;
 
 const setSchemaForCurrentPoolConnection = async (
 	schemaName: string,
@@ -36,18 +37,37 @@ const setSchema = async (schemaName: string): Promise<void> => {
 };
 
 const dropSchema = async (schemaName: string): Promise<void> => {
-	await db.query(`DROP SCHEMA ${schemaName} CASCADE;`);
+	await db.query(`DROP SCHEMA IF EXISTS ${schemaName} CASCADE;`);
+};
+
+/**
+ * Restores a test schema from the pre-created worker dump file.
+ * The dump file is created during global setup with the correct schema name.
+ */
+const restoreSchemaFromDump = async (workerId: number): Promise<void> => {
+	const workerDumpFile = getWorkerDumpFilePath(workerId);
+
+	// Execute via psql -f for fast execution directly from file
+	// psql reads connection info from PG* environment variables
+	await execAsync(`psql -f "${workerDumpFile}"`);
 };
 
 export const prepareDatabaseForCurrentWorker = async (): Promise<void> => {
-	const schemaName = getSchemaNameForCurrentTestWorker();
-	await createSchema(schemaName);
+	const workerId = getWorkerIdForCurrentTest();
+	const schemaName = generateSchemaName(workerId);
+
+	// Drop any existing schema (cleanup from failed previous test)
+	await dropSchema(schemaName);
+
+	// Restore schema from pre-created worker dump file
+	await restoreSchemaFromDump(workerId);
+
+	// Set search path to the new test schema
 	await setSchema(schemaName);
-	await migrate(schemaName);
-	await initializeDatabase();
 };
 
 export const cleanupDatabaseForCurrentWorker = async (): Promise<void> => {
-	const schemaName = getSchemaNameForCurrentTestWorker();
+	const workerId = getWorkerIdForCurrentTest();
+	const schemaName = generateSchemaName(workerId);
 	await dropSchema(schemaName);
 };

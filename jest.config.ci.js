@@ -1,6 +1,8 @@
 var config = require('./jest.config.base.js');
+var integrationConfig = require('./jest.config.int.js');
+var unitConfig = require('./jest.config.unit.js');
 
-commonProjectConfig = {
+var commonProjectConfig = {
 	transform: {
 		'^.+\\.tsx?$': [
 			'ts-jest',
@@ -19,13 +21,16 @@ module.exports = {
 		{
 			...commonProjectConfig,
 			displayName: 'integration',
-			testMatch: ['**/*.int.test.ts'],
-			setupFilesAfterEnv: ['<rootDir>/src/test/integrationSuiteSetup.ts'],
+			testMatch: integrationConfig.testMatch,
+			globalSetup: integrationConfig.globalSetup,
+			globalTeardown: integrationConfig.globalTeardown,
+			setupFilesAfterEnv: integrationConfig.setupFilesAfterEnv,
+			maxWorkers: integrationConfig.maxWorkers,
 		},
 		{
 			...commonProjectConfig,
 			displayName: 'unit',
-			testMatch: ['**/*.unit.test.ts'],
+			testMatch: unitConfig.testMatch,
 		},
 	],
 };

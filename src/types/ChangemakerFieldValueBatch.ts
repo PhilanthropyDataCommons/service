@@ -1,5 +1,6 @@
 import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
+import type { KeycloakId } from './KeycloakId';
 import type { Source } from './Source';
 import type { Writable } from './Writable';
 
@@ -7,6 +8,7 @@ interface ChangemakerFieldValueBatch {
 	readonly id: number;
 	sourceId: number;
 	notes: string | null;
+	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
 	readonly source: Source;
 }

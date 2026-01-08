@@ -16,11 +16,16 @@
 			"type": ["string", "null"],
 			"example": "Routine annual import"
 		},
+		"createdBy": {
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",
 			"readOnly": true
 		}
 	},
-	"required": ["id", "sourceId", "source", "notes", "createdAt"]
+	"required": ["id", "sourceId", "source", "notes", "createdBy", "createdAt"]
 }

@@ -13,6 +13,7 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
+import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	BaseFieldDataType,
 	BaseFieldCategory,
@@ -21,6 +22,9 @@ import {
 
 describe('POST /changemakerFieldValues', () => {
 	it('Successfully creates a changemaker field value', async () => {
+		const testUser = await loadTestUser();
+		const testUserAuthContext = getAuthContext(testUser, true);
+
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '11-1111111',
 			name: 'Test Organization',
@@ -34,10 +38,14 @@ describe('POST /changemakerFieldValues', () => {
 			changemakerId: changemaker.id,
 		});
 
-		const batch = await createChangemakerFieldValueBatch(db, null, {
-			sourceId: source.id,
-			notes: 'Test batch',
-		});
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: 'Test batch',
+			},
+		);
 
 		const result = await request(app)
 			.post('/changemakerFieldValues')
@@ -65,6 +73,9 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Allows multiple values for same changemaker+field+batch combination', async () => {
+		const testUser = await loadTestUser();
+		const testUserAuthContext = getAuthContext(testUser, true);
+
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '22-2222222',
 			name: 'Test Organization',
@@ -78,10 +89,14 @@ describe('POST /changemakerFieldValues', () => {
 			changemakerId: changemaker.id,
 		});
 
-		const batch = await createChangemakerFieldValueBatch(db, null, {
-			sourceId: source.id,
-			notes: 'Test batch',
-		});
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: 'Test batch',
+			},
+		);
 
 		// Create first value
 		await request(app)
@@ -153,6 +168,9 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Accepts null for goodAsOf', async () => {
+		const testUser = await loadTestUser();
+		const testUserAuthContext = getAuthContext(testUser, true);
+
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '99-9999999',
 			name: 'Test Organization',
@@ -166,10 +184,14 @@ describe('POST /changemakerFieldValues', () => {
 			changemakerId: changemaker.id,
 		});
 
-		const batch = await createChangemakerFieldValueBatch(db, null, {
-			sourceId: source.id,
-			notes: 'Test batch',
-		});
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: 'Test batch',
+			},
+		);
 
 		const result = await request(app)
 			.post('/changemakerFieldValues')
@@ -211,6 +233,9 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 422 when user does not have edit permission on changemaker', async () => {
+		const testUser = await loadTestUser();
+		const testUserAuthContext = getAuthContext(testUser, true);
+
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '33-3333333',
 			name: 'Other Organization',
@@ -224,10 +249,14 @@ describe('POST /changemakerFieldValues', () => {
 			changemakerId: changemaker.id,
 		});
 
-		const batch = await createChangemakerFieldValueBatch(db, null, {
-			sourceId: source.id,
-			notes: 'Test batch',
-		});
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: 'Test batch',
+			},
+		);
 
 		// No permissions granted to test user
 
@@ -251,6 +280,9 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 409 when base field does not exist', async () => {
+		const testUser = await loadTestUser();
+		const testUserAuthContext = getAuthContext(testUser, true);
+
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '44-4444444',
 			name: 'Test Organization',
@@ -262,10 +294,14 @@ describe('POST /changemakerFieldValues', () => {
 			changemakerId: changemaker.id,
 		});
 
-		const batch = await createChangemakerFieldValueBatch(db, null, {
-			sourceId: source.id,
-			notes: 'Test batch',
-		});
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: 'Test batch',
+			},
+		);
 
 		const result = await request(app)
 			.post('/changemakerFieldValues')
@@ -287,6 +323,9 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 422 when base field is not organization category', async () => {
+		const testUser = await loadTestUser();
+		const testUserAuthContext = getAuthContext(testUser, true);
+
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '55-5555555',
 			name: 'Test Organization',
@@ -308,10 +347,14 @@ describe('POST /changemakerFieldValues', () => {
 			changemakerId: changemaker.id,
 		});
 
-		const batch = await createChangemakerFieldValueBatch(db, null, {
-			sourceId: source.id,
-			notes: 'Test batch',
-		});
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: 'Test batch',
+			},
+		);
 
 		const result = await request(app)
 			.post('/changemakerFieldValues')
@@ -332,6 +375,9 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 422 when base field is forbidden', async () => {
+		const testUser = await loadTestUser();
+		const testUserAuthContext = getAuthContext(testUser, true);
+
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '66-6666666',
 			name: 'Test Organization',
@@ -353,10 +399,14 @@ describe('POST /changemakerFieldValues', () => {
 			changemakerId: changemaker.id,
 		});
 
-		const batch = await createChangemakerFieldValueBatch(db, null, {
-			sourceId: source.id,
-			notes: 'Test batch',
-		});
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: 'Test batch',
+			},
+		);
 
 		const result = await request(app)
 			.post('/changemakerFieldValues')
@@ -405,6 +455,9 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 409 when changemaker does not exist', async () => {
+		const testUser = await loadTestUser();
+		const testUserAuthContext = getAuthContext(testUser, true);
+
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '88-8888888',
 			name: 'Test Organization',
@@ -418,10 +471,14 @@ describe('POST /changemakerFieldValues', () => {
 			changemakerId: changemaker.id,
 		});
 
-		const batch = await createChangemakerFieldValueBatch(db, null, {
-			sourceId: source.id,
-			notes: 'Test batch',
-		});
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: 'Test batch',
+			},
+		);
 
 		const result = await request(app)
 			.post('/changemakerFieldValues')

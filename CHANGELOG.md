@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `ChangemakerFieldValueBatch` entities now have a `createdBy` attribute tracking the user who created the batch.
 - `FieldValueBase` type now exists as a common base for `ProposalFieldValue` and `ChangemakerFieldValue`.
 - `Changemaker.fields` now includes `ChangemakerFieldValue` objects in addition to `ProposalFieldValue` objects, with source-based priority determining the "gold" value per base field.
 

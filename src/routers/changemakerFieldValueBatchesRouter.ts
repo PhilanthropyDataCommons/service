@@ -4,6 +4,18 @@ import { requireAuthentication } from '../middleware';
 
 const changemakerFieldValueBatchesRouter = express.Router();
 
+changemakerFieldValueBatchesRouter.get(
+	'/',
+	requireAuthentication,
+	changemakerFieldValueBatchesHandlers.getChangemakerFieldValueBatches,
+);
+
+changemakerFieldValueBatchesRouter.get(
+	'/:batchId',
+	requireAuthentication,
+	changemakerFieldValueBatchesHandlers.getChangemakerFieldValueBatch,
+);
+
 changemakerFieldValueBatchesRouter.post(
 	'/',
 	requireAuthentication,

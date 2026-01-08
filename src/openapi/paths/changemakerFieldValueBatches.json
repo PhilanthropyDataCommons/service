@@ -1,4 +1,37 @@
 {
+	"get": {
+		"operationId": "getChangemakerFieldValueBatches",
+		"summary": "Gets a list of changemaker field value batches.",
+		"description": "Returns a paginated list of all changemaker field value batches.",
+		"tags": ["Changemaker Field Value Batches"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "All changemaker field value batches currently registered in the PDC.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ChangemakerFieldValueBatchBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	},
 	"post": {
 		"operationId": "addChangemakerFieldValueBatch",
 		"summary": "Creates a new changemaker field value batch.",

@@ -233,6 +233,9 @@
 		"/changemakerFieldValueBatches": {
 			"$ref": "./paths/changemakerFieldValueBatches.json"
 		},
+		"/changemakerFieldValueBatches/{batchId}": {
+			"$ref": "./paths/changemakerFieldValueBatch.json"
+		},
 		"/changemakerFieldValues": {
 			"$ref": "./paths/changemakerFieldValues.json"
 		},

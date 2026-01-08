@@ -17,6 +17,7 @@ BEGIN
 		'sourceId', changemaker_field_value_batch.source_id,
 		'source', source_json,
 		'notes', changemaker_field_value_batch.notes,
+		'createdBy', changemaker_field_value_batch.created_by,
 		'createdAt', to_json(changemaker_field_value_batch.created_at)#>>'{}'
 	);
 END;

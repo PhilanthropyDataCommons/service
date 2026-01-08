@@ -17,6 +17,7 @@ export * from './CopyBaseFieldsJobPayload';
 export * from './DataProvider';
 export * from './EphemeralUserGroupAssociation';
 export * from './express/AuthenticatedRequest';
+export * from './FieldValueBase';
 export * from './File';
 export * from './FiscalSponsorship';
 export * from './Funder';

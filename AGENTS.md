@@ -373,13 +373,32 @@ The ERD at `docs/ENTITY_RELATIONSHIP_DIAGRAM.md` documents the database schema u
 
 ### Other Documentation to Keep Current
 
-| Document               | Update When                                  |
-| ---------------------- | -------------------------------------------- |
-| `docs/ARCHITECTURE.md` | Architectural changes or new system patterns |
-| `docs/GLOSSARY.md`     | Introducing new terminology or concepts      |
-| `docs/PERMISSIONS.md`  | Changing the permissions model               |
-| `README.md`            | Adding features or changing setup            |
-| `src/openapi/api.json` | Adding/modifying API endpoints               |
+| Document               | Update When                                                       |
+| ---------------------- | ----------------------------------------------------------------- |
+| `CHANGELOG.md`         | Any API changes (new endpoints, schema changes, behavior changes) |
+| `docs/ARCHITECTURE.md` | Architectural changes or new system patterns                      |
+| `docs/GLOSSARY.md`     | Introducing new terminology or concepts                           |
+| `docs/PERMISSIONS.md`  | Changing the permissions model                                    |
+| `README.md`            | Adding features or changing setup                                 |
+| `src/openapi/api.json` | Adding/modifying API endpoints                                    |
+
+### Changelog
+
+The `CHANGELOG.md` file follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. **Always update the changelog when making API changes**, including:
+
+- New endpoints or entity types
+- Changes to request/response schemas
+- Changes to API behavior (e.g., new filtering, sorting, or data selection logic)
+- Deprecations or removals
+
+Add entries under the `## Unreleased` section using the appropriate subsection:
+
+- `### Added` - New features
+- `### Changed` - Changes to existing functionality
+- `### Deprecated` - Features that will be removed
+- `### Removed` - Removed features
+- `### Fixed` - Bug fixes
+- `### Security` - Security-related changes
 
 ## Maintaining This Document
 

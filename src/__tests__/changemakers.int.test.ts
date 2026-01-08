@@ -7,6 +7,8 @@ import {
 	createOrUpdateBaseField,
 	createOpportunity,
 	createChangemaker,
+	createChangemakerFieldValue,
+	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
 	createOrUpdateFunder,
 	createProposal,
@@ -26,6 +28,8 @@ import {
 } from '../test/utils';
 import {
 	expectArray,
+	expectArrayContaining,
+	expectObjectContaining,
 	expectString,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
@@ -1484,6 +1488,432 @@ describe('/changemakers', () => {
 				.set(adminUserAuthHeader)
 				.send()
 				.expect(404);
+		});
+	});
+
+	describe('GET /:id with ChangemakerFieldValues', () => {
+		it('returns ChangemakerFieldValue when no ProposalFieldValue exists', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const baseField = await createOrUpdateBaseField(db, null, {
+				label: 'Organization Mission',
+				shortCode: 'org_mission_cfv_test',
+				description: 'The mission of the organization.',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '99-9999991',
+				name: 'Test Changemaker CFV',
+				keycloakOrganizationId: null,
+			});
+			// Create a changemaker-sourced source
+			const changemakerSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: `${changemaker.name} source`,
+			});
+			// Create a batch linked to the source
+			const batch = await createChangemakerFieldValueBatch(
+				db,
+				systemUserAuthContext,
+				{
+					sourceId: changemakerSource.id,
+					notes: 'Test batch',
+				},
+			);
+			// Create a ChangemakerFieldValue
+			const changemakerFieldValue = await createChangemakerFieldValue(
+				db,
+				systemUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+					baseFieldShortCode: baseField.shortCode,
+					batchId: batch.id,
+					value: 'Our mission is to change the world.',
+					isValid: true,
+					goodAsOf: null,
+				},
+			);
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: [changemakerFieldValue],
+					});
+				});
+		});
+
+		it('returns changemaker-sourced ChangemakerFieldValue over funder-sourced ProposalFieldValue', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const baseField = await createOrUpdateBaseField(db, null, {
+				label: 'Organization Website',
+				shortCode: 'org_website_priority_test',
+				description: 'The website of the organization.',
+				dataType: BaseFieldDataType.URL,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '99-9999992',
+				name: 'Test Changemaker Priority',
+				keycloakOrganizationId: null,
+			});
+
+			// Create a funder and opportunity for the ProposalFieldValue
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'funder_priority_test',
+				name: 'Funder Priority Test',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Priority Test Opportunity',
+				funderShortCode: funder.shortCode,
+			});
+			const funderSource = await createSource(db, null, {
+				funderShortCode: funder.shortCode,
+				label: 'Funder Priority Source',
+			});
+
+			// Create ProposalFieldValue from funder source (should be lower priority)
+			const proposal = await createProposal(db, systemUserAuthContext, {
+				opportunityId: opportunity.id,
+				externalId: 'priority-test-proposal',
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: changemaker.id,
+				proposalId: proposal.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				systemUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: funderSource.id,
+				},
+			);
+			const applicationFormField = await createApplicationFormField(db, null, {
+				label: 'Website',
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: baseField.shortCode,
+				position: 1,
+				instructions: 'Enter website',
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: applicationFormField.id,
+				position: 1,
+				value: 'https://funder-provided.com',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Create changemaker-sourced ChangemakerFieldValue (should win)
+			const changemakerSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: `${changemaker.name} source`,
+			});
+			const batch = await createChangemakerFieldValueBatch(
+				db,
+				systemUserAuthContext,
+				{
+					sourceId: changemakerSource.id,
+					notes: 'Changemaker batch',
+				},
+			);
+			const changemakerFieldValue = await createChangemakerFieldValue(
+				db,
+				systemUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+					baseFieldShortCode: baseField.shortCode,
+					batchId: batch.id,
+					value: 'https://changemaker-provided.com',
+					isValid: true,
+					goodAsOf: null,
+				},
+			);
+
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					// Should return the changemaker-sourced value, not funder-sourced
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: [changemakerFieldValue],
+					});
+				});
+		});
+
+		it('returns newer ChangemakerFieldValue when both have same source priority', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const baseField = await createOrUpdateBaseField(db, null, {
+				label: 'Organization Phone',
+				shortCode: 'org_phone_recency_test',
+				description: 'The phone of the organization.',
+				dataType: BaseFieldDataType.PHONE_NUMBER,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '99-9999993',
+				name: 'Test Changemaker Recency',
+				keycloakOrganizationId: null,
+			});
+
+			// Create changemaker-sourced source
+			const changemakerSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: `${changemaker.name} source`,
+			});
+
+			// Create older ChangemakerFieldValue
+			const olderBatch = await createChangemakerFieldValueBatch(
+				db,
+				systemUserAuthContext,
+				{
+					sourceId: changemakerSource.id,
+					notes: 'Older batch',
+				},
+			);
+			await createChangemakerFieldValue(db, systemUserAuthContext, {
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: olderBatch.id,
+				value: '+15555550001',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Create newer ChangemakerFieldValue (should win)
+			const newerBatch = await createChangemakerFieldValueBatch(
+				db,
+				systemUserAuthContext,
+				{
+					sourceId: changemakerSource.id,
+					notes: 'Newer batch',
+				},
+			);
+			const newerFieldValue = await createChangemakerFieldValue(
+				db,
+				systemUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+					baseFieldShortCode: baseField.shortCode,
+					batchId: newerBatch.id,
+					value: '+15555550002',
+					isValid: true,
+					goodAsOf: null,
+				},
+			);
+
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					// Should return the newer value
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: [newerFieldValue],
+					});
+				});
+		});
+
+		it('does not return invalid ChangemakerFieldValues', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const baseField = await createOrUpdateBaseField(db, null, {
+				label: 'Organization Email',
+				shortCode: 'org_email_validity_test',
+				description: 'The email of the organization.',
+				dataType: BaseFieldDataType.EMAIL,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '99-9999994',
+				name: 'Test Changemaker Validity',
+				keycloakOrganizationId: null,
+			});
+
+			const changemakerSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: `${changemaker.name} source`,
+			});
+			const batch = await createChangemakerFieldValueBatch(
+				db,
+				systemUserAuthContext,
+				{
+					sourceId: changemakerSource.id,
+					notes: 'Test batch',
+				},
+			);
+			// Create an invalid ChangemakerFieldValue
+			await createChangemakerFieldValue(db, systemUserAuthContext, {
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch.id,
+				value: 'not-a-valid-email',
+				isValid: false,
+				goodAsOf: null,
+			});
+
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					// Should return no fields since the only value is invalid
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: [],
+					});
+				});
+		});
+
+		it('returns both ProposalFieldValue and ChangemakerFieldValue for different base fields', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const baseFieldEmail = await createOrUpdateBaseField(db, null, {
+				label: 'Org Email Multi',
+				shortCode: 'org_email_multi_test',
+				description: 'The email of the organization.',
+				dataType: BaseFieldDataType.EMAIL,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			const baseFieldPhone = await createOrUpdateBaseField(db, null, {
+				label: 'Org Phone Multi',
+				shortCode: 'org_phone_multi_test',
+				description: 'The phone of the organization.',
+				dataType: BaseFieldDataType.PHONE_NUMBER,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '99-9999995',
+				name: 'Test Changemaker Multi Fields',
+				keycloakOrganizationId: null,
+			});
+
+			// Create ChangemakerFieldValue for email
+			const changemakerSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: `${changemaker.name} source`,
+			});
+			const batch = await createChangemakerFieldValueBatch(
+				db,
+				systemUserAuthContext,
+				{
+					sourceId: changemakerSource.id,
+					notes: 'Multi test batch',
+				},
+			);
+			await createChangemakerFieldValue(db, systemUserAuthContext, {
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseFieldEmail.shortCode,
+				batchId: batch.id,
+				value: 'multi@test.com',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Create ProposalFieldValue for phone
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'funder_multi_test',
+				name: 'Funder Multi Test',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Multi Test Opportunity',
+				funderShortCode: funder.shortCode,
+			});
+			const funderSource = await createSource(db, null, {
+				funderShortCode: funder.shortCode,
+				label: 'Funder Multi Source',
+			});
+			const proposal = await createProposal(db, systemUserAuthContext, {
+				opportunityId: opportunity.id,
+				externalId: 'multi-test-proposal',
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: changemaker.id,
+				proposalId: proposal.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				systemUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: funderSource.id,
+				},
+			);
+			const applicationFormField = await createApplicationFormField(db, null, {
+				label: 'Phone',
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: baseFieldPhone.shortCode,
+				position: 1,
+				instructions: 'Enter phone',
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: applicationFormField.id,
+				position: 1,
+				value: '+15555559999',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					// Should return both field values (one from each type)
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: expectArrayContaining([
+							expectObjectContaining({
+								changemakerId: changemaker.id,
+								value: 'multi@test.com',
+							}),
+							expectObjectContaining({
+								proposalVersionId: proposalVersion.id,
+								value: '+15555559999',
+							}),
+						]),
+					});
+				});
 		});
 	});
 });

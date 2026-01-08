@@ -1,5 +1,6 @@
 import { ajv } from '../ajv';
 import { keycloakIdSchema } from './KeycloakId';
+import type { ChangemakerFieldValue } from './ChangemakerFieldValue';
 import type { KeycloakId } from './KeycloakId';
 import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
@@ -18,7 +19,7 @@ interface ShallowChangemaker {
 
 interface Changemaker extends ShallowChangemaker {
 	readonly fiscalSponsors: ShallowChangemaker[];
-	readonly fields: ProposalFieldValue[];
+	readonly fields: Array<ProposalFieldValue | ChangemakerFieldValue>;
 }
 
 type WritableChangemaker = Writable<Changemaker>;

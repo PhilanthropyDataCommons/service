@@ -31,6 +31,9 @@
 			"changemakerParam": {
 				"$ref": "./components/parameters/changemakerParam.json"
 			},
+			"changemakerFieldValueBatchParam": {
+				"$ref": "./components/parameters/changemakerFieldValueBatchParam.json"
+			},
 			"proposalParam": {
 				"$ref": "./components/parameters/proposalParam.json"
 			},
@@ -91,6 +94,9 @@
 			},
 			"ChangemakerFieldValue": {
 				"$ref": "./components/schemas/ChangemakerFieldValue.json"
+			},
+			"ChangemakerFieldValueBundle": {
+				"$ref": "./components/schemas/ChangemakerFieldValueBundle.json"
 			},
 			"PresignedPost": {
 				"$ref": "./components/schemas/PresignedPost.json"
@@ -238,6 +244,9 @@
 		},
 		"/changemakerFieldValues": {
 			"$ref": "./paths/changemakerFieldValues.json"
+		},
+		"/changemakerFieldValues/{fieldValueId}": {
+			"$ref": "./paths/changemakerFieldValue.json"
 		},
 		"/proposals": {
 			"$ref": "./paths/proposals.json"

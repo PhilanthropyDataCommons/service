@@ -1,0 +1,48 @@
+{
+	"get": {
+		"operationId": "getChangemakerFieldValueById",
+		"summary": "Gets a specific changemaker field value.",
+		"tags": ["Changemaker Field Values"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "fieldValueId",
+				"description": "The PDC-generated ID of a changemaker field value.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The changemaker field value.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ChangemakerFieldValue.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

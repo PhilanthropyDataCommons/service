@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.28.0 2025-01-08
+
 ### Added
 
 - `ChangemakerFieldValueBatch` entities now have a `createdBy` attribute tracking the user who created the batch.
 - `GET /changemakerFieldValueBatches` endpoint now exists to retrieve a paginated list of changemaker field value batches.
 - `GET /changemakerFieldValueBatches/:batchId` endpoint now exists to retrieve a specific changemaker field value batch by ID.
+- `GET /changemakerFieldValues` endpoint now exists to retrieve a paginated list of changemaker field values with optional filtering by `changemakerFieldValueBatch` and `changemaker`.
+- `GET /changemakerFieldValues/:fieldValueId` endpoint now exists to retrieve a specific changemaker field value by ID.
 - `FieldValueBase` type now exists as a common base for `ProposalFieldValue` and `ChangemakerFieldValue`.
 - `Changemaker.fields` now includes `ChangemakerFieldValue` objects in addition to `ProposalFieldValue` objects, with source-based priority determining the "gold" value per base field.
 

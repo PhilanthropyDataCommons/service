@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"type": "integer"
+	},
+	"in": "query",
+	"name": "changemakerFieldValueBatch",
+	"required": false,
+	"description": "A reference (ID) to an existing changemaker field value batch entity."
+}

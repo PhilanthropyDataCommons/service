@@ -51,7 +51,7 @@ npm run migrate
 
 ## After Making Changes
 
-**Always run the formatter and linter after making changes:**
+**Always run the formatter and linter after making ANY changes, including documentation, configuration, SQL, and JSON files:**
 
 ```bash
 # Auto-fix formatting issues (run this first)
@@ -399,6 +399,15 @@ Add entries under the `## Unreleased` section using the appropriate subsection:
 - `### Removed` - Removed features
 - `### Fixed` - Bug fixes
 - `### Security` - Security-related changes
+
+### Making a Release
+
+When creating a new release version:
+
+1. Move entries from `## Unreleased` to a new version section (e.g., `## 0.28.0 2025-01-08`)
+2. Update the version in `src/openapi/api.json` to match the new release version
+3. Leave an empty `## Unreleased` section for future changes
+4. Run `npm run format` and `npm run lint` to ensure all files are properly formatted
 
 ## Maintaining This Document
 

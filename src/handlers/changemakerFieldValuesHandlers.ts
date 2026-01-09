@@ -2,12 +2,16 @@ import { HTTP_STATUS } from '../constants';
 import {
 	db,
 	createChangemakerFieldValue,
+	getLimitValues,
 	loadBaseField,
 	loadChangemaker,
+	loadChangemakerFieldValue,
 	loadChangemakerFieldValueBatch,
+	loadChangemakerFieldValueBundle,
 } from '../database';
 import {
 	isAuthContext,
+	isId,
 	isWritableChangemakerFieldValue,
 	Permission,
 	BaseFieldCategory,
@@ -20,6 +24,12 @@ import {
 	NotFoundError,
 	UnprocessableEntityError,
 } from '../errors';
+import {
+	extractChangemakerFieldValueBatchParameters,
+	extractChangemakerParameters,
+	extractPaginationParameters,
+} from '../queryParameters';
+import { coerceParams } from '../coercion';
 import { authContextHasChangemakerPermission } from '../authorization';
 import { fieldValueIsValid } from '../fieldValidation';
 import type { Request, Response } from 'express';
@@ -121,6 +131,57 @@ const postChangemakerFieldValue = async (
 		.send(changemakerFieldValue);
 };
 
+const getChangemakerFieldValues = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
+	const paginationParameters = extractPaginationParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	const { changemakerFieldValueBatchId } =
+		extractChangemakerFieldValueBatchParameters(req);
+	const { changemakerId } = extractChangemakerParameters(req);
+
+	const bundle = await loadChangemakerFieldValueBundle(
+		db,
+		req,
+		changemakerFieldValueBatchId,
+		changemakerId,
+		limit,
+		offset,
+	);
+
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(bundle);
+};
+
+const getChangemakerFieldValue = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
+	const { fieldValueId } = coerceParams(req.params);
+	if (!isId(fieldValueId)) {
+		throw new InputValidationError(
+			'Invalid fieldValueId parameter.',
+			isId.errors ?? [],
+		);
+	}
+	const fieldValue = await loadChangemakerFieldValue(db, req, fieldValueId);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(fieldValue);
+};
+
 export const changemakerFieldValuesHandlers = {
+	getChangemakerFieldValue,
+	getChangemakerFieldValues,
 	postChangemakerFieldValue,
 };

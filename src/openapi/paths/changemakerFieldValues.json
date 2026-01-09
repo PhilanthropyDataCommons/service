@@ -1,4 +1,45 @@
 {
+	"get": {
+		"operationId": "getChangemakerFieldValues",
+		"summary": "Gets a list of changemaker field values.",
+		"description": "Returns a paginated list of changemaker field values. Optionally filter by batch or changemaker.",
+		"tags": ["Changemaker Field Values"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"$ref": "../components/parameters/changemakerFieldValueBatchParam.json"
+			},
+			{
+				"$ref": "../components/parameters/changemakerParam.json"
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "All changemaker field values matching the filter criteria.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/ChangemakerFieldValueBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			}
+		}
+	},
 	"post": {
 		"operationId": "addChangemakerFieldValue",
 		"summary": "Creates a new field value for a changemaker.",

@@ -1,0 +1,49 @@
+{
+	"get": {
+		"operationId": "getApplicationFormCsvTemplate",
+		"summary": "Gets a CSV template for bulk upload based on an application form.",
+		"description": "Returns a CSV file with headers matching the application form's fields in position order. This template can be used to prepare data for bulk upload.",
+		"tags": ["Application Forms"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "applicationFormId",
+				"description": "The PDC-generated ID of an application form.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "A CSV template file with headers only.",
+				"content": {
+					"text/csv": {
+						"schema": {
+							"type": "string",
+							"example": "organization_name,organization_tax_id,project_title\n"
+						}
+					}
+				},
+				"headers": {
+					"Content-Disposition": {
+						"description": "Suggests a filename for the downloaded template",
+						"schema": {
+							"type": "string",
+							"example": "attachment; filename=\"application-form-42-template.csv\""
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

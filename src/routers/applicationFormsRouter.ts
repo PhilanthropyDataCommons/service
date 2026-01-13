@@ -5,6 +5,11 @@ import { requireAuthentication } from '../middleware';
 const applicationFormsRouter = express.Router();
 
 applicationFormsRouter.get(
+	'/:applicationFormId/csvTemplate',
+	requireAuthentication,
+	applicationFormsHandlers.getApplicationFormCsvTemplate,
+);
+applicationFormsRouter.get(
 	'/:applicationFormId',
 	requireAuthentication,
 	applicationFormsHandlers.getApplicationForm,

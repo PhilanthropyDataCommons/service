@@ -139,6 +139,7 @@ erDiagram
     int id PK
     string status
     int sourceId FK
+    int applicationFormId FK
     int proposalsDataFileId FK
     int attachmentsArchiveFileId FK
     string funderShortCode FK
@@ -182,6 +183,7 @@ erDiagram
   ProposalVersion }o--|| User : "is created by"
   BulkUploadTask }o--|| User : "is created by"
   BulkUploadTask }o--|| Source : "uses"
+  BulkUploadTask }o--o| ApplicationForm : "uses"
   BulkUploadTask ||--o{ BulkUploadLog : "has"
   BulkUploadTask }o--|| File : "has proposals data"
   BulkUploadTask }o--o| File : "has attachments archive"

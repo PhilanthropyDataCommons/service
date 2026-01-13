@@ -125,8 +125,40 @@ const postApplicationForms = async (
 	}
 };
 
+const getApplicationFormCsvTemplate = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
+
+	const { applicationFormId } = coerceParams(req.params);
+	if (!isId(applicationFormId)) {
+		throw new InputValidationError('Invalid request.', isId.errors ?? []);
+	}
+
+	const applicationForm = await loadApplicationForm(db, req, applicationFormId);
+
+	// Generate CSV header from application form fields
+	// Fields are already sorted by position in the loadApplicationForm response
+	const headers = applicationForm.fields
+		.map((field) => field.baseFieldShortCode)
+		.join(',');
+
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('text/csv')
+		.setHeader(
+			'Content-Disposition',
+			`attachment; filename="application-form-${applicationFormId}-template.csv"`,
+		)
+		.send(`${headers}\n`);
+};
+
 export const applicationFormsHandlers = {
 	getApplicationForm,
+	getApplicationFormCsvTemplate,
 	getApplicationForms,
 	postApplicationForms,
 };

@@ -523,6 +523,153 @@ describe('/applicationForms', () => {
 		});
 	});
 
+	describe('GET /:applicationFormId/csvTemplate', () => {
+		it('requires authentication', async () => {
+			await request(app).get('/applicationForms/1/csvTemplate').expect(401);
+		});
+
+		it('returns a CSV template with headers matching the application form fields', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			await createTestBaseFields();
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'organizationName',
+				position: 1,
+				label: 'Organization Name',
+				instructions: 'Please enter the name of the organization.',
+			});
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'yearsOfWork',
+				position: 2,
+				label: 'Years of Work',
+				instructions: 'Please enter the number of years of work.',
+			});
+
+			const result = await request(app)
+				.get(`/applicationForms/${applicationForm.id}/csvTemplate`)
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.headers['content-type']).toMatch(/text\/csv/);
+			expect(result.headers['content-disposition']).toBe(
+				`attachment; filename="application-form-${applicationForm.id}-template.csv"`,
+			);
+			expect(result.text).toBe('organizationName,yearsOfWork\n');
+		});
+
+		it('returns headers in position order', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			await createTestBaseFields();
+			// Add fields in reverse position order to test sorting
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'yearsOfWork',
+				position: 2,
+				label: 'Years of Work',
+				instructions: null,
+			});
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'organizationName',
+				position: 1,
+				label: 'Organization Name',
+				instructions: null,
+			});
+
+			const result = await request(app)
+				.get(`/applicationForms/${applicationForm.id}/csvTemplate`)
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.text).toBe('organizationName,yearsOfWork\n');
+		});
+
+		it('returns an empty header row for a form with no fields', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+
+			const result = await request(app)
+				.get(`/applicationForms/${applicationForm.id}/csvTemplate`)
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.text).toBe('\n');
+		});
+
+		it('returns 404 when the application form does not exist', async () => {
+			const result = await request(app)
+				.get('/applicationForms/9999/csvTemplate')
+				.set(authHeader)
+				.expect(404);
+
+			expect(result.body).toMatchObject({
+				name: 'NotFoundError',
+			});
+		});
+
+		it('returns 404 when the user does not have access to the funder', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			// Don't grant any permissions to the test user
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+
+			await request(app)
+				.get(`/applicationForms/${applicationForm.id}/csvTemplate`)
+				.set(authHeader)
+				.expect(404);
+		});
+	});
+
 	describe('POST /', () => {
 		it('requires authentication', async () => {
 			await request(app).post('/applicationForms').expect(401);

@@ -3,8 +3,10 @@ import {
 	db,
 	createBulkUploadTask,
 	getLimitValues,
+	loadApplicationForm,
 	loadBulkUploadTaskBundle,
 	loadFileIfCreatedBy,
+	loadOpportunity,
 } from '../database';
 import {
 	Permission,
@@ -66,13 +68,32 @@ const postBulkUploadTask = async (
 
 	const {
 		sourceId,
+		applicationFormId,
 		funderShortCode,
 		proposalsDataFileId,
 		attachmentsArchiveFileId,
 	} = body;
+
+	// Load the application form to validate it exists
+	const applicationForm = await loadApplicationForm(db, req, applicationFormId);
+
+	// Load the opportunity to get the funder for permission check
+	const opportunity = await loadOpportunity(
+		db,
+		req,
+		applicationForm.opportunityId,
+	);
+
+	// Validate the provided funderShortCode matches the application form's funder
+	if (opportunity.funderShortCode !== funderShortCode) {
+		throw new UnprocessableEntityError(
+			'The provided funderShortCode does not match the application form.',
+		);
+	}
+
 	if (!authContextHasFunderPermission(req, funderShortCode, Permission.EDIT)) {
 		throw new UnprocessableEntityError(
-			'You do not have write permissions on a funder with the specified short code.',
+			'You do not have write permissions on the funder associated with this application form.',
 		);
 	}
 
@@ -93,6 +114,7 @@ const postBulkUploadTask = async (
 	try {
 		const bulkUploadTask = await createBulkUploadTask(db, req, {
 			sourceId,
+			applicationFormId,
 			funderShortCode,
 			proposalsDataFileId,
 			attachmentsArchiveFileId,

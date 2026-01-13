@@ -10,6 +10,9 @@ import {
 	loadProposalBundle,
 	loadApplicationFormBundle,
 	createBulkUploadTask,
+	createApplicationForm,
+	createApplicationFormField,
+	createOpportunity,
 	loadSystemUser,
 	loadChangemakerBundle,
 	loadChangemakerProposalBundle,
@@ -46,15 +49,46 @@ import type {
 
 const s3Mock = mockClient(S3Client);
 
+const FIELD_LABELS: Record<string, string> = {
+	proposal_submitter_email: 'Proposal Submitter Email',
+	organization_name: 'Organization Name',
+	organization_tax_id: 'Organization EIN',
+	favorite_file: 'Favorite File',
+};
+
 const createTestBulkUploadTask = async (
 	authContext: AuthContext,
 	proposalsDataFileId: number,
 	overrideValues?: Partial<InternallyWritableBulkUploadTask>,
+	fieldShortCodes: string[] = ['proposal_submitter_email', 'organization_name'],
 ): Promise<BulkUploadTask> => {
 	const systemSource = await loadSystemSource(db, null);
 	const systemFunder = await loadSystemFunder(db, null);
+
+	const opportunity = await createOpportunity(db, authContext, {
+		title: 'Test Opportunity for Bulk Upload',
+		funderShortCode: systemFunder.shortCode,
+	});
+	const applicationForm = await createApplicationForm(db, authContext, {
+		opportunityId: opportunity.id,
+	});
+
+	await Promise.all(
+		fieldShortCodes.map(
+			async (shortCode, i) =>
+				await createApplicationFormField(db, authContext, {
+					applicationFormId: applicationForm.id,
+					baseFieldShortCode: shortCode,
+					position: i,
+					label: FIELD_LABELS[shortCode] ?? shortCode,
+					instructions: null,
+				}),
+		),
+	);
+
 	const defaultValues = {
 		sourceId: systemSource.id,
+		applicationFormId: applicationForm.id,
 		funderShortCode: systemFunder.shortCode,
 		attachmentsArchiveFileId: null,
 		status: TaskStatus.PENDING,
@@ -110,6 +144,7 @@ describe('processBulkUploadTask', () => {
 		s3Mock.reset();
 	});
 	it('should attempt to access the contents of the file associated with the specified bulk upload', async () => {
+		await createTestBaseFields();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
@@ -142,6 +177,7 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should fail if the proposalsDataFile is not accessible', async () => {
+		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
@@ -171,6 +207,7 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
+		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
@@ -258,6 +295,7 @@ describe('processBulkUploadTask', () => {
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		// Empty CSV should fail because the application form has fields but CSV is empty
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
@@ -309,6 +347,7 @@ describe('processBulkUploadTask', () => {
 			{
 				attachmentsArchiveFileId: attachmentsArchiveFile.id,
 			},
+			['proposal_submitter_email', 'organization_name', 'favorite_file'],
 		);
 
 		s3Mock
@@ -684,6 +723,8 @@ describe('processBulkUploadTask', () => {
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
+			undefined,
+			['proposal_submitter_email', 'organization_name', 'organization_tax_id'],
 		);
 
 		s3Mock.on(GetObjectCommand).resolves({

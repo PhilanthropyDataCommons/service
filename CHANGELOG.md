@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.29.0 2026-01-13
+
+### Changed
+
+- Bulk upload tasks now require `applicationFormId` in addition to `funderShortCode`.
+- Bulk upload no longer creates application forms dynamically - it uses an existing application form.
+
+### Added
+
+- `GET /applicationForms/:id/csvTemplate` endpoint for generating bulk upload CSV templates from application form fields.
+- `BulkUploadTask` now includes `applicationFormId` and `applicationForm` attributes.
+
 ## 0.28.0 2025-01-08
 
 ### Added

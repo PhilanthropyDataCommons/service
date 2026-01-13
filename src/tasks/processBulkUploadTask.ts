@@ -14,15 +14,11 @@ import { getS3Client } from '../s3';
 import { db } from '../database/db';
 import { getDefaultS3Bucket } from '../config';
 import {
-	createApplicationForm,
-	createApplicationFormField,
 	createBulkUploadLog,
-	createOpportunity,
 	createChangemakerProposal,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
-	loadBaseFields,
 	loadBulkUploadTask,
 	loadOrCreateChangemaker,
 	updateBulkUploadTask,
@@ -47,7 +43,7 @@ import type {
 	ProposalFieldValue,
 	AuthContext,
 	File,
-	WritableApplicationFormField,
+	ApplicationFormField,
 } from '../types';
 
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
@@ -119,39 +115,29 @@ const loadShortCodesFromBulkUploadTaskCsv = async (
 	return shortCodes;
 };
 
-const assertShortCodesReferToExistingBaseFields = async (
-	shortCodes: string[],
-): Promise<void> => {
-	const baseFields = await loadBaseFields();
-	shortCodes.forEach((shortCode) => {
-		const baseField = baseFields.find(
-			(baseFieldCandidate) => baseFieldCandidate.shortCode === shortCode,
+const assertCsvHeadersMatchApplicationForm = (
+	csvShortCodes: string[],
+	applicationFormFields: ApplicationFormField[],
+): void => {
+	const expectedShortCodes = applicationFormFields.map(
+		(field) => field.baseFieldShortCode,
+	);
+
+	if (csvShortCodes.length !== expectedShortCodes.length) {
+		throw new Error(
+			`CSV has ${csvShortCodes.length} columns but application form has ${expectedShortCodes.length} fields`,
 		);
-		if (baseField === undefined) {
-			throw new Error(`${shortCode} is not a valid BaseField short code.`);
+	}
+
+	expectedShortCodes.forEach((expected, index) => {
+		const { [index]: actual } = csvShortCodes;
+		if (actual !== expected) {
+			const columnNumber = index + SINGLE_STEP;
+			throw new Error(
+				`CSV column ${columnNumber} is "${actual}" but application form expects "${expected}"`,
+			);
 		}
 	});
-};
-
-const assertShortCodesAreValid = async (
-	shortCodes: string[],
-): Promise<void> => {
-	await assertShortCodesReferToExistingBaseFields(shortCodes);
-};
-
-/* eslint-disable-next-line @typescript-eslint/no-magic-numbers --
- * The meaning of "0" here is pretty explicit, especially wrapped in a named helper
- */
-const isEmpty = (arr: unknown[]): boolean => arr.length === 0;
-
-const assertCsvContainsValidShortCodes = async (
-	csvPath: string,
-): Promise<void> => {
-	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
-	if (isEmpty(shortCodes)) {
-		throw new Error('No short codes detected in the first row of the CSV');
-	}
-	await assertShortCodesAreValid(shortCodes);
 };
 
 const assertCsvContainsRowsOfEqualLength = async (
@@ -172,37 +158,11 @@ const assertCsvContainsRowsOfEqualLength = async (
 
 const assertBulkUploadTaskCsvIsValid = async (
 	csvPath: string,
+	applicationFormFields: ApplicationFormField[],
 ): Promise<void> => {
-	await assertCsvContainsValidShortCodes(csvPath);
+	const csvShortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
+	assertCsvHeadersMatchApplicationForm(csvShortCodes, applicationFormFields);
 	await assertCsvContainsRowsOfEqualLength(csvPath);
-};
-
-const generateWritableApplicationFormFields = async (
-	csvPath: string,
-	applicationFormId: number,
-): Promise<WritableApplicationFormField[]> => {
-	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
-	const baseFields = await loadBaseFields();
-	const writableApplicationFormFields = shortCodes.map(
-		(shortCode, index): WritableApplicationFormField => {
-			const baseField = baseFields.find(
-				(candidateBaseField) => candidateBaseField.shortCode === shortCode,
-			);
-			if (baseField === undefined) {
-				throw new Error(
-					`No base field could be found with shortCode "${shortCode}"`,
-				);
-			}
-			return {
-				applicationFormId,
-				baseFieldShortCode: baseField.shortCode,
-				position: index,
-				label: baseField.label,
-				instructions: null,
-			};
-		},
-	);
-	return writableApplicationFormFields;
 };
 
 const getChangemakerTaxIdIndex = (columns: string[]): number =>
@@ -433,293 +393,287 @@ class AttachmentsManager {
 	}
 }
 
-export const processBulkUploadTask = async (
-	payload: unknown,
-	helpers: JobHelpers,
-): Promise<void> => {
-	const { logger: graphileLogger } = helpers;
-	if (!isProcessBulkUploadJobPayload(payload)) {
-		graphileLogger.error('Malformed bulk upload job payload', {
-			errors: isProcessBulkUploadJobPayload.errors ?? [],
-		});
-		return;
-	}
-	const systemUserAuthContext = await loadSystemUserAuthContext();
-	graphileLogger.debug(
-		`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
-	);
-	const bulkUploadTask = await loadBulkUploadTask(
-		db,
-		systemUserAuthContext,
-		payload.bulkUploadId,
-	);
-
-	const taskAuthContext = await loadTaskAuthContext(bulkUploadTask);
-	if (bulkUploadTask.status !== TaskStatus.PENDING) {
-		graphileLogger.warn(
-			'Bulk upload cannot be processed because it is not in a PENDING state',
-			{ bulkUploadTask },
-		);
-		return;
-	}
-
-	await updateBulkUploadTask(
-		db,
-		taskAuthContext,
-		{
-			status: TaskStatus.IN_PROGRESS,
-		},
-		bulkUploadTask.id,
-	);
-
-	const temporaryProposalsDataFile = await downloadFileDataToTemporaryStorage(
-		bulkUploadTask.proposalsDataFile,
-		graphileLogger,
-	).catch(async (err: unknown) => {
-		graphileLogger.warn('Download of bulk upload file from S3 failed', { err });
-		await createBulkUploadLog(db, taskAuthContext, {
-			bulkUploadTaskId: bulkUploadTask.id,
-			isError: true,
-			details: getBulkUploadLogDetailsFromError(err),
-		});
-	});
-
-	if (temporaryProposalsDataFile === undefined) {
-		await updateBulkUploadTask(
-			db,
-			taskAuthContext,
-			{
-				status: TaskStatus.FAILED,
-			},
-			bulkUploadTask.id,
-		);
-		return;
-	}
-
-	const temporaryProposalAttachmentFiles = await prepareProposalAttachments(
-		bulkUploadTask,
-		graphileLogger,
-	).catch(async (err: unknown) => {
-		graphileLogger.warn('Preparation of proposal attachments failed', {
-			err,
-		});
-		await createBulkUploadLog(db, taskAuthContext, {
-			bulkUploadTaskId: bulkUploadTask.id,
-			isError: true,
-			details: getBulkUploadLogDetailsFromError(err),
-		});
-	});
-
-	if (temporaryProposalAttachmentFiles === undefined) {
-		await updateBulkUploadTask(
-			db,
-			taskAuthContext,
-			{
-				status: TaskStatus.FAILED,
-			},
-			bulkUploadTask.id,
-		);
-		return;
-	}
-
-	let bulkUploadHasFailed = false;
-
-	try {
-		const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(
-			temporaryProposalsDataFile.path,
-		);
-		const changemakerNameIndex = getChangemakerNameIndex(shortCodes);
-		const changemakerTaxIdIndex = getChangemakerTaxIdIndex(shortCodes);
-
-		await assertBulkUploadTaskCsvIsValid(temporaryProposalsDataFile.path);
-
-		await db.transaction(async (transactionDb) => {
-			const attachmentsManager = new AttachmentsManager(
-				transactionDb,
-				taskAuthContext,
-				temporaryProposalAttachmentFiles,
-				graphileLogger,
-			);
-			const opportunity = await createOpportunity(
-				transactionDb,
-				taskAuthContext,
-				{
-					title: `Bulk Upload (${bulkUploadTask.createdAt})`,
-					funderShortCode: bulkUploadTask.funderShortCode,
-				},
-			);
-			const applicationForm = await createApplicationForm(
-				transactionDb,
-				taskAuthContext,
-				{
-					opportunityId: opportunity.id,
-				},
-			);
-			const pendingApplicationFormFields =
-				await generateWritableApplicationFormFields(
-					temporaryProposalsDataFile.path,
-					applicationForm.id,
-				);
-			const applicationFormFields = await allNoLeaks(
-				pendingApplicationFormFields.map(
-					async (writableApplicationFormField) =>
-						await createApplicationFormField(
-							transactionDb,
-							taskAuthContext,
-							writableApplicationFormField,
-						),
-				),
-			);
-			const csvReadStream = fs.createReadStream(
-				temporaryProposalsDataFile.path,
-			);
-			const STARTING_ROW = 2;
-			const parser = parse({
-				from: STARTING_ROW,
+export const processBulkUploadTask =
+	// eslint-disable-next-line complexity -- This function has many sequential steps that are hard to refactor
+	async (payload: unknown, helpers: JobHelpers): Promise<void> => {
+		const { logger: graphileLogger } = helpers;
+		if (!isProcessBulkUploadJobPayload(payload)) {
+			graphileLogger.error('Malformed bulk upload job payload', {
+				errors: isProcessBulkUploadJobPayload.errors ?? [],
 			});
-			csvReadStream.pipe(parser);
-			let recordNumber = 0;
+			return;
+		}
+		const systemUserAuthContext = await loadSystemUserAuthContext();
+		graphileLogger.debug(
+			`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
+		);
+		const bulkUploadTask = await loadBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			payload.bulkUploadId,
+		);
 
-			await parser.forEach(async (record: string[]) => {
-				recordNumber += SINGLE_STEP;
-				const proposal = await createProposal(transactionDb, taskAuthContext, {
-					opportunityId: opportunity.id,
-					externalId: `${recordNumber}`,
-				});
-				const proposalVersion = await createProposalVersion(
+		const taskAuthContext = await loadTaskAuthContext(bulkUploadTask);
+		if (bulkUploadTask.status !== TaskStatus.PENDING) {
+			graphileLogger.warn(
+				'Bulk upload cannot be processed because it is not in a PENDING state',
+				{ bulkUploadTask },
+			);
+			return;
+		}
+
+		await updateBulkUploadTask(
+			db,
+			taskAuthContext,
+			{
+				status: TaskStatus.IN_PROGRESS,
+			},
+			bulkUploadTask.id,
+		);
+
+		const temporaryProposalsDataFile = await downloadFileDataToTemporaryStorage(
+			bulkUploadTask.proposalsDataFile,
+			graphileLogger,
+		).catch(async (err: unknown) => {
+			graphileLogger.warn('Download of bulk upload file from S3 failed', {
+				err,
+			});
+			await createBulkUploadLog(db, taskAuthContext, {
+				bulkUploadTaskId: bulkUploadTask.id,
+				isError: true,
+				details: getBulkUploadLogDetailsFromError(err),
+			});
+		});
+
+		if (temporaryProposalsDataFile === undefined) {
+			await updateBulkUploadTask(
+				db,
+				taskAuthContext,
+				{
+					status: TaskStatus.FAILED,
+				},
+				bulkUploadTask.id,
+			);
+			return;
+		}
+
+		const temporaryProposalAttachmentFiles = await prepareProposalAttachments(
+			bulkUploadTask,
+			graphileLogger,
+		).catch(async (err: unknown) => {
+			graphileLogger.warn('Preparation of proposal attachments failed', {
+				err,
+			});
+			await createBulkUploadLog(db, taskAuthContext, {
+				bulkUploadTaskId: bulkUploadTask.id,
+				isError: true,
+				details: getBulkUploadLogDetailsFromError(err),
+			});
+		});
+
+		if (temporaryProposalAttachmentFiles === undefined) {
+			await updateBulkUploadTask(
+				db,
+				taskAuthContext,
+				{
+					status: TaskStatus.FAILED,
+				},
+				bulkUploadTask.id,
+			);
+			return;
+		}
+
+		let bulkUploadHasFailed = false;
+
+		try {
+			// Load the application form that was specified when creating the bulk upload task
+			if (bulkUploadTask.applicationForm === null) {
+				throw new Error(
+					'Bulk upload task does not have an associated application form',
+				);
+			}
+			const {
+				applicationForm,
+				applicationForm: { fields: applicationFormFields },
+			} = bulkUploadTask;
+
+			const shortCodes = applicationFormFields.map(
+				(field) => field.baseFieldShortCode,
+			);
+			const changemakerNameIndex = getChangemakerNameIndex(shortCodes);
+			const changemakerTaxIdIndex = getChangemakerTaxIdIndex(shortCodes);
+
+			// Validate CSV headers match the application form fields exactly
+			await assertBulkUploadTaskCsvIsValid(
+				temporaryProposalsDataFile.path,
+				applicationFormFields,
+			);
+
+			await db.transaction(async (transactionDb) => {
+				const attachmentsManager = new AttachmentsManager(
 					transactionDb,
 					taskAuthContext,
-					{
-						proposalId: proposal.id,
-						applicationFormId: applicationForm.id,
-						sourceId: bulkUploadTask.sourceId,
-					},
+					temporaryProposalAttachmentFiles,
+					graphileLogger,
 				);
 
-				const {
-					[changemakerNameIndex]: changemakerName,
-					[changemakerTaxIdIndex]: changemakerTaxId,
-				} = record;
-				if (changemakerTaxId !== undefined) {
-					const changemaker = await loadOrCreateChangemaker(
+				const csvReadStream = fs.createReadStream(
+					temporaryProposalsDataFile.path,
+				);
+				const STARTING_ROW = 2;
+				const parser = parse({
+					from: STARTING_ROW,
+				});
+				csvReadStream.pipe(parser);
+				let recordNumber = 0;
+
+				await parser.forEach(async (record: string[]) => {
+					recordNumber += SINGLE_STEP;
+					const proposal = await createProposal(
 						transactionDb,
 						taskAuthContext,
 						{
-							name: changemakerName ?? 'Unnamed Organization',
-							taxId: changemakerTaxId,
-							keycloakOrganizationId: null,
+							opportunityId: applicationForm.opportunityId,
+							externalId: `${recordNumber}`,
 						},
 					);
-					await createChangemakerProposal(transactionDb, taskAuthContext, {
-						changemakerId: changemaker.id,
-						proposalId: proposal.id,
-					});
-				}
+					const proposalVersion = await createProposalVersion(
+						transactionDb,
+						taskAuthContext,
+						{
+							proposalId: proposal.id,
+							applicationFormId: applicationForm.id,
+							sourceId: bulkUploadTask.sourceId,
+						},
+					);
 
-				await allNoLeaks(
-					record.map<Promise<ProposalFieldValue>>(async (fieldValue, index) => {
-						const { [index]: applicationFormField } = applicationFormFields;
-						if (applicationFormField === undefined) {
-							throw new Error(
-								'There is no form field associated with this column',
-							);
-						}
-
-						let processedFieldValue = fieldValue;
-						let isValid = fieldValueIsValid(
-							fieldValue,
-							applicationFormField.baseField.dataType,
-						);
-
-						// File attachments are the one unique case where we need to convert the bulk upload value
-						// into a PDC File ID.  The value in the CSV is the relative path of the file within the
-						// attachments archive.
-						if (
-							applicationFormField.baseField.dataType === BaseFieldDataType.FILE
-						) {
-							const attachmentFile =
-								await attachmentsManager.getAttachmentFile(fieldValue);
-							processedFieldValue = attachmentFile.id.toString();
-							isValid = true;
-						}
-
-						return await createProposalFieldValue(
+					const {
+						[changemakerNameIndex]: changemakerName,
+						[changemakerTaxIdIndex]: changemakerTaxId,
+					} = record;
+					if (changemakerTaxId !== undefined) {
+						const changemaker = await loadOrCreateChangemaker(
 							transactionDb,
 							taskAuthContext,
 							{
-								proposalVersionId: proposalVersion.id,
-								applicationFormFieldId: applicationFormField.id,
-								value: processedFieldValue,
-								position: index,
-								isValid,
-								goodAsOf: null,
+								name: changemakerName ?? 'Unnamed Organization',
+								taxId: changemakerTaxId,
+								keycloakOrganizationId: null,
 							},
 						);
-					}),
-				);
+						await createChangemakerProposal(transactionDb, taskAuthContext, {
+							changemakerId: changemaker.id,
+							proposalId: proposal.id,
+						});
+					}
+
+					await allNoLeaks(
+						record.map<Promise<ProposalFieldValue>>(
+							async (fieldValue, index) => {
+								const { [index]: applicationFormField } = applicationFormFields;
+								if (applicationFormField === undefined) {
+									throw new Error(
+										'There is no form field associated with this column',
+									);
+								}
+
+								let processedFieldValue = fieldValue;
+								let isValid = fieldValueIsValid(
+									fieldValue,
+									applicationFormField.baseField.dataType,
+								);
+
+								// File attachments are the one unique case where we need to convert the bulk upload value
+								// into a PDC File ID.  The value in the CSV is the relative path of the file within the
+								// attachments archive.
+								if (
+									applicationFormField.baseField.dataType ===
+									BaseFieldDataType.FILE
+								) {
+									const attachmentFile =
+										await attachmentsManager.getAttachmentFile(fieldValue);
+									processedFieldValue = attachmentFile.id.toString();
+									isValid = true;
+								}
+
+								return await createProposalFieldValue(
+									transactionDb,
+									taskAuthContext,
+									{
+										proposalVersionId: proposalVersion.id,
+										applicationFormFieldId: applicationFormField.id,
+										value: processedFieldValue,
+										position: index,
+										isValid,
+										goodAsOf: null,
+									},
+								);
+							},
+						),
+					);
+				});
 			});
-		});
-	} catch (err) {
-		graphileLogger.info('Bulk upload has failed', { err });
-		await createBulkUploadLog(db, taskAuthContext, {
-			bulkUploadTaskId: bulkUploadTask.id,
-			isError: true,
-			details: getBulkUploadLogDetailsFromError(err),
-		});
-		bulkUploadHasFailed = true;
-	}
+		} catch (err) {
+			graphileLogger.info('Bulk upload has failed', { err });
+			await createBulkUploadLog(db, taskAuthContext, {
+				bulkUploadTaskId: bulkUploadTask.id,
+				isError: true,
+				details: getBulkUploadLogDetailsFromError(err),
+			});
+			bulkUploadHasFailed = true;
+		}
 
-	try {
-		await temporaryProposalsDataFile.cleanup();
-	} catch (err) {
-		const message = `Cleanup of a temporary file failed (${temporaryProposalsDataFile.path})`;
-		graphileLogger.warn(message, { err });
-		await createBulkUploadLog(db, taskAuthContext, {
-			bulkUploadTaskId: bulkUploadTask.id,
-			// `isError` is intended for UIs to find an explanation for bulk upload failure. Not this.
-			isError: false,
-			details: getBulkUploadLogDetailsFromError(
-				new Error(message, { cause: err }),
-			),
-		});
-	}
+		try {
+			await temporaryProposalsDataFile.cleanup();
+		} catch (err) {
+			const message = `Cleanup of a temporary file failed (${temporaryProposalsDataFile.path})`;
+			graphileLogger.warn(message, { err });
+			await createBulkUploadLog(db, taskAuthContext, {
+				bulkUploadTaskId: bulkUploadTask.id,
+				// `isError` is intended for UIs to find an explanation for bulk upload failure. Not this.
+				isError: false,
+				details: getBulkUploadLogDetailsFromError(
+					new Error(message, { cause: err }),
+				),
+			});
+		}
 
-	try {
-		await cleanupTemporaryFileMap(
-			temporaryProposalAttachmentFiles,
-			graphileLogger,
-		);
-	} catch (err) {
-		const message = 'Cleanup of temporary attachment files failed';
-		graphileLogger.warn(message, {
-			err,
-		});
-		await createBulkUploadLog(db, taskAuthContext, {
-			bulkUploadTaskId: bulkUploadTask.id,
-			isError: false,
-			details: getBulkUploadLogDetailsFromError(
-				new Error(message, { cause: err }),
-			),
-		});
-	}
+		try {
+			await cleanupTemporaryFileMap(
+				temporaryProposalAttachmentFiles,
+				graphileLogger,
+			);
+		} catch (err) {
+			const message = 'Cleanup of temporary attachment files failed';
+			graphileLogger.warn(message, {
+				err,
+			});
+			await createBulkUploadLog(db, taskAuthContext, {
+				bulkUploadTaskId: bulkUploadTask.id,
+				isError: false,
+				details: getBulkUploadLogDetailsFromError(
+					new Error(message, { cause: err }),
+				),
+			});
+		}
 
-	if (bulkUploadHasFailed) {
-		await updateBulkUploadTask(
-			db,
-			taskAuthContext,
-			{
-				status: TaskStatus.FAILED,
-			},
-			bulkUploadTask.id,
-		);
-	} else {
-		await updateBulkUploadTask(
-			db,
-			taskAuthContext,
-			{
-				status: TaskStatus.COMPLETED,
-			},
-			bulkUploadTask.id,
-		);
-	}
-};
+		if (bulkUploadHasFailed) {
+			await updateBulkUploadTask(
+				db,
+				taskAuthContext,
+				{
+					status: TaskStatus.FAILED,
+				},
+				bulkUploadTask.id,
+			);
+		} else {
+			await updateBulkUploadTask(
+				db,
+				taskAuthContext,
+				{
+					status: TaskStatus.COMPLETED,
+				},
+				bulkUploadTask.id,
+			);
+		}
+	};

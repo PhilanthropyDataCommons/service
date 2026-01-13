@@ -215,6 +215,9 @@
 		"/applicationForms/{applicationFormId}": {
 			"$ref": "./paths/applicationForm.json"
 		},
+		"/applicationForms/{applicationFormId}/proposalDataCsv": {
+			"$ref": "./paths/applicationFormProposalDataCsv.json"
+		},
 		"/applicationFormFields/{applicationFormFieldId}": {
 			"$ref": "./paths/applicationFormField.json"
 		},

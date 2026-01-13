@@ -1,0 +1,49 @@
+{
+	"get": {
+		"operationId": "getApplicationFormProposalDataCsv",
+		"summary": "Gets a proposal data CSV for bulk upload based on an application form.",
+		"description": "Returns a CSV file with two header rows: application form field IDs and application form field labels, in position order. This file can be used to prepare data for bulk upload.",
+		"tags": ["Application Forms"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "applicationFormId",
+				"description": "The PDC-generated ID of an application form.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "A CSV file with field ID and label header rows.",
+				"content": {
+					"text/csv": {
+						"schema": {
+							"type": "string",
+							"example": "1,2,3\nOrganization Name,Years of Work,Project Title\n"
+						}
+					}
+				},
+				"headers": {
+					"Content-Disposition": {
+						"description": "Suggests a filename for the downloaded file",
+						"schema": {
+							"type": "string",
+							"example": "attachment; filename=\"application-form-42-proposal-data.csv\""
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

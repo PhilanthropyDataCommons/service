@@ -7,10 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+
 ### Added
 
+- `GET /applicationForm/{applicationFormId}/proposalDataCsv` returns an application form in a usable csv format for making bulk uploads
 - `applicationFormId` is now a field on `bulkUploadTasks`
-
 
 ## 0.28.0 2025-01-08
 

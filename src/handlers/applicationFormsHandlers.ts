@@ -125,8 +125,36 @@ const postApplicationForms = async (
 	}
 };
 
+const getApplicationFormProposalDataCsv = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
+
+	const { applicationFormId } = coerceParams(req.params);
+	if (!isId(applicationFormId)) {
+		throw new InputValidationError('Invalid request.', isId.errors ?? []);
+	}
+
+	const applicationForm = await loadApplicationForm(db, req, applicationFormId);
+
+	const labels = applicationForm.fields.map((field) => field.label).join(',');
+
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('text/csv')
+		.setHeader(
+			'Content-Disposition',
+			`attachment; filename="application-form-${applicationFormId}-proposal-data.csv"`,
+		)
+		.send(`${labels}\n`);
+};
+
 export const applicationFormsHandlers = {
 	getApplicationForm,
+	getApplicationFormProposalDataCsv,
 	getApplicationForms,
 	postApplicationForms,
 };

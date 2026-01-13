@@ -1,14 +1,12 @@
 import { ajv } from '../ajv';
-import { shortCodeSchema } from './ShortCode';
 import { idSchema } from './Id';
+import type { ApplicationForm } from './ApplicationForm';
 import type { BulkUploadLog } from './BulkUploadLog';
 import type { TaskStatus } from './TaskStatus';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { Source } from './Source';
 import type { KeycloakId } from './KeycloakId';
-import type { ShortCode } from './ShortCode';
-import type { Funder } from './Funder';
 import type { File } from './File';
 import type { Id } from './Id';
 import type { User } from './User';
@@ -17,12 +15,12 @@ interface BulkUploadTask {
 	readonly id: number;
 	sourceId: Id;
 	readonly source: Source;
+	applicationFormId: Id;
+	readonly applicationForm: ApplicationForm;
 	proposalsDataFileId: Id;
 	readonly proposalsDataFile: File;
 	attachmentsArchiveFileId: Id | null;
 	readonly attachmentsArchiveFile: File | null;
-	funderShortCode: ShortCode;
-	readonly funder: Funder;
 	readonly status: TaskStatus;
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
@@ -39,6 +37,7 @@ const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 	type: 'object',
 	properties: {
 		sourceId: idSchema,
+		applicationFormId: idSchema,
 		proposalsDataFileId: idSchema,
 		attachmentsArchiveFileId: {
 			...idSchema,
@@ -48,15 +47,12 @@ const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 			 */
 			nullable: true as false,
 		},
-		funderShortCode: {
-			...shortCodeSchema,
-		},
 	},
 	required: [
 		'sourceId',
+		'applicationFormId',
 		'proposalsDataFileId',
 		'attachmentsArchiveFileId',
-		'funderShortCode',
 	],
 };
 

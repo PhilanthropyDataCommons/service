@@ -2,7 +2,9 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
+	createApplicationForm,
 	createBulkUploadTask,
+	createOpportunity,
 	createOrUpdateUser,
 	loadSystemSource,
 	loadSystemUser,
@@ -16,6 +18,7 @@ import { createTestFile } from '../test/factories';
 import {
 	expectArray,
 	expectNumber,
+	expectObject,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
 import {
@@ -77,23 +80,54 @@ describe('/tasks/bulkUploads', () => {
 				testUserAuthContext,
 			);
 
+			const firstOpportunity = await createOpportunity(
+				db,
+				systemUserAuthContext,
+				{
+					title: 'Test Opportunity 1',
+					funderShortCode: systemFunder.shortCode,
+				},
+			);
+			const firstApplicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: firstOpportunity.id,
+				},
+			);
+			const secondOpportunity = await createOpportunity(
+				db,
+				systemUserAuthContext,
+				{
+					title: 'Test Opportunity 2',
+					funderShortCode: anotherFunder.shortCode,
+				},
+			);
+			const secondApplicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: secondOpportunity.id,
+				},
+			);
+
 			const visibleBulkUpload = await createBulkUploadTask(
 				db,
 				testUserAuthContext,
 				{
 					sourceId: systemSource.id,
+					applicationFormId: firstApplicationForm.id,
 					proposalsDataFileId: firstProposalsDataFile.id,
 					attachmentsArchiveFileId: null,
 					status: TaskStatus.PENDING,
-					funderShortCode: systemFunder.shortCode,
 				},
 			);
 			await createBulkUploadTask(db, testUserAuthContext, {
 				sourceId: systemSource.id,
+				applicationFormId: secondApplicationForm.id,
 				proposalsDataFileId: secondProposalsDataFile.id,
 				attachmentsArchiveFileId: null,
 				status: TaskStatus.COMPLETED,
-				funderShortCode: anotherFunder.shortCode,
 			});
 
 			await request(app)
@@ -111,6 +145,8 @@ describe('/tasks/bulkUploads', () => {
 		it('returns all bulk uploads for administrative users', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
@@ -120,15 +156,28 @@ describe('/tasks/bulkUploads', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const firstProposal = await createTestFile(db, testUserAuthContext);
 			const secondProposal = await createTestFile(db, testUserAuthContext);
+
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			const firstBulkUploadTask = await createBulkUploadTask(
 				db,
 				testUserAuthContext,
 				{
 					sourceId: systemSource.id,
+					applicationFormId: applicationForm.id,
 					proposalsDataFileId: firstProposal.id,
 					attachmentsArchiveFileId: null,
 					status: TaskStatus.PENDING,
-					funderShortCode: systemFunder.shortCode,
 				},
 			);
 			const secondBulkUploadTask = await createBulkUploadTask(
@@ -136,10 +185,10 @@ describe('/tasks/bulkUploads', () => {
 				anotherUserAuthContext,
 				{
 					sourceId: systemSource.id,
+					applicationFormId: applicationForm.id,
 					proposalsDataFileId: secondProposal.id,
 					attachmentsArchiveFileId: null,
 					status: TaskStatus.COMPLETED,
-					funderShortCode: systemFunder.shortCode,
 				},
 			);
 
@@ -158,6 +207,8 @@ describe('/tasks/bulkUploads', () => {
 		it('returns upload tasks for specified createdBy user', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
@@ -171,22 +222,34 @@ describe('/tasks/bulkUploads', () => {
 				anotherUserAuthContext,
 			);
 
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			await createBulkUploadTask(db, testUserAuthContext, {
 				sourceId: systemSource.id,
+				applicationFormId: applicationForm.id,
 				proposalsDataFileId: firstProposalsFile.id,
 				attachmentsArchiveFileId: null,
 				status: TaskStatus.PENDING,
-				funderShortCode: systemFunder.shortCode,
 			});
 			const visibleBulkUploadTask = await createBulkUploadTask(
 				db,
 				anotherUserAuthContext,
 				{
 					sourceId: systemSource.id,
+					applicationFormId: applicationForm.id,
 					proposalsDataFileId: secondProposalsFile.id,
 					attachmentsArchiveFileId: null,
 					status: TaskStatus.COMPLETED,
-					funderShortCode: systemFunder.shortCode,
 				},
 			);
 
@@ -207,6 +270,8 @@ describe('/tasks/bulkUploads', () => {
 		it('returns upload tasks for the admin user when createdBy is set to me as an admin', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
@@ -219,23 +284,36 @@ describe('/tasks/bulkUploads', () => {
 				db,
 				anotherUserAuthContext,
 			);
+
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			const visibleBulkUploadTask = await createBulkUploadTask(
 				db,
 				testUserAuthContext,
 				{
 					sourceId: systemSource.id,
+					applicationFormId: applicationForm.id,
 					proposalsDataFileId: firstProposalsFile.id,
 					attachmentsArchiveFileId: null,
 					status: TaskStatus.PENDING,
-					funderShortCode: systemFunder.shortCode,
 				},
 			);
 			await createBulkUploadTask(db, anotherUserAuthContext, {
 				sourceId: systemSource.id,
+				applicationFormId: applicationForm.id,
 				proposalsDataFileId: secondProposalsFile.id,
 				attachmentsArchiveFileId: null,
 				status: TaskStatus.COMPLETED,
-				funderShortCode: systemFunder.shortCode,
 			});
 
 			await request(app)
@@ -253,8 +331,23 @@ describe('/tasks/bulkUploads', () => {
 		it('supports pagination', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
+
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			const bulkUploadTasks = (
 				await Promise.all(
 					Array.from(Array(20)).map(async () => {
@@ -264,10 +357,10 @@ describe('/tasks/bulkUploads', () => {
 						);
 						return await createBulkUploadTask(db, testUserAuthContext, {
 							sourceId: systemSource.id,
+							applicationFormId: applicationForm.id,
 							proposalsDataFileId: proposalsDataFile.id,
 							attachmentsArchiveFileId: null,
 							status: TaskStatus.COMPLETED,
-							funderShortCode: systemFunder.shortCode,
 						});
 					}),
 				)
@@ -318,13 +411,30 @@ describe('/tasks/bulkUploads', () => {
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
 			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			const testData: WritableBulkUploadTask = {
 				sourceId: systemSource.id,
-				funderShortCode: systemFunder.shortCode,
+				applicationFormId: applicationForm.id,
 				proposalsDataFileId: proposalsDataFile.id,
 				attachmentsArchiveFileId: null,
 			};
@@ -344,8 +454,9 @@ describe('/tasks/bulkUploads', () => {
 				logs: [],
 				sourceId: systemSource.id,
 				source: systemSource,
-				funderShortCode: systemFunder.shortCode,
-				funder: systemFunder,
+				applicationFormId: applicationForm.id,
+				applicationForm: expectObject(),
+
 				proposalsDataFileId: expectNumber(),
 				proposalsDataFile,
 				attachmentsArchiveFileId: null,
@@ -368,12 +479,29 @@ describe('/tasks/bulkUploads', () => {
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
 			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 			const attachmentsArchiveFile = await createTestFile(
 				db,
 				testUserAuthContext,
+			);
+
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
 			);
 
 			const before = await loadTableMetrics('bulk_upload_tasks');
@@ -383,7 +511,7 @@ describe('/tasks/bulkUploads', () => {
 				.set(authHeader)
 				.send({
 					sourceId: systemSource.id,
-					funderShortCode: systemFunder.shortCode,
+					applicationFormId: applicationForm.id,
 					proposalsDataFileId: proposalsDataFile.id,
 					attachmentsArchiveFileId: attachmentsArchiveFile.id,
 				})
@@ -396,8 +524,9 @@ describe('/tasks/bulkUploads', () => {
 				id: expectNumber(),
 				sourceId: systemSource.id,
 				source: systemSource,
-				funderShortCode: systemFunder.shortCode,
-				funder: systemFunder,
+				applicationFormId: applicationForm.id,
+				applicationForm: expectObject(),
+
 				proposalsDataFileId: expectNumber(),
 				proposalsDataFile,
 				attachmentsArchiveFileId: expectNumber(),
@@ -430,9 +559,21 @@ describe('/tasks/bulkUploads', () => {
 				permission: Permission.MANAGE,
 			});
 
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			const testData: WritableBulkUploadTask = {
 				sourceId: systemSource.id,
-				funderShortCode: systemFunder.shortCode,
+				applicationFormId: applicationForm.id,
 				proposalsDataFileId: proposalsDataFile.id,
 				attachmentsArchiveFileId: null,
 			};
@@ -449,7 +590,7 @@ describe('/tasks/bulkUploads', () => {
 			expect(result.body).toEqual({
 				details: [{ name: 'UnprocessableEntityError' }],
 				message:
-					'You do not have write permissions on a funder with the specified short code.',
+					'You do not have write permissions on the funder associated with this application form.',
 				name: 'UnprocessableEntityError',
 			});
 			expect(after.count).toEqual(0);
@@ -467,9 +608,21 @@ describe('/tasks/bulkUploads', () => {
 				permission: Permission.EDIT,
 			});
 
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			const testData: Omit<WritableBulkUploadTask, 'proposalsDataFileId'> = {
 				sourceId: systemSource.id,
-				funderShortCode: systemFunder.shortCode,
+				applicationFormId: applicationForm.id,
 				attachmentsArchiveFileId: null,
 			};
 			const result = await request(app)
@@ -496,42 +649,24 @@ describe('/tasks/bulkUploads', () => {
 				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
 			});
-			const testData: Omit<WritableBulkUploadTask, 'proposalsDataFileId'> & {
-				proposalsDataFileId: string;
-			} = {
-				sourceId: systemSource.id,
-				funderShortCode: systemFunder.shortCode,
-				proposalsDataFileId: 'not a file id',
-				attachmentsArchiveFileId: null,
-			};
-			const result = await request(app)
-				.post('/tasks/bulkUploads')
-				.type('application/json')
-				.set(authHeader)
-				.send(testData)
-				.expect(400);
-			expect(result.body).toMatchObject({
-				name: 'InputValidationError',
-				details: expectArray(),
-			});
-		});
 
-		it('returns 400 bad request when an invalid proposalDataFileId is provided', async () => {
-			const systemSource = await loadSystemSource(db, null);
-			const systemFunder = await loadSystemFunder(db, null);
-			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
 			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			const testData: Omit<WritableBulkUploadTask, 'proposalsDataFileId'> & {
 				proposalsDataFileId: string;
 			} = {
 				sourceId: systemSource.id,
-				funderShortCode: systemFunder.shortCode,
+				applicationFormId: applicationForm.id,
 				proposalsDataFileId: 'not a file id',
 				attachmentsArchiveFileId: null,
 			};
@@ -557,6 +692,11 @@ describe('/tasks/bulkUploads', () => {
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
 			});
 
@@ -565,9 +705,21 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 			);
 
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			const testData: WritableBulkUploadTask = {
 				sourceId: systemSource.id,
-				funderShortCode: systemFunder.shortCode,
+				applicationFormId: applicationForm.id,
 				proposalsDataFileId: fileOwnedByAnotherUser.id,
 				attachmentsArchiveFileId: null,
 			};
@@ -605,6 +757,11 @@ describe('/tasks/bulkUploads', () => {
 			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
 				permission: Permission.EDIT,
 			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
@@ -613,9 +770,21 @@ describe('/tasks/bulkUploads', () => {
 				anotherUserAuthContext,
 			);
 
+			const opportunity = await createOpportunity(db, systemUserAuthContext, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+
 			const testData: WritableBulkUploadTask = {
 				sourceId: systemSource.id,
-				funderShortCode: systemFunder.shortCode,
+				applicationFormId: applicationForm.id,
 				proposalsDataFileId: proposalsDataFile.id,
 				attachmentsArchiveFileId: attachmentsArchiveFileOwnedByAnotherUser.id,
 			};

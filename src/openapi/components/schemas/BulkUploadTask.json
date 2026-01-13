@@ -13,6 +13,23 @@
 			"$ref": "./Source.json",
 			"readOnly": true
 		},
+		"applicationFormId": {
+			"type": "integer",
+			"description": "The ID of the application form that defines the structure of the bulk upload CSV",
+			"example": 42
+		},
+		"applicationForm": {
+			"oneOf": [
+				{
+					"$ref": "./ApplicationForm.json"
+				},
+				{
+					"type": "null"
+				}
+			],
+			"readOnly": true,
+			"description": "The application form that defines the structure of the bulk upload CSV. Null for legacy bulk uploads."
+		},
 		"funderShortCode": {
 			"type": "string",
 			"example": "pdc"
@@ -83,6 +100,7 @@
 	"required": [
 		"id",
 		"sourceId",
+		"applicationFormId",
 		"proposalsDataFileId",
 		"status",
 		"createdBy",

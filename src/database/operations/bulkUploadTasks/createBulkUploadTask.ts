@@ -12,6 +12,7 @@ const createBulkUploadTask = generateCreateOrUpdateItemOperation<
 	'bulkUploadTasks.insertOne',
 	[
 		'sourceId',
+		'applicationFormId',
 		'funderShortCode',
 		'proposalsDataFileId',
 		'attachmentsArchiveFileId',

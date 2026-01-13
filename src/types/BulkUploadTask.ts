@@ -1,6 +1,7 @@
 import { ajv } from '../ajv';
 import { shortCodeSchema } from './ShortCode';
 import { idSchema } from './Id';
+import type { ApplicationForm } from './ApplicationForm';
 import type { BulkUploadLog } from './BulkUploadLog';
 import type { TaskStatus } from './TaskStatus';
 import type { JSONSchemaType } from 'ajv';
@@ -17,6 +18,8 @@ interface BulkUploadTask {
 	readonly id: number;
 	sourceId: Id;
 	readonly source: Source;
+	applicationFormId: Id;
+	readonly applicationForm: ApplicationForm | null;
 	proposalsDataFileId: Id;
 	readonly proposalsDataFile: File;
 	attachmentsArchiveFileId: Id | null;
@@ -39,6 +42,7 @@ const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 	type: 'object',
 	properties: {
 		sourceId: idSchema,
+		applicationFormId: idSchema,
 		proposalsDataFileId: idSchema,
 		attachmentsArchiveFileId: {
 			...idSchema,
@@ -54,6 +58,7 @@ const writableBulkUploadTaskSchema: JSONSchemaType<WritableBulkUploadTask> = {
 	},
 	required: [
 		'sourceId',
+		'applicationFormId',
 		'proposalsDataFileId',
 		'attachmentsArchiveFileId',
 		'funderShortCode',

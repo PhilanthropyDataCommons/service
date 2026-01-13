@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.29.0 2026-01-13
+
 ### Changed
 
 - Bulk upload tasks now require `applicationFormId` in addition to `funderShortCode`.

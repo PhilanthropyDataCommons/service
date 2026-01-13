@@ -73,18 +73,18 @@ const createTestBulkUploadTask = async (
 		opportunityId: opportunity.id,
 	});
 
-	for (let i = 0; i < fieldShortCodes.length; i += 1) {
-		const shortCode = fieldShortCodes[i];
-		if (shortCode !== undefined) {
-			await createApplicationFormField(db, authContext, {
-				applicationFormId: applicationForm.id,
-				baseFieldShortCode: shortCode,
-				position: i,
-				label: FIELD_LABELS[shortCode] ?? shortCode,
-				instructions: null,
-			});
-		}
-	}
+	await Promise.all(
+		fieldShortCodes.map(
+			async (shortCode, i) =>
+				await createApplicationFormField(db, authContext, {
+					applicationFormId: applicationForm.id,
+					baseFieldShortCode: shortCode,
+					position: i,
+					label: FIELD_LABELS[shortCode] ?? shortCode,
+					instructions: null,
+				}),
+		),
+	);
 
 	const defaultValues = {
 		sourceId: systemSource.id,

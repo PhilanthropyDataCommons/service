@@ -1,0 +1,188 @@
+erDiagram
+  BaseField {
+    string shortCode PK
+    string label
+    string description
+    string dataType
+    string category
+    int valueRelevanceHours
+    string sensitivityClassification
+    datetime createdAt
+  }
+  BaseFieldLocalization {
+    int id PK
+    string baseFieldShortCode FK
+    string language
+    string label
+    string description
+    datetime createdAt
+  }
+  Changemaker {
+    int id PK
+    string taxId
+    string name
+    uuid keycloakOrganizationId
+    datetime createdAt
+  }
+  ChangemakerFieldValue {
+    int id PK
+    int changemakerId FK
+    string baseFieldShortCode FK
+    int batchId FK
+    string value
+    boolean isValid
+    datetime goodAsOf
+    datetime createdAt
+  }
+  ChangemakerFieldValueBatch {
+    int id PK
+    int sourceId FK
+    string notes
+    datetime createdAt
+  }
+  ChangemakersProposal {
+    int id PK
+    int changemakerId FK
+    int proposalId FK
+    datetime createdAt
+  }
+  FiscalSponsorship {
+    int fiscalSponseeChangemakerId PK_FK
+    int fiscalSponsorChangemakerId PK_FK
+    uuid createdBy FK
+    datetime notAfter
+    datetime createdAt
+  }
+  Proposal {
+    int id PK
+    int opportunityId FK
+    string externalId
+    uuid createdBy FK
+    datetime createdAt
+  }
+  Opportunity {
+    int id PK
+    string title
+    string funderShortCode FK
+    datetime createdAt
+  }
+  ApplicationForm {
+    int id PK
+    int opportunityId FK
+    int version
+    datetime createdAt
+  }
+  ApplicationFormField {
+    int id PK
+    int applicationFormId FK
+    string baseFieldShortCode FK
+    int position
+    string label
+    string instructions
+    datetime createdAt
+  }
+  ProposalVersion {
+    int id PK
+    int proposalId FK
+    int sourceId FK
+    int applicationFormId FK
+    int version
+    uuid createdBy FK
+    datetime createdAt
+  }
+  ProposalFieldValue {
+    int id PK
+    int proposalVersionId FK
+    int applicationFormFieldId FK
+    int position
+    string value
+    boolean isValid
+    datetime goodAsOf
+    datetime createdAt
+  }
+  DataProvider {
+    string shortCode PK
+    string name
+    uuid keycloakOrganizationId
+    datetime createdAt
+  }
+  Funder {
+    string shortCode PK
+    string name
+    uuid keycloakOrganizationId
+    boolean isCollaborative
+    datetime createdAt
+  }
+  Source {
+    int id PK
+    string label
+    string funderShortCode FK
+    int changemakerId FK
+    string dataProviderShortCode FK
+    datetime createdAt
+  }
+  File {
+    int id PK
+    string region
+    int s3BucketId FK
+    string fileKey
+    string mediaType
+    uuid createdBy FK
+    datetime createdAt
+  }
+  BulkUploadTask {
+    int id PK
+    string status
+    int sourceId FK
+    int proposalsDataFileId FK
+    int attachmentsArchiveFileId FK
+    string funderShortCode FK
+    uuid createdBy FK
+    datetime createdAt
+  }
+  BulkUploadLog {
+    int id PK
+    int bulkUploadTaskId FK
+    string message
+    datetime createdAt
+  }
+  User {
+    uuid keycloakUserId PK
+    string keycloakUserName
+    datetime createdAt
+  }
+
+  Proposal }|--|| Opportunity : "responds to"
+  Opportunity ||--|{ ApplicationForm : establishes
+  Funder ||--|{ Opportunity : has
+  Funder ||--|{ BulkUploadTask : has
+  ApplicationForm ||--|{ ApplicationFormField : has
+  ApplicationFormField }o--|| BaseField : represents
+  BaseField ||--o{ BaseFieldLocalization : "has localizations"
+  Proposal ||--|{ ProposalVersion : has
+  ProposalVersion ||--|{ ProposalFieldValue : contains
+  ProposalVersion }o--|| ApplicationForm : "uses"
+  ProposalFieldValue }o--|| ApplicationFormField : populates
+  Changemaker ||--o{ ChangemakersProposal : "is associated with"
+  Proposal ||--o{ ChangemakersProposal : "is associated with"
+  Changemaker ||--o{ ChangemakerFieldValue : "has"
+  ChangemakerFieldValue }o--|| BaseField : "is for"
+  ChangemakerFieldValue }o--|| ChangemakerFieldValueBatch : "belongs to"
+  ChangemakerFieldValueBatch }o--|| Source : "comes from"
+  Source }|--o| Funder : "represents"
+  Source }|--o| Changemaker : "represents"
+  Source }|--o| DataProvider : "represents"
+  ProposalVersion }o--|| Source : "comes from"
+  Proposal }o--|| User : "is created by"
+  ProposalVersion }o--|| User : "is created by"
+  BulkUploadTask }o--|| User : "is created by"
+  BulkUploadTask }o--|| Source : "uses"
+  BulkUploadTask ||--o{ BulkUploadLog : "has"
+  BulkUploadTask }o--|| File : "has proposals data"
+  BulkUploadTask }o--o| File : "has attachments archive"
+  User }o--o{ Changemaker : "is granted permissions for"
+  User }o--o{ Funder : "is granted permissions for"
+  User }o--o{ DataProvider : "is granted permissions for"
+  User }o--o{ Opportunity : "is granted permissions for"
+  Changemaker ||--o{ FiscalSponsorship : "sponsors"
+  Changemaker ||--o{ FiscalSponsorship : "is sponsored by"

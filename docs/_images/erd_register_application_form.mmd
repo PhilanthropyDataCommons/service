@@ -1,0 +1,10 @@
+sequenceDiagram
+  actor Admin
+  participant API
+  participant Database
+  Admin ->>+ API : Here is a new application form
+  API ->>+ Database : Register any new base fields
+  Database ->>- API : OK!
+  API ->>+ Database : Register the new application form
+  Database ->>- API : OK!
+  API ->>- Admin :  OK!

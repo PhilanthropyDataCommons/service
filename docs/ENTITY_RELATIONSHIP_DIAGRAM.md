@@ -1,197 +1,7 @@
 # PDC Schema
 
 ## Entity Relationship Diagram
-
-```mermaid
-erDiagram
-  BaseField {
-    string shortCode PK
-    string label
-    string description
-    string dataType
-    string category
-    int valueRelevanceHours
-    string sensitivityClassification
-    datetime createdAt
-  }
-  BaseFieldLocalization {
-    int id PK
-    string baseFieldShortCode FK
-    string language
-    string label
-    string description
-    datetime createdAt
-  }
-  Changemaker {
-    int id PK
-    string taxId
-    string name
-    uuid keycloakOrganizationId
-    datetime createdAt
-  }
-  ChangemakerFieldValue {
-    int id PK
-    int changemakerId FK
-    string baseFieldShortCode FK
-    int batchId FK
-    string value
-    boolean isValid
-    datetime goodAsOf
-    datetime createdAt
-  }
-  ChangemakerFieldValueBatch {
-    int id PK
-    int sourceId FK
-    string notes
-    datetime createdAt
-  }
-  ChangemakersProposal {
-    int id PK
-    int changemakerId FK
-    int proposalId FK
-    datetime createdAt
-  }
-  FiscalSponsorship {
-    int fiscalSponseeChangemakerId PK_FK
-    int fiscalSponsorChangemakerId PK_FK
-    uuid createdBy FK
-    datetime notAfter
-    datetime createdAt
-  }
-  Proposal {
-    int id PK
-    int opportunityId FK
-    string externalId
-    uuid createdBy FK
-    datetime createdAt
-  }
-  Opportunity {
-    int id PK
-    string title
-    string funderShortCode FK
-    datetime createdAt
-  }
-  ApplicationForm {
-    int id PK
-    int opportunityId FK
-    int version
-    datetime createdAt
-  }
-  ApplicationFormField {
-    int id PK
-    int applicationFormId FK
-    string baseFieldShortCode FK
-    int position
-    string label
-    string instructions
-    datetime createdAt
-  }
-  ProposalVersion {
-    int id PK
-    int proposalId FK
-    int sourceId FK
-    int applicationFormId FK
-    int version
-    uuid createdBy FK
-    datetime createdAt
-  }
-  ProposalFieldValue {
-    int id PK
-    int proposalVersionId FK
-    int applicationFormFieldId FK
-    int position
-    string value
-    boolean isValid
-    datetime goodAsOf
-    datetime createdAt
-  }
-  DataProvider {
-    string shortCode PK
-    string name
-    uuid keycloakOrganizationId
-    datetime createdAt
-  }
-  Funder {
-    string shortCode PK
-    string name
-    uuid keycloakOrganizationId
-    boolean isCollaborative
-    datetime createdAt
-  }
-  Source {
-    int id PK
-    string label
-    string funderShortCode FK
-    int changemakerId FK
-    string dataProviderShortCode FK
-    datetime createdAt
-  }
-  File {
-    int id PK
-    string region
-    int s3BucketId FK
-    string fileKey
-    string mediaType
-    uuid createdBy FK
-    datetime createdAt
-  }
-  BulkUploadTask {
-    int id PK
-    string status
-    int sourceId FK
-    int proposalsDataFileId FK
-    int attachmentsArchiveFileId FK
-    string funderShortCode FK
-    uuid createdBy FK
-    datetime createdAt
-  }
-  BulkUploadLog {
-    int id PK
-    int bulkUploadTaskId FK
-    string message
-    datetime createdAt
-  }
-  User {
-    uuid keycloakUserId PK
-    string keycloakUserName
-    datetime createdAt
-  }
-
-  Proposal }|--|| Opportunity : "responds to"
-  Opportunity ||--|{ ApplicationForm : establishes
-  Funder ||--|{ Opportunity : has
-  Funder ||--|{ BulkUploadTask : has
-  ApplicationForm ||--|{ ApplicationFormField : has
-  ApplicationFormField }o--|| BaseField : represents
-  BaseField ||--o{ BaseFieldLocalization : "has localizations"
-  Proposal ||--|{ ProposalVersion : has
-  ProposalVersion ||--|{ ProposalFieldValue : contains
-  ProposalVersion }o--|| ApplicationForm : "uses"
-  ProposalFieldValue }o--|| ApplicationFormField : populates
-  Changemaker ||--o{ ChangemakersProposal : "is associated with"
-  Proposal ||--o{ ChangemakersProposal : "is associated with"
-  Changemaker ||--o{ ChangemakerFieldValue : "has"
-  ChangemakerFieldValue }o--|| BaseField : "is for"
-  ChangemakerFieldValue }o--|| ChangemakerFieldValueBatch : "belongs to"
-  ChangemakerFieldValueBatch }o--|| Source : "comes from"
-  Source }|--o| Funder : "represents"
-  Source }|--o| Changemaker : "represents"
-  Source }|--o| DataProvider : "represents"
-  ProposalVersion }o--|| Source : "comes from"
-  Proposal }o--|| User : "is created by"
-  ProposalVersion }o--|| User : "is created by"
-  BulkUploadTask }o--|| User : "is created by"
-  BulkUploadTask }o--|| Source : "uses"
-  BulkUploadTask ||--o{ BulkUploadLog : "has"
-  BulkUploadTask }o--|| File : "has proposals data"
-  BulkUploadTask }o--o| File : "has attachments archive"
-  User }o--o{ Changemaker : "is granted permissions for"
-  User }o--o{ Funder : "is granted permissions for"
-  User }o--o{ DataProvider : "is granted permissions for"
-  User }o--o{ Opportunity : "is granted permissions for"
-  Changemaker ||--o{ FiscalSponsorship : "sponsors"
-  Changemaker ||--o{ FiscalSponsorship : "is sponsored by"
-```
+![Entity relationship diagram](_images/erd_entity_relationship_diagram.png)
 
 ## Narrative
 
@@ -226,18 +36,7 @@ It would use the ProposalFieldValue set as the primary source, and the Changemak
 
 ### Registering an Application Form
 
-```mermaid
-sequenceDiagram
-  actor Admin
-  participant API
-  participant Database
-  Admin ->>+ API : Here is a new application form
-  API ->>+ Database : Register any new base fields
-  Database ->>- API : OK!
-  API ->>+ Database : Register the new application form
-  Database ->>- API : OK!
-  API ->>- Admin :  OK!
-```
+![Register an application form](_images/erd_register_application_form.png)
 
 New `Application Forms` will have to be externally defined; some day maybe we will make a user interface that generates an `Application Form` definition, but for the short term this will be manually written JSON (or YAML, or something else highly structured). The form will define the full set of `Application Form Fields` along with the shortCode of the `Base Field` to which the `Application Form Fields` map.
 
@@ -266,18 +65,7 @@ The database does not differentiate between "core" and "custom" fields. Rather, 
 
 ### Pre-filling an Application
 
-```mermaid
-sequenceDiagram
-  participant GMS
-  participant API
-  participant Database
-  GMS ->>+ API : Get field values
-  API ->>+ Database : Get Proposal Field Values
-  Database ->>- API : Here they are
-  API ->>+ Database : Get Changemaker Field Values
-  Database ->>- API : Here they are
-  API ->>- GMS :  Here they are
-```
+![Pre-filling an application](_images/erd_prefill_application.png)
 
 When a changemaker begins to fill out a proposal, the Grant Management System would request all field values known for that `Changemaker`. Which values are returned could be based on business logic; it could be the complete set; it could be restricted to just the fields associated with a given application form -- these would be implementation details but the form would support any of them.
 
@@ -288,18 +76,7 @@ Which values are ultimately selected for prepopulation is an implementation deta
 
 ### Submitting a Proposal
 
-```mermaid
-sequenceDiagram
-  participant GMS
-  participant API
-  participant Database
-  GMS ->>+ API : Save this completed Proposal
-  API ->>+ Database : Create a new Proposal
-  Database ->>- API : OK
-  API ->>+ Database : Save the Proposal Field Values
-  Database ->>- API : OK
-  API ->>- GMS : OK
-```
+![Submitting a proposal](_images/erd_submitting_proposal.png)
 
 The above flow is based on an assumption that we know this is the first time the changemaker had submitted a proposal / it is not an update to an existing proposal.
 

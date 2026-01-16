@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant GMS
+  participant API
+  participant Database
+  GMS ->>+ API : Save this completed Proposal
+  API ->>+ Database : Create a new Proposal
+  Database ->>- API : OK
+  API ->>+ Database : Save the Proposal Field Values
+  Database ->>- API : OK
+  API ->>- GMS : OK

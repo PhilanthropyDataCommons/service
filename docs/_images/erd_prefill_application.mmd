@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant GMS
+  participant API
+  participant Database
+  GMS ->>+ API : Get field values
+  API ->>+ Database : Get Proposal Field Values
+  Database ->>- API : Here they are
+  API ->>+ Database : Get Changemaker Field Values
+  Database ->>- API : Here they are
+  API ->>- GMS :  Here they are

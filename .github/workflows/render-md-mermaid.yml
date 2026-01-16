@@ -1,0 +1,73 @@
+name: Generate Mermaid Diagrams
+on:
+  push:
+    paths:
+      - 'docs/_images/**.mmd'
+  pull_request:
+    paths:
+      - 'docs/_images/**.mmd'
+jobs:
+  generate-diagrams:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      
+      - name: Setup Mermaid CLI
+        uses: AnimMouse/setup-mermaid-cli@v1
+      
+      - name: Get changed mermaid files
+        id: changed-files
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            git fetch origin ${{ github.event.pull_request.base.ref }}
+            BASE_REF="origin/${{ github.event.pull_request.base.ref }}"
+          else
+            if git rev-parse HEAD~1 >/dev/null 2>&1; then
+              BASE_REF="HEAD~1"
+            else
+              BASE_REF="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+            fi
+          fi
+          
+          echo "Comparing against: $BASE_REF"
+          echo "Changed .mmd files:"
+          git diff --name-only --diff-filter=ACM $BASE_REF HEAD | grep '^docs/_images/.*\.mmd$' || true
+          
+          # Save to file for processing
+          git diff --name-only --diff-filter=ACM $BASE_REF HEAD | grep '^docs/_images/.*\.mmd$' > changed_files.txt || true
+          
+          echo "Files to process:"
+          cat changed_files.txt || echo "No files found"
+      
+      - name: Generate diagrams from changed files
+        run: |
+          if [ ! -s changed_files.txt ]; then
+            echo "No .mmd files changed, skipping diagram generation"
+            exit 0
+          fi
+          
+          while IFS= read -r input; do
+            if [ -f "$input" ]; then
+              output="${input%.mmd}.png"
+              
+              echo "Processing: $input -> $output"
+              mmdc -i "$input" -o "$output"
+            fi
+          done < changed_files.txt
+      
+      - name: Commit generated diagrams
+        run: |
+          if [ ! -s changed_files.txt ]; then
+            echo "No files to commit"
+            exit 0
+          fi
+          
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/_images/*.png
+          git diff --quiet && git diff --staged --quiet || git commit -m "Generate Mermaid diagrams"
+          git push

@@ -635,16 +635,16 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
@@ -654,7 +654,7 @@ describe('/proposalVersions', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 1,
-					applicationFormId: 2,
+					applicationFormId: 9999,
 					sourceId: systemSource.id,
 					fieldValues: [],
 				})
@@ -667,7 +667,7 @@ describe('/proposalVersions', () => {
 				details: [
 					{
 						entityType: 'ApplicationForm',
-						entityId: 2,
+						entityId: 9999,
 					},
 				],
 			});
@@ -679,23 +679,23 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
+			const opportunity1 = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
-			await createOpportunity(db, null, {
+			const opportunity2 = await createOpportunity(db, null, {
 				title: '💧',
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity1.id,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: opportunity1.id,
 			});
-			await createApplicationForm(db, null, {
-				opportunityId: 2,
+			const wrongForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity2.id,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
@@ -705,7 +705,7 @@ describe('/proposalVersions', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					proposalId: 1,
-					applicationFormId: 2,
+					applicationFormId: wrongForm.id,
 					sourceId: systemSource.id,
 					fieldValues: [],
 				})
@@ -718,7 +718,7 @@ describe('/proposalVersions', () => {
 				details: [
 					{
 						entityType: 'ApplicationForm',
-						entityId: 2,
+						entityId: wrongForm.id,
 						contextEntityType: 'Proposal',
 						contextEntityId: 1,
 					},

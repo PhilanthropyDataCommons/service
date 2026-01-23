@@ -14,15 +14,11 @@ import { getS3Client } from '../s3';
 import { db } from '../database/db';
 import { getDefaultS3Bucket } from '../config';
 import {
-	createApplicationForm,
-	createApplicationFormField,
 	createBulkUploadLog,
-	createOpportunity,
 	createChangemakerProposal,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
-	loadBaseFields,
 	loadBulkUploadTask,
 	loadOrCreateChangemaker,
 	updateBulkUploadTask,
@@ -43,11 +39,12 @@ import type { TinyPg } from 'tinypg';
 import type { JobHelpers, Logger as GraphileLogger } from 'graphile-worker';
 import type { FileResult } from 'tmp-promise';
 import type {
+	ApplicationForm,
+	ApplicationFormField,
 	BulkUploadTask,
 	ProposalFieldValue,
 	AuthContext,
 	File,
-	WritableApplicationFormField,
 } from '../types';
 
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
@@ -100,116 +97,55 @@ const downloadFileDataToTemporaryStorage = async (
 	return temporaryFile;
 };
 
-const loadShortCodesFromBulkUploadTaskCsv = async (
-	csvPath: string,
-): Promise<string[]> => {
-	let shortCodes: string[] = [];
-	let hasLoadedShortCodes = false;
+const loadHeaderRowFromCsv = async (csvPath: string): Promise<string[]> => {
+	let headers: string[] = [];
+	let hasLoadedHeaders = false;
 	const parser = fs.createReadStream(csvPath).pipe(
 		// Loading the entire CSV is a waste, but the `to` option is currently broken
 		// See https://github.com/adaltas/node-csv/issues/410
 		parse(),
 	);
 	await parser.forEach((record: string[]) => {
-		if (!hasLoadedShortCodes) {
-			shortCodes = record;
-			hasLoadedShortCodes = true;
+		if (!hasLoadedHeaders) {
+			headers = record;
+			hasLoadedHeaders = true;
 		}
 	});
-	return shortCodes;
+	return headers;
 };
 
-const assertShortCodesReferToExistingBaseFields = async (
-	shortCodes: string[],
+const assertCsvMatchesApplicationForm = async (
+	csvPath: string,
+	applicationForm: ApplicationForm,
 ): Promise<void> => {
-	const baseFields = await loadBaseFields();
-	shortCodes.forEach((shortCode) => {
-		const baseField = baseFields.find(
-			(baseFieldCandidate) => baseFieldCandidate.shortCode === shortCode,
+	const csvLabels = await loadHeaderRowFromCsv(csvPath);
+	const expectedLabels = applicationForm.fields.map((field) => field.label);
+
+	if (csvLabels.length !== expectedLabels.length) {
+		throw new Error(
+			`CSV has ${csvLabels.length} columns but the application form has ${expectedLabels.length} fields.`,
 		);
-		if (baseField === undefined) {
-			throw new Error(`${shortCode} is not a valid BaseField short code.`);
-		}
-	});
-};
-
-const assertShortCodesAreValid = async (
-	shortCodes: string[],
-): Promise<void> => {
-	await assertShortCodesReferToExistingBaseFields(shortCodes);
-};
-
-/* eslint-disable-next-line @typescript-eslint/no-magic-numbers --
- * The meaning of "0" here is pretty explicit, especially wrapped in a named helper
- */
-const isEmpty = (arr: unknown[]): boolean => arr.length === 0;
-
-const assertCsvContainsValidShortCodes = async (
-	csvPath: string,
-): Promise<void> => {
-	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
-	if (isEmpty(shortCodes)) {
-		throw new Error('No short codes detected in the first row of the CSV');
 	}
-	await assertShortCodesAreValid(shortCodes);
-};
 
-const assertCsvContainsRowsOfEqualLength = async (
-	csvPath: string,
-): Promise<void> => {
-	const csvReadStream = fs.createReadStream(csvPath);
-	const parser = parse();
-	parser.on('readable', () => {
-		while (parser.read() !== null) {
-			// Iterate through the data -- an error will be thrown if
-			// any columns have a different number of fields
-			// see https://csv.js.org/parse/options/relax_column_count/
+	csvLabels.forEach((label, index) => {
+		const { [index]: expectedLabel } = expectedLabels;
+		if (label !== expectedLabel) {
+			throw new Error(
+				`CSV column ${index} has label "${label}" but the application form expects "${expectedLabel}" at that position.`,
+			);
 		}
 	});
-	csvReadStream.pipe(parser);
-	await finished(parser);
 };
 
-const assertBulkUploadTaskCsvIsValid = async (
-	csvPath: string,
-): Promise<void> => {
-	await assertCsvContainsValidShortCodes(csvPath);
-	await assertCsvContainsRowsOfEqualLength(csvPath);
-};
-
-const generateWritableApplicationFormFields = async (
-	csvPath: string,
-	applicationFormId: number,
-): Promise<WritableApplicationFormField[]> => {
-	const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(csvPath);
-	const baseFields = await loadBaseFields();
-	const writableApplicationFormFields = shortCodes.map(
-		(shortCode, index): WritableApplicationFormField => {
-			const baseField = baseFields.find(
-				(candidateBaseField) => candidateBaseField.shortCode === shortCode,
-			);
-			if (baseField === undefined) {
-				throw new Error(
-					`No base field could be found with shortCode "${shortCode}"`,
-				);
-			}
-			return {
-				applicationFormId,
-				baseFieldShortCode: baseField.shortCode,
-				position: index,
-				label: baseField.label,
-				instructions: null,
-			};
-		},
+const getChangemakerTaxIdIndex = (fields: ApplicationFormField[]): number =>
+	fields.findIndex(
+		(field) => field.baseFieldShortCode === CHANGEMAKER_TAX_ID_SHORT_CODE,
 	);
-	return writableApplicationFormFields;
-};
 
-const getChangemakerTaxIdIndex = (columns: string[]): number =>
-	columns.indexOf(CHANGEMAKER_TAX_ID_SHORT_CODE);
-
-const getChangemakerNameIndex = (columns: string[]): number =>
-	columns.indexOf(CHANGEMAKER_NAME_SHORT_CODE);
+const getChangemakerNameIndex = (fields: ApplicationFormField[]): number =>
+	fields.findIndex(
+		(field) => field.baseFieldShortCode === CHANGEMAKER_NAME_SHORT_CODE,
+	);
 
 // THIS FUNCTION IS A MONKEY PATCH
 // Really we should be passing the jwt of the calling user so that an auth context can be re-generated
@@ -525,13 +461,18 @@ export const processBulkUploadTask = async (
 	let bulkUploadHasFailed = false;
 
 	try {
-		const shortCodes = await loadShortCodesFromBulkUploadTaskCsv(
-			temporaryProposalsDataFile.path,
-		);
-		const changemakerNameIndex = getChangemakerNameIndex(shortCodes);
-		const changemakerTaxIdIndex = getChangemakerTaxIdIndex(shortCodes);
+		const { applicationForm } = bulkUploadTask;
+		const { fields: applicationFormFields } = applicationForm;
 
-		await assertBulkUploadTaskCsvIsValid(temporaryProposalsDataFile.path);
+		await assertCsvMatchesApplicationForm(
+			temporaryProposalsDataFile.path,
+			applicationForm,
+		);
+
+		const changemakerNameIndex = getChangemakerNameIndex(applicationFormFields);
+		const changemakerTaxIdIndex = getChangemakerTaxIdIndex(
+			applicationFormFields,
+		);
 
 		await db.transaction(async (transactionDb) => {
 			const attachmentsManager = new AttachmentsManager(
@@ -539,36 +480,6 @@ export const processBulkUploadTask = async (
 				taskAuthContext,
 				temporaryProposalAttachmentFiles,
 				graphileLogger,
-			);
-			const opportunity = await createOpportunity(
-				transactionDb,
-				taskAuthContext,
-				{
-					title: `Bulk Upload (${bulkUploadTask.createdAt})`,
-					funderShortCode: bulkUploadTask.funderShortCode,
-				},
-			);
-			const applicationForm = await createApplicationForm(
-				transactionDb,
-				taskAuthContext,
-				{
-					opportunityId: opportunity.id,
-				},
-			);
-			const pendingApplicationFormFields =
-				await generateWritableApplicationFormFields(
-					temporaryProposalsDataFile.path,
-					applicationForm.id,
-				);
-			const applicationFormFields = await allNoLeaks(
-				pendingApplicationFormFields.map(
-					async (writableApplicationFormField) =>
-						await createApplicationFormField(
-							transactionDb,
-							taskAuthContext,
-							writableApplicationFormField,
-						),
-				),
 			);
 			const csvReadStream = fs.createReadStream(
 				temporaryProposalsDataFile.path,
@@ -580,10 +491,12 @@ export const processBulkUploadTask = async (
 			csvReadStream.pipe(parser);
 			let recordNumber = 0;
 
+			const { opportunityId } = applicationForm;
+
 			await parser.forEach(async (record: string[]) => {
 				recordNumber += SINGLE_STEP;
 				const proposal = await createProposal(transactionDb, taskAuthContext, {
-					opportunityId: opportunity.id,
+					opportunityId,
 					externalId: `${recordNumber}`,
 				});
 				const proposalVersion = await createProposalVersion(

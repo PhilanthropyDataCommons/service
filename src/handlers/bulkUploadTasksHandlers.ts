@@ -3,8 +3,10 @@ import {
 	db,
 	createBulkUploadTask,
 	getLimitValues,
+	loadApplicationForm,
 	loadBulkUploadTaskBundle,
 	loadFileIfCreatedBy,
+	loadOpportunity,
 } from '../database';
 import {
 	Permission,
@@ -27,6 +29,42 @@ import { addProcessBulkUploadJob } from '../jobQueue';
 import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 import type { AuthContext } from '../types';
+
+const validateApplicationFormCreatePermission = async (
+	authContext: AuthContext,
+	applicationFormId: number,
+): Promise<void> => {
+	try {
+		const applicationForm = await loadApplicationForm(
+			db,
+			authContext,
+			applicationFormId,
+		);
+		const opportunity = await loadOpportunity(
+			db,
+			authContext,
+			applicationForm.opportunityId,
+		);
+		if (
+			!authContextHasFunderPermission(
+				authContext,
+				opportunity.funderShortCode,
+				Permission.EDIT,
+			)
+		) {
+			throw new UnprocessableEntityError(
+				'You do not have write permissions on the funder associated with this application form.',
+			);
+		}
+	} catch (err: unknown) {
+		if (err instanceof NotFoundError) {
+			throw new UnprocessableEntityError(
+				'You do not have write permissions on the funder associated with this application form.',
+			);
+		}
+		throw err;
+	}
+};
 
 const validateFileOwnership = async (
 	authContext: AuthContext,
@@ -66,15 +104,12 @@ const postBulkUploadTask = async (
 
 	const {
 		sourceId,
-		funderShortCode,
+		applicationFormId,
 		proposalsDataFileId,
 		attachmentsArchiveFileId,
 	} = body;
-	if (!authContextHasFunderPermission(req, funderShortCode, Permission.EDIT)) {
-		throw new UnprocessableEntityError(
-			'You do not have write permissions on a funder with the specified short code.',
-		);
-	}
+
+	await validateApplicationFormCreatePermission(req, applicationFormId);
 
 	await validateFileOwnership(
 		req,
@@ -93,7 +128,7 @@ const postBulkUploadTask = async (
 	try {
 		const bulkUploadTask = await createBulkUploadTask(db, req, {
 			sourceId,
-			funderShortCode,
+			applicationFormId,
 			proposalsDataFileId,
 			attachmentsArchiveFileId,
 			status: TaskStatus.PENDING,

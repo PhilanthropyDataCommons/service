@@ -5,18 +5,22 @@ SELECT
 		:authContextIsAdministrator
 	) AS object
 FROM bulk_upload_tasks
+	INNER JOIN application_forms
+		ON bulk_upload_tasks.application_form_id = application_forms.id
+	INNER JOIN opportunities
+		ON application_forms.opportunity_id = opportunities.id
 WHERE
 	CASE
 		WHEN :createdBy::uuid IS NULL THEN
 			TRUE
 		ELSE
-			created_by = :createdBy
+			bulk_upload_tasks.created_by = :createdBy
 	END
 	AND has_funder_permission(
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator,
-		funder_short_code,
+		opportunities.funder_short_code,
 		'view'
 	)
-ORDER BY id DESC
+ORDER BY bulk_upload_tasks.id DESC
 LIMIT :limit OFFSET :offset;

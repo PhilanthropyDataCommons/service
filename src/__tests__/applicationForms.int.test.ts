@@ -55,14 +55,21 @@ describe('/applicationForms', () => {
 			await request(app).get('/applicationForms').expect(401);
 		});
 
-		it('returns an empty array when no data is present', async () => {
+		it('returns the system application form when no other data is present', async () => {
 			const response = await request(app)
 				.get('/applicationForms')
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toMatchObject({
-				entries: [],
-				total: 0,
+				entries: [
+					{
+						createdAt: expectTimestamp(),
+						id: 1,
+						opportunityId: 1,
+						version: 1,
+					},
+				],
+				total: 1,
 			});
 		});
 
@@ -77,13 +84,13 @@ describe('/applicationForms', () => {
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
-			});
-			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: 2,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 3,
 			});
 			const response = await request(app)
 				.get('/applicationForms')
@@ -100,17 +107,23 @@ describe('/applicationForms', () => {
 					{
 						createdAt: expectTimestamp(),
 						id: 2,
-						opportunityId: 1,
-						version: 2,
+						opportunityId: 2,
+						version: 1,
 					},
 					{
 						createdAt: expectTimestamp(),
 						id: 3,
 						opportunityId: 2,
+						version: 2,
+					},
+					{
+						createdAt: expectTimestamp(),
+						id: 4,
+						opportunityId: 3,
 						version: 1,
 					},
 				],
-				total: 3,
+				total: 4,
 			});
 		});
 
@@ -139,13 +152,13 @@ describe('/applicationForms', () => {
 				funderShortCode: otherFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
-			});
-			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: 2,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+			});
+			await createApplicationForm(db, null, {
+				opportunityId: 3,
 			});
 			const response = await request(app)
 				.get('/applicationForms')
@@ -163,12 +176,19 @@ describe('/applicationForms', () => {
 					{
 						createdAt: expectTimestamp(),
 						id: 2,
-						opportunityId: 1,
+						opportunityId: 2,
+						fields: [],
+						version: 1,
+					},
+					{
+						createdAt: expectTimestamp(),
+						id: 3,
+						opportunityId: 2,
 						fields: [],
 						version: 2,
 					},
 				],
-				total: 3,
+				total: 4,
 			});
 		});
 	});
@@ -189,56 +209,56 @@ describe('/applicationForms', () => {
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
-			});
-			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: 2,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
 			});
+			await createApplicationForm(db, null, {
+				opportunityId: 3,
+			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
-				applicationFormId: 3,
+				applicationFormId: 4,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Anni Worki',
 				instructions: 'Please enter the number of years of work.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 3,
+				applicationFormId: 4,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Org Nomen',
 				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 2,
+				applicationFormId: 3,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 2,
+				applicationFormId: 3,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
 			});
 			const result = await request(app)
-				.get('/applicationForms/2')
+				.get('/applicationForms/3')
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 
 			expect(result.body).toMatchObject({
-				id: 2,
-				opportunityId: 1,
+				id: 3,
+				opportunityId: 2,
 				version: 2,
 				fields: [
 					{
 						id: 4,
-						applicationFormId: 2,
+						applicationFormId: 3,
 						baseFieldShortCode: 'yearsOfWork',
 						baseField: {
 							label: 'Years of work',
@@ -254,7 +274,7 @@ describe('/applicationForms', () => {
 					},
 					{
 						id: 3,
-						applicationFormId: 2,
+						applicationFormId: 3,
 						baseFieldShortCode: 'organizationName',
 						baseField: {
 							label: 'Organization Name',
@@ -287,35 +307,35 @@ describe('/applicationForms', () => {
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: 2,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
-				applicationFormId: 1,
+				applicationFormId: 2,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 1,
+				applicationFormId: 2,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
 			});
 			const result = await request(app)
-				.get('/applicationForms/1')
+				.get('/applicationForms/2')
 				.set(authHeader)
 				.expect(200);
 
 			expect(result.body).toMatchObject({
-				id: 1,
-				opportunityId: 1,
+				id: 2,
+				opportunityId: 2,
 				version: 1,
 				fields: [
 					{
-						applicationFormId: 1,
+						applicationFormId: 2,
 						baseFieldShortCode: 'yearsOfWork',
 						baseField: {
 							label: 'Years of work',
@@ -331,7 +351,7 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp(),
 					},
 					{
-						applicationFormId: 1,
+						applicationFormId: 2,
 						baseFieldShortCode: 'organizationName',
 						baseField: {
 							label: 'Organization Name',
@@ -364,35 +384,35 @@ describe('/applicationForms', () => {
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: 2,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
-				applicationFormId: 1,
+				applicationFormId: 2,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 				instructions: null,
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 1,
+				applicationFormId: 2,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: null,
 			});
 			const result = await request(app)
-				.get('/applicationForms/1')
+				.get('/applicationForms/2')
 				.set(authHeader)
 				.expect(200);
 
 			expect(result.body).toMatchObject({
-				id: 1,
-				opportunityId: 1,
+				id: 2,
+				opportunityId: 2,
 				version: 1,
 				fields: [
 					{
-						applicationFormId: 1,
+						applicationFormId: 2,
 						baseFieldShortCode: 'yearsOfWork',
 						baseField: {
 							label: 'Years of work',
@@ -408,7 +428,7 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp(),
 					},
 					{
-						applicationFormId: 1,
+						applicationFormId: 2,
 						baseFieldShortCode: 'organizationName',
 						baseField: {
 							label: 'Organization Name',
@@ -458,13 +478,13 @@ describe('/applicationForms', () => {
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});
 			const result = await request(app)
-				.get('/applicationForms/1')
+				.get(`/applicationForms/${applicationForm.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 
 			expect(result.body).toMatchObject({
-				id: 1,
-				opportunityId: 1,
+				id: applicationForm.id,
+				opportunityId: opportunity.id,
 				version: 1,
 				fields: [],
 				createdAt: expectTimestamp(),
@@ -491,24 +511,24 @@ describe('/applicationForms', () => {
 				funderShortCode: systemFunder.shortCode,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 1,
+				opportunityId: 2,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
-				applicationFormId: 1,
+				applicationFormId: 2,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 1,
+				applicationFormId: 2,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
 			});
-			await request(app).get('/applicationForms/1').set(authHeader).expect(404);
+			await request(app).get('/applicationForms/2').set(authHeader).expect(404);
 		});
 
 		it('should return 404 when the applicationForm does not exist', async () => {
@@ -520,6 +540,153 @@ describe('/applicationForms', () => {
 				name: 'NotFoundError',
 				details: expectArray(),
 			});
+		});
+	});
+
+	describe('GET /:applicationFormId/proposalDataCsv', () => {
+		it('requires authentication', async () => {
+			await request(app).get('/applicationForms/1/proposalDataCsv').expect(401);
+		});
+
+		it('returns a CSV with labels matching the application form fields', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			await createTestBaseFields();
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'organizationName',
+				position: 1,
+				label: 'Organization Name',
+				instructions: 'Please enter the name of the organization.',
+			});
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'yearsOfWork',
+				position: 2,
+				label: 'Years of Work',
+				instructions: 'Please enter the number of years of work.',
+			});
+
+			const result = await request(app)
+				.get(`/applicationForms/${applicationForm.id}/proposalDataCsv`)
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.headers['content-type']).toMatch(/text\/csv/);
+			expect(result.headers['content-disposition']).toBe(
+				`attachment; filename="application-form-${applicationForm.id}-proposal-data.csv"`,
+			);
+			expect(result.text).toBe('Organization Name,Years of Work\n');
+		});
+
+		it('returns fields in position order', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			await createTestBaseFields();
+
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'yearsOfWork',
+				position: 2,
+				label: 'Years of Work',
+				instructions: null,
+			});
+			await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'organizationName',
+				position: 1,
+				label: 'Organization Name',
+				instructions: null,
+			});
+
+			const result = await request(app)
+				.get(`/applicationForms/${applicationForm.id}/proposalDataCsv`)
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.text).toBe('Organization Name,Years of Work\n');
+		});
+
+		it('returns an empty row for a form with no fields', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				funderShortCode: systemFunder.shortCode,
+				permission: Permission.VIEW,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+
+			const result = await request(app)
+				.get(`/applicationForms/${applicationForm.id}/proposalDataCsv`)
+				.set(authHeader)
+				.expect(200);
+
+			expect(result.text).toBe('\n');
+		});
+
+		it('returns 404 when the application form does not exist', async () => {
+			const result = await request(app)
+				.get('/applicationForms/9999/proposalDataCsv')
+				.set(authHeader)
+				.expect(404);
+
+			expect(result.body).toMatchObject({
+				name: 'NotFoundError',
+			});
+		});
+
+		it('returns 404 when the user does not have access to the funder', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+
+			await request(app)
+				.get(`/applicationForms/${applicationForm.id}/proposalDataCsv`)
+				.set(authHeader)
+				.expect(404);
 		});
 	});
 
@@ -558,15 +725,15 @@ describe('/applicationForms', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics('application_forms');
-			expect(before.count).toEqual(0);
+			expect(before.count).toEqual(1);
 			expect(result.body).toMatchObject({
-				id: 1,
-				opportunityId: 1,
+				id: 2,
+				opportunityId: 2,
 				version: 1,
 				fields: [],
 				createdAt: expectTimestamp(),
 			});
-			expect(after.count).toEqual(1);
+			expect(after.count).toEqual(2);
 		});
 
 		it('creates exactly one application form as an administrator', async () => {
@@ -587,8 +754,8 @@ describe('/applicationForms', () => {
 				.expect(201);
 			const after = await loadTableMetrics('application_forms');
 			expect(result.body).toMatchObject({
-				id: 1,
-				opportunityId: 1,
+				id: 2,
+				opportunityId: 2,
 				version: 1,
 				fields: [],
 				createdAt: expectTimestamp(),
@@ -626,8 +793,8 @@ describe('/applicationForms', () => {
 				})
 				.expect(401);
 			const after = await loadTableMetrics('application_forms');
-			expect(before.count).toEqual(0);
-			expect(after.count).toEqual(0);
+			expect(before.count).toEqual(1);
+			expect(after.count).toEqual(1);
 		});
 
 		it('creates exactly the number of provided fields', async () => {
@@ -658,12 +825,12 @@ describe('/applicationForms', () => {
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
-				id: 1,
-				opportunityId: 1,
+				id: 2,
+				opportunityId: 2,
 				version: 1,
 				fields: [
 					{
-						applicationFormId: 1,
+						applicationFormId: 2,
 						baseFieldShortCode: 'organizationName',
 						createdAt: expectTimestamp(),
 						id: 1,
@@ -699,8 +866,8 @@ describe('/applicationForms', () => {
 				})
 				.expect(201);
 			expect(result.body).toMatchObject({
-				id: 3,
-				opportunityId: 1,
+				id: 4,
+				opportunityId: 2,
 				version: 3,
 				createdAt: expectTimestamp(),
 			});
@@ -790,7 +957,7 @@ describe('/applicationForms', () => {
 				.type('application/json')
 				.set(authHeaderWithAdminRole)
 				.send({
-					opportunityId: 1,
+					opportunityId: 9999,
 					fields: [],
 				})
 				.expect(422);

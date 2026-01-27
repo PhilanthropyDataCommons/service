@@ -8,7 +8,8 @@ CREATE FUNCTION bulk_upload_task_to_json(
 RETURNS jsonb AS $$
 DECLARE
   source_json JSONB;
-  funder_json JSONB;
+  application_form_json JSONB;
+
   proposals_data_file_json JSONB;
   bulk_upload_logs_json JSONB;
   attachments_archive_file_json JSONB;
@@ -19,10 +20,11 @@ BEGIN
   FROM sources
   WHERE sources.id = bulk_upload_task.source_id;
 
-  SELECT funder_to_json(funders.*)
-  INTO funder_json
-  FROM funders
-  WHERE funders.short_code = bulk_upload_task.funder_short_code;
+  SELECT application_form_to_json(application_forms.*)
+  INTO application_form_json
+  FROM application_forms
+  WHERE application_forms.id = bulk_upload_task.application_form_id;
+
 
   SELECT file_to_json(files.*)
   INTO proposals_data_file_json
@@ -49,12 +51,13 @@ BEGIN
     'id', bulk_upload_task.id,
     'sourceId', bulk_upload_task.source_id,
     'source', source_json,
+    'applicationFormId', bulk_upload_task.application_form_id,
+    'applicationForm', application_form_json,
     'proposalsDataFileId', bulk_upload_task.proposals_data_file_id,
     'proposalsDataFile', proposals_data_file_json,
     'attachmentsArchiveFileId', bulk_upload_task.attachments_archive_file_id,
     'attachmentsArchiveFile', attachments_archive_file_json,
-    'funderShortCode', bulk_upload_task.funder_short_code,
-		'funder', funder_json,
+
     'status', bulk_upload_task.status,
     'createdBy', bulk_upload_task.created_by,
     'createdByUser', created_by_user_json,

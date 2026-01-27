@@ -1,6 +1,6 @@
 INSERT INTO bulk_upload_tasks (
 	source_id,
-	funder_short_code,
+	application_form_id,
 	proposals_data_file_id,
 	attachments_archive_file_id,
 	status,
@@ -8,7 +8,7 @@ INSERT INTO bulk_upload_tasks (
 )
 VALUES (
 	:sourceId,
-	:funderShortCode,
+	:applicationFormId,
 	:proposalsDataFileId,
 	:attachmentsArchiveFileId,
 	:status,

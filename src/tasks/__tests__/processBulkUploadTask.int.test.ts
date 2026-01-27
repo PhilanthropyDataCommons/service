@@ -6,14 +6,15 @@ import { sdkStreamMixin } from '@smithy/util-stream';
 import {
 	db,
 	createOrUpdateBaseField,
+	createApplicationForm,
+	createApplicationFormField,
+	createOpportunity,
 	loadBulkUploadTask,
 	loadProposalBundle,
-	loadApplicationFormBundle,
 	createBulkUploadTask,
 	loadSystemUser,
 	loadChangemakerBundle,
 	loadChangemakerProposalBundle,
-	loadOpportunityBundle,
 	loadSystemSource,
 	loadSystemFunder,
 	loadFileBundle,
@@ -42,20 +43,48 @@ import type {
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
 	AuthContext,
+	Opportunity,
 } from '../../types';
 
 const s3Mock = mockClient(S3Client);
 
+const createTestApplicationForm = async (
+	authContext: AuthContext,
+	shortCodes: string[],
+): Promise<{ applicationFormId: number; opportunity: Opportunity }> => {
+	const systemFunder = await loadSystemFunder(db, null);
+	const opportunity = await createOpportunity(db, authContext, {
+		title: 'Test Opportunity',
+		funderShortCode: systemFunder.shortCode,
+	});
+	const applicationForm = await createApplicationForm(db, authContext, {
+		opportunityId: opportunity.id,
+	});
+	await Promise.all(
+		shortCodes.map(
+			async (shortCode, index) =>
+				await createApplicationFormField(db, authContext, {
+					applicationFormId: applicationForm.id,
+					baseFieldShortCode: shortCode,
+					position: index,
+					label: shortCode,
+					instructions: null,
+				}),
+		),
+	);
+	return { applicationFormId: applicationForm.id, opportunity };
+};
+
 const createTestBulkUploadTask = async (
 	authContext: AuthContext,
 	proposalsDataFileId: number,
+	applicationFormId: number,
 	overrideValues?: Partial<InternallyWritableBulkUploadTask>,
 ): Promise<BulkUploadTask> => {
 	const systemSource = await loadSystemSource(db, null);
-	const systemFunder = await loadSystemFunder(db, null);
 	const defaultValues = {
 		sourceId: systemSource.id,
-		funderShortCode: systemFunder.shortCode,
+		applicationFormId,
 		attachmentsArchiveFileId: null,
 		status: TaskStatus.PENDING,
 	};
@@ -110,12 +139,18 @@ describe('processBulkUploadTask', () => {
 		s3Mock.reset();
 	});
 	it('should attempt to access the contents of the file associated with the specified bulk upload', async () => {
+		await createTestBaseFields();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
+			applicationFormId,
 		);
 
 		s3Mock.on(GetObjectCommand).resolves({
@@ -142,13 +177,19 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should fail if the proposalsDataFile is not accessible', async () => {
+		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
+			applicationFormId,
 		);
 
 		s3Mock.on(GetObjectCommand).rejects(new Error('NoSuchKey'));
@@ -171,13 +212,19 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
+		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
+			applicationFormId,
 			{
 				status: TaskStatus.IN_PROGRESS,
 			},
@@ -210,15 +257,20 @@ describe('processBulkUploadTask', () => {
 		expect(s3Mock.commandCalls(GetObjectCommand).length).toBe(0);
 	});
 
-	it('should fail if the csv contains an invalid short code', async () => {
+	it('should fail if the csv does not match the application form fields', async () => {
 		await createTestBaseFields();
 		const testAuthContext = await getTestAuthContext();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
+			applicationFormId,
 		);
 
 		s3Mock.on(GetObjectCommand).resolves({
@@ -258,9 +310,14 @@ describe('processBulkUploadTask', () => {
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
+			applicationFormId,
 		);
 
 		s3Mock.on(GetObjectCommand).resolves({
@@ -303,9 +360,14 @@ describe('processBulkUploadTask', () => {
 			db,
 			systemUserAuthContext,
 		);
+		const { applicationFormId, opportunity } = await createTestApplicationForm(
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'favorite_file'],
+		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
+			applicationFormId,
 			{
 				attachmentsArchiveFileId: attachmentsArchiveFile.id,
 			},
@@ -369,30 +431,6 @@ describe('processBulkUploadTask', () => {
 			bulkUploadTask.id,
 		);
 
-		const {
-			entries: [opportunity],
-		} = await loadOpportunityBundle(db, testAuthContext, NO_LIMIT, NO_OFFSET);
-		if (opportunity === undefined) {
-			throw new Error('The opportunity was not created');
-		}
-
-		const {
-			entries: [applicationForm],
-		} = await loadApplicationFormBundle(
-			db,
-			testAuthContext,
-			NO_LIMIT,
-			NO_OFFSET,
-		);
-		if (applicationForm === undefined) {
-			throw new Error('The application form was not created');
-		}
-		expect(applicationForm).toMatchObject({
-			opportunityId: opportunity.id,
-			version: 1,
-			createdAt: expectTimestamp(),
-		});
-
 		const proposalBundle = await loadProposalBundle(
 			db,
 			testAuthContext,
@@ -410,17 +448,17 @@ describe('processBulkUploadTask', () => {
 					createdBy: systemUser.keycloakUserId,
 					externalId: '2',
 					id: 2,
-					opportunityId: 1,
+					opportunityId: 2,
 					opportunity,
 					versions: [
 						{
-							applicationFormId: 1,
+							applicationFormId,
 							createdAt: expectTimestamp(),
 							createdBy: systemUser.keycloakUserId,
 							fieldValues: [
 								{
 									applicationFormField: {
-										applicationFormId: 1,
+										applicationFormId,
 										baseField: {
 											createdAt: expectTimestamp(),
 											dataType: 'string',
@@ -438,7 +476,7 @@ describe('processBulkUploadTask', () => {
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
 										instructions: null,
-										label: 'Proposal Submitter Email',
+										label: 'proposal_submitter_email',
 										position: 0,
 									},
 									applicationFormFieldId: expectNumber(),
@@ -453,7 +491,7 @@ describe('processBulkUploadTask', () => {
 								},
 								{
 									applicationFormField: {
-										applicationFormId: 1,
+										applicationFormId,
 										baseField: {
 											createdAt: expectTimestamp(),
 											dataType: 'string',
@@ -470,7 +508,7 @@ describe('processBulkUploadTask', () => {
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
 										instructions: null,
-										label: 'Organization Name',
+										label: 'organization_name',
 										position: 1,
 									},
 									applicationFormFieldId: expectNumber(),
@@ -485,7 +523,7 @@ describe('processBulkUploadTask', () => {
 								},
 								{
 									applicationFormField: {
-										applicationFormId: 1,
+										applicationFormId,
 										baseField: {
 											createdAt: expectTimestamp(),
 											dataType: 'file',
@@ -502,7 +540,7 @@ describe('processBulkUploadTask', () => {
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
 										instructions: null,
-										label: 'Favorite File',
+										label: 'favorite_file',
 										position: 2,
 									},
 									applicationFormFieldId: expectNumber(),
@@ -529,17 +567,17 @@ describe('processBulkUploadTask', () => {
 					createdBy: systemUser.keycloakUserId,
 					externalId: '1',
 					id: 1,
-					opportunityId: 1,
-					opportunity: expectObject(),
+					opportunityId: 2,
+					opportunity,
 					versions: [
 						{
-							applicationFormId: 1,
+							applicationFormId,
 							createdAt: expectTimestamp(),
 							createdBy: systemUser.keycloakUserId,
 							fieldValues: [
 								{
 									applicationFormField: {
-										applicationFormId: 1,
+										applicationFormId,
 										baseField: {
 											createdAt: expectTimestamp(),
 											dataType: 'string',
@@ -557,7 +595,7 @@ describe('processBulkUploadTask', () => {
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
 										instructions: null,
-										label: 'Proposal Submitter Email',
+										label: 'proposal_submitter_email',
 										position: 0,
 									},
 									applicationFormFieldId: expectNumber(),
@@ -572,7 +610,7 @@ describe('processBulkUploadTask', () => {
 								},
 								{
 									applicationFormField: {
-										applicationFormId: 1,
+										applicationFormId,
 										baseField: {
 											createdAt: expectTimestamp(),
 											dataType: 'string',
@@ -589,7 +627,7 @@ describe('processBulkUploadTask', () => {
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
 										instructions: null,
-										label: 'Organization Name',
+										label: 'organization_name',
 										position: 1,
 									},
 									applicationFormFieldId: expectNumber(),
@@ -604,7 +642,7 @@ describe('processBulkUploadTask', () => {
 								},
 								{
 									applicationFormField: {
-										applicationFormId: 1,
+										applicationFormId,
 										baseField: {
 											createdAt: expectTimestamp(),
 											dataType: 'file',
@@ -621,7 +659,7 @@ describe('processBulkUploadTask', () => {
 										createdAt: expectTimestamp(),
 										id: expectNumber(),
 										instructions: null,
-										label: 'Favorite File',
+										label: 'favorite_file',
 										position: 2,
 									},
 									applicationFormFieldId: expectNumber(),
@@ -681,9 +719,14 @@ describe('processBulkUploadTask', () => {
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'organization_tax_id'],
+		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			systemUserAuthContext,
 			proposalsDataFile.id,
+			applicationFormId,
 		);
 
 		s3Mock.on(GetObjectCommand).resolves({

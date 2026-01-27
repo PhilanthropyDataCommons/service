@@ -13,12 +13,11 @@
 			"$ref": "./Source.json",
 			"readOnly": true
 		},
-		"funderShortCode": {
-			"type": "string",
-			"example": "pdc"
+		"applicationFormId": {
+			"$ref": "./id.json"
 		},
-		"funder": {
-			"$ref": "./Funder.json",
+		"applicationForm": {
+			"$ref": "./ApplicationForm.json",
 			"readOnly": true
 		},
 		"proposalsDataFileId": {
@@ -83,6 +82,7 @@
 	"required": [
 		"id",
 		"sourceId",
+		"applicationFormId",
 		"proposalsDataFileId",
 		"status",
 		"createdBy",

@@ -5,6 +5,7 @@ import {
 	createOpportunity,
 	loadTableMetrics,
 	loadSystemFunder,
+	loadSystemOpportunity,
 	createOrUpdateUserFunderPermission,
 	loadSystemUser,
 	createOrUpdateFunder,
@@ -23,18 +24,20 @@ describe('/opportunities', () => {
 			await request(app).get('/opportunities').expect(401);
 		});
 
-		it('returns an empty bundle when no data is present', async () => {
+		it('returns the system opportunity when no other data is present', async () => {
+			const systemOpportunity = await loadSystemOpportunity(db, null);
 			await request(app)
 				.get('/opportunities')
 				.set(authHeaderWithAdminRole)
 				.expect(200, {
-					entries: [],
-					total: 0,
+					entries: [systemOpportunity],
+					total: 1,
 				});
 		});
 
 		it('returns all opportunities present in the database for an admin user', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
+			const systemOpportunity = await loadSystemOpportunity(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,
@@ -49,22 +52,23 @@ describe('/opportunities', () => {
 				.expect(200);
 			expect(response.body).toEqual({
 				entries: [
+					systemOpportunity,
 					{
-						id: 1,
+						id: 2,
 						createdAt: expectTimestamp(),
 						title: 'Tremendous opportunity 👌',
 						funderShortCode: systemFunder.shortCode,
 						funder: systemFunder,
 					},
 					{
-						id: 2,
+						id: 3,
 						createdAt: expectTimestamp(),
 						title: 'Terrific opportunity 👐',
 						funderShortCode: systemFunder.shortCode,
 						funder: systemFunder,
 					},
 				],
-				total: 2,
+				total: 3,
 			});
 		});
 
@@ -73,6 +77,7 @@ describe('/opportunities', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const visibleFunder = await loadSystemFunder(db, null);
+			const systemOpportunity = await loadSystemOpportunity(db, null);
 			const anotherFunder = await createOrUpdateFunder(db, null, {
 				name: 'another funder',
 				shortCode: 'anotherFunder',
@@ -97,8 +102,8 @@ describe('/opportunities', () => {
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				entries: [visibleOpportunity],
-				total: 2,
+				entries: [systemOpportunity, visibleOpportunity],
+				total: 3,
 			});
 		});
 	});
@@ -124,11 +129,11 @@ describe('/opportunities', () => {
 			});
 
 			const response = await request(app)
-				.get(`/opportunities/2`)
+				.get(`/opportunities/3`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				id: 2,
+				id: 3,
 				createdAt: expectTimestamp(),
 				title: '✨',
 				funderShortCode: systemFunder.shortCode,
@@ -230,13 +235,13 @@ describe('/opportunities', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics('opportunities');
-			expect(before.count).toEqual(0);
+			expect(before.count).toEqual(1);
 			expect(result.body).toMatchObject({
-				id: 1,
+				id: 2,
 				title: '🎆',
 				createdAt: expectTimestamp(),
 			});
-			expect(after.count).toEqual(1);
+			expect(after.count).toEqual(2);
 		});
 
 		it('returns 401 unauthorized if the user does not have edit permission on the associated funder', async () => {
@@ -265,8 +270,8 @@ describe('/opportunities', () => {
 				})
 				.expect(401);
 			const after = await loadTableMetrics('opportunities');
-			expect(before.count).toEqual(0);
-			expect(after.count).toEqual(0);
+			expect(before.count).toEqual(1);
+			expect(after.count).toEqual(1);
 		});
 
 		it('returns 400 bad request when no title sent', async () => {

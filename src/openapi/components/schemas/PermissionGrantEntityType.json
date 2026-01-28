@@ -1,0 +1,17 @@
+{
+	"type": "string",
+	"enum": [
+		"funder",
+		"changemaker",
+		"dataProvider",
+		"opportunity",
+		"proposal",
+		"proposalVersion",
+		"applicationForm",
+		"applicationFormField",
+		"proposalFieldValue",
+		"source",
+		"bulkUpload",
+		"changemakerFieldValue"
+	]
+}

@@ -1,0 +1,20 @@
+{
+	"allOf": [
+		{ "$ref": "./PermissionGrantBase.json" },
+		{
+			"type": "object",
+			"properties": {
+				"contextEntityType": {
+					"type": "string",
+					"const": "applicationFormField"
+				},
+				"applicationFormFieldId": {
+					"type": "integer",
+					"description": "The ID of the application form field.",
+					"example": 500
+				}
+			},
+			"required": ["contextEntityType", "applicationFormFieldId"]
+		}
+	]
+}

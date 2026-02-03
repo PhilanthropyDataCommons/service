@@ -60,7 +60,7 @@
 		"@types/jest": "^30.0.0",
 		"@types/language-tags": "^1.0.4",
 		"@types/mime-types": "^3.0.1",
-		"@types/node": "^24.10.4",
+		"@types/node": "^24.10.9",
 		"@types/pg": "^8.16.0",
 		"@types/supertest": "^6.0.3",
 		"@types/swagger-ui-express": "^4.1.8",
@@ -90,9 +90,9 @@
 		"typescript-eslint": "^8.50.1"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.958.0",
-		"@aws-sdk/s3-presigned-post": "^3.958.0",
-		"@aws-sdk/s3-request-presigner": "^3.958.0",
+		"@aws-sdk/client-s3": "^3.975.0",
+		"@aws-sdk/s3-presigned-post": "^3.975.0",
+		"@aws-sdk/s3-request-presigner": "^3.975.0",
 		"ajv": "^8.17.1",
 		"ajv-formats": "^3.0.1",
 		"ajv-keywords": "^5.1.0",

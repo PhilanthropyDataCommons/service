@@ -1,0 +1,28 @@
+{
+	"allOf": [
+		{ "$ref": "./PermissionGrantBase.json" },
+		{
+			"type": "object",
+			"properties": {
+				"contextEntityType": {
+					"type": "string",
+					"const": "opportunity"
+				},
+				"opportunityId": {
+					"type": "integer",
+					"description": "The ID of the opportunity.",
+					"example": 100
+				},
+				"scope": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"enum": ["opportunity"]
+					},
+					"minItems": 1
+				}
+			},
+			"required": ["contextEntityType", "opportunityId"]
+		}
+	]
+}

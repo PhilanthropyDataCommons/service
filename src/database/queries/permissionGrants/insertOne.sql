@@ -1,0 +1,43 @@
+INSERT INTO permission_grants (
+	grantee_type,
+	grantee_user_keycloak_user_id,
+	grantee_keycloak_organization_id,
+	context_entity_type,
+	changemaker_id,
+	funder_short_code,
+	data_provider_short_code,
+	opportunity_id,
+	proposal_id,
+	proposal_version_id,
+	application_form_id,
+	application_form_field_id,
+	proposal_field_value_id,
+	source_id,
+	bulk_upload_task_id,
+	changemaker_field_value_id,
+	scope,
+	verbs,
+	created_by
+)
+VALUES (
+	:granteeType::permission_grant_grantee_type_t,
+	:granteeUserKeycloakUserId::uuid,
+	:granteeKeycloakOrganizationId::uuid,
+	:contextEntityType::permission_grant_entity_type_t,
+	:changemakerId::integer,
+	:funderShortCode::text,
+	:dataProviderShortCode::text,
+	:opportunityId::integer,
+	:proposalId::integer,
+	:proposalVersionId::integer,
+	:applicationFormId::integer,
+	:applicationFormFieldId::integer,
+	:proposalFieldValueId::integer,
+	:sourceId::integer,
+	:bulkUploadTaskId::integer,
+	:changemakerFieldValueId::integer,
+	:scope::permission_grant_entity_type_t [],
+	:verbs::permission_grant_verb_t [],
+	:authContextKeycloakUserId::uuid
+)
+RETURNING permission_grant_to_json(permission_grants) AS object;

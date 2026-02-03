@@ -156,6 +156,29 @@ erDiagram
     string keycloakUserName
     datetime createdAt
   }
+  PermissionGrant {
+    int id PK
+    string granteeType
+    uuid granteeUserKeycloakUserId FK
+    uuid granteeKeycloakOrganizationId
+    string contextEntityType
+    int changemakerId FK
+    string funderShortCode FK
+    string dataProviderShortCode FK
+    int opportunityId FK
+    int proposalId FK
+    int proposalVersionId FK
+    int applicationFormId FK
+    int applicationFormFieldId FK
+    int proposalFieldValueId FK
+    int sourceId FK
+    int bulkUploadTaskId FK
+    int changemakerFieldValueId FK
+    string[] scope
+    string[] verbs
+    uuid createdBy FK
+    datetime createdAt
+  }
 
   Proposal }|--|| Opportunity : "responds to"
   Opportunity ||--|{ ApplicationForm : establishes
@@ -185,10 +208,20 @@ erDiagram
   BulkUploadTask ||--o{ BulkUploadLog : "has"
   BulkUploadTask }o--|| File : "has proposals data"
   BulkUploadTask }o--o| File : "has attachments archive"
-  User }o--o{ Changemaker : "is granted permissions for"
-  User }o--o{ Funder : "is granted permissions for"
-  User }o--o{ DataProvider : "is granted permissions for"
-  User }o--o{ Opportunity : "is granted permissions for"
+  PermissionGrant }o--o| Changemaker : "references"
+  PermissionGrant }o--o| Funder : "references"
+  PermissionGrant }o--o| DataProvider : "references"
+  PermissionGrant }o--o| Opportunity : "references"
+  PermissionGrant }o--o| Proposal : "references"
+  PermissionGrant }o--o| ProposalVersion : "references"
+  PermissionGrant }o--o| ApplicationForm : "references"
+  PermissionGrant }o--o| ApplicationFormField : "references"
+  PermissionGrant }o--o| ProposalFieldValue : "references"
+  PermissionGrant }o--o| Source : "references"
+  PermissionGrant }o--o| BulkUploadTask : "references"
+  PermissionGrant }o--o| ChangemakerFieldValue : "references"
+  PermissionGrant }o--o| User : "is granted to"
+  PermissionGrant }o--|| User : "is created by"
   Changemaker ||--o{ FiscalSponsorship : "sponsors"
   Changemaker ||--o{ FiscalSponsorship : "is sponsored by"
 ```

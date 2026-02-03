@@ -5,6 +5,7 @@ import nock from 'nock';
  */
 import { db } from '../database';
 import { loadConfig } from '../config';
+import { resetTestPermissionGrantFactory } from './factories';
 import {
 	prepareDatabaseForCurrentWorker,
 	cleanupDatabaseForCurrentWorker,
@@ -28,6 +29,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
+	resetTestPermissionGrantFactory();
 	mockJwks.start();
 	await prepareDatabaseForCurrentWorker();
 	await loadConfig();

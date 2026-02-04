@@ -1,5 +1,3 @@
-name: Publish to WordPress
-
 on:
   push:
     branches:
@@ -11,16 +9,21 @@ on:
     inputs:
       force_publish:
         description: 'Force republish all posts'
-        required: false
         default: 'false'
 
 jobs:
   publish:
-    uses: OpenTechStrategies/wp-post-gfm/.github/workflows/wp-post-gfm.yml@main
-    with:
-      posts_directory: 'docs'  # Your posts directory
-      force_publish: ${{ github.event.inputs.force_publish || false }}
-    secrets:
-      WORDPRESS_URL: ${{ secrets.WORDPRESS_URL }}
-      WORDPRESS_USERNAME: ${{ secrets.WORDPRESS_USERNAME }}
-      WORDPRESS_APP_PASSWORD: ${{ secrets.WORDPRESS_APP_PASSWORD }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - name: Publish to WordPress
+        uses: OpenTechStrategies/wp-post-gfm@main
+        with:
+          directory: 'docs'
+          force_publish: true
+          WORDPRESS_URL: ${{ secrets.WORDPRESS_URL }}
+          WORDPRESS_USERNAME: ${{ secrets.WORDPRESS_USERNAME }}
+          WORDPRESS_APP_PASSWORD: ${{ secrets.WORDPRESS_APP_PASSWORD }}

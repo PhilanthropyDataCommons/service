@@ -1,4 +1,4 @@
-/* eslint-disable eslint-comments/require-description --
+/* eslint-disable @eslint-community/eslint-comments/require-description --
  * The work required to thoughtfully comment on each of these disables at this point is probably
  * similar to the work required to potentially refactor in a way that would remove the need to disable
  * the rule in the first place.

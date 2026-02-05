@@ -8,14 +8,14 @@ import type {
 	S3Bucket,
 } from '../../types';
 
-let defaultS3Bucket: S3Bucket | null = null;
+let defaultS3BucketPromise: Promise<S3Bucket> | null = null;
 
 const getDefaultS3Bucket = async (
 	db: TinyPg,
 	authContext: AuthContext,
 ): Promise<S3Bucket> => {
-	defaultS3Bucket ??= await createTestS3Bucket(db, authContext);
-	return defaultS3Bucket;
+	defaultS3BucketPromise ??= createTestS3Bucket(db, authContext);
+	return await defaultS3BucketPromise;
 };
 
 const createTestFile = async (

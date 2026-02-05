@@ -12,18 +12,13 @@ const readAndExpandDocumentationFile = async (
 	return expandedContent;
 };
 
-const expandedDocumentationCache: Record<string, string> = {};
+const expandedDocumentationCache: Record<string, Promise<string>> = {};
 const getExpandedDocumentation = async (
 	relativeFilePath: string,
 ): Promise<string> => {
-	const { [relativeFilePath]: cachedValue } = expandedDocumentationCache;
-	if (cachedValue !== undefined) {
-		return cachedValue;
-	}
-	const expandedContent =
-		await readAndExpandDocumentationFile(relativeFilePath);
-	expandedDocumentationCache[relativeFilePath] = expandedContent;
-	return expandedContent;
+	expandedDocumentationCache[relativeFilePath] ??=
+		readAndExpandDocumentationFile(relativeFilePath);
+	return await expandedDocumentationCache[relativeFilePath];
 };
 
 const getRootApiSpec = async (req: Request, res: Response): Promise<void> => {

@@ -8,13 +8,14 @@ updates:
       timezone: 'Etc/UTC'
     cooldown:
       default-days: 7
-    open-pull-requests-limit: 10
     ignore:
       - dependency-name: 'mock-jwks'
         update-types: ['version-update:semver-major']
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
       - dependency-name: 'uuid'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'postgres-schema-migrations'
         update-types: ['version-update:semver-major']
     groups:
       aws-sdk:
@@ -35,7 +36,6 @@ updates:
       timezone: 'Etc/UTC'
     cooldown:
       default-days: 7
-    open-pull-requests-limit: 2
 
   - package-ecosystem: 'github-actions'
     directory: '.github/workflows'

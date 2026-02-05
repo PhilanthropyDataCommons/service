@@ -7,11 +7,11 @@ import { processJwt } from '../processJwt';
 import {
 	allowNextToResolve,
 	generateNextWithAssertions,
+	getMockNextFunction,
 } from '../../test/utils';
 import { mockJwt as authHeader, getMockJwt } from '../../test/mockJwt';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import { expectNumber } from '../../test/asymettricMatchers';
-import type { NextFunction } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
 import type { AuthenticatedRequest } from '../../types';
 
@@ -152,7 +152,7 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 	it('does not call next twice if middleware throws an error after calling next', async () => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
-		const nextMock: NextFunction = jest.fn();
+		const nextMock = getMockNextFunction();
 		customMiddleware.mockReset();
 		customMiddleware.mockImplementation(
 			/* eslint-disable-next-line @typescript-eslint/require-await --
@@ -174,7 +174,7 @@ DcIUm2m37s+QJR4qBRUsmd/aIiH/xeA0Y1VIMMso3U1vW9iYfDWHkaaiYUWzYI5u
 	it('calls next if middleware throws an error before calling next', async () => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
-		const nextMock: NextFunction = jest.fn();
+		const nextMock = getMockNextFunction();
 		customMiddleware.mockReset();
 
 		/* eslint-disable-next-line @typescript-eslint/require-await --

@@ -14,15 +14,19 @@ export const allowNextToResolve = async (): Promise<void> => {
 export const generateNextWithAssertions = (
 	runAssertions: (err?: unknown) => void | Promise<void>,
 	done: (value?: unknown) => unknown,
-): jest.Mock =>
-	jest.fn(async (err?) => {
-		try {
-			await Promise.resolve(runAssertions(err));
-		} catch (thrownError) {
-			done(thrownError);
-			return;
-		}
-		done();
+): jest.Mock<void, unknown[]> =>
+	jest.fn((...args: unknown[]) => {
+		const [err] = args;
+		Promise.resolve()
+			.then(async () => {
+				await runAssertions(err);
+			})
+			.then(() => {
+				done();
+			})
+			.catch((thrownError: unknown) => {
+				done(thrownError);
+			});
 	});
 
 export const getTestUserKeycloakUserId = (): KeycloakId =>
@@ -62,6 +66,9 @@ export const getTestAuthContext = async (
 	isAdministrator = true,
 ): Promise<AuthContext> =>
 	getAuthContext(await loadTestUser(), isAdministrator);
+
+export const getMockNextFunction = (): jest.Mock<void, unknown[]> =>
+	jest.fn((): void => undefined);
 
 export const NO_OFFSET = 0;
 

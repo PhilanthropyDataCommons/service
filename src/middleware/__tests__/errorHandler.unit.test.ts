@@ -3,6 +3,7 @@ import { UnauthorizedError } from 'express-jwt';
 import { errorHandler } from '../errorHandler';
 import { DatabaseError } from '../../errors';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
+import { getMockNextFunction } from '../../test/utils';
 
 describe('errorHandler', () => {
 	it('should process errors that are not Errors', () => {
@@ -15,7 +16,7 @@ describe('errorHandler', () => {
 		res.status = statusMock;
 		res.contentType = contentTypeMock;
 		res.send = sendMock;
-		const next = jest.fn();
+		const next = getMockNextFunction();
 		errorHandler(err, req, res, next);
 		expect(statusMock).toHaveBeenCalledWith(500);
 		expect(sendMock).toHaveBeenCalledWith(
@@ -37,7 +38,7 @@ describe('errorHandler', () => {
 		res.status = statusMock;
 		res.contentType = contentTypeMock;
 		res.send = sendMock;
-		const next = jest.fn();
+		const next = getMockNextFunction();
 		errorHandler(err, req, res, next);
 		expect(statusMock).toHaveBeenCalledWith(401);
 		expect(sendMock).toHaveBeenCalledWith(
@@ -59,7 +60,7 @@ describe('errorHandler', () => {
 		res.status = statusMock;
 		res.contentType = contentTypeMock;
 		res.send = sendMock;
-		const next = jest.fn();
+		const next = getMockNextFunction();
 		errorHandler(err, req, res, next);
 		expect(statusMock).toHaveBeenCalledWith(503);
 		expect(sendMock).toHaveBeenCalledWith(
@@ -88,7 +89,7 @@ describe('errorHandler', () => {
 		res.status = statusMock;
 		res.contentType = contentTypeMock;
 		res.send = sendMock;
-		const next = jest.fn();
+		const next = getMockNextFunction();
 		errorHandler(err, req, res, next);
 		expect(statusMock).toHaveBeenCalledWith(500);
 		expect(sendMock).toHaveBeenCalledWith(

@@ -1,27 +1,27 @@
 import { requireAuthentication } from '../requireAuthentication';
 import { UnauthorizedError } from '../../errors';
-import { allowNextToResolve, loadTestUser } from '../../test/utils';
+import {
+	allowNextToResolve,
+	getMockNextFunction,
+	loadTestUser,
+} from '../../test/utils';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
-import type { NextFunction } from 'express';
 import type { AuthenticatedRequest } from '../../types';
 
 describe('requireAuthentication', () => {
 	it('calls next with an UnauthorizedError when no auth value is provided', async () => {
 		const req = getMockRequest();
 		const res = getMockResponse();
-		const nextMock = jest.fn();
+		const nextMock = getMockNextFunction();
 		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 
-		expect(nextMock).toHaveBeenCalled();
-		/* eslint-disable @typescript-eslint/no-unsafe-member-access --
-		 * We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
-		 */
-		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
-		expect(nextMock.mock.calls[0][0].message).toEqual(
-			'No authorization token was found.',
+		expect(nextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: 'No authorization token was found.',
+			}),
 		);
-		/* eslint-enable @typescript-eslint/no-unsafe-member-access */
+		expect(nextMock.mock.calls[0]?.[0]).toBeInstanceOf(UnauthorizedError);
 	});
 
 	it('calls next with an UnauthorizedError when no auth sub is provided', async () => {
@@ -29,19 +29,17 @@ describe('requireAuthentication', () => {
 		const res = getMockResponse();
 		req.auth = {};
 		req.user = await loadTestUser();
-		const nextMock = jest.fn();
+		const nextMock = getMockNextFunction();
 		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 
-		expect(nextMock).toHaveBeenCalled();
-		/* eslint-disable @typescript-eslint/no-unsafe-member-access --
-		 * We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
-		 */
-		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
-		expect(nextMock.mock.calls[0][0].message).toEqual(
-			'The authentication token must have a non-empty value for `auth.sub`.',
+		expect(nextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message:
+					'The authentication token must have a non-empty value for `auth.sub`.',
+			}),
 		);
-		/* eslint-enable @typescript-eslint/no-unsafe-member-access */
+		expect(nextMock.mock.calls[0]?.[0]).toBeInstanceOf(UnauthorizedError);
 	});
 
 	it('calls next with an UnauthorizedError when a blank auth sub is provided', async () => {
@@ -51,19 +49,17 @@ describe('requireAuthentication', () => {
 			sub: '',
 		};
 		req.user = await loadTestUser();
-		const nextMock = jest.fn();
+		const nextMock = getMockNextFunction();
 		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 
-		expect(nextMock).toHaveBeenCalled();
-		/* eslint-disable @typescript-eslint/no-unsafe-member-access --
-		 * We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
-		 */
-		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
-		expect(nextMock.mock.calls[0][0].message).toEqual(
-			'The authentication token must have a non-empty value for `auth.sub`.',
+		expect(nextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message:
+					'The authentication token must have a non-empty value for `auth.sub`.',
+			}),
 		);
-		/* eslint-enable @typescript-eslint/no-unsafe-member-access */
+		expect(nextMock.mock.calls[0]?.[0]).toBeInstanceOf(UnauthorizedError);
 	});
 
 	it('calls next with an UnauthorizedError when there is no user provided', async () => {
@@ -73,19 +69,16 @@ describe('requireAuthentication', () => {
 			sub: 'test@example.com',
 			name: 'Norbert',
 		};
-		const nextMock = jest.fn();
+		const nextMock = getMockNextFunction();
 		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 
-		expect(nextMock).toHaveBeenCalled();
-		/* eslint-disable @typescript-eslint/no-unsafe-member-access --
-		 * We know that the first `calls` is populated due to the passage of `.toHaveBeenCalled`
-		 */
-		expect(nextMock.mock.calls[0][0]).toBeInstanceOf(UnauthorizedError);
-		expect(nextMock.mock.calls[0][0].message).toEqual(
-			'The request lacks an AuthContext.',
+		expect(nextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: 'The request lacks an AuthContext.',
+			}),
 		);
-		/* eslint-enable @typescript-eslint/no-unsafe-member-access */
+		expect(nextMock.mock.calls[0]?.[0]).toBeInstanceOf(UnauthorizedError);
 	});
 
 	it('calls next when an auth value is provided', async () => {
@@ -99,7 +92,7 @@ describe('requireAuthentication', () => {
 			isAdministrator: false,
 		};
 		req.user = await loadTestUser();
-		const nextMock: NextFunction = jest.fn();
+		const nextMock = getMockNextFunction();
 		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
 

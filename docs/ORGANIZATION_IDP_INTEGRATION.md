@@ -32,25 +32,25 @@ available for Keycloak organizations, the organization in the `pdc` realm should
 be configured to allow an organization member to administer its organization,
 and this should obsolete the first two options above.
 
+## To Test an Integration
+
+After creating an integration (below), test it using the following steps.
+
+0. Make sure that the user is assigned to PDC within the external IdP
+1. Visit the API docs
+2. Click "Authorize"
+3. Click "Authorize" on the "Available authorizations" modal
+4. Enter an email address with the organization's domain
+5. Verify that the browser is redirected to the correct IdP (outside PDC)
+6. Authenticate (log in)
+7. Verify that a redirect back (through Keycloak) to the PDC API docs occurs
+8. Try an API call
+
 ## External Okta Identity Providers
 
 Before integrating, the PDC team needs to name an identifying alias for each
 integrated system, for example `foundation-okta-oidc` or `foundation-okta-saml`,
 to be used to link PDC Keycloak with the external IdP.
-
-### Testing an Okta Integration
-
-After creating an Okta integration (below), test it using the following steps.
-
-1. Visit the API docs
-2. Click "Authorize"
-3. Click "Authorize" on the "Available authorizations" modal
-4. Enter an email address with the organization's domain
-5. Verify that the browser is redirected to Okta.
-
-If the user is assigned to the application in Okta, proceed with authentication
-and a redirect back to the PDC API docs should occur. There should be no need to
-enter a name or email address, however PDC prompts for a mobile number for 2FA.
 
 ### Okta Configuration using OIDC (preferred over SAML)
 

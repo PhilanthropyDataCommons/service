@@ -16,6 +16,8 @@ updates:
         update-types: ['version-update:semver-major']
       - dependency-name: 'uuid'
         update-types: ['version-update:semver-major']
+      - dependency-name: 'postgres-schema-migrations'
+        update-types: ['version-update:semver-major']
     groups:
       aws-sdk:
         patterns:

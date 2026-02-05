@@ -8,7 +8,7 @@ const readAndExpandDocumentationFile = async (
 ): Promise<string> => {
 	const absoluteFilePath = path.join(__dirname, '../openapi', relativeFilePath);
 	const rawContent = await fs.readFile(absoluteFilePath, 'utf8');
-	const expandedContent = rawContent.replace(/{{AUTH_ISSUER}}/g, issuer);
+	const expandedContent = rawContent.replace(/\{\{AUTH_ISSUER\}\}/gv, issuer);
 	return expandedContent;
 };
 

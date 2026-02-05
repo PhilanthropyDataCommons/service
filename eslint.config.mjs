@@ -84,7 +84,6 @@ export default defineConfig([
 			],
 
 			// These are temporarily disabled so we can turn them on alongside necessary code changes
-			'require-unicode-regexp': 'off',
 			'require-atomic-updates': 'off',
 			'@typescript-eslint/strict-void-return': 'off',
 		},

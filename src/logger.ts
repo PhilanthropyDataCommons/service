@@ -6,7 +6,7 @@ import type { Logger } from 'pino';
  */
 const redactBearerString = (secret: string): string =>
 	secret.replace(
-		/^(?<prefix>Bearer [A-Za-z0-9]*\.[A-Za-z0-9]*\.).*/,
+		/^(?<prefix>Bearer [A-Za-z0-9]*\.[A-Za-z0-9]*\.).*/v,
 		'$<prefix>[redacted]',
 	);
 

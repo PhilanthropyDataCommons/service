@@ -32,25 +32,25 @@ available for Keycloak organizations, the organization in the `pdc` realm should
 be configured to allow an organization member to administer its organization,
 and this should obsolete the first two options above.
 
+## To Test an Integration
+
+After creating an integration (below), test it using the following steps.
+
+0. Make sure that the user is assigned to PDC within the external IdP
+1. Visit the API docs
+2. Click "Authorize"
+3. Click "Authorize" on the "Available authorizations" modal
+4. Enter an email address with the organization's domain
+5. Verify that the browser is redirected to the correct IdP (outside PDC)
+6. Authenticate (log in)
+7. Verify that a redirect back (through Keycloak) to the PDC API docs occurs
+8. Try an API call
+
 ## External Okta Identity Providers
 
 Before integrating, the PDC team needs to name an identifying alias for each
 integrated system, for example `foundation-okta-oidc` or `foundation-okta-saml`,
 to be used to link PDC Keycloak with the external IdP.
-
-### Testing an Okta Integration
-
-After creating an Okta integration (below), test it using the following steps.
-
-1. Visit the API docs
-2. Click "Authorize"
-3. Click "Authorize" on the "Available authorizations" modal
-4. Enter an email address with the organization's domain
-5. Verify that the browser is redirected to Okta.
-
-If the user is assigned to the application in Okta, proceed with authentication
-and a redirect back to the PDC API docs should occur. There should be no need to
-enter a name or email address, however PDC prompts for a mobile number for 2FA.
 
 ### Okta Configuration using OIDC (preferred over SAML)
 
@@ -196,11 +196,11 @@ will determine whether a myfoundation user can log into the PDC. If
 login procedure will be used for authentication, and if successful, the user
 will be redirected to PDC Keycloak and be granted a valid PDC session.
 
-### Google Workspace Configuration using SAML 2.0
+## Google Workspace Configuration using SAML 2.0
 
 As of this writing, Google Workspace seems to support SAML 2.0 and not OIDC.
 
-#### In Google Workspace
+### In Google Workspace
 
 Via https://support.google.com/a/answer/6087519?sjid=14379173059534913826-NA#zippy=%2Cstep-add-the-custom-saml-app
 
@@ -216,7 +216,7 @@ Via https://support.google.com/a/answer/6087519?sjid=14379173059534913826-NA#zip
 
 Send the metadata XML file to the person helping with integration.
 
-#### In PDC Keycloak
+### In PDC Keycloak
 
 1. Visit the Keycloak admin console
 2. In the PDC realm, visit "Identity providers"
@@ -281,7 +281,7 @@ https://www.keycloak.org/docs/26.2.5/server_admin/index.html#_managing_identity_
 8. Set "Redirect when email domain matches" to `On`
 9. Click "Save".
 
-#### In Google Workspace Again
+### In Google Workspace Again
 
 1. Enter Keycloak's "Redirect URI" as Google's "ACS URL"
 2. Enter Keycloak's "Service provider entity ID" as Google's "Entity ID"
@@ -329,6 +329,109 @@ Grant members of the PDC group access to log in to the PDC App.
 8. Click "SAVE"
 9. Visit the "Philanthropy Data Commons" app again
 10. Verify that "User access" is "ON for 1 group", namely the "PDC" group
+
+## Microsoft Entra Configuration Using Built-in Microsoft Provider
+
+Following https://www.keycloak.org/docs/26.5.2/server_admin/index.html#_microsoft
+
+### In Microsoft Entra
+
+From https://entra.microsoft.com/ perform the following steps.
+
+1. Copy or save the Tenant ID
+2. Visit "App registrations"
+3. Click "New registration"
+4. Set "Name" to `Philanthropy Data Commons`
+5. Set "Who can use this application or access this API?" to "Accounts in this
+   organizational directory only (Default Directory only - Single tenant)"
+6. Click "Register"
+7. Click "Certificates & secrets"
+8. Under "Client secrets" click "New client secret"
+9. Set "Description" to `PDC delegated authentication`
+10. Set "Expires" to "730 days (24 months)"
+11. Click "Add"
+12. Copy or save the secret Value and Secret ID
+13. Send Tenant ID, Application (client) ID, and secret Value to the PDC admin
+
+Grant permission to PDC Keycloak to read user data from Microsoft.
+
+1. Under "Manage" click "API Permissions"
+2. Under "Microsoft Graph" to the right of "User.Read" click the ellipsis "..."
+3. Under "Configured Permissions" click "Add a permission"
+4. Click "Microsoft Graph"
+5. Click "Delegated permissions"
+6. Check "email", "openid", and "profile"
+7. Click "Add permissions"
+8. Click "Grant admin consent for Default Directory"
+
+Restrict PDC access to specific users (or groups)
+
+Following https://learn.microsoft.com/en-us/entra/identity-platform/howto-restrict-your-app-to-a-set-of-users
+
+1. Click "Enterprise Apps" in the leftmost menu
+2. Click "Philanthropy Data Commons" (this context differs from the above)
+3. Under "Manage" click "Properties"
+4. Set "Assignment required?" to "Yes"
+5. Click "Save" (above the properties)
+6. Under "Manage" click "Users and groups"
+7. Click "Add user/group"
+8. Under "Users" click "None Selected"
+9. Check the users that should have access to PDC
+10. Click "Select"
+11. Click "Assign"
+
+If your subscription permits, you may instead (of steps 8-9) create a PDC group,
+assign users to that group, and then assign the group to the App.
+
+### In Keycloak
+
+1. Visit the Keycloak admin console
+2. In the PDC realm, visit "Identity providers"
+3. Click "Add provider"
+4. Under "Social", click "Microsoft"
+5. Set "Alias" to include the short name of the organization and `client`, for
+   example `myfoundation-microsoft-entra-client`
+6. Set the display name to include the full name of the organization, for
+   example `My Foundation Microsoft Entra Client`
+7. Set the "Client ID" to the value provided by the Entra admin (a UUID)
+8. Set the "Client Secret" to the value provided by the Entra admin
+9. Set "Prompt" to `login`
+10. Set Tenant ID to the value provided by the Entra admin (a UUID)
+11. Click "Add"
+
+Under the newly created Identity provider,
+
+1. Set "Scopes" to `openid profile email`
+2. Set "Hide on login page" to "On"
+3. Set "Show in Account console" to "When linked"
+4. Set "Sync mode" to "Import"
+5. Click "Save"
+6. Copy or save the "Redirect URI" value
+7. Send the Redirect URI to the Entra admin
+
+Link the Organization to the newly created Identity provider:
+
+1. Visit "Organizations"
+2. Open the organization
+3. Click the "Identity Providers" tab
+4. Click "Link identity provider"
+5. Select the IdP (created above) from the "Identity provider" dropdown menu
+6. Select the organization's domain name from the "Domain" dropdown menu
+7. Keep "Hide on login page" set to `On`
+8. Set "Redirect when email domain matches" to `On`
+9. Click "Save".
+
+### In Microsoft Entra again
+
+1. Visit "App registrations"
+2. Click the "All applications" tab
+3. Click "Philanthropy Data Commons"
+4. Under "Redirect URIs" click "Add a Redirect URI"
+5. Click "Add Redirect URI"
+6. Click "Web"
+7. Set "Redirect URI" to the value sent by the PDC admin
+8. Ensure the "Implicit grant and hybrid flows" items are unchecked
+9. Click "Configure"
 
 ## Keycloak Configuration
 

@@ -13,21 +13,21 @@ import type {
 	WritablePermissionGrant,
 } from '../../types';
 
-let systemChangemaker: Changemaker | null = null;
+let systemChangemakerPromise: Promise<Changemaker> | null = null;
 
 const getOrCreateSystemChangemaker = async (
 	db: TinyPg,
 ): Promise<Changemaker> => {
-	systemChangemaker ??= await createChangemaker(db, null, {
+	systemChangemakerPromise ??= createChangemaker(db, null, {
 		taxId: '99-9999999',
 		name: 'System Test Changemaker',
 		keycloakOrganizationId: null,
 	});
-	return systemChangemaker;
+	return await systemChangemakerPromise;
 };
 
 const resetTestPermissionGrantFactory = (): void => {
-	systemChangemaker = null;
+	systemChangemakerPromise = null;
 };
 
 const createTestPermissionGrant = async (

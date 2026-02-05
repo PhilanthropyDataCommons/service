@@ -586,7 +586,7 @@ describe('/applicationForms', () => {
 				.set(authHeader)
 				.expect(200);
 
-			expect(result.headers['content-type']).toMatch(/text\/csv/);
+			expect(result.headers['content-type']).toMatch(/text\/csv/v);
 			expect(result.headers['content-disposition']).toBe(
 				`attachment; filename="application-form-${applicationForm.id}-proposal-data.csv"`,
 			);

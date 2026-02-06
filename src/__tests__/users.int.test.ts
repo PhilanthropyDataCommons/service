@@ -3,24 +3,17 @@ import { v4 as uuidv4 } from 'uuid';
 import { app } from '../app';
 import {
 	db,
-	createOrUpdateFunder,
 	createOrUpdateUser,
 	loadSystemUser,
 	loadTableMetrics,
-	createOpportunity,
-	createOrUpdateUserOpportunityPermission,
 } from '../database';
-import { getAuthContext, loadTestUser } from '../test/utils';
+import { loadTestUser } from '../test/utils';
 import { expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import {
-	keycloakIdToString,
-	stringToKeycloakId,
-	OpportunityPermission,
-} from '../types';
+import { keycloakIdToString, stringToKeycloakId } from '../types';
 
 const createAdditionalTestUser = async () =>
 	await createOrUpdateUser(db, null, {
@@ -48,50 +41,6 @@ describe('/users', () => {
 				entries: [
 					{
 						...testUser,
-						permissions: {
-							opportunity: {},
-						},
-						createdAt: expectTimestamp(),
-					},
-				],
-			});
-		});
-
-		it('returns the permissions associated with a user', async () => {
-			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
-			const funder = await createOrUpdateFunder(db, null, {
-				name: 'Test Funder',
-				shortCode: 'testFunder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Test Opportunity',
-				funderShortCode: funder.shortCode,
-			});
-			await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				opportunityId: opportunity.id,
-				opportunityPermission: OpportunityPermission.CREATE_PROPOSAL,
-			});
-			const { count: userCount } = await loadTableMetrics('users');
-
-			const response = await request(app)
-				.get('/users')
-				.set(authHeader)
-				.expect(200);
-			expect(response.body).toEqual({
-				total: userCount,
-				entries: [
-					{
-						...testUser,
-						permissions: {
-							opportunity: {
-								[opportunity.id]: [OpportunityPermission.CREATE_PROPOSAL],
-							},
-						},
 						createdAt: expectTimestamp(),
 					},
 				],
@@ -162,41 +111,26 @@ describe('/users', () => {
 					{
 						keycloakUserId: uuids[14],
 						keycloakUserName: 'Alice',
-						permissions: {
-							opportunity: {},
-						},
 						createdAt: expectTimestamp(),
 					},
 					{
 						keycloakUserId: uuids[13],
 						keycloakUserName: 'Alice',
-						permissions: {
-							opportunity: {},
-						},
 						createdAt: expectTimestamp(),
 					},
 					{
 						keycloakUserId: uuids[12],
 						keycloakUserName: 'Alice',
-						permissions: {
-							opportunity: {},
-						},
 						createdAt: expectTimestamp(),
 					},
 					{
 						keycloakUserId: uuids[11],
 						keycloakUserName: 'Alice',
-						permissions: {
-							opportunity: {},
-						},
 						createdAt: expectTimestamp(),
 					},
 					{
 						keycloakUserId: uuids[10],
 						keycloakUserName: 'Alice',
-						permissions: {
-							opportunity: {},
-						},
 						createdAt: expectTimestamp(),
 					},
 				],

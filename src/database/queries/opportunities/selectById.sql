@@ -14,6 +14,7 @@ WHERE
 			:authContextKeycloakUserId,
 			:authContextIsAdministrator,
 			opportunities.id,
-			'view'
+			'view',
+			'opportunity'
 		)
 	);

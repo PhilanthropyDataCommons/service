@@ -20,7 +20,8 @@ WHERE
 			:authContextKeycloakUserId,
 			:authContextIsAdministrator,
 			opportunities.funder_short_code,
-			'view'
+			'view',
+			'funder'
 		)
 		OR has_changemaker_permission(
 			:authContextKeycloakUserId,

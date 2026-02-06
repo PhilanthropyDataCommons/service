@@ -3,6 +3,7 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	getLimitValues,
+	hasFunderPermission,
 	loadApplicationForm,
 	loadApplicationFormBundle,
 	loadOpportunity,
@@ -12,7 +13,8 @@ import {
 	isWritableApplicationFormWithFields,
 	isId,
 	isAuthContext,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 } from '../types';
 import {
 	FailedMiddlewareError,
@@ -23,7 +25,6 @@ import {
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
-import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
 const getApplicationForms = async (
@@ -87,11 +88,11 @@ const postApplicationForms = async (
 	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (
-			!authContextHasFunderPermission(
-				req,
-				opportunity.funderShortCode,
-				Permission.EDIT,
-			)
+			!(await hasFunderPermission(db, req, {
+				funderShortCode: opportunity.funderShortCode,
+				permission: PermissionGrantVerb.EDIT,
+				scope: PermissionGrantEntityType.FUNDER,
+			}))
 		) {
 			throw new UnauthorizedError();
 		}

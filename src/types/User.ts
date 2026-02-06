@@ -15,7 +15,6 @@ interface User {
 	keycloakUserName: string | null | undefined;
 	readonly permissions: {
 		dataProvider: Record<string, Permission[]>;
-		funder: Record<string, Permission[]>;
 		opportunity: Record<string, OpportunityPermission[]>;
 	};
 	readonly createdAt: string;
@@ -40,14 +39,6 @@ const userSchema: JSONSchemaType<User> = {
 					},
 					required: [],
 				},
-				funder: {
-					type: 'object',
-					additionalProperties: {
-						type: 'array',
-						items: permissionSchema,
-					},
-					required: [],
-				},
 				opportunity: {
 					type: 'object',
 					additionalProperties: {
@@ -57,7 +48,7 @@ const userSchema: JSONSchemaType<User> = {
 					required: [],
 				},
 			},
-			required: ['dataProvider', 'funder', 'opportunity'],
+			required: ['dataProvider', 'opportunity'],
 		},
 		createdAt: {
 			type: 'string',

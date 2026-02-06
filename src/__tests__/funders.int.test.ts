@@ -8,9 +8,9 @@ import {
 	loadSystemFunder,
 	createOrUpdateFunderCollaborativeMember,
 	loadSystemUser,
-	createOrUpdateUserFunderPermission,
 	createFunderCollaborativeInvitation,
 	loadFunderCollaborativeMember,
+	createPermissionGrant,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
@@ -18,7 +18,12 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
-import { FunderCollaborativeInvitationStatus, Permission } from '../types';
+import {
+	FunderCollaborativeInvitationStatus,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
+} from '../types';
 
 const createTestFunders = async ({
 	theFundFund,
@@ -369,6 +374,8 @@ describe('/funders', () => {
 			it('returns exactly one funder collaborative member selected by short code', async () => {
 				const testUser = await loadTestUser();
 				const testUserAuthContext = getAuthContext(testUser);
+				const systemUser = await loadSystemUser(db, null);
+				const systemUserAuthContext = getAuthContext(systemUser);
 				await createTestFunders({
 					theFundFund: true,
 					theFoundationFoundation: false,
@@ -377,10 +384,13 @@ describe('/funders', () => {
 					theFunnyFunders: false,
 					theFungibleFund: false,
 				});
-				await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
-					userKeycloakUserId: testUser.keycloakUserId,
+				await createPermissionGrant(db, systemUserAuthContext, {
+					granteeType: PermissionGrantGranteeType.USER,
+					granteeUserKeycloakUserId: testUser.keycloakUserId,
+					contextEntityType: PermissionGrantEntityType.FUNDER,
 					funderShortCode: 'theFundFund',
-					permission: Permission.MANAGE,
+					scope: [PermissionGrantEntityType.FUNDER],
+					verbs: [PermissionGrantVerb.MANAGE],
 				});
 				await createOrUpdateFunderCollaborativeMember(db, testUserAuthContext, {
 					funderCollaborativeShortCode: 'theFundFund',
@@ -401,7 +411,8 @@ describe('/funders', () => {
 			});
 			it('throws a 404 when the funder collaborative member does not exist', async () => {
 				const testUser = await loadTestUser();
-				const testUserAuthContext = getAuthContext(testUser);
+				const systemUser = await loadSystemUser(db, null);
+				const systemUserAuthContext = getAuthContext(systemUser);
 				await createTestFunders({
 					theFundFund: true,
 					theFoundationFoundation: false,
@@ -410,10 +421,13 @@ describe('/funders', () => {
 					theFunnyFunders: false,
 					theFungibleFund: false,
 				});
-				await createOrUpdateUserFunderPermission(db, testUserAuthContext, {
-					userKeycloakUserId: testUser.keycloakUserId,
+				await createPermissionGrant(db, systemUserAuthContext, {
+					granteeType: PermissionGrantGranteeType.USER,
+					granteeUserKeycloakUserId: testUser.keycloakUserId,
+					contextEntityType: PermissionGrantEntityType.FUNDER,
 					funderShortCode: 'theFundFund',
-					permission: Permission.MANAGE,
+					scope: [PermissionGrantEntityType.FUNDER],
+					verbs: [PermissionGrantVerb.MANAGE],
 				});
 				const response = await agent
 					.get('/funders/theFundFund/members/theFoundationFoundation')
@@ -645,10 +659,13 @@ describe('/funders', () => {
 				theFungibleFund: false,
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: 'theFoundationFoundation',
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
 
 			const result = await agent
@@ -755,10 +772,13 @@ describe('/funders', () => {
 				theFungibleFund: false,
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: 'theFundFund',
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
 
 			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
@@ -850,10 +870,13 @@ describe('/funders', () => {
 				theFungibleFund: true,
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: 'theFundFund',
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
 
 			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
@@ -955,10 +978,13 @@ describe('/funders', () => {
 				theFungibleFund: false,
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: 'theFundFund',
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
 
 			await createFunderCollaborativeInvitation(db, systemUserAuthContext, {
@@ -1014,10 +1040,13 @@ describe('/funders', () => {
 				theFungibleFund: true,
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: 'theFundFund',
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
 
 			await createOrUpdateFunderCollaborativeMember(db, systemUserAuthContext, {
@@ -1069,10 +1098,13 @@ describe('/funders', () => {
 			theFungibleFund: true,
 		});
 
-		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: testUser.keycloakUserId,
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.FUNDER,
 			funderShortCode: 'theFundFund',
-			permission: Permission.MANAGE,
+			scope: [PermissionGrantEntityType.FUNDER],
+			verbs: [PermissionGrantVerb.MANAGE],
 		});
 
 		await createOrUpdateFunderCollaborativeMember(db, systemUserAuthContext, {
@@ -1116,10 +1148,13 @@ describe('/funders', () => {
 			theFungibleFund: true,
 		});
 
-		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: testUser.keycloakUserId,
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.FUNDER,
 			funderShortCode: 'theFundFund',
-			permission: Permission.MANAGE,
+			scope: [PermissionGrantEntityType.FUNDER],
+			verbs: [PermissionGrantVerb.MANAGE],
 		});
 
 		await createOrUpdateFunderCollaborativeMember(db, systemUserAuthContext, {
@@ -1163,10 +1198,13 @@ describe('/funders', () => {
 			theFungibleFund: true,
 		});
 
-		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: testUser.keycloakUserId,
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.FUNDER,
 			funderShortCode: 'theFundFund',
-			permission: Permission.MANAGE,
+			scope: [PermissionGrantEntityType.FUNDER],
+			verbs: [PermissionGrantVerb.MANAGE],
 		});
 
 		await createOrUpdateFunderCollaborativeMember(db, systemUserAuthContext, {
@@ -1211,10 +1249,13 @@ describe('/funders', () => {
 			theFungibleFund: true,
 		});
 
-		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: testUser.keycloakUserId,
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.FUNDER,
 			funderShortCode: 'theFundFund',
-			permission: Permission.MANAGE,
+			scope: [PermissionGrantEntityType.FUNDER],
+			verbs: [PermissionGrantVerb.MANAGE],
 		});
 
 		await createFunderCollaborativeInvitation(db, systemUserAuthContext, {

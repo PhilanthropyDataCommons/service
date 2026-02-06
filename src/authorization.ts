@@ -16,14 +16,6 @@ const authContextHasDataProviderPermission = (
 		permission,
 	);
 
-const authContextHasFunderPermission = (
-	auth: AuthContext,
-	funderShortCode: ShortCode,
-	permission: Permission,
-): boolean =>
-	auth.role.isAdministrator ||
-	(auth.user.permissions.funder[funderShortCode] ?? []).includes(permission);
-
 const authContextHasOpportunityPermission = (
 	auth: AuthContext,
 	opportunityId: Id,
@@ -36,6 +28,5 @@ const authContextHasOpportunityPermission = (
 
 export {
 	authContextHasDataProviderPermission,
-	authContextHasFunderPermission,
 	authContextHasOpportunityPermission,
 };

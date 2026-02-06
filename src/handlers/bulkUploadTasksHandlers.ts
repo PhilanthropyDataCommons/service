@@ -3,13 +3,15 @@ import {
 	db,
 	createBulkUploadTask,
 	getLimitValues,
+	hasFunderPermission,
 	loadApplicationForm,
 	loadBulkUploadTaskBundle,
 	loadFileIfCreatedBy,
 	loadOpportunity,
 } from '../database';
 import {
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 	TaskStatus,
 	isAuthContext,
 	isWritableBulkUploadTask,
@@ -26,7 +28,6 @@ import {
 	extractPaginationParameters,
 } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
-import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 import type { AuthContext } from '../types';
 
@@ -46,11 +47,11 @@ const validateApplicationFormCreatePermission = async (
 			applicationForm.opportunityId,
 		);
 		if (
-			!authContextHasFunderPermission(
-				authContext,
-				opportunity.funderShortCode,
-				Permission.EDIT,
-			)
+			!(await hasFunderPermission(db, authContext, {
+				funderShortCode: opportunity.funderShortCode,
+				permission: PermissionGrantVerb.EDIT,
+				scope: PermissionGrantEntityType.FUNDER,
+			}))
 		) {
 			throw new UnprocessableEntityError(
 				'You do not have write permissions on the funder associated with this application form.',

@@ -3,6 +3,7 @@ import {
 	db,
 	createOpportunity,
 	getLimitValues,
+	hasFunderPermission,
 	loadOpportunity,
 	loadOpportunityBundle,
 } from '../database';
@@ -10,7 +11,8 @@ import {
 	isAuthContext,
 	isId,
 	isWritableOpportunity,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 } from '../types';
 import {
 	FailedMiddlewareError,
@@ -19,7 +21,6 @@ import {
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
-import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
 const getOpportunities = async (req: Request, res: Response): Promise<void> => {
@@ -61,11 +62,11 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 	if (
-		!authContextHasFunderPermission(
-			req,
-			req.body.funderShortCode,
-			Permission.EDIT,
-		)
+		!(await hasFunderPermission(db, req, {
+			funderShortCode: req.body.funderShortCode,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.FUNDER,
+		}))
 	) {
 		throw new UnauthorizedError();
 	}

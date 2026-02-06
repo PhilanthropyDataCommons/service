@@ -3,6 +3,7 @@ import {
 	db,
 	createChangemakerProposal,
 	getLimitValues,
+	hasFunderPermission,
 	loadChangemakerProposalBundle,
 	loadProposal,
 	loadOpportunity,
@@ -10,7 +11,8 @@ import {
 import {
 	isAuthContext,
 	isWritableChangemakerProposal,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 } from '../types';
 import {
 	FailedMiddlewareError,
@@ -23,7 +25,6 @@ import {
 	extractProposalParameters,
 	extractPaginationParameters,
 } from '../queryParameters';
-import { authContextHasFunderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
 const getChangemakerProposals = async (
@@ -73,11 +74,11 @@ const postChangemakerProposal = async (
 		const proposal = await loadProposal(db, req, proposalId);
 		const opportunity = await loadOpportunity(db, req, proposal.opportunityId);
 		if (
-			!authContextHasFunderPermission(
-				req,
-				opportunity.funderShortCode,
-				Permission.EDIT,
-			)
+			!(await hasFunderPermission(db, req, {
+				funderShortCode: opportunity.funderShortCode,
+				permission: PermissionGrantVerb.EDIT,
+				scope: PermissionGrantEntityType.FUNDER,
+			}))
 		) {
 			throw new UnprocessableEntityError(
 				'You do not have write permissions on the funder associated with this proposal.',

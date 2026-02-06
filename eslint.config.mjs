@@ -82,8 +82,6 @@ export default defineConfig([
 					caughtErrors: 'none',
 				},
 			],
-			// These are temporarily disabled so we can turn them on alongside necessary code changes
-			'@typescript-eslint/strict-void-return': 'off',
 		},
 		settings: {
 			'import/resolver': {

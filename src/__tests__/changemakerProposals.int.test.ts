@@ -11,7 +11,7 @@ import {
 	loadSystemUser,
 	createOrUpdateUserFunderPermission,
 	createOrUpdateFunder,
-	createOrUpdateUserChangemakerPermission,
+	createPermissionGrant,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
@@ -19,7 +19,12 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { Permission } from '../types';
+import {
+	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
+} from '../types';
 
 const insertTestChangemakers = async () => {
 	await createChangemaker(db, null, {
@@ -67,10 +72,13 @@ describe('/changemakerProposals', () => {
 				funderShortCode: visibleFunder.shortCode,
 				permission: Permission.VIEW,
 			});
-			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: visibleChangemaker.id,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const visibleOpportunity = await createOpportunity(db, null, {
 				title: '🔥',

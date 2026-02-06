@@ -1,23 +1,8 @@
 import { requireAdministratorRole } from '../requireAdministratorRole';
 import { UnauthorizedError } from '../../errors';
-import {
-	getTestUserKeycloakUserId,
-	getTestUserKeycloakUserName,
-} from '../../test/utils';
+import { getMockedUser } from '../../test/utils';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
-import type { AuthenticatedRequest, User } from '../../types';
-
-const getMockedUser = (): User => ({
-	keycloakUserId: getTestUserKeycloakUserId(),
-	keycloakUserName: getTestUserKeycloakUserName(),
-	createdAt: '',
-	permissions: {
-		changemaker: {},
-		dataProvider: {},
-		funder: {},
-		opportunity: {},
-	},
-});
+import type { AuthenticatedRequest } from '../../types';
 
 describe('requireAuthentication', () => {
 	it('calls next with an UnauthorizedError when no roles value is provided', (done) => {

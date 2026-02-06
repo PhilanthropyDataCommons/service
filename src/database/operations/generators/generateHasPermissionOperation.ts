@@ -2,7 +2,11 @@ import {
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
-import type { AuthIdentityAndRole, PermissionGrantVerb } from '../../../types';
+import type {
+	AuthIdentityAndRole,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
+} from '../../../types';
 import type TinyPg from 'tinypg';
 
 interface HasPermissionResult {
@@ -18,13 +22,19 @@ interface HasPermissionResult {
  * @returns A function that checks if a user has the specified permission on the entity.
  */
 const generateHasPermissionOperation =
-	(queryName: string, entityIdParamName: string) =>
-	async (
+	<K extends string>(
+		queryName: string,
+		entityIdParamName: K,
+	): ((
 		db: TinyPg,
 		authContext: AuthIdentityAndRole | null,
-		entityId: unknown,
-		permission: PermissionGrantVerb,
-	): Promise<boolean> => {
+		options: Record<K, unknown> & {
+			permission: PermissionGrantVerb;
+			scope: PermissionGrantEntityType;
+		},
+	) => Promise<boolean>) =>
+	async (db, authContext, options): Promise<boolean> => {
+		const { [entityIdParamName]: entityId, permission, scope } = options;
 		const authContextKeycloakUserId =
 			getKeycloakUserIdFromAuthContext(authContext);
 		const authContextIsAdministrator =
@@ -36,6 +46,7 @@ const generateHasPermissionOperation =
 			isAdministrator: authContextIsAdministrator,
 			[entityIdParamName]: entityId,
 			permission,
+			scope,
 		});
 		return row?.hasPermission ?? false;
 	};

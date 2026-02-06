@@ -34,6 +34,17 @@ export const getTestUserKeycloakUserId = (): KeycloakId =>
 
 export const getTestUserKeycloakUserName = (): string => 'Moe';
 
+export const getMockedUser = (): User => ({
+	keycloakUserId: getTestUserKeycloakUserId(),
+	keycloakUserName: getTestUserKeycloakUserName(),
+	createdAt: '',
+	permissions: {
+		dataProvider: {},
+		funder: {},
+		opportunity: {},
+	},
+});
+
 export const createTestUser = async (): Promise<User> =>
 	await createOrUpdateUser(db, null, {
 		keycloakUserId: getTestUserKeycloakUserId(),

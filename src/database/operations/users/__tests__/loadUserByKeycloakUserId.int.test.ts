@@ -1,10 +1,7 @@
 import { loadUserByKeycloakUserId } from '../loadUserByKeycloakUserId';
 import {
 	createOrUpdateUser,
-	createChangemaker,
 	createOrUpdateFunder,
-	createOrUpdateUserChangemakerPermission,
-	createOrUpdateUserGroupChangemakerPermission,
 	createEphemeralUserGroupAssociation,
 	loadSystemUser,
 	createOrUpdateDataProvider,
@@ -37,13 +34,6 @@ describe('loadUserByKeycloakUserId', () => {
 			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
 			keycloakUserName: 'Bob',
 		});
-		const changemakerKeycloakOrganizationId =
-			'b10aaea1-4558-422b-85bf-073bfc9cd05f';
-		const changemaker = await createChangemaker(db, null, {
-			keycloakOrganizationId: changemakerKeycloakOrganizationId,
-			name: 'Foo Changemaker',
-			taxId: '12-3456789',
-		});
 		const funderKeycloakOrganizationId = 'f4941cc3-6b39-4b4f-bc60-cac4541d2788';
 		const funder = await createOrUpdateFunder(db, null, {
 			keycloakOrganizationId: funderKeycloakOrganizationId,
@@ -61,15 +51,6 @@ describe('loadUserByKeycloakUserId', () => {
 		const opportunity = await createOpportunity(db, null, {
 			title: 'Test Opportunity',
 			funderShortCode: funder.shortCode,
-		});
-
-		// Associate the user with a changemaker group
-		await createEphemeralUserGroupAssociation(db, null, {
-			userKeycloakUserId: user.keycloakUserId,
-			userGroupKeycloakOrganizationId: stringToKeycloakId(
-				changemakerKeycloakOrganizationId,
-			),
-			notAfter: ephemeralExpiration,
 		});
 
 		// Associate the user with a funder group
@@ -91,16 +72,6 @@ describe('loadUserByKeycloakUserId', () => {
 		});
 
 		// Assign EDIT and VIEW via direct permissions
-		await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: user.keycloakUserId,
-			changemakerId: changemaker.id,
-			permission: Permission.EDIT,
-		});
-		await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: user.keycloakUserId,
-			changemakerId: changemaker.id,
-			permission: Permission.VIEW,
-		});
 		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
 			userKeycloakUserId: user.keycloakUserId,
 			funderShortCode: funder.shortCode,
@@ -133,28 +104,6 @@ describe('loadUserByKeycloakUserId', () => {
 		});
 
 		// Assign MANAGE and VIEW via group permissions
-		await createOrUpdateUserGroupChangemakerPermission(
-			db,
-			systemUserAuthContext,
-			{
-				keycloakOrganizationId: stringToKeycloakId(
-					changemakerKeycloakOrganizationId,
-				),
-				changemakerId: changemaker.id,
-				permission: Permission.MANAGE,
-			},
-		);
-		await createOrUpdateUserGroupChangemakerPermission(
-			db,
-			systemUserAuthContext,
-			{
-				keycloakOrganizationId: stringToKeycloakId(
-					changemakerKeycloakOrganizationId,
-				),
-				changemakerId: changemaker.id,
-				permission: Permission.VIEW,
-			},
-		);
 		await createOrUpdateUserGroupFunderPermission(db, systemUserAuthContext, {
 			keycloakOrganizationId: stringToKeycloakId(funderKeycloakOrganizationId),
 			funderShortCode: funder.shortCode,
@@ -220,13 +169,6 @@ describe('loadUserByKeycloakUserId', () => {
 			...user,
 			createdAt: expectTimestamp(),
 			permissions: {
-				changemaker: {
-					1: expectArrayContaining([
-						Permission.MANAGE,
-						Permission.EDIT,
-						Permission.VIEW,
-					]),
-				},
 				dataProvider: {
 					fooDataProvider: expectArrayContaining([
 						Permission.MANAGE,
@@ -261,23 +203,7 @@ describe('loadUserByKeycloakUserId', () => {
 			keycloakUserName: 'Carol',
 		});
 
-		// Associate the user with a changemaker group
-		const changemakerKeycloakOrganizationId =
-			'b10aaea1-4558-422b-85bf-073bfc9cd05f';
-		const changemaker = await createChangemaker(db, null, {
-			keycloakOrganizationId: changemakerKeycloakOrganizationId,
-			name: 'Foo Changemaker',
-			taxId: '12-3456789',
-		});
-		await createEphemeralUserGroupAssociation(db, null, {
-			userKeycloakUserId: user.keycloakUserId,
-			userGroupKeycloakOrganizationId: stringToKeycloakId(
-				changemakerKeycloakOrganizationId,
-			),
-			notAfter: new Date(0).toISOString(),
-		});
-
-		// Associate the user with a funder group
+		// Associate the user with a funder group (expired)
 		const funderKeycloakOrganizationId = 'f4941cc3-6b39-4b4f-bc60-cac4541d2788';
 		const funder = await createOrUpdateFunder(db, null, {
 			keycloakOrganizationId: funderKeycloakOrganizationId,
@@ -293,7 +219,7 @@ describe('loadUserByKeycloakUserId', () => {
 			notAfter: new Date(0).toISOString(),
 		});
 
-		// Associate the user with a data provider group
+		// Associate the user with a data provider group (expired)
 		const dataProviderKeycloakOrganizationId =
 			'9426f49a-4c11-4d26-9e58-2b62bf2ee512';
 		const dataProvider = await createOrUpdateDataProvider(db, null, {
@@ -310,17 +236,6 @@ describe('loadUserByKeycloakUserId', () => {
 		});
 
 		// Assign VIEW via group permissions
-		await createOrUpdateUserGroupChangemakerPermission(
-			db,
-			systemUserAuthContext,
-			{
-				keycloakOrganizationId: stringToKeycloakId(
-					changemakerKeycloakOrganizationId,
-				),
-				changemakerId: changemaker.id,
-				permission: Permission.VIEW,
-			},
-		);
 		await createOrUpdateUserGroupFunderPermission(db, systemUserAuthContext, {
 			keycloakOrganizationId: stringToKeycloakId(funderKeycloakOrganizationId),
 			funderShortCode: funder.shortCode,
@@ -348,7 +263,6 @@ describe('loadUserByKeycloakUserId', () => {
 			...user,
 			createdAt: expectTimestamp(),
 			permissions: {
-				changemaker: {},
 				dataProvider: {},
 				funder: {},
 				opportunity: {},
@@ -357,23 +271,9 @@ describe('loadUserByKeycloakUserId', () => {
 	});
 
 	it('should not populate roles when loaded without authorization', async () => {
-		const systemUser = await loadSystemUser(db, null);
-		const systemUserAuthContext = getAuthContext(systemUser, true);
 		const user = await createOrUpdateUser(db, null, {
 			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
 			keycloakUserName: 'Carol',
-		});
-		const changemakerKeycloakOrganizationId =
-			'b10aaea1-4558-422b-85bf-073bfc9cd05f';
-		const changemaker = await createChangemaker(db, null, {
-			keycloakOrganizationId: changemakerKeycloakOrganizationId,
-			name: 'Foo Changemaker',
-			taxId: '12-3456789',
-		});
-		await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: user.keycloakUserId,
-			changemakerId: changemaker.id,
-			permission: Permission.EDIT,
 		});
 
 		const populatedUser = await loadUserByKeycloakUserId(
@@ -386,7 +286,6 @@ describe('loadUserByKeycloakUserId', () => {
 			...user,
 			createdAt: expectTimestamp(),
 			permissions: {
-				changemaker: {},
 				dataProvider: {},
 				funder: {},
 				opportunity: {},

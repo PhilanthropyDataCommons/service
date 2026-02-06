@@ -18,8 +18,8 @@ import {
 	loadSystemUser,
 	createOrUpdateUserFunderPermission,
 	createOrUpdateFunder,
-	createOrUpdateUserChangemakerPermission,
 	createOrUpdateUserOpportunityPermission,
+	createPermissionGrant,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -37,8 +37,11 @@ import {
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	keycloakIdToString,
-	Permission,
 	OpportunityPermission,
+	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
 } from '../types';
 
 const createTestBaseFields = async () => {
@@ -101,10 +104,13 @@ describe('/proposals', () => {
 				funderShortCode: visibleFunder.shortCode,
 				permission: Permission.VIEW,
 			});
-			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: visibleChangemaker.id,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const visibleOpportunity = await createOpportunity(db, null, {
 				title: '🔥',

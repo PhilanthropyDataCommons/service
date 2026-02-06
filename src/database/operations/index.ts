@@ -26,6 +26,4 @@ export * from './proposals';
 export * from './proposalVersions';
 export * from './s3Buckets';
 export * from './sources';
-export * from './userGroupOpportunityPermissions';
-export * from './userOpportunityPermissions';
 export * from './users';

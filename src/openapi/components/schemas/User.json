@@ -11,12 +11,6 @@
 			"description": "The full name of the user (described in OIDC 1.0 'name' standard claim) as of most recent logged-in service activity.",
 			"example": "John Doe"
 		},
-		"permissions": {
-			"type": "object",
-			"readOnly": true,
-			"properties": {},
-			"required": []
-		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",

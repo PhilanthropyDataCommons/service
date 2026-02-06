@@ -12,7 +12,8 @@ WHERE
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator,
 		id,
-		'view'
+		'view',
+		'opportunity'
 	)
 ORDER BY id
 LIMIT :limit OFFSET :offset;

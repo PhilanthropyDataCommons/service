@@ -10,11 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Migrated changemaker permissions to the unified `permission_grants` table. Changemaker permissions should now be managed via the `/permissionGrants` endpoints.
-- The `permissions.changemaker` property has been removed from the `User` type. Changemaker permissions are now checked asynchronously via the permission_grants table.
 - Migrated funder permissions to the unified `permission_grants` table. Funder permissions should now be managed via the `/permissionGrants` endpoints.
-- The `permissions.funder` property has been removed from the `User` type. Funder permissions are now checked asynchronously via the permission_grants table.
 - Migrated data provider permissions to the unified `permission_grants` table. Data provider permissions should now be managed via the `/permissionGrants` endpoints.
-- The `permissions.dataProvider` property has been removed from the `User` type. Data provider permissions are now checked asynchronously via the permission_grants table.
+- Migrated opportunity permissions to the unified `permission_grants` table. Opportunity permissions should now be managed via the `/permissionGrants` endpoints.
+- The `permissions` property has been removed from the `User` type entirely. All permission checks are now performed asynchronously via the permission_grants table.
 
 ### Removed
 
@@ -36,6 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `PUT /userGroups/{keycloakOrganizationId}/dataProviders/{dataProviderShortCode}/permissions/{permission}`
   - `DELETE /userGroups/{keycloakOrganizationId}/dataProviders/{dataProviderShortCode}/permissions/{permission}`
 - `UserDataProviderPermission` and `UserGroupDataProviderPermission` schemas have been removed from the OpenAPI spec.
+- Legacy opportunity permission endpoints have been removed:
+  - `PUT /users/{userKeycloakUserId}/opportunities/{opportunityId}/permissions/{opportunityPermission}`
+  - `DELETE /users/{userKeycloakUserId}/opportunities/{opportunityId}/permissions/{opportunityPermission}`
+  - `PUT /userGroups/{keycloakOrganizationId}/opportunities/{opportunityId}/permissions/{opportunityPermission}`
+  - `DELETE /userGroups/{keycloakOrganizationId}/opportunities/{opportunityId}/permissions/{opportunityPermission}`
+- `UserOpportunityPermission` and `UserGroupOpportunityPermission` schemas have been removed from the OpenAPI spec.
 
 ## 0.30.0 2026-01-27
 

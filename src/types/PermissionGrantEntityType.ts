@@ -98,6 +98,7 @@ const allowedScopesForContextEntityType: Record<
 	],
 	[PermissionGrantEntityType.OPPORTUNITY]: [
 		PermissionGrantEntityType.OPPORTUNITY,
+		PermissionGrantEntityType.PROPOSAL,
 	],
 	[PermissionGrantEntityType.PROPOSAL]: [PermissionGrantEntityType.PROPOSAL],
 	[PermissionGrantEntityType.PROPOSAL_VERSION]: [

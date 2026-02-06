@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- Migrated changemaker permissions to the unified `permission_grants` table. Changemaker permissions should now be managed via the `/permissionGrants` endpoints.
+- The `permissions.changemaker` property has been removed from the `User` type. Changemaker permissions are now checked asynchronously via the permission_grants table.
+
+### Removed
+
+- Legacy changemaker permission endpoints have been removed:
+  - `PUT /users/{userKeycloakUserId}/changemakers/{changemakerId}/permissions/{permission}`
+  - `DELETE /users/{userKeycloakUserId}/changemakers/{changemakerId}/permissions/{permission}`
+  - `PUT /userGroups/{keycloakOrganizationId}/changemakers/{changemakerId}/permissions/{permission}`
+  - `DELETE /userGroups/{keycloakOrganizationId}/changemakers/{changemakerId}/permissions/{permission}`
+- `UserChangemakerPermission` and `UserGroupChangemakerPermission` schemas have been removed from the OpenAPI spec.
+
 ## 0.30.0 2026-01-27
 
 ### Added

@@ -21,7 +21,8 @@ BEGIN
     auth_context_keycloak_user_id,
     auth_context_is_administrator,
     changemakers.id,
-    'view'
+    'view',
+    'changemaker'
   );
 
   SELECT data_provider_to_json(data_providers.*)

@@ -3,16 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { app } from '../app';
 import {
 	db,
-	createChangemaker,
 	createOrUpdateDataProvider,
 	createOrUpdateFunder,
-	createOrUpdateUserChangemakerPermission,
 	createOrUpdateUserDataProviderPermission,
 	createOrUpdateUserFunderPermission,
 	createOrUpdateUser,
 	loadSystemUser,
 	loadTableMetrics,
-	removeUserChangemakerPermission,
 	createOpportunity,
 	createOrUpdateUserOpportunityPermission,
 } from '../database';
@@ -56,7 +53,6 @@ describe('/users', () => {
 					{
 						...testUser,
 						permissions: {
-							changemaker: {},
 							dataProvider: {},
 							funder: {},
 							opportunity: {},
@@ -82,11 +78,6 @@ describe('/users', () => {
 				keycloakOrganizationId: null,
 				isCollaborative: false,
 			});
-			const changemaker = await createChangemaker(db, null, {
-				name: 'Test Changemaker',
-				taxId: '12-3456789',
-				keycloakOrganizationId: null,
-			});
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Test Opportunity',
 				funderShortCode: funder.shortCode,
@@ -105,11 +96,6 @@ describe('/users', () => {
 				permission: Permission.EDIT,
 				funderShortCode: funder.shortCode,
 			});
-			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				permission: Permission.VIEW,
-				changemakerId: changemaker.id,
-			});
 			await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				opportunityId: opportunity.id,
@@ -127,9 +113,6 @@ describe('/users', () => {
 					{
 						...testUser,
 						permissions: {
-							changemaker: {
-								[changemaker.id]: [Permission.VIEW],
-							},
 							dataProvider: {
 								testProvider: [Permission.MANAGE],
 							},
@@ -139,50 +122,6 @@ describe('/users', () => {
 							opportunity: {
 								[opportunity.id]: [OpportunityPermission.CREATE_PROPOSAL],
 							},
-						},
-						createdAt: expectTimestamp(),
-					},
-				],
-			});
-		});
-
-		it('does not return deleted permissions associated with a user', async () => {
-			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
-			const changemaker = await createChangemaker(db, null, {
-				name: 'Test Changemaker',
-				taxId: '12-3456789',
-				keycloakOrganizationId: null,
-			});
-			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				permission: Permission.VIEW,
-				changemakerId: changemaker.id,
-			});
-			await removeUserChangemakerPermission(
-				db,
-				null,
-				testUser.keycloakUserId,
-				changemaker.id,
-				Permission.VIEW,
-			);
-			const { count: userCount } = await loadTableMetrics('users');
-
-			const response = await request(app)
-				.get('/users')
-				.set(authHeader)
-				.expect(200);
-			expect(response.body).toEqual({
-				total: userCount,
-				entries: [
-					{
-						...testUser,
-						permissions: {
-							changemaker: {},
-							dataProvider: {},
-							funder: {},
-							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -255,7 +194,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[14],
 						keycloakUserName: 'Alice',
 						permissions: {
-							changemaker: {},
 							dataProvider: {},
 							funder: {},
 							opportunity: {},
@@ -266,7 +204,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[13],
 						keycloakUserName: 'Alice',
 						permissions: {
-							changemaker: {},
 							dataProvider: {},
 							funder: {},
 							opportunity: {},
@@ -277,7 +214,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[12],
 						keycloakUserName: 'Alice',
 						permissions: {
-							changemaker: {},
 							dataProvider: {},
 							funder: {},
 							opportunity: {},
@@ -288,7 +224,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[11],
 						keycloakUserName: 'Alice',
 						permissions: {
-							changemaker: {},
 							dataProvider: {},
 							funder: {},
 							opportunity: {},
@@ -299,7 +234,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[10],
 						keycloakUserName: 'Alice',
 						permissions: {
-							changemaker: {},
 							dataProvider: {},
 							funder: {},
 							opportunity: {},

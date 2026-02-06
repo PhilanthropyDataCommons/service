@@ -67,7 +67,7 @@ describe('/users/funders/:funderShortcode/permissions/:permission', () => {
 			const user = await loadTestUser();
 			await request(app)
 				.put(
-					`/users/${keycloakIdToString(user.keycloakUserId)}/changemakers/this is not valid/permissions/${Permission.MANAGE}`,
+					`/users/${keycloakIdToString(user.keycloakUserId)}/funders/this is not valid/permissions/${Permission.MANAGE}`,
 				)
 				.set(authHeaderWithAdminRole)
 				.send({})

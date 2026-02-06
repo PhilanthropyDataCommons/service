@@ -6,14 +6,6 @@ import type {
 	ShortCode,
 } from './types';
 
-const authContextHasChangemakerPermission = (
-	auth: AuthContext,
-	changemakerId: Id,
-	permission: Permission,
-): boolean =>
-	auth.role.isAdministrator ||
-	(auth.user.permissions.changemaker[changemakerId] ?? []).includes(permission);
-
 const authContextHasDataProviderPermission = (
 	auth: AuthContext,
 	dataProviderShortCode: ShortCode,
@@ -43,7 +35,6 @@ const authContextHasOpportunityPermission = (
 	);
 
 export {
-	authContextHasChangemakerPermission,
 	authContextHasDataProviderPermission,
 	authContextHasFunderPermission,
 	authContextHasOpportunityPermission,

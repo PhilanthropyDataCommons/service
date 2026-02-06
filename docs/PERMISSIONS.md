@@ -227,7 +227,7 @@ context key).
 | view   | funder   | View the funder's opportunities                                   |
 |        |          | View application forms associated with the funder's opportunities |
 |        |          | View bulk upload tasks associated with the funder                 |
-|        |          | View proposals associated with the funder's opportunities         |
+| view   | proposal | View proposals associated with the funder's opportunities         |
 |        |          | View proposal versions associated with the funder's opportunities |
 |        |          | View changemaker-proposal associations for the funder's proposals |
 | create | proposal | Create proposals for the funder's opportunities                   |
@@ -248,9 +248,9 @@ context key).
 
 | Verb | Scope       | What It Enables                                            |
 | ---- | ----------- | ---------------------------------------------------------- |
-| view | changemaker | View proposals associated with the changemaker             |
+| view | changemaker | View changemaker field values for the changemaker          |
+| view | proposal    | View proposals associated with the changemaker             |
 |      |             | View proposal versions associated with the changemaker     |
-|      |             | View changemaker field values for the changemaker          |
 |      |             | View changemaker-proposal associations for the changemaker |
 | edit | changemaker | Create or update changemaker field values                  |
 |      |             | Create sources associated with the changemaker             |
@@ -263,10 +263,25 @@ context key). Opportunity permissions inherit from the parent funder, so a
 funder's opportunities. Opportunity-level grants provide more granular control
 for specific opportunities.
 
-| Verb   | Scope       | What It Enables                               |
-| ------ | ----------- | --------------------------------------------- |
-| view   | opportunity | View the specific opportunity                 |
-| create | proposal    | Create proposals for the specific opportunity |
+| Verb   | Scope       | What It Enables                                                        |
+| ------ | ----------- | ---------------------------------------------------------------------- |
+| view   | opportunity | View the specific opportunity                                          |
+| view   | proposal    | View proposals associated with the opportunity                         |
+|        |             | View proposal versions for the opportunity's proposals                 |
+|        |             | View changemaker-proposal associations for the opportunity's proposals |
+| create | proposal    | Create proposals for the specific opportunity                          |
+
+### Proposal Permissions
+
+Permissions granted directly against a proposal (using the proposal's `id` as
+the context key). This provides the most granular access control for individual
+proposals.
+
+| Verb | Scope    | What It Enables                                         |
+| ---- | -------- | ------------------------------------------------------- |
+| view | proposal | View the specific proposal                              |
+|      |          | View proposal versions for the proposal                 |
+|      |          | View changemaker-proposal associations for the proposal |
 
 ### Data Provider Permissions
 
@@ -279,10 +294,9 @@ Permissions granted against a data provider (using the data provider's
 
 ### Other Contexts
 
-The permission system data model includes additional contexts (`proposal`,
-`proposalVersion`, `applicationForm`, `applicationFormField`,
-`proposalFieldValue`, `source`, `bulkUpload`, `changemakerFieldValue`) that can
-have permission grants created. However, these contexts do not currently have
-permission checks enforced in the codebase. Access to these entities is
-controlled through the parent entity permissions described above (funder or
-changemaker).
+The permission system data model includes additional contexts (`proposalVersion`,
+`applicationForm`, `applicationFormField`, `proposalFieldValue`, `source`,
+`bulkUpload`, `changemakerFieldValue`) that can have permission grants created.
+However, these contexts do not currently have permission checks enforced in the
+codebase. Access to these entities is controlled through the parent entity
+permissions described above (funder, changemaker, opportunity, or proposal).

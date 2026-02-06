@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated data provider permissions to the unified `permission_grants` table. Data provider permissions should now be managed via the `/permissionGrants` endpoints.
 - Migrated opportunity permissions to the unified `permission_grants` table. Opportunity permissions should now be managed via the `/permissionGrants` endpoints.
 - The `permissions` property has been removed from the `User` type entirely. All permission checks are now performed asynchronously via the permission_grants table.
+- Viewing proposals, proposal versions, and changemaker-proposal associations now requires `view | proposal` scope instead of inheriting from `view | funder` or `view | changemaker`. The `view | proposal` scope can be granted at the proposal, opportunity, funder, or changemaker context level and will be inherited appropriately.
 
 ### Removed
 

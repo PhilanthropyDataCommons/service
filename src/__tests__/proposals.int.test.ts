@@ -100,7 +100,10 @@ describe('/proposals', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [
+					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.PROPOSAL,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -108,7 +111,10 @@ describe('/proposals', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: visibleChangemaker.id,
-				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				scope: [
+					PermissionGrantEntityType.CHANGEMAKER,
+					PermissionGrantEntityType.PROPOSAL,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const visibleOpportunity = await createOpportunity(db, null, {

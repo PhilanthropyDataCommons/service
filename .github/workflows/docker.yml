@@ -73,7 +73,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Wait for CI and other workflows to succeed
-        uses: kachick/wait-other-jobs@v3
+        uses: kachick/wait-other-jobs@v4
         timeout-minutes: 24
         with:
           wait-list: |

@@ -15,7 +15,7 @@ jobs:
       URL: ${{ vars.DEPLOYMENT_URL }}
     steps:
       - name: Wait for CI, build, and other workflows to succeed
-        uses: kachick/wait-other-jobs@v3
+        uses: kachick/wait-other-jobs@v4
         timeout-minutes: 24
         with:
           wait-list: |

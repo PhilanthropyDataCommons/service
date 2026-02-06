@@ -10,7 +10,7 @@ import {
 	isKeycloakId,
 	isPermission,
 	isShortCode,
-	isWritableUserFunderPermission,
+	isWritableUserDataProviderPermission,
 } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
 import { coerceParams } from '../coercion';
@@ -83,10 +83,10 @@ const putUserDataProviderPermission = async (
 			isPermission.errors ?? [],
 		);
 	}
-	if (!isWritableUserFunderPermission(req.body)) {
+	if (!isWritableUserDataProviderPermission(req.body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
-			isWritableUserFunderPermission.errors ?? [],
+			isWritableUserDataProviderPermission.errors ?? [],
 		);
 	}
 

@@ -1,7 +1,7 @@
 /**
  * Middleware to require a specific funder permission for a request.
  *
- * @param {Permission} permission - The required permission to check for.
+ * @param {PermissionGrantVerb} permission - The required permission to check for.
  * @returns {Function} Middleware function to validate the funder permission.
  *
  * The middleware does the following:
@@ -12,45 +12,58 @@
  *
  * If any of the checks fail, the middleware will pass an appropriate error to the next middleware.
  */
+import { db } from '../database';
+import { hasFunderPermission } from '../database/operations';
 import { InputValidationError, UnauthorizedError } from '../errors';
-import { isAuthContext, isShortCode } from '../types';
-import type { Permission } from '../types';
-import type { Response, Request, NextFunction } from 'express';
+import {
+	isAuthContext,
+	isShortCode,
+	PermissionGrantEntityType,
+} from '../types';
+import type { PermissionGrantVerb } from '../types';
+import type { NextFunction, Request, Response } from 'express';
 
 const requireFunderPermission =
-	(permission: Permission) =>
-	(req: Request, res: Response, next: NextFunction) => {
-		if (!isAuthContext(req)) {
-			next(new UnauthorizedError('The request lacks an AuthContext.'));
-			return;
-		}
-		if (req.role.isAdministrator) {
+	(permission: PermissionGrantVerb) =>
+	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		try {
+			if (!isAuthContext(req)) {
+				next(new UnauthorizedError('The request lacks an AuthContext.'));
+				return;
+			}
+			if (req.role.isAdministrator) {
+				next();
+				return;
+			}
+			const {
+				params: { funderShortCode },
+			} = req;
+			if (!isShortCode(funderShortCode)) {
+				next(
+					new InputValidationError(
+						'Invalid funderShortCode.',
+						isShortCode.errors ?? [],
+					),
+				);
+				return;
+			}
+			const hasPermission = await hasFunderPermission(db, req, {
+				funderShortCode,
+				permission,
+				scope: PermissionGrantEntityType.FUNDER,
+			});
+			if (!hasPermission) {
+				next(
+					new UnauthorizedError(
+						'Authenticated user does not have permission to perform this action.',
+					),
+				);
+				return;
+			}
 			next();
-			return;
+		} catch (error) {
+			next(error);
 		}
-		const {
-			params: { funderShortCode },
-		} = req;
-		if (!isShortCode(funderShortCode)) {
-			next(
-				new InputValidationError(
-					'Invalid funderShortCode.',
-					isShortCode.errors ?? [],
-				),
-			);
-			return;
-		}
-		const { user } = req;
-		const permissions = user.permissions.funder[funderShortCode] ?? [];
-		if (!permissions.includes(permission)) {
-			next(
-				new UnauthorizedError(
-					'Authenticated user does not have permission to perform this action.',
-				),
-			);
-			return;
-		}
-		next();
 	};
 
 export { requireFunderPermission };

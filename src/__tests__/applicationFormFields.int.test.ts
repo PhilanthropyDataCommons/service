@@ -7,7 +7,7 @@ import {
 	createOpportunity,
 	createOrUpdateBaseField,
 	createOrUpdateFunder,
-	createOrUpdateUserFunderPermission,
+	createPermissionGrant,
 	loadSystemFunder,
 	loadSystemUser,
 } from '../database';
@@ -17,7 +17,9 @@ import {
 	BaseFieldDataType,
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
 } from '../types';
 
 describe('/applicationFormFields', () => {
@@ -56,15 +58,21 @@ describe('/applicationFormFields', () => {
 				instructions: 'Original instructions',
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 
 			const response = await request(app)
@@ -116,15 +124,21 @@ describe('/applicationFormFields', () => {
 				instructions: 'Original instructions',
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 
 			const response = await request(app)
@@ -176,15 +190,21 @@ describe('/applicationFormFields', () => {
 				instructions: 'Original instructions',
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 
 			const response = await request(app)
@@ -238,15 +258,21 @@ describe('/applicationFormFields', () => {
 				instructions: 'Please provide your website',
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 
 			const response = await request(app)
@@ -298,15 +324,21 @@ describe('/applicationFormFields', () => {
 				instructions: 'Please select your organization type',
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 
 			const response = await request(app)
@@ -358,15 +390,21 @@ describe('/applicationFormFields', () => {
 				instructions: null,
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 
 			await request(app)
@@ -411,15 +449,21 @@ describe('/applicationFormFields', () => {
 				instructions: null,
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 
 			await request(app)
@@ -480,10 +524,13 @@ describe('/applicationFormFields', () => {
 				instructions: null,
 			});
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 
 			await request(app)
@@ -502,10 +549,13 @@ describe('/applicationFormFields', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const systemFunder = await loadSystemFunder(db, null);
 
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 
 			await request(app)

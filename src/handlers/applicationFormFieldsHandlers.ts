@@ -1,6 +1,7 @@
 import { HTTP_STATUS } from '../constants';
 import {
 	db,
+	hasFunderPermission,
 	loadApplicationForm,
 	loadApplicationFormField,
 	loadOpportunity,
@@ -10,14 +11,14 @@ import {
 	isId,
 	isAuthContext,
 	isApplicationFormFieldPatch,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 } from '../types';
 import {
 	FailedMiddlewareError,
 	InputValidationError,
 	UnauthorizedError,
 } from '../errors';
-import { authContextHasFunderPermission } from '../authorization';
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 import type { AuthContext } from '../types';
@@ -25,7 +26,7 @@ import type { AuthContext } from '../types';
 const checkApplicationFormFieldPermission = async (
 	authContext: AuthContext,
 	applicationFormFieldId: number,
-	permission: Permission,
+	permission: PermissionGrantVerb,
 ): Promise<void> => {
 	const applicationFormField = await loadApplicationFormField(
 		db,
@@ -46,11 +47,11 @@ const checkApplicationFormFieldPermission = async (
 	);
 
 	if (
-		!authContextHasFunderPermission(
-			authContext,
-			opportunity.funderShortCode,
+		!(await hasFunderPermission(db, authContext, {
+			funderShortCode: opportunity.funderShortCode,
 			permission,
-		)
+			scope: PermissionGrantEntityType.FUNDER,
+		}))
 	) {
 		throw new UnauthorizedError();
 	}
@@ -81,7 +82,7 @@ const patchApplicationFormField = async (
 	await checkApplicationFormFieldPermission(
 		req,
 		applicationFormFieldId,
-		Permission.EDIT,
+		PermissionGrantVerb.EDIT,
 	);
 
 	const updatedField = await updateApplicationFormField(

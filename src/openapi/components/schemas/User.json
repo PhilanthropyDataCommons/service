@@ -23,18 +23,9 @@
 							"$ref": "./Permission.json"
 						}
 					}
-				},
-				"funder": {
-					"type": "object",
-					"additionalProperties": {
-						"type": "array",
-						"items": {
-							"$ref": "./Permission.json"
-						}
-					}
 				}
 			},
-			"required": ["dataProvider", "funder"]
+			"required": ["dataProvider"]
 		},
 		"createdAt": {
 			"type": "string",

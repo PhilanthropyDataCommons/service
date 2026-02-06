@@ -239,14 +239,8 @@
 			"UserBundle": {
 				"$ref": "./components/schemas/UserBundle.json"
 			},
-			"UserFunderPermission": {
-				"$ref": "./components/schemas/UserFunderPermission.json"
-			},
 			"UserDataProviderPermission": {
 				"$ref": "./components/schemas/UserDataProviderPermission.json"
-			},
-			"UserGroupFunderPermission": {
-				"$ref": "./components/schemas/UserGroupFunderPermission.json"
 			},
 			"UserGroupDataProviderPermission": {
 				"$ref": "./components/schemas/UserGroupDataProviderPermission.json"
@@ -380,17 +374,11 @@
 		"/users": {
 			"$ref": "./paths/users.json"
 		},
-		"/users/{userKeycloakUserId}/funders/{funderShortCode}/permissions/{permission}": {
-			"$ref": "./paths/userFunderPermission.json"
-		},
 		"/users/{userKeycloakUserId}/dataProviders/{dataProviderShortCode}/permissions/{permission}": {
 			"$ref": "./paths/userDataProviderPermission.json"
 		},
 		"/users/{userKeycloakUserId}/opportunities/{opportunityId}/permissions/{opportunityPermission}": {
 			"$ref": "./paths/userOpportunityPermission.json"
-		},
-		"/userGroups/{keycloakOrganizationId}/funders/{funderShortCode}/permissions/{permission}": {
-			"$ref": "./paths/userGroupFunderPermission.json"
 		},
 		"/userGroups/{keycloakOrganizationId}/dataProviders/{dataProviderShortCode}/permissions/{permission}": {
 			"$ref": "./paths/userGroupDataProviderPermission.json"

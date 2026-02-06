@@ -3,6 +3,7 @@ import {
 	createProposalFieldValue,
 	createProposalVersion,
 	db,
+	hasFunderPermission,
 	loadApplicationForm,
 	loadApplicationFormField,
 	loadOpportunity,
@@ -13,7 +14,8 @@ import {
 	isAuthContext,
 	isWritableProposalVersionWithFieldValues,
 	isId,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 } from '../types';
 import {
 	InputValidationError,
@@ -23,7 +25,6 @@ import {
 	UnprocessableEntityError,
 } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
-import { authContextHasFunderPermission } from '../authorization';
 import { allNoLeaks } from '../promises';
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
@@ -140,11 +141,11 @@ const postProposalVersion = async (
 		const proposal = await loadProposal(db, req, proposalId);
 		const opportunity = await loadOpportunity(db, req, proposal.opportunityId);
 		if (
-			!authContextHasFunderPermission(
-				req,
-				opportunity.funderShortCode,
-				Permission.EDIT,
-			)
+			!(await hasFunderPermission(db, req, {
+				funderShortCode: opportunity.funderShortCode,
+				permission: PermissionGrantVerb.EDIT,
+				scope: PermissionGrantEntityType.FUNDER,
+			}))
 		) {
 			throw new UnprocessableEntityError(
 				'You do not have write permissions on this proposal.',

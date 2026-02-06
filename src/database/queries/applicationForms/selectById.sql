@@ -7,5 +7,6 @@ WHERE
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator,
 		opportunities.funder_short_code,
-		'view'
+		'view',
+		'funder'
 	);

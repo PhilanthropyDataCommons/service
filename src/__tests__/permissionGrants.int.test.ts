@@ -540,7 +540,7 @@ describe('/permissionGrants', () => {
 					granteeUserKeycloakUserId: testUserKeycloakUserId,
 					contextEntityType: 'changemaker',
 					changemakerId: changemaker.id,
-					scope: ['changemaker', 'proposal'],
+					scope: ['changemaker', 'funder'],
 					verbs: ['view'],
 				})
 				.expect(400);

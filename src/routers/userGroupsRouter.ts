@@ -1,24 +1,9 @@
 import express from 'express';
-import { userGroupDataProviderPermissionsHandlers } from '../handlers/userGroupDataProviderPermissionsHandlers';
 import { userGroupOpportunityPermissionsHandlers } from '../handlers/userGroupOpportunityPermissionsHandlers';
-import {
-	requireAdministratorRole,
-	requireDataProviderPermission,
-} from '../middleware';
-import { Permission } from '../types';
+import { requireAdministratorRole } from '../middleware';
 
 const userGroupsRouter = express.Router();
 
-userGroupsRouter.put(
-	'/:keycloakOrganizationId/dataProviders/:dataProviderShortCode/permissions/:permission',
-	requireDataProviderPermission(Permission.MANAGE),
-	userGroupDataProviderPermissionsHandlers.putUserGroupDataProviderPermission,
-);
-userGroupsRouter.delete(
-	'/:keycloakOrganizationId/dataProviders/:dataProviderShortCode/permissions/:permission',
-	requireDataProviderPermission(Permission.MANAGE),
-	userGroupDataProviderPermissionsHandlers.deleteUserGroupDataProviderPermission,
-);
 userGroupsRouter.put(
 	'/:keycloakOrganizationId/opportunities/:opportunityId/permissions/:opportunityPermission',
 	requireAdministratorRole,

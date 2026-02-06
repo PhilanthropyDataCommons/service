@@ -2,7 +2,8 @@ CREATE OR REPLACE FUNCTION has_data_provider_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	data_provider_short_code short_code_t,
-	permission permission_t
+	permission permission_grant_verb_t,
+	scope permission_grant_entity_type_t
 ) RETURNS boolean AS $$
 DECLARE
 	has_permission boolean;
@@ -13,20 +14,33 @@ BEGIN
 	END IF;
 
 	-- Check if the user has the specified permission on the specified data provider
+	-- via direct user grant or group membership
 	SELECT EXISTS (
 		SELECT 1
-		FROM user_data_provider_permissions
-		WHERE user_data_provider_permissions.user_keycloak_user_id = has_data_provider_permission.user_keycloak_user_id
-			AND user_data_provider_permissions.data_provider_short_code = has_data_provider_permission.data_provider_short_code
-			AND user_data_provider_permissions.permission = has_data_provider_permission.permission
-	) OR EXISTS (
-		SELECT 1
-		FROM ephemeral_user_group_associations
-		JOIN user_group_data_provider_permissions
-			ON user_group_data_provider_permissions.keycloak_organization_id = ephemeral_user_group_associations.user_group_keycloak_organization_id
-		WHERE ephemeral_user_group_associations.user_keycloak_user_id = has_data_provider_permission.user_keycloak_user_id
-			AND user_group_data_provider_permissions.data_provider_short_code = has_data_provider_permission.data_provider_short_code
-			AND user_group_data_provider_permissions.permission = has_data_provider_permission.permission
+		FROM permission_grants pg
+		WHERE pg.context_entity_type = 'dataProvider'
+			AND pg.data_provider_short_code
+				= has_data_provider_permission.data_provider_short_code
+			AND has_data_provider_permission.permission = ANY(pg.verbs)
+			AND has_data_provider_permission.scope = ANY(pg.scope)
+			AND (
+				(
+					pg.grantee_type = 'user'
+					AND pg.grantee_user_keycloak_user_id
+						= has_data_provider_permission.user_keycloak_user_id
+				)
+				OR (
+					pg.grantee_type = 'userGroup'
+					AND EXISTS (
+						SELECT 1
+						FROM ephemeral_user_group_associations euga
+						WHERE euga.user_keycloak_user_id
+							= has_data_provider_permission.user_keycloak_user_id
+							AND euga.user_group_keycloak_organization_id
+								= pg.grantee_keycloak_organization_id
+					)
+				)
+			)
 	) INTO has_permission;
 
 	RETURN has_permission;

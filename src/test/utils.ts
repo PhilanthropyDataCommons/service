@@ -39,7 +39,6 @@ export const getMockedUser = (): User => ({
 	keycloakUserName: getTestUserKeycloakUserName(),
 	createdAt: '',
 	permissions: {
-		dataProvider: {},
 		opportunity: {},
 	},
 });

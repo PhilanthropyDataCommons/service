@@ -3,14 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { app } from '../app';
 import {
 	db,
-	createOrUpdateDataProvider,
 	createOrUpdateFunder,
 	createOrUpdateUser,
 	loadSystemUser,
 	loadTableMetrics,
 	createOpportunity,
 	createOrUpdateUserOpportunityPermission,
-	createOrUpdateUserDataProviderPermission,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectTimestamp } from '../test/asymettricMatchers';
@@ -21,7 +19,6 @@ import {
 import {
 	keycloakIdToString,
 	stringToKeycloakId,
-	Permission,
 	OpportunityPermission,
 } from '../types';
 
@@ -52,7 +49,6 @@ describe('/users', () => {
 					{
 						...testUser,
 						permissions: {
-							dataProvider: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -65,11 +61,6 @@ describe('/users', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider(db, null, {
-				name: 'Test Provider',
-				shortCode: 'testProvider',
-				keycloakOrganizationId: null,
-			});
 			const funder = await createOrUpdateFunder(db, null, {
 				name: 'Test Funder',
 				shortCode: 'testFunder',
@@ -80,15 +71,6 @@ describe('/users', () => {
 				title: 'Test Opportunity',
 				funderShortCode: funder.shortCode,
 			});
-			await createOrUpdateUserDataProviderPermission(
-				db,
-				systemUserAuthContext,
-				{
-					userKeycloakUserId: testUser.keycloakUserId,
-					dataProviderShortCode: dataProvider.shortCode,
-					permission: Permission.MANAGE,
-				},
-			);
 			await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				opportunityId: opportunity.id,
@@ -106,9 +88,6 @@ describe('/users', () => {
 					{
 						...testUser,
 						permissions: {
-							dataProvider: {
-								testProvider: [Permission.MANAGE],
-							},
 							opportunity: {
 								[opportunity.id]: [OpportunityPermission.CREATE_PROPOSAL],
 							},
@@ -184,7 +163,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[14],
 						keycloakUserName: 'Alice',
 						permissions: {
-							dataProvider: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -193,7 +171,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[13],
 						keycloakUserName: 'Alice',
 						permissions: {
-							dataProvider: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -202,7 +179,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[12],
 						keycloakUserName: 'Alice',
 						permissions: {
-							dataProvider: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -211,7 +187,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[11],
 						keycloakUserName: 'Alice',
 						permissions: {
-							dataProvider: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -220,7 +195,6 @@ describe('/users', () => {
 						keycloakUserId: uuids[10],
 						keycloakUserName: 'Alice',
 						permissions: {
-							dataProvider: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),

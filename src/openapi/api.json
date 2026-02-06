@@ -238,12 +238,6 @@
 			},
 			"UserBundle": {
 				"$ref": "./components/schemas/UserBundle.json"
-			},
-			"UserDataProviderPermission": {
-				"$ref": "./components/schemas/UserDataProviderPermission.json"
-			},
-			"UserGroupDataProviderPermission": {
-				"$ref": "./components/schemas/UserGroupDataProviderPermission.json"
 			}
 		}
 	},
@@ -374,14 +368,8 @@
 		"/users": {
 			"$ref": "./paths/users.json"
 		},
-		"/users/{userKeycloakUserId}/dataProviders/{dataProviderShortCode}/permissions/{permission}": {
-			"$ref": "./paths/userDataProviderPermission.json"
-		},
 		"/users/{userKeycloakUserId}/opportunities/{opportunityId}/permissions/{opportunityPermission}": {
 			"$ref": "./paths/userOpportunityPermission.json"
-		},
-		"/userGroups/{keycloakOrganizationId}/dataProviders/{dataProviderShortCode}/permissions/{permission}": {
-			"$ref": "./paths/userGroupDataProviderPermission.json"
 		},
 		"/userGroups/{keycloakOrganizationId}/opportunities/{opportunityId}/permissions/{opportunityPermission}": {
 			"$ref": "./paths/userGroupOpportunityPermission.json"

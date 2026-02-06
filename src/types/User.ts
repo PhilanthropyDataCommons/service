@@ -1,10 +1,8 @@
 import { keycloakIdSchema } from './KeycloakId';
-import { permissionSchema } from './Permission';
 import { opportunityPermissionSchema } from './OpportunityPermission';
 import type { KeycloakId } from './KeycloakId';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
-import type { Permission } from './Permission';
 import type { OpportunityPermission } from './OpportunityPermission';
 
 interface User {
@@ -14,7 +12,6 @@ interface User {
 	// https://github.com/ajv-validator/ajv/issues/2163.
 	keycloakUserName: string | null | undefined;
 	readonly permissions: {
-		dataProvider: Record<string, Permission[]>;
 		opportunity: Record<string, OpportunityPermission[]>;
 	};
 	readonly createdAt: string;
@@ -31,14 +28,6 @@ const userSchema: JSONSchemaType<User> = {
 		permissions: {
 			type: 'object',
 			properties: {
-				dataProvider: {
-					type: 'object',
-					additionalProperties: {
-						type: 'array',
-						items: permissionSchema,
-					},
-					required: [],
-				},
 				opportunity: {
 					type: 'object',
 					additionalProperties: {
@@ -48,7 +37,7 @@ const userSchema: JSONSchemaType<User> = {
 					required: [],
 				},
 			},
-			required: ['dataProvider', 'opportunity'],
+			required: ['opportunity'],
 		},
 		createdAt: {
 			type: 'string',

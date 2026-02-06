@@ -33,7 +33,8 @@ BEGIN
     auth_context_keycloak_user_id,
     auth_context_is_administrator,
     data_providers.short_code,
-    'view'
+    'view',
+    'dataProvider'
   );
 
   SELECT funder_to_json(funders.*)

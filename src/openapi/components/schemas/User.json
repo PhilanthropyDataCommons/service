@@ -14,18 +14,8 @@
 		"permissions": {
 			"type": "object",
 			"readOnly": true,
-			"properties": {
-				"dataProvider": {
-					"type": "object",
-					"additionalProperties": {
-						"type": "array",
-						"items": {
-							"$ref": "./Permission.json"
-						}
-					}
-				}
-			},
-			"required": ["dataProvider"]
+			"properties": {},
+			"required": []
 		},
 		"createdAt": {
 			"type": "string",

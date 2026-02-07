@@ -25,7 +25,8 @@ WHERE
 					:authContextKeycloakUserId,
 					:authContextIsAdministrator,
 					changemakers_proposals.changemaker_id,
-					'view'
+					'view',
+					'changemaker'
 				)
 		)
 	);

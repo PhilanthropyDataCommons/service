@@ -8,7 +8,7 @@ import {
 	createChangemakerFieldValueBatch,
 	createChangemakerFieldValue,
 	loadSystemUser,
-	createOrUpdateUserChangemakerPermission,
+	createPermissionGrant,
 } from '../database';
 import { expectNumber, expectTimestamp } from '../test/asymettricMatchers';
 import { createTestBaseField } from '../test/factories';
@@ -21,7 +21,9 @@ import {
 	BaseFieldDataType,
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
 } from '../types';
 
 describe('POST /changemakerFieldValues', () => {
@@ -577,10 +579,13 @@ describe('GET /changemakerFieldValues', () => {
 			keycloakOrganizationId: null,
 		});
 
-		await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: testUser.keycloakUserId,
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 			changemakerId: visibleChangemaker.id,
-			permission: Permission.VIEW,
+			scope: [PermissionGrantEntityType.CHANGEMAKER],
+			verbs: [PermissionGrantVerb.VIEW],
 		});
 
 		const baseField = await createTestBaseField(db, null);
@@ -964,10 +969,13 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 			keycloakOrganizationId: null,
 		});
 
-		await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: testUser.keycloakUserId,
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 			changemakerId: changemaker.id,
-			permission: Permission.VIEW,
+			scope: [PermissionGrantEntityType.CHANGEMAKER],
+			verbs: [PermissionGrantVerb.VIEW],
 		});
 
 		const baseField = await createTestBaseField(db, null);

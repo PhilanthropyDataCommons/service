@@ -65,7 +65,8 @@ WHERE
 					:authContextKeycloakUserId,
 					:authContextIsAdministrator,
 					permission_cp.changemaker_id,
-					'view'
+					'view',
+					'changemaker'
 				)
 		)
 	)

@@ -1,5 +1,6 @@
 export * from './applicationFormFields';
 export * from './applicationForms';
+export * from './authorization';
 export * from './baseFieldLocalization';
 export * from './baseFields';
 export * from './baseFieldsCopyTasks';
@@ -25,10 +26,8 @@ export * from './proposals';
 export * from './proposalVersions';
 export * from './s3Buckets';
 export * from './sources';
-export * from './userChangemakerPermissions';
 export * from './userDataProviderPermissions';
 export * from './userFunderPermissions';
-export * from './userGroupChangemakerPermissions';
 export * from './userGroupDataProviderPermissions';
 export * from './userGroupFunderPermissions';
 export * from './userGroupOpportunityPermissions';

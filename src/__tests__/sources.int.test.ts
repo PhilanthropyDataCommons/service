@@ -9,7 +9,6 @@ import {
 	loadSystemSource,
 	loadTableMetrics,
 	loadSystemUser,
-	createOrUpdateUserChangemakerPermission,
 	createOrUpdateUserFunderPermission,
 	createOrUpdateUserDataProviderPermission,
 	createOpportunity,
@@ -17,6 +16,7 @@ import {
 	createProposalVersion,
 	createApplicationForm,
 	loadSystemFunder,
+	createPermissionGrant,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
@@ -24,7 +24,13 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
-import { Permission, PostgresErrorCode } from '../types';
+import {
+	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
+	PostgresErrorCode,
+} from '../types';
 
 const agent = request.agent(app);
 
@@ -250,10 +256,13 @@ describe('/sources', () => {
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -285,15 +294,21 @@ describe('/sources', () => {
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
-			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent

@@ -239,17 +239,11 @@
 			"UserBundle": {
 				"$ref": "./components/schemas/UserBundle.json"
 			},
-			"UserChangemakerPermission": {
-				"$ref": "./components/schemas/UserChangemakerPermission.json"
-			},
 			"UserFunderPermission": {
 				"$ref": "./components/schemas/UserFunderPermission.json"
 			},
 			"UserDataProviderPermission": {
 				"$ref": "./components/schemas/UserDataProviderPermission.json"
-			},
-			"UserGroupChangemakerPermission": {
-				"$ref": "./components/schemas/UserGroupChangemakerPermission.json"
 			},
 			"UserGroupFunderPermission": {
 				"$ref": "./components/schemas/UserGroupFunderPermission.json"
@@ -386,9 +380,6 @@
 		"/users": {
 			"$ref": "./paths/users.json"
 		},
-		"/users/{userKeycloakUserId}/changemakers/{changemakerId}/permissions/{permission}": {
-			"$ref": "./paths/userChangemakerPermission.json"
-		},
 		"/users/{userKeycloakUserId}/funders/{funderShortCode}/permissions/{permission}": {
 			"$ref": "./paths/userFunderPermission.json"
 		},
@@ -397,9 +388,6 @@
 		},
 		"/users/{userKeycloakUserId}/opportunities/{opportunityId}/permissions/{opportunityPermission}": {
 			"$ref": "./paths/userOpportunityPermission.json"
-		},
-		"/userGroups/{keycloakOrganizationId}/changemakers/{changemakerId}/permissions/{permission}": {
-			"$ref": "./paths/userGroupChangemakerPermission.json"
 		},
 		"/userGroups/{keycloakOrganizationId}/funders/{funderShortCode}/permissions/{permission}": {
 			"$ref": "./paths/userGroupFunderPermission.json"

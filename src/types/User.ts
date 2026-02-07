@@ -14,7 +14,6 @@ interface User {
 	// https://github.com/ajv-validator/ajv/issues/2163.
 	keycloakUserName: string | null | undefined;
 	readonly permissions: {
-		changemaker: Record<string, Permission[]>;
 		dataProvider: Record<string, Permission[]>;
 		funder: Record<string, Permission[]>;
 		opportunity: Record<string, OpportunityPermission[]>;
@@ -33,14 +32,6 @@ const userSchema: JSONSchemaType<User> = {
 		permissions: {
 			type: 'object',
 			properties: {
-				changemaker: {
-					type: 'object',
-					additionalProperties: {
-						type: 'array',
-						items: permissionSchema,
-					},
-					required: [],
-				},
 				dataProvider: {
 					type: 'object',
 					additionalProperties: {
@@ -66,7 +57,7 @@ const userSchema: JSONSchemaType<User> = {
 					required: [],
 				},
 			},
-			required: ['changemaker', 'dataProvider', 'funder', 'opportunity'],
+			required: ['dataProvider', 'funder', 'opportunity'],
 		},
 		createdAt: {
 			type: 'string',

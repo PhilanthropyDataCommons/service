@@ -6,5 +6,6 @@ WHERE
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator,
 		changemaker_id,
-		'view'
+		'view',
+		'changemaker'
 	);

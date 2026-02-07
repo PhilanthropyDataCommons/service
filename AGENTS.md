@@ -82,6 +82,18 @@ The linter (`npm run lint`) checks for:
 npm run test
 ```
 
+The full test suite takes several minutes to run. Avoid running the full test suite (`npm run test`) unless explicitly requested. Instead, run specific test files relevant to your changes:
+
+```bash
+# Run a specific test file
+npx jest --config=jest.config.int.js --runInBand src/__tests__/yourFile.int.test.ts
+
+# Run tests matching a pattern
+npx jest --config=jest.config.int.js --runInBand --testNamePattern="test description"
+```
+
+The user will run the full test suite themselves when needed.
+
 ## Project Structure
 
 ```

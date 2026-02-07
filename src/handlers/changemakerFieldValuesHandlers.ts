@@ -3,6 +3,7 @@ import {
 	db,
 	createChangemakerFieldValue,
 	getLimitValues,
+	hasChangemakerPermission,
 	loadBaseField,
 	loadChangemaker,
 	loadChangemakerFieldValue,
@@ -13,7 +14,8 @@ import {
 	isAuthContext,
 	isId,
 	isWritableChangemakerFieldValue,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 } from '../types';
@@ -30,7 +32,6 @@ import {
 	extractPaginationParameters,
 } from '../queryParameters';
 import { coerceParams } from '../coercion';
-import { authContextHasChangemakerPermission } from '../authorization';
 import { fieldValueIsValid } from '../fieldValidation';
 import type { Request, Response } from 'express';
 
@@ -64,7 +65,11 @@ const postChangemakerFieldValue = async (
 	});
 
 	if (
-		!authContextHasChangemakerPermission(req, changemakerId, Permission.EDIT)
+		!(await hasChangemakerPermission(db, req, {
+			changemakerId,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.CHANGEMAKER,
+		}))
 	) {
 		throw new UnprocessableEntityError(
 			'You do not have write permissions on this changemaker.',

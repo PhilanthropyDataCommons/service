@@ -6,7 +6,7 @@ import {
 	loadTableMetrics,
 	loadSystemFunder,
 	loadSystemOpportunity,
-	createOrUpdateUserFunderPermission,
+	createPermissionGrant,
 	loadSystemUser,
 	createOrUpdateFunder,
 } from '../database';
@@ -16,7 +16,11 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { Permission } from '../types';
+import {
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
+} from '../types';
 
 describe('/opportunities', () => {
 	describe('GET /', () => {
@@ -84,10 +88,13 @@ describe('/opportunities', () => {
 				keycloakOrganizationId: null,
 				isCollaborative: false,
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const visibleOpportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
@@ -146,10 +153,13 @@ describe('/opportunities', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: '✨',
@@ -219,10 +229,13 @@ describe('/opportunities', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 			const before = await loadTableMetrics('opportunities');
 			const result = await request(app)
@@ -249,15 +262,21 @@ describe('/opportunities', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
 			const before = await loadTableMetrics('opportunities');
 			await request(app)

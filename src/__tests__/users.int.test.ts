@@ -5,13 +5,12 @@ import {
 	db,
 	createOrUpdateDataProvider,
 	createOrUpdateFunder,
-	createOrUpdateUserDataProviderPermission,
-	createOrUpdateUserFunderPermission,
 	createOrUpdateUser,
 	loadSystemUser,
 	loadTableMetrics,
 	createOpportunity,
 	createOrUpdateUserOpportunityPermission,
+	createOrUpdateUserDataProviderPermission,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectTimestamp } from '../test/asymettricMatchers';
@@ -54,7 +53,6 @@ describe('/users', () => {
 						...testUser,
 						permissions: {
 							dataProvider: {},
-							funder: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -87,15 +85,10 @@ describe('/users', () => {
 				systemUserAuthContext,
 				{
 					userKeycloakUserId: testUser.keycloakUserId,
-					permission: Permission.MANAGE,
 					dataProviderShortCode: dataProvider.shortCode,
+					permission: Permission.MANAGE,
 				},
 			);
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				permission: Permission.EDIT,
-				funderShortCode: funder.shortCode,
-			});
 			await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
 				userKeycloakUserId: testUser.keycloakUserId,
 				opportunityId: opportunity.id,
@@ -115,9 +108,6 @@ describe('/users', () => {
 						permissions: {
 							dataProvider: {
 								testProvider: [Permission.MANAGE],
-							},
-							funder: {
-								testFunder: [Permission.EDIT],
 							},
 							opportunity: {
 								[opportunity.id]: [OpportunityPermission.CREATE_PROPOSAL],
@@ -195,7 +185,6 @@ describe('/users', () => {
 						keycloakUserName: 'Alice',
 						permissions: {
 							dataProvider: {},
-							funder: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -205,7 +194,6 @@ describe('/users', () => {
 						keycloakUserName: 'Alice',
 						permissions: {
 							dataProvider: {},
-							funder: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -215,7 +203,6 @@ describe('/users', () => {
 						keycloakUserName: 'Alice',
 						permissions: {
 							dataProvider: {},
-							funder: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -225,7 +212,6 @@ describe('/users', () => {
 						keycloakUserName: 'Alice',
 						permissions: {
 							dataProvider: {},
-							funder: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),
@@ -235,7 +221,6 @@ describe('/users', () => {
 						keycloakUserName: 'Alice',
 						permissions: {
 							dataProvider: {},
-							funder: {},
 							opportunity: {},
 						},
 						createdAt: expectTimestamp(),

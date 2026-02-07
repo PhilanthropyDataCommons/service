@@ -4,6 +4,7 @@ import {
 	createSource,
 	getLimitValues,
 	hasChangemakerPermission,
+	hasFunderPermission,
 	loadSource,
 	loadSourceBundle,
 	removeSource,
@@ -23,10 +24,7 @@ import {
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
-import {
-	authContextHasDataProviderPermission,
-	authContextHasFunderPermission,
-} from '../authorization';
+import { authContextHasDataProviderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
 const postSource = async (req: Request, res: Response): Promise<void> => {
@@ -41,11 +39,11 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 	}
 	if (
 		'funderShortCode' in req.body &&
-		!authContextHasFunderPermission(
-			req,
-			req.body.funderShortCode,
-			Permission.EDIT,
-		)
+		!(await hasFunderPermission(db, req, {
+			funderShortCode: req.body.funderShortCode,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.FUNDER,
+		}))
 	) {
 		throw new UnprocessableEntityError(
 			'You do not have write permissions on a funder with the specified short code.',

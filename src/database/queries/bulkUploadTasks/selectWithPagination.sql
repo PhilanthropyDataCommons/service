@@ -20,7 +20,8 @@ WHERE
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator,
 		opportunities.funder_short_code,
-		'view'
+		'view',
+		'funder'
 	)
 ORDER BY bulk_upload_tasks.id DESC
 LIMIT :limit OFFSET :offset;

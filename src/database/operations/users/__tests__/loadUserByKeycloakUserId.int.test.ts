@@ -5,8 +5,6 @@ import {
 	createEphemeralUserGroupAssociation,
 	loadSystemUser,
 	createOrUpdateDataProvider,
-	createOrUpdateUserFunderPermission,
-	createOrUpdateUserGroupFunderPermission,
 	createOrUpdateUserDataProviderPermission,
 	createOrUpdateUserGroupDataProviderPermission,
 	createOpportunity,
@@ -34,9 +32,8 @@ describe('loadUserByKeycloakUserId', () => {
 			keycloakUserId: '42db47e1-0612-4a41-9092-7928491b1fad',
 			keycloakUserName: 'Bob',
 		});
-		const funderKeycloakOrganizationId = 'f4941cc3-6b39-4b4f-bc60-cac4541d2788';
 		const funder = await createOrUpdateFunder(db, null, {
-			keycloakOrganizationId: funderKeycloakOrganizationId,
+			keycloakOrganizationId: null,
 			name: 'Foo Funder',
 			shortCode: 'fooFunder',
 			isCollaborative: false,
@@ -44,22 +41,13 @@ describe('loadUserByKeycloakUserId', () => {
 		const dataProviderKeycloakOrganizationId =
 			'9426f49a-4c11-4d26-9e58-2b62bf2ee512';
 		const dataProvider = await createOrUpdateDataProvider(db, null, {
-			keycloakOrganizationId: funderKeycloakOrganizationId,
+			keycloakOrganizationId: dataProviderKeycloakOrganizationId,
 			name: 'Foo Data Provider',
 			shortCode: 'fooDataProvider',
 		});
 		const opportunity = await createOpportunity(db, null, {
 			title: 'Test Opportunity',
 			funderShortCode: funder.shortCode,
-		});
-
-		// Associate the user with a funder group
-		await createEphemeralUserGroupAssociation(db, null, {
-			userKeycloakUserId: user.keycloakUserId,
-			userGroupKeycloakOrganizationId: stringToKeycloakId(
-				funderKeycloakOrganizationId,
-			),
-			notAfter: ephemeralExpiration,
 		});
 
 		// Associate the user with a data provider group
@@ -71,17 +59,7 @@ describe('loadUserByKeycloakUserId', () => {
 			notAfter: ephemeralExpiration,
 		});
 
-		// Assign EDIT and VIEW via direct permissions
-		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: user.keycloakUserId,
-			funderShortCode: funder.shortCode,
-			permission: Permission.EDIT,
-		});
-		await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: user.keycloakUserId,
-			funderShortCode: funder.shortCode,
-			permission: Permission.VIEW,
-		});
+		// Assign EDIT and VIEW via direct user permissions
 		await createOrUpdateUserDataProviderPermission(db, systemUserAuthContext, {
 			userKeycloakUserId: user.keycloakUserId,
 			dataProviderShortCode: dataProvider.shortCode,
@@ -104,16 +82,6 @@ describe('loadUserByKeycloakUserId', () => {
 		});
 
 		// Assign MANAGE and VIEW via group permissions
-		await createOrUpdateUserGroupFunderPermission(db, systemUserAuthContext, {
-			keycloakOrganizationId: stringToKeycloakId(funderKeycloakOrganizationId),
-			funderShortCode: funder.shortCode,
-			permission: Permission.MANAGE,
-		});
-		await createOrUpdateUserGroupFunderPermission(db, systemUserAuthContext, {
-			keycloakOrganizationId: stringToKeycloakId(funderKeycloakOrganizationId),
-			funderShortCode: funder.shortCode,
-			permission: Permission.VIEW,
-		});
 		await createOrUpdateUserGroupDataProviderPermission(
 			db,
 			systemUserAuthContext,
@@ -176,13 +144,6 @@ describe('loadUserByKeycloakUserId', () => {
 						Permission.VIEW,
 					]),
 				},
-				funder: {
-					fooFunder: expectArrayContaining([
-						Permission.MANAGE,
-						Permission.EDIT,
-						Permission.VIEW,
-					]),
-				},
 				opportunity: {
 					[opportunity.id]: expectArrayContaining([
 						OpportunityPermission.MANAGE,
@@ -203,27 +164,11 @@ describe('loadUserByKeycloakUserId', () => {
 			keycloakUserName: 'Carol',
 		});
 
-		// Associate the user with a funder group (expired)
-		const funderKeycloakOrganizationId = 'f4941cc3-6b39-4b4f-bc60-cac4541d2788';
-		const funder = await createOrUpdateFunder(db, null, {
-			keycloakOrganizationId: funderKeycloakOrganizationId,
-			name: 'Foo Funder',
-			shortCode: 'fooFunder',
-			isCollaborative: false,
-		});
-		await createEphemeralUserGroupAssociation(db, null, {
-			userKeycloakUserId: user.keycloakUserId,
-			userGroupKeycloakOrganizationId: stringToKeycloakId(
-				funderKeycloakOrganizationId,
-			),
-			notAfter: new Date(0).toISOString(),
-		});
-
 		// Associate the user with a data provider group (expired)
 		const dataProviderKeycloakOrganizationId =
 			'9426f49a-4c11-4d26-9e58-2b62bf2ee512';
 		const dataProvider = await createOrUpdateDataProvider(db, null, {
-			keycloakOrganizationId: funderKeycloakOrganizationId,
+			keycloakOrganizationId: dataProviderKeycloakOrganizationId,
 			name: 'Foo Data Provider',
 			shortCode: 'fooDataProvider',
 		});
@@ -236,11 +181,6 @@ describe('loadUserByKeycloakUserId', () => {
 		});
 
 		// Assign VIEW via group permissions
-		await createOrUpdateUserGroupFunderPermission(db, systemUserAuthContext, {
-			keycloakOrganizationId: stringToKeycloakId(funderKeycloakOrganizationId),
-			funderShortCode: funder.shortCode,
-			permission: Permission.VIEW,
-		});
 		await createOrUpdateUserGroupDataProviderPermission(
 			db,
 			systemUserAuthContext,
@@ -264,7 +204,6 @@ describe('loadUserByKeycloakUserId', () => {
 			createdAt: expectTimestamp(),
 			permissions: {
 				dataProvider: {},
-				funder: {},
 				opportunity: {},
 			},
 		});
@@ -287,7 +226,6 @@ describe('loadUserByKeycloakUserId', () => {
 			createdAt: expectTimestamp(),
 			permissions: {
 				dataProvider: {},
-				funder: {},
 				opportunity: {},
 			},
 		});

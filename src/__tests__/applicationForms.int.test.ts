@@ -6,7 +6,7 @@ import {
 	createOrUpdateBaseField,
 	createOpportunity,
 	createOrUpdateFunder,
-	createOrUpdateUserFunderPermission,
+	createPermissionGrant,
 	db,
 	loadSystemFunder,
 	loadSystemUser,
@@ -17,7 +17,9 @@ import {
 	BaseFieldDataType,
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
 } from '../types';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
@@ -132,10 +134,13 @@ describe('/applicationForms', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const otherFunder = await createOrUpdateFunder(db, null, {
 				shortCode: 'otherFunder',
@@ -297,10 +302,13 @@ describe('/applicationForms', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createOpportunity(db, null, {
 				title: 'Holiday opportunity 🎄',
@@ -374,10 +382,13 @@ describe('/applicationForms', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createOpportunity(db, null, {
 				title: 'Holiday opportunity 🎄',
@@ -496,15 +507,21 @@ describe('/applicationForms', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
 			await createOpportunity(db, null, {
 				title: 'Holiday opportunity 🎄',
@@ -553,10 +570,13 @@ describe('/applicationForms', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Test Opportunity',
@@ -598,10 +618,13 @@ describe('/applicationForms', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Test Opportunity',
@@ -640,10 +663,13 @@ describe('/applicationForms', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Test Opportunity',
@@ -700,15 +726,21 @@ describe('/applicationForms', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
@@ -768,15 +800,21 @@ describe('/applicationForms', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',

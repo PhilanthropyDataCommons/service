@@ -7,7 +7,8 @@ WHERE
 			:authContextKeycloakUserId,
 			:authContextIsAdministrator,
 			opportunities.funder_short_code,
-			'view'
+			'view',
+			'funder'
 		)
 		OR has_opportunity_permission(
 			:authContextKeycloakUserId,

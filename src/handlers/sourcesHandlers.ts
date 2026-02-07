@@ -4,6 +4,7 @@ import {
 	createSource,
 	getLimitValues,
 	hasChangemakerPermission,
+	hasDataProviderPermission,
 	hasFunderPermission,
 	loadSource,
 	loadSourceBundle,
@@ -13,7 +14,6 @@ import {
 	isAuthContext,
 	isId,
 	isWritableSource,
-	Permission,
 	PermissionGrantEntityType,
 	PermissionGrantVerb,
 } from '../types';
@@ -24,7 +24,6 @@ import {
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
-import { authContextHasDataProviderPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
 const postSource = async (req: Request, res: Response): Promise<void> => {
@@ -51,11 +50,11 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 	}
 	if (
 		'dataProviderShortCode' in req.body &&
-		!authContextHasDataProviderPermission(
-			req,
-			req.body.dataProviderShortCode,
-			Permission.EDIT,
-		)
+		!(await hasDataProviderPermission(db, req, {
+			dataProviderShortCode: req.body.dataProviderShortCode,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.DATA_PROVIDER,
+		}))
 	) {
 		throw new UnprocessableEntityError(
 			'You do not have write permissions on a data provider with the specified short code.',

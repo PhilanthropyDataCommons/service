@@ -49,27 +49,12 @@ WHERE
 		ELSE
 			opportunities.funder_short_code = :funderShortCode
 	END
-	AND (
-		has_funder_permission(
-			:authContextKeycloakUserId,
-			:authContextIsAdministrator,
-			opportunities.funder_short_code,
-			'view',
-			'funder'
-		)
-		OR EXISTS (
-			SELECT 1
-			FROM changemakers_proposals AS permission_cp
-			WHERE
-				permission_cp.proposal_id = proposals.id
-				AND has_changemaker_permission(
-					:authContextKeycloakUserId,
-					:authContextIsAdministrator,
-					permission_cp.changemaker_id,
-					'view',
-					'changemaker'
-				)
-		)
+	AND has_proposal_permission(
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator,
+		proposals.id,
+		'view',
+		'proposal'
 	)
 GROUP BY proposals.id
 ORDER BY proposals.id DESC

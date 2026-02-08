@@ -3,7 +3,7 @@ import {
 	db,
 	createProposal,
 	getLimitValues,
-	hasFunderPermission,
+	hasOpportunityPermission,
 	loadProposal,
 	loadProposalBundle,
 	loadOpportunity,
@@ -14,7 +14,6 @@ import {
 	isWritableProposal,
 	PermissionGrantEntityType,
 	PermissionGrantVerb,
-	OpportunityPermission,
 } from '../types';
 import {
 	FailedMiddlewareError,
@@ -30,7 +29,6 @@ import {
 	extractFunderParameters,
 } from '../queryParameters';
 import { coerceParams } from '../coercion';
-import { authContextHasOpportunityPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
 const getProposals = async (req: Request, res: Response): Promise<void> => {
@@ -94,16 +92,11 @@ const postProposal = async (req: Request, res: Response): Promise<void> => {
 	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (
-			!(await hasFunderPermission(db, req, {
-				funderShortCode: opportunity.funderShortCode,
-				permission: PermissionGrantVerb.EDIT,
-				scope: PermissionGrantEntityType.FUNDER,
-			})) &&
-			!authContextHasOpportunityPermission(
-				req,
-				opportunity.id,
-				OpportunityPermission.CREATE_PROPOSAL,
-			)
+			!(await hasOpportunityPermission(db, req, {
+				opportunityId: opportunity.id,
+				permission: PermissionGrantVerb.CREATE,
+				scope: PermissionGrantEntityType.PROPOSAL,
+			}))
 		) {
 			throw new UnprocessableEntityError(
 				'You do not have permission to create a proposal for this opportunity.',

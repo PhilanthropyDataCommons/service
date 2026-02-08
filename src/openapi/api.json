@@ -367,12 +367,6 @@
 		},
 		"/users": {
 			"$ref": "./paths/users.json"
-		},
-		"/users/{userKeycloakUserId}/opportunities/{opportunityId}/permissions/{opportunityPermission}": {
-			"$ref": "./paths/userOpportunityPermission.json"
-		},
-		"/userGroups/{keycloakOrganizationId}/opportunities/{opportunityId}/permissions/{opportunityPermission}": {
-			"$ref": "./paths/userGroupOpportunityPermission.json"
 		}
 	}
 }

@@ -1,6 +1,5 @@
-// Jest hoists .mock() calls, so this needs to go before imports.
-// See https://stackoverflow.com/a/67595592/159522
-const mockedGeneratePresignedPost = jest.fn();
+import { mockClient } from 'aws-sdk-client-mock';
+import { S3Client } from '@aws-sdk/client-s3';
 import request from 'supertest';
 import { app } from '../app';
 import { mockJwt as authHeader } from '../test/mockJwt';
@@ -10,12 +9,13 @@ import {
 	expectTimestamp,
 } from '../test/asymettricMatchers';
 
-jest.mock('@aws-sdk/client-s3');
-jest.mock('../s3', () => ({
-	generatePresignedPost: mockedGeneratePresignedPost,
-}));
+const s3Mock = mockClient(S3Client);
 
 describe('/files', () => {
+	beforeEach(() => {
+		s3Mock.reset();
+	});
+
 	describe('POST /', () => {
 		it('requires authentication', async () => {
 			await request(app).post('/files').expect(401);

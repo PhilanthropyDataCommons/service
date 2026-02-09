@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Viewing proposal field values now requires explicit `view | proposalFieldValue` scope. This scope can be granted at the proposalFieldValue, proposal, opportunity, funder, or changemaker context level. Users with only `view | proposal` scope will see proposals with empty `fieldValues` arrays.
+- Existing permissions with `proposal` scope have been migrated to also include `proposalFieldValue` scope, ensuring backward compatibility.
 - Migrated changemaker permissions to the unified `permission_grants` table. Changemaker permissions should now be managed via the `/permissionGrants` endpoints.
 - Migrated funder permissions to the unified `permission_grants` table. Funder permissions should now be managed via the `/permissionGrants` endpoints.
 - Migrated data provider permissions to the unified `permission_grants` table. Data provider permissions should now be managed via the `/permissionGrants` endpoints.

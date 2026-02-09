@@ -1,4 +1,9 @@
-SELECT changemaker_proposal_to_json(changemakers_proposals.*) AS object
+SELECT
+	changemaker_proposal_to_json(
+		changemakers_proposals.*,
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator
+	) AS object
 FROM changemakers_proposals
 WHERE
 	CASE

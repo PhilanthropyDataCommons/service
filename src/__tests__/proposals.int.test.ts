@@ -1429,6 +1429,83 @@ describe('/proposals', () => {
 			});
 		});
 
+		it('returns empty fieldValues array when user has proposal scope but not proposalFieldValue scope', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createOrUpdateFunder(db, null, {
+				name: 'Test Funder',
+				shortCode: 'testFunder',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const systemSource = await loadSystemSource(db, null);
+			await createTestBaseFields();
+
+			// Grant only proposal scope (not proposalFieldValue)
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: testFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Test Opportunity',
+				funderShortCode: testFunder.shortCode,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			const applicationFormField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'summary',
+				position: 1,
+				label: 'Summary',
+				instructions: 'Enter a summary',
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				testUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+				},
+			);
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: applicationFormField.id,
+				position: 1,
+				value: 'This value should be hidden',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			const response = await request(app)
+				.get(`/proposals/${proposal.id}`)
+				.set(authHeader)
+				.expect(200);
+
+			expect(response.body).toMatchObject({
+				id: proposal.id,
+				versions: [
+					{
+						id: proposalVersion.id,
+						fieldValues: [],
+					},
+				],
+			});
+		});
+
 		it('does not return proposal field values associated with forbidden base fields', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);

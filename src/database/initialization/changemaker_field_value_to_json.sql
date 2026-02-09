@@ -1,7 +1,9 @@
 SELECT drop_function('changemaker_field_value_to_json');
 
 CREATE FUNCTION changemaker_field_value_to_json(
-	changemaker_field_value changemaker_field_values
+	changemaker_field_value changemaker_field_values,
+	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_is_administrator boolean DEFAULT FALSE
 )
 RETURNS jsonb AS $$
 DECLARE
@@ -28,7 +30,11 @@ BEGIN
 	FROM base_fields
 	WHERE base_fields.short_code = changemaker_field_value.base_field_short_code;
 
-	SELECT changemaker_field_value_batch_to_json(changemaker_field_value_batches.*)
+	SELECT changemaker_field_value_batch_to_json(
+		changemaker_field_value_batches.*,
+		auth_context_keycloak_user_id,
+		auth_context_is_administrator
+	)
 	INTO batch_json
 	FROM changemaker_field_value_batches
 	WHERE changemaker_field_value_batches.id = changemaker_field_value.batch_id;

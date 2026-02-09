@@ -11,6 +11,7 @@ import {
 	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
 	createOrUpdateFunder,
+	createPermissionGrant,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
@@ -41,6 +42,9 @@ import {
 	BaseFieldDataType,
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
 	PostgresErrorCode,
 	stringToKeycloakId,
 } from '../types';
@@ -61,7 +65,8 @@ const insertTestChangemakers = async () => {
 const setupTestContext = async () => {
 	const systemSource = await loadSystemSource(db, null);
 	const systemUser = await loadSystemUser(db, null);
-	const systemUserAuthContext = getAuthContext(systemUser);
+	const systemUserAuthContext = getAuthContext(systemUser, true);
+	const testUser = await loadTestUser();
 	const baseFieldEmail = await createOrUpdateBaseField(db, null, {
 		label: 'Fifty one fifty three',
 		shortCode: 'fifty_one_fifty_three',
@@ -109,6 +114,20 @@ const setupTestContext = async () => {
 		keycloakOrganizationId: null,
 		isCollaborative: false,
 	});
+
+	// Grant test user permission to view proposal field values for this funder
+	await createPermissionGrant(db, systemUserAuthContext, {
+		granteeType: PermissionGrantGranteeType.USER,
+		granteeUserKeycloakUserId: testUser.keycloakUserId,
+		contextEntityType: PermissionGrantEntityType.FUNDER,
+		funderShortCode: firstFunder.shortCode,
+		scope: [
+			PermissionGrantEntityType.PROPOSAL,
+			PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+		],
+		verbs: [PermissionGrantVerb.VIEW],
+	});
+
 	const firstFunderOpportunity = await createOpportunity(db, null, {
 		title: `${firstFunder.name} opportunity`,
 		funderShortCode: firstFunder.shortCode,
@@ -1805,7 +1824,8 @@ describe('/changemakers', () => {
 
 		it('returns both ProposalFieldValue and ChangemakerFieldValue for different base fields', async () => {
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
 			const baseFieldEmail = await createOrUpdateBaseField(db, null, {
 				label: 'Org Email Multi',
 				shortCode: 'org_email_multi_test',
@@ -1861,6 +1881,20 @@ describe('/changemakers', () => {
 				keycloakOrganizationId: null,
 				isCollaborative: false,
 			});
+
+			// Grant permission with proposalFieldValue scope so test user can see field values
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [
+					PermissionGrantEntityType.PROPOSAL,
+					PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+				],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Multi Test Opportunity',
 				funderShortCode: funder.shortCode,
@@ -1924,6 +1958,185 @@ describe('/changemakers', () => {
 								value: '+15555559999',
 							}),
 						]),
+					});
+				});
+		});
+
+		it('only returns ProposalFieldValues from proposals where user has proposalFieldValue scope', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
+
+			const baseFieldEmail = await createOrUpdateBaseField(db, null, {
+				label: 'Org Email Perm Test',
+				shortCode: 'org_email_perm_test',
+				description: 'The email of the organization.',
+				dataType: BaseFieldDataType.EMAIL,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			const baseFieldPhone = await createOrUpdateBaseField(db, null, {
+				label: 'Org Phone Perm Test',
+				shortCode: 'org_phone_perm_test',
+				description: 'The phone of the organization.',
+				dataType: BaseFieldDataType.PHONE_NUMBER,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '99-9999996',
+				name: 'Test Changemaker Permission Filter',
+				keycloakOrganizationId: null,
+			});
+
+			// Create two funders with different permissions
+			const funderWithFieldValueScope = await createOrUpdateFunder(db, null, {
+				shortCode: 'funder_with_fv_scope',
+				name: 'Funder With Field Value Scope',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const funderWithoutFieldValueScope = await createOrUpdateFunder(
+				db,
+				null,
+				{
+					shortCode: 'funder_without_fv_scope',
+					name: 'Funder Without Field Value Scope',
+					keycloakOrganizationId: null,
+					isCollaborative: false,
+				},
+			);
+
+			// Grant permission WITH proposalFieldValue scope for first funder
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funderWithFieldValueScope.shortCode,
+				scope: [
+					PermissionGrantEntityType.PROPOSAL,
+					PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+				],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			// Grant permission WITHOUT proposalFieldValue scope for second funder
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funderWithoutFieldValueScope.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			// Create proposal 1 (under funder WITH proposalFieldValue scope)
+			const opportunity1 = await createOpportunity(db, null, {
+				title: 'Opportunity With FV Scope',
+				funderShortCode: funderWithFieldValueScope.shortCode,
+			});
+			const source1 = await createSource(db, null, {
+				funderShortCode: funderWithFieldValueScope.shortCode,
+				label: 'Source With FV Scope',
+			});
+			const proposal1 = await createProposal(db, systemUserAuthContext, {
+				opportunityId: opportunity1.id,
+				externalId: 'proposal-with-fv-scope',
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: changemaker.id,
+				proposalId: proposal1.id,
+			});
+			const applicationForm1 = await createApplicationForm(db, null, {
+				opportunityId: opportunity1.id,
+				name: null,
+			});
+			const proposalVersion1 = await createProposalVersion(
+				db,
+				systemUserAuthContext,
+				{
+					proposalId: proposal1.id,
+					applicationFormId: applicationForm1.id,
+					sourceId: source1.id,
+				},
+			);
+			const applicationFormField1 = await createApplicationFormField(db, null, {
+				label: 'Email',
+				applicationFormId: applicationForm1.id,
+				baseFieldShortCode: baseFieldEmail.shortCode,
+				position: 1,
+				instructions: 'Enter email',
+			});
+			const visibleFieldValue = await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion1.id,
+				applicationFormFieldId: applicationFormField1.id,
+				position: 1,
+				value: 'visible@test.com',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Create proposal 2 (under funder WITHOUT proposalFieldValue scope)
+			const opportunity2 = await createOpportunity(db, null, {
+				title: 'Opportunity Without FV Scope',
+				funderShortCode: funderWithoutFieldValueScope.shortCode,
+			});
+			const source2 = await createSource(db, null, {
+				funderShortCode: funderWithoutFieldValueScope.shortCode,
+				label: 'Source Without FV Scope',
+			});
+			const proposal2 = await createProposal(db, systemUserAuthContext, {
+				opportunityId: opportunity2.id,
+				externalId: 'proposal-without-fv-scope',
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: changemaker.id,
+				proposalId: proposal2.id,
+			});
+			const applicationForm2 = await createApplicationForm(db, null, {
+				opportunityId: opportunity2.id,
+				name: null,
+			});
+			const proposalVersion2 = await createProposalVersion(
+				db,
+				systemUserAuthContext,
+				{
+					proposalId: proposal2.id,
+					applicationFormId: applicationForm2.id,
+					sourceId: source2.id,
+				},
+			);
+			const applicationFormField2 = await createApplicationFormField(db, null, {
+				label: 'Phone',
+				applicationFormId: applicationForm2.id,
+				baseFieldShortCode: baseFieldPhone.shortCode,
+				position: 1,
+				instructions: 'Enter phone',
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion2.id,
+				applicationFormFieldId: applicationFormField2.id,
+				position: 1,
+				value: '+15555550000',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					// Should only return the field value from the proposal where user
+					// has proposalFieldValue scope, not the one without
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: [visibleFieldValue],
 					});
 				});
 		});

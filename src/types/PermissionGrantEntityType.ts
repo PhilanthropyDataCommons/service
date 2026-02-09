@@ -92,10 +92,12 @@ const allowedScopesForContextEntityType: Record<
 	[PermissionGrantEntityType.CHANGEMAKER]: [
 		PermissionGrantEntityType.CHANGEMAKER,
 		PermissionGrantEntityType.PROPOSAL,
+		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 	],
 	[PermissionGrantEntityType.FUNDER]: [
 		PermissionGrantEntityType.FUNDER,
 		PermissionGrantEntityType.PROPOSAL,
+		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 	],
 	[PermissionGrantEntityType.DATA_PROVIDER]: [
 		PermissionGrantEntityType.DATA_PROVIDER,
@@ -103,8 +105,12 @@ const allowedScopesForContextEntityType: Record<
 	[PermissionGrantEntityType.OPPORTUNITY]: [
 		PermissionGrantEntityType.OPPORTUNITY,
 		PermissionGrantEntityType.PROPOSAL,
+		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 	],
-	[PermissionGrantEntityType.PROPOSAL]: [PermissionGrantEntityType.PROPOSAL],
+	[PermissionGrantEntityType.PROPOSAL]: [
+		PermissionGrantEntityType.PROPOSAL,
+		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+	],
 	[PermissionGrantEntityType.PROPOSAL_VERSION]: [
 		PermissionGrantEntityType.PROPOSAL_VERSION,
 	],

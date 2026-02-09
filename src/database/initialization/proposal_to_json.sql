@@ -1,13 +1,21 @@
 SELECT drop_function('proposal_to_json');
 
-CREATE FUNCTION proposal_to_json(proposal proposals)
+CREATE FUNCTION proposal_to_json(
+	proposal proposals,
+	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_is_administrator boolean DEFAULT FALSE
+)
 RETURNS jsonb AS $$
 DECLARE
   proposal_versions_json JSONB;
   opportunity_json JSONB;
 BEGIN
   SELECT jsonb_agg(
-    proposal_version_to_json(proposal_versions.*)
+    proposal_version_to_json(
+      proposal_versions.*,
+      auth_context_keycloak_user_id,
+      auth_context_is_administrator
+    )
     ORDER BY proposal_versions.version DESC, proposal_versions.id DESC
   )
   INTO proposal_versions_json

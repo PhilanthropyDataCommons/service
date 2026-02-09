@@ -7,5 +7,8 @@ INSERT INTO changemaker_field_value_batches (
 	:notes,
 	:authContextKeycloakUserId
 )
-RETURNING changemaker_field_value_batch_to_json(changemaker_field_value_batches)
-	AS object;
+RETURNING changemaker_field_value_batch_to_json(
+	changemaker_field_value_batches,
+	:authContextKeycloakUserId,
+	:authContextIsAdministrator
+) AS object;

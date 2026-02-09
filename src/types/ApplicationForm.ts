@@ -10,6 +10,7 @@ import type { Writable } from './Writable';
 interface ApplicationForm {
 	readonly id: number;
 	opportunityId: number;
+	name: string | null;
 	readonly version: number;
 	readonly fields: ApplicationFormField[];
 	readonly createdAt: string;
@@ -28,12 +29,20 @@ const writableApplicationFormWithFieldsSchema: JSONSchemaType<WritableApplicatio
 			opportunityId: {
 				type: 'number',
 			},
+			name: {
+				type: 'string',
+				/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+				 * This is a workaround for the fact that AJV does not support nullable types in TypeScript.
+				 * See: https://github.com/ajv-validator/ajv/issues/2163
+				 */
+				nullable: true as false,
+			},
 			fields: {
 				type: 'array',
 				items: writableApplicationFormFieldWithApplicationContextSchema,
 			},
 		},
-		required: ['opportunityId', 'fields'],
+		required: ['opportunityId', 'name', 'fields'],
 	};
 
 const isWritableApplicationFormWithFields = ajv.compile(

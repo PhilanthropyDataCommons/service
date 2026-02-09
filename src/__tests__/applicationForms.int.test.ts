@@ -87,12 +87,15 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+				name: null,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+				name: null,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 3,
+				name: null,
 			});
 			const response = await request(app)
 				.get('/applicationForms')
@@ -158,12 +161,15 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+				name: null,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+				name: null,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 3,
+				name: null,
 			});
 			const response = await request(app)
 				.get('/applicationForms')
@@ -175,6 +181,7 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp(),
 						id: 1,
 						opportunityId: 1,
+						name: null,
 						fields: [],
 						version: 1,
 					},
@@ -182,6 +189,7 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp(),
 						id: 2,
 						opportunityId: 2,
+						name: null,
 						fields: [],
 						version: 1,
 					},
@@ -189,6 +197,7 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp(),
 						id: 3,
 						opportunityId: 2,
+						name: null,
 						fields: [],
 						version: 2,
 					},
@@ -215,12 +224,15 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+				name: null,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+				name: null,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 3,
+				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
@@ -316,6 +328,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
@@ -396,6 +409,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
@@ -466,6 +480,7 @@ describe('/applicationForms', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 				label: 'Forbidden Field',
@@ -529,6 +544,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 2,
+				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
@@ -584,6 +600,7 @@ describe('/applicationForms', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
@@ -632,6 +649,7 @@ describe('/applicationForms', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			await createTestBaseFields();
 
@@ -677,6 +695,7 @@ describe('/applicationForms', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			const result = await request(app)
@@ -707,6 +726,7 @@ describe('/applicationForms', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			await request(app)
@@ -753,6 +773,7 @@ describe('/applicationForms', () => {
 				.set(authHeader)
 				.send({
 					opportunityId: opportunity.id,
+					name: null,
 					fields: [],
 				})
 				.expect(201);
@@ -761,6 +782,7 @@ describe('/applicationForms', () => {
 			expect(result.body).toMatchObject({
 				id: 2,
 				opportunityId: 2,
+				name: null,
 				version: 1,
 				fields: [],
 				createdAt: expectTimestamp(),
@@ -781,6 +803,7 @@ describe('/applicationForms', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: opportunity.id,
+					name: null,
 					fields: [],
 				})
 				.expect(201);
@@ -788,11 +811,76 @@ describe('/applicationForms', () => {
 			expect(result.body).toMatchObject({
 				id: 2,
 				opportunityId: 2,
+				name: null,
 				version: 1,
 				fields: [],
 				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
+		});
+
+		it('creates an application form with a name', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const result = await request(app)
+				.post('/applicationForms')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					opportunityId: opportunity.id,
+					name: '2025 Grant Application',
+					fields: [],
+				})
+				.expect(201);
+			expect(result.body).toMatchObject({
+				id: 2,
+				opportunityId: 2,
+				name: '2025 Grant Application',
+				version: 1,
+				fields: [],
+				createdAt: expectTimestamp(),
+			});
+		});
+
+		it('creates an application form with null name', async () => {
+			const systemFunder = await loadSystemFunder(db, null);
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Tremendous opportunity 👌',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const result = await request(app)
+				.post('/applicationForms')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					opportunityId: opportunity.id,
+					name: null,
+					fields: [],
+				})
+				.expect(201);
+			expect(result.body).toMatchObject({
+				id: 2,
+				opportunityId: 2,
+				name: null,
+				version: 1,
+				fields: [],
+				createdAt: expectTimestamp(),
+			});
+		});
+
+		it('returns 400 bad request when no name is provided', async () => {
+			await request(app)
+				.post('/applicationForms')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					opportunityId: 1,
+					fields: [],
+				})
+				.expect(400);
 		});
 
 		it(`returns 401 unauthorized if the user does not have edit permission on the associated opportunity's funder`, async () => {
@@ -827,6 +915,7 @@ describe('/applicationForms', () => {
 				.set(authHeader)
 				.send({
 					opportunityId: opportunity.id,
+					name: null,
 					fields: [],
 				})
 				.expect(401);
@@ -849,6 +938,7 @@ describe('/applicationForms', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: opportunity.id,
+					name: null,
 					fields: [
 						{
 							baseFieldShortCode: 'organizationName',
@@ -865,6 +955,7 @@ describe('/applicationForms', () => {
 			expect(result.body).toMatchObject({
 				id: 2,
 				opportunityId: 2,
+				name: null,
 				version: 1,
 				fields: [
 					{
@@ -890,9 +981,11 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const result = await request(app)
 				.post('/applicationForms')
@@ -900,6 +993,7 @@ describe('/applicationForms', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: opportunity.id,
+					name: null,
 					fields: [],
 				})
 				.expect(201);
@@ -934,6 +1028,7 @@ describe('/applicationForms', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: opportunity.id,
+					name: null,
 					fields: [
 						{
 							baseFieldShortCode: forbiddenBaseField.shortCode,
@@ -976,6 +1071,7 @@ describe('/applicationForms', () => {
 				.set(authHeader)
 				.send({
 					opportunityId: 1,
+					name: null,
 					fields: [
 						{
 							foo: 'not a field',
@@ -996,6 +1092,7 @@ describe('/applicationForms', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: 9999,
+					name: null,
 					fields: [],
 				})
 				.expect(422);
@@ -1035,6 +1132,7 @@ describe('/applicationForms', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					opportunityId: opportunity.id,
+					name: null,
 					fields: [
 						{
 							baseFieldShortCode: 'organizationName',

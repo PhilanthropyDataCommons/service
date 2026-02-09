@@ -36,6 +36,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 		const applicationForm = await createApplicationForm(db, null, {
 			opportunityId: opportunity.id,
+			name: null,
 		});
 		const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Forbidden Field',
@@ -103,6 +104,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 		const applicationForm = await createApplicationForm(db, null, {
 			opportunityId: opportunity.id,
+			name: null,
 		});
 
 		const fileBaseField = await createOrUpdateBaseField(db, null, {
@@ -191,6 +193,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 		const applicationForm = await createApplicationForm(db, null, {
 			opportunityId: opportunity.id,
+			name: null,
 		});
 
 		// Create a file base field
@@ -274,6 +277,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 		const applicationForm = await createApplicationForm(db, null, {
 			opportunityId: opportunity.id,
+			name: null,
 		});
 
 		// Create a file base field
@@ -349,6 +353,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 		const applicationForm = await createApplicationForm(db, null, {
 			opportunityId: opportunity.id,
+			name: null,
 		});
 
 		// Create a file base field
@@ -424,6 +429,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 		const applicationForm = await createApplicationForm(db, null, {
 			opportunityId: opportunity.id,
+			name: null,
 		});
 
 		// Create a string base field

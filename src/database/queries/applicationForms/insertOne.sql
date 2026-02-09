@@ -1,8 +1,10 @@
 INSERT INTO application_forms (
 	opportunity_id,
+	name,
 	version
 ) VALUES (
 	:opportunityId,
+	:name,
 	coalesce(
 		(
 			SELECT max(af.version) + 1

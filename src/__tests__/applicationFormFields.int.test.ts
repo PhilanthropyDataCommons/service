@@ -37,6 +37,7 @@ describe('/applicationFormFields', () => {
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			const baseField = await createOrUpdateBaseField(db, null, {
@@ -103,6 +104,7 @@ describe('/applicationFormFields', () => {
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			const baseField = await createOrUpdateBaseField(db, null, {
@@ -169,6 +171,7 @@ describe('/applicationFormFields', () => {
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			const baseField = await createOrUpdateBaseField(db, null, {
@@ -237,6 +240,7 @@ describe('/applicationFormFields', () => {
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			const baseField = await createOrUpdateBaseField(db, null, {
@@ -303,6 +307,7 @@ describe('/applicationFormFields', () => {
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			const baseField = await createOrUpdateBaseField(db, null, {
@@ -369,6 +374,7 @@ describe('/applicationFormFields', () => {
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			const baseField = await createOrUpdateBaseField(db, null, {
@@ -428,6 +434,7 @@ describe('/applicationFormFields', () => {
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			const baseField = await createOrUpdateBaseField(db, null, {
@@ -503,6 +510,7 @@ describe('/applicationFormFields', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 
 			const baseField = await createOrUpdateBaseField(db, null, {

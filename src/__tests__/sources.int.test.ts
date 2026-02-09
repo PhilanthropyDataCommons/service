@@ -638,6 +638,7 @@ describe('/sources', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: 1,
+					name: null,
 				},
 			);
 			await createProposalVersion(db, systemUserAuthContext, {

@@ -311,6 +311,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
@@ -436,6 +437,7 @@ describe('/proposals', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const proposalVersion = await createProposalVersion(
 				db,
@@ -640,6 +642,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
 				proposalId: 1,
@@ -943,6 +946,7 @@ describe('/proposals', () => {
 			await createTestBaseFields();
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
@@ -1190,6 +1194,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
@@ -1446,6 +1451,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,

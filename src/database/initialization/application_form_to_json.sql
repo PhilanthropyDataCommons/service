@@ -18,6 +18,7 @@ BEGIN
   RETURN jsonb_build_object(
     'id', application_form.id,
     'opportunityId', application_form.opportunity_id,
+    'name', application_form.name,
     'version', application_form.version,
     'fields', COALESCE(application_form_fields_json, '[]'::JSONB),
     'createdAt', application_form.created_at

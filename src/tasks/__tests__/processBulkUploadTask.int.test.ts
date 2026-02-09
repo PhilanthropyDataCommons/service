@@ -59,6 +59,7 @@ const createTestApplicationForm = async (
 	});
 	const applicationForm = await createApplicationForm(db, authContext, {
 		opportunityId: opportunity.id,
+		name: null,
 	});
 	await Promise.all(
 		shortCodes.map(

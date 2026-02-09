@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- `GET /files` endpoint to retrieve a paginated list of files. Users see only files they created; administrators can see all files and filter by creator using the `createdBy` parameter.
+
 ### Changed
 
 - Migrated changemaker permissions to the unified `permission_grants` table. Changemaker permissions should now be managed via the `/permissionGrants` endpoints.

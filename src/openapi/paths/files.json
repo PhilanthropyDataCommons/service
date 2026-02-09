@@ -1,4 +1,27 @@
 {
+	"get": {
+		"operationId": "getFiles",
+		"summary": "Gets a list of files.",
+		"tags": ["Files"],
+		"description": "Returns a paginated list of files created by the authenticated user. Administrators can see all files and filter by creator using the createdBy parameter.",
+		"security": [{ "auth": [] }],
+		"parameters": [
+			{ "$ref": "../components/parameters/pageParam.json" },
+			{ "$ref": "../components/parameters/countParam.json" },
+			{ "$ref": "../components/parameters/createdByParam.json" }
+		],
+		"responses": {
+			"200": {
+				"description": "A list of files.",
+				"content": {
+					"application/json": {
+						"schema": { "$ref": "../components/schemas/FileBundle.json" }
+					}
+				}
+			},
+			"401": { "$ref": "../components/responses/Unauthorized.json" }
+		}
+	},
 	"post": {
 		"operationId": "createFile",
 		"summary": "Create a new file",

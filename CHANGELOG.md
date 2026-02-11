@@ -50,6 +50,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `DELETE /userGroups/{keycloakOrganizationId}/opportunities/{opportunityId}/permissions/{opportunityPermission}`
 - `UserOpportunityPermission` and `UserGroupOpportunityPermission` schemas have been removed from the OpenAPI spec.
 
+### Fixed
+
+- `Changemaker.fields` file values are now decorated with `downloadUrl` to allow access to file contents.
+- `ChangemakerProposal.proposal.versions[].fieldValues` file values are now decorated with `downloadUrl`.
+
 ## 0.30.0 2026-01-27
 
 ### Added

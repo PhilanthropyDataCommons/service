@@ -53,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `Changemaker.fields` file values are now decorated with `downloadUrl` to allow access to file contents.
+- `ChangemakerProposal.proposal.versions[].fieldValues` file values are now decorated with `downloadUrl`.
 
 ## 0.30.0 2026-01-27
 

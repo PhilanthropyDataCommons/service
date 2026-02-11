@@ -1,11 +1,15 @@
 import { ajv } from '../ajv';
+import type { Changemaker } from './Changemaker';
 import type { JSONSchemaType } from 'ajv';
+import type { Proposal } from './Proposal';
 import type { Writable } from './Writable';
 
 interface ChangemakerProposal {
 	readonly id: number;
 	changemakerId: number;
 	proposalId: number;
+	readonly changemaker: Changemaker;
+	readonly proposal: Proposal;
 	readonly createdAt: string;
 }
 

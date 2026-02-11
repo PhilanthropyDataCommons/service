@@ -2275,6 +2275,7 @@ describe('/changemakers', () => {
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const proposalVersion = await createProposalVersion(
 				db,

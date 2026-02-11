@@ -4,8 +4,16 @@ import {
 	db,
 	createOpportunity,
 	createChangemaker,
+	createChangemakerFieldValue,
+	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
 	createProposal,
+	createProposalVersion,
+	createProposalFieldValue,
+	createApplicationForm,
+	createApplicationFormField,
+	createOrUpdateBaseField,
+	createSource,
 	loadTableMetrics,
 	loadSystemFunder,
 	loadSystemUser,
@@ -13,12 +21,21 @@ import {
 	createPermissionGrant,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
-import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import { createTestFile } from '../test/factories';
+import {
+	expectArray,
+	expectObjectContaining,
+	expectString,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
 import {
+	BaseFieldCategory,
+	BaseFieldDataType,
+	BaseFieldSensitivityClassification,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
@@ -297,6 +314,219 @@ describe('/changemakerProposals', () => {
 				.get('/changemakerProposals?changemaker=foo')
 				.set(authHeader)
 				.expect(400);
+		});
+
+		it('decorates proposal version file field values with downloadUrl', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemFunder = await loadSystemFunder(db, null);
+
+			// Create a file-type base field (PROJECT category for proposal-only field)
+			const baseFieldFile = await createOrUpdateBaseField(db, null, {
+				label: 'Project Attachment',
+				shortCode: 'project_attachment_cmp_test',
+				description: 'An attachment for the project.',
+				dataType: BaseFieldDataType.FILE,
+				category: BaseFieldCategory.PROJECT,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '88-8888883',
+				name: 'Proposal File Decorated Changemaker',
+				keycloakOrganizationId: null,
+			});
+
+			// Create a test file
+			const testFile = await createTestFile(db, systemUserAuthContext, {
+				name: 'project-attachment.pdf',
+				mimeType: 'application/pdf',
+				size: 25000,
+			});
+
+			// Create funder source
+			const funderSource = await createSource(db, null, {
+				funderShortCode: systemFunder.shortCode,
+				label: 'Proposal Version File Funder Source',
+			});
+
+			// Create opportunity and proposal
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Proposal Version File Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, systemUserAuthContext, {
+				opportunityId: opportunity.id,
+				externalId: 'proposal-version-file-test',
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: changemaker.id,
+				proposalId: proposal.id,
+			});
+
+			// Create application form and field
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				systemUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: funderSource.id,
+				},
+			);
+			const applicationFormField = await createApplicationFormField(db, null, {
+				label: 'Project Attachment',
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: baseFieldFile.shortCode,
+				position: 1,
+				instructions: 'Upload project attachment',
+			});
+
+			// Create ProposalFieldValue with file
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: applicationFormField.id,
+				position: 1,
+				value: testFile.id.toString(),
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			await request(app)
+				.get(`/changemakerProposals?changemaker=${changemaker.id}`)
+				.set(authHeaderWithAdminRole)
+				.expect(200)
+				.expect((res) => {
+					// The file should appear in proposal.versions[].fieldValues with downloadUrl
+					expect(res.body).toMatchObject({
+						entries: [
+							expectObjectContaining({
+								proposal: expectObjectContaining({
+									id: proposal.id,
+									versions: [
+										expectObjectContaining({
+											id: proposalVersion.id,
+											fieldValues: [
+												expectObjectContaining({
+													value: testFile.id.toString(),
+													file: expectObjectContaining({
+														id: testFile.id,
+														name: 'project-attachment.pdf',
+														downloadUrl: expectString(),
+													}),
+												}),
+											],
+										}),
+									],
+								}),
+							}),
+						],
+					});
+				});
+		});
+
+		it('decorates changemaker field values with downloadUrl', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemFunder = await loadSystemFunder(db, null);
+
+			// Create a file-type base field (ORGANIZATION category for changemaker fields)
+			const baseFieldFile = await createOrUpdateBaseField(db, null, {
+				label: 'Org Document CMP',
+				shortCode: 'org_document_cmp_test',
+				description: 'A document associated with the organization.',
+				dataType: BaseFieldDataType.FILE,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '88-8888884',
+				name: 'Changemaker File Decorated Changemaker',
+				keycloakOrganizationId: null,
+			});
+
+			// Create a test file
+			const testFile = await createTestFile(db, systemUserAuthContext, {
+				name: 'org-document.pdf',
+				mimeType: 'application/pdf',
+				size: 30000,
+			});
+
+			// Create changemaker-sourced source and batch for changemaker field values
+			const changemakerSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: `${changemaker.name} source`,
+			});
+			const batch = await createChangemakerFieldValueBatch(
+				db,
+				systemUserAuthContext,
+				{
+					sourceId: changemakerSource.id,
+					notes: 'CMP file download URL test batch',
+				},
+			);
+
+			// Create a ChangemakerFieldValue with the file ID as the value
+			await createChangemakerFieldValue(db, systemUserAuthContext, {
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseFieldFile.shortCode,
+				batchId: batch.id,
+				value: testFile.id.toString(),
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Create a proposal to link to the changemaker
+			const opportunity = await createOpportunity(db, null, {
+				title: 'CMP Changemaker Field Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, systemUserAuthContext, {
+				opportunityId: opportunity.id,
+				externalId: 'cmp-changemaker-field-test',
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: changemaker.id,
+				proposalId: proposal.id,
+			});
+
+			await request(app)
+				.get(`/changemakerProposals?changemaker=${changemaker.id}`)
+				.set(authHeaderWithAdminRole)
+				.expect(200)
+				.expect((res) => {
+					// The file should appear in changemaker.fields with downloadUrl
+					expect(res.body).toMatchObject({
+						entries: [
+							expectObjectContaining({
+								changemaker: expectObjectContaining({
+									id: changemaker.id,
+									fields: [
+										expectObjectContaining({
+											changemakerId: changemaker.id,
+											baseFieldShortCode: baseFieldFile.shortCode,
+											value: testFile.id.toString(),
+											file: expectObjectContaining({
+												id: testFile.id,
+												name: 'org-document.pdf',
+												downloadUrl: expectString(),
+											}),
+										}),
+									],
+								}),
+							}),
+						],
+					});
+				});
 		});
 	});
 

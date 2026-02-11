@@ -111,7 +111,10 @@ describe('/proposalVersions', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [
+					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.PROPOSAL,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createOpportunity(db, null, {
@@ -159,7 +162,10 @@ describe('/proposalVersions', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: visibleChangemaker.id,
-				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				scope: [
+					PermissionGrantEntityType.CHANGEMAKER,
+					PermissionGrantEntityType.PROPOSAL,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createOpportunity(db, null, {
@@ -311,16 +317,11 @@ describe('/proposalVersions', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.EDIT],
-			});
-			await createPermissionGrant(db, systemUserAuthContext, {
-				granteeType: PermissionGrantGranteeType.USER,
-				granteeUserKeycloakUserId: testUser.keycloakUserId,
-				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.VIEW],
+				scope: [
+					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.PROPOSAL,
+				],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
 			});
 			await createOpportunity(db, null, {
 				title: '🔥',

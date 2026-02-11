@@ -70,7 +70,10 @@ describe('/changemakerProposals', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [
+					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.PROPOSAL,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -78,7 +81,10 @@ describe('/changemakerProposals', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: visibleChangemaker.id,
-				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				scope: [
+					PermissionGrantEntityType.CHANGEMAKER,
+					PermissionGrantEntityType.PROPOSAL,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const visibleOpportunity = await createOpportunity(db, null, {
@@ -362,16 +368,11 @@ describe('/changemakerProposals', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.EDIT],
-			});
-			await createPermissionGrant(db, systemUserAuthContext, {
-				granteeType: PermissionGrantGranteeType.USER,
-				granteeUserKeycloakUserId: testUser.keycloakUserId,
-				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.VIEW],
+				scope: [
+					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.PROPOSAL,
+				],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
@@ -431,7 +432,10 @@ describe('/changemakerProposals', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [
+					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.PROPOSAL,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createOpportunity(db, null, {

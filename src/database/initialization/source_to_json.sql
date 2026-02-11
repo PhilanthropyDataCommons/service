@@ -1,6 +1,10 @@
 SELECT drop_function('source_to_json');
 
-CREATE FUNCTION source_to_json(source sources)
+CREATE FUNCTION source_to_json(
+	source sources,
+	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_is_administrator boolean DEFAULT FALSE
+)
 RETURNS jsonb AS $$
 DECLARE
   data_provider_json JSONB := NULL::JSONB;
@@ -18,7 +22,13 @@ BEGIN
   FROM funders
   WHERE funders.short_code = source.funder_short_code;
 
-  SELECT changemaker_to_json(changemakers.*)
+  -- Use shallow=TRUE to prevent infinite recursion (source -> changemaker -> fields -> batch -> source)
+  SELECT changemaker_to_json(
+    changemakers.*,
+    auth_context_keycloak_user_id,
+    auth_context_is_administrator,
+    TRUE
+  )
   INTO changemaker_json
   FROM changemakers
   WHERE changemakers.id = source.changemaker_id;

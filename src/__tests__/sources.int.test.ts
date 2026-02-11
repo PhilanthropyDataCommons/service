@@ -146,11 +146,18 @@ describe('/sources', () => {
 				.expect(201);
 			const after = await loadTableMetrics('sources');
 			expect(before.count).toEqual(1);
+			// Source response includes a shallow changemaker (no fields/fiscalSponsors)
 			expect(result.body).toMatchObject({
 				id: 2,
 				label: 'Example Corp',
 				changemakerId: changemaker.id,
-				changemaker,
+				changemaker: {
+					id: changemaker.id,
+					taxId: changemaker.taxId,
+					name: changemaker.name,
+					keycloakOrganizationId: changemaker.keycloakOrganizationId,
+					createdAt: changemaker.createdAt,
+				},
 				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(2);
@@ -272,11 +279,18 @@ describe('/sources', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics('sources');
+			// Source response includes a shallow changemaker (no fields/fiscalSponsors)
 			expect(result.body).toMatchObject({
 				id: 2,
 				label: 'Example Corp',
 				changemakerId: changemaker.id,
-				changemaker,
+				changemaker: {
+					id: changemaker.id,
+					taxId: changemaker.taxId,
+					name: changemaker.name,
+					keycloakOrganizationId: changemaker.keycloakOrganizationId,
+					createdAt: changemaker.createdAt,
+				},
 				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);

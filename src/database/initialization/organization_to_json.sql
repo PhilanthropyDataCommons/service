@@ -11,9 +11,9 @@ DECLARE
   data_provider_json JSONB := NULL::JSONB;
   funder_json JSONB := NULL::JSONB;
 BEGIN
-  -- Shallow changemaker (3rd arg) because the purpose is to get the changemaker ID.
-  -- Not passing the auth context (2nd arg) because we want shallow fields anyway.
-  SELECT changemaker_to_json(changemakers.*, NULL, TRUE)
+  -- Shallow changemaker (4th arg) because the purpose is to get the changemaker ID.
+  -- Not passing the auth context (2nd/3rd args) because we want shallow fields anyway.
+  SELECT changemaker_to_json(changemakers.*, NULL, FALSE, TRUE)
   INTO changemaker_json
   FROM changemakers
   WHERE changemakers.keycloak_organization_id = keycloak_id

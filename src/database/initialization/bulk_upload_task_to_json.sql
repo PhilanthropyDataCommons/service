@@ -15,7 +15,11 @@ DECLARE
   attachments_archive_file_json JSONB;
   created_by_user_json JSONB;
 BEGIN
-  SELECT source_to_json(sources.*)
+  SELECT source_to_json(
+    sources.*,
+    auth_context_keycloak_user_id,
+    auth_context_is_administrator
+  )
   INTO source_json
   FROM sources
   WHERE sources.id = bulk_upload_task.source_id;

@@ -1,11 +1,16 @@
-SELECT proposal_to_json(proposals.*) AS object
+SELECT
+	proposal_to_json(
+		proposals.*,
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator
+	) AS object
 FROM proposals
 WHERE
-	proposals.id = :proposalId
+	id = :proposalId
 	AND has_proposal_permission(
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator,
-		proposals.id,
+		id,
 		'view',
 		'proposal'
 	);

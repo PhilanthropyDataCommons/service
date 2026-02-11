@@ -3,6 +3,7 @@ SELECT drop_function('changemaker_to_json');
 CREATE FUNCTION changemaker_to_json(
 	changemaker changemakers,
 	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_is_administrator boolean DEFAULT FALSE,
 	shallow boolean DEFAULT FALSE
 )
 RETURNS jsonb AS $$
@@ -12,7 +13,7 @@ DECLARE
 	changemaker_json JSONB;
 BEGIN
 	-- Terminate changemaker recursion by setting shallow here. This means no fields or sponsors in sponsors.
-	SELECT jsonb_agg(changemaker_to_json(fiscal_sponsors.*, auth_context_keycloak_user_id, TRUE))
+	SELECT jsonb_agg(changemaker_to_json(fiscal_sponsors.*, auth_context_keycloak_user_id, auth_context_is_administrator, TRUE))
 	INTO fiscal_sponsors_json
 	FROM changemakers AS fiscal_sponsors
 	INNER JOIN fiscal_sponsorships fs
@@ -68,12 +69,24 @@ BEGIN
 				AND u.keycloak_user_id IS NOT NULL
 				-- Guard against the valid-but-not-really-valid-here system user:
 				AND u.keycloak_user_id != system_keycloak_user_id()
+				-- Check permission to view this proposal field value:
+				AND has_proposal_field_value_permission(
+					auth_context_keycloak_user_id,
+					auth_context_is_administrator,
+					pfv.id,
+					'view',
+					'proposalFieldValue'
+				)
 
 			UNION ALL
 
 			-- ChangemakerFieldValues
 			SELECT
-				changemaker_field_value_to_json(cfv.*) AS field_value_json,
+				changemaker_field_value_to_json(
+					cfv.*,
+					auth_context_keycloak_user_id,
+					auth_context_is_administrator
+				) AS field_value_json,
 				cfv.base_field_short_code AS base_field_short_code,
 				s.changemaker_id AS source_changemaker_id,
 				s.funder_short_code AS source_funder_short_code,

@@ -1,4 +1,9 @@
-SELECT proposal_to_json(proposals.*) AS object
+SELECT
+	proposal_to_json(
+		proposals.*,
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator
+	) AS object
 FROM proposals
 	INNER JOIN opportunities
 		ON proposals.opportunity_id = opportunities.id

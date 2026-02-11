@@ -8,4 +8,8 @@ SET
 		keycloak_organization_id
 	)
 WHERE id = :changemakerId
-RETURNING changemaker_to_json(changemakers) AS object;
+RETURNING changemaker_to_json(
+	changemakers,
+	:authContextKeycloakUserId,
+	:authContextIsAdministrator
+) AS object;

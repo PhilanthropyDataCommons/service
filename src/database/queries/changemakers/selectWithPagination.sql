@@ -1,6 +1,10 @@
 SELECT DISTINCT
 	o.id,
-	changemaker_to_json(o.*, :authContextKeycloakUserId) AS object
+	changemaker_to_json(
+		o.*,
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator
+	) AS object
 FROM changemakers AS o
 	LEFT JOIN changemakers_proposals AS op ON o.id = op.changemaker_id
 WHERE

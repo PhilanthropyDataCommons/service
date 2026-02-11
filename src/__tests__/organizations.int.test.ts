@@ -4,11 +4,11 @@ import {
 	db,
 	createChangemaker,
 	createOrUpdateDataProvider,
-	createOrUpdateFunder,
 	createPermissionGrant,
 	loadSystemUser,
 } from '../database';
 import { expectArray } from '../test/asymettricMatchers';
+import { createTestFunder } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -70,23 +70,19 @@ describe('/organizations', () => {
 				keycloakOrganizationId: '865cb652-a1d2-418a-8c89-015c0d6e4676',
 			});
 
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				name: 'Funder Organization does not exist in Keycloak or has not been linked.',
 				shortCode: 'unexpectedfunderone',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			const expectedFunder = await createOrUpdateFunder(db, null, {
+			const expectedFunder = await createTestFunder(db, null, {
 				name: 'Change, Inc.',
 				shortCode: 'changeinc',
 				keycloakOrganizationId,
-				isCollaborative: false,
 			});
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				name: 'Funder Organization is linked but I am not the one that should be returned.',
 				shortCode: 'unexpectedfundertwo',
 				keycloakOrganizationId: '75b4198f-dd88-4a6c-8259-fe4d725af125',
-				isCollaborative: false,
 			});
 
 			const response = await agent
@@ -112,17 +108,14 @@ describe('/organizations', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const keycloakOrganizationId = 'b5465297-d63a-4371-8054-f94d95f1aace';
 
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				name: 'Unlinked funder one.',
 				shortCode: 'unlinkedfunderone',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			const expectedFunder = await createOrUpdateFunder(db, null, {
+			const expectedFunder = await createTestFunder(db, null, {
 				name: 'Funderdome',
 				shortCode: 'funderdome',
 				keycloakOrganizationId,
-				isCollaborative: false,
 			});
 			const authContext = await getTestAuthContext(false);
 			// Grant myself view access to this organization
@@ -136,11 +129,10 @@ describe('/organizations', () => {
 			});
 			const keycloakOrganizationIdLackingPerm =
 				'75b4198f-dd88-4a6c-8259-fe4d725af125';
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				name: 'Decoy funder, unexpected because I lack view access to this org',
 				shortCode: 'decoyfunderunexpected',
 				keycloakOrganizationId: keycloakOrganizationIdLackingPerm,
-				isCollaborative: false,
 			});
 
 			// I have view access to this org

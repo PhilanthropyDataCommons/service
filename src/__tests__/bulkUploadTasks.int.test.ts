@@ -10,11 +10,10 @@ import {
 	loadSystemUser,
 	loadTableMetrics,
 	loadSystemFunder,
-	createOrUpdateFunder,
 	createPermissionGrant,
 } from '../database';
+import { createTestFile, createTestFunder } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
-import { createTestFile } from '../test/factories';
 import {
 	expectArray,
 	expectNumber,
@@ -62,12 +61,7 @@ describe('/tasks/bulkUploads', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
-			const anotherFunder = await createOrUpdateFunder(db, null, {
-				shortCode: 'anotherFunder',
-				name: 'Another Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const anotherFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,

@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	createChangemaker,
-	createOrUpdateFunder,
 	createSource,
 	db,
 	loadTableMetrics,
@@ -13,7 +12,7 @@ import {
 	expectArray,
 	expectNumber,
 } from '../test/asymettricMatchers';
-import { createTestPermissionGrant } from '../test/factories';
+import { createTestFunder, createTestPermissionGrant } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -84,12 +83,7 @@ describe('/permissionGrants', () => {
 		it('supports pagination', async () => {
 			const authContext = await getTestAuthContext();
 			await createTestPermissionGrant(db, authContext);
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'testFunder',
-				name: 'Test Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 			await createTestPermissionGrant(db, authContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
@@ -243,12 +237,7 @@ describe('/permissionGrants', () => {
 
 		it('creates and returns a permission grant for a user group', async () => {
 			const userGroupKeycloakId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'testFunder',
-				name: 'Test Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 			const before = await loadTableMetrics('permission_grants');
 			const result = await agent
 				.post('/permissionGrants')

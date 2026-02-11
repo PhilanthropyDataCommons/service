@@ -17,11 +17,10 @@ import {
 	loadTableMetrics,
 	loadSystemFunder,
 	loadSystemUser,
-	createOrUpdateFunder,
 	createPermissionGrant,
 } from '../database';
+import { createTestFunder, createTestFile } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
-import { createTestFile } from '../test/factories';
 import {
 	expectArray,
 	expectObjectContaining,
@@ -66,11 +65,9 @@ describe('/changemakerProposals', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const visibleFunder = await createOrUpdateFunder(db, null, {
+			const visibleFunder = await createTestFunder(db, null, {
 				name: 'Visible Funder',
 				shortCode: 'visibleFunder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
 			const visibleChangemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',

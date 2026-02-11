@@ -17,9 +17,9 @@ import {
 	loadTableMetrics,
 	loadSystemFunder,
 	loadSystemUser,
-	createOrUpdateFunder,
 	createPermissionGrant,
 } from '../database';
+import { createTestFunder } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	expectArray,
@@ -86,11 +86,9 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherFunder = await loadSystemFunder(db, null);
-			const visibleFunder = await createOrUpdateFunder(db, null, {
+			const visibleFunder = await createTestFunder(db, null, {
 				name: 'Visible Funder',
 				shortCode: 'visibleFunder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
 			const visibleChangemaker = await createChangemaker(db, null, {
 				name: 'Visible Changemaker',
@@ -212,12 +210,7 @@ describe('/proposals', () => {
 		it('returns a subset of proposals present in the database when a funder filter is provided', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const testFunder = await createOrUpdateFunder(db, null, {
-				name: 'Test Funder',
-				shortCode: 'testFunder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const testFunder = await createTestFunder(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createTestBaseFields();
 
@@ -1455,11 +1448,9 @@ describe('/proposals', () => {
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const testFunder = await createOrUpdateFunder(db, null, {
+			const testFunder = await createTestFunder(db, null, {
 				name: 'Test Funder',
 				shortCode: 'testFunder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
 			const systemSource = await loadSystemSource(db, null);
 			await createTestBaseFields();

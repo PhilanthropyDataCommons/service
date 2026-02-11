@@ -9,8 +9,8 @@ import {
 	loadSystemOpportunity,
 	createPermissionGrant,
 	loadSystemUser,
-	createOrUpdateFunder,
 } from '../database';
+import { createTestFunder } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
@@ -84,12 +84,7 @@ describe('/opportunities', () => {
 			const testUser = await loadTestUser();
 			const visibleFunder = await loadSystemFunder(db, null);
 			const systemOpportunity = await loadSystemOpportunity(db, null);
-			const anotherFunder = await createOrUpdateFunder(db, null, {
-				name: 'another funder',
-				shortCode: 'anotherFunder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const anotherFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,

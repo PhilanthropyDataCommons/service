@@ -5,7 +5,6 @@ import {
 	createChangemaker,
 	createEphemeralUserGroupAssociation,
 	createOrUpdateDataProvider,
-	createOrUpdateFunder,
 	createSource,
 	loadSystemSource,
 	loadTableMetrics,
@@ -17,8 +16,9 @@ import {
 	loadSystemFunder,
 	createPermissionGrant,
 } from '../database';
-import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import { createTestFunder } from '../test/factories';
+import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -224,12 +224,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 409 conflict when label is not unique on funder foreign key', async () => {
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'exampleFunder',
-				name: 'Example Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 			await createSource(db, null, {
 				label: 'Example Corp',
 				funderShortCode: funder.shortCode,
@@ -362,12 +357,7 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one funder source for an admin user', async () => {
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'foo',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')
@@ -375,7 +365,7 @@ describe('/sources', () => {
 				.set(adminUserAuthHeader)
 				.send({
 					label: 'Example Corp',
-					funderShortCode: 'foo',
+					funderShortCode: funder.shortCode,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('sources');
@@ -383,7 +373,7 @@ describe('/sources', () => {
 			expect(result.body).toMatchObject({
 				id: 2,
 				label: 'Example Corp',
-				funderShortCode: 'foo',
+				funderShortCode: funder.shortCode,
 				funder,
 				createdAt: expectTimestamp(),
 			});
@@ -394,12 +384,7 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'foo',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -415,14 +400,14 @@ describe('/sources', () => {
 				.set(authHeader)
 				.send({
 					label: 'Example Corp',
-					funderShortCode: 'foo',
+					funderShortCode: funder.shortCode,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('sources');
 			expect(result.body).toMatchObject({
 				id: 2,
 				label: 'Example Corp',
-				funderShortCode: 'foo',
+				funderShortCode: funder.shortCode,
 				funder,
 				createdAt: expectTimestamp(),
 			});
@@ -433,12 +418,7 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'foo',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -480,7 +460,7 @@ describe('/sources', () => {
 				.set(authHeader)
 				.send({
 					label: 'Example Corp',
-					funderShortCode: 'foo',
+					funderShortCode: funder.shortCode,
 				})
 				.expect(422);
 			const after = await loadTableMetrics('sources');

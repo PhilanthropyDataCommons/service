@@ -6,11 +6,11 @@ import {
 	createApplicationFormField,
 	createOpportunity,
 	createOrUpdateBaseField,
-	createOrUpdateFunder,
 	createPermissionGrant,
 	loadSystemFunder,
 	loadSystemUser,
 } from '../database';
+import { createTestFunder } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import {
@@ -497,12 +497,7 @@ describe('/applicationFormFields', () => {
 			const testUser = await loadTestUser();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const funder = await createOrUpdateFunder(db, null, {
-				name: 'Test Funder',
-				shortCode: 'test_funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Test Opportunity',

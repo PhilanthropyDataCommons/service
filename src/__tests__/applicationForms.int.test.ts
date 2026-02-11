@@ -5,7 +5,6 @@ import {
 	createApplicationFormField,
 	createOrUpdateBaseField,
 	createOpportunity,
-	createOrUpdateFunder,
 	createPermissionGrant,
 	db,
 	loadSystemFunder,
@@ -13,6 +12,7 @@ import {
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
+import { createTestFunder } from '../test/factories';
 import {
 	BaseFieldDataType,
 	BaseFieldCategory,
@@ -145,12 +145,7 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const otherFunder = await createOrUpdateFunder(db, null, {
-				shortCode: 'otherFunder',
-				name: 'Other Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const otherFunder = await createTestFunder(db, null);
 			await createOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: systemFunder.shortCode,

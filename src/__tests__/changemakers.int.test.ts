@@ -10,7 +10,6 @@ import {
 	createChangemakerFieldValue,
 	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
-	createOrUpdateFunder,
 	createPermissionGrant,
 	createProposal,
 	createProposalFieldValue,
@@ -22,12 +21,12 @@ import {
 	createOrUpdateDataProvider,
 	loadSystemFunder,
 } from '../database';
+import { createTestFunder, createTestFile } from '../test/factories';
 import {
 	getAuthContext,
 	getTestUserKeycloakUserId,
 	loadTestUser,
 } from '../test/utils';
-import { createTestFile } from '../test/factories';
 import {
 	expectArray,
 	expectArrayContaining,
@@ -109,11 +108,9 @@ const setupTestContext = async () => {
 		changemakerId: secondChangemaker.id,
 		label: `${secondChangemaker.name} source`,
 	});
-	const firstFunder = await createOrUpdateFunder(db, null, {
+	const firstFunder = await createTestFunder(db, null, {
 		shortCode: 'funder_5393',
 		name: 'Funder 5393',
-		keycloakOrganizationId: null,
-		isCollaborative: false,
 	});
 
 	// Grant test user permission to view proposal field values for this funder
@@ -1610,12 +1607,7 @@ describe('/changemakers', () => {
 			});
 
 			// Create a funder and opportunity for the ProposalFieldValue
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'funder_priority_test',
-				name: 'Funder Priority Test',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Priority Test Opportunity',
 				funderShortCode: funder.shortCode,
@@ -1908,12 +1900,7 @@ describe('/changemakers', () => {
 			});
 
 			// Create ProposalFieldValue for phone
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'funder_multi_test',
-				name: 'Funder Multi Test',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 
 			// Grant permission with proposalFieldValue scope so test user can see field values
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -2038,22 +2025,14 @@ describe('/changemakers', () => {
 			});
 
 			// Create two funders with different permissions
-			const funderWithFieldValueScope = await createOrUpdateFunder(db, null, {
+			const funderWithFieldValueScope = await createTestFunder(db, null, {
 				shortCode: 'funder_with_fv_scope',
 				name: 'Funder With Field Value Scope',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			const funderWithoutFieldValueScope = await createOrUpdateFunder(
-				db,
-				null,
-				{
-					shortCode: 'funder_without_fv_scope',
-					name: 'Funder Without Field Value Scope',
-					keycloakOrganizationId: null,
-					isCollaborative: false,
-				},
-			);
+			const funderWithoutFieldValueScope = await createTestFunder(db, null, {
+				shortCode: 'funder_without_fv_scope',
+				name: 'Funder Without Field Value Scope',
+			});
 
 			// Grant permission WITH proposalFieldValue scope for first funder
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -2423,11 +2402,9 @@ describe('/changemakers', () => {
 			});
 
 			// Create funder, opportunity, and proposal for ProposalFieldValue
-			const funder = await createOrUpdateFunder(db, null, {
+			const funder = await createTestFunder(db, null, {
 				shortCode: 'funder_proposal_file_test',
 				name: 'Funder Proposal File Test',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: 'Proposal File Test Opportunity',

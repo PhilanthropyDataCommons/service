@@ -53,7 +53,5 @@ export * from './TaskStatus';
 export * from './TinyPgErrorWithQueryContext';
 export * from './UnifiedAuditLog';
 export * from './User';
-export * from './UserGroupOpportunityPermission';
-export * from './UserOpportunityPermission';
 export * from './Uuid';
 export * from './Writable';

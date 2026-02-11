@@ -17,7 +17,6 @@ import {
 	loadSystemFunder,
 	loadSystemUser,
 	createOrUpdateFunder,
-	createOrUpdateUserOpportunityPermission,
 	createPermissionGrant,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
@@ -36,7 +35,6 @@ import {
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	keycloakIdToString,
-	OpportunityPermission,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
@@ -1654,23 +1652,31 @@ describe('/proposals', () => {
 
 		it('creates exactly one proposal when the user has create_proposal and view permissions on the opportunity', async () => {
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser();
 			const systemFunder = await loadSystemFunder(db, null);
 			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',
 				funderShortCode: systemFunder.shortCode,
 			});
-			await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
 				opportunityId: opportunity.id,
-				opportunityPermission: OpportunityPermission.CREATE_PROPOSAL,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
-			await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
 				opportunityId: opportunity.id,
-				opportunityPermission: OpportunityPermission.VIEW,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
+
 			const before = await loadTableMetrics('proposals');
 			const result = await request(app)
 				.post('/proposals')

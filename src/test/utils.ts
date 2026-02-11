@@ -38,9 +38,6 @@ export const getMockedUser = (): User => ({
 	keycloakUserId: getTestUserKeycloakUserId(),
 	keycloakUserName: getTestUserKeycloakUserName(),
 	createdAt: '',
-	permissions: {
-		opportunity: {},
-	},
 });
 
 export const createTestUser = async (): Promise<User> =>

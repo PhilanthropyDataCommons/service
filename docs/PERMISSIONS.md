@@ -160,73 +160,129 @@ to changemaker `42`." It may not be the case that changemaker 42 is the group
 mentioned here, it may be that group `06e80ea0-32b7-4716-b031-95d701a88a2` is a
 funder, data provider, or other changemaker entirely.
 
-## Permission Descriptions
+## Permission System Overview
 
-### Changemaker
+The PDC permission system uses four concepts:
 
-#### Edit
+- **Grantee**: The user or group receiving the permission (identified by
+  Keycloak UUID)
+- **Context**: The entity the permission is granted against (e.g., "changemaker
+  foo" or "funder bar")
+- **Verb**: The action being permitted (see Available Verbs below)
+- **Scope**: The type of data the permission enables access to (e.g.,
+  `proposal`, `changemaker`)
 
-- Allows users to create sources for the changemaker.
+### Available Verbs
 
-#### Manage
+The permission system supports the following verbs:
 
-- Allows users to modify the permissions for the changemaker for other users and user groups.
+| Verb   | Description                                       |
+| ------ | ------------------------------------------------- |
+| view   | Read access to data                               |
+| create | Create new data                                   |
+| edit   | Modify existing data                              |
+| delete | Delete data                                       |
+| manage | Manage permission grants associated with the data |
 
-#### View
+Note: The current implementation uses `edit` for both creation and modification
+operations in most contexts. This is a known semantic mismatch with the intended
+meaning of the verb.
 
-- Allows users to view the proposal associations with the changemaker.
-- Allows users to view proposals associated with the changemaker.
-- Allows users to view proposal versions associated with the changemaker.
+For example, "User X can view proposals of changemaker foo" breaks down as:
 
-### Data Provider
+- Grantee: User X
+- Verb: view
+- Context: changemaker foo
+- Scope: proposal
 
-#### Edit
+Currently, most enforced permissions use a scope that matches the context type
+(e.g., funder context with funder scope). The data model supports more granular
+grants where scope differs from context (e.g., opportunity context with proposal
+scope), though not all combinations are currently enforced.
 
-- Allows users to create sources for the data provider.
+### Administrator Bypass
 
-#### Manage
+Users with the `pdc-admin` role in Keycloak automatically pass all permission
+checks. This role grants full administrative access to the PDC service.
 
-- Allows users to modify the permissions for the data provider for other users and user groups.
+### Permission Grant Management
 
-### Funder
+All CRUD operations on permission grants require the `pdc-admin` role.
+Non-administrators cannot directly create, view, or delete permission grants
+through the API.
 
-#### Edit
+## Implemented Permissions
 
-- Allows users to create new opportunities for the funder.
-- Allows users to create new application forms for the funder's opportunities.
-- Allows users to create new bulk uploads for the funder.
-- Allows users to create sources for the funder.
-- Allows users to create new proposals for the funder's opportunities.
-- Allows users to create new changemaker relationships with proposals for the funder's opportunities.
-- Allows users to create new proposal versions for proposals responding to the funder's opportunities.
+The following sections describe permissions that are actually enforced by the
+PDC service. While the data model supports additional context+verb+scope
+combinations, only those listed below affect access control.
 
-#### Manage
+### Funder Permissions
 
-- Allows users to modify the permissions for the funder for other users and user groups.
+Permissions granted against a funder (using the funder's `shortCode` as the
+context key).
 
-#### View
+| Verb   | Scope    | What It Enables                                                   |
+| ------ | -------- | ----------------------------------------------------------------- |
+| view   | funder   | View the funder's opportunities                                   |
+|        |          | View application forms associated with the funder's opportunities |
+|        |          | View bulk upload tasks associated with the funder                 |
+|        |          | View proposals associated with the funder's opportunities         |
+|        |          | View proposal versions associated with the funder's opportunities |
+|        |          | View changemaker-proposal associations for the funder's proposals |
+| create | proposal | Create proposals for the funder's opportunities                   |
+| edit   | funder   | Create or update opportunities for the funder                     |
+|        |          | Create or update application forms for the funder's opportunities |
+|        |          | Create or update application form fields                          |
+|        |          | Create or update proposal versions for the funder's proposals     |
+|        |          | Create bulk upload tasks for the funder                           |
+|        |          | Create or update changemaker-proposal associations                |
+|        |          | Create sources associated with the funder                         |
+| manage | funder   | View, send, and respond to funder collaborative invitations       |
+|        |          | View collaborative members for the funder                         |
 
-- Allows users to view the application forms associated with the funder's opportunities.
-- Allows users to view the bulk uploads associated with the funder.
-- Allows users to view the changemaker associations with any proposals associated with the funder's opportunities.
-- Allows users to view proposals associated with the funder's opportunities
-- Allows users to view proposal versions associated with the funder's opportunities
-- Allows users to view the funder's opportunities
+### Changemaker Permissions
 
-### Opportunity
+Permissions granted against a changemaker (using the changemaker's `id` as the
+context key).
 
-#### Edit
+| Verb | Scope       | What It Enables                                            |
+| ---- | ----------- | ---------------------------------------------------------- |
+| view | changemaker | View proposals associated with the changemaker             |
+|      |             | View proposal versions associated with the changemaker     |
+|      |             | View changemaker field values for the changemaker          |
+|      |             | View changemaker-proposal associations for the changemaker |
+| edit | changemaker | Create or update changemaker field values                  |
+|      |             | Create sources associated with the changemaker             |
 
-This permission exists but has not yet been implemented to provide additional access.
+### Opportunity Permissions
 
-#### Manage
+Permissions granted against an opportunity (using the opportunity's `id` as the
+context key). Opportunity permissions inherit from the parent funder, so a
+`create | proposal` grant on a funder automatically applies to all of that
+funder's opportunities. Opportunity-level grants provide more granular control
+for specific opportunities.
 
-This permission exists but has not yet been implemented to provide additional access.
+| Verb   | Scope       | What It Enables                               |
+| ------ | ----------- | --------------------------------------------- |
+| view   | opportunity | View the specific opportunity                 |
+| create | proposal    | Create proposals for the specific opportunity |
 
-#### View
+### Data Provider Permissions
 
-This permission exists but has not yet been implemented to provide additional access.
+Permissions granted against a data provider (using the data provider's
+`shortCode` as the context key).
 
-#### Create Proposal
+| Verb | Scope         | What It Enables                                  |
+| ---- | ------------- | ------------------------------------------------ |
+| edit | data_provider | Create sources associated with the data provider |
 
-This permission exists but has not yet been implemented to provide additional access.
+### Other Contexts
+
+The permission system data model includes additional contexts (`proposal`,
+`proposalVersion`, `applicationForm`, `applicationFormField`,
+`proposalFieldValue`, `source`, `bulkUpload`, `changemakerFieldValue`) that can
+have permission grants created. However, these contexts do not currently have
+permission checks enforced in the codebase. Access to these entities is
+controlled through the parent entity permissions described above (funder or
+changemaker).

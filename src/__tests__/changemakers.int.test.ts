@@ -1524,7 +1524,8 @@ describe('/changemakers', () => {
 	describe('GET /:id with ChangemakerFieldValues', () => {
 		it('returns ChangemakerFieldValue when no ProposalFieldValue exists', async () => {
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
 			const baseField = await createOrUpdateBaseField(db, null, {
 				label: 'Organization Mission',
 				shortCode: 'org_mission_cfv_test',
@@ -1567,6 +1568,15 @@ describe('/changemakers', () => {
 					goodAsOf: null,
 				},
 			);
+			// Grant changemakerFieldValue scope so test user can see restricted changemaker fields
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
 			await request(app)
 				.get(`/changemakers/${changemaker.id}`)
 				.set(authHeader)
@@ -1581,7 +1591,8 @@ describe('/changemakers', () => {
 
 		it('returns changemaker-sourced ChangemakerFieldValue over funder-sourced ProposalFieldValue', async () => {
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
 			const baseField = await createOrUpdateBaseField(db, null, {
 				label: 'Organization Website',
 				shortCode: 'org_website_priority_test',
@@ -1678,6 +1689,16 @@ describe('/changemakers', () => {
 				},
 			);
 
+			// Grant changemakerFieldValue scope so test user can see restricted changemaker fields
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
 			await request(app)
 				.get(`/changemakers/${changemaker.id}`)
 				.set(authHeader)
@@ -1693,7 +1714,8 @@ describe('/changemakers', () => {
 
 		it('returns newer ChangemakerFieldValue when both have same source priority', async () => {
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
 			const baseField = await createOrUpdateBaseField(db, null, {
 				label: 'Organization Phone',
 				shortCode: 'org_phone_recency_test',
@@ -1755,6 +1777,16 @@ describe('/changemakers', () => {
 					goodAsOf: null,
 				},
 			);
+
+			// Grant changemakerFieldValue scope so test user can see restricted changemaker fields
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
 
 			await request(app)
 				.get(`/changemakers/${changemaker.id}`)
@@ -1893,6 +1925,16 @@ describe('/changemakers', () => {
 					PermissionGrantEntityType.PROPOSAL,
 					PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 				],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			// Grant changemakerFieldValue scope so test user can see restricted changemaker fields
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 
@@ -2142,9 +2184,131 @@ describe('/changemakers', () => {
 				});
 		});
 
+		it('only returns ChangemakerFieldValues when user has changemakerFieldValue scope or field is public', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
+
+			// Create a restricted field (requires permission)
+			const restrictedBaseField = await createOrUpdateBaseField(db, null, {
+				label: 'Restricted Org Field',
+				shortCode: 'restricted_org_cfv_perm_test',
+				description: 'A restricted organization field.',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			// Create a public field (visible to all authenticated users)
+			const publicBaseField = await createOrUpdateBaseField(db, null, {
+				label: 'Public Org Field',
+				shortCode: 'public_org_cfv_perm_test',
+				description: 'A public organization field.',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
+			});
+
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '99-9999990',
+				name: 'Test Changemaker CFV Permissions',
+				keycloakOrganizationId: null,
+			});
+
+			// Create changemaker-sourced source and batch
+			const changemakerSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: `${changemaker.name} source`,
+			});
+			const batch = await createChangemakerFieldValueBatch(
+				db,
+				systemUserAuthContext,
+				{
+					sourceId: changemakerSource.id,
+					notes: 'CFV permission test batch',
+				},
+			);
+
+			// Create a restricted ChangemakerFieldValue
+			await createChangemakerFieldValue(db, systemUserAuthContext, {
+				changemakerId: changemaker.id,
+				baseFieldShortCode: restrictedBaseField.shortCode,
+				batchId: batch.id,
+				value: 'restricted-value',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Create a public ChangemakerFieldValue
+			await createChangemakerFieldValue(db, systemUserAuthContext, {
+				changemakerId: changemaker.id,
+				baseFieldShortCode: publicBaseField.shortCode,
+				batchId: batch.id,
+				value: 'public-value',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Without permission, user should only see public field (exactly one)
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					// Use exact match on fields array to verify only public field is returned
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: [
+							expectObjectContaining({
+								changemakerId: changemaker.id,
+								baseFieldShortCode: publicBaseField.shortCode,
+								value: 'public-value',
+							}),
+						],
+					});
+				});
+
+			// Grant changemakerFieldValue scope to test user
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			// With permission, user should see both fields
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: expectArrayContaining([
+							expectObjectContaining({
+								changemakerId: changemaker.id,
+								baseFieldShortCode: restrictedBaseField.shortCode,
+								value: 'restricted-value',
+							}),
+							expectObjectContaining({
+								changemakerId: changemaker.id,
+								baseFieldShortCode: publicBaseField.shortCode,
+								value: 'public-value',
+							}),
+						]),
+					});
+				});
+		});
+
 		it('decorates ChangemakerFieldValue file fields with downloadUrl', async () => {
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
 
 			// Create a file-type base field
 			const baseFieldFile = await createOrUpdateBaseField(db, null, {
@@ -2193,6 +2357,16 @@ describe('/changemakers', () => {
 				value: testFile.id.toString(),
 				isValid: true,
 				goodAsOf: null,
+			});
+
+			// Grant changemakerFieldValue scope so test user can see restricted changemaker fields
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 
 			await request(app)

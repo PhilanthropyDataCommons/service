@@ -5,6 +5,6 @@ const createApplicationForm = generateCreateOrUpdateItemOperation<
 	ApplicationForm,
 	WritableApplicationForm,
 	[]
->('applicationForms.insertOne', ['opportunityId'], []);
+>('applicationForms.insertOne', ['opportunityId', 'name'], []);
 
 export { createApplicationForm };

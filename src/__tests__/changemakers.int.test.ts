@@ -451,6 +451,7 @@ describe('/changemakers', () => {
 					null,
 					{
 						opportunityId,
+						name: null,
 					},
 				);
 				// Older field that is valid
@@ -480,6 +481,7 @@ describe('/changemakers', () => {
 				const { id: applicationFormIdLatestValid } =
 					await createApplicationForm(db, null, {
 						opportunityId,
+						name: null,
 					});
 				const latestValidValue = await createProposalFieldValue(db, null, {
 					proposalVersionId: (
@@ -509,6 +511,7 @@ describe('/changemakers', () => {
 					null,
 					{
 						opportunityId,
+						name: null,
 					},
 				);
 				// Latest value but invalid
@@ -578,6 +581,7 @@ describe('/changemakers', () => {
 				const { id: applicationFormIdChangemakerEarliest } =
 					await createApplicationForm(db, null, {
 						opportunityId: opportunity.id,
+						name: null,
 					});
 				// Set up older field value that is from the changemaker. We'll expect this to be returned.
 				const changemakerEarliestValue = await createProposalFieldValue(
@@ -610,6 +614,7 @@ describe('/changemakers', () => {
 				const { id: applicationFormIdFunderLatest } =
 					await createApplicationForm(db, null, {
 						opportunityId: opportunity.id,
+						name: null,
 					});
 				// Set up newer field value that is from the funder.
 				await createProposalFieldValue(db, null, {
@@ -674,6 +679,7 @@ describe('/changemakers', () => {
 				const { id: applicationFormIdFunderEarliest } =
 					await createApplicationForm(db, null, {
 						opportunityId: opportunity.id,
+						name: null,
 					});
 				// Set up older field value that is from the funder. We'll expect this to be returned.
 				const funderEarliestValue = await createProposalFieldValue(db, null, {
@@ -702,6 +708,7 @@ describe('/changemakers', () => {
 				const { id: applicationFormIdDataProviderLatest } =
 					await createApplicationForm(db, null, {
 						opportunityId: opportunity.id,
+						name: null,
 					});
 				// Set up newer field value that is from the data platform provider.
 				await createProposalFieldValue(db, null, {
@@ -767,6 +774,7 @@ describe('/changemakers', () => {
 				const { id: applicationFormIdDataProviderEarliest } =
 					await createApplicationForm(db, null, {
 						opportunityId: firstFunderOpportunity.id,
+						name: null,
 					});
 				// Set up older field value.
 				await createProposalFieldValue(db, null, {
@@ -794,6 +802,7 @@ describe('/changemakers', () => {
 				const { id: applicationFormIdDataProviderLatest } =
 					await createApplicationForm(db, null, {
 						opportunityId: firstFunderOpportunity.id,
+						name: null,
 					});
 				// Set up newer field value.
 				const dataProviderNewestValue = await createProposalFieldValue(
@@ -864,6 +873,7 @@ describe('/changemakers', () => {
 				});
 				const applicationForm = await createApplicationForm(db, null, {
 					opportunityId: opportunity.id,
+					name: null,
 				});
 				const applicationFormField = await createApplicationFormField(
 					db,
@@ -1595,6 +1605,7 @@ describe('/changemakers', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const proposalVersion = await createProposalVersion(
 				db,
@@ -1868,6 +1879,7 @@ describe('/changemakers', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const proposalVersion = await createProposalVersion(
 				db,

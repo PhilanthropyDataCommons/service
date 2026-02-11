@@ -81,6 +81,7 @@ describe('/proposalVersions', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const proposalVersion = await createProposalVersion(
 				db,
@@ -127,6 +128,7 @@ describe('/proposalVersions', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const proposalVersion = await createProposalVersion(
 				db,
@@ -178,6 +180,7 @@ describe('/proposalVersions', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const proposalVersion = await createProposalVersion(
 				db,
@@ -243,6 +246,7 @@ describe('/proposalVersions', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const proposalVersion = await createProposalVersion(
 				db,
@@ -280,6 +284,7 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
+				name: null,
 			});
 			const before = await loadTableMetrics('proposal_versions');
 			logger.debug('before: %o', before);
@@ -333,6 +338,7 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
+				name: null,
 			});
 			const before = await loadTableMetrics('proposal_versions');
 			const result = await request(app)
@@ -370,6 +376,7 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
+				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
@@ -458,6 +465,7 @@ describe('/proposalVersions', () => {
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 				label: 'Forbidden Field',
@@ -592,6 +600,7 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
+				name: null,
 			});
 			const result = await request(app)
 				.post('/proposalVersions')
@@ -630,6 +639,7 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
+				name: null,
 			});
 			await request(app)
 				.post('/proposalVersions')
@@ -659,6 +669,7 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
+				name: null,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
@@ -707,9 +718,11 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity1.id,
+				name: null,
 			});
 			const wrongForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity2.id,
+				name: null,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
@@ -756,6 +769,7 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
+				name: null,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);
@@ -808,9 +822,11 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
+				name: null,
 			});
 			await createApplicationForm(db, null, {
 				opportunityId: 1,
+				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {

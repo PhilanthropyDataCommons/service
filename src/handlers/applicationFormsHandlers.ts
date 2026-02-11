@@ -84,7 +84,7 @@ const postApplicationForms = async (
 		);
 	}
 
-	const { fields, opportunityId } = body;
+	const { fields, opportunityId, name } = body;
 	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (
@@ -99,6 +99,7 @@ const postApplicationForms = async (
 		const finalApplicationForm = await db.transaction(async (transactionDb) => {
 			const applicationForm = await createApplicationForm(transactionDb, null, {
 				opportunityId,
+				name,
 			});
 			const applicationFormFields = await Promise.all(
 				fields.map(

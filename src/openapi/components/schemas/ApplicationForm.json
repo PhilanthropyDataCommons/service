@@ -10,6 +10,10 @@
 			"type": "integer",
 			"example": 3203
 		},
+		"name": {
+			"type": ["string", "null"],
+			"example": "2025 Grant Application"
+		},
 		"version": {
 			"type": "integer",
 			"readOnly": true,
@@ -27,5 +31,5 @@
 			"readOnly": true
 		}
 	},
-	"required": ["id", "opportunityId", "version", "fields", "createdAt"]
+	"required": ["id", "opportunityId", "name", "version", "fields", "createdAt"]
 }

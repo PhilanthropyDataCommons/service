@@ -98,6 +98,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: firstOpportunity.id,
+					name: null,
 				},
 			);
 			const secondOpportunity = await createOpportunity(
@@ -113,6 +114,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: secondOpportunity.id,
+					name: null,
 				},
 			);
 
@@ -171,6 +173,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -236,6 +239,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -299,6 +303,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -350,6 +355,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -440,6 +446,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -518,6 +525,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -591,6 +599,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -643,6 +652,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -688,6 +698,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -749,6 +760,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 
@@ -820,6 +832,7 @@ describe('/tasks/bulkUploads', () => {
 				systemUserAuthContext,
 				{
 					opportunityId: opportunity.id,
+					name: null,
 				},
 			);
 

@@ -1,4 +1,5 @@
 import { generateCreateOrUpdateItemOperation } from '../generators';
+import { decorateWithFileDownloadUrls } from '../../../decorators/changemaker';
 import type { Changemaker, Id, WritableChangemaker } from '../../../types';
 
 const updateChangemaker = generateCreateOrUpdateItemOperation<
@@ -9,6 +10,7 @@ const updateChangemaker = generateCreateOrUpdateItemOperation<
 	'changemakers.updateById',
 	['taxId', 'name', 'keycloakOrganizationId'],
 	['changemakerId'],
+	decorateWithFileDownloadUrls,
 );
 
 export { updateChangemaker };

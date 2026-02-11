@@ -27,6 +27,7 @@ import {
 	getTestUserKeycloakUserId,
 	loadTestUser,
 } from '../test/utils';
+import { createTestFile } from '../test/factories';
 import {
 	expectArray,
 	expectArrayContaining,
@@ -2137,6 +2138,202 @@ describe('/changemakers', () => {
 					expect(res.body).toMatchObject({
 						id: changemaker.id,
 						fields: [visibleFieldValue],
+					});
+				});
+		});
+
+		it('decorates ChangemakerFieldValue file fields with downloadUrl', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+
+			// Create a file-type base field
+			const baseFieldFile = await createOrUpdateBaseField(db, null, {
+				label: 'Organization Document',
+				shortCode: 'org_document_download_url_test',
+				description: 'A document associated with the organization.',
+				dataType: BaseFieldDataType.FILE,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '99-9999998',
+				name: 'Test Changemaker File Download',
+				keycloakOrganizationId: null,
+			});
+
+			// Create a test file
+			const testFile = await createTestFile(db, systemUserAuthContext, {
+				name: 'test-document.pdf',
+				mimeType: 'application/pdf',
+				size: 12345,
+			});
+
+			// Create changemaker-sourced source and batch
+			const changemakerSource = await createSource(db, null, {
+				changemakerId: changemaker.id,
+				label: `${changemaker.name} source`,
+			});
+			const batch = await createChangemakerFieldValueBatch(
+				db,
+				systemUserAuthContext,
+				{
+					sourceId: changemakerSource.id,
+					notes: 'File download URL test batch',
+				},
+			);
+
+			// Create a ChangemakerFieldValue with the file ID as the value
+			await createChangemakerFieldValue(db, systemUserAuthContext, {
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseFieldFile.shortCode,
+				batchId: batch.id,
+				value: testFile.id.toString(),
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: [
+							expectObjectContaining({
+								changemakerId: changemaker.id,
+								baseFieldShortCode: baseFieldFile.shortCode,
+								value: testFile.id.toString(),
+								file: expectObjectContaining({
+									id: testFile.id,
+									name: 'test-document.pdf',
+									downloadUrl: expectString(),
+								}),
+							}),
+						],
+					});
+				});
+		});
+
+		it('decorates ProposalFieldValue file fields with downloadUrl', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
+
+			// Create a file-type base field (must be ORGANIZATION category to appear in changemaker fields)
+			const baseFieldFile = await createOrUpdateBaseField(db, null, {
+				label: 'Organization Attachment',
+				shortCode: 'org_attachment_download_url_test',
+				description: 'An attachment associated with the organization.',
+				dataType: BaseFieldDataType.FILE,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const changemaker = await createChangemaker(db, null, {
+				taxId: '99-9999999',
+				name: 'Test Changemaker Proposal File Download',
+				keycloakOrganizationId: null,
+			});
+
+			// Create a test file
+			const testFile = await createTestFile(db, systemUserAuthContext, {
+				name: 'proposal-attachment.pdf',
+				mimeType: 'application/pdf',
+				size: 54321,
+			});
+
+			// Create funder, opportunity, and proposal for ProposalFieldValue
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'funder_proposal_file_test',
+				name: 'Funder Proposal File Test',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Proposal File Test Opportunity',
+				funderShortCode: funder.shortCode,
+			});
+			const funderSource = await createSource(db, null, {
+				funderShortCode: funder.shortCode,
+				label: 'Funder Proposal File Source',
+			});
+
+			const proposal = await createProposal(db, systemUserAuthContext, {
+				opportunityId: opportunity.id,
+				externalId: 'proposal-file-test',
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: changemaker.id,
+				proposalId: proposal.id,
+			});
+
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				systemUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: funderSource.id,
+				},
+			);
+			const applicationFormField = await createApplicationFormField(db, null, {
+				label: 'Attachment',
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: baseFieldFile.shortCode,
+				position: 1,
+				instructions: 'Upload attachment',
+			});
+
+			// Create a ProposalFieldValue with the file ID as the value
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: applicationFormField.id,
+				position: 1,
+				value: testFile.id.toString(),
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Grant permission to view proposals and their field values
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [
+					PermissionGrantEntityType.PROPOSAL,
+					PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+				],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).toMatchObject({
+						id: changemaker.id,
+						fields: [
+							expectObjectContaining({
+								proposalVersionId: proposalVersion.id,
+								value: testFile.id.toString(),
+								file: expectObjectContaining({
+									id: testFile.id,
+									name: 'proposal-attachment.pdf',
+									downloadUrl: expectString(),
+								}),
+							}),
+						],
 					});
 				});
 		});

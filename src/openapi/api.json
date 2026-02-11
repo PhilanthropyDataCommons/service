@@ -200,6 +200,9 @@
 			"File": {
 				"$ref": "./components/schemas/File.json"
 			},
+			"FileBundle": {
+				"$ref": "./components/schemas/FileBundle.json"
+			},
 			"S3Bucket": {
 				"$ref": "./components/schemas/S3Bucket.json"
 			},

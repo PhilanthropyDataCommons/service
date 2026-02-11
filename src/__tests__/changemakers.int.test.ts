@@ -5,7 +5,6 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	createOrUpdateBaseField,
-	createOpportunity,
 	createChangemaker,
 	createChangemakerFieldValue,
 	createChangemakerFieldValueBatch,
@@ -18,13 +17,13 @@ import {
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
-	loadSystemFunder,
 } from '../database';
 import {
 	createTestChangemaker,
 	createTestDataProvider,
 	createTestFile,
 	createTestFunder,
+	createTestOpportunity,
 } from '../test/factories';
 import {
 	getAuthContext,
@@ -130,8 +129,7 @@ const setupTestContext = async () => {
 		verbs: [PermissionGrantVerb.VIEW],
 	});
 
-	const firstFunderOpportunity = await createOpportunity(db, null, {
-		title: `${firstFunder.name} opportunity`,
+	const firstFunderOpportunity = await createTestOpportunity(db, null, {
 		funderShortCode: firstFunder.shortCode,
 	});
 	const { id: firstFunderSourceId } = await createSource(db, null, {
@@ -289,14 +287,10 @@ describe('/changemakers', () => {
 		it('returns a subset of changemakers present in the database when a proposal filter is provided', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createChangemaker(db, null, {
 				taxId: '123-123-123',
@@ -335,18 +329,14 @@ describe('/changemakers', () => {
 		it('does not return duplicate changemakers when a changemaker has multiple proposals', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-2',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createChangemaker(db, null, {
 				taxId: '123-123-123',
@@ -1536,8 +1526,7 @@ describe('/changemakers', () => {
 
 			// Create a funder and opportunity for the ProposalFieldValue
 			const funder = await createTestFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Priority Test Opportunity',
+			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: funder.shortCode,
 			});
 			const funderSource = await createSource(db, null, {
@@ -1841,8 +1830,7 @@ describe('/changemakers', () => {
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Multi Test Opportunity',
+			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: funder.shortCode,
 			});
 			const funderSource = await createSource(db, null, {
@@ -1974,8 +1962,7 @@ describe('/changemakers', () => {
 			});
 
 			// Create proposal 1 (under funder WITH proposalFieldValue scope)
-			const opportunity1 = await createOpportunity(db, null, {
-				title: 'Opportunity With FV Scope',
+			const opportunity1 = await createTestOpportunity(db, null, {
 				funderShortCode: funderWithFieldValueScope.shortCode,
 			});
 			const source1 = await createSource(db, null, {
@@ -2020,8 +2007,7 @@ describe('/changemakers', () => {
 			});
 
 			// Create proposal 2 (under funder WITHOUT proposalFieldValue scope)
-			const opportunity2 = await createOpportunity(db, null, {
-				title: 'Opportunity Without FV Scope',
+			const opportunity2 = await createTestOpportunity(db, null, {
 				funderShortCode: funderWithoutFieldValueScope.shortCode,
 			});
 			const source2 = await createSource(db, null, {
@@ -2322,8 +2308,7 @@ describe('/changemakers', () => {
 				shortCode: 'funder_proposal_file_test',
 				name: 'Funder Proposal File Test',
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Proposal File Test Opportunity',
+			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: funder.shortCode,
 			});
 			const funderSource = await createSource(db, null, {

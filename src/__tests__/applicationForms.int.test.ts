@@ -4,15 +4,13 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	createOrUpdateBaseField,
-	createOpportunity,
 	createPermissionGrant,
 	db,
-	loadSystemFunder,
 	loadSystemUser,
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { createTestFunder } from '../test/factories';
+import { createTestFunder, createTestOpportunity } from '../test/factories';
 import {
 	BaseFieldDataType,
 	BaseFieldCategory,
@@ -76,25 +74,18 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns all application forms present in the database when the user is an administrator', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
-			});
-			await createOpportunity(db, null, {
-				title: 'Good opportunity',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity1 = await createTestOpportunity(db, null);
+			const opportunity2 = await createTestOpportunity(db, null);
 			await createApplicationForm(db, null, {
-				opportunityId: 2,
+				opportunityId: opportunity1.id,
 				name: null,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 2,
+				opportunityId: opportunity1.id,
 				name: null,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 3,
+				opportunityId: opportunity2.id,
 				name: null,
 			});
 			const response = await request(app)
@@ -112,19 +103,19 @@ describe('/applicationForms', () => {
 					{
 						createdAt: expectTimestamp(),
 						id: 2,
-						opportunityId: 2,
+						opportunityId: opportunity1.id,
 						version: 1,
 					},
 					{
 						createdAt: expectTimestamp(),
 						id: 3,
-						opportunityId: 2,
+						opportunityId: opportunity1.id,
 						version: 2,
 					},
 					{
 						createdAt: expectTimestamp(),
 						id: 4,
-						opportunityId: 3,
+						opportunityId: opportunity2.id,
 						version: 1,
 					},
 				],
@@ -133,7 +124,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns only application forms that the user is allowed to view', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
+			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -141,29 +132,27 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: visibleFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const otherFunder = await createTestFunder(db, null);
-			await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
+			const visibleOpportunity = await createTestOpportunity(db, null, {
+				funderShortCode: visibleFunder.shortCode,
 			});
-			await createOpportunity(db, null, {
-				title: 'Good opportunity',
+			const hiddenOpportunity = await createTestOpportunity(db, null, {
 				funderShortCode: otherFunder.shortCode,
 			});
-			await createApplicationForm(db, null, {
-				opportunityId: 2,
+			const visibleApplicationForm1 = await createApplicationForm(db, null, {
+				opportunityId: visibleOpportunity.id,
+				name: null,
+			});
+			const visibleApplicationForm2 = await createApplicationForm(db, null, {
+				opportunityId: visibleOpportunity.id,
 				name: null,
 			});
 			await createApplicationForm(db, null, {
-				opportunityId: 2,
-				name: null,
-			});
-			await createApplicationForm(db, null, {
-				opportunityId: 3,
+				opportunityId: hiddenOpportunity.id,
 				name: null,
 			});
 			const response = await request(app)
@@ -171,32 +160,7 @@ describe('/applicationForms', () => {
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				entries: [
-					{
-						createdAt: expectTimestamp(),
-						id: 1,
-						opportunityId: 1,
-						name: null,
-						fields: [],
-						version: 1,
-					},
-					{
-						createdAt: expectTimestamp(),
-						id: 2,
-						opportunityId: 2,
-						name: null,
-						fields: [],
-						version: 1,
-					},
-					{
-						createdAt: expectTimestamp(),
-						id: 3,
-						opportunityId: 2,
-						name: null,
-						fields: [],
-						version: 2,
-					},
-				],
+				entries: [visibleApplicationForm1, visibleApplicationForm2],
 				total: 4,
 			});
 		});
@@ -208,69 +172,61 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns an application form with its fields when the user is an administrator', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: 'Holiday opportunity 🎄',
-				funderShortCode: systemFunder.shortCode,
-			});
-			await createOpportunity(db, null, {
-				title: 'Another holiday opportunity 🕎',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity1 = await createTestOpportunity(db, null);
+			const opportunity2 = await createTestOpportunity(db, null);
 			await createApplicationForm(db, null, {
-				opportunityId: 2,
+				opportunityId: opportunity1.id,
 				name: null,
 			});
-			await createApplicationForm(db, null, {
-				opportunityId: 2,
+			const applicationForm2 = await createApplicationForm(db, null, {
+				opportunityId: opportunity1.id,
 				name: null,
 			});
-			await createApplicationForm(db, null, {
-				opportunityId: 3,
+			const applicationForm3 = await createApplicationForm(db, null, {
+				opportunityId: opportunity2.id,
 				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
-				applicationFormId: 4,
+				applicationFormId: applicationForm3.id,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Anni Worki',
 				instructions: 'Please enter the number of years of work.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 4,
+				applicationFormId: applicationForm3.id,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Org Nomen',
 				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 3,
+				applicationFormId: applicationForm2.id,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 3,
+				applicationFormId: applicationForm2.id,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
 			});
 			const result = await request(app)
-				.get('/applicationForms/3')
+				.get(`/applicationForms/${applicationForm2.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 
 			expect(result.body).toMatchObject({
-				id: 3,
-				opportunityId: 2,
+				id: applicationForm2.id,
+				opportunityId: opportunity1.id,
 				version: 2,
 				fields: [
 					{
-						id: 4,
-						applicationFormId: 3,
+						applicationFormId: applicationForm2.id,
 						baseFieldShortCode: 'yearsOfWork',
 						baseField: {
 							label: 'Years of work',
@@ -285,8 +241,7 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp(),
 					},
 					{
-						id: 3,
-						applicationFormId: 3,
+						applicationFormId: applicationForm2.id,
 						baseFieldShortCode: 'organizationName',
 						baseField: {
 							label: 'Organization Name',
@@ -305,7 +260,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns an application form with its fields when the user has read access to the relevant funder', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
+			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -313,45 +268,44 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: visibleFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOpportunity(db, null, {
-				title: 'Holiday opportunity 🎄',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: visibleFunder.shortCode,
 			});
-			await createApplicationForm(db, null, {
-				opportunityId: 2,
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
 				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
-				applicationFormId: 2,
+				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 2,
+				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
 			});
 			const result = await request(app)
-				.get('/applicationForms/2')
+				.get(`/applicationForms/${applicationForm.id}`)
 				.set(authHeader)
 				.expect(200);
 
 			expect(result.body).toMatchObject({
-				id: 2,
-				opportunityId: 2,
+				id: applicationForm.id,
+				opportunityId: opportunity.id,
 				version: 1,
 				fields: [
 					{
-						applicationFormId: 2,
+						applicationFormId: applicationForm.id,
 						baseFieldShortCode: 'yearsOfWork',
 						baseField: {
 							label: 'Years of work',
@@ -367,7 +321,7 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp(),
 					},
 					{
-						applicationFormId: 2,
+						applicationFormId: applicationForm.id,
 						baseFieldShortCode: 'organizationName',
 						baseField: {
 							label: 'Organization Name',
@@ -386,7 +340,7 @@ describe('/applicationForms', () => {
 			});
 		});
 		it('returns an application form with its fields when the user has read access to the relevant funder, and the instructions are null', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
+			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -394,45 +348,44 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: visibleFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createOpportunity(db, null, {
-				title: 'Holiday opportunity 🎄',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: visibleFunder.shortCode,
 			});
-			await createApplicationForm(db, null, {
-				opportunityId: 2,
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
 				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
-				applicationFormId: 2,
+				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 				instructions: null,
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 2,
+				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: null,
 			});
 			const result = await request(app)
-				.get('/applicationForms/2')
+				.get(`/applicationForms/${applicationForm.id}`)
 				.set(authHeader)
 				.expect(200);
 
 			expect(result.body).toMatchObject({
-				id: 2,
-				opportunityId: 2,
+				id: applicationForm.id,
+				opportunityId: opportunity.id,
 				version: 1,
 				fields: [
 					{
-						applicationFormId: 2,
+						applicationFormId: applicationForm.id,
 						baseFieldShortCode: 'yearsOfWork',
 						baseField: {
 							label: 'Years of work',
@@ -448,7 +401,7 @@ describe('/applicationForms', () => {
 						createdAt: expectTimestamp(),
 					},
 					{
-						applicationFormId: 2,
+						applicationFormId: applicationForm.id,
 						baseFieldShortCode: 'organizationName',
 						baseField: {
 							label: 'Organization Name',
@@ -468,11 +421,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('does not return formFields associated with `FORBIDDEN` BaseFields', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Holiday opportunity 🎄',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
 				name: null,
@@ -513,7 +462,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('should return 404 when the user does not have read access to the relevant funder', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
+			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -521,7 +470,7 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
@@ -529,34 +478,36 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.MANAGE],
 			});
-			await createOpportunity(db, null, {
-				title: 'Holiday opportunity 🎄',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: testFunder.shortCode,
 			});
-			await createApplicationForm(db, null, {
-				opportunityId: 2,
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
 				name: null,
 			});
 			await createTestBaseFields();
 			await createApplicationFormField(db, null, {
-				applicationFormId: 2,
+				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'organizationName',
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
 			});
 			await createApplicationFormField(db, null, {
-				applicationFormId: 2,
+				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'yearsOfWork',
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
 			});
-			await request(app).get('/applicationForms/2').set(authHeader).expect(404);
+			await request(app)
+				.get(`/applicationForms/${applicationForm.id}`)
+				.set(authHeader)
+				.expect(404);
 		});
 
 		it('should return 404 when the applicationForm does not exist', async () => {
@@ -577,7 +528,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns a CSV with labels matching the application form fields', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
+			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -585,13 +536,12 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: visibleFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Test Opportunity',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: visibleFunder.shortCode,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -626,7 +576,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns fields in position order', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
+			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -634,13 +584,12 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: visibleFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Test Opportunity',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: visibleFunder.shortCode,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -672,7 +621,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns an empty row for a form with no fields', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
+			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -680,13 +629,12 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: visibleFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Test Opportunity',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: visibleFunder.shortCode,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -713,12 +661,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 404 when the user does not have access to the funder', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Test Opportunity',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
 				name: null,
@@ -737,7 +680,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly one application form as a user with proper permissions', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
+			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -745,7 +688,7 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
@@ -753,13 +696,12 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: testFunder.shortCode,
 			});
 			const before = await loadTableMetrics('application_forms');
 			const result = await request(app)
@@ -775,8 +717,7 @@ describe('/applicationForms', () => {
 			const after = await loadTableMetrics('application_forms');
 			expect(before.count).toEqual(1);
 			expect(result.body).toMatchObject({
-				id: 2,
-				opportunityId: 2,
+				opportunityId: opportunity.id,
 				name: null,
 				version: 1,
 				fields: [],
@@ -786,11 +727,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly one application form as an administrator', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const before = await loadTableMetrics('application_forms');
 			const result = await request(app)
 				.post('/applicationForms')
@@ -804,8 +741,7 @@ describe('/applicationForms', () => {
 				.expect(201);
 			const after = await loadTableMetrics('application_forms');
 			expect(result.body).toMatchObject({
-				id: 2,
-				opportunityId: 2,
+				opportunityId: opportunity.id,
 				name: null,
 				version: 1,
 				fields: [],
@@ -815,11 +751,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates an application form with a name', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -831,8 +763,7 @@ describe('/applicationForms', () => {
 				})
 				.expect(201);
 			expect(result.body).toMatchObject({
-				id: 2,
-				opportunityId: 2,
+				opportunityId: opportunity.id,
 				name: '2025 Grant Application',
 				version: 1,
 				fields: [],
@@ -841,11 +772,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates an application form with null name', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -857,8 +784,7 @@ describe('/applicationForms', () => {
 				})
 				.expect(201);
 			expect(result.body).toMatchObject({
-				id: 2,
-				opportunityId: 2,
+				opportunityId: opportunity.id,
 				name: null,
 				version: 1,
 				fields: [],
@@ -879,7 +805,7 @@ describe('/applicationForms', () => {
 		});
 
 		it(`returns 401 unauthorized if the user does not have edit permission on the associated opportunity's funder`, async () => {
-			const systemFunder = await loadSystemFunder(db, null);
+			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -887,7 +813,7 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
@@ -895,13 +821,12 @@ describe('/applicationForms', () => {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.MANAGE],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: testFunder.shortCode,
 			});
 			const before = await loadTableMetrics('application_forms');
 			await request(app)
@@ -920,11 +845,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly the number of provided fields', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createTestBaseFields();
 			const before = await loadTableMetrics('application_form_fields');
 			const result = await request(app)
@@ -948,16 +869,13 @@ describe('/applicationForms', () => {
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
-				id: 2,
-				opportunityId: 2,
+				opportunityId: opportunity.id,
 				name: null,
 				version: 1,
 				fields: [
 					{
-						applicationFormId: 2,
 						baseFieldShortCode: 'organizationName',
 						createdAt: expectTimestamp(),
-						id: 1,
 						label: 'Organization Name',
 						instructions: 'Please enter the name of the organization.',
 						position: 1,
@@ -969,11 +887,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('increments version when creating a second form for an opportunity', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
 				name: null,
@@ -993,19 +907,14 @@ describe('/applicationForms', () => {
 				})
 				.expect(201);
 			expect(result.body).toMatchObject({
-				id: 4,
-				opportunityId: 2,
+				opportunityId: opportunity.id,
 				version: 3,
 				createdAt: expectTimestamp(),
 			});
 		});
 
 		it('returns 400 when attempting to create a form field using a forbidden base field', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 				label: 'Forbidden Field',
 				description: 'This field should not be used in application forms',
@@ -1098,11 +1007,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 500 UnknownError if a generic Error is thrown when inserting the field', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createTestBaseFields();
 			jest
 				.spyOn(db, 'sql')

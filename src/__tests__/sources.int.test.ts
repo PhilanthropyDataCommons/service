@@ -7,11 +7,9 @@ import {
 	loadSystemSource,
 	loadTableMetrics,
 	loadSystemUser,
-	createOpportunity,
 	createProposal,
 	createProposalVersion,
 	createApplicationForm,
-	loadSystemFunder,
 	createPermissionGrant,
 } from '../database';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
@@ -19,6 +17,7 @@ import {
 	createTestChangemaker,
 	createTestDataProvider,
 	createTestFunder,
+	createTestOpportunity,
 } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -615,25 +614,21 @@ describe('/sources', () => {
 		it('Returns 422 Unprocessable Content when it tries to delete a source that is associated with a proposal', async () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const systemFunder = await loadSystemFunder(db, null);
 			const changemaker = await createTestChangemaker(db, null);
 			const localSource = await createSource(db, null, {
 				changemakerId: changemaker.id,
 				label: 'Example Inc.',
 			});
-			await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const proposal = await createProposal(db, systemUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(
 				db,
 				systemUserAuthContext,
 				{
-					opportunityId: 1,
+					opportunityId: opportunity.id,
 					name: null,
 				},
 			);

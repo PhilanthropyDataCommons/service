@@ -4,7 +4,6 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	createOrUpdateBaseField,
-	createOpportunity,
 	createChangemakerProposal,
 	createEphemeralUserGroupAssociation,
 	createProposal,
@@ -18,7 +17,11 @@ import {
 	loadSystemUser,
 	createPermissionGrant,
 } from '../database';
-import { createTestChangemaker, createTestFunder } from '../test/factories';
+import {
+	createTestChangemaker,
+	createTestFunder,
+	createTestOpportunity,
+} from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	expectArray,
@@ -114,12 +117,10 @@ describe('/proposals', () => {
 				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const visibleOpportunity = await createOpportunity(db, null, {
-				title: '🔥',
+			const visibleOpportunity = await createTestOpportunity(db, null, {
 				funderShortCode: visibleFunder.shortCode,
 			});
-			const anotherOpportunity = await createOpportunity(db, null, {
-				title: 'another',
+			const anotherOpportunity = await createTestOpportunity(db, null, {
 				funderShortCode: anotherFunder.shortCode,
 			});
 			await createTestBaseFields();
@@ -160,11 +161,7 @@ describe('/proposals', () => {
 		it('returns a subset of proposals present in the database when a changemaker filter is provided', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 
 			await createTestBaseFields();
 			const proposal = await createProposal(db, testUserAuthContext, {
@@ -206,15 +203,10 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const testFunder = await createTestFunder(db, null);
-			const systemFunder = await loadSystemFunder(db, null);
 			await createTestBaseFields();
 
-			const systemOpportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
-			const testFunderOpportunity = await createOpportunity(db, null, {
-				title: '🌊',
+			const systemOpportunity = await createTestOpportunity(db, null);
+			const testFunderOpportunity = await createTestOpportunity(db, null, {
 				funderShortCode: testFunder.shortCode,
 			});
 
@@ -283,11 +275,7 @@ describe('/proposals', () => {
 		it('returns a subset of proposals present in the database when search is provided', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 
 			const systemSource = await loadSystemSource(db, null);
 			await createTestBaseFields();
@@ -405,11 +393,7 @@ describe('/proposals', () => {
 		it('does not return proposals where there is a search match against a forbidden base field', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const systemSource = await loadSystemSource(db, null);
 			const forbiddenField = await createOrUpdateBaseField(db, null, {
 				label: 'Forbidden Field',
@@ -477,11 +461,7 @@ describe('/proposals', () => {
 				keycloakUserName: 'Dave',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 
 			await createTestBaseFields();
 			await createProposal(db, testUserAuthContext, {
@@ -529,11 +509,7 @@ describe('/proposals', () => {
 				keycloakUserName: 'Erin',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 
 			await createTestBaseFields();
 			await createProposal(db, testUserAuthContext, {
@@ -574,11 +550,7 @@ describe('/proposals', () => {
 				keycloakUserName: 'Fulton',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 
 			await createTestBaseFields();
 			await createProposal(db, testUserAuthContext, {
@@ -615,11 +587,7 @@ describe('/proposals', () => {
 			await db.query("set default_text_search_config = 'simple';");
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Grand opportunity',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const systemSource = await loadSystemSource(db, null);
 			await createTestBaseFields();
 			await createProposal(db, testUserAuthContext, {
@@ -736,11 +704,7 @@ describe('/proposals', () => {
 		it('returns according to pagination parameters', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
@@ -849,11 +813,7 @@ describe('/proposals', () => {
 				keycloakUserName: 'Georgina',
 			});
 			const anotherUserAuthContext = getAuthContext(anotherUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '⛰️',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const proposal = await createProposal(db, anotherUserAuthContext, {
 				externalId: `proposal-1`,
 				opportunityId: opportunity.id,
@@ -914,11 +874,7 @@ describe('/proposals', () => {
 		it('returns the one proposal asked for', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '⛰️',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 
 			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-1`,
@@ -947,11 +903,7 @@ describe('/proposals', () => {
 		it('returns one proposal with deep fields', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🌎',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createTestBaseFields();
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -1195,12 +1147,8 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const systemFunder = await loadSystemFunder(db, null);
 			await createTestBaseFields();
-			const opportunity = await createOpportunity(db, null, {
-				title: '🌎',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
 				name: null,
@@ -1460,8 +1408,7 @@ describe('/proposals', () => {
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Test Opportunity',
+			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: testFunder.shortCode,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -1517,7 +1464,6 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const systemFunder = await loadSystemFunder(db, null);
 			await createTestBaseFields();
 			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 				shortCode: 'forbiddenField',
@@ -1529,10 +1475,7 @@ describe('/proposals', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: '🌎',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
 				name: null,
@@ -1660,11 +1603,7 @@ describe('/proposals', () => {
 		});
 
 		it('creates exactly one proposal when the user is an administrator', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const before = await loadTableMetrics('proposals');
 			const testUser = await loadTestUser();
 			const result = await request(app)
@@ -1701,10 +1640,7 @@ describe('/proposals', () => {
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const before = await loadTableMetrics('proposals');
 			const result = await request(app)
 				.post('/proposals')
@@ -1727,11 +1663,7 @@ describe('/proposals', () => {
 		});
 
 		it('returns 422 if the user does not have permission', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const before = await loadTableMetrics('proposals');
 			await request(app)
 				.post('/proposals')
@@ -1750,11 +1682,7 @@ describe('/proposals', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser();
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,

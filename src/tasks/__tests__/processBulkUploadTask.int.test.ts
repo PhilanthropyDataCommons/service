@@ -8,7 +8,6 @@ import {
 	createOrUpdateBaseField,
 	createApplicationForm,
 	createApplicationFormField,
-	createOpportunity,
 	loadBulkUploadTask,
 	loadProposalBundle,
 	createBulkUploadTask,
@@ -16,7 +15,6 @@ import {
 	loadChangemakerBundle,
 	loadChangemakerProposalBundle,
 	loadSystemSource,
-	loadSystemFunder,
 	loadFileBundle,
 } from '../../database';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
@@ -38,7 +36,7 @@ import {
 	expectObject,
 	expectTimestamp,
 } from '../../test/asymettricMatchers';
-import { createTestFile } from '../../test/factories';
+import { createTestFile, createTestOpportunity } from '../../test/factories';
 import type {
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
@@ -52,11 +50,7 @@ const createTestApplicationForm = async (
 	authContext: AuthContext,
 	shortCodes: string[],
 ): Promise<{ applicationFormId: number; opportunity: Opportunity }> => {
-	const systemFunder = await loadSystemFunder(db, null);
-	const opportunity = await createOpportunity(db, authContext, {
-		title: 'Test Opportunity',
-		funderShortCode: systemFunder.shortCode,
-	});
+	const opportunity = await createTestOpportunity(db, authContext);
 	const applicationForm = await createApplicationForm(db, authContext, {
 		opportunityId: opportunity.id,
 		name: null,

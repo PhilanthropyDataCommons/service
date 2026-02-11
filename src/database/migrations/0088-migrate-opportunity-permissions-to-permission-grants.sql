@@ -67,4 +67,4 @@ SELECT deaudit_table('user_opportunity_permissions');
 SELECT deaudit_table('user_group_opportunity_permissions');
 DROP TABLE IF EXISTS user_opportunity_permissions CASCADE;
 DROP TABLE IF EXISTS user_group_opportunity_permissions CASCADE;
-DROP TYPE IF EXISTS opportunity_permission_t;
+DROP TYPE IF EXISTS opportunity_permission_t CASCADE;

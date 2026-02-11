@@ -3,7 +3,6 @@ import { app } from '../app';
 import {
 	db,
 	createEphemeralUserGroupAssociation,
-	createOrUpdateDataProvider,
 	createSource,
 	loadSystemSource,
 	loadTableMetrics,
@@ -16,7 +15,11 @@ import {
 	createPermissionGrant,
 } from '../database';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
-import { createTestChangemaker, createTestFunder } from '../test/factories';
+import {
+	createTestChangemaker,
+	createTestDataProvider,
+	createTestFunder,
+} from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
@@ -174,11 +177,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 409 conflict when label is not unique on data provider foreign key', async () => {
-			const dataProvider = await createOrUpdateDataProvider(db, null, {
-				shortCode: 'ExampleInc',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const dataProvider = await createTestDataProvider(db, null);
 			await createSource(db, null, {
 				label: 'Example Corp',
 				dataProviderShortCode: dataProvider.shortCode,
@@ -445,11 +444,7 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one data provider source for an admin user', async () => {
-			const dataProvider = await createOrUpdateDataProvider(db, null, {
-				shortCode: 'foo',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const dataProvider = await createTestDataProvider(db, null);
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')
@@ -457,7 +452,7 @@ describe('/sources', () => {
 				.set(adminUserAuthHeader)
 				.send({
 					label: 'Example Corp',
-					dataProviderShortCode: 'foo',
+					dataProviderShortCode: dataProvider.shortCode,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('sources');
@@ -465,7 +460,7 @@ describe('/sources', () => {
 			expect(result.body).toMatchObject({
 				id: 2,
 				label: 'Example Corp',
-				dataProviderShortCode: 'foo',
+				dataProviderShortCode: dataProvider.shortCode,
 				dataProvider,
 				createdAt: expectTimestamp(),
 			});
@@ -476,11 +471,7 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider(db, null, {
-				shortCode: 'foo',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const dataProvider = await createTestDataProvider(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -496,14 +487,14 @@ describe('/sources', () => {
 				.set(authHeader)
 				.send({
 					label: 'Example Corp',
-					dataProviderShortCode: 'foo',
+					dataProviderShortCode: dataProvider.shortCode,
 				})
 				.expect(201);
 			const after = await loadTableMetrics('sources');
 			expect(result.body).toMatchObject({
 				id: 2,
 				label: 'Example Corp',
-				dataProviderShortCode: 'foo',
+				dataProviderShortCode: dataProvider.shortCode,
 				dataProvider,
 				createdAt: expectTimestamp(),
 			});
@@ -514,11 +505,7 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider(db, null, {
-				shortCode: 'foo',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const dataProvider = await createTestDataProvider(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -552,7 +539,7 @@ describe('/sources', () => {
 				.set(authHeader)
 				.send({
 					label: 'Example Corp',
-					dataProviderShortCode: 'foo',
+					dataProviderShortCode: dataProvider.shortCode,
 				})
 				.expect(422);
 			const after = await loadTableMetrics('sources');

@@ -172,6 +172,31 @@ Migrations and queries follow SQLFluff linting with these rules:
 - Tests use `supertest` for HTTP assertions
 - Mock JWT authentication via `mockJwt` from `src/test/mockJwt.ts`
 - Test utilities in `src/test/utils.ts`
+- Test factories in `src/test/factories/` for creating test entities
+
+#### Test Factories
+
+Use factories from `src/test/factories/` to create test entities (e.g., `createTestFunder`, `createTestChangemaker`, `createTestDataProvider`). Factories provide sensible defaults, so **only pass override values when**:
+
+1. The test is specifically testing that value (e.g., testing name updates)
+2. The value is needed to differentiate multiple objects in the test
+3. The value is referenced elsewhere in the test (e.g., a shortCode used in an API call)
+
+```typescript
+// Good - only override what's needed
+const funder = await createTestFunder(db, null);
+const namedFunder = await createTestFunder(db, null, {
+	shortCode: 'specificCode',
+});
+
+// Bad - unnecessary overrides
+const funder = await createTestFunder(db, null, {
+	shortCode: 'test_funder',
+	name: 'Test Funder',
+	keycloakOrganizationId: null,
+	isCollaborative: false,
+});
+```
 
 Example test pattern:
 

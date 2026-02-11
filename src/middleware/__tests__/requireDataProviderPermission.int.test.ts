@@ -1,11 +1,7 @@
 import { requireDataProviderPermission } from '../requireDataProviderPermission';
 import { InputValidationError, UnauthorizedError } from '../../errors';
-import {
-	db,
-	createOrUpdateDataProvider,
-	createPermissionGrant,
-	loadSystemUser,
-} from '../../database';
+import { db, createPermissionGrant, loadSystemUser } from '../../database';
+import { createTestDataProvider } from '../../test/factories';
 import { getAuthContext, getMockedUser, loadTestUser } from '../../test/utils';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import {
@@ -76,11 +72,7 @@ describe('requireDataProviderPermission', () => {
 	it('calls next with an UnauthorizedError when user lacks permission', (done) => {
 		void (async () => {
 			const testUser = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider(db, null, {
-				shortCode: 'test_dp_no_perm',
-				name: 'Test Data Provider',
-				keycloakOrganizationId: null,
-			});
+			const dataProvider = await createTestDataProvider(db, null);
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
@@ -109,11 +101,7 @@ describe('requireDataProviderPermission', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider(db, null, {
-				shortCode: 'test_dp_with_perm',
-				name: 'Permitted Data Provider',
-				keycloakOrganizationId: null,
-			});
+			const dataProvider = await createTestDataProvider(db, null);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -147,11 +135,7 @@ describe('requireDataProviderPermission', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser();
-			const dataProvider = await createOrUpdateDataProvider(db, null, {
-				shortCode: 'test_dp_view_only',
-				name: 'View Only Data Provider',
-				keycloakOrganizationId: null,
-			});
+			const dataProvider = await createTestDataProvider(db, null);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,

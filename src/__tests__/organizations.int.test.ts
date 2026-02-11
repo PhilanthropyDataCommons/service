@@ -1,13 +1,12 @@
 import request from 'supertest';
 import { app } from '../app';
-import {
-	db,
-	createOrUpdateDataProvider,
-	createPermissionGrant,
-	loadSystemUser,
-} from '../database';
+import { db, createPermissionGrant, loadSystemUser } from '../database';
 import { expectArray } from '../test/asymettricMatchers';
-import { createTestChangemaker, createTestFunder } from '../test/factories';
+import {
+	createTestChangemaker,
+	createTestDataProvider,
+	createTestFunder,
+} from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -37,46 +36,30 @@ describe('/organizations', () => {
 				'bde830f0-d590-467a-8431-cdf9d6af1b87',
 			);
 
-			await createTestChangemaker(db, null, {
-				name: 'Changemaker does not exist in Keycloak or has not been linked.',
-			});
+			// Unlinked entities (should not be returned)
+			await createTestChangemaker(db, null);
+			await createTestDataProvider(db, null);
+			await createTestFunder(db, null);
+
+			// Expected entities (linked to target keycloakOrganizationId)
 			const expectedChangemaker = await createTestChangemaker(db, null, {
-				name: 'Change, Inc.',
 				keycloakOrganizationId,
 			});
-			await createTestChangemaker(db, null, {
-				name: 'Changemaker is linked but I am not the one that should be returned.',
-				keycloakOrganizationId: 'fa32e21e-e471-4d28-b101-7788c611aa04',
-			});
-
-			await createOrUpdateDataProvider(db, null, {
-				name: 'Data Provider Organization does not exist in Keycloak or has not been linked.',
-				shortCode: 'unexpecteddataproviderone',
-				keycloakOrganizationId: null,
-			});
-			const expectedDataProvider = await createOrUpdateDataProvider(db, null, {
-				name: 'Change, Inc.',
-				shortCode: 'changeinc',
+			const expectedDataProvider = await createTestDataProvider(db, null, {
 				keycloakOrganizationId,
-			});
-			await createOrUpdateDataProvider(db, null, {
-				name: 'Data Provider Organization is linked but I am not the one that should be returned.',
-				shortCode: 'unexpecteddataprovidertwo',
-				keycloakOrganizationId: '865cb652-a1d2-418a-8c89-015c0d6e4676',
-			});
-
-			await createTestFunder(db, null, {
-				name: 'Funder Organization does not exist in Keycloak or has not been linked.',
-				shortCode: 'unexpectedfunderone',
 			});
 			const expectedFunder = await createTestFunder(db, null, {
-				name: 'Change, Inc.',
-				shortCode: 'changeinc',
 				keycloakOrganizationId,
 			});
+
+			// Decoy entities (linked to different keycloakOrganizationIds)
+			await createTestChangemaker(db, null, {
+				keycloakOrganizationId: 'fa32e21e-e471-4d28-b101-7788c611aa04',
+			});
+			await createTestDataProvider(db, null, {
+				keycloakOrganizationId: '865cb652-a1d2-418a-8c89-015c0d6e4676',
+			});
 			await createTestFunder(db, null, {
-				name: 'Funder Organization is linked but I am not the one that should be returned.',
-				shortCode: 'unexpectedfundertwo',
 				keycloakOrganizationId: '75b4198f-dd88-4a6c-8259-fe4d725af125',
 			});
 
@@ -150,12 +133,11 @@ describe('/organizations', () => {
 		it('returns only the data provider on which my org has view permission', async () => {
 			const keycloakOrganizationId = stringToKeycloakId(mockOrgId);
 
-			await createOrUpdateDataProvider(db, null, {
+			await createTestDataProvider(db, null, {
 				name: 'Unlinked Data Provider one.',
 				shortCode: 'unlinkeddataproviderone',
-				keycloakOrganizationId: null,
 			});
-			const expectedDataProvider = await createOrUpdateDataProvider(db, null, {
+			const expectedDataProvider = await createTestDataProvider(db, null, {
 				name: 'Dapper Data Provider',
 				shortCode: 'dapperdataprovider',
 				keycloakOrganizationId,
@@ -173,7 +155,7 @@ describe('/organizations', () => {
 			});
 			const keycloakOrganizationIdLackingPerm =
 				'24fea6aa-f1c5-4594-8bdc-b1789d4d0840';
-			await createOrUpdateDataProvider(db, null, {
+			await createTestDataProvider(db, null, {
 				name: 'Decoy Data Provider, unexpected because I lack view access to this org',
 				shortCode: 'decoydataproviderunexpected',
 				keycloakOrganizationId: keycloakOrganizationIdLackingPerm,

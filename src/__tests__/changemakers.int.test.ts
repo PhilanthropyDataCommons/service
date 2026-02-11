@@ -18,11 +18,11 @@ import {
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
-	createOrUpdateDataProvider,
 	loadSystemFunder,
 } from '../database';
 import {
 	createTestChangemaker,
+	createTestDataProvider,
 	createTestFile,
 	createTestFunder,
 } from '../test/factories';
@@ -138,16 +138,8 @@ const setupTestContext = async () => {
 		funderShortCode: firstFunder.shortCode,
 		label: `${firstFunder.name} source`,
 	});
-	const firstDataProvider = await createOrUpdateDataProvider(db, null, {
-		shortCode: 'data_provider_5431',
-		name: 'Data Platform Provider 5431',
-		keycloakOrganizationId: null,
-	});
-	const secondDataProvider = await createOrUpdateDataProvider(db, null, {
-		shortCode: 'data_provider_5477',
-		name: 'Data Platform Provider 5477',
-		keycloakOrganizationId: null,
-	});
+	const firstDataProvider = await createTestDataProvider(db, null);
+	const secondDataProvider = await createTestDataProvider(db, null);
 	const { id: firstDataProviderSourceId } = await createSource(db, null, {
 		dataProviderShortCode: firstDataProvider.shortCode,
 		label: `${firstDataProvider.name} source`,

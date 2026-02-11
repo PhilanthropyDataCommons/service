@@ -15,15 +15,6 @@
 			"type": "object",
 			"readOnly": true,
 			"properties": {
-				"changemaker": {
-					"type": "object",
-					"additionalProperties": {
-						"type": "array",
-						"items": {
-							"$ref": "./Permission.json"
-						}
-					}
-				},
 				"dataProvider": {
 					"type": "object",
 					"additionalProperties": {
@@ -43,7 +34,7 @@
 					}
 				}
 			},
-			"required": ["changemaker", "dataProvider", "funder"]
+			"required": ["dataProvider", "funder"]
 		},
 		"createdAt": {
 			"type": "string",

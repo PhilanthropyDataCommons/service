@@ -14,9 +14,9 @@ import {
 	loadSystemUser,
 	createOrUpdateUserFunderPermission,
 	createChangemaker,
-	createOrUpdateUserChangemakerPermission,
 	createChangemakerProposal,
 	createProposalFieldValue,
+	createPermissionGrant,
 } from '../database';
 import { getLogger } from '../logger';
 import {
@@ -24,6 +24,9 @@ import {
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
 } from '../types';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -150,10 +153,13 @@ describe('/proposalVersions', () => {
 				taxId: '123456789',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserChangemakerPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: visibleChangemaker.id,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',

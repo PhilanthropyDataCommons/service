@@ -26,7 +26,8 @@ WHERE
 			:authContextKeycloakUserId,
 			:authContextIsAdministrator,
 			changemakers_proposals.changemaker_id,
-			'view'
+			'view',
+			'changemaker'
 		)
 	)
 ORDER BY changemakers_proposals.id DESC

@@ -1,10 +1,9 @@
-SELECT drop_function('has_changemaker_permission');
-
 CREATE OR REPLACE FUNCTION has_changemaker_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	changemaker_id int,
-	permission permission_t
+	permission permission_grant_verb_t,
+	scope permission_grant_entity_type_t
 ) RETURNS boolean AS $$
 DECLARE
 	has_permission boolean;
@@ -15,20 +14,33 @@ BEGIN
 	END IF;
 
 	-- Check if the user has the specified permission on the specified changemaker
+	-- via direct user grant or group membership
 	SELECT EXISTS (
 		SELECT 1
-		FROM user_changemaker_permissions
-		WHERE user_changemaker_permissions.user_keycloak_user_id = has_changemaker_permission.user_keycloak_user_id
-			AND user_changemaker_permissions.changemaker_id = has_changemaker_permission.changemaker_id
-			AND user_changemaker_permissions.permission = has_changemaker_permission.permission
-	) OR EXISTS (
-		SELECT 1
-		FROM ephemeral_user_group_associations
-		JOIN user_group_changemaker_permissions
-			ON user_group_changemaker_permissions.keycloak_organization_id = ephemeral_user_group_associations.user_group_keycloak_organization_id
-		WHERE ephemeral_user_group_associations.user_keycloak_user_id = has_changemaker_permission.user_keycloak_user_id
-			AND user_group_changemaker_permissions.changemaker_id = has_changemaker_permission.changemaker_id
-			AND user_group_changemaker_permissions.permission = has_changemaker_permission.permission
+		FROM permission_grants pg
+		WHERE pg.context_entity_type = 'changemaker'
+			AND pg.changemaker_id
+				= has_changemaker_permission.changemaker_id
+			AND has_changemaker_permission.permission = ANY(pg.verbs)
+			AND has_changemaker_permission.scope = ANY(pg.scope)
+			AND (
+				(
+					pg.grantee_type = 'user'
+					AND pg.grantee_user_keycloak_user_id
+						= has_changemaker_permission.user_keycloak_user_id
+				)
+				OR (
+					pg.grantee_type = 'userGroup'
+					AND EXISTS (
+						SELECT 1
+						FROM ephemeral_user_group_associations euga
+						WHERE euga.user_keycloak_user_id
+							= has_changemaker_permission.user_keycloak_user_id
+							AND euga.user_group_keycloak_organization_id
+								= pg.grantee_keycloak_organization_id
+					)
+				)
+			)
 	) INTO has_permission;
 
 	RETURN has_permission;

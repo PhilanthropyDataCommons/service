@@ -3,11 +3,19 @@ import {
 	db,
 	createSource,
 	getLimitValues,
+	hasChangemakerPermission,
 	loadSource,
 	loadSourceBundle,
 	removeSource,
 } from '../database';
-import { isAuthContext, isId, isWritableSource, Permission } from '../types';
+import {
+	isAuthContext,
+	isId,
+	isWritableSource,
+	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
+} from '../types';
 import {
 	FailedMiddlewareError,
 	InputValidationError,
@@ -16,7 +24,6 @@ import {
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
 import {
-	authContextHasChangemakerPermission,
 	authContextHasDataProviderPermission,
 	authContextHasFunderPermission,
 } from '../authorization';
@@ -58,11 +65,11 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 	}
 	if (
 		'changemakerId' in req.body &&
-		!authContextHasChangemakerPermission(
-			req,
-			req.body.changemakerId,
-			Permission.EDIT,
-		)
+		!(await hasChangemakerPermission(db, req, {
+			changemakerId: req.body.changemakerId,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.CHANGEMAKER,
+		}))
 	) {
 		throw new UnprocessableEntityError(
 			'You do not have write permissions on a changemaker with the specified id.',

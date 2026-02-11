@@ -17,7 +17,8 @@ WHERE
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator,
 		changemaker_id,
-		'view'
+		'view',
+		'changemaker'
 	)
 ORDER BY id DESC
 LIMIT :limit OFFSET :offset;

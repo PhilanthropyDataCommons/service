@@ -1,13 +1,11 @@
 import express from 'express';
 import { userDataProviderPermissionsHandlers } from '../handlers/userDataProviderPermissionsHandlers';
-import { userFunderPermissionsHandlers } from '../handlers/userFunderPermissionsHandlers';
 import { userOpportunityPermissionsHandlers } from '../handlers/userOpportunityPermissionsHandlers';
 import { usersHandlers } from '../handlers/usersHandlers';
 import {
 	requireAdministratorRole,
 	requireAuthentication,
 	requireDataProviderPermission,
-	requireFunderPermission,
 } from '../middleware';
 import { Permission } from '../types';
 
@@ -23,16 +21,6 @@ usersRouter.delete(
 	'/:userKeycloakUserId/dataProviders/:dataProviderShortCode/permissions/:permission',
 	requireDataProviderPermission(Permission.MANAGE),
 	userDataProviderPermissionsHandlers.deleteUserDataProviderPermission,
-);
-usersRouter.put(
-	'/:userKeycloakUserId/funders/:funderShortCode/permissions/:permission',
-	requireFunderPermission(Permission.MANAGE),
-	userFunderPermissionsHandlers.putUserFunderPermission,
-);
-usersRouter.delete(
-	'/:userKeycloakUserId/funders/:funderShortCode/permissions/:permission',
-	requireFunderPermission(Permission.MANAGE),
-	userFunderPermissionsHandlers.deleteUserFunderPermission,
 );
 usersRouter.put(
 	'/:userKeycloakUserId/opportunities/:opportunityId/permissions/:opportunityPermission',

@@ -6,7 +6,8 @@ WHERE
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator,
 		opportunities.funder_short_code,
-		'view'
+		'view',
+		'funder'
 	)
 ORDER BY application_forms.id
 LIMIT :limit OFFSET :offset;

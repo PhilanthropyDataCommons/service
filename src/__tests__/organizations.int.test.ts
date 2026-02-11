@@ -5,8 +5,9 @@ import {
 	createChangemaker,
 	createOrUpdateDataProvider,
 	createOrUpdateFunder,
-	createOrUpdateUserFunderPermission,
+	createPermissionGrant,
 	createOrUpdateUserGroupDataProviderPermission,
+	loadSystemUser,
 } from '../database';
 import { expectArray } from '../test/asymettricMatchers';
 import {
@@ -14,8 +15,15 @@ import {
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 	mockOrgId,
 } from '../test/mockJwt';
-import { keycloakIdToString, Permission, stringToKeycloakId } from '../types';
-import { getTestAuthContext } from '../test/utils';
+import {
+	keycloakIdToString,
+	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
+	stringToKeycloakId,
+} from '../types';
+import { getAuthContext, getTestAuthContext } from '../test/utils';
 
 const agent = request.agent(app);
 
@@ -102,6 +110,8 @@ describe('/organizations', () => {
 		});
 
 		it('returns only the funder on which I have view permission', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
 			const keycloakOrganizationId = 'b5465297-d63a-4371-8054-f94d95f1aace';
 
 			await createOrUpdateFunder(db, null, {
@@ -118,10 +128,13 @@ describe('/organizations', () => {
 			});
 			const authContext = await getTestAuthContext(false);
 			// Grant myself view access to this organization
-			await createOrUpdateUserFunderPermission(db, authContext, {
-				userKeycloakUserId: authContext.user.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: authContext.user.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: expectedFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const keycloakOrganizationIdLackingPerm =
 				'75b4198f-dd88-4a6c-8259-fe4d725af125';

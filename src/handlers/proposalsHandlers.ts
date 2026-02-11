@@ -3,6 +3,7 @@ import {
 	db,
 	createProposal,
 	getLimitValues,
+	hasFunderPermission,
 	loadProposal,
 	loadProposalBundle,
 	loadOpportunity,
@@ -11,7 +12,8 @@ import {
 	isId,
 	isAuthContext,
 	isWritableProposal,
-	Permission,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 	OpportunityPermission,
 } from '../types';
 import {
@@ -28,10 +30,7 @@ import {
 	extractFunderParameters,
 } from '../queryParameters';
 import { coerceParams } from '../coercion';
-import {
-	authContextHasFunderPermission,
-	authContextHasOpportunityPermission,
-} from '../authorization';
+import { authContextHasOpportunityPermission } from '../authorization';
 import type { Request, Response } from 'express';
 
 const getProposals = async (req: Request, res: Response): Promise<void> => {
@@ -95,11 +94,11 @@ const postProposal = async (req: Request, res: Response): Promise<void> => {
 	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (
-			!authContextHasFunderPermission(
-				req,
-				opportunity.funderShortCode,
-				Permission.EDIT,
-			) &&
+			!(await hasFunderPermission(db, req, {
+				funderShortCode: opportunity.funderShortCode,
+				permission: PermissionGrantVerb.EDIT,
+				scope: PermissionGrantEntityType.FUNDER,
+			})) &&
 			!authContextHasOpportunityPermission(
 				req,
 				opportunity.id,

@@ -16,7 +16,6 @@ import {
 	loadTableMetrics,
 	loadSystemFunder,
 	loadSystemUser,
-	createOrUpdateUserFunderPermission,
 	createOrUpdateFunder,
 	createOrUpdateUserOpportunityPermission,
 	createPermissionGrant,
@@ -38,7 +37,6 @@ import {
 	BaseFieldSensitivityClassification,
 	keycloakIdToString,
 	OpportunityPermission,
-	Permission,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
@@ -99,10 +97,13 @@ describe('/proposals', () => {
 				taxId: '123-123-123',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -1598,10 +1599,13 @@ describe('/proposals', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 			const opportunity = await createOpportunity(db, null, {
 				title: '🔥',

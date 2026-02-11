@@ -44,7 +44,8 @@ BEGIN
     auth_context_keycloak_user_id,
     auth_context_is_administrator,
     funders.short_code,
-    'view'
+    'view',
+    'funder'
   );
 
   RETURN

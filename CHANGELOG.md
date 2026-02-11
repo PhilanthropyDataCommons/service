@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Migrated changemaker permissions to the unified `permission_grants` table. Changemaker permissions should now be managed via the `/permissionGrants` endpoints.
 - The `permissions.changemaker` property has been removed from the `User` type. Changemaker permissions are now checked asynchronously via the permission_grants table.
+- Migrated funder permissions to the unified `permission_grants` table. Funder permissions should now be managed via the `/permissionGrants` endpoints.
+- The `permissions.funder` property has been removed from the `User` type. Funder permissions are now checked asynchronously via the permission_grants table.
 
 ### Removed
 
@@ -20,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `PUT /userGroups/{keycloakOrganizationId}/changemakers/{changemakerId}/permissions/{permission}`
   - `DELETE /userGroups/{keycloakOrganizationId}/changemakers/{changemakerId}/permissions/{permission}`
 - `UserChangemakerPermission` and `UserGroupChangemakerPermission` schemas have been removed from the OpenAPI spec.
+- Legacy funder permission endpoints have been removed:
+  - `PUT /users/{userKeycloakUserId}/funders/{funderShortCode}/permissions/{permission}`
+  - `DELETE /users/{userKeycloakUserId}/funders/{funderShortCode}/permissions/{permission}`
+  - `PUT /userGroups/{keycloakOrganizationId}/funders/{funderShortCode}/permissions/{permission}`
+  - `DELETE /userGroups/{keycloakOrganizationId}/funders/{funderShortCode}/permissions/{permission}`
+- `UserFunderPermission` and `UserGroupFunderPermission` schemas have been removed from the OpenAPI spec.
 
 ## 0.30.0 2026-01-27
 

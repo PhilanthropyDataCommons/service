@@ -5,12 +5,11 @@ import {
 	createChangemaker,
 	createOrUpdateDataProvider,
 	createOrUpdateFunder,
+	createOrUpdateUserDataProviderPermission,
 	createSource,
 	loadSystemSource,
 	loadTableMetrics,
 	loadSystemUser,
-	createOrUpdateUserFunderPermission,
-	createOrUpdateUserDataProviderPermission,
 	createOpportunity,
 	createProposal,
 	createProposalVersion,
@@ -369,10 +368,13 @@ describe('/sources', () => {
 				keycloakOrganizationId: null,
 				isCollaborative: false,
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
-				permission: Permission.EDIT,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
@@ -405,15 +407,21 @@ describe('/sources', () => {
 				keycloakOrganizationId: null,
 				isCollaborative: false,
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
-				permission: Permission.MANAGE,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
 			});
-			await createOrUpdateUserFunderPermission(db, systemUserAuthContext, {
-				userKeycloakUserId: testUser.keycloakUserId,
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent

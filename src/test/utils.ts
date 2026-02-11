@@ -40,7 +40,6 @@ export const getMockedUser = (): User => ({
 	createdAt: '',
 	permissions: {
 		dataProvider: {},
-		funder: {},
 		opportunity: {},
 	},
 });

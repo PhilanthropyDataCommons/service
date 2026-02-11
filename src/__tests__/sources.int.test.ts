@@ -5,7 +5,6 @@ import {
 	createChangemaker,
 	createOrUpdateDataProvider,
 	createOrUpdateFunder,
-	createOrUpdateUserDataProviderPermission,
 	createSource,
 	loadSystemSource,
 	loadTableMetrics,
@@ -24,7 +23,6 @@ import {
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
 import {
-	Permission,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
@@ -480,15 +478,14 @@ describe('/sources', () => {
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(
-				db,
-				systemUserAuthContext,
-				{
-					userKeycloakUserId: testUser.keycloakUserId,
-					dataProviderShortCode: dataProvider.shortCode,
-					permission: Permission.EDIT,
-				},
-			);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
+				dataProviderShortCode: dataProvider.shortCode,
+				scope: [PermissionGrantEntityType.DATA_PROVIDER],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')
@@ -519,24 +516,14 @@ describe('/sources', () => {
 				name: 'Example Inc.',
 				keycloakOrganizationId: null,
 			});
-			await createOrUpdateUserDataProviderPermission(
-				db,
-				systemUserAuthContext,
-				{
-					userKeycloakUserId: testUser.keycloakUserId,
-					dataProviderShortCode: dataProvider.shortCode,
-					permission: Permission.MANAGE,
-				},
-			);
-			await createOrUpdateUserDataProviderPermission(
-				db,
-				systemUserAuthContext,
-				{
-					userKeycloakUserId: testUser.keycloakUserId,
-					dataProviderShortCode: dataProvider.shortCode,
-					permission: Permission.VIEW,
-				},
-			);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
+				dataProviderShortCode: dataProvider.shortCode,
+				scope: [PermissionGrantEntityType.DATA_PROVIDER],
+				verbs: [PermissionGrantVerb.MANAGE, PermissionGrantVerb.VIEW],
+			});
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')

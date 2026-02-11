@@ -6,7 +6,6 @@ import {
 	createOrUpdateDataProvider,
 	createOrUpdateFunder,
 	createPermissionGrant,
-	createOrUpdateUserGroupDataProviderPermission,
 	loadSystemUser,
 } from '../database';
 import { expectArray } from '../test/asymettricMatchers';
@@ -17,7 +16,6 @@ import {
 } from '../test/mockJwt';
 import {
 	keycloakIdToString,
-	Permission,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
@@ -175,12 +173,16 @@ describe('/organizations', () => {
 				shortCode: 'dapperdataprovider',
 				keycloakOrganizationId,
 			});
-			const authContext = await getTestAuthContext(false);
-			// Grant my one organization of which I'm a member view access to this organization
-			await createOrUpdateUserGroupDataProviderPermission(db, authContext, {
-				keycloakOrganizationId,
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			// Grant my organization of which I'm a member view access to this data provider
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: keycloakOrganizationId,
+				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
 				dataProviderShortCode: expectedDataProvider.shortCode,
-				permission: Permission.VIEW,
+				scope: [PermissionGrantEntityType.DATA_PROVIDER],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const keycloakOrganizationIdLackingPerm =
 				'24fea6aa-f1c5-4594-8bdc-b1789d4d0840';

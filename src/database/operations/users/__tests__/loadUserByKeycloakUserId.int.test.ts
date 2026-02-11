@@ -4,19 +4,12 @@ import {
 	createOrUpdateFunder,
 	createEphemeralUserGroupAssociation,
 	loadSystemUser,
-	createOrUpdateDataProvider,
-	createOrUpdateUserDataProviderPermission,
-	createOrUpdateUserGroupDataProviderPermission,
 	createOpportunity,
 	createOrUpdateUserOpportunityPermission,
 	createOrUpdateUserGroupOpportunityPermission,
 } from '../..';
 import { db } from '../../../db';
-import {
-	OpportunityPermission,
-	Permission,
-	stringToKeycloakId,
-} from '../../../../types';
+import { OpportunityPermission, stringToKeycloakId } from '../../../../types';
 import { getAuthContext } from '../../../../test/utils';
 import {
 	expectArrayContaining,
@@ -38,38 +31,22 @@ describe('loadUserByKeycloakUserId', () => {
 			shortCode: 'fooFunder',
 			isCollaborative: false,
 		});
-		const dataProviderKeycloakOrganizationId =
-			'9426f49a-4c11-4d26-9e58-2b62bf2ee512';
-		const dataProvider = await createOrUpdateDataProvider(db, null, {
-			keycloakOrganizationId: dataProviderKeycloakOrganizationId,
-			name: 'Foo Data Provider',
-			shortCode: 'fooDataProvider',
-		});
+		const keycloakOrganizationId = '9426f49a-4c11-4d26-9e58-2b62bf2ee512';
 		const opportunity = await createOpportunity(db, null, {
 			title: 'Test Opportunity',
 			funderShortCode: funder.shortCode,
 		});
 
-		// Associate the user with a data provider group
+		// Associate the user with an organization group
 		await createEphemeralUserGroupAssociation(db, null, {
 			userKeycloakUserId: user.keycloakUserId,
 			userGroupKeycloakOrganizationId: stringToKeycloakId(
-				dataProviderKeycloakOrganizationId,
+				keycloakOrganizationId,
 			),
 			notAfter: ephemeralExpiration,
 		});
 
 		// Assign EDIT and VIEW via direct user permissions
-		await createOrUpdateUserDataProviderPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: user.keycloakUserId,
-			dataProviderShortCode: dataProvider.shortCode,
-			permission: Permission.EDIT,
-		});
-		await createOrUpdateUserDataProviderPermission(db, systemUserAuthContext, {
-			userKeycloakUserId: user.keycloakUserId,
-			dataProviderShortCode: dataProvider.shortCode,
-			permission: Permission.VIEW,
-		});
 		await createOrUpdateUserOpportunityPermission(db, systemUserAuthContext, {
 			userKeycloakUserId: user.keycloakUserId,
 			opportunityId: opportunity.id,
@@ -81,36 +58,12 @@ describe('loadUserByKeycloakUserId', () => {
 			opportunityPermission: OpportunityPermission.VIEW,
 		});
 
-		// Assign MANAGE and VIEW via group permissions
-		await createOrUpdateUserGroupDataProviderPermission(
-			db,
-			systemUserAuthContext,
-			{
-				keycloakOrganizationId: stringToKeycloakId(
-					dataProviderKeycloakOrganizationId,
-				),
-				dataProviderShortCode: dataProvider.shortCode,
-				permission: Permission.MANAGE,
-			},
-		);
-		await createOrUpdateUserGroupDataProviderPermission(
-			db,
-			systemUserAuthContext,
-			{
-				keycloakOrganizationId: stringToKeycloakId(
-					dataProviderKeycloakOrganizationId,
-				),
-				dataProviderShortCode: dataProvider.shortCode,
-				permission: Permission.VIEW,
-			},
-		);
+		// Assign MANAGE and CREATE_PROPOSAL via group permissions
 		await createOrUpdateUserGroupOpportunityPermission(
 			db,
 			systemUserAuthContext,
 			{
-				keycloakOrganizationId: stringToKeycloakId(
-					dataProviderKeycloakOrganizationId,
-				),
+				keycloakOrganizationId: stringToKeycloakId(keycloakOrganizationId),
 				opportunityId: opportunity.id,
 				opportunityPermission: OpportunityPermission.MANAGE,
 			},
@@ -119,9 +72,7 @@ describe('loadUserByKeycloakUserId', () => {
 			db,
 			systemUserAuthContext,
 			{
-				keycloakOrganizationId: stringToKeycloakId(
-					dataProviderKeycloakOrganizationId,
-				),
+				keycloakOrganizationId: stringToKeycloakId(keycloakOrganizationId),
 				opportunityId: opportunity.id,
 				opportunityPermission: OpportunityPermission.CREATE_PROPOSAL,
 			},
@@ -137,13 +88,6 @@ describe('loadUserByKeycloakUserId', () => {
 			...user,
 			createdAt: expectTimestamp(),
 			permissions: {
-				dataProvider: {
-					fooDataProvider: expectArrayContaining([
-						Permission.MANAGE,
-						Permission.EDIT,
-						Permission.VIEW,
-					]),
-				},
 				opportunity: {
 					[opportunity.id]: expectArrayContaining([
 						OpportunityPermission.MANAGE,
@@ -164,32 +108,34 @@ describe('loadUserByKeycloakUserId', () => {
 			keycloakUserName: 'Carol',
 		});
 
-		// Associate the user with a data provider group (expired)
-		const dataProviderKeycloakOrganizationId =
-			'9426f49a-4c11-4d26-9e58-2b62bf2ee512';
-		const dataProvider = await createOrUpdateDataProvider(db, null, {
-			keycloakOrganizationId: dataProviderKeycloakOrganizationId,
-			name: 'Foo Data Provider',
-			shortCode: 'fooDataProvider',
+		// Associate the user with an organization group (expired)
+		const keycloakOrganizationId = '9426f49a-4c11-4d26-9e58-2b62bf2ee512';
+		const funder = await createOrUpdateFunder(db, null, {
+			keycloakOrganizationId: null,
+			name: 'Foo Funder',
+			shortCode: 'fooFunder',
+			isCollaborative: false,
+		});
+		const opportunity = await createOpportunity(db, null, {
+			title: 'Test Opportunity',
+			funderShortCode: funder.shortCode,
 		});
 		await createEphemeralUserGroupAssociation(db, null, {
 			userKeycloakUserId: user.keycloakUserId,
 			userGroupKeycloakOrganizationId: stringToKeycloakId(
-				dataProviderKeycloakOrganizationId,
+				keycloakOrganizationId,
 			),
 			notAfter: new Date(0).toISOString(),
 		});
 
 		// Assign VIEW via group permissions
-		await createOrUpdateUserGroupDataProviderPermission(
+		await createOrUpdateUserGroupOpportunityPermission(
 			db,
 			systemUserAuthContext,
 			{
-				keycloakOrganizationId: stringToKeycloakId(
-					dataProviderKeycloakOrganizationId,
-				),
-				dataProviderShortCode: dataProvider.shortCode,
-				permission: Permission.VIEW,
+				keycloakOrganizationId: stringToKeycloakId(keycloakOrganizationId),
+				opportunityId: opportunity.id,
+				opportunityPermission: OpportunityPermission.VIEW,
 			},
 		);
 
@@ -203,7 +149,6 @@ describe('loadUserByKeycloakUserId', () => {
 			...user,
 			createdAt: expectTimestamp(),
 			permissions: {
-				dataProvider: {},
 				opportunity: {},
 			},
 		});
@@ -225,7 +170,6 @@ describe('loadUserByKeycloakUserId', () => {
 			...user,
 			createdAt: expectTimestamp(),
 			permissions: {
-				dataProvider: {},
 				opportunity: {},
 			},
 		});

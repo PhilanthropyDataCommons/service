@@ -1,20 +1,4 @@
-import type {
-	AuthContext,
-	Id,
-	OpportunityPermission,
-	Permission,
-	ShortCode,
-} from './types';
-
-const authContextHasDataProviderPermission = (
-	auth: AuthContext,
-	dataProviderShortCode: ShortCode,
-	permission: Permission,
-): boolean =>
-	auth.role.isAdministrator ||
-	(auth.user.permissions.dataProvider[dataProviderShortCode] ?? []).includes(
-		permission,
-	);
+import type { AuthContext, Id, OpportunityPermission } from './types';
 
 const authContextHasOpportunityPermission = (
 	auth: AuthContext,
@@ -26,7 +10,4 @@ const authContextHasOpportunityPermission = (
 		opportunityPermission,
 	);
 
-export {
-	authContextHasDataProviderPermission,
-	authContextHasOpportunityPermission,
-};
+export { authContextHasOpportunityPermission };

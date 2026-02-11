@@ -3,7 +3,6 @@ import { app } from '../app';
 import {
 	db,
 	createOpportunity,
-	createChangemaker,
 	createChangemakerFieldValue,
 	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
@@ -19,7 +18,11 @@ import {
 	loadSystemUser,
 	createPermissionGrant,
 } from '../database';
-import { createTestFunder, createTestFile } from '../test/factories';
+import {
+	createTestChangemaker,
+	createTestFile,
+	createTestFunder,
+} from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	expectArray,
@@ -41,12 +44,11 @@ import {
 } from '../types';
 
 const insertTestChangemakers = async () => {
-	await createChangemaker(db, null, {
+	await createTestChangemaker(db, null, {
 		taxId: '11-1111111',
 		name: 'Example Inc.',
-		keycloakOrganizationId: null,
 	});
-	await createChangemaker(db, null, {
+	await createTestChangemaker(db, null, {
 		taxId: '22-2222222',
 		name: 'Another Inc.',
 		keycloakOrganizationId: '402b1208-be48-11ef-8af9-b767e5e8e4ee',
@@ -69,15 +71,11 @@ describe('/changemakerProposals', () => {
 				name: 'Visible Funder',
 				shortCode: 'visibleFunder',
 			});
-			const visibleChangemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
+			const visibleChangemaker = await createTestChangemaker(db, null, {
 				name: 'Visible Changemaker',
-				keycloakOrganizationId: null,
 			});
-			const anotherChangemaker = await createChangemaker(db, null, {
-				taxId: '22-2222222',
+			const anotherChangemaker = await createTestChangemaker(db, null, {
 				name: 'Another Changemaker',
-				keycloakOrganizationId: '402b1208-be48-11ef-8af9-b767e5e8e4ee',
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -330,10 +328,9 @@ describe('/changemakerProposals', () => {
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
-			const changemaker = await createChangemaker(db, null, {
+			const changemaker = await createTestChangemaker(db, null, {
 				taxId: '88-8888883',
 				name: 'Proposal File Decorated Changemaker',
-				keycloakOrganizationId: null,
 			});
 
 			// Create a test file
@@ -445,10 +442,9 @@ describe('/changemakerProposals', () => {
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
-			const changemaker = await createChangemaker(db, null, {
+			const changemaker = await createTestChangemaker(db, null, {
 				taxId: '88-8888884',
 				name: 'Changemaker File Decorated Changemaker',
-				keycloakOrganizationId: null,
 			});
 
 			// Create a test file

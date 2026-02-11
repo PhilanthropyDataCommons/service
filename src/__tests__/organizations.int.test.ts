@@ -2,13 +2,12 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
-	createChangemaker,
 	createOrUpdateDataProvider,
 	createPermissionGrant,
 	loadSystemUser,
 } from '../database';
 import { expectArray } from '../test/asymettricMatchers';
-import { createTestFunder } from '../test/factories';
+import { createTestChangemaker, createTestFunder } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -38,18 +37,14 @@ describe('/organizations', () => {
 				'bde830f0-d590-467a-8431-cdf9d6af1b87',
 			);
 
-			await createChangemaker(db, null, {
-				taxId: '33-3333333',
+			await createTestChangemaker(db, null, {
 				name: 'Changemaker does not exist in Keycloak or has not been linked.',
-				keycloakOrganizationId: null,
 			});
-			const expectedChangemaker = await createChangemaker(db, null, {
-				taxId: '55-5555555',
+			const expectedChangemaker = await createTestChangemaker(db, null, {
 				name: 'Change, Inc.',
 				keycloakOrganizationId,
 			});
-			await createChangemaker(db, null, {
-				taxId: '44-4444444',
+			await createTestChangemaker(db, null, {
 				name: 'Changemaker is linked but I am not the one that should be returned.',
 				keycloakOrganizationId: 'fa32e21e-e471-4d28-b101-7788c611aa04',
 			});

@@ -5,7 +5,6 @@ import {
 	createApplicationFormField,
 	createOrUpdateBaseField,
 	createOpportunity,
-	createChangemaker,
 	createChangemakerProposal,
 	createEphemeralUserGroupAssociation,
 	createProposal,
@@ -19,7 +18,7 @@ import {
 	loadSystemUser,
 	createPermissionGrant,
 } from '../database';
-import { createTestFunder } from '../test/factories';
+import { createTestChangemaker, createTestFunder } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	expectArray,
@@ -90,10 +89,8 @@ describe('/proposals', () => {
 				name: 'Visible Funder',
 				shortCode: 'visibleFunder',
 			});
-			const visibleChangemaker = await createChangemaker(db, null, {
+			const visibleChangemaker = await createTestChangemaker(db, null, {
 				name: 'Visible Changemaker',
-				taxId: '123-123-123',
-				keycloakOrganizationId: null,
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -178,10 +175,8 @@ describe('/proposals', () => {
 				externalId: 'proposal-2',
 				opportunityId: opportunity.id,
 			});
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '123-123-123',
+			const changemaker = await createTestChangemaker(db, null, {
 				name: 'Canadian Company',
-				keycloakOrganizationId: null,
 			});
 			await createChangemakerProposal(db, null, {
 				changemakerId: changemaker.id,

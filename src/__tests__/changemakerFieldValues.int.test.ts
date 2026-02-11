@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
-	createChangemaker,
 	createOrUpdateBaseField,
 	createSource,
 	createChangemakerFieldValueBatch,
@@ -12,7 +11,7 @@ import {
 	createPermissionGrant,
 } from '../database';
 import { expectNumber, expectTimestamp } from '../test/asymettricMatchers';
-import { createTestBaseField } from '../test/factories';
+import { createTestBaseField, createTestChangemaker } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
@@ -33,11 +32,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '11-1111111',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -84,11 +79,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '22-2222222',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -179,11 +170,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '99-9999999',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -244,11 +231,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '33-3333333',
-			name: 'Other Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -291,11 +274,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '44-4444444',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const source = await createSource(db, null, {
 			label: 'Test Source',
@@ -334,11 +313,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '55-5555555',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const proposalField = await createOrUpdateBaseField(db, null, {
 			shortCode: 'test_proposal_field',
@@ -386,11 +361,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '66-6666666',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const forbiddenField = await createOrUpdateBaseField(db, null, {
 			shortCode: 'forbidden_field_test',
@@ -435,11 +406,7 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 409 when batch does not exist', async () => {
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '77-7777777',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -466,11 +433,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '88-8888888',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -513,11 +476,7 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '90-9090901',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -569,16 +528,12 @@ describe('GET /changemakerFieldValues', () => {
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const testUser = await loadTestUser();
 
-		const visibleChangemaker = await createChangemaker(db, null, {
-			taxId: '90-9090910',
+		const visibleChangemaker = await createTestChangemaker(db, null, {
 			name: 'Visible Organization',
-			keycloakOrganizationId: null,
 		});
 
-		const hiddenChangemaker = await createChangemaker(db, null, {
-			taxId: '90-9090911',
+		const hiddenChangemaker = await createTestChangemaker(db, null, {
 			name: 'Hidden Organization',
-			keycloakOrganizationId: null,
 		});
 
 		await createPermissionGrant(db, systemUserAuthContext, {
@@ -655,11 +610,7 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '90-9090912',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -718,11 +669,7 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '90-9090902',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -782,16 +729,12 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker1 = await createChangemaker(db, null, {
-			taxId: '90-9090903',
+		const changemaker1 = await createTestChangemaker(db, null, {
 			name: 'First Organization',
-			keycloakOrganizationId: null,
 		});
 
-		const changemaker2 = await createChangemaker(db, null, {
-			taxId: '90-9090904',
+		const changemaker2 = await createTestChangemaker(db, null, {
 			name: 'Second Organization',
-			keycloakOrganizationId: null,
 		});
 
 		const baseField = await createTestBaseField(db, null);
@@ -857,11 +800,7 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '90-9090905',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -940,11 +879,7 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '90-9090906',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -984,11 +919,7 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const testUser = await loadTestUser();
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '90-9090920',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		await createPermissionGrant(db, systemUserAuthContext, {
 			granteeType: PermissionGrantGranteeType.USER,
@@ -1038,11 +969,7 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '90-9090921',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
 

@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
-	createChangemaker,
 	createEphemeralUserGroupAssociation,
 	createOrUpdateDataProvider,
 	createSource,
@@ -17,7 +16,7 @@ import {
 	createPermissionGrant,
 } from '../database';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
-import { createTestFunder } from '../test/factories';
+import { createTestChangemaker, createTestFunder } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
@@ -52,11 +51,7 @@ describe('/sources', () => {
 
 		it('returns all sources present in the database', async () => {
 			const systemSource = await loadSystemSource(db, null);
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const source = await createSource(db, null, {
 				label: 'Example Inc.',
 				changemakerId: changemaker.id,
@@ -75,11 +70,7 @@ describe('/sources', () => {
 		});
 
 		it('returns exactly one source selected by id', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const source = await createSource(db, null, {
 				label: 'Example Inc.',
 				changemakerId: changemaker.id,
@@ -112,11 +103,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 404 when id is not found', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			await createSource(db, null, {
 				label: 'not to be returned',
 				changemakerId: changemaker.id,
@@ -131,11 +118,7 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one changemaker source for an admin user', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')
@@ -166,11 +149,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 409 conflict when label is not unique on changemaker foreign key', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			await createSource(db, null, {
 				label: 'Example Corp',
 				changemakerId: changemaker.id,
@@ -252,11 +231,7 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -297,11 +272,7 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -595,11 +566,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 400 bad request when no label sent', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -639,11 +606,7 @@ describe('/sources', () => {
 		});
 
 		it('deletes exactly one source that has no proposals associated with it', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const localSource = await createSource(db, null, {
 				changemakerId: changemaker.id,
 				label: 'Example Inc.',
@@ -666,11 +629,7 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const systemFunder = await loadSystemFunder(db, null);
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const localSource = await createSource(db, null, {
 				changemakerId: changemaker.id,
 				label: 'Example Inc.',

@@ -1,4 +1,5 @@
 export * from './createTestBaseField';
+export * from './createTestChangemaker';
 export * from './createTestFile';
 export * from './createTestFunder';
 export * from './createTestPermissionGrant';

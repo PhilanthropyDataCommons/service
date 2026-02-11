@@ -12,12 +12,12 @@ import {
 	loadTableMetrics,
 	loadSystemFunder,
 	loadSystemUser,
-	createChangemaker,
 	createChangemakerProposal,
 	createProposalFieldValue,
 	createPermissionGrant,
 } from '../database';
 import { getLogger } from '../logger';
+import { createTestChangemaker } from '../test/factories';
 import {
 	BaseFieldDataType,
 	BaseFieldCategory,
@@ -154,10 +154,8 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
-			const visibleChangemaker = await createChangemaker(db, null, {
+			const visibleChangemaker = await createTestChangemaker(db, null, {
 				name: 'Visible Changemaker',
-				taxId: '123456789',
-				keycloakOrganizationId: null,
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,

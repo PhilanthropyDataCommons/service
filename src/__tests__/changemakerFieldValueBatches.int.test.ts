@@ -2,12 +2,12 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
-	createChangemaker,
 	createChangemakerFieldValueBatch,
 	createOrUpdateUser,
 	createSource,
 } from '../database';
 import { expectNumber, expectTimestamp } from '../test/asymettricMatchers';
+import { createTestChangemaker } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -16,11 +16,7 @@ import { getAuthContext, loadTestUser } from '../test/utils';
 
 describe('POST /changemakerFieldValueBatches', () => {
 	it('Successfully creates a changemaker field value batch', async () => {
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '11-1111111',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const source = await createSource(db, null, {
 			label: 'Test Source',
@@ -50,11 +46,7 @@ describe('POST /changemakerFieldValueBatches', () => {
 	});
 
 	it('Accepts null for notes', async () => {
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '22-2222222',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const source = await createSource(db, null, {
 			label: 'Test Source',
@@ -145,11 +137,7 @@ describe('GET /changemakerFieldValueBatches', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '33-3333333',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const source = await createSource(db, null, {
 			label: 'Test Source',
@@ -194,11 +182,7 @@ describe('GET /changemakerFieldValueBatches', () => {
 		});
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '55-5555555',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const source = await createSource(db, null, {
 			label: 'Test Source',
@@ -239,11 +223,7 @@ describe('GET /changemakerFieldValueBatches', () => {
 		});
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '66-6666666',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const source = await createSource(db, null, {
 			label: 'Test Source',
@@ -289,11 +269,7 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '44-4444444',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const source = await createSource(db, null, {
 			label: 'Test Source',
@@ -324,11 +300,7 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		});
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '77-7777777',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const source = await createSource(db, null, {
 			label: 'Test Source',
@@ -361,11 +333,7 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		});
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createChangemaker(db, null, {
-			taxId: '88-8888888',
-			name: 'Test Organization',
-			keycloakOrganizationId: null,
-		});
+		const changemaker = await createTestChangemaker(db, null);
 
 		const source = await createSource(db, null, {
 			label: 'Test Source',

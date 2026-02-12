@@ -3,6 +3,7 @@ import { app } from '../app';
 import {
 	db,
 	createOpportunity,
+	createEphemeralUserGroupAssociation,
 	loadTableMetrics,
 	loadSystemFunder,
 	loadSystemOpportunity,
@@ -20,6 +21,7 @@ import {
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
+	stringToKeycloakId,
 } from '../types';
 
 describe('/opportunities', () => {
@@ -207,11 +209,32 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 404 when the user does not have view permission', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser();
 			const systemFunder = await loadSystemFunder(db, null);
 			const opportunity = await createOpportunity(db, null, {
 				title: 'This definitely should not be returned',
 				funderShortCode: systemFunder.shortCode,
 			});
+
+			// Also create a userGroup permission grant with an EXPIRED association
+			// to verify that expired associations don't grant access
+			const expiredOrgId = 'cccccccc-1111-2222-3333-444444444444';
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+				opportunityId: opportunity.id,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createEphemeralUserGroupAssociation(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+			});
+
 			await request(app)
 				.get(`/opportunities/${opportunity.id}`)
 				.set(authHeader)

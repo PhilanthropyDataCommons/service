@@ -7,6 +7,7 @@ import {
 	createSource,
 	createChangemakerFieldValueBatch,
 	createChangemakerFieldValue,
+	createEphemeralUserGroupAssociation,
 	loadSystemUser,
 	createPermissionGrant,
 } from '../database';
@@ -24,6 +25,7 @@ import {
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
+	stringToKeycloakId,
 } from '../types';
 
 describe('POST /changemakerFieldValues', () => {
@@ -648,6 +650,8 @@ describe('GET /changemakerFieldValues', () => {
 	});
 
 	it('Returns empty entries when user has no permissions', async () => {
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser, true);
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
@@ -680,6 +684,23 @@ describe('GET /changemakerFieldValues', () => {
 			value: 'Test value',
 			isValid: true,
 			goodAsOf: '2024-01-01T00:00:00Z',
+		});
+
+		// Also create a userGroup permission grant with an EXPIRED association
+		// to verify that expired associations don't grant access
+		const expiredOrgId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER_GROUP,
+			granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+			changemakerId: changemaker.id,
+			scope: [PermissionGrantEntityType.CHANGEMAKER],
+			verbs: [PermissionGrantVerb.VIEW],
+		});
+		await createEphemeralUserGroupAssociation(db, null, {
+			userKeycloakUserId: testUser.keycloakUserId,
+			userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+			notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
 		});
 
 		const result = await request(app)
@@ -1012,6 +1033,8 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 	});
 
 	it('Returns 404 when user lacks view permission on changemaker', async () => {
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser, true);
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
@@ -1044,6 +1067,23 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 			value: 'Test value',
 			isValid: true,
 			goodAsOf: '2024-01-01T00:00:00Z',
+		});
+
+		// Also create a userGroup permission grant with an EXPIRED association
+		// to verify that expired associations don't grant access
+		const expiredOrgId = 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff';
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER_GROUP,
+			granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+			changemakerId: changemaker.id,
+			scope: [PermissionGrantEntityType.CHANGEMAKER],
+			verbs: [PermissionGrantVerb.VIEW],
+		});
+		await createEphemeralUserGroupAssociation(db, null, {
+			userKeycloakUserId: testUser.keycloakUserId,
+			userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+			notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
 		});
 
 		const result = await request(app)

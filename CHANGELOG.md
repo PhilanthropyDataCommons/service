@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Permission checks for userGroup-based grants now correctly ignore expired ephemeral user group associations.
+
 ## 0.31.0 2026-02-12
 
 ### Added

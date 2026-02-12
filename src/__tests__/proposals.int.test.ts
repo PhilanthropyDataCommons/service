@@ -7,6 +7,7 @@ import {
 	createOpportunity,
 	createChangemaker,
 	createChangemakerProposal,
+	createEphemeralUserGroupAssociation,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
@@ -38,6 +39,7 @@ import {
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
+	stringToKeycloakId,
 } from '../types';
 
 const createTestBaseFields = async () => {
@@ -851,6 +853,8 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when the current user does not have permission to view the provided id', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser();
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -862,9 +866,26 @@ describe('/proposals', () => {
 				title: '⛰️',
 				funderShortCode: systemFunder.shortCode,
 			});
-			await createProposal(db, anotherUserAuthContext, {
+			const proposal = await createProposal(db, anotherUserAuthContext, {
 				externalId: `proposal-1`,
 				opportunityId: opportunity.id,
+			});
+
+			// Also create a userGroup permission grant with an EXPIRED association
+			// to verify that expired associations don't grant access
+			const expiredOrgId = 'dddddddd-1111-2222-3333-444444444444';
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				contextEntityType: PermissionGrantEntityType.PROPOSAL,
+				proposalId: proposal.id,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createEphemeralUserGroupAssociation(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
 			});
 
 			const response = await request(app)

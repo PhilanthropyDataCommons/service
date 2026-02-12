@@ -38,6 +38,7 @@ BEGIN
 							= has_changemaker_permission.user_keycloak_user_id
 							AND euga.user_group_keycloak_organization_id
 								= pg.grantee_keycloak_organization_id
+							AND NOT is_expired(euga.not_after)
 					)
 				)
 			)

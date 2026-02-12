@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.31.0 2026-02-12
+
 ### Added
 
 - `GET /files` endpoint to retrieve a paginated list of files. Users see only files they created; administrators can see all files and filter by creator using the `createdBy` parameter.
@@ -14,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Viewing changemaker field values now requires explicit `view | changemakerFieldValue` scope, unless the field has `public` sensitivity classification. This scope can be granted at the changemaker context level.
 - Viewing proposal field values now requires explicit `view | proposalFieldValue` scope. This scope can be granted at the proposalFieldValue, proposal, opportunity, funder, or changemaker context level. Users with only `view | proposal` scope will see proposals with empty `fieldValues` arrays.
 - Existing permissions with `proposal` scope have been migrated to also include `proposalFieldValue` scope, ensuring backward compatibility.
 - Migrated changemaker permissions to the unified `permission_grants` table. Changemaker permissions should now be managed via the `/permissionGrants` endpoints.

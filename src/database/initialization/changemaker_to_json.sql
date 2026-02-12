@@ -111,6 +111,17 @@ BEGIN
 				AND u.keycloak_user_id IS NOT NULL
 				-- Guard against the valid-but-not-really-valid-here system user:
 				AND u.keycloak_user_id != system_keycloak_user_id()
+				-- Check permission: field must be public OR user has view permission
+				AND (
+					bf.sensitivity_classification = 'public'
+					OR has_changemaker_permission(
+						auth_context_keycloak_user_id,
+						auth_context_is_administrator,
+						cfv.changemaker_id,
+						'view',
+						'changemakerFieldValue'
+					)
+				)
 		) AS combined_field_values
 		ORDER BY
 			base_field_short_code,

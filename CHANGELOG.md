@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.31.0 2026-02-12
+
 ### Added
 
 - `GET /files` endpoint to retrieve a paginated list of files. Users see only files they created; administrators can see all files and filter by creator using the `createdBy` parameter.

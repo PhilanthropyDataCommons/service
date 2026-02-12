@@ -30,8 +30,8 @@ and how to perform most of these steps follow in this document.
 
 See also a [checklist to onboard organizations].
 
-[integrates the changemaker's IdP]: ./ORGANIZATION_IDP_INTEGRATION.md
-[checklist to onboard organizations]: ./ORGANIZATION_ONBOARDING_CHECKLIST.md
+[integrates the changemaker's IdP]: ./onboarding/ORGANIZATION_IDP_INTEGRATION.md
+[checklist to onboard organizations]: ./onboarding/ORGANIZATION_ONBOARDING_CHECKLIST.md
 
 ## Users and Their Keycloak UUIDs
 
@@ -56,7 +56,7 @@ user. The UUID is shown both in the URL and in the ID field of the user page.
 
 Within the PDC service, we usually refer to this UUID as the [`keycloakUserId`].
 
-[`keycloakUserId`]: ../src/types/User.ts#L9
+[`keycloakUserId`]: https://github.com/PhilanthropyDataCommons/service/blob/main/src/types/User.ts#L7
 
 ## How to Grant or Revoke PDC Data Permissions to Users
 

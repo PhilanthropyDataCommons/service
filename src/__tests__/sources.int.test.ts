@@ -3,6 +3,7 @@ import { app } from '../app';
 import {
 	db,
 	createChangemaker,
+	createEphemeralUserGroupAssociation,
 	createOrUpdateDataProvider,
 	createOrUpdateFunder,
 	createSource,
@@ -27,6 +28,7 @@ import {
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
 	PostgresErrorCode,
+	stringToKeycloakId,
 } from '../types';
 
 const agent = request.agent(app);
@@ -321,6 +323,24 @@ describe('/sources', () => {
 				scope: [PermissionGrantEntityType.CHANGEMAKER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
+
+			// Also create a userGroup permission grant with EDIT verb but an EXPIRED association
+			// to verify that expired associations don't grant access
+			const expiredOrgId = 'eeeeeeee-1111-2222-3333-444444444444';
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+			await createEphemeralUserGroupAssociation(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+			});
+
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')
@@ -435,6 +455,24 @@ describe('/sources', () => {
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
+
+			// Also create a userGroup permission grant with EDIT verb but an EXPIRED association
+			// to verify that expired associations don't grant access
+			const expiredOrgId = 'ffffffff-1111-2222-3333-444444444444';
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+			await createEphemeralUserGroupAssociation(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+			});
+
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')
@@ -538,6 +576,24 @@ describe('/sources', () => {
 				scope: [PermissionGrantEntityType.DATA_PROVIDER],
 				verbs: [PermissionGrantVerb.MANAGE, PermissionGrantVerb.VIEW],
 			});
+
+			// Also create a userGroup permission grant with EDIT verb but an EXPIRED association
+			// to verify that expired associations don't grant access
+			const expiredOrgId = '11111111-aaaa-bbbb-cccc-dddddddddddd';
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
+				dataProviderShortCode: dataProvider.shortCode,
+				scope: [PermissionGrantEntityType.DATA_PROVIDER],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+			await createEphemeralUserGroupAssociation(db, null, {
+				userKeycloakUserId: testUser.keycloakUserId,
+				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
+				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+			});
+
 			const before = await loadTableMetrics('sources');
 			const result = await agent
 				.post('/sources')

@@ -111,7 +111,7 @@ You can verify that your file has been successfully uploaded using the
   automatically associate the field value with the corresponding file and
   populate `file` with the correct metadata.
 - Below is an example `/proposalVersion` POST request, which includes all field
-  values, even though only one will be changed.
+  values, even though we are only trying to add file ID 76 to the fourth field value.
 
   ```json
   {

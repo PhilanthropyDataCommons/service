@@ -16,21 +16,13 @@ BEGIN
 	)
 	INTO proposal_field_values_json
 	FROM proposal_field_values
-	INNER JOIN application_form_fields
-		ON proposal_field_values.application_form_field_id = application_form_fields.id
-	INNER JOIN base_fields
-		ON application_form_fields.base_field_short_code = base_fields.short_code
 	WHERE proposal_field_values.proposal_version_id = proposal_version.id
-		AND base_fields.sensitivity_classification != 'forbidden'
-		AND (
-			auth_context_is_administrator
-			OR has_proposal_field_value_permission(
-				auth_context_keycloak_user_id,
-				auth_context_is_administrator,
-				proposal_field_values.id,
-				'view',
-				'proposalFieldValue'
-			)
+		AND has_proposal_field_value_permission(
+			auth_context_keycloak_user_id,
+			auth_context_is_administrator,
+			proposal_field_values.id,
+			'view',
+			'proposalFieldValue'
 		);
 
 	SELECT source_to_json(

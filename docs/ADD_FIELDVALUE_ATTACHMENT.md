@@ -1,7 +1,9 @@
 # Uploading attachments to field values
 
-This details the steps for uploading files as attachments to field values using
-the PDC API.
+This details the steps for uploading files as attachments to field
+values using the PDC API. Note that PDC is unable to act as storage
+for any other files except those which will be used as field value
+attachments (or as part of the Bulk Upload process).
 
 If you would like to use the Swagger UI to make requests and view their
 attendant schema, you can do so at api.philanthropydatacommons.org. You will
@@ -82,9 +84,18 @@ value**
 	-F "file=@/path/to/sampleproposal.csv"
 ```
 
+You can verify that your file has been successfully uploaded using the
+`/files` GET endpoint.
+
 ### Associate file ID with a field value
 
-- Make sure you have the file IDs of the files you'd like to include.
+- Make sure you have the file IDs of the files you'd like to
+  include. 
+    - If you need to look up the ID of a recently uploaded file, you
+      can use the `/files` GET endpoint.
+    - You can also filter the `/files` GET response by uploader,
+      including using `me` to get a list of files uploaded with your
+      account.
 - When posting a new versions of existing items, as with posting new proposal
   versions, **you will need to include all the fields originally included that
   you would like to preserve**, though not as verbosely as the full GET

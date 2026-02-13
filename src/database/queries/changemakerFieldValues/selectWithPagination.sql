@@ -13,12 +13,12 @@ WHERE
 		ELSE
 			changemaker_id = :changemakerId
 	END
-	AND has_changemaker_permission(
+	AND has_changemaker_field_value_permission(
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator,
-		changemaker_id,
+		id,
 		'view',
-		'changemaker'
+		'changemakerFieldValue'
 	)
 ORDER BY id DESC
 LIMIT :limit OFFSET :offset;

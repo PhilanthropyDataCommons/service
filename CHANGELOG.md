@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- Creating changemaker field values now requires `create | changemakerFieldValue` scope (previously required `edit | changemaker`). This scope can be granted at the changemaker context level.
+- Existing changemaker permissions with `changemaker` scope have been migrated to also include `changemakerFieldValue` scope, ensuring backward compatibility.
+
 ### Fixed
 
 - Permission checks for userGroup-based grants now correctly ignore expired ephemeral user group associations.

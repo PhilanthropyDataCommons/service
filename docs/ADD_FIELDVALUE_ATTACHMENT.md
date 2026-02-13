@@ -60,6 +60,7 @@ Uploading documents to the database via the PDC API is a multistep process.
 
 **Use `presignedPost` values to create a `curl` request to the response `url`
 value**
+
 - Use the following formatting changes:
   - Each field should be preceded with `-F`
   - The entire key-value pair should be enclosed within double-quotes
@@ -90,12 +91,12 @@ You can verify that your file has been successfully uploaded using the
 ### Associate file ID with a field value
 
 - Make sure you have the file IDs of the files you'd like to
-  include. 
-    - If you need to look up the ID of a recently uploaded file, you
-      can use the `/files` GET endpoint.
-    - You can also filter the `/files` GET response by uploader,
-      including using `me` to get a list of files uploaded with your
-      account.
+  include.
+  - If you need to look up the ID of a recently uploaded file, you
+    can use the `/files` GET endpoint.
+  - You can also filter the `/files` GET response by uploader,
+    including using `me` to get a list of files uploaded with your
+    account.
 - When posting a new versions of existing items, as with posting new proposal
   versions, **you will need to include all the fields originally included that
   you would like to preserve**, though not as verbosely as the full GET

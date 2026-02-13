@@ -67,12 +67,12 @@ const postChangemakerFieldValue = async (
 	if (
 		!(await hasChangemakerPermission(db, req, {
 			changemakerId,
-			permission: PermissionGrantVerb.EDIT,
-			scope: PermissionGrantEntityType.CHANGEMAKER,
+			permission: PermissionGrantVerb.CREATE,
+			scope: PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
 		}))
 	) {
 		throw new UnprocessableEntityError(
-			'You do not have write permissions on this changemaker.',
+			'You do not have permission to create field values for this changemaker.',
 		);
 	}
 

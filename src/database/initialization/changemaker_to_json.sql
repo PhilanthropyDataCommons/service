@@ -104,22 +104,18 @@ BEGIN
 				ON cfvb.source_id = s.id
 			WHERE cfv.changemaker_id = changemaker.id
 				AND bf.category = 'organization'
-				AND bf.sensitivity_classification != 'forbidden'
 				AND cfv.is_valid
 				-- Guard against possible removal of NON NULL constraint on users table:
 				AND u.keycloak_user_id IS NOT NULL
 				-- Guard against the valid-but-not-really-valid-here system user:
 				AND u.keycloak_user_id != system_keycloak_user_id()
-				-- Check permission: field must be public OR user has view permission
-				AND (
-					bf.sensitivity_classification = 'public'
-					OR has_changemaker_permission(
-						auth_context_keycloak_user_id,
-						auth_context_is_administrator,
-						cfv.changemaker_id,
-						'view',
-						'changemakerFieldValue'
-					)
+				-- Check permission to view this changemaker field value:
+				AND has_changemaker_field_value_permission(
+					auth_context_keycloak_user_id,
+					auth_context_is_administrator,
+					cfv.id,
+					'view',
+					'changemakerFieldValue'
 				)
 		) AS combined_field_values
 		ORDER BY

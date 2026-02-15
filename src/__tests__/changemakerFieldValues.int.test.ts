@@ -240,7 +240,7 @@ describe('POST /changemakerFieldValues', () => {
 			.expect(401);
 	});
 
-	it('Returns 422 when user does not have edit permission on changemaker', async () => {
+	it('Returns 422 when user does not have create permission on changemakerFieldValue', async () => {
 		const testUser = await loadTestUser();
 		const testUserAuthContext = getAuthContext(testUser, true);
 
@@ -283,7 +283,69 @@ describe('POST /changemakerFieldValues', () => {
 
 		expect(result.body).toMatchObject({
 			name: 'UnprocessableEntityError',
-			message: 'You do not have write permissions on this changemaker.',
+			message:
+				'You do not have permission to create field values for this changemaker.',
+		});
+	});
+
+	it('Allows non-admin user with create permission on changemakerFieldValue to create', async () => {
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const testUser = await loadTestUser();
+		const testUserAuthContext = getAuthContext(testUser, true);
+
+		const changemaker = await createChangemaker(db, null, {
+			taxId: '33-3333334',
+			name: 'Permissioned Organization',
+			keycloakOrganizationId: null,
+		});
+
+		// Grant create permission on changemakerFieldValue scope
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+			changemakerId: changemaker.id,
+			scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
+			verbs: [PermissionGrantVerb.CREATE],
+		});
+
+		const baseField = await createTestBaseField(db, null);
+
+		const source = await createSource(db, null, {
+			label: 'Test Source',
+			changemakerId: changemaker.id,
+		});
+
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: 'Test batch',
+			},
+		);
+
+		const result = await request(app)
+			.post('/changemakerFieldValues')
+			.type('application/json')
+			.set(authHeader)
+			.send({
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch.id,
+				value: 'Test value from permissioned user',
+				goodAsOf: '2024-01-01T00:00:00Z',
+			})
+			.expect(201);
+
+		expect(result.body).toMatchObject({
+			id: expectNumber(),
+			changemakerId: changemaker.id,
+			baseFieldShortCode: baseField.shortCode,
+			batchId: batch.id,
+			value: 'Test value from permissioned user',
+			isValid: true,
 		});
 	});
 
@@ -586,7 +648,10 @@ describe('GET /changemakerFieldValues', () => {
 			granteeUserKeycloakUserId: testUser.keycloakUserId,
 			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 			changemakerId: visibleChangemaker.id,
-			scope: [PermissionGrantEntityType.CHANGEMAKER],
+			scope: [
+				PermissionGrantEntityType.CHANGEMAKER,
+				PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+			],
 			verbs: [PermissionGrantVerb.VIEW],
 		});
 
@@ -995,7 +1060,10 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 			granteeUserKeycloakUserId: testUser.keycloakUserId,
 			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 			changemakerId: changemaker.id,
-			scope: [PermissionGrantEntityType.CHANGEMAKER],
+			scope: [
+				PermissionGrantEntityType.CHANGEMAKER,
+				PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+			],
 			verbs: [PermissionGrantVerb.VIEW],
 		});
 

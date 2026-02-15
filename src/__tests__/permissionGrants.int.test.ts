@@ -1,19 +1,16 @@
 import request from 'supertest';
 import { app } from '../app';
-import {
-	createChangemaker,
-	createOrUpdateFunder,
-	createSource,
-	db,
-	loadTableMetrics,
-	removeSource,
-} from '../database';
+import { createSource, db, loadTableMetrics, removeSource } from '../database';
 import {
 	expectTimestamp,
 	expectArray,
 	expectNumber,
 } from '../test/asymettricMatchers';
-import { createTestPermissionGrant } from '../test/factories';
+import {
+	createTestChangemaker,
+	createTestFunder,
+	createTestPermissionGrant,
+} from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -84,12 +81,7 @@ describe('/permissionGrants', () => {
 		it('supports pagination', async () => {
 			const authContext = await getTestAuthContext();
 			await createTestPermissionGrant(db, authContext);
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'testFunder',
-				name: 'Test Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 			await createTestPermissionGrant(db, authContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
@@ -184,11 +176,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('requires administrator role', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -206,11 +194,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('creates and returns a permission grant for a user', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const before = await loadTableMetrics('permission_grants');
 			const result = await agent
 				.post('/permissionGrants')
@@ -243,12 +227,7 @@ describe('/permissionGrants', () => {
 
 		it('creates and returns a permission grant for a user group', async () => {
 			const userGroupKeycloakId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'testFunder',
-				name: 'Test Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 			const before = await loadTableMetrics('permission_grants');
 			const result = await agent
 				.post('/permissionGrants')
@@ -501,11 +480,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('returns 400 bad request when scope contains entity type not allowed for context', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -526,11 +501,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('returns 400 bad request when scope contains mix of allowed and disallowed types', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
-				name: 'Example Inc.',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -638,11 +609,7 @@ describe('/permissionGrants', () => {
 
 		it('cascades deletion when the referenced entity is deleted', async () => {
 			const authContext = await getTestAuthContext();
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '22-2222222',
-				name: 'Cascade Test Changemaker',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const source = await createSource(db, null, {
 				label: 'Cascade Test Source',
 				changemakerId: changemaker.id,

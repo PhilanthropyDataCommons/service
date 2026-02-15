@@ -2,8 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
-	createOpportunity,
-	createChangemaker,
 	createChangemakerFieldValue,
 	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
@@ -15,13 +13,16 @@ import {
 	createOrUpdateBaseField,
 	createSource,
 	loadTableMetrics,
-	loadSystemFunder,
 	loadSystemUser,
-	createOrUpdateFunder,
 	createPermissionGrant,
 } from '../database';
+import {
+	createTestChangemaker,
+	createTestFile,
+	createTestFunder,
+	createTestOpportunity,
+} from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
-import { createTestFile } from '../test/factories';
 import {
 	expectArray,
 	expectObjectContaining,
@@ -42,12 +43,11 @@ import {
 } from '../types';
 
 const insertTestChangemakers = async () => {
-	await createChangemaker(db, null, {
+	await createTestChangemaker(db, null, {
 		taxId: '11-1111111',
 		name: 'Example Inc.',
-		keycloakOrganizationId: null,
 	});
-	await createChangemaker(db, null, {
+	await createTestChangemaker(db, null, {
 		taxId: '22-2222222',
 		name: 'Another Inc.',
 		keycloakOrganizationId: '402b1208-be48-11ef-8af9-b767e5e8e4ee',
@@ -61,26 +61,20 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('only returns the ChangemakerProposals that the user has rights to view', async () => {
-			const anotherFunder = await loadSystemFunder(db, null);
+			const anotherFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const visibleFunder = await createOrUpdateFunder(db, null, {
+			const visibleFunder = await createTestFunder(db, null, {
 				name: 'Visible Funder',
 				shortCode: 'visibleFunder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			const visibleChangemaker = await createChangemaker(db, null, {
-				taxId: '11-1111111',
+			const visibleChangemaker = await createTestChangemaker(db, null, {
 				name: 'Visible Changemaker',
-				keycloakOrganizationId: null,
 			});
-			const anotherChangemaker = await createChangemaker(db, null, {
-				taxId: '22-2222222',
+			const anotherChangemaker = await createTestChangemaker(db, null, {
 				name: 'Another Changemaker',
-				keycloakOrganizationId: '402b1208-be48-11ef-8af9-b767e5e8e4ee',
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -104,12 +98,10 @@ describe('/changemakerProposals', () => {
 				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const visibleOpportunity = await createOpportunity(db, null, {
-				title: '🔥',
+			const visibleOpportunity = await createTestOpportunity(db, null, {
 				funderShortCode: visibleFunder.shortCode,
 			});
-			const anotherOpportunity = await createOpportunity(db, null, {
-				title: '🔥',
+			const anotherOpportunity = await createTestOpportunity(db, null, {
 				funderShortCode: anotherFunder.shortCode,
 			});
 			const funderVisibleProposal = await createProposal(
@@ -167,11 +159,7 @@ describe('/changemakerProposals', () => {
 		it('returns the ChangemakerProposals for the specified changemaker', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await insertTestChangemakers();
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
@@ -251,11 +239,7 @@ describe('/changemakerProposals', () => {
 		it('returns the ProposalChangemakers for the specified proposal', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await insertTestChangemakers();
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
@@ -319,7 +303,7 @@ describe('/changemakerProposals', () => {
 		it('decorates proposal version file field values with downloadUrl', async () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const systemFunder = await loadSystemFunder(db, null);
+			const testFunder = await createTestFunder(db, null);
 
 			// Create a file-type base field (PROJECT category for proposal-only field)
 			const baseFieldFile = await createOrUpdateBaseField(db, null, {
@@ -333,10 +317,9 @@ describe('/changemakerProposals', () => {
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
-			const changemaker = await createChangemaker(db, null, {
+			const changemaker = await createTestChangemaker(db, null, {
 				taxId: '88-8888883',
 				name: 'Proposal File Decorated Changemaker',
-				keycloakOrganizationId: null,
 			});
 
 			// Create a test file
@@ -348,14 +331,13 @@ describe('/changemakerProposals', () => {
 
 			// Create funder source
 			const funderSource = await createSource(db, null, {
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				label: 'Proposal Version File Funder Source',
 			});
 
 			// Create opportunity and proposal
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Proposal Version File Test Opportunity',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: testFunder.shortCode,
 			});
 			const proposal = await createProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity.id,
@@ -434,7 +416,6 @@ describe('/changemakerProposals', () => {
 		it('decorates changemaker field values with downloadUrl', async () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const systemFunder = await loadSystemFunder(db, null);
 
 			// Create a file-type base field (ORGANIZATION category for changemaker fields)
 			const baseFieldFile = await createOrUpdateBaseField(db, null, {
@@ -448,10 +429,9 @@ describe('/changemakerProposals', () => {
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
-			const changemaker = await createChangemaker(db, null, {
+			const changemaker = await createTestChangemaker(db, null, {
 				taxId: '88-8888884',
 				name: 'Changemaker File Decorated Changemaker',
-				keycloakOrganizationId: null,
 			});
 
 			// Create a test file
@@ -486,10 +466,7 @@ describe('/changemakerProposals', () => {
 			});
 
 			// Create a proposal to link to the changemaker
-			const opportunity = await createOpportunity(db, null, {
-				title: 'CMP Changemaker Field Test Opportunity',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			const proposal = await createProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: 'cmp-changemaker-field-test',
@@ -538,11 +515,7 @@ describe('/changemakerProposals', () => {
 		it('creates exactly one ChangemakerProposal when the user is an administrator', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await insertTestChangemakers();
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
@@ -592,21 +565,20 @@ describe('/changemakerProposals', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
+			const testFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [
 					PermissionGrantEntityType.FUNDER,
 					PermissionGrantEntityType.PROPOSAL,
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: testFunder.shortCode,
 			});
 			await insertTestChangemakers();
 			await createProposal(db, testUserAuthContext, {
@@ -656,21 +628,20 @@ describe('/changemakerProposals', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
+			const testFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [
 					PermissionGrantEntityType.FUNDER,
 					PermissionGrantEntityType.PROPOSAL,
 				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: testFunder.shortCode,
 			});
 			await insertTestChangemakers();
 			await createProposal(db, testUserAuthContext, {
@@ -704,11 +675,7 @@ describe('/changemakerProposals', () => {
 		it('returns 400 bad request when no proposalId is sent', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await insertTestChangemakers();
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
@@ -731,11 +698,7 @@ describe('/changemakerProposals', () => {
 		it('returns 400 bad request when no changemakerId is sent', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await insertTestChangemakers();
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
@@ -756,11 +719,7 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 422 Unprocessable Content when a non-existent proposal is sent', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			await createTestOpportunity(db, null);
 			await insertTestChangemakers();
 			const result = await request(app)
 				.post('/changemakerProposals')
@@ -787,18 +746,17 @@ describe('/changemakerProposals', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
+			const testFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: testFunder.shortCode,
 			});
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
@@ -823,18 +781,17 @@ describe('/changemakerProposals', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
+			const testFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: testFunder.shortCode,
 			});
 			await insertTestChangemakers();
 			await createProposal(db, testUserAuthContext, {

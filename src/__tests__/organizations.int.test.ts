@@ -1,14 +1,12 @@
 import request from 'supertest';
 import { app } from '../app';
-import {
-	db,
-	createChangemaker,
-	createOrUpdateDataProvider,
-	createOrUpdateFunder,
-	createPermissionGrant,
-	loadSystemUser,
-} from '../database';
+import { db, createPermissionGrant, loadSystemUser } from '../database';
 import { expectArray } from '../test/asymettricMatchers';
+import {
+	createTestChangemaker,
+	createTestDataProvider,
+	createTestFunder,
+} from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -38,55 +36,31 @@ describe('/organizations', () => {
 				'bde830f0-d590-467a-8431-cdf9d6af1b87',
 			);
 
-			await createChangemaker(db, null, {
-				taxId: '33-3333333',
-				name: 'Changemaker does not exist in Keycloak or has not been linked.',
-				keycloakOrganizationId: null,
-			});
-			const expectedChangemaker = await createChangemaker(db, null, {
-				taxId: '55-5555555',
-				name: 'Change, Inc.',
+			// Unlinked entities (should not be returned)
+			await createTestChangemaker(db, null);
+			await createTestDataProvider(db, null);
+			await createTestFunder(db, null);
+
+			// Expected entities (linked to target keycloakOrganizationId)
+			const expectedChangemaker = await createTestChangemaker(db, null, {
 				keycloakOrganizationId,
 			});
-			await createChangemaker(db, null, {
-				taxId: '44-4444444',
-				name: 'Changemaker is linked but I am not the one that should be returned.',
+			const expectedDataProvider = await createTestDataProvider(db, null, {
+				keycloakOrganizationId,
+			});
+			const expectedFunder = await createTestFunder(db, null, {
+				keycloakOrganizationId,
+			});
+
+			// Decoy entities (linked to different keycloakOrganizationIds)
+			await createTestChangemaker(db, null, {
 				keycloakOrganizationId: 'fa32e21e-e471-4d28-b101-7788c611aa04',
 			});
-
-			await createOrUpdateDataProvider(db, null, {
-				name: 'Data Provider Organization does not exist in Keycloak or has not been linked.',
-				shortCode: 'unexpecteddataproviderone',
-				keycloakOrganizationId: null,
-			});
-			const expectedDataProvider = await createOrUpdateDataProvider(db, null, {
-				name: 'Change, Inc.',
-				shortCode: 'changeinc',
-				keycloakOrganizationId,
-			});
-			await createOrUpdateDataProvider(db, null, {
-				name: 'Data Provider Organization is linked but I am not the one that should be returned.',
-				shortCode: 'unexpecteddataprovidertwo',
+			await createTestDataProvider(db, null, {
 				keycloakOrganizationId: '865cb652-a1d2-418a-8c89-015c0d6e4676',
 			});
-
-			await createOrUpdateFunder(db, null, {
-				name: 'Funder Organization does not exist in Keycloak or has not been linked.',
-				shortCode: 'unexpectedfunderone',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
-			const expectedFunder = await createOrUpdateFunder(db, null, {
-				name: 'Change, Inc.',
-				shortCode: 'changeinc',
-				keycloakOrganizationId,
-				isCollaborative: false,
-			});
-			await createOrUpdateFunder(db, null, {
-				name: 'Funder Organization is linked but I am not the one that should be returned.',
-				shortCode: 'unexpectedfundertwo',
+			await createTestFunder(db, null, {
 				keycloakOrganizationId: '75b4198f-dd88-4a6c-8259-fe4d725af125',
-				isCollaborative: false,
 			});
 
 			const response = await agent
@@ -112,17 +86,14 @@ describe('/organizations', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const keycloakOrganizationId = 'b5465297-d63a-4371-8054-f94d95f1aace';
 
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				name: 'Unlinked funder one.',
 				shortCode: 'unlinkedfunderone',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			const expectedFunder = await createOrUpdateFunder(db, null, {
+			const expectedFunder = await createTestFunder(db, null, {
 				name: 'Funderdome',
 				shortCode: 'funderdome',
 				keycloakOrganizationId,
-				isCollaborative: false,
 			});
 			const authContext = await getTestAuthContext(false);
 			// Grant myself view access to this organization
@@ -136,11 +107,10 @@ describe('/organizations', () => {
 			});
 			const keycloakOrganizationIdLackingPerm =
 				'75b4198f-dd88-4a6c-8259-fe4d725af125';
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				name: 'Decoy funder, unexpected because I lack view access to this org',
 				shortCode: 'decoyfunderunexpected',
 				keycloakOrganizationId: keycloakOrganizationIdLackingPerm,
-				isCollaborative: false,
 			});
 
 			// I have view access to this org
@@ -163,12 +133,11 @@ describe('/organizations', () => {
 		it('returns only the data provider on which my org has view permission', async () => {
 			const keycloakOrganizationId = stringToKeycloakId(mockOrgId);
 
-			await createOrUpdateDataProvider(db, null, {
+			await createTestDataProvider(db, null, {
 				name: 'Unlinked Data Provider one.',
 				shortCode: 'unlinkeddataproviderone',
-				keycloakOrganizationId: null,
 			});
-			const expectedDataProvider = await createOrUpdateDataProvider(db, null, {
+			const expectedDataProvider = await createTestDataProvider(db, null, {
 				name: 'Dapper Data Provider',
 				shortCode: 'dapperdataprovider',
 				keycloakOrganizationId,
@@ -186,7 +155,7 @@ describe('/organizations', () => {
 			});
 			const keycloakOrganizationIdLackingPerm =
 				'24fea6aa-f1c5-4594-8bdc-b1789d4d0840';
-			await createOrUpdateDataProvider(db, null, {
+			await createTestDataProvider(db, null, {
 				name: 'Decoy Data Provider, unexpected because I lack view access to this org',
 				shortCode: 'decoydataproviderunexpected',
 				keycloakOrganizationId: keycloakOrganizationIdLackingPerm,

@@ -2,12 +2,12 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
-	createOrUpdateDataProvider,
 	loadDataProvider,
 	loadSystemDataProvider,
 	loadTableMetrics,
 } from '../database';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import { createTestDataProvider } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -23,37 +23,15 @@ describe('/dataProviders', () => {
 
 		it('returns all data providers present in the database', async () => {
 			const systemDataProvider = await loadSystemDataProvider(db, null);
-			await createOrUpdateDataProvider(db, null, {
-				shortCode: 'dataRUs',
-				name: 'Data R Us',
-				keycloakOrganizationId: null,
-			});
-			await createOrUpdateDataProvider(db, null, {
-				shortCode: 'nonProfitWarehouse',
-				name: 'Nonprofit Warehouse',
-				keycloakOrganizationId: null,
-			});
+			const firstDataProvider = await createTestDataProvider(db, null);
+			const secondDataProvider = await createTestDataProvider(db, null);
 
 			const response = await agent
 				.get('/dataProviders')
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toStrictEqual({
-				entries: [
-					{
-						shortCode: 'nonProfitWarehouse',
-						createdAt: expectTimestamp(),
-						name: 'Nonprofit Warehouse',
-						keycloakOrganizationId: null,
-					},
-					{
-						shortCode: 'dataRUs',
-						createdAt: expectTimestamp(),
-						name: 'Data R Us',
-						keycloakOrganizationId: null,
-					},
-					systemDataProvider,
-				],
+				entries: [secondDataProvider, firstDataProvider, systemDataProvider],
 				total: 3,
 			});
 		});
@@ -65,36 +43,19 @@ describe('/dataProviders', () => {
 		});
 
 		it('returns exactly one data provider selected by short code', async () => {
-			await createOrUpdateDataProvider(db, null, {
-				shortCode: 'dataRUs',
-				name: 'Data R Us',
-				keycloakOrganizationId: null,
-			});
-			await createOrUpdateDataProvider(db, null, {
-				shortCode: 'nonProfitWarehouse',
-				name: 'Nonprofit Warehouse',
-				keycloakOrganizationId: null,
-			});
+			await createTestDataProvider(db, null);
+			const expectedDataProvider = await createTestDataProvider(db, null);
 
 			const response = await agent
-				.get(`/dataProviders/nonProfitWarehouse`)
+				.get(`/dataProviders/${expectedDataProvider.shortCode}`)
 				.set(authHeader)
 				.expect(200);
-			expect(response.body).toStrictEqual({
-				shortCode: 'nonProfitWarehouse',
-				createdAt: expectTimestamp(),
-				name: 'Nonprofit Warehouse',
-				keycloakOrganizationId: null,
-			});
+			expect(response.body).toStrictEqual(expectedDataProvider);
 		});
 
 		it('returns 404 when short code is not found', async () => {
-			await createOrUpdateDataProvider(db, null, {
-				shortCode: 'dataRUs',
-				name: 'Data R Us',
-				keycloakOrganizationId: null,
-			});
-			await agent.get('/dataProviders/foo').set(authHeader).expect(404);
+			await createTestDataProvider(db, null);
+			await agent.get('/dataProviders/nonexistent').set(authHeader).expect(404);
 		});
 	});
 
@@ -135,23 +96,13 @@ describe('/dataProviders', () => {
 		});
 
 		it('updates an existing data provider and no others', async () => {
-			await createOrUpdateDataProvider(db, null, {
-				shortCode: 'firework',
-				name: 'boring text base firework',
-				keycloakOrganizationId: null,
+			const targetDataProvider = await createTestDataProvider(db, null, {
+				name: 'Original Name',
 			});
-			const anotherDataProviderBefore = await createOrUpdateDataProvider(
-				db,
-				null,
-				{
-					shortCode: 'anotherFirework',
-					name: 'another boring text base firework',
-					keycloakOrganizationId: null,
-				},
-			);
+			const otherDataProviderBefore = await createTestDataProvider(db, null);
 			const before = await loadTableMetrics('data_providers');
 			const result = await agent
-				.put('/dataProviders/firework')
+				.put(`/dataProviders/${targetDataProvider.shortCode}`)
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({
@@ -159,20 +110,20 @@ describe('/dataProviders', () => {
 					keycloakOrganizationId: '8b0163ac-bd91-11ef-8579-9fa8ab9f4b7d',
 				})
 				.expect(201);
-			const anotherDataProviderAfter = await loadDataProvider(
+			const otherDataProviderAfter = await loadDataProvider(
 				db,
 				null,
-				'anotherFirework',
+				otherDataProviderBefore.shortCode,
 			);
 			const after = await loadTableMetrics('data_providers');
 			expect(result.body).toStrictEqual({
-				shortCode: 'firework',
+				shortCode: targetDataProvider.shortCode,
 				name: '🎆',
 				keycloakOrganizationId: '8b0163ac-bd91-11ef-8579-9fa8ab9f4b7d',
 				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count);
-			expect(anotherDataProviderAfter).toEqual(anotherDataProviderBefore);
+			expect(otherDataProviderAfter).toEqual(otherDataProviderBefore);
 		});
 
 		it('returns 400 bad request when no name is sent', async () => {

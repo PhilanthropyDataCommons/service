@@ -5,12 +5,10 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	createOrUpdateBaseField,
-	createOpportunity,
 	createChangemaker,
 	createChangemakerFieldValue,
 	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
-	createOrUpdateFunder,
 	createPermissionGrant,
 	createProposal,
 	createProposalFieldValue,
@@ -19,15 +17,19 @@ import {
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
-	createOrUpdateDataProvider,
-	loadSystemFunder,
 } from '../database';
+import {
+	createTestChangemaker,
+	createTestDataProvider,
+	createTestFile,
+	createTestFunder,
+	createTestOpportunity,
+} from '../test/factories';
 import {
 	getAuthContext,
 	getTestUserKeycloakUserId,
 	loadTestUser,
 } from '../test/utils';
-import { createTestFile } from '../test/factories';
 import {
 	expectArray,
 	expectArrayContaining,
@@ -109,11 +111,9 @@ const setupTestContext = async () => {
 		changemakerId: secondChangemaker.id,
 		label: `${secondChangemaker.name} source`,
 	});
-	const firstFunder = await createOrUpdateFunder(db, null, {
+	const firstFunder = await createTestFunder(db, null, {
 		shortCode: 'funder_5393',
 		name: 'Funder 5393',
-		keycloakOrganizationId: null,
-		isCollaborative: false,
 	});
 
 	// Grant test user permission to view proposal field values for this funder
@@ -129,24 +129,15 @@ const setupTestContext = async () => {
 		verbs: [PermissionGrantVerb.VIEW],
 	});
 
-	const firstFunderOpportunity = await createOpportunity(db, null, {
-		title: `${firstFunder.name} opportunity`,
+	const firstFunderOpportunity = await createTestOpportunity(db, null, {
 		funderShortCode: firstFunder.shortCode,
 	});
 	const { id: firstFunderSourceId } = await createSource(db, null, {
 		funderShortCode: firstFunder.shortCode,
 		label: `${firstFunder.name} source`,
 	});
-	const firstDataProvider = await createOrUpdateDataProvider(db, null, {
-		shortCode: 'data_provider_5431',
-		name: 'Data Platform Provider 5431',
-		keycloakOrganizationId: null,
-	});
-	const secondDataProvider = await createOrUpdateDataProvider(db, null, {
-		shortCode: 'data_provider_5477',
-		name: 'Data Platform Provider 5477',
-		keycloakOrganizationId: null,
-	});
+	const firstDataProvider = await createTestDataProvider(db, null);
+	const secondDataProvider = await createTestDataProvider(db, null);
 	const { id: firstDataProviderSourceId } = await createSource(db, null, {
 		dataProviderShortCode: firstDataProvider.shortCode,
 		label: `${firstDataProvider.name} source`,
@@ -296,14 +287,10 @@ describe('/changemakers', () => {
 		it('returns a subset of changemakers present in the database when a proposal filter is provided', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createChangemaker(db, null, {
 				taxId: '123-123-123',
@@ -342,18 +329,14 @@ describe('/changemakers', () => {
 		it('does not return duplicate changemakers when a changemaker has multiple proposals', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-2',
-				opportunityId: 1,
+				opportunityId: opportunity.id,
 			});
 			await createChangemaker(db, null, {
 				taxId: '123-123-123',
@@ -1034,9 +1017,7 @@ describe('/changemakers', () => {
 
 	describe('PATCH /:id', () => {
 		it('Successfully sets a keycloakOrganizationId where previously null', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '0413938240766429660404877575834592091277',
-				name: 'Changemaker 0413938240766429660404877575834592091277',
+			const changemaker = await createTestChangemaker(db, null, {
 				keycloakOrganizationId: null,
 			});
 			const newOrganizationId = stringToKeycloakId(
@@ -1059,10 +1040,9 @@ describe('/changemakers', () => {
 		});
 
 		it('Successfully changes a taxId', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '9804410587598905789786443694633460095646',
-				name: 'Changemaker with changing tax ID',
-				keycloakOrganizationId: null,
+			const originalTaxId = '9804410587598905789786443694633460095646';
+			const changemaker = await createTestChangemaker(db, null, {
+				taxId: originalTaxId,
 			});
 			const newTaxId = '7595152072656722360933945510658631139960';
 			const result = await request(app)
@@ -1082,9 +1062,8 @@ describe('/changemakers', () => {
 		});
 
 		it('Successfully changes a name and Keycloak organization ID', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '0589037839239992596491929160281098521279',
-				name: 'Whoops, a bad name here',
+			const changemaker = await createTestChangemaker(db, null, {
+				name: 'Original Name',
 				keycloakOrganizationId: stringToKeycloakId(
 					'd32693c1-d8de-40a3-8de9-a84f0737f015',
 				),
@@ -1169,13 +1148,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Returns user error when no fields are sent', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '4200940637362024164716787854746203032491',
-				name: 'Changemaker 4200940637362024164716787854746203032491',
-				keycloakOrganizationId: stringToKeycloakId(
-					'5533ace6-d60d-4da0-9dfd-fbcec0a4fdf8',
-				),
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			await request(app)
 				.patch(`/changemakers/${changemaker.id}`)
 				.type('application/json')
@@ -1185,11 +1158,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Returns 400 validation error when taxId is set to null', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '1234567890',
-				name: 'Test Changemaker',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const result = await request(app)
 				.patch(`/changemakers/${changemaker.id}`)
 				.type('application/json')
@@ -1205,11 +1174,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Returns 400 validation error when name is set to null', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '0987654321',
-				name: 'Another Test Changemaker',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			const result = await request(app)
 				.patch(`/changemakers/${changemaker.id}`)
 				.type('application/json')
@@ -1225,9 +1190,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Successfully sets keycloakOrganizationId to null', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '5555555555',
-				name: 'Changemaker with org id',
+			const changemaker = await createTestChangemaker(db, null, {
 				keycloakOrganizationId: stringToKeycloakId(
 					'12345678-1234-1234-1234-123456789abc',
 				),
@@ -1249,20 +1212,14 @@ describe('/changemakers', () => {
 
 	describe('PUT /:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId', () => {
 		it('Successfully adds and reflects two fiscal sponsorships', async () => {
-			const fiscalSponsee = await createChangemaker(db, null, {
-				taxId: '5081291550860062107766631030417388169256',
-				name: 'Sponsee 5081291550860062107766631030417388169256',
-				keycloakOrganizationId: null,
+			const fiscalSponsee = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsee',
 			});
-			const fiscalSponsor = await createChangemaker(db, null, {
-				taxId: '0118304041375623758777905068103837593356',
-				name: 'Sponsor 0118304041375623758777905068103837593356',
-				keycloakOrganizationId: null,
+			const fiscalSponsor = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor One',
 			});
-			const fiscalSponsorTwo = await createChangemaker(db, null, {
-				taxId: '8533165123659550499871910387521368428424',
-				name: 'Sponsor 8533165123659550499871910387521368428424',
-				keycloakOrganizationId: null,
+			const fiscalSponsorTwo = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor Two',
 			});
 			const result = await request(app)
 				.put(
@@ -1321,15 +1278,11 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires authentication', async () => {
-			const fiscalSponsee = await createChangemaker(db, null, {
-				taxId: '2931491497481164952498947862581097119543',
-				name: 'Sponsee 2931491497481164952498947862581097119543',
-				keycloakOrganizationId: null,
+			const fiscalSponsee = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsee',
 			});
-			const fiscalSponsor = await createChangemaker(db, null, {
-				taxId: '1760370275937448424960420855817329405546',
-				name: 'Sponsor 1760370275937448424960420855817329405546',
-				keycloakOrganizationId: null,
+			const fiscalSponsor = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor',
 			});
 			await request(app)
 				.put(
@@ -1341,11 +1294,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires sponsor to differ from sponsee', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '6662026305156335697506682975139641746440',
-				name: 'Changemaker 6662026305156335697506682975139641746440',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			await request(app)
 				.put(`/changemakers/${changemaker.id}/fiscalSponsors/${changemaker.id}`)
 				.type('application/json')
@@ -1355,15 +1304,11 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires integer fiscal sponsee changemaker ID', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '9185467240703696384011509519069015034382',
-				name: 'Changemaker 9185467240703696384011509519069015034382',
-				keycloakOrganizationId: null,
+			const changemaker = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsee',
 			});
-			const fiscalSponsor = await createChangemaker(db, null, {
-				taxId: '9543545368164071044940139233866036020587',
-				name: 'Changemaker 9543545368164071044940139233866036020587',
-				keycloakOrganizationId: null,
+			const fiscalSponsor = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor',
 			});
 			await request(app)
 				.put(
@@ -1376,15 +1321,11 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires integer fiscal sponsor changemaker ID', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '7298203414664558984610516511378791622113',
-				name: 'Changemaker 7298203414664558984610516511378791622113',
-				keycloakOrganizationId: null,
+			const changemaker = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsee',
 			});
-			const fiscalSponsor = await createChangemaker(db, null, {
-				taxId: '8494764604446455156148141002214850975680',
-				name: 'Changemaker 8494764604446455156148141002214850975680',
-				keycloakOrganizationId: null,
+			const fiscalSponsor = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor',
 			});
 			await request(app)
 				.put(
@@ -1399,20 +1340,14 @@ describe('/changemakers', () => {
 
 	describe('DELETE /:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId', () => {
 		it('Successfully deletes and reflects fiscal sponsorship deletion', async () => {
-			const fiscalSponsee = await createChangemaker(db, null, {
-				taxId: '1176348939800751264285731454220204166679',
-				name: 'Sponsee 1176348939800751264285731454220204166679',
-				keycloakOrganizationId: 'f1dccc27-7577-49ce-bf1a-be2e5857453e',
+			const fiscalSponsee = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsee',
 			});
-			const fiscalSponsorToRemove = await createChangemaker(db, null, {
-				taxId: '4381635557716751790531984665685833874838',
-				name: 'Sponsor 4381635557716751790531984665685833874838',
-				keycloakOrganizationId: 'b40c474a-a800-4b38-9b1d-4fa5334891d4',
+			const fiscalSponsorToRemove = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor To Remove',
 			});
-			const fiscalSponsorToKeep = await createChangemaker(db, null, {
-				taxId: '4175749600938079345538870816774326771318',
-				name: 'Sponsor 4175749600938079345538870816774326771318',
-				keycloakOrganizationId: 'e87e0629-e0a5-40ed-8149-61853a41469b',
+			const fiscalSponsorToKeep = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor To Keep',
 			});
 			await request(app)
 				.put(
@@ -1458,15 +1393,11 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires integer fiscal sponsee changemaker ID', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '1242568879363886626420956259771401621899',
-				name: 'Changemaker 1242568879363886626420956259771401621899',
-				keycloakOrganizationId: null,
+			const changemaker = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsee',
 			});
-			const fiscalSponsor = await createChangemaker(db, null, {
-				taxId: '9631835019383831266590218120243485803527',
-				name: 'Changemaker 9631835019383831266590218120243485803527',
-				keycloakOrganizationId: null,
+			const fiscalSponsor = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor',
 			});
 			await request(app)
 				.delete(
@@ -1479,15 +1410,11 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires integer fiscal sponsor changemaker ID', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '3909708258449105175781605552529587857130',
-				name: 'Changemaker 3909708258449105175781605552529587857130',
-				keycloakOrganizationId: null,
+			const changemaker = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsee',
 			});
-			const fiscalSponsor = await createChangemaker(db, null, {
-				taxId: '0122135026985401334024359249372342493508',
-				name: 'Changemaker 0122135026985401334024359249372342493508',
-				keycloakOrganizationId: null,
+			const fiscalSponsor = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor',
 			});
 			await request(app)
 				.delete(
@@ -1500,15 +1427,11 @@ describe('/changemakers', () => {
 		});
 
 		it('Returns 404 on non-existent row', async () => {
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '0628076601768301607043597902351679068570',
-				name: 'Changemaker 0628076601768301607043597902351679068570',
-				keycloakOrganizationId: null,
+			const changemaker = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsee',
 			});
-			const fiscalSponsor = await createChangemaker(db, null, {
-				taxId: '0450942762614979070967286505967259109014',
-				name: 'Changemaker 0450942762614979070967286505967259109014',
-				keycloakOrganizationId: null,
+			const fiscalSponsor = await createTestChangemaker(db, null, {
+				name: 'Fiscal Sponsor',
 			});
 			await request(app)
 				.delete(
@@ -1536,11 +1459,7 @@ describe('/changemakers', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '99-9999991',
-				name: 'Test Changemaker CFV',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 			// Create a changemaker-sourced source
 			const changemakerSource = await createSource(db, null, {
 				changemakerId: changemaker.id,
@@ -1603,21 +1522,11 @@ describe('/changemakers', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '99-9999992',
-				name: 'Test Changemaker Priority',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 
 			// Create a funder and opportunity for the ProposalFieldValue
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'funder_priority_test',
-				name: 'Funder Priority Test',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Priority Test Opportunity',
+			const funder = await createTestFunder(db, null);
+			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: funder.shortCode,
 			});
 			const funderSource = await createSource(db, null, {
@@ -1726,11 +1635,7 @@ describe('/changemakers', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '99-9999993',
-				name: 'Test Changemaker Recency',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 
 			// Create changemaker-sourced source
 			const changemakerSource = await createSource(db, null, {
@@ -1814,11 +1719,7 @@ describe('/changemakers', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '99-9999994',
-				name: 'Test Changemaker Validity',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 
 			const changemakerSource = await createSource(db, null, {
 				changemakerId: changemaker.id,
@@ -1879,11 +1780,7 @@ describe('/changemakers', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const changemaker = await createChangemaker(db, null, {
-				taxId: '99-9999995',
-				name: 'Test Changemaker Multi Fields',
-				keycloakOrganizationId: null,
-			});
+			const changemaker = await createTestChangemaker(db, null);
 
 			// Create ChangemakerFieldValue for email
 			const changemakerSource = await createSource(db, null, {
@@ -1908,12 +1805,7 @@ describe('/changemakers', () => {
 			});
 
 			// Create ProposalFieldValue for phone
-			const funder = await createOrUpdateFunder(db, null, {
-				shortCode: 'funder_multi_test',
-				name: 'Funder Multi Test',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, null);
 
 			// Grant permission with proposalFieldValue scope so test user can see field values
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -1938,8 +1830,7 @@ describe('/changemakers', () => {
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Multi Test Opportunity',
+			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: funder.shortCode,
 			});
 			const funderSource = await createSource(db, null, {
@@ -2038,22 +1929,14 @@ describe('/changemakers', () => {
 			});
 
 			// Create two funders with different permissions
-			const funderWithFieldValueScope = await createOrUpdateFunder(db, null, {
+			const funderWithFieldValueScope = await createTestFunder(db, null, {
 				shortCode: 'funder_with_fv_scope',
 				name: 'Funder With Field Value Scope',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			const funderWithoutFieldValueScope = await createOrUpdateFunder(
-				db,
-				null,
-				{
-					shortCode: 'funder_without_fv_scope',
-					name: 'Funder Without Field Value Scope',
-					keycloakOrganizationId: null,
-					isCollaborative: false,
-				},
-			);
+			const funderWithoutFieldValueScope = await createTestFunder(db, null, {
+				shortCode: 'funder_without_fv_scope',
+				name: 'Funder Without Field Value Scope',
+			});
 
 			// Grant permission WITH proposalFieldValue scope for first funder
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -2079,8 +1962,7 @@ describe('/changemakers', () => {
 			});
 
 			// Create proposal 1 (under funder WITH proposalFieldValue scope)
-			const opportunity1 = await createOpportunity(db, null, {
-				title: 'Opportunity With FV Scope',
+			const opportunity1 = await createTestOpportunity(db, null, {
 				funderShortCode: funderWithFieldValueScope.shortCode,
 			});
 			const source1 = await createSource(db, null, {
@@ -2125,8 +2007,7 @@ describe('/changemakers', () => {
 			});
 
 			// Create proposal 2 (under funder WITHOUT proposalFieldValue scope)
-			const opportunity2 = await createOpportunity(db, null, {
-				title: 'Opportunity Without FV Scope',
+			const opportunity2 = await createTestOpportunity(db, null, {
 				funderShortCode: funderWithoutFieldValueScope.shortCode,
 			});
 			const source2 = await createSource(db, null, {
@@ -2423,14 +2304,11 @@ describe('/changemakers', () => {
 			});
 
 			// Create funder, opportunity, and proposal for ProposalFieldValue
-			const funder = await createOrUpdateFunder(db, null, {
+			const funder = await createTestFunder(db, null, {
 				shortCode: 'funder_proposal_file_test',
 				name: 'Funder Proposal File Test',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: 'Proposal File Test Opportunity',
+			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: funder.shortCode,
 			});
 			const funderSource = await createSource(db, null, {

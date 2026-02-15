@@ -2,15 +2,14 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
-	createOpportunity,
 	createEphemeralUserGroupAssociation,
 	loadTableMetrics,
 	loadSystemFunder,
 	loadSystemOpportunity,
 	createPermissionGrant,
 	loadSystemUser,
-	createOrUpdateFunder,
 } from '../database';
+import { createTestFunder, createTestOpportunity } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
@@ -42,38 +41,19 @@ describe('/opportunities', () => {
 		});
 
 		it('returns all opportunities present in the database for an admin user', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
 			const systemOpportunity = await loadSystemOpportunity(db, null);
-			await createOpportunity(db, null, {
+			const opportunity1 = await createTestOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
-				funderShortCode: systemFunder.shortCode,
 			});
-			await createOpportunity(db, null, {
+			const opportunity2 = await createTestOpportunity(db, null, {
 				title: 'Terrific opportunity 👐',
-				funderShortCode: systemFunder.shortCode,
 			});
 			const response = await request(app)
 				.get('/opportunities')
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				entries: [
-					systemOpportunity,
-					{
-						id: 2,
-						createdAt: expectTimestamp(),
-						title: 'Tremendous opportunity 👌',
-						funderShortCode: systemFunder.shortCode,
-						funder: systemFunder,
-					},
-					{
-						id: 3,
-						createdAt: expectTimestamp(),
-						title: 'Terrific opportunity 👐',
-						funderShortCode: systemFunder.shortCode,
-						funder: systemFunder,
-					},
-				],
+				entries: [systemOpportunity, opportunity1, opportunity2],
 				total: 3,
 			});
 		});
@@ -84,12 +64,7 @@ describe('/opportunities', () => {
 			const testUser = await loadTestUser();
 			const visibleFunder = await loadSystemFunder(db, null);
 			const systemOpportunity = await loadSystemOpportunity(db, null);
-			const anotherFunder = await createOrUpdateFunder(db, null, {
-				name: 'another funder',
-				shortCode: 'anotherFunder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const anotherFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -98,12 +73,11 @@ describe('/opportunities', () => {
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const visibleOpportunity = await createOpportunity(db, null, {
+			const visibleOpportunity = await createTestOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
 				funderShortCode: visibleFunder.shortCode,
 			});
-			await createOpportunity(db, null, {
-				title: 'Terrific opportunity 👐',
+			await createTestOpportunity(db, null, {
 				funderShortCode: anotherFunder.shortCode,
 			});
 			const response = await request(app)
@@ -123,49 +97,32 @@ describe('/opportunities', () => {
 		});
 
 		it('returns exactly one opportunity selected by id', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: '🔥',
-				funderShortCode: systemFunder.shortCode,
-			});
-			await createOpportunity(db, null, {
-				title: '✨',
-				funderShortCode: systemFunder.shortCode,
-			});
-			await createOpportunity(db, null, {
-				title: '🚀',
-				funderShortCode: systemFunder.shortCode,
-			});
+			await createTestOpportunity(db, null);
+			const secondOpportunity = await createTestOpportunity(db, null);
+			await createTestOpportunity(db, null);
 
 			const response = await request(app)
-				.get(`/opportunities/3`)
+				.get(`/opportunities/${secondOpportunity.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
-			expect(response.body).toEqual({
-				id: 3,
-				createdAt: expectTimestamp(),
-				title: '✨',
-				funderShortCode: systemFunder.shortCode,
-				funder: systemFunder,
-			});
+			expect(response.body).toEqual(secondOpportunity);
 		});
 
 		it('returns an opportunity when the user has funder permission', async () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
-			const systemFunder = await loadSystemFunder(db, null);
+			const visibleFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: systemFunder.shortCode,
+				funderShortCode: visibleFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createOpportunity(db, null, {
-				title: '✨',
-				funderShortCode: systemFunder.shortCode,
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: visibleFunder.shortCode,
 			});
 			const response = await request(app)
 				.get(`/opportunities/${opportunity.id}`)
@@ -197,11 +154,7 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 404 when id is not found', async () => {
-			const systemFunder = await loadSystemFunder(db, null);
-			await createOpportunity(db, null, {
-				title: 'This definitely should not be returned',
-				funderShortCode: systemFunder.shortCode,
-			});
+			await createTestOpportunity(db, null);
 			await request(app)
 				.get('/opportunities/9001')
 				.set(authHeaderWithAdminRole)
@@ -212,11 +165,7 @@ describe('/opportunities', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser();
-			const systemFunder = await loadSystemFunder(db, null);
-			const opportunity = await createOpportunity(db, null, {
-				title: 'This definitely should not be returned',
-				funderShortCode: systemFunder.shortCode,
-			});
+			const opportunity = await createTestOpportunity(db, null);
 
 			// Also create a userGroup permission grant with an EXPIRED association
 			// to verify that expired associations don't grant access

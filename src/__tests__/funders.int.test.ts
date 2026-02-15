@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	db,
-	createOrUpdateFunder,
 	loadFunder,
 	loadTableMetrics,
 	loadSystemFunder,
@@ -14,6 +13,7 @@ import {
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import { createTestFunder } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -40,40 +40,34 @@ const createTestFunders = async ({
 	theFunnyFunders: boolean;
 	theFungibleFund: boolean;
 }) => {
-	await createOrUpdateFunder(db, null, {
+	await createTestFunder(db, null, {
 		shortCode: 'theFundFund',
 		name: 'The Fund Fund',
-		keycloakOrganizationId: null,
 		isCollaborative: theFundFund,
 	});
-	await createOrUpdateFunder(db, null, {
+	await createTestFunder(db, null, {
 		shortCode: 'theFoundationFoundation',
 		name: 'The Foundation Foundation',
-		keycloakOrganizationId: null,
 		isCollaborative: theFoundationFoundation,
 	});
-	await createOrUpdateFunder(db, null, {
+	await createTestFunder(db, null, {
 		shortCode: 'theFundersWhoFund',
 		name: 'The Funders Who Fund',
-		keycloakOrganizationId: null,
 		isCollaborative: theFundersWhoFund,
 	});
-	await createOrUpdateFunder(db, null, {
+	await createTestFunder(db, null, {
 		shortCode: 'theFundingFathers',
 		name: 'The Funding Fathers',
-		keycloakOrganizationId: null,
 		isCollaborative: theFundingFathers,
 	});
-	await createOrUpdateFunder(db, null, {
+	await createTestFunder(db, null, {
 		shortCode: 'theFunnyFunders',
 		name: 'The Funny Funders',
-		keycloakOrganizationId: null,
 		isCollaborative: theFunnyFunders,
 	});
-	await createOrUpdateFunder(db, null, {
+	await createTestFunder(db, null, {
 		shortCode: 'theFungibleFund',
 		name: 'The Fungible Fund',
-		keycloakOrganizationId: null,
 		isCollaborative: theFungibleFund,
 	});
 };
@@ -88,17 +82,13 @@ describe('/funders', () => {
 
 		it('returns all funders present in the database', async () => {
 			const systemFunder = await loadSystemFunder(db, null);
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
 
 			const response = await agent.get('/funders').set(authHeader).expect(200);
@@ -131,17 +121,14 @@ describe('/funders', () => {
 		});
 
 		it('returns exactly one funder selected by short code', async () => {
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
-				isCollaborative: false,
 			});
 
 			const response = await agent
@@ -158,11 +145,9 @@ describe('/funders', () => {
 		});
 
 		it('returns 404 when short code is not found', async () => {
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
 			await agent.get('/funders/foo').set(authHeader).expect(404);
 		});
@@ -205,17 +190,13 @@ describe('/funders', () => {
 		});
 
 		it('updates an existing funder and no others', async () => {
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'firework',
 				name: 'boring text-based firework',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
-			const anotherFunderBefore = await createOrUpdateFunder(db, null, {
+			const anotherFunderBefore = await createTestFunder(db, null, {
 				shortCode: 'anotherFirework',
 				name: 'another boring text based firework',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
 			const before = await loadTableMetrics('data_providers');
 			const result = await agent
@@ -618,17 +599,14 @@ describe('/funders', () => {
 		});
 
 		it('requires MANAGE permission on the funder', async () => {
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
-				keycloakOrganizationId: null,
 				isCollaborative: true,
 			});
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
 			});
 
 			const result = await agent
@@ -738,10 +716,9 @@ describe('/funders', () => {
 		});
 
 		it('requires MANAGE permission on the funder', async () => {
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
-				keycloakOrganizationId: null,
 				isCollaborative: true,
 			});
 
@@ -836,10 +813,9 @@ describe('/funders', () => {
 		});
 
 		it('requires MANAGE permission on the funder', async () => {
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
-				keycloakOrganizationId: null,
 				isCollaborative: true,
 			});
 
@@ -950,10 +926,9 @@ describe('/funders', () => {
 		});
 
 		it('requires MANAGE permission on the invited funder', async () => {
-			await createOrUpdateFunder(db, null, {
+			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
-				keycloakOrganizationId: null,
 				isCollaborative: true,
 			});
 

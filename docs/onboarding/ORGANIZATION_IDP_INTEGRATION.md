@@ -73,7 +73,7 @@ with the insertion of group steps and appendage of access policy steps).
 1. On the left nav bar, visit "Applications" -> "Applications"
 2. Click "Create App Integration"
 
-   ![Create App Integration](images/okta_create_app_integration.png)
+   ![Create App Integration](../images/okta_create_app_integration.png)
 
 3. Click "OIDC"
 4. Select "Web Application"
@@ -148,11 +148,11 @@ using Okta.
 2. On the left nav bar, visit "Applications" -> "Applications"
 3. Click "Create App Integration"
 
-   ![Create App Integration](images/okta_create_app_integration.png)
+   ![Create App Integration](../images/okta_create_app_integration.png)
 
 4. Click "SAML 2.0"
 
-   ![SAML 2.0](images/okta_create_a_new_app_integration_SAML.png)
+   ![SAML 2.0](../images/okta_create_a_new_app_integration_SAML.png)
 
 5. Click "Next"
 6. Set "App Name" to `Philanthropy Data Commons`
@@ -177,13 +177,13 @@ using Okta.
     - Map `firstName`, `Basic` to `user.firstName`
     - Map `lastName`, `Basic` to `user.lastName`
 
-    ![Attribute Statements map](images/okta_attribute_statements.png)
+    ![Attribute Statements map](../images/okta_attribute_statements.png)
 
 18. Click "Next"
 19. Click "Finish"
 20. Send Okta's SAML "Metadata URL" value to the PDC team.
 
-    ![SAML Metadata URL](images/okta_metadata_url.png)
+    ![SAML Metadata URL](../images/okta_metadata_url.png)
 
 The PDC team will use this URL to configure an Identity Provider (IdP) within
 PDC Keycloak and link it to a PDC Keycloak organization such that when users log

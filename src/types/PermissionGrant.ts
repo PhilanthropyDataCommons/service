@@ -1,225 +1,428 @@
 import { ajv } from '../ajv';
+import { isEmpty } from '../arrays';
+import { BaseFieldCategory } from './BaseField';
 import { keycloakIdSchema } from './KeycloakId';
-import { getJsonSchemaTypeForEntityKeyType } from './PermissionGrantEntityKeyType';
 import {
-	getAllowedScopesForContextEntityType,
-	getContextEntityKeyProperties,
-	PermissionGrantEntityType,
-} from './PermissionGrantEntityType';
-import { PermissionGrantGranteeType } from './PermissionGrantGranteeType';
+	PermissionGrantGranteeType,
+	permissionGrantGranteeTypeSchema,
+} from './PermissionGrantGranteeType';
 import { permissionGrantVerbSchema } from './PermissionGrantVerb';
+import type { TypeGuardWithAjvErrors } from '../ajv';
 import type { KeycloakId } from './KeycloakId';
 import type { PermissionGrantVerb } from './PermissionGrantVerb';
 import type { Writable } from './Writable';
+import type { ValidateFunction } from 'ajv';
 
-interface PermissionGrantBase {
+enum PermissionGrantEntityType {
+	FUNDER = 'funder',
+	CHANGEMAKER = 'changemaker',
+	DATA_PROVIDER = 'dataProvider',
+	OPPORTUNITY = 'opportunity',
+	PROPOSAL = 'proposal',
+	PROPOSAL_VERSION = 'proposalVersion',
+	APPLICATION_FORM = 'applicationForm',
+	APPLICATION_FORM_FIELD = 'applicationFormField',
+	PROPOSAL_FIELD_VALUE = 'proposalFieldValue',
+	SOURCE = 'source',
+	BULK_UPLOAD = 'bulkUpload',
+	CHANGEMAKER_FIELD_VALUE = 'changemakerFieldValue',
+}
+
+enum PermissionGrantEntityKeyType {
+	ID = 'id',
+	SHORT_CODE = 'shortCode',
+}
+
+interface PermissionGrantEntityKeyValueType {
+	[PermissionGrantEntityKeyType.ID]: number;
+	[PermissionGrantEntityKeyType.SHORT_CODE]: string;
+}
+
+interface PermissionGrantCondition {
+	property: string;
+	operator: string;
+	value: string[];
+}
+
+// The key name for each grantee type
+const granteeKeyProperties = {
+	[PermissionGrantGranteeType.USER]: {
+		keyName: 'granteeUserKeycloakUserId',
+	},
+	[PermissionGrantGranteeType.USER_GROUP]: {
+		keyName: 'granteeKeycloakOrganizationId',
+	},
+} as const satisfies Record<PermissionGrantGranteeType, { keyName: string }>;
+
+// The primary key name + data type for each context entity
+const contextEntityKeyProperties = {
+	[PermissionGrantEntityType.CHANGEMAKER]: {
+		keyName: 'changemakerId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+	[PermissionGrantEntityType.FUNDER]: {
+		keyName: 'funderShortCode',
+		keyType: PermissionGrantEntityKeyType.SHORT_CODE,
+	},
+	[PermissionGrantEntityType.DATA_PROVIDER]: {
+		keyName: 'dataProviderShortCode',
+		keyType: PermissionGrantEntityKeyType.SHORT_CODE,
+	},
+	[PermissionGrantEntityType.OPPORTUNITY]: {
+		keyName: 'opportunityId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+	[PermissionGrantEntityType.PROPOSAL]: {
+		keyName: 'proposalId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+	[PermissionGrantEntityType.PROPOSAL_VERSION]: {
+		keyName: 'proposalVersionId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+	[PermissionGrantEntityType.APPLICATION_FORM]: {
+		keyName: 'applicationFormId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+	[PermissionGrantEntityType.APPLICATION_FORM_FIELD]: {
+		keyName: 'applicationFormFieldId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+	[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: {
+		keyName: 'proposalFieldValueId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+	[PermissionGrantEntityType.SOURCE]: {
+		keyName: 'sourceId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+	[PermissionGrantEntityType.BULK_UPLOAD]: {
+		keyName: 'bulkUploadTaskId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: {
+		keyName: 'changemakerFieldValueId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
+} as const satisfies Record<
+	PermissionGrantEntityType,
+	{ keyName: string; keyType: PermissionGrantEntityKeyType }
+>;
+
+const contextEntityTypeScopes = {
+	[PermissionGrantEntityType.CHANGEMAKER]: [
+		PermissionGrantEntityType.CHANGEMAKER,
+		PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+		PermissionGrantEntityType.PROPOSAL,
+		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+	],
+	[PermissionGrantEntityType.FUNDER]: [
+		PermissionGrantEntityType.FUNDER,
+		PermissionGrantEntityType.OPPORTUNITY,
+		PermissionGrantEntityType.PROPOSAL,
+		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+	],
+	[PermissionGrantEntityType.DATA_PROVIDER]: [
+		PermissionGrantEntityType.DATA_PROVIDER,
+	],
+	[PermissionGrantEntityType.OPPORTUNITY]: [
+		PermissionGrantEntityType.OPPORTUNITY,
+		PermissionGrantEntityType.PROPOSAL,
+		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+	],
+	[PermissionGrantEntityType.PROPOSAL]: [
+		PermissionGrantEntityType.PROPOSAL,
+		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+	],
+	[PermissionGrantEntityType.PROPOSAL_VERSION]: [
+		PermissionGrantEntityType.PROPOSAL_VERSION,
+	],
+	[PermissionGrantEntityType.APPLICATION_FORM]: [
+		PermissionGrantEntityType.APPLICATION_FORM,
+	],
+	[PermissionGrantEntityType.APPLICATION_FORM_FIELD]: [
+		PermissionGrantEntityType.APPLICATION_FORM_FIELD,
+	],
+	[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: [
+		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+	],
+	[PermissionGrantEntityType.SOURCE]: [PermissionGrantEntityType.SOURCE],
+	[PermissionGrantEntityType.BULK_UPLOAD]: [
+		PermissionGrantEntityType.BULK_UPLOAD,
+	],
+	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: [
+		PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+	],
+} as const satisfies Record<
+	PermissionGrantEntityType,
+	readonly PermissionGrantEntityType[]
+>;
+
+const scopeConditions = {
+	[PermissionGrantEntityType.CHANGEMAKER]: [],
+	[PermissionGrantEntityType.FUNDER]: [],
+	[PermissionGrantEntityType.DATA_PROVIDER]: [],
+	[PermissionGrantEntityType.OPPORTUNITY]: [],
+	[PermissionGrantEntityType.PROPOSAL]: [],
+	[PermissionGrantEntityType.PROPOSAL_VERSION]: [],
+	[PermissionGrantEntityType.APPLICATION_FORM]: [],
+	[PermissionGrantEntityType.APPLICATION_FORM_FIELD]: [],
+	[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: [
+		{
+			property: 'baseFieldCategory',
+			operator: 'in',
+			value: Object.values(BaseFieldCategory),
+		},
+	],
+	[PermissionGrantEntityType.SOURCE]: [],
+	[PermissionGrantEntityType.BULK_UPLOAD]: [],
+	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: [],
+} as const satisfies Record<
+	PermissionGrantEntityType,
+	readonly PermissionGrantCondition[]
+>;
+
+interface UnkeyedPermissionGrant {
 	readonly id: number;
-	granteeType: PermissionGrantGranteeType;
-	contextEntityType: PermissionGrantEntityType;
-	scope: PermissionGrantEntityType[];
 	verbs: PermissionGrantVerb[];
 	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
+	contextEntityType: PermissionGrantEntityType;
+	granteeType: PermissionGrantGranteeType;
+	scope: PermissionGrantEntityType[];
+	conditions?: Partial<
+		Record<PermissionGrantEntityType, PermissionGrantCondition>
+	> | null;
 }
 
-interface PermissionGrantWithUserGrantee extends PermissionGrantBase {
-	granteeType: PermissionGrantGranteeType.USER;
-	granteeUserKeycloakUserId: KeycloakId;
-}
-
-interface PermissionGrantWithUserGroupGrantee extends PermissionGrantBase {
-	granteeType: PermissionGrantGranteeType.USER_GROUP;
-	granteeKeycloakOrganizationId: KeycloakId;
-}
-
-type PermissionGrantWithGrantee =
-	| PermissionGrantWithUserGrantee
-	| PermissionGrantWithUserGroupGrantee;
-
-type ChangemakerPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.CHANGEMAKER;
-	changemakerId: number;
+type GranteeKeysByGranteeType = {
+	[G in PermissionGrantGranteeType]: Record<
+		(typeof granteeKeyProperties)[G]['keyName'],
+		KeycloakId
+	>;
 };
 
-type FunderPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.FUNDER;
-	funderShortCode: string;
+type ContextEntityKeysByContextEntityType = {
+	[T in PermissionGrantEntityType]: Record<
+		(typeof contextEntityKeyProperties)[T]['keyName'],
+		PermissionGrantEntityKeyValueType[(typeof contextEntityKeyProperties)[T]['keyType']]
+	>;
 };
 
-type DataProviderPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.DATA_PROVIDER;
-	dataProviderShortCode: string;
+type PermissionGrantGranteeKeyVariant<G extends PermissionGrantGranteeType> =
+	GranteeKeysByGranteeType[G] & {
+		granteeType: G;
+	};
+
+type PermissionGrantContextEntityKeyVariant<
+	C extends PermissionGrantEntityType,
+> = ContextEntityKeysByContextEntityType[C] & {
+	contextEntityType: C;
 };
 
-type OpportunityPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.OPPORTUNITY;
-	opportunityId: number;
-};
-
-type ProposalPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.PROPOSAL;
-	proposalId: number;
-};
-
-type ProposalVersionPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION;
-	proposalVersionId: number;
-};
-
-type ApplicationFormPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.APPLICATION_FORM;
-	applicationFormId: number;
-};
-
-type ApplicationFormFieldPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.APPLICATION_FORM_FIELD;
-	applicationFormFieldId: number;
-};
-
-type ProposalFieldValuePermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE;
-	proposalFieldValueId: number;
-};
-
-type SourcePermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.SOURCE;
-	sourceId: number;
-};
-
-type BulkUploadPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.BULK_UPLOAD;
-	bulkUploadTaskId: number;
-};
-
-type ChangemakerFieldValuePermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE;
-	changemakerFieldValueId: number;
-};
-
-type PermissionGrant =
-	| ChangemakerPermissionGrant
-	| FunderPermissionGrant
-	| DataProviderPermissionGrant
-	| OpportunityPermissionGrant
-	| ProposalPermissionGrant
-	| ProposalVersionPermissionGrant
-	| ApplicationFormPermissionGrant
-	| ApplicationFormFieldPermissionGrant
-	| ProposalFieldValuePermissionGrant
-	| SourcePermissionGrant
-	| BulkUploadPermissionGrant
-	| ChangemakerFieldValuePermissionGrant;
+type PermissionGrant = UnkeyedPermissionGrant &
+	{
+		[C in PermissionGrantEntityType]: PermissionGrantContextEntityKeyVariant<C>;
+	}[PermissionGrantEntityType] &
+	{
+		[G in PermissionGrantGranteeType]: PermissionGrantGranteeKeyVariant<G>;
+	}[PermissionGrantGranteeType];
 
 type WritablePermissionGrant = Writable<PermissionGrant>;
 
-const getSchemaFragmentForContextEntityType = (
-	contextEntityType: PermissionGrantEntityType,
-): { properties: Record<string, object>; required: string[] } => {
-	const { keyName, keyType } = getContextEntityKeyProperties(contextEntityType);
-	return {
+type WritableUnkeyedPermissionGrant = Writable<UnkeyedPermissionGrant>;
+
+const jsonSchemaTypeForPermissionGrantEntityKeyType: Record<
+	PermissionGrantEntityKeyType,
+	string
+> = {
+	[PermissionGrantEntityKeyType.ID]: 'integer',
+	[PermissionGrantEntityKeyType.SHORT_CODE]: 'string',
+};
+
+const permissionGrantConditionSchema = {
+	type: 'object',
+	properties: {
+		property: { type: 'string' },
+		operator: { type: 'string' },
+		value: {
+			type: 'array',
+			items: { type: 'string' },
+			minItems: 1,
+		},
+	},
+	required: ['property', 'operator', 'value'],
+	additionalProperties: false,
+};
+
+const isWritableUnkeyedPermissionGrant =
+	ajv.compile<WritableUnkeyedPermissionGrant>({
+		type: 'object',
 		properties: {
 			contextEntityType: {
 				type: 'string',
-				const: contextEntityType,
+				enum: Object.values(PermissionGrantEntityType),
 			},
-			[keyName]: { type: getJsonSchemaTypeForEntityKeyType(keyType) },
-		},
-		required: ['contextEntityType', keyName],
-	};
-};
-
-const getSchemaFragmentForGranteeType = (
-	granteeType: PermissionGrantGranteeType,
-): { properties: Record<string, object>; required: string[] } => {
-	switch (granteeType) {
-		case PermissionGrantGranteeType.USER:
-			return {
-				properties: {
-					granteeType: {
-						type: 'string',
-						const: PermissionGrantGranteeType.USER,
-					},
-					granteeUserKeycloakUserId: keycloakIdSchema,
-				},
-				required: ['granteeType', 'granteeUserKeycloakUserId'],
-			};
-		case PermissionGrantGranteeType.USER_GROUP:
-			return {
-				properties: {
-					granteeType: {
-						type: 'string',
-						const: PermissionGrantGranteeType.USER_GROUP,
-					},
-					granteeKeycloakOrganizationId: keycloakIdSchema,
-				},
-				required: ['granteeType', 'granteeKeycloakOrganizationId'],
-			};
-	}
-};
-
-const getSchemaForWritablePermissionGrantVariant = (
-	granteeType: PermissionGrantGranteeType,
-	contextEntityType: PermissionGrantEntityType,
-): object => {
-	const schemaFragmentForContextEntityType =
-		getSchemaFragmentForContextEntityType(contextEntityType);
-	const schemaFragmentForGranteeType =
-		getSchemaFragmentForGranteeType(granteeType);
-	const allowedScopes = getAllowedScopesForContextEntityType(contextEntityType);
-
-	return {
-		type: 'object',
-		properties: {
-			scope: {
-				type: 'array',
-				items: {
-					type: 'string',
-					enum: allowedScopes,
-				},
-				minItems: 1,
-			},
+			granteeType: permissionGrantGranteeTypeSchema,
 			verbs: {
 				type: 'array',
 				items: permissionGrantVerbSchema,
 				minItems: 1,
 			},
-			...schemaFragmentForGranteeType.properties,
-			...schemaFragmentForContextEntityType.properties,
+			scope: {
+				type: 'array',
+				items: {
+					type: 'string',
+					enum: Object.values(PermissionGrantEntityType),
+				},
+				minItems: 1,
+			},
+			conditions: {
+				type: 'object',
+				nullable: true,
+				properties: Object.fromEntries(
+					Object.values(PermissionGrantEntityType).map((entityType) => [
+						entityType,
+						permissionGrantConditionSchema,
+					]),
+				),
+				additionalProperties: false,
+			},
 		},
-		required: [
-			'scope',
-			'verbs',
-			...schemaFragmentForGranteeType.required,
-			...schemaFragmentForContextEntityType.required,
-		],
-		additionalProperties: false,
-	};
+		required: ['contextEntityType', 'granteeType', 'verbs', 'scope'],
+	});
+
+const contextKeyValidatorCache = new Map<
+	PermissionGrantEntityType,
+	ValidateFunction
+>();
+
+const getContextKeyValidator = (
+	contextEntityType: PermissionGrantEntityType,
+): ValidateFunction => {
+	const existing = contextKeyValidatorCache.get(contextEntityType);
+	if (existing !== undefined) {
+		return existing;
+	}
+	const {
+		[contextEntityType]: { keyName, keyType },
+	} = contextEntityKeyProperties;
+	const validator = ajv.compile({
+		type: 'object',
+		properties: {
+			[keyName]: {
+				type: jsonSchemaTypeForPermissionGrantEntityKeyType[keyType],
+			},
+		},
+		required: [keyName],
+	});
+	contextKeyValidatorCache.set(contextEntityType, validator);
+	return validator;
 };
 
-const allSchemaVariants = Object.values(PermissionGrantEntityType).flatMap(
-	(contextEntityType) => [
-		getSchemaForWritablePermissionGrantVariant(
-			PermissionGrantGranteeType.USER,
-			contextEntityType,
-		),
-		getSchemaForWritablePermissionGrantVariant(
-			PermissionGrantGranteeType.USER_GROUP,
-			contextEntityType,
-		),
-	],
-);
+const granteeKeyValidatorCache = new Map<
+	PermissionGrantGranteeType,
+	ValidateFunction
+>();
 
-const writablePermissionGrantSchema = {
-	oneOf: allSchemaVariants,
+const getGranteeKeyValidator = (
+	granteeType: PermissionGrantGranteeType,
+): ValidateFunction => {
+	const existing = granteeKeyValidatorCache.get(granteeType);
+	if (existing !== undefined) {
+		return existing;
+	}
+	const {
+		[granteeType]: { keyName },
+	} = granteeKeyProperties;
+	const validator = ajv.compile({
+		type: 'object',
+		properties: {
+			[keyName]: keycloakIdSchema,
+		},
+		required: [keyName],
+	});
+	granteeKeyValidatorCache.set(granteeType, validator);
+	return validator;
 };
 
-const isWritablePermissionGrant = ajv.compile<WritablePermissionGrant>(
-	writablePermissionGrantSchema,
-);
+const coreWritableKeys = new Set([
+	'contextEntityType',
+	'granteeType',
+	'verbs',
+	'scope',
+	'conditions',
+]);
+
+const getAllowedKeys = (
+	contextEntityType: PermissionGrantEntityType,
+	granteeType: PermissionGrantGranteeType,
+): Set<string> => {
+	const allowed = new Set(coreWritableKeys);
+	allowed.add(contextEntityKeyProperties[contextEntityType].keyName);
+	allowed.add(granteeKeyProperties[granteeType].keyName);
+	return allowed;
+};
+
+const isWritablePermissionGrant: TypeGuardWithAjvErrors<
+	WritablePermissionGrant
+> = (data: unknown): data is WritablePermissionGrant => {
+	if (!isWritableUnkeyedPermissionGrant(data)) {
+		isWritablePermissionGrant.errors =
+			isWritableUnkeyedPermissionGrant.errors ?? null;
+		return false;
+	}
+
+	const { contextEntityType, granteeType } = data;
+
+	const validateContextKey = getContextKeyValidator(contextEntityType);
+	if (!validateContextKey(data)) {
+		isWritablePermissionGrant.errors = validateContextKey.errors ?? null;
+		return false;
+	}
+
+	const validateGranteeKey = getGranteeKeyValidator(granteeType);
+	if (!validateGranteeKey(data)) {
+		isWritablePermissionGrant.errors = validateGranteeKey.errors ?? null;
+		return false;
+	}
+
+	const allowedKeys = getAllowedKeys(contextEntityType, granteeType);
+	const unexpectedKeys = Object.keys(data).filter(
+		(key) => !allowedKeys.has(key),
+	);
+	if (!isEmpty(unexpectedKeys)) {
+		isWritablePermissionGrant.errors = unexpectedKeys.map((key) => ({
+			instancePath: '',
+			schemaPath: '',
+			keyword: 'additionalProperties',
+			params: { additionalProperty: key },
+			message: `must NOT have additional property '${key}'`,
+		}));
+		return false;
+	}
+
+	isWritablePermissionGrant.errors = null;
+	return true;
+};
+
+const getScopesForContextEntityType = (
+	contextEntityType: PermissionGrantEntityType,
+): readonly PermissionGrantEntityType[] =>
+	contextEntityTypeScopes[contextEntityType];
+
+const getConditionsForScope = (
+	scopeKey: PermissionGrantEntityType,
+): readonly PermissionGrantCondition[] => scopeConditions[scopeKey];
 
 export {
+	getConditionsForScope,
+	getScopesForContextEntityType,
 	isWritablePermissionGrant,
+	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	type PermissionGrant,
+	type PermissionGrantCondition,
 	type WritablePermissionGrant,
+	type WritableUnkeyedPermissionGrant,
 };

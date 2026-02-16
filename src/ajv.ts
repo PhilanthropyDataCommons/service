@@ -2,8 +2,16 @@ import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 import addFormats from 'ajv-formats';
 import * as tags from 'language-tags';
+import type { ValidateFunction } from 'ajv';
 
-export const ajv = new Ajv();
+interface TypeGuardWithAjvErrors<T> extends Pick<
+	ValidateFunction<T>,
+	'errors'
+> {
+	(data: unknown): data is T;
+}
+
+const ajv = new Ajv();
 
 ajv.addKeyword({
 	keyword: 'isValidLanguageTag',
@@ -14,3 +22,5 @@ ajv.addKeyword({
 
 ajvKeywords(ajv, 'instanceof');
 addFormats(ajv, ['email', 'uri', 'uuid']);
+
+export { ajv, type TypeGuardWithAjvErrors };

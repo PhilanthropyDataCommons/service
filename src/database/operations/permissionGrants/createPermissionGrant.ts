@@ -26,6 +26,7 @@ const createPermissionGrant = generateCreateOrUpdateItemOperation<
 		'changemakerFieldValueId',
 		'scope',
 		'verbs',
+		'conditions',
 	],
 	[],
 );

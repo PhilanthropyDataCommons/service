@@ -158,6 +158,9 @@
 			"BaseField": {
 				"$ref": "./components/schemas/BaseField.json"
 			},
+			"BaseFieldCategory": {
+				"$ref": "./components/schemas/BaseFieldCategory.json"
+			},
 			"BaseFieldLocalization": {
 				"$ref": "./components/schemas/BaseFieldLocalization.json"
 			},
@@ -226,6 +229,12 @@
 			},
 			"PermissionGrant": {
 				"$ref": "./components/schemas/PermissionGrant.json"
+			},
+			"PermissionGrantConditionRule": {
+				"$ref": "./components/schemas/PermissionGrantConditionRule.json"
+			},
+			"PermissionGrantConditions": {
+				"$ref": "./components/schemas/PermissionGrantConditions.json"
 			},
 			"PermissionGrantBundle": {
 				"$ref": "./components/schemas/PermissionGrantBundle.json"

@@ -53,7 +53,7 @@ const postPermissionGrant = async (
 	}
 
 	if (body.conditions !== undefined && body.conditions !== null) {
-		const scopeStrings: string[] = body.scope;
+		const scopeStrings = body.scope as string[];
 		const invalidKeys = Object.keys(body.conditions).filter(
 			(key) => !scopeStrings.includes(key),
 		);

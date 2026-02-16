@@ -13,15 +13,89 @@ import type { KeycloakId } from './KeycloakId';
 import type { PermissionGrantVerb } from './PermissionGrantVerb';
 import type { Writable } from './Writable';
 
-interface PermissionGrantConditionLeaf {
+interface PermissionGrantCondition {
 	field: string;
-	operator: 'in' | 'equals';
-	value: string | string[];
+	operator: string;
+	value: unknown;
 }
 
-type PermissionGrantConditions = Partial<
-	Record<string, PermissionGrantConditionLeaf>
->;
+interface ConditionsByPermissionGrantEntityType
+	extends Record<PermissionGrantEntityType, PermissionGrantCondition> {
+	[PermissionGrantEntityType.CHANGEMAKER]: never;
+	[PermissionGrantEntityType.FUNDER]: never;
+	[PermissionGrantEntityType.DATA_PROVIDER]: never;
+	[PermissionGrantEntityType.OPPORTUNITY]: never;
+	[PermissionGrantEntityType.PROPOSAL]: never;
+	[PermissionGrantEntityType.PROPOSAL_VERSION]: never;
+	[PermissionGrantEntityType.APPLICATION_FORM]: never;
+	[PermissionGrantEntityType.APPLICATION_FORM_FIELD]: never;
+	[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: {
+		field: 'baseFieldCategory';
+		operator: 'in';
+		value: BaseFieldCategory[];
+	};
+	[PermissionGrantEntityType.SOURCE]: never;
+	[PermissionGrantEntityType.BULK_UPLOAD]: never;
+	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: never;
+}
+
+interface ScopesByPermissionGrantEntityType
+	extends Record<PermissionGrantEntityType, PermissionGrantEntityType> {
+	[PermissionGrantEntityType.CHANGEMAKER]:
+		| PermissionGrantEntityType.CHANGEMAKER
+		| PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE
+		| PermissionGrantEntityType.PROPOSAL
+		| PermissionGrantEntityType.PROPOSAL_FIELD_VALUE;
+	[PermissionGrantEntityType.FUNDER]:
+		| PermissionGrantEntityType.FUNDER
+		| PermissionGrantEntityType.PROPOSAL
+		| PermissionGrantEntityType.PROPOSAL_FIELD_VALUE;
+	[PermissionGrantEntityType.DATA_PROVIDER]: PermissionGrantEntityType.DATA_PROVIDER;
+	[PermissionGrantEntityType.OPPORTUNITY]:
+		| PermissionGrantEntityType.OPPORTUNITY
+		| PermissionGrantEntityType.PROPOSAL
+		| PermissionGrantEntityType.PROPOSAL_FIELD_VALUE;
+	[PermissionGrantEntityType.PROPOSAL]:
+		| PermissionGrantEntityType.PROPOSAL
+		| PermissionGrantEntityType.PROPOSAL_FIELD_VALUE;
+	[PermissionGrantEntityType.PROPOSAL_VERSION]: PermissionGrantEntityType.PROPOSAL_VERSION;
+	[PermissionGrantEntityType.APPLICATION_FORM]: PermissionGrantEntityType.APPLICATION_FORM;
+	[PermissionGrantEntityType.APPLICATION_FORM_FIELD]: PermissionGrantEntityType.APPLICATION_FORM_FIELD;
+	[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE;
+	[PermissionGrantEntityType.SOURCE]: PermissionGrantEntityType.SOURCE;
+	[PermissionGrantEntityType.BULK_UPLOAD]: PermissionGrantEntityType.BULK_UPLOAD;
+	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE;
+}
+
+type ConditionsForScopes<S extends PermissionGrantEntityType> =
+	| (S extends keyof ConditionsByPermissionGrantEntityType
+			? Pick<ConditionsByPermissionGrantEntityType, S>
+			: never)
+	| null;
+
+interface ContextEntityKeysByPermissionGrantEntityType
+	extends Record<PermissionGrantEntityType, object> {
+	[PermissionGrantEntityType.CHANGEMAKER]: { changemakerId: number };
+	[PermissionGrantEntityType.FUNDER]: { funderShortCode: string };
+	[PermissionGrantEntityType.DATA_PROVIDER]: { dataProviderShortCode: string };
+	[PermissionGrantEntityType.OPPORTUNITY]: { opportunityId: number };
+	[PermissionGrantEntityType.PROPOSAL]: { proposalId: number };
+	[PermissionGrantEntityType.PROPOSAL_VERSION]: { proposalVersionId: number };
+	[PermissionGrantEntityType.APPLICATION_FORM]: {
+		applicationFormId: number;
+	};
+	[PermissionGrantEntityType.APPLICATION_FORM_FIELD]: {
+		applicationFormFieldId: number;
+	};
+	[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: {
+		proposalFieldValueId: number;
+	};
+	[PermissionGrantEntityType.SOURCE]: { sourceId: number };
+	[PermissionGrantEntityType.BULK_UPLOAD]: { bulkUploadTaskId: number };
+	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: {
+		changemakerFieldValueId: number;
+	};
+}
 
 interface PermissionGrantBase {
 	readonly id: number;
@@ -29,7 +103,7 @@ interface PermissionGrantBase {
 	contextEntityType: PermissionGrantEntityType;
 	scope: PermissionGrantEntityType[];
 	verbs: PermissionGrantVerb[];
-	conditions?: PermissionGrantConditions | null;
+	conditions?: Partial<ConditionsByPermissionGrantEntityType> | null;
 	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
 }
@@ -48,79 +122,17 @@ type PermissionGrantWithGrantee =
 	| PermissionGrantWithUserGrantee
 	| PermissionGrantWithUserGroupGrantee;
 
-type ChangemakerPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.CHANGEMAKER;
-	changemakerId: number;
-};
+type ScopedPermissionGrant<T extends PermissionGrantEntityType> =
+	PermissionGrantWithGrantee &
+		ContextEntityKeysByPermissionGrantEntityType[T] & {
+			contextEntityType: T;
+			scope: Array<ScopesByPermissionGrantEntityType[T]>;
+			conditions?: ConditionsForScopes<ScopesByPermissionGrantEntityType[T]>;
+		};
 
-type FunderPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.FUNDER;
-	funderShortCode: string;
-};
-
-type DataProviderPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.DATA_PROVIDER;
-	dataProviderShortCode: string;
-};
-
-type OpportunityPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.OPPORTUNITY;
-	opportunityId: number;
-};
-
-type ProposalPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.PROPOSAL;
-	proposalId: number;
-};
-
-type ProposalVersionPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION;
-	proposalVersionId: number;
-};
-
-type ApplicationFormPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.APPLICATION_FORM;
-	applicationFormId: number;
-};
-
-type ApplicationFormFieldPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.APPLICATION_FORM_FIELD;
-	applicationFormFieldId: number;
-};
-
-type ProposalFieldValuePermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE;
-	proposalFieldValueId: number;
-};
-
-type SourcePermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.SOURCE;
-	sourceId: number;
-};
-
-type BulkUploadPermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.BULK_UPLOAD;
-	bulkUploadTaskId: number;
-};
-
-type ChangemakerFieldValuePermissionGrant = PermissionGrantWithGrantee & {
-	contextEntityType: PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE;
-	changemakerFieldValueId: number;
-};
-
-type PermissionGrant =
-	| ChangemakerPermissionGrant
-	| FunderPermissionGrant
-	| DataProviderPermissionGrant
-	| OpportunityPermissionGrant
-	| ProposalPermissionGrant
-	| ProposalVersionPermissionGrant
-	| ApplicationFormPermissionGrant
-	| ApplicationFormFieldPermissionGrant
-	| ProposalFieldValuePermissionGrant
-	| SourcePermissionGrant
-	| BulkUploadPermissionGrant
-	| ChangemakerFieldValuePermissionGrant;
+type PermissionGrant = {
+	[T in PermissionGrantEntityType]: ScopedPermissionGrant<T>;
+}[PermissionGrantEntityType];
 
 type WritablePermissionGrant = Writable<PermissionGrant>;
 
@@ -169,45 +181,49 @@ const getSchemaFragmentForGranteeType = (
 	}
 };
 
-const conditionLeafSchema = {
-	type: 'object',
-	properties: {
-		field: {
-			type: 'string',
-			enum: ['baseFieldCategory'],
-		},
-		operator: {
-			type: 'string',
-			enum: ['in', 'equals'],
-		},
-		value: {
-			oneOf: [
-				{
+const conditionSchemaForScope: Partial<
+	Record<PermissionGrantEntityType, object>
+> = {
+	[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: {
+		type: 'object',
+		properties: {
+			field: {
+				type: 'string',
+				enum: ['baseFieldCategory'],
+			},
+			operator: {
+				type: 'string',
+				enum: ['in'],
+			},
+			value: {
+				type: 'array',
+				items: {
 					type: 'string',
 					enum: Object.values(BaseFieldCategory),
 				},
-				{
-					type: 'array',
-					items: {
-						type: 'string',
-						enum: Object.values(BaseFieldCategory),
-					},
-					minItems: 1,
-				},
-			],
+				minItems: 1,
+			},
 		},
+		required: ['field', 'operator', 'value'],
+		additionalProperties: false,
 	},
-	required: ['field', 'operator', 'value'],
-	additionalProperties: false,
 };
 
-const conditionsSchema = {
-	type: 'object',
-	properties: {
-		[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: conditionLeafSchema,
-	},
-	additionalProperties: false,
-	nullable: true,
+const getConditionsSchemaForScopes = (
+	scopes: PermissionGrantEntityType[],
+): object => {
+	const scopeSet = new Set<string>(scopes);
+	const properties = Object.fromEntries(
+		Object.entries(conditionSchemaForScope).filter(([key]) =>
+			scopeSet.has(key),
+		),
+	);
+	return {
+		type: 'object',
+		properties,
+		additionalProperties: false,
+		nullable: true,
+	};
 };
 
 const getSchemaForWritablePermissionGrantVariant = (
@@ -236,7 +252,7 @@ const getSchemaForWritablePermissionGrantVariant = (
 				items: permissionGrantVerbSchema,
 				minItems: 1,
 			},
-			conditions: conditionsSchema,
+			conditions: getConditionsSchemaForScopes(allowedScopes),
 			...schemaFragmentForGranteeType.properties,
 			...schemaFragmentForContextEntityType.properties,
 		},
@@ -275,7 +291,6 @@ export {
 	isWritablePermissionGrant,
 	PermissionGrantGranteeType,
 	type PermissionGrant,
-	type PermissionGrantConditionLeaf,
-	type PermissionGrantConditions,
+	type ConditionsByPermissionGrantEntityType,
 	type WritablePermissionGrant,
 };

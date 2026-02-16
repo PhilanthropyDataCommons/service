@@ -155,6 +155,9 @@
 			"BaseField": {
 				"$ref": "./components/schemas/BaseField.json"
 			},
+			"BaseFieldCategory": {
+				"$ref": "./components/schemas/BaseFieldCategory.json"
+			},
 			"BaseFieldLocalization": {
 				"$ref": "./components/schemas/BaseFieldLocalization.json"
 			},

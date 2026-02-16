@@ -26,9 +26,7 @@ BEGIN
 		RETURN FALSE;
 	END IF;
 
-	IF op = 'equals' THEN
-		RETURN actual_value = condition_value #>> '{}';
-	ELSIF op = 'in' THEN
+	IF op = 'in' THEN
 		RETURN actual_value IN (
 			SELECT jsonb_array_elements_text(condition_value)
 		);

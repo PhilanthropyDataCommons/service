@@ -989,7 +989,7 @@ describe('/proposalVersions', () => {
 					proposalFieldValue: {
 						field: 'baseFieldCategory',
 						operator: 'in',
-						value: ['budget'],
+						value: [BaseFieldCategory.BUDGET],
 					},
 				},
 			});
@@ -1198,7 +1198,7 @@ describe('/proposalVersions', () => {
 					proposalFieldValue: {
 						field: 'baseFieldCategory',
 						operator: 'in',
-						value: ['budget'],
+						value: [BaseFieldCategory.BUDGET],
 					},
 				},
 			});
@@ -1214,7 +1214,7 @@ describe('/proposalVersions', () => {
 			});
 		});
 
-		it('filters field values correctly with equals operator', async () => {
+		it('filters field values correctly with in operator and single value', async () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -1295,7 +1295,7 @@ describe('/proposalVersions', () => {
 				goodAsOf: null,
 			});
 
-			// Grant proposal view and conditional field value access with equals
+			// Grant proposal view and conditional field value access with in (single value)
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -1314,8 +1314,8 @@ describe('/proposalVersions', () => {
 				conditions: {
 					proposalFieldValue: {
 						field: 'baseFieldCategory',
-						operator: 'equals',
-						value: 'budget',
+						operator: 'in',
+						value: [BaseFieldCategory.BUDGET],
 					},
 				},
 			});

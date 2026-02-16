@@ -8,22 +8,15 @@
 		},
 		"operator": {
 			"type": "string",
-			"enum": ["in", "equals"],
+			"enum": ["in"],
 			"description": "The comparison operator."
 		},
 		"value": {
-			"oneOf": [
-				{
-					"type": "string"
-				},
-				{
-					"type": "array",
-					"items": {
-						"type": "string"
-					},
-					"minItems": 1
-				}
-			],
+			"type": "array",
+			"items": {
+				"$ref": "./BaseFieldCategory.json"
+			},
+			"minItems": 1,
 			"description": "The value(s) to compare against."
 		}
 	},

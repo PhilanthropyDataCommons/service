@@ -687,10 +687,10 @@ describe('/permissionGrants', () => {
 			});
 		});
 
-		it('creates a permission grant with equals operator condition', async () => {
+		it('creates a permission grant with in operator condition', async () => {
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'eqCondFunder',
-				name: 'Equals Conditions Funder',
+				name: 'In Condition Funder',
 				keycloakOrganizationId: null,
 				isCollaborative: false,
 			});
@@ -708,8 +708,8 @@ describe('/permissionGrants', () => {
 					conditions: {
 						proposalFieldValue: {
 							field: 'baseFieldCategory',
-							operator: 'equals',
-							value: 'budget',
+							operator: 'in',
+							value: ['budget'],
 						},
 					},
 				})
@@ -719,8 +719,8 @@ describe('/permissionGrants', () => {
 				conditions: {
 					proposalFieldValue: {
 						field: 'baseFieldCategory',
-						operator: 'equals',
-						value: 'budget',
+						operator: 'in',
+						value: ['budget'],
 					},
 				},
 			});

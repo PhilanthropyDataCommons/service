@@ -8,14 +8,19 @@ CREATE OR REPLACE FUNCTION has_proposal_field_value_permission(
 DECLARE
 	has_permission boolean;
 	sensitivity sensitivity_classification;
+	base_field_category text;
+	entity_data jsonb;
 BEGIN
-	-- Look up the sensitivity classification for the associated base field
-	SELECT bf.sensitivity_classification
-	INTO sensitivity
+	-- Look up the sensitivity classification and category for the associated base field
+	SELECT bf.sensitivity_classification, bf.category
+	INTO sensitivity, base_field_category
 	FROM proposal_field_values pfv
 	INNER JOIN application_form_fields aff ON pfv.application_form_field_id = aff.id
 	INNER JOIN base_fields bf ON aff.base_field_short_code = bf.short_code
 	WHERE pfv.id = has_proposal_field_value_permission.proposal_field_value_id;
+
+	-- Build entity data for condition evaluation
+	entity_data := jsonb_build_object('baseFieldCategory', base_field_category);
 
 	-- Forbidden fields are never viewable by anyone
 	IF sensitivity = 'forbidden' THEN
@@ -94,6 +99,9 @@ BEGIN
 					)
 				)
 			)
+		AND evaluate_permission_conditions(
+			pg.conditions, 'proposalFieldValue', entity_data
+		)
 	) INTO has_permission;
 
 	RETURN has_permission;

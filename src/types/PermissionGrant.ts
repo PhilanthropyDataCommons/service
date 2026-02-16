@@ -1,4 +1,5 @@
 import { ajv } from '../ajv';
+import { BaseFieldCategory } from './BaseField';
 import { keycloakIdSchema } from './KeycloakId';
 import { getJsonSchemaTypeForEntityKeyType } from './PermissionGrantEntityKeyType';
 import {
@@ -12,12 +13,23 @@ import type { KeycloakId } from './KeycloakId';
 import type { PermissionGrantVerb } from './PermissionGrantVerb';
 import type { Writable } from './Writable';
 
+interface PermissionGrantConditionLeaf {
+	field: string;
+	operator: 'in' | 'equals';
+	value: string | string[];
+}
+
+type PermissionGrantConditions = Partial<
+	Record<string, PermissionGrantConditionLeaf>
+>;
+
 interface PermissionGrantBase {
 	readonly id: number;
 	granteeType: PermissionGrantGranteeType;
 	contextEntityType: PermissionGrantEntityType;
 	scope: PermissionGrantEntityType[];
 	verbs: PermissionGrantVerb[];
+	conditions?: PermissionGrantConditions | null;
 	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
 }
@@ -157,6 +169,47 @@ const getSchemaFragmentForGranteeType = (
 	}
 };
 
+const conditionLeafSchema = {
+	type: 'object',
+	properties: {
+		field: {
+			type: 'string',
+			enum: ['baseFieldCategory'],
+		},
+		operator: {
+			type: 'string',
+			enum: ['in', 'equals'],
+		},
+		value: {
+			oneOf: [
+				{
+					type: 'string',
+					enum: Object.values(BaseFieldCategory),
+				},
+				{
+					type: 'array',
+					items: {
+						type: 'string',
+						enum: Object.values(BaseFieldCategory),
+					},
+					minItems: 1,
+				},
+			],
+		},
+	},
+	required: ['field', 'operator', 'value'],
+	additionalProperties: false,
+};
+
+const conditionsSchema = {
+	type: 'object',
+	properties: {
+		[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: conditionLeafSchema,
+	},
+	additionalProperties: false,
+	nullable: true,
+};
+
 const getSchemaForWritablePermissionGrantVariant = (
 	granteeType: PermissionGrantGranteeType,
 	contextEntityType: PermissionGrantEntityType,
@@ -183,6 +236,7 @@ const getSchemaForWritablePermissionGrantVariant = (
 				items: permissionGrantVerbSchema,
 				minItems: 1,
 			},
+			conditions: conditionsSchema,
 			...schemaFragmentForGranteeType.properties,
 			...schemaFragmentForContextEntityType.properties,
 		},
@@ -221,5 +275,7 @@ export {
 	isWritablePermissionGrant,
 	PermissionGrantGranteeType,
 	type PermissionGrant,
+	type PermissionGrantConditionLeaf,
+	type PermissionGrantConditions,
 	type WritablePermissionGrant,
 };

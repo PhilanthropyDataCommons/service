@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Permission grants now support optional `conditions` that restrict which entities the grant applies to based on entity data. The initial implementation supports filtering `proposalFieldValue` scope by `baseFieldCategory` using the `in` operator.
+
 ### Changed
 
 - Creating changemaker field values now requires `create | changemakerFieldValue` scope (previously required `edit | changemaker`). This scope can be granted at the changemaker context level.

@@ -1,0 +1,16 @@
+{
+	"type": "string",
+	"enum": [
+		"project",
+		"organization",
+		"needs_assessment",
+		"methodology",
+		"budget",
+		"evaluation",
+		"sustainability",
+		"partnerships",
+		"outcomes",
+		"technical",
+		"uncategorized"
+	]
+}

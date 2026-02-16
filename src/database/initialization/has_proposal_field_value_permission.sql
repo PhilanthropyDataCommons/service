@@ -8,10 +8,11 @@ CREATE OR REPLACE FUNCTION has_proposal_field_value_permission(
 DECLARE
 	has_permission boolean;
 	sensitivity sensitivity_classification;
+	base_field_category text;
 BEGIN
-	-- Look up the sensitivity classification for the associated base field
-	SELECT bf.sensitivity_classification
-	INTO sensitivity
+	-- Look up the sensitivity classification and category for the associated base field
+	SELECT bf.sensitivity_classification, bf.category
+	INTO sensitivity, base_field_category
 	FROM proposal_field_values pfv
 	INNER JOIN application_form_fields aff ON pfv.application_form_field_id = aff.id
 	INNER JOIN base_fields bf ON aff.base_field_short_code = bf.short_code
@@ -94,6 +95,21 @@ BEGIN
 					)
 				)
 			)
+		AND (
+			pg.conditions IS NULL
+			OR NOT pg.conditions ? 'proposalFieldValue'
+			OR (
+				pg.conditions #>> '{proposalFieldValue,field}'
+					= 'baseFieldCategory'
+				AND pg.conditions #>> '{proposalFieldValue,operator}'
+					= 'in'
+				AND base_field_category::text IN (
+					SELECT jsonb_array_elements_text(
+						pg.conditions #> '{proposalFieldValue,value}'
+					)
+				)
+			)
+		)
 	) INTO has_permission;
 
 	RETURN has_permission;

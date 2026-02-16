@@ -322,6 +322,51 @@ Permissions granted against a data provider (using the data provider's
 | ---- | ------------- | ------------------------------------------------ |
 | edit | data_provider | Create sources associated with the data provider |
 
+### Conditional Permissions
+
+Permission grants can optionally include `conditions` that restrict which
+entities the grant applies to based on entity data. When a grant has conditions,
+it only applies to entities that match the specified criteria. Grants without
+conditions (or with `conditions: null`) apply unconditionally, preserving
+backward compatibility.
+
+Conditions are keyed by scope entity type. Each condition specifies a `field`,
+an `operator`, and a `value`:
+
+- **field**: The entity data field to evaluate (currently only
+  `baseFieldCategory` is supported)
+- **operator**: `in` for array membership match
+- **value**: An array of strings
+
+For example, to grant a funder view access to only budget-related proposal field
+values:
+
+```json
+{
+	"granteeType": "user",
+	"granteeUserKeycloakUserId": "550e8400-e29b-41d4-a716-446655440000",
+	"contextEntityType": "funder",
+	"funderShortCode": "examplefunder",
+	"scope": ["proposalFieldValue"],
+	"verbs": ["view"],
+	"conditions": {
+		"proposalFieldValue": {
+			"field": "baseFieldCategory",
+			"operator": "in",
+			"value": ["budget", "project"]
+		}
+	}
+}
+```
+
+This grant allows the user to view proposal field values only for base fields
+categorized as `budget` or `project`. Field values in other categories (e.g.,
+`organization`, `evaluation`) would not be visible through this grant.
+
+Condition keys must be present in the grant's `scope` array. For instance, a
+condition keyed on `proposalFieldValue` requires `proposalFieldValue` to be
+included in the scope.
+
 ### Other Contexts
 
 The permission system data model includes additional contexts (`proposalVersion`,

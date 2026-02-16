@@ -613,6 +613,218 @@ describe('/permissionGrants', () => {
 				details: expectArray(),
 			});
 		});
+
+		it('creates and returns a permission grant with conditions', async () => {
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'condFunder',
+				name: 'Conditions Test Funder',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'funder',
+					funderShortCode: funder.shortCode,
+					scope: ['proposalFieldValue'],
+					verbs: ['view'],
+					conditions: {
+						proposalFieldValue: {
+							field: 'baseFieldCategory',
+							operator: 'in',
+							value: ['budget', 'project'],
+						},
+					},
+				})
+				.expect(201);
+
+			expect(result.body).toMatchObject({
+				id: expectNumber(),
+				granteeType: 'user',
+				granteeUserKeycloakUserId: testUserKeycloakUserId,
+				contextEntityType: 'funder',
+				funderShortCode: funder.shortCode,
+				scope: ['proposalFieldValue'],
+				verbs: ['view'],
+				conditions: {
+					proposalFieldValue: {
+						field: 'baseFieldCategory',
+						operator: 'in',
+						value: ['budget', 'project'],
+					},
+				},
+				createdBy: testUserKeycloakUserId,
+				createdAt: expectTimestamp(),
+			});
+		});
+
+		it('creates a permission grant with null conditions', async () => {
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'nullCondFunder',
+				name: 'Null Conditions Funder',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'funder',
+					funderShortCode: funder.shortCode,
+					scope: ['proposalFieldValue'],
+					verbs: ['view'],
+					conditions: null,
+				})
+				.expect(201);
+
+			expect(result.body).toMatchObject({
+				conditions: null,
+			});
+		});
+
+		it('creates a permission grant with in operator condition', async () => {
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'eqCondFunder',
+				name: 'In Condition Funder',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'funder',
+					funderShortCode: funder.shortCode,
+					scope: ['proposalFieldValue'],
+					verbs: ['view'],
+					conditions: {
+						proposalFieldValue: {
+							field: 'baseFieldCategory',
+							operator: 'in',
+							value: ['budget'],
+						},
+					},
+				})
+				.expect(201);
+
+			expect(result.body).toMatchObject({
+				conditions: {
+					proposalFieldValue: {
+						field: 'baseFieldCategory',
+						operator: 'in',
+						value: ['budget'],
+					},
+				},
+			});
+		});
+
+		it('returns 400 when conditions has invalid field name', async () => {
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'badFieldFunder',
+				name: 'Bad Field Funder',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'funder',
+					funderShortCode: funder.shortCode,
+					scope: ['proposalFieldValue'],
+					verbs: ['view'],
+					conditions: {
+						proposalFieldValue: {
+							field: 'invalidField',
+							operator: 'in',
+							value: ['budget'],
+						},
+					},
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('returns 400 when conditions has invalid operator', async () => {
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'badOpFunder',
+				name: 'Bad Op Funder',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'funder',
+					funderShortCode: funder.shortCode,
+					scope: ['proposalFieldValue'],
+					verbs: ['view'],
+					conditions: {
+						proposalFieldValue: {
+							field: 'baseFieldCategory',
+							operator: 'notIn',
+							value: ['budget'],
+						},
+					},
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('returns 400 when condition key is not in scope', async () => {
+			const funder = await createOrUpdateFunder(db, null, {
+				shortCode: 'noScopeFunder',
+				name: 'No Scope Funder',
+				keycloakOrganizationId: null,
+				isCollaborative: false,
+			});
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'funder',
+					funderShortCode: funder.shortCode,
+					scope: ['funder'],
+					verbs: ['view'],
+					conditions: {
+						proposalFieldValue: {
+							field: 'baseFieldCategory',
+							operator: 'in',
+							value: ['budget'],
+						},
+					},
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+			});
+		});
 	});
 
 	describe('DELETE /:permissionGrantId', () => {

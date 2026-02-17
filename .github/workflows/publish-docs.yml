@@ -1,0 +1,30 @@
+name: Publish to WordPress
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**/*.md'
+  workflow_dispatch:
+    inputs:
+      force_publish:
+        description: 'Force republish all posts'
+        default: 'true'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - name: Publish to WordPress
+        uses: OpenTechStrategies/wp-post-gfm@main
+        with:
+          directory: 'docs'
+          default_status: 'publish'
+        env:
+          WP_URL: ${{ secrets.WORDPRESS_URL }}
+          WP_USERNAME: ${{ secrets.WORDPRESS_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WORDPRESS_APP_PASSWORD }}

@@ -25,6 +25,6 @@ jobs:
           directory: 'docs'
           default_status: 'publish'
         env:
-          WP_URL: ${{ secrets.WORDPRESS_URL }}
-          WP_USERNAME: ${{ secrets.WORDPRESS_USERNAME }}
-          WP_APP_PASSWORD: ${{ secrets.WORDPRESS_APP_PASSWORD }}
+          WP_URL: ${{ secrets.WP_URL }}
+          WP_USERNAME: ${{ secrets.WP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}

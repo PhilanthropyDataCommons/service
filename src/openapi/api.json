@@ -218,9 +218,6 @@
 			"SourcePermissionGrant": {
 				"$ref": "./components/schemas/SourcePermissionGrant.json"
 			},
-			"Permission": {
-				"$ref": "./components/schemas/Permission.json"
-			},
 			"PermissionGrant": {
 				"$ref": "./components/schemas/PermissionGrant.json"
 			},

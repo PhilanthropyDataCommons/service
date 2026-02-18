@@ -342,6 +342,106 @@ describe('/proposalVersions', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
+		it('returns 422 when user has edit|funder but not edit|proposal scope', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const testFunder = await createTestFunder(db, null);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: testFunder.shortCode,
+				scope: [
+					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.PROPOSAL,
+				],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: testFunder.shortCode,
+				scope: [
+					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.OPPORTUNITY,
+				],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+			const opportunity = await createTestOpportunity(db, null, {
+				funderShortCode: testFunder.shortCode,
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+					fieldValues: [],
+				})
+				.expect(422);
+		});
+
+		it('creates a proposal version for a user with edit|proposal on the opportunity', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const opportunity = await createTestOpportunity(db, null);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+				opportunityId: opportunity.id,
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.PROPOSAL,
+				],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			const before = await loadTableMetrics('proposal_versions');
+			const result = await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+					fieldValues: [],
+				})
+				.expect(201);
+			const after = await loadTableMetrics('proposal_versions');
+			expect(result.body).toMatchObject({
+				proposalId: proposal.id,
+				fieldValues: [],
+			});
+			expect(after.count).toEqual(before.count + 1);
+		});
+
 		it('creates exactly the number of provided field values', async () => {
 			const testUser = await loadTestUser();
 			const testUserAuthContext = getAuthContext(testUser);

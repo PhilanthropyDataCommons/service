@@ -224,19 +224,18 @@ context key).
 
 | Verb   | Scope              | What It Enables                                                   |
 | ------ | ------------------ | ----------------------------------------------------------------- |
-| view   | funder             | View the funder's opportunities                                   |
-|        |                    | View application forms associated with the funder's opportunities |
-|        |                    | View bulk upload tasks associated with the funder                 |
+| view   | opportunity        | View the funder's opportunities                                   |
+|        |                    | View application forms and fields for the funder's opportunities  |
+|        |                    | View bulk upload tasks associated with the funder's opportunities |
 | view   | proposal           | View proposals associated with the funder's opportunities         |
 |        |                    | View proposal versions associated with the funder's opportunities |
 |        |                    | View changemaker-proposal associations for the funder's proposals |
 | view   | proposalFieldValue | View proposal field values for the funder's proposals             |
+| create | opportunity        | Create opportunities for the funder                               |
 | create | proposal           | Create proposals for the funder's opportunities                   |
-| edit   | funder             | Create or update opportunities for the funder                     |
-|        |                    | Create or update application forms for the funder's opportunities |
-|        |                    | Create or update application form fields                          |
-|        |                    | Create or update proposal versions for the funder's proposals     |
-|        |                    | Create bulk upload tasks for the funder                           |
+|        |                    | Create bulk upload tasks for the funder's opportunities           |
+| edit   | opportunity        | Create or update application forms and fields for the funder      |
+| edit   | funder             | Create or update proposal versions for the funder's proposals     |
 |        |                    | Create or update changemaker-proposal associations                |
 |        |                    | Create sources associated with the funder                         |
 | manage | funder             | View, send, and respond to funder collaborative invitations       |
@@ -273,6 +272,7 @@ for specific opportunities.
 |        |                    | View changemaker-proposal associations for the opportunity's proposals |
 | view   | proposalFieldValue | View proposal field values for the opportunity's proposals             |
 | create | proposal           | Create proposals for the specific opportunity                          |
+|        |                    | Create bulk upload tasks for the specific opportunity                  |
 
 ### Proposal Permissions
 

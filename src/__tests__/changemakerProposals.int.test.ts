@@ -573,6 +573,7 @@ describe('/changemakerProposals', () => {
 				funderShortCode: testFunder.shortCode,
 				scope: [
 					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.OPPORTUNITY,
 					PermissionGrantEntityType.PROPOSAL,
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
@@ -636,6 +637,7 @@ describe('/changemakerProposals', () => {
 				funderShortCode: testFunder.shortCode,
 				scope: [
 					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.OPPORTUNITY,
 					PermissionGrantEntityType.PROPOSAL,
 				],
 				verbs: [PermissionGrantVerb.VIEW],

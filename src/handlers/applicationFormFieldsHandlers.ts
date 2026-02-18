@@ -1,7 +1,7 @@
 import { HTTP_STATUS } from '../constants';
 import {
 	db,
-	hasFunderPermission,
+	hasOpportunityPermission,
 	loadApplicationForm,
 	loadApplicationFormField,
 	loadOpportunity,
@@ -47,10 +47,10 @@ const checkApplicationFormFieldPermission = async (
 	);
 
 	if (
-		!(await hasFunderPermission(db, authContext, {
-			funderShortCode: opportunity.funderShortCode,
+		!(await hasOpportunityPermission(db, authContext, {
+			opportunityId: opportunity.id,
 			permission,
-			scope: PermissionGrantEntityType.FUNDER,
+			scope: PermissionGrantEntityType.OPPORTUNITY,
 		}))
 	) {
 		throw new UnauthorizedError();

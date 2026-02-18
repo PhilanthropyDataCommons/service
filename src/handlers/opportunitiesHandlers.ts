@@ -64,8 +64,8 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 	if (
 		!(await hasFunderPermission(db, req, {
 			funderShortCode: req.body.funderShortCode,
-			permission: PermissionGrantVerb.EDIT,
-			scope: PermissionGrantEntityType.FUNDER,
+			permission: PermissionGrantVerb.CREATE,
+			scope: PermissionGrantEntityType.OPPORTUNITY,
 		}))
 	) {
 		throw new UnauthorizedError();

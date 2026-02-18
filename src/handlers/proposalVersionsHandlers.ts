@@ -80,6 +80,7 @@ const assertApplicationFormExistsForProposal = async (
 };
 
 const assertProposalFieldValuesMapToApplicationForm = async (
+	authContext: AuthContext,
 	applicationFormId: number,
 	proposalFieldValues: WritableProposalFieldValueWithProposalVersionContext[],
 ): Promise<void> => {
@@ -89,7 +90,7 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 			try {
 				const applicationFormField = await loadApplicationFormField(
 					db,
-					null,
+					authContext,
 					proposalFieldValue.applicationFormFieldId,
 				);
 				if (applicationFormField.applicationFormId !== applicationFormId) {
@@ -157,6 +158,7 @@ const postProposalVersion = async (
 			proposalId,
 		);
 		await assertProposalFieldValuesMapToApplicationForm(
+			req,
 			applicationFormId,
 			fieldValues,
 		);

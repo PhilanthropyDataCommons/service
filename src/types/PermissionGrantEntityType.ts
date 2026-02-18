@@ -96,6 +96,7 @@ const allowedScopesForContextEntityType: Record<
 	],
 	[PermissionGrantEntityType.FUNDER]: [
 		PermissionGrantEntityType.FUNDER,
+		PermissionGrantEntityType.OPPORTUNITY,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 	],

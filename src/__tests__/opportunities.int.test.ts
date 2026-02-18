@@ -70,7 +70,7 @@ describe('/opportunities', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const visibleOpportunity = await createTestOpportunity(db, null, {
@@ -118,7 +118,7 @@ describe('/opportunities', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createTestOpportunity(db, null, {
@@ -196,7 +196,7 @@ describe('/opportunities', () => {
 			await request(app).post('/opportunities').expect(401);
 		});
 
-		it('creates and returns exactly one opportunity when edit funder permission is set', async () => {
+		it('creates and returns exactly one opportunity when create opportunity permission is set', async () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -206,8 +206,8 @@ describe('/opportunities', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			const before = await loadTableMetrics('opportunities');
 			const result = await request(app)
@@ -229,7 +229,7 @@ describe('/opportunities', () => {
 			expect(after.count).toEqual(2);
 		});
 
-		it('returns 401 unauthorized if the user does not have edit permission on the associated funder', async () => {
+		it('returns 401 unauthorized if the user does not have create opportunity permission on the associated funder', async () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser();
@@ -239,7 +239,7 @@ describe('/opportunities', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: systemFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {

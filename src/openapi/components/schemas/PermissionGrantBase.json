@@ -1,71 +1,81 @@
 {
 	"type": "object",
-	"properties": {
-		"id": {
-			"type": "integer",
-			"readOnly": true,
-			"example": 42
-		},
-		"scope": {
-			"type": "array",
-			"items": {
-				"$ref": "./PermissionGrantEntityType.json"
-			},
-			"minItems": 1,
-			"description": "The entity types this grant applies to within the context."
-		},
-		"verbs": {
-			"type": "array",
-			"items": {
-				"$ref": "./PermissionGrantVerb.json"
-			},
-			"minItems": 1,
-			"description": "The permission verbs granted."
-		},
-		"createdBy": {
-			"type": "string",
-			"format": "uuid",
-			"readOnly": true,
-			"description": "The Keycloak user ID of the user who created this grant.",
-			"example": "770e8400-e29b-41d4-a716-446655440002"
-		},
-		"createdAt": {
-			"type": "string",
-			"format": "date-time",
-			"readOnly": true
-		}
-	},
-	"required": ["scope", "verbs"],
-	"oneOf": [
+	"allOf": [
 		{
+			"type": "object",
 			"properties": {
-				"granteeType": {
-					"type": "string",
-					"const": "user"
+				"id": {
+					"type": "integer",
+					"readOnly": true,
+					"example": 42
 				},
-				"granteeUserKeycloakUserId": {
+				"scope": {
+					"type": "array",
+					"items": {
+						"$ref": "./PermissionGrantEntityType.json"
+					},
+					"minItems": 1,
+					"description": "The entity types this grant applies to within the context."
+				},
+				"verbs": {
+					"type": "array",
+					"items": {
+						"$ref": "./PermissionGrantVerb.json"
+					},
+					"minItems": 1,
+					"description": "The permission verbs granted."
+				},
+				"createdBy": {
 					"type": "string",
 					"format": "uuid",
-					"description": "The Keycloak user ID of the grantee.",
-					"example": "550e8400-e29b-41d4-a716-446655440000"
-				}
-			},
-			"required": ["granteeType", "granteeUserKeycloakUserId"]
-		},
-		{
-			"properties": {
-				"granteeType": {
-					"type": "string",
-					"const": "userGroup"
+					"readOnly": true,
+					"description": "The Keycloak user ID of the user who created this grant.",
+					"example": "770e8400-e29b-41d4-a716-446655440002"
 				},
-				"granteeKeycloakOrganizationId": {
+				"createdAt": {
 					"type": "string",
-					"format": "uuid",
-					"description": "The Keycloak organization ID of the grantee group.",
-					"example": "660e8400-e29b-41d4-a716-446655440001"
+					"format": "date-time",
+					"readOnly": true
 				}
 			},
-			"required": ["granteeType", "granteeKeycloakOrganizationId"]
+			"required": ["id", "scope", "verbs", "createdBy", "createdAt"]
+  	},
+		{
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"granteeType": {
+							"type": "string",
+							"enum": ["user"]
+						},
+						"granteeUserKeycloakUserId": {
+							"type": "string",
+							"format": "uuid",
+							"description": "The Keycloak user ID of the grantee.",
+							"example": "550e8400-e29b-41d4-a716-446655440000"
+						}
+					},
+					"required": ["granteeType", "granteeUserKeycloakUserId"]
+				},
+				{
+					"type": "object",
+					"properties": {
+						"granteeType": {
+							"type": "string",
+							"enum": ["userGroup"]
+						},
+						"granteeKeycloakOrganizationId": {
+							"type": "string",
+							"format": "uuid",
+							"description": "The Keycloak organization ID of the grantee group.",
+							"example": "660e8400-e29b-41d4-a716-446655440001"
+						}
+					},
+					"required": ["granteeType", "granteeKeycloakOrganizationId"]
+				}
+			]
 		}
-	]
+	],
+	"required": ["granteeType"]
 }

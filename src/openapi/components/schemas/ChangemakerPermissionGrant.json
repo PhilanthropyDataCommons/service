@@ -1,4 +1,5 @@
 {
+	"type": "object",
 	"allOf": [
 		{ "$ref": "./PermissionGrantBase.json" },
 		{
@@ -6,7 +7,7 @@
 			"properties": {
 				"contextEntityType": {
 					"type": "string",
-					"const": "changemaker"
+					"enum": ["changemaker"]
 				},
 				"changemakerId": {
 					"type": "integer",
@@ -22,7 +23,7 @@
 					"minItems": 1
 				}
 			},
-			"required": ["contextEntityType", "changemakerId"]
+			"required": ["contextEntityType", "changemakerId", "scope"]
 		}
 	]
 }

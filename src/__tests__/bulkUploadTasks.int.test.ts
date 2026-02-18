@@ -69,7 +69,7 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const firstProposalsDataFile = await createTestFile(
@@ -414,7 +414,7 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -422,8 +422,8 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 
@@ -492,7 +492,7 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -500,8 +500,8 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 			const attachmentsArchiveFile = await createTestFile(
@@ -561,7 +561,7 @@ describe('/tasks/bulkUploads', () => {
 			expect(after.count).toEqual(1);
 		});
 
-		it('returns 422 unprocessable entity when the user does not have edit permission for the associated funder', async () => {
+		it('returns 422 unprocessable entity when the user does not have create proposal permission for the associated opportunity', async () => {
 			const systemSource = await loadSystemSource(db, null);
 			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
@@ -574,7 +574,7 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -582,7 +582,7 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.MANAGE],
 			});
 
@@ -621,7 +621,7 @@ describe('/tasks/bulkUploads', () => {
 			expect(result.body).toEqual({
 				details: [{ name: 'UnprocessableEntityError' }],
 				message:
-					'You do not have write permissions on the funder associated with this application form.',
+					'You do not have permission to create proposals for this opportunity.',
 				name: 'UnprocessableEntityError',
 			});
 			expect(after.count).toEqual(0);
@@ -638,7 +638,7 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -687,7 +687,7 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -739,7 +739,7 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -747,8 +747,8 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 
 			const fileOwnedByAnotherUser = await createTestFile(
@@ -814,7 +814,7 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -822,8 +822,8 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 			const attachmentsArchiveFileOwnedByAnotherUser = await createTestFile(

@@ -3,7 +3,7 @@ import {
 	createApplicationForm,
 	createApplicationFormField,
 	getLimitValues,
-	hasFunderPermission,
+	hasOpportunityPermission,
 	loadApplicationForm,
 	loadApplicationFormBundle,
 	loadOpportunity,
@@ -88,10 +88,10 @@ const postApplicationForms = async (
 	try {
 		const opportunity = await loadOpportunity(db, req, opportunityId);
 		if (
-			!(await hasFunderPermission(db, req, {
-				funderShortCode: opportunity.funderShortCode,
+			!(await hasOpportunityPermission(db, req, {
+				opportunityId: opportunity.id,
 				permission: PermissionGrantVerb.EDIT,
-				scope: PermissionGrantEntityType.FUNDER,
+				scope: PermissionGrantEntityType.OPPORTUNITY,
 			}))
 		) {
 			throw new UnauthorizedError();

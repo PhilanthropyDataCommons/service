@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- Opportunity creation now requires `create | opportunity` scope on funder permission grants (previously `edit | funder`).
+- Viewing opportunities, application forms, application form fields, and bulk upload tasks now uses `opportunity` scope instead of `funder` scope.
+- Creating and editing application forms and application form fields now uses `edit | opportunity` scope instead of `edit | funder`.
+- Creating bulk upload tasks now requires `create | proposal` scope instead of `edit | opportunity`.
+- Application form field queries now enforce permission checks via `has_opportunity_permission`.
+- Existing funder permission grants with `funder` scope have been migrated to also include `opportunity` scope. New `create | opportunity` grants have been created for users who had `edit | funder`.
+
 ### Fixed
 
 - Permission checks for userGroup-based grants now correctly ignore expired ephemeral user group associations.

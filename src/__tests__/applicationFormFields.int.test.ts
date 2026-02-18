@@ -58,7 +58,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -66,7 +66,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -121,7 +121,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -129,7 +129,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -184,7 +184,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -192,7 +192,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -249,7 +249,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -257,7 +257,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -312,7 +312,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -320,7 +320,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -375,7 +375,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -383,7 +383,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -431,7 +431,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -439,7 +439,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -501,7 +501,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 
@@ -527,7 +527,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 

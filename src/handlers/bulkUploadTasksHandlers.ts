@@ -3,7 +3,7 @@ import {
 	db,
 	createBulkUploadTask,
 	getLimitValues,
-	hasFunderPermission,
+	hasOpportunityPermission,
 	loadApplicationForm,
 	loadBulkUploadTaskBundle,
 	loadFileIfCreatedBy,
@@ -47,20 +47,20 @@ const validateApplicationFormCreatePermission = async (
 			applicationForm.opportunityId,
 		);
 		if (
-			!(await hasFunderPermission(db, authContext, {
-				funderShortCode: opportunity.funderShortCode,
-				permission: PermissionGrantVerb.EDIT,
-				scope: PermissionGrantEntityType.FUNDER,
+			!(await hasOpportunityPermission(db, authContext, {
+				opportunityId: opportunity.id,
+				permission: PermissionGrantVerb.CREATE,
+				scope: PermissionGrantEntityType.PROPOSAL,
 			}))
 		) {
 			throw new UnprocessableEntityError(
-				'You do not have write permissions on the funder associated with this application form.',
+				'You do not have permission to create proposals for this opportunity.',
 			);
 		}
 	} catch (err: unknown) {
 		if (err instanceof NotFoundError) {
 			throw new UnprocessableEntityError(
-				'You do not have write permissions on the funder associated with this application form.',
+				'You do not have permission to create proposals for this opportunity.',
 			);
 		}
 		throw err;

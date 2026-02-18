@@ -258,6 +258,37 @@ describe('/permissionGrants', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
+		it('creates a permission grant for a user not in the users table', async () => {
+			const arbitraryUserKeycloakUserId =
+				'b4e46c13-0abc-4a7e-9d72-a1b2c3d4e5f6';
+			const changemaker = await createTestChangemaker(db, null);
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: arbitraryUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(201);
+
+			expect(result.body).toMatchObject({
+				id: expectNumber(),
+				granteeType: 'user',
+				granteeUserKeycloakUserId: arbitraryUserKeycloakUserId,
+				contextEntityType: 'changemaker',
+				changemakerId: changemaker.id,
+				scope: ['changemaker'],
+				verbs: ['view'],
+				createdBy: testUserKeycloakUserId,
+				createdAt: expectTimestamp(),
+			});
+		});
+
 		it('returns 422 when referenced entity does not exist', async () => {
 			await agent
 				.post('/permissionGrants')

@@ -159,7 +159,7 @@ erDiagram
   PermissionGrant {
     int id PK
     string granteeType
-    uuid granteeUserKeycloakUserId FK
+    uuid granteeUserKeycloakUserId
     uuid granteeKeycloakOrganizationId
     string contextEntityType
     int changemakerId FK
@@ -220,7 +220,6 @@ erDiagram
   PermissionGrant }o--o| Source : "references"
   PermissionGrant }o--o| BulkUploadTask : "references"
   PermissionGrant }o--o| ChangemakerFieldValue : "references"
-  PermissionGrant }o--o| User : "is granted to"
   PermissionGrant }o--|| User : "is created by"
   Changemaker ||--o{ FiscalSponsorship : "sponsors"
   Changemaker ||--o{ FiscalSponsorship : "is sponsored by"

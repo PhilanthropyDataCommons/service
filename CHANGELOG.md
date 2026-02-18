@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Permission grants for users no longer require the user to exist in the PDC database. Grants can now reference any Keycloak user UUID, matching the existing behavior for user group grants.
 - ProposalVersion creation now requires `edit | proposal` scope (checked via `has_proposal_permission`) instead of `edit | funder` scope. Existing funder permission grants with `edit` verb and `funder` scope have been migrated to also include `proposal` scope.
 - Opportunity creation now requires `create | opportunity` scope on funder permission grants (previously `edit | funder`).
 - Viewing opportunities, application forms, application form fields, and bulk upload tasks now uses `opportunity` scope instead of `funder` scope.

@@ -91,6 +91,7 @@ const allowedScopesForContextEntityType: Record<
 > = {
 	[PermissionGrantEntityType.CHANGEMAKER]: [
 		PermissionGrantEntityType.CHANGEMAKER,
+		PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 	],

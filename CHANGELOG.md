@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Creating bulk upload tasks now requires `create | proposal` scope instead of `edit | opportunity`.
 - Application form field queries now enforce permission checks via `has_opportunity_permission`.
 - Existing funder permission grants with `funder` scope have been migrated to also include `opportunity` scope. New `create | opportunity` grants have been created for users who had `edit | funder`.
+- Creating changemaker field values now requires `create | changemakerFieldValue` scope (previously required `edit | changemaker`). This scope can be granted at the changemaker context level.
+- Existing changemaker permissions with `changemaker` scope have been migrated to also include `changemakerFieldValue` scope, ensuring backward compatibility.
 
 ### Fixed
 

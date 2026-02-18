@@ -235,9 +235,9 @@ context key).
 | create | proposal           | Create proposals for the funder's opportunities                   |
 |        |                    | Create bulk upload tasks for the funder's opportunities           |
 | edit   | opportunity        | Create or update application forms and fields for the funder      |
-| edit   | funder             | Create or update proposal versions for the funder's proposals     |
-|        |                    | Create or update changemaker-proposal associations                |
+| edit   | funder             | Create or update changemaker-proposal associations                |
 |        |                    | Create sources associated with the funder                         |
+| edit   | proposal           | Create or update proposal versions for the funder's proposals     |
 | manage | funder             | View, send, and respond to funder collaborative invitations       |
 |        |                    | View collaborative members for the funder                         |
 
@@ -246,15 +246,16 @@ context key).
 Permissions granted against a changemaker (using the changemaker's `id` as the
 context key).
 
-| Verb | Scope              | What It Enables                                            |
-| ---- | ------------------ | ---------------------------------------------------------- |
-| view | changemaker        | View changemaker field values for the changemaker          |
-| view | proposal           | View proposals associated with the changemaker             |
-|      |                    | View proposal versions associated with the changemaker     |
-|      |                    | View changemaker-proposal associations for the changemaker |
-| view | proposalFieldValue | View proposal field values for the changemaker's proposals |
-| edit | changemaker        | Create or update changemaker field values                  |
-|      |                    | Create sources associated with the changemaker             |
+| Verb | Scope              | What It Enables                                                    |
+| ---- | ------------------ | ------------------------------------------------------------------ |
+| view | changemaker        | View changemaker field values for the changemaker                  |
+| view | proposal           | View proposals associated with the changemaker                     |
+|      |                    | View proposal versions associated with the changemaker             |
+|      |                    | View changemaker-proposal associations for the changemaker         |
+| view | proposalFieldValue | View proposal field values for the changemaker's proposals         |
+| edit | changemaker        | Create or update changemaker field values                          |
+|      |                    | Create sources associated with the changemaker                     |
+| edit | proposal           | Create or update proposal versions for the changemaker's proposals |
 
 ### Opportunity Permissions
 
@@ -273,6 +274,7 @@ for specific opportunities.
 | view   | proposalFieldValue | View proposal field values for the opportunity's proposals             |
 | create | proposal           | Create proposals for the specific opportunity                          |
 |        |                    | Create bulk upload tasks for the specific opportunity                  |
+| edit   | proposal           | Create or update proposal versions for the opportunity's proposals     |
 
 ### Proposal Permissions
 
@@ -286,6 +288,7 @@ proposals.
 |      |                    | View proposal versions for the proposal                 |
 |      |                    | View changemaker-proposal associations for the proposal |
 | view | proposalFieldValue | View proposal field values for the proposal             |
+| edit | proposal           | Create or update proposal versions for the proposal     |
 
 ### ProposalFieldValue Permissions
 

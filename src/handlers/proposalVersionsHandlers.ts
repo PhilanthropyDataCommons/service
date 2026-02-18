@@ -3,10 +3,9 @@ import {
 	createProposalFieldValue,
 	createProposalVersion,
 	db,
-	hasFunderPermission,
+	hasProposalPermission,
 	loadApplicationForm,
 	loadApplicationFormField,
-	loadOpportunity,
 	loadProposal,
 	loadProposalVersion,
 } from '../database';
@@ -140,12 +139,11 @@ const postProposalVersion = async (
 	const { sourceId, fieldValues, proposalId, applicationFormId } = body;
 	try {
 		const proposal = await loadProposal(db, req, proposalId);
-		const opportunity = await loadOpportunity(db, req, proposal.opportunityId);
 		if (
-			!(await hasFunderPermission(db, req, {
-				funderShortCode: opportunity.funderShortCode,
+			!(await hasProposalPermission(db, req, {
+				proposalId: proposal.id,
 				permission: PermissionGrantVerb.EDIT,
-				scope: PermissionGrantEntityType.FUNDER,
+				scope: PermissionGrantEntityType.PROPOSAL,
 			}))
 		) {
 			throw new UnprocessableEntityError(

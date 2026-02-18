@@ -1,0 +1,2 @@
+ALTER TABLE permission_grants
+DROP CONSTRAINT permission_grants_grantee_user_keycloak_user_id_fkey;

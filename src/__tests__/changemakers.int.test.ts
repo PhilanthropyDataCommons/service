@@ -474,6 +474,7 @@ describe('/changemakers', () => {
 							position: 5279,
 							instructions:
 								'Please enter the email address of the organization.',
+							inputType: null,
 						})
 					).id,
 					position: 5297,
@@ -502,6 +503,7 @@ describe('/changemakers', () => {
 							position: 5347,
 							instructions:
 								'Please enter the email address of the organization.',
+							inputType: null,
 						})
 					).id,
 					position: 5381,
@@ -534,6 +536,7 @@ describe('/changemakers', () => {
 							position: 5209,
 							instructions:
 								'Please enter the email address of the organization.',
+							inputType: null,
 						})
 					).id,
 					position: 5231,
@@ -606,6 +609,7 @@ describe('/changemakers', () => {
 								position: 5407,
 								instructions:
 									'Please enter the phone number of the organization.',
+								inputType: null,
 							})
 						).id,
 						position: 5413,
@@ -636,6 +640,7 @@ describe('/changemakers', () => {
 							position: 5417,
 							instructions:
 								'Please enter the phone number of the organization.',
+							inputType: null,
 						})
 					).id,
 					position: 5419,
@@ -701,6 +706,7 @@ describe('/changemakers', () => {
 							position: 5437,
 							instructions:
 								'Please enter the phone number of the organization.',
+							inputType: null,
 						})
 					).id,
 					position: 5441,
@@ -730,6 +736,7 @@ describe('/changemakers', () => {
 							position: 5443,
 							instructions:
 								'Please enter the phone number of the organization.',
+							inputType: null,
 						})
 					).id,
 					position: 5449,
@@ -795,6 +802,7 @@ describe('/changemakers', () => {
 							baseFieldShortCode: baseFieldWebsite.shortCode,
 							position: 5479,
 							instructions: 'Please enter the website of the organization.',
+							inputType: null,
 						})
 					).id,
 					position: 5483,
@@ -826,6 +834,7 @@ describe('/changemakers', () => {
 								baseFieldShortCode: baseFieldWebsite.shortCode,
 								position: 5501,
 								instructions: 'Please enter the website of the organization.',
+								inputType: null,
 							})
 						).id,
 						position: 5503,
@@ -887,6 +896,7 @@ describe('/changemakers', () => {
 						baseFieldShortCode: forbiddenBaseField.shortCode,
 						position: 1,
 						instructions: 'Please enter the forbidden field.',
+						inputType: null,
 					},
 				);
 				const proposalVersion = await createProposalVersion(
@@ -1562,6 +1572,7 @@ describe('/changemakers', () => {
 				baseFieldShortCode: baseField.shortCode,
 				position: 1,
 				instructions: 'Enter website',
+				inputType: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: proposalVersion.id,
@@ -1864,6 +1875,7 @@ describe('/changemakers', () => {
 				baseFieldShortCode: baseFieldPhone.shortCode,
 				position: 1,
 				instructions: 'Enter phone',
+				inputType: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: proposalVersion.id,
@@ -1996,6 +2008,7 @@ describe('/changemakers', () => {
 				baseFieldShortCode: baseFieldEmail.shortCode,
 				position: 1,
 				instructions: 'Enter email',
+				inputType: null,
 			});
 			const visibleFieldValue = await createProposalFieldValue(db, null, {
 				proposalVersionId: proposalVersion1.id,
@@ -2041,6 +2054,7 @@ describe('/changemakers', () => {
 				baseFieldShortCode: baseFieldPhone.shortCode,
 				position: 1,
 				instructions: 'Enter phone',
+				inputType: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: proposalVersion2.id,
@@ -2344,6 +2358,7 @@ describe('/changemakers', () => {
 				baseFieldShortCode: baseFieldFile.shortCode,
 				position: 1,
 				instructions: 'Upload attachment',
+				inputType: null,
 			});
 
 			// Create a ProposalFieldValue with the file ID as the value

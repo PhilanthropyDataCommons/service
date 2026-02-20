@@ -307,6 +307,7 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Short summary',
 				instructions: 'Please enter a short summary of the proposal.',
+				inputType: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
@@ -428,6 +429,7 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Not Allowed',
 				instructions: 'This field should not be used in proposal versions',
+				inputType: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: proposalVersion.id,
@@ -618,6 +620,7 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Concise summary',
 				instructions: 'Please enter a concise summary of the proposal.',
+				inputType: null,
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
@@ -915,6 +918,7 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Short summary or title',
 				instructions: 'Please enter a short summary or title of the proposal.',
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
@@ -923,6 +927,7 @@ describe('/proposals', () => {
 				label: 'Long summary or abstract',
 				instructions:
 					'Please enter a long summary or abstract of the proposal.',
+				inputType: null,
 			});
 			const systemSource = await loadSystemSource(db, null);
 			await createProposal(db, testUserAuthContext, {
@@ -1159,6 +1164,7 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Short summary or title',
 				instructions: 'Please enter a short summary or title of the proposal.',
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
@@ -1167,6 +1173,7 @@ describe('/proposals', () => {
 				label: 'Long summary or abstract',
 				instructions:
 					'Please enter a full summary or abstract of the proposal.',
+				inputType: null,
 			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-2525-01-04T00Z`,
@@ -1421,6 +1428,7 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Summary',
 				instructions: 'Enter a summary',
+				inputType: null,
 			});
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
@@ -1486,6 +1494,7 @@ describe('/proposals', () => {
 				position: 1,
 				label: 'Short summary or title',
 				instructions: 'Please enter a short summary or title of the proposal.',
+				inputType: null,
 			});
 			const forbiddenApplicationFormField = await createApplicationFormField(
 				db,
@@ -1496,6 +1505,7 @@ describe('/proposals', () => {
 					position: 2,
 					label: 'forbidden field',
 					instructions: 'This field should not be used in proposal versions',
+					inputType: null,
 				},
 			);
 			await createProposal(db, testUserAuthContext, {

@@ -462,6 +462,7 @@ describe('/proposalVersions', () => {
 				position: 1,
 				label: 'First Name',
 				instructions: 'Please enter the first name of the applicant.',
+				inputType: null,
 			});
 			const lastNameField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -469,6 +470,7 @@ describe('/proposalVersions', () => {
 				position: 2,
 				label: 'Last Name',
 				instructions: 'Please enter the last name of the applicant.',
+				inputType: null,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			const result = await request(app)
@@ -558,6 +560,7 @@ describe('/proposalVersions', () => {
 					position: 1,
 					label: 'Forbidden Field',
 					instructions: 'This field should not be used in proposal versions',
+					inputType: null,
 				},
 			);
 			const proposalVersion = await createProposalVersion(
@@ -882,6 +885,7 @@ describe('/proposalVersions', () => {
 				position: 1,
 				label: 'First Name',
 				instructions: 'Please enter the first name of the applicant.',
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm1.id,
@@ -889,6 +893,7 @@ describe('/proposalVersions', () => {
 				position: 2,
 				label: 'Last Name',
 				instructions: 'Please enter the last name of the applicant.',
+				inputType: null,
 			});
 			const before = await loadTableMetrics('proposal_field_values');
 			logger.debug('before: %o', before);

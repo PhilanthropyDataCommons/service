@@ -4,6 +4,15 @@ import type { BaseField } from './BaseField';
 import type { Writable } from './Writable';
 import type { ShortCode } from './ShortCode';
 
+enum ApplicationFormFieldInputType {
+	SHORT_TEXT = 'shortText',
+	LONG_TEXT = 'longText',
+	RADIO = 'radio',
+	DROPDOWN = 'dropdown',
+	MULTISELECT = 'multiselect',
+	HIDDEN = 'hidden',
+}
+
 interface ApplicationFormField {
 	readonly id: number;
 	applicationFormId: number;
@@ -12,6 +21,7 @@ interface ApplicationFormField {
 	position: number;
 	label: string;
 	instructions: string | null;
+	inputType: ApplicationFormFieldInputType | null;
 	readonly createdAt: string;
 }
 
@@ -43,12 +53,27 @@ const writableApplicationFormFieldWithApplicationContextSchema: JSONSchemaType<W
 				 */
 				nullable: true as false,
 			},
+			inputType: {
+				type: 'string',
+				enum: Object.values(ApplicationFormFieldInputType),
+				/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+				 * This is a gross workaround for the fact that AJV does not support nullable types in TypeScript.
+				 * See: https://github.com/ajv-validator/ajv/issues/2163
+				 */
+				nullable: true as false,
+			},
 		},
-		required: ['baseFieldShortCode', 'position', 'label', 'instructions'],
+		required: [
+			'baseFieldShortCode',
+			'position',
+			'label',
+			'instructions',
+			'inputType',
+		],
 	};
 
 type ApplicationFormFieldPatch = Partial<
-	Pick<ApplicationFormField, 'label' | 'instructions'>
+	Pick<ApplicationFormField, 'label' | 'instructions' | 'inputType'>
 >;
 
 const applicationFormFieldPatchSchema: JSONSchemaType<ApplicationFormFieldPatch> =
@@ -63,6 +88,11 @@ const applicationFormFieldPatchSchema: JSONSchemaType<ApplicationFormFieldPatch>
 				type: 'string',
 				nullable: true,
 			},
+			inputType: {
+				type: 'string',
+				enum: Object.values(ApplicationFormFieldInputType),
+				nullable: true,
+			},
 		},
 		additionalProperties: false,
 		minProperties: 1,
@@ -73,6 +103,7 @@ const isApplicationFormFieldPatch = ajv.compile(
 );
 
 export {
+	ApplicationFormFieldInputType,
 	type ApplicationFormField,
 	type ApplicationFormFieldPatch,
 	type WritableApplicationFormField,

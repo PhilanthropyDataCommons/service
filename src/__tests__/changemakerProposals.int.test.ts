@@ -368,6 +368,7 @@ describe('/changemakerProposals', () => {
 				baseFieldShortCode: baseFieldFile.shortCode,
 				position: 1,
 				instructions: 'Upload project attachment',
+				inputType: null,
 			});
 
 			// Create ProposalFieldValue with file

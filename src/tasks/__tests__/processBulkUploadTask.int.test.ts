@@ -64,6 +64,7 @@ const createTestApplicationForm = async (
 					position: index,
 					label: shortCode,
 					instructions: null,
+					inputType: null,
 				}),
 		),
 	);

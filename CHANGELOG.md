@@ -7,10 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Added
-
-- `applicationFormField` now has an `inputType` field to provide rendering hints for UIs rendering the fields.
-
 ### Changed
 
 - Permission grants for users no longer require the user to exist in the PDC database. Grants can now reference any Keycloak user UUID, matching the existing behavior for user group grants.
@@ -27,6 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Permission checks for userGroup-based grants now correctly ignore expired ephemeral user group associations.
+
+## 0.32.0 2026-02-20
+
+### Added
+
+- `applicationFormField` now has an `inputType` field to provide rendering hints for UIs rendering the fields.
 
 ## 0.31.0 2026-02-12
 

@@ -20,6 +20,7 @@ BEGIN
     'position', application_form_field.position,
     'label', application_form_field.label,
     'instructions', application_form_field.instructions,
+    'inputType', application_form_field.input_type,
     'createdAt', application_form_field.created_at
   );
 END;

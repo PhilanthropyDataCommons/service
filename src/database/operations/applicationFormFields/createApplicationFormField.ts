@@ -16,6 +16,7 @@ const createApplicationFormField = generateCreateOrUpdateItemOperation<
 		'position',
 		'label',
 		'instructions',
+		'inputType',
 	],
 	[],
 );

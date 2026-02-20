@@ -11,7 +11,7 @@ const updateApplicationFormField = generateCreateOrUpdateItemOperation<
 	[applicationFormFieldId: Id]
 >(
 	'applicationFormFields.updateById',
-	['label', 'instructions'],
+	['label', 'instructions', 'inputType'],
 	['applicationFormFieldId'],
 );
 

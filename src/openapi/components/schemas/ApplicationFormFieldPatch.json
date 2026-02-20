@@ -9,6 +9,18 @@
 			"type": ["string", "null"],
 			"example": "Please enter the full legal name of your organization.",
 			"description": "Explicit instructions for the user to fill information into the form field."
+		},
+		"inputType": {
+			"oneOf": [
+				{
+					"$ref": "./ApplicationFormFieldInputType.json"
+				},
+				{
+					"type": "null"
+				}
+			],
+			"example": "shortText",
+			"description": "A rendering hint for the UI indicating how the field should be displayed to the user."
 		}
 	},
 	"minProperties": 1,

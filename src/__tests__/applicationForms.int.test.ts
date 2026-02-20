@@ -193,6 +193,7 @@ describe('/applicationForms', () => {
 				position: 1,
 				label: 'Anni Worki',
 				instructions: 'Please enter the number of years of work.',
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm3.id,
@@ -200,6 +201,7 @@ describe('/applicationForms', () => {
 				position: 2,
 				label: 'Org Nomen',
 				instructions: 'Please enter the name of the organization.',
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm2.id,
@@ -207,6 +209,7 @@ describe('/applicationForms', () => {
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm2.id,
@@ -214,6 +217,7 @@ describe('/applicationForms', () => {
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
+				inputType: null,
 			});
 			const result = await request(app)
 				.get(`/applicationForms/${applicationForm2.id}`)
@@ -286,6 +290,7 @@ describe('/applicationForms', () => {
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -293,6 +298,7 @@ describe('/applicationForms', () => {
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
+				inputType: null,
 			});
 			const result = await request(app)
 				.get(`/applicationForms/${applicationForm.id}`)
@@ -366,6 +372,7 @@ describe('/applicationForms', () => {
 				position: 2,
 				label: 'Name of Organization',
 				instructions: null,
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -373,6 +380,7 @@ describe('/applicationForms', () => {
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: null,
+				inputType: null,
 			});
 			const result = await request(app)
 				.get(`/applicationForms/${applicationForm.id}`)
@@ -442,6 +450,7 @@ describe('/applicationForms', () => {
 				position: 1,
 				label: 'Anni Worki',
 				instructions: 'Please enter the number of years of work.',
+				inputType: null,
 			});
 			await createOrUpdateBaseField(db, null, {
 				...forbiddenBaseField,
@@ -520,6 +529,7 @@ describe('/applicationForms', () => {
 				position: 1,
 				label: 'Organization Name',
 				instructions: 'Please enter the name of the organization.',
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -527,6 +537,7 @@ describe('/applicationForms', () => {
 				position: 2,
 				label: 'Years of Work',
 				instructions: 'Please enter the number of years of work.',
+				inputType: null,
 			});
 
 			const result = await request(app)
@@ -569,6 +580,7 @@ describe('/applicationForms', () => {
 				position: 2,
 				label: 'Years of Work',
 				instructions: null,
+				inputType: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -576,6 +588,7 @@ describe('/applicationForms', () => {
 				position: 1,
 				label: 'Organization Name',
 				instructions: null,
+				inputType: null,
 			});
 
 			const result = await request(app)
@@ -827,6 +840,7 @@ describe('/applicationForms', () => {
 							position: 1,
 							label: 'Organization Name',
 							instructions: 'Please enter the name of the organization.',
+							inputType: null,
 						},
 					],
 				})
@@ -904,6 +918,8 @@ describe('/applicationForms', () => {
 							baseFieldShortCode: forbiddenBaseField.shortCode,
 							position: 1,
 							label: 'Forbidden Field',
+							instructions: null,
+							inputType: null,
 						},
 					],
 				})
@@ -1004,6 +1020,8 @@ describe('/applicationForms', () => {
 							baseFieldShortCode: 'organizationName',
 							position: 1,
 							label: 'Organization Name',
+							instructions: null,
+							inputType: null,
 						},
 					],
 				})

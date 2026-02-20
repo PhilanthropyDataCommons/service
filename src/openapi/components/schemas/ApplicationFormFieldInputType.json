@@ -1,0 +1,4 @@
+{
+	"type": "string",
+	"enum": ["shortText", "longText", "radio", "dropdown", "multiselect", "hidden"]
+}

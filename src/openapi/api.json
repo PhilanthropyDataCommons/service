@@ -143,6 +143,9 @@
 			"ApplicationFormFieldPermissionGrant": {
 				"$ref": "./components/schemas/ApplicationFormFieldPermissionGrant.json"
 			},
+			"ApplicationFormFieldInputType": {
+				"$ref": "./components/schemas/ApplicationFormFieldInputType.json"
+			},
 			"ApplicationFormFieldPatch": {
 				"$ref": "./components/schemas/ApplicationFormFieldPatch.json"
 			},

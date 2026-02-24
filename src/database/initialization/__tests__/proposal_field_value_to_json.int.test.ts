@@ -51,6 +51,7 @@ describe('/proposal_field_value_to_json', () => {
 				position: 1,
 				label: 'Forbidden Field',
 				instructions: 'This field should not be used in proposal versions',
+				inputType: null,
 			},
 		);
 		const proposalVersion = await createProposalVersion(
@@ -117,6 +118,7 @@ describe('/proposal_field_value_to_json', () => {
 				position: 1,
 				label: 'Upload a document',
 				instructions: 'Please upload your document',
+				inputType: null,
 			},
 		);
 
@@ -203,6 +205,7 @@ describe('/proposal_field_value_to_json', () => {
 				position: 1,
 				label: 'Upload a document',
 				instructions: 'Please upload your document',
+				inputType: null,
 			},
 		);
 
@@ -283,6 +286,7 @@ describe('/proposal_field_value_to_json', () => {
 				position: 1,
 				label: 'Upload a document',
 				instructions: 'Please upload your document',
+				inputType: null,
 			},
 		);
 
@@ -355,6 +359,7 @@ describe('/proposal_field_value_to_json', () => {
 				position: 1,
 				label: 'Upload a document',
 				instructions: 'Please upload your document',
+				inputType: null,
 			},
 		);
 
@@ -427,6 +432,7 @@ describe('/proposal_field_value_to_json', () => {
 				position: 1,
 				label: 'Enter text',
 				instructions: 'Please enter some text',
+				inputType: null,
 			},
 		);
 

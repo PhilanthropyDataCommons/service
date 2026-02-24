@@ -36,6 +36,18 @@
 			"example": "Please enter the first name of the applicant.",
 			"description": "Explicit instructions for the user to fill information into the form field."
 		},
+		"inputType": {
+			"oneOf": [
+				{
+					"$ref": "./ApplicationFormFieldInputType.json"
+				},
+				{
+					"type": "null"
+				}
+			],
+			"example": "shortText",
+			"description": "A rendering hint for the UI indicating how the field should be displayed to the user."
+		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",
@@ -50,6 +62,7 @@
 		"position",
 		"label",
 		"createdAt",
-		"instructions"
+		"instructions",
+		"inputType"
 	]
 }

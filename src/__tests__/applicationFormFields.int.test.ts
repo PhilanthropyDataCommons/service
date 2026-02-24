@@ -12,6 +12,7 @@ import { createTestFunder, createTestOpportunity } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import {
+	ApplicationFormFieldInputType,
 	BaseFieldDataType,
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
@@ -51,6 +52,7 @@ describe('/applicationFormFields', () => {
 				position: 1,
 				label: 'Original Label',
 				instructions: 'Original instructions',
+				inputType: null,
 			});
 
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -114,6 +116,7 @@ describe('/applicationFormFields', () => {
 				position: 1,
 				label: 'Contact Email',
 				instructions: 'Original instructions',
+				inputType: null,
 			});
 
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -177,6 +180,7 @@ describe('/applicationFormFields', () => {
 				position: 1,
 				label: 'Original Label',
 				instructions: 'Original instructions',
+				inputType: null,
 			});
 
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -242,6 +246,7 @@ describe('/applicationFormFields', () => {
 				position: 1,
 				label: 'Website URL',
 				instructions: 'Please provide your website',
+				inputType: null,
 			});
 
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -305,6 +310,7 @@ describe('/applicationFormFields', () => {
 				position: 1,
 				label: 'Organization Type',
 				instructions: 'Please select your organization type',
+				inputType: null,
 			});
 
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -339,6 +345,70 @@ describe('/applicationFormFields', () => {
 			});
 		});
 
+		it('successfully updates inputType', async () => {
+			const testUser = await loadTestUser();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+
+			const opportunity = await createTestOpportunity(db, null);
+
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+
+			const baseField = await createOrUpdateBaseField(db, null, {
+				label: 'Input Type Test Field',
+				shortCode: 'input_type_test_10',
+				description: 'Field for testing inputType updates',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const applicationFormField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: baseField.shortCode,
+				position: 1,
+				label: 'Input Type Test',
+				instructions: 'Test instructions',
+				inputType: null,
+			});
+
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: opportunity.funderShortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: opportunity.funderShortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+
+			const response = await request(app)
+				.patch(`/applicationFormFields/${applicationFormField.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					inputType: ApplicationFormFieldInputType.DROPDOWN,
+				})
+				.expect(200);
+
+			expect(response.body).toEqual({
+				...applicationFormField,
+				inputType: ApplicationFormFieldInputType.DROPDOWN,
+			});
+		});
+
 		it('returns 400 for empty request body', async () => {
 			const testUser = await loadTestUser();
 			const systemUser = await loadSystemUser(db, null);
@@ -368,6 +438,7 @@ describe('/applicationFormFields', () => {
 				position: 1,
 				label: 'Test Label',
 				instructions: null,
+				inputType: null,
 			});
 
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -424,6 +495,7 @@ describe('/applicationFormFields', () => {
 				position: 1,
 				label: 'Test Label',
 				instructions: null,
+				inputType: null,
 			});
 
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -494,6 +566,7 @@ describe('/applicationFormFields', () => {
 				position: 1,
 				label: 'Test Label',
 				instructions: null,
+				inputType: null,
 			});
 
 			await createPermissionGrant(db, systemUserAuthContext, {

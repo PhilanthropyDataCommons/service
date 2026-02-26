@@ -46,12 +46,29 @@ After creating an integration (below), test it using the following steps.
 7. Verify that a redirect back (through Keycloak) to the PDC API docs occurs
 8. Try an API call
 
+# Keycloak Configuration
+
+Before beginning, the PDC admin should configure the PDC realm to use organizations
+and set up an organization.
+
+See also this Keycloak Documentation:
+https://www.keycloak.org/docs/26.2.5/server_admin/index.html#_managing_organizations
+
+1. In the PDC realm, go to "Realm Settings"
+2. Set "Organizations" to `On` (if not already enabled)
+3. Set "Admin Permissions" to `On`
+4. Click "Save"
+5. Visit "Organizations"
+6. Click "Create Organization" (if not already present):
+   - Set "Name" to the long name of the organization, e.g. `My Foundation`
+   - Set "Alias" to a short name of the organization, e.g. `myfoundation`
+   - Set "Domain" to the organization's domain name, e.g. `myfoundation.org`
+   - Optionally set "Redirect URL" to the API documentation URL
+7. Click "Save".
+
 ## External Identity Providers
 
-Before integrating, the PDC team needs to name an identifying alias for each
-integrated system, for example `foundation-okta-oidc` or `foundation-okta-saml`,
-to be used to link PDC Keycloak with the external IdP.
-
-- [Okta](./external-idp/IDP_OKTA.md)
-- [Google Workspace](./externap-idp/IDP_GOOGLE_WORKSPACE.md)
+- [Okta via OIDC](./external-idp/IDP_OKTA_OIDC.md) (preferred over SAML)
+- [Okta via SAML 2.0](./external-idp/IDP_OKTA_SAML.md)
+- [Google Workspace](./external-idp/IDP_GOOGLE_WORKSPACE.md)
 - [Microsoft Entra](./external-idp/IDP_MS_ENTRA.md)

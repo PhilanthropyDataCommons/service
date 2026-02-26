@@ -13,7 +13,7 @@ Use https://auth.philanthropydatacommons.org/admin to do these steps.
 - [ ] Add the organization to Keycloak organizations
   - [ ] Follow existing naming conventions
   - [ ] Note/copy the new organization UUID for use below
-- [ ] If the organization has an IdP, do (./ORGANIZATION_IDP_INTEGRATION.md)
+- [ ] If the organization has an IdP, [integrate it](./ORGANIZATION_IDP_INTEGRATION.md)
 - [ ] If the organization will submit data using software, add a Keycloak client
   - [ ] Follow the `pdc-[org short name]-data-ingest` naming convention
   - [ ] Set "Client authentication" to "On"

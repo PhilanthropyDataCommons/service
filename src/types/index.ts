@@ -35,8 +35,6 @@ export * from './PaginationParameters';
 export * from './PaginationParametersQuery';
 export * from './Permission';
 export * from './PermissionGrant';
-export * from './PermissionGrantEntityKeyType';
-export * from './PermissionGrantEntityType';
 export * from './PermissionGrantGranteeType';
 export * from './PermissionGrantVerb';
 export * from './PlatformProviderResponse';

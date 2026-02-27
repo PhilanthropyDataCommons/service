@@ -52,6 +52,20 @@ const postPermissionGrant = async (
 		);
 	}
 
+	if (body.conditions !== undefined && body.conditions !== null) {
+		const scopeStrings = body.scope as string[];
+		const invalidKeys = Object.keys(body.conditions).filter(
+			(key) => !scopeStrings.includes(key),
+		);
+		const [firstInvalidKey] = invalidKeys;
+		if (firstInvalidKey !== undefined) {
+			throw new InputValidationError(
+				`Condition keys must be present in the grant scope. Invalid keys: ${invalidKeys.join(', ')}`,
+				[],
+			);
+		}
+	}
+
 	const permissionGrant = await createPermissionGrant(db, req, body);
 
 	res

@@ -24,8 +24,8 @@
 		"start": "ts-node src/index.ts | pino-pretty",
 		"test": "npm run test:unit && npm run test:integration",
 		"test:unit": "jest --config=jest.config.unit.js",
-		"test:integration": "jest --config=jest.config.int.js --runInBand",
-		"test:ci": "jest --config=jest.config.ci.js --runInBand"
+		"test:integration": "jest --config=jest.config.int.js",
+		"test:ci": "jest --config=jest.config.ci.js"
 	},
 	"repository": {
 		"type": "git",

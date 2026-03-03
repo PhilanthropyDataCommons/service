@@ -22,6 +22,17 @@
 			"minItems": 1,
 			"description": "The permission verbs granted."
 		},
+		"conditions": {
+			"oneOf": [
+				{
+					"$ref": "./PermissionGrantConditions.json"
+				},
+				{
+					"type": "null"
+				}
+			],
+			"description": "Optional conditions that restrict when this permission grant applies. NULL means the grant applies unconditionally."
+		},
 		"createdBy": {
 			"type": "string",
 			"format": "uuid",

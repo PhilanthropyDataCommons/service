@@ -31,7 +31,9 @@ import {
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	expectArray,
+	expectArrayContaining,
 	expectNumber,
+	expectObjectContaining,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
 import {
@@ -931,6 +933,459 @@ describe('/proposalVersions', () => {
 				],
 			});
 			expect(after.count).toEqual(0);
+		});
+	});
+
+	describe('conditional permissions on proposal field values', () => {
+		it('returns only field values matching the condition category', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+
+			// Create base fields with different categories
+			await createOrUpdateBaseField(db, null, {
+				label: 'Budget Amount',
+				description: 'The budget amount',
+				shortCode: 'budgetAmount',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.BUDGET,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			await createOrUpdateBaseField(db, null, {
+				label: 'Org Name',
+				description: 'The organization name',
+				shortCode: 'orgName',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Conditional Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'cond-proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			const budgetField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'budgetAmount',
+				position: 1,
+				label: 'Budget Amount',
+				instructions: null,
+			});
+			const orgField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'orgName',
+				position: 2,
+				label: 'Organization Name',
+				instructions: null,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				testUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+				},
+			);
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: budgetField.id,
+				position: 1,
+				value: '$50,000',
+				isValid: true,
+				goodAsOf: null,
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: orgField.id,
+				position: 1,
+				value: 'Example Org',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Grant proposal view access (needed to see the proposal version)
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			// Grant conditional field value access - only budget fields
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL_FIELD_VALUE],
+				verbs: [PermissionGrantVerb.VIEW],
+				conditions: {
+					proposalFieldValue: {
+						field: 'baseFieldCategory',
+						operator: 'in',
+						value: [BaseFieldCategory.BUDGET],
+					},
+				},
+			});
+
+			const response = await request(app)
+				.get(`/proposalVersions/${proposalVersion.id}`)
+				.set(authHeader)
+				.expect(200);
+
+			// Should only contain the budget field value, not the org field value
+			expect(response.body).toMatchObject({
+				fieldValues: [
+					expect.objectContaining({
+						applicationFormFieldId: budgetField.id,
+						value: '$50,000',
+					}),
+				],
+			});
+		});
+
+		it('returns all field values when grant has no conditions', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+
+			await createOrUpdateBaseField(db, null, {
+				label: 'Budget Amount',
+				description: 'The budget amount',
+				shortCode: 'budgetAmount',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.BUDGET,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			await createOrUpdateBaseField(db, null, {
+				label: 'Org Name',
+				description: 'The organization name',
+				shortCode: 'orgName',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const opportunity = await createOpportunity(db, null, {
+				title: 'No Conditions Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'nocond-proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			const budgetField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'budgetAmount',
+				position: 1,
+				label: 'Budget Amount',
+				instructions: null,
+			});
+			const orgField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'orgName',
+				position: 2,
+				label: 'Organization Name',
+				instructions: null,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				testUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+				},
+			);
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: budgetField.id,
+				position: 1,
+				value: '$50,000',
+				isValid: true,
+				goodAsOf: null,
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: orgField.id,
+				position: 1,
+				value: 'Example Org',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Grant both proposal and unconditional field value access
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [
+					PermissionGrantEntityType.PROPOSAL,
+					PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+				],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await request(app)
+				.get(`/proposalVersions/${proposalVersion.id}`)
+				.set(authHeader)
+				.expect(200);
+
+			// Should contain both field values
+			expect(response.body).toMatchObject({
+				fieldValues: expectArrayContaining([
+					expectObjectContaining({
+						applicationFormFieldId: budgetField.id,
+					}),
+					expectObjectContaining({
+						applicationFormFieldId: orgField.id,
+					}),
+				]),
+			});
+		});
+
+		it('returns no field values when condition excludes all present categories', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+
+			await createOrUpdateBaseField(db, null, {
+				label: 'Org Name',
+				description: 'The organization name',
+				shortCode: 'orgName',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Exclusion Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'excl-proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			const orgField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'orgName',
+				position: 1,
+				label: 'Organization Name',
+				instructions: null,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				testUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+				},
+			);
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: orgField.id,
+				position: 1,
+				value: 'Example Org',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Grant proposal view and conditional field value access for budget only
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL_FIELD_VALUE],
+				verbs: [PermissionGrantVerb.VIEW],
+				conditions: {
+					proposalFieldValue: {
+						field: 'baseFieldCategory',
+						operator: 'in',
+						value: [BaseFieldCategory.BUDGET],
+					},
+				},
+			});
+
+			const response = await request(app)
+				.get(`/proposalVersions/${proposalVersion.id}`)
+				.set(authHeader)
+				.expect(200);
+
+			// Should have no field values since all are organization category
+			expect(response.body).toMatchObject({
+				fieldValues: [],
+			});
+		});
+
+		it('filters field values correctly with in operator and single value', async () => {
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser();
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const systemFunder = await loadSystemFunder(db, null);
+
+			await createOrUpdateBaseField(db, null, {
+				label: 'Budget Amount',
+				description: 'The budget amount',
+				shortCode: 'budgetAmount',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.BUDGET,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+			await createOrUpdateBaseField(db, null, {
+				label: 'Org Name',
+				description: 'The organization name',
+				shortCode: 'orgName',
+				dataType: BaseFieldDataType.STRING,
+				category: BaseFieldCategory.ORGANIZATION,
+				valueRelevanceHours: null,
+				sensitivityClassification:
+					BaseFieldSensitivityClassification.RESTRICTED,
+			});
+
+			const opportunity = await createOpportunity(db, null, {
+				title: 'Equals Test Opportunity',
+				funderShortCode: systemFunder.shortCode,
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'eq-proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			const budgetField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'budgetAmount',
+				position: 1,
+				label: 'Budget Amount',
+				instructions: null,
+			});
+			const orgField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'orgName',
+				position: 2,
+				label: 'Organization Name',
+				instructions: null,
+			});
+			const proposalVersion = await createProposalVersion(
+				db,
+				testUserAuthContext,
+				{
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+				},
+			);
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: budgetField.id,
+				position: 1,
+				value: '$75,000',
+				isValid: true,
+				goodAsOf: null,
+			});
+			await createProposalFieldValue(db, null, {
+				proposalVersionId: proposalVersion.id,
+				applicationFormFieldId: orgField.id,
+				position: 1,
+				value: 'Another Org',
+				isValid: true,
+				goodAsOf: null,
+			});
+
+			// Grant proposal view and conditional field value access with in (single value)
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL_FIELD_VALUE],
+				verbs: [PermissionGrantVerb.VIEW],
+				conditions: {
+					proposalFieldValue: {
+						field: 'baseFieldCategory',
+						operator: 'in',
+						value: [BaseFieldCategory.BUDGET],
+					},
+				},
+			});
+
+			const response = await request(app)
+				.get(`/proposalVersions/${proposalVersion.id}`)
+				.set(authHeader)
+				.expect(200);
+
+			// Should only contain the budget field value
+			expect(response.body).toMatchObject({
+				fieldValues: [
+					expect.objectContaining({
+						applicationFormFieldId: budgetField.id,
+						value: '$75,000',
+					}),
+				],
+			});
 		});
 	});
 });

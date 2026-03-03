@@ -1,0 +1,10 @@
+{
+	"type": "object",
+	"properties": {
+		"proposalFieldValue": {
+			"$ref": "./PermissionGrantConditionLeaf.json"
+		}
+	},
+	"additionalProperties": false,
+	"description": "Optional conditions that restrict when this permission grant applies. Keyed by scope entity type."
+}

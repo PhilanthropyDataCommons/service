@@ -17,6 +17,7 @@ INSERT INTO permission_grants (
 	changemaker_field_value_id,
 	scope,
 	verbs,
+	conditions,
 	created_by
 )
 VALUES (
@@ -38,6 +39,7 @@ VALUES (
 	:changemakerFieldValueId::integer,
 	:scope::permission_grant_entity_type_t [],
 	:verbs::permission_grant_verb_t [],
+	:conditions::jsonb,
 	:authContextKeycloakUserId::uuid
 )
 RETURNING permission_grant_to_json(permission_grants) AS object;

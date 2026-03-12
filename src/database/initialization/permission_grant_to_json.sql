@@ -13,6 +13,7 @@ BEGIN
 		'scope', permission_grant.scope,
 		'verbs', permission_grant.verbs,
 		'createdBy', permission_grant.created_by,
+		'conditions', permission_grant.conditions,
 		'createdAt', permission_grant.created_at
 	) || CASE permission_grant.context_entity_type
 		WHEN 'changemaker'

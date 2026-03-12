@@ -1,3 +1,4 @@
+import { isEmpty } from '../arrays';
 import { HTTP_STATUS } from '../constants';
 import {
 	createPermissionGrant,
@@ -9,9 +10,91 @@ import {
 } from '../database';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
-import { isAuthContext, isId, isWritablePermissionGrant } from '../types';
+import {
+	getConditionsForScope,
+	getScopesForContextEntityType,
+	isAuthContext,
+	isId,
+	isWritablePermissionGrant,
+	type PermissionGrantEntityType,
+	type PermissionGrantCondition,
+	type WritableUnkeyedPermissionGrant,
+} from '../types';
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
+
+const assertPermissionGrantHasValidScope = (
+	permissionGrant: WritableUnkeyedPermissionGrant,
+): void => {
+	const { scope, contextEntityType } = permissionGrant;
+	const allowedScopeValues = getScopesForContextEntityType(contextEntityType);
+	const invalidScope = scope.find((s) => !allowedScopeValues.includes(s));
+	if (invalidScope !== undefined) {
+		throw new InputValidationError(
+			`Scope value "${invalidScope}" is not valid for context entity type "${contextEntityType}". Allowed values: ${allowedScopeValues.join(', ')}.`,
+			[],
+		);
+	}
+};
+
+const assertPermissionGrantConditionEntryIsValidForScope = (
+	scopeKey: PermissionGrantEntityType,
+	condition: PermissionGrantCondition,
+): void => {
+	const conditionDefinitions = getConditionsForScope(scopeKey);
+	const matchingDefinition = conditionDefinitions.find(
+		(def) => def.field === condition.field,
+	);
+	if (matchingDefinition === undefined) {
+		throw new InputValidationError(
+			`Invalid condition field "${condition.field}" for scope "${scopeKey}".`,
+			[],
+		);
+	}
+
+	if (matchingDefinition.operator !== condition.operator) {
+		throw new InputValidationError(
+			`Invalid condition operator "${condition.operator}" for scope "${scopeKey}", field "${condition.field}".`,
+			[],
+		);
+	}
+
+	const invalidValue = condition.value.find(
+		(v) => !matchingDefinition.value.includes(v),
+	);
+	if (invalidValue !== undefined) {
+		throw new InputValidationError(
+			`Invalid condition value "${invalidValue}" for scope "${scopeKey}", field "${condition.field}".`,
+			[],
+		);
+	}
+};
+
+const assertPermissionGrantHasValidConditions = (
+	permissionGrant: WritableUnkeyedPermissionGrant,
+): void => {
+	const { conditions, scope } = permissionGrant;
+	if (conditions === undefined || conditions === null) {
+		return;
+	}
+
+	const scopeSet = new Set<string>(scope);
+	const conditionKeys = Object.keys(conditions);
+	const invalidKeys = conditionKeys.filter((key) => !scopeSet.has(key));
+	if (!isEmpty(invalidKeys)) {
+		throw new InputValidationError(
+			`Condition keys must be present in the grant scope. Invalid keys: ${invalidKeys.join(', ')}`,
+			[],
+		);
+	}
+
+	for (const scopeKey of scope) {
+		const { [scopeKey]: condition } = conditions;
+		if (condition !== undefined) {
+			assertPermissionGrantConditionEntryIsValidForScope(scopeKey, condition);
+		}
+	}
+};
 
 const getPermissionGrants = async (
 	req: Request,
@@ -52,20 +135,8 @@ const postPermissionGrant = async (
 		);
 	}
 
-	if (body.conditions !== undefined && body.conditions !== null) {
-		const scopeStrings = body.scope as string[];
-		const invalidKeys = Object.keys(body.conditions).filter(
-			(key) => !scopeStrings.includes(key),
-		);
-		const [firstInvalidKey] = invalidKeys;
-		if (firstInvalidKey !== undefined) {
-			throw new InputValidationError(
-				`Condition keys must be present in the grant scope. Invalid keys: ${invalidKeys.join(', ')}`,
-				[],
-			);
-		}
-	}
-
+	assertPermissionGrantHasValidScope(body);
+	assertPermissionGrantHasValidConditions(body);
 	const permissionGrant = await createPermissionGrant(db, req, body);
 
 	res

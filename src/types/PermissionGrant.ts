@@ -1,49 +1,17 @@
-/**
- * Permission Grant Configuration
- *
- * This file defines the permission grant type system. When adding or modifying
- * permissions, there are several data structures that must be kept in sync:
- *
- * 1. `PermissionGrantEntityType` enum — Add new entity types here. The string
- *    value must match the database `permission_grant_entity_type` enum.
- *
- * 2. `contextEntityKeyProperties` — Maps each entity type to its primary key
- *    field name and key type (integer ID or string short code). This determines
- *    which field appears on the permission grant when the entity is used as a
- *    context entity (e.g. `changemakerId` for CHANGEMAKER).
- *
- * 3. `allowedScopesForContextEntityType` — Defines which scopes can be granted
- *    when each entity type is used as the context. Scope inheritance flows
- *    through these lists: e.g. a grant on a CHANGEMAKER context can include
- *    CHANGEMAKER_FIELD_VALUE scope, meaning "this grant on a changemaker also
- *    covers its field values." To allow a new child entity's permissions to be
- *    granted from a parent context, add the child's entity type to the parent's
- *    scope list.
- *
- * 4. `SupportedConditions` — Defines optional conditions that can restrict a
- *    grant's scope to a subset of matching entities. Add a new entry keyed by
- *    the scope's entity type with the condition shape (field, operator, value).
- *
- * 5. `conditionSchemaForScope` — The JSON Schema used to validate conditions
- *    in API requests. Must have a matching entry for each key in
- *    `SupportedConditions`.
- *
- * Additionally, new entity types require a corresponding database migration to
- * add the value to the `permission_grant_entity_type` PostgreSQL enum, and any
- * SQL permission-check functions (e.g. `has_*_permission`) must be updated to
- * handle the new scope.
- */
 import { ajv } from '../ajv';
 import { BaseFieldCategory } from './BaseField';
 import { keycloakIdSchema } from './KeycloakId';
-import { PermissionGrantGranteeType } from './PermissionGrantGranteeType';
+import {
+	PermissionGrantGranteeType,
+	permissionGrantGranteeTypeSchema,
+} from './PermissionGrantGranteeType';
 import { permissionGrantVerbSchema } from './PermissionGrantVerb';
+import type { TypeGuardWithAjvErrors } from '../ajv';
 import type { KeycloakId } from './KeycloakId';
 import type { PermissionGrantVerb } from './PermissionGrantVerb';
 import type { Writable } from './Writable';
-import type { JSONSchemaType } from 'ajv';
+import type { ValidateFunction } from 'ajv';
 
-// The types of entity supported by the permission system
 enum PermissionGrantEntityType {
 	FUNDER = 'funder',
 	CHANGEMAKER = 'changemaker',
@@ -69,9 +37,10 @@ interface PermissionGrantEntityKeyValueType {
 	[PermissionGrantEntityKeyType.SHORT_CODE]: string;
 }
 
-interface PermissionGrantEntityKeyProperty {
-	keyName: string;
-	keyType: PermissionGrantEntityKeyType;
+interface PermissionGrantCondition {
+	field: string;
+	operator: string;
+	value: string[];
 }
 
 // The key name for each grantee type
@@ -136,10 +105,9 @@ const contextEntityKeyProperties = {
 	},
 } as const satisfies Record<
 	PermissionGrantEntityType,
-	PermissionGrantEntityKeyProperty
+	{ keyName: string; keyType: PermissionGrantEntityKeyType }
 >;
 
-// The scopes allowed for each context entity
 const contextEntityTypeScopes = {
 	[PermissionGrantEntityType.CHANGEMAKER]: [
 		PermissionGrantEntityType.CHANGEMAKER,
@@ -189,13 +157,6 @@ const contextEntityTypeScopes = {
 	readonly PermissionGrantEntityType[]
 >;
 
-// The conditions allowed for each scope
-interface PermissionGrantCondition {
-	field: string;
-	operator: string;
-	value: string[];
-}
-
 const scopeConditions = {
 	[PermissionGrantEntityType.CHANGEMAKER]: [],
 	[PermissionGrantEntityType.FUNDER]: [],
@@ -220,24 +181,17 @@ const scopeConditions = {
 	readonly PermissionGrantCondition[]
 >;
 
-/////////////
-
-type ScopesByContextEntityType = {
-	[T in PermissionGrantEntityType]: (typeof contextEntityTypeScopes)[T][number];
-};
-
-type ContextEntityKeysByContextEntityType = {
-	[T in PermissionGrantEntityType]: Record<
-		(typeof contextEntityKeyProperties)[T]['keyName'],
-		PermissionGrantEntityKeyValueType[(typeof contextEntityKeyProperties)[T]['keyType']]
-	>;
-};
-
-interface PermissionGrantBase {
+interface UnkeyedPermissionGrant {
 	readonly id: number;
 	verbs: PermissionGrantVerb[];
 	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
+	contextEntityType: PermissionGrantEntityType;
+	granteeType: PermissionGrantGranteeType;
+	scope: PermissionGrantEntityType[];
+	conditions?: Partial<
+		Record<PermissionGrantEntityType, PermissionGrantCondition>
+	> | null;
 }
 
 type GranteeKeysByGranteeType = {
@@ -247,27 +201,35 @@ type GranteeKeysByGranteeType = {
 	>;
 };
 
-type PermissionGrantVariant<
-	T extends PermissionGrantEntityType,
-	G extends PermissionGrantGranteeType,
-> = PermissionGrantBase &
-	GranteeKeysByGranteeType[G] &
-	ContextEntityKeysByContextEntityType[T] & {
+type ContextEntityKeysByContextEntityType = {
+	[T in PermissionGrantEntityType]: Record<
+		(typeof contextEntityKeyProperties)[T]['keyName'],
+		PermissionGrantEntityKeyValueType[(typeof contextEntityKeyProperties)[T]['keyType']]
+	>;
+};
+
+type PermissionGrantGranteeKeyVariant<G extends PermissionGrantGranteeType> =
+	GranteeKeysByGranteeType[G] & {
 		granteeType: G;
-		contextEntityType: T;
-		scope: Array<ScopesByContextEntityType[T]>;
-		conditions?: Partial<
-			Record<PermissionGrantEntityType, PermissionGrantCondition>
-		> | null;
 	};
 
-type PermissionGrant = {
-	[T in PermissionGrantEntityType]: {
-		[G in PermissionGrantGranteeType]: PermissionGrantVariant<T, G>;
+type PermissionGrantContextEntityKeyVariant<
+	C extends PermissionGrantEntityType,
+> = ContextEntityKeysByContextEntityType[C] & {
+	contextEntityType: C;
+};
+
+type PermissionGrant = UnkeyedPermissionGrant &
+	{
+		[C in PermissionGrantEntityType]: PermissionGrantContextEntityKeyVariant<C>;
+	}[PermissionGrantEntityType] &
+	{
+		[G in PermissionGrantGranteeType]: PermissionGrantGranteeKeyVariant<G>;
 	}[PermissionGrantGranteeType];
-}[PermissionGrantEntityType];
 
 type WritablePermissionGrant = Writable<PermissionGrant>;
+
+type WritableUnkeyedPermissionGrant = Writable<UnkeyedPermissionGrant>;
 
 const jsonSchemaTypeForPermissionGrantEntityKeyType: Record<
 	PermissionGrantEntityKeyType,
@@ -277,75 +239,40 @@ const jsonSchemaTypeForPermissionGrantEntityKeyType: Record<
 	[PermissionGrantEntityKeyType.SHORT_CODE]: 'string',
 };
 
-const getSchemaForCondition = (
-	condition: PermissionGrantCondition,
-): JSONSchemaType<PermissionGrantCondition> => ({
+const permissionGrantConditionSchema = {
 	type: 'object',
 	properties: {
-		field: {
-			type: 'string',
-			enum: [condition.field],
-		},
-		operator: {
-			type: 'string',
-			enum: [condition.operator],
-		},
+		field: { type: 'string' },
+		operator: { type: 'string' },
 		value: {
 			type: 'array',
-			items: {
-				type: 'string',
-				enum: [...condition.value],
-			},
+			items: { type: 'string' },
+			minItems: 1,
 		},
 	},
 	required: ['field', 'operator', 'value'],
 	additionalProperties: false,
-});
+};
 
-const getSchemaForWritablePermissionGrantVariant = <
-	T extends PermissionGrantEntityType,
-	G extends PermissionGrantGranteeType,
->(
-	granteeType: G,
-	contextEntityType: T,
-): JSONSchemaType<Writable<PermissionGrantVariant<T, G>>> => {
-	const {
-		[contextEntityType]: { keyName: contextKeyName, keyType: contextKeyType },
-	} = contextEntityKeyProperties;
-	const {
-		[granteeType]: { keyName: granteeKeyName },
-	} = granteeKeyProperties;
-
-	/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
-	 * ajv's JSONSchemaType uses conditional types that cannot be resolved
-	 * while T is a generic type parameter. The schema is structurally correct
-	 * for the given T, but TypeScript cannot verify this statically.
-	 */
-	return {
+const isWritableUnkeyedPermissionGrant =
+	ajv.compile<WritableUnkeyedPermissionGrant>({
 		type: 'object',
 		properties: {
-			granteeType: {
+			contextEntityType: {
 				type: 'string',
-				const: granteeType,
+				enum: Object.values(PermissionGrantEntityType),
 			},
-			[granteeKeyName]: keycloakIdSchema,
+			granteeType: permissionGrantGranteeTypeSchema,
 			verbs: {
 				type: 'array',
 				items: permissionGrantVerbSchema,
 				minItems: 1,
 			},
-			contextEntityType: {
-				type: 'string',
-				const: contextEntityType,
-			},
-			[contextKeyName]: {
-				type: jsonSchemaTypeForPermissionGrantEntityKeyType[contextKeyType],
-			},
 			scope: {
 				type: 'array',
 				items: {
 					type: 'string',
-					enum: contextEntityTypeScopes[contextEntityType],
+					enum: Object.values(PermissionGrantEntityType),
 				},
 				minItems: 1,
 			},
@@ -353,51 +280,93 @@ const getSchemaForWritablePermissionGrantVariant = <
 				type: 'object',
 				nullable: true,
 				properties: Object.fromEntries(
-					contextEntityTypeScopes[contextEntityType].flatMap((scope) =>
-						scopeConditions[scope].map((condition) => [
-							scope,
-							getSchemaForCondition(condition),
-						]),
-					),
+					Object.values(PermissionGrantEntityType).map((entityType) => [
+						entityType,
+						permissionGrantConditionSchema,
+					]),
 				),
 				additionalProperties: false,
 			},
 		},
-		required: [
-			'scope',
-			'verbs',
-			'granteeType',
-			granteeKeyName,
-			'contextEntityType',
-			contextKeyName,
-		],
-		additionalProperties: false,
-	} as unknown as JSONSchemaType<Writable<PermissionGrantVariant<T, G>>>;
+		required: ['contextEntityType', 'granteeType', 'verbs', 'scope'],
+	});
+
+const buildContextKeyValidator = (
+	contextEntityType: PermissionGrantEntityType,
+): ValidateFunction => {
+	const {
+		[contextEntityType]: { keyName, keyType },
+	} = contextEntityKeyProperties;
+	return ajv.compile({
+		type: 'object',
+		properties: {
+			[keyName]: {
+				type: jsonSchemaTypeForPermissionGrantEntityKeyType[keyType],
+			},
+		},
+		required: [keyName],
+	});
 };
 
-const allSchemaVariants = Object.values(PermissionGrantEntityType).flatMap(
-	(contextEntityType) => [
-		getSchemaForWritablePermissionGrantVariant(
-			PermissionGrantGranteeType.USER,
-			contextEntityType,
-		),
-		getSchemaForWritablePermissionGrantVariant(
-			PermissionGrantGranteeType.USER_GROUP,
-			contextEntityType,
-		),
-	],
-);
-
-const writablePermissionGrantSchema: JSONSchemaType<WritablePermissionGrant> = {
-	oneOf: allSchemaVariants,
+const buildGranteeKeyValidator = (
+	granteeType: PermissionGrantGranteeType,
+): ValidateFunction => {
+	const {
+		[granteeType]: { keyName },
+	} = granteeKeyProperties;
+	return ajv.compile({
+		type: 'object',
+		properties: {
+			[keyName]: keycloakIdSchema,
+		},
+		required: [keyName],
+	});
 };
 
-const isWritablePermissionGrant = ajv.compile(writablePermissionGrantSchema);
+const isWritablePermissionGrant: TypeGuardWithAjvErrors<
+	WritablePermissionGrant
+> = (data: unknown): data is WritablePermissionGrant => {
+	if (!isWritableUnkeyedPermissionGrant(data)) {
+		isWritablePermissionGrant.errors =
+			isWritableUnkeyedPermissionGrant.errors ?? null;
+		return false;
+	}
+
+	const { contextEntityType, granteeType } = data;
+
+	const validateContextKey = buildContextKeyValidator(contextEntityType);
+	if (!validateContextKey(data)) {
+		isWritablePermissionGrant.errors = validateContextKey.errors ?? null;
+		return false;
+	}
+
+	const validateGranteeKey = buildGranteeKeyValidator(granteeType);
+	if (!validateGranteeKey(data)) {
+		isWritablePermissionGrant.errors = validateGranteeKey.errors ?? null;
+		return false;
+	}
+
+	isWritablePermissionGrant.errors = null;
+	return true;
+};
+
+const getScopesForContextEntityType = (
+	contextEntityType: PermissionGrantEntityType,
+): readonly PermissionGrantEntityType[] =>
+	contextEntityTypeScopes[contextEntityType];
+
+const getConditionsForScope = (
+	scopeKey: PermissionGrantEntityType,
+): readonly PermissionGrantCondition[] => scopeConditions[scopeKey];
 
 export {
+	getConditionsForScope,
+	getScopesForContextEntityType,
 	isWritablePermissionGrant,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	type PermissionGrant,
+	type PermissionGrantCondition,
 	type WritablePermissionGrant,
+	type WritableUnkeyedPermissionGrant,
 };

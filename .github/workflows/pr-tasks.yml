@@ -1,0 +1,12 @@
+name: 'Check Required PR Tasks'
+on:
+  pull_request:
+    types: [edited, opened, synchronize, reopened]
+
+jobs:
+  task-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: iukekini/pr-tasks-validator-action@v1.0.4
+        with:
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'

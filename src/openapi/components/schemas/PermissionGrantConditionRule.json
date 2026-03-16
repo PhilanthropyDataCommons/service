@@ -1,0 +1,25 @@
+{
+	"type": "object",
+	"properties": {
+		"property": {
+			"type": "string",
+			"enum": ["baseFieldCategory"],
+			"description": "The entity data property to evaluate the condition against."
+		},
+		"operator": {
+			"type": "string",
+			"enum": ["in"],
+			"description": "The comparison operator."
+		},
+		"value": {
+			"type": "array",
+			"items": {
+				"$ref": "./BaseFieldCategory.json"
+			},
+			"minItems": 1,
+			"description": "The value(s) to compare against."
+		}
+	},
+	"required": ["property", "operator", "value"],
+	"additionalProperties": false
+}

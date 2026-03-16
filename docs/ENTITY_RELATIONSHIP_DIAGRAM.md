@@ -176,6 +176,7 @@ erDiagram
     int changemakerFieldValueId FK
     string[] scope
     string[] verbs
+    jsonb conditions
     uuid createdBy FK
     datetime createdAt
   }

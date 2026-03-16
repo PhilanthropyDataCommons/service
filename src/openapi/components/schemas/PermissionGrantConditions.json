@@ -1,0 +1,10 @@
+{
+	"type": "object",
+	"properties": {
+		"proposalFieldValue": {
+			"$ref": "./PermissionGrantConditionRule.json"
+		}
+	},
+	"additionalProperties": false,
+	"description": "Optional conditions that restrict when this permission grant applies. Currently, only the `proposalFieldValue` condition is supported. Each key must be an entity type present in the grant's `scope` array; keys not in `scope` will be rejected."
+}

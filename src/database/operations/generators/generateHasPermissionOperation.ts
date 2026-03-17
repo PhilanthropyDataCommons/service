@@ -7,7 +7,7 @@ import type {
 	PermissionGrantEntityType,
 	PermissionGrantVerb,
 } from '../../../types';
-import type TinyPg from 'tinypg';
+import type { TinyPg } from 'tinypg';
 
 interface HasPermissionResult {
 	hasPermission: boolean;
@@ -26,7 +26,7 @@ const generateHasPermissionOperation =
 		queryName: string,
 		entityIdParamName: K,
 	): ((
-		db: TinyPg,
+		db: Pick<TinyPg, 'sql'>,
 		authContext: AuthIdentityAndRole | null,
 		options: Record<K, unknown> & {
 			permission: PermissionGrantVerb;

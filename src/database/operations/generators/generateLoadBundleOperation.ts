@@ -9,7 +9,7 @@ import type {
 	Bundle,
 	JsonResultSet,
 } from '../../../types';
-import type TinyPg from 'tinypg';
+import type { TinyPg } from 'tinypg';
 
 /**
  * Generates a bundle loader function for a specific query and table.
@@ -31,7 +31,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 ) => {
 	const generatedParameterNames = [...parameterNames, 'limit', 'offset'];
 	return async (
-		db: TinyPg,
+		db: Pick<TinyPg, 'sql'>,
 		authContext: AuthIdentityAndRole | null,
 		...args: [...P, limit: number | undefined, offset: number | undefined]
 	): Promise<Bundle<T>> => {

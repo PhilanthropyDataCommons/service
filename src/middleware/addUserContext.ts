@@ -1,5 +1,5 @@
 import {
-	db,
+	getDatabase,
 	createOrUpdateUser,
 	loadUserByKeycloakUserId,
 	createEphemeralUserGroupAssociation,
@@ -27,6 +27,7 @@ const addUserContext = (
 	res: Response,
 	next: NextFunction,
 ): void => {
+	const db = getDatabase();
 	const keycloakUserId = getAuthSubFromRequest(req);
 	const keycloakUserName = getAuthNameFromRequest(req);
 	const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);

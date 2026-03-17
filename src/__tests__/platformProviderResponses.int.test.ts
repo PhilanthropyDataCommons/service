@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { app } from '../app';
-import { db, loadTableMetrics } from '../database';
+import { getDatabase, loadTableMetrics } from '../database';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import { mockJwt as authHeader } from '../test/mockJwt';
 
@@ -19,6 +19,7 @@ describe('/platformProviderResponses', () => {
 		});
 
 		it('returns the desired platform provider responses', async () => {
+			const db = getDatabase();
 			await db.sql('platformProviderResponses.insertOne', {
 				externalId: '000000000',
 				platformProvider: 'example',
@@ -67,7 +68,8 @@ describe('/platformProviderResponses', () => {
 
 	describe('POST /', () => {
 		it('creates exactly one platform provider response', async () => {
-			const before = await loadTableMetrics('platform_provider_responses');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'platform_provider_responses');
 			const result = await request(app)
 				.post('/platformProviderResponses')
 				.type('application/json')
@@ -80,7 +82,7 @@ describe('/platformProviderResponses', () => {
 					},
 				})
 				.expect(201);
-			const after = await loadTableMetrics('platform_provider_responses');
+			const after = await loadTableMetrics(db, 'platform_provider_responses');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				externalId: '000000000',
@@ -94,12 +96,13 @@ describe('/platformProviderResponses', () => {
 		});
 
 		it('updates values when data is submitted against an existing primary key', async () => {
+			const db = getDatabase();
 			await db.sql('platformProviderResponses.insertOne', {
 				externalId: '000000000',
 				platformProvider: 'example',
 				data: JSON.stringify({ helloWorld: 42 }),
 			});
-			const before = await loadTableMetrics('platform_provider_responses');
+			const before = await loadTableMetrics(db, 'platform_provider_responses');
 			const result = await request(app)
 				.post('/platformProviderResponses')
 				.type('application/json')
@@ -112,7 +115,7 @@ describe('/platformProviderResponses', () => {
 					},
 				})
 				.expect(201);
-			const after = await loadTableMetrics('platform_provider_responses');
+			const after = await loadTableMetrics(db, 'platform_provider_responses');
 			expect(before.count).toEqual(1);
 			expect(after.count).toEqual(1);
 			expect(result.body).toMatchObject({
@@ -126,7 +129,8 @@ describe('/platformProviderResponses', () => {
 		});
 
 		it('returns a 400 error if no external ID is provided', async () => {
-			const before = await loadTableMetrics('platform_provider_responses');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'platform_provider_responses');
 			const result = await request(app)
 				.post('/platformProviderResponses')
 				.type('application/json')
@@ -138,7 +142,7 @@ describe('/platformProviderResponses', () => {
 					},
 				})
 				.expect(400);
-			const after = await loadTableMetrics('platform_provider_responses');
+			const after = await loadTableMetrics(db, 'platform_provider_responses');
 			expect(before.count).toEqual(0);
 			expect(after.count).toEqual(0);
 			expect(result.body).toMatchObject({

@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	createBaseFieldsCopyTask,
 	loadBaseFieldsCopyTaskBundle,
 	getLimitValues,
@@ -25,6 +25,7 @@ const postBaseFieldsCopyTask = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const body = req.body as unknown;
 	if (!isWritableBaseFieldsCopyTask(body)) {
@@ -57,6 +58,7 @@ const getBaseFieldsCopyTasks = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);

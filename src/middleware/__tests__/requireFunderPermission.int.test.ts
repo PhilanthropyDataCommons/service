@@ -1,7 +1,7 @@
 import { requireFunderPermission } from '../requireFunderPermission';
 import { InputValidationError, UnauthorizedError } from '../../errors';
 import {
-	db,
+	getDatabase,
 	createOrUpdateFunder,
 	createPermissionGrant,
 	loadSystemUser,
@@ -63,7 +63,8 @@ describe('requireFunderPermission', () => {
 
 	it('calls next with an UnauthorizedError when user lacks permission', (done) => {
 		void (async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			await createOrUpdateFunder(db, null, {
 				shortCode: 'test_funder_no_perm',
 				name: 'Test Funder No Permission',
@@ -95,9 +96,10 @@ describe('requireFunderPermission', () => {
 
 	it('calls next without error when user has the required permission', (done) => {
 		void (async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'test_funder_with_perm',
 				name: 'Permitted Funder',
@@ -134,9 +136,10 @@ describe('requireFunderPermission', () => {
 
 	it('calls next with an UnauthorizedError when user has a different permission than required', (done) => {
 		void (async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'test_funder_view_only',
 				name: 'View Only Funder',

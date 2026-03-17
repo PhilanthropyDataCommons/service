@@ -1,8 +1,8 @@
-import type TinyPg from 'tinypg';
+import type { TinyPg } from 'tinypg';
 import type { AuthIdentityAndRole } from '../../../types';
 
 const createServiceQueryAuditLog = async (
-	db: TinyPg,
+	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthIdentityAndRole | null,
 	createValues: {
 		queryName: string;

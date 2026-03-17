@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	loadDataProvider,
 	loadSystemDataProvider,
 	loadTableMetrics,
@@ -12,7 +12,6 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
-
 const agent = request.agent(app);
 
 describe('/dataProviders', () => {
@@ -22,6 +21,7 @@ describe('/dataProviders', () => {
 		});
 
 		it('returns all data providers present in the database', async () => {
+			const db = getDatabase();
 			const systemDataProvider = await loadSystemDataProvider(db, null);
 			const firstDataProvider = await createTestDataProvider(db, null);
 			const secondDataProvider = await createTestDataProvider(db, null);
@@ -43,6 +43,7 @@ describe('/dataProviders', () => {
 		});
 
 		it('returns exactly one data provider selected by short code', async () => {
+			const db = getDatabase();
 			await createTestDataProvider(db, null);
 			const expectedDataProvider = await createTestDataProvider(db, null);
 
@@ -54,6 +55,7 @@ describe('/dataProviders', () => {
 		});
 
 		it('returns 404 when short code is not found', async () => {
+			const db = getDatabase();
 			await createTestDataProvider(db, null);
 			await agent.get('/dataProviders/nonexistent').set(authHeader).expect(404);
 		});
@@ -69,14 +71,15 @@ describe('/dataProviders', () => {
 		});
 
 		it('creates and returns exactly one data provider', async () => {
-			const before = await loadTableMetrics('data_providers');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'data_providers');
 			const result = await agent
 				.put('/dataProviders/firework')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({ name: '🎆' })
 				.expect(201);
-			const after = await loadTableMetrics('data_providers');
+			const after = await loadTableMetrics(db, 'data_providers');
 			expect(result.body).toStrictEqual({
 				shortCode: 'firework',
 				name: '🎆',
@@ -96,11 +99,12 @@ describe('/dataProviders', () => {
 		});
 
 		it('updates an existing data provider and no others', async () => {
+			const db = getDatabase();
 			const targetDataProvider = await createTestDataProvider(db, null, {
 				name: 'Original Name',
 			});
 			const otherDataProviderBefore = await createTestDataProvider(db, null);
-			const before = await loadTableMetrics('data_providers');
+			const before = await loadTableMetrics(db, 'data_providers');
 			const result = await agent
 				.put(`/dataProviders/${targetDataProvider.shortCode}`)
 				.type('application/json')
@@ -115,7 +119,7 @@ describe('/dataProviders', () => {
 				null,
 				otherDataProviderBefore.shortCode,
 			);
-			const after = await loadTableMetrics('data_providers');
+			const after = await loadTableMetrics(db, 'data_providers');
 			expect(result.body).toStrictEqual({
 				shortCode: targetDataProvider.shortCode,
 				name: '🎆',
@@ -140,14 +144,15 @@ describe('/dataProviders', () => {
 		});
 
 		it('returns 400 bad request when disallowed characters are included in the short code', async () => {
-			const before = await loadTableMetrics('data_providers');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'data_providers');
 			await agent
 				.put('/dataProviders/my provider')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({ name: '🎆' })
 				.expect(400);
-			const after = await loadTableMetrics('data_providers');
+			const after = await loadTableMetrics(db, 'data_providers');
 			expect(after.count).toEqual(before.count);
 		});
 	});

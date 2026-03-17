@@ -3,10 +3,11 @@ import nock from 'nock';
  * This file is loaded by jest, as specified by the integration test jest configuration file
  * via `setupFilesAfterEnv`.
  */
-import { db } from '../database';
+import { getDatabase } from '../database';
 import { loadConfig } from '../config';
 import { resetTestPermissionGrantFactory } from './factories';
 import {
+	createAndSetDatabase,
 	prepareDatabaseForCurrentWorker,
 	cleanupDatabaseForCurrentWorker,
 } from './harnessFunctions';
@@ -24,8 +25,12 @@ import { createTestUser } from './utils';
 // setting the schema / path.
 jest.mock('graphile-worker');
 
+beforeAll(() => {
+	createAndSetDatabase();
+});
+
 afterAll(async () => {
-	await db.close();
+	await getDatabase().close();
 });
 
 beforeEach(async () => {
@@ -33,7 +38,7 @@ beforeEach(async () => {
 	mockJwks.start();
 	await prepareDatabaseForCurrentWorker();
 	await loadConfig();
-	await createTestUser();
+	await createTestUser(getDatabase());
 });
 
 afterEach(async () => {

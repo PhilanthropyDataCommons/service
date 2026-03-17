@@ -1,7 +1,7 @@
-import { db } from '../../db';
 import { isTableMetrics } from '../../../types';
 import { InternalValidationError } from '../../../errors';
 import type { TableMetrics } from '../../../types';
+import type { TinyPg } from 'tinypg';
 
 interface RawTableMetrics {
 	count: string;
@@ -9,6 +9,7 @@ interface RawTableMetrics {
 }
 
 export const loadTableMetrics = async (
+	db: Pick<TinyPg, 'query'>,
 	tableName: string,
 ): Promise<TableMetrics> => {
 	const metricsQueryResult = await db.query<RawTableMetrics>(`

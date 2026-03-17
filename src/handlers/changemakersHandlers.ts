@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	getLimitValues,
 	loadChangemakerBundle,
 	loadChangemaker,
@@ -29,6 +29,7 @@ import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
 const postChangemaker = async (req: Request, res: Response): Promise<void> => {
+	const db = getDatabase();
 	if (!isWritableChangemaker(req.body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
@@ -43,6 +44,7 @@ const postChangemaker = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getChangemakers = async (req: Request, res: Response): Promise<void> => {
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { limit, offset } = getLimitValues(paginationParameters);
 	const { proposalId } = extractProposalParameters(req);
@@ -61,6 +63,7 @@ const getChangemakers = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getChangemaker = async (req: Request, res: Response): Promise<void> => {
+	const db = getDatabase();
 	const { changemakerId } = coerceParams(req.params);
 	if (!isId(changemakerId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
@@ -77,6 +80,7 @@ const patchChangemaker = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { changemakerId } = coerceParams(req.params);
 	if (!isId(changemakerId)) {
 		throw new InputValidationError(
@@ -130,6 +134,7 @@ const putChangemakerFiscalSponsor = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { changemakerId, fiscalSponsorChangemakerId } = coerceParams(
 		req.params,
 	);
@@ -160,6 +165,7 @@ const deleteChangemakerFiscalSponsor = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
+	const db = getDatabase();
 	const { changemakerId, fiscalSponsorChangemakerId } = coerceParams(
 		req.params,
 	);

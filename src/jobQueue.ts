@@ -2,7 +2,8 @@ import { Logger, quickAddJob, run, runMigrations } from 'graphile-worker';
 import { TEN_MINUTES_IN_MS } from './constants/time';
 import { copyBaseFields, processBulkUploadTask } from './tasks';
 import { getLogger } from './logger';
-import { db } from './database/db';
+import { getDatabase } from './database/db';
+import type { TinyPg } from 'tinypg';
 import type { Job } from 'graphile-worker';
 import type {
 	CopyBaseFieldsJobPayload,
@@ -38,6 +39,7 @@ export const jobQueueLogger = new Logger((scope) => (level, message, meta) => {
 });
 
 export const startJobQueue = async (): Promise<void> => {
+	const db = getDatabase();
 	const runner = await run({
 		logger: jobQueueLogger,
 		pgPool: db.pool,
@@ -60,7 +62,7 @@ export const startJobQueue = async (): Promise<void> => {
 	});
 };
 
-export const runJobQueueMigrations = async (): Promise<void> => {
+export const runJobQueueMigrations = async (db: TinyPg): Promise<void> => {
 	await runMigrations({
 		logger: jobQueueLogger,
 		pgPool: db.pool,
@@ -70,8 +72,9 @@ export const runJobQueueMigrations = async (): Promise<void> => {
 export const addJob = async (
 	jobType: JobType,
 	payload: unknown,
-): Promise<Job> =>
-	await quickAddJob(
+): Promise<Job> => {
+	const db = getDatabase();
+	return await quickAddJob(
 		{
 			logger: jobQueueLogger,
 			pgPool: db.pool,
@@ -79,6 +82,7 @@ export const addJob = async (
 		jobType,
 		payload,
 	);
+};
 
 export const addProcessBulkUploadJob = async (
 	payload: ProcessBulkUploadJobPayload,

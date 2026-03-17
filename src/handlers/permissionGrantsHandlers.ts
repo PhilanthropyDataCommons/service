@@ -2,7 +2,7 @@ import { isEmpty } from '../arrays';
 import { HTTP_STATUS } from '../constants';
 import {
 	createPermissionGrant,
-	db,
+	getDatabase,
 	getLimitValues,
 	loadPermissionGrant,
 	loadPermissionGrantBundle,
@@ -103,6 +103,7 @@ const getPermissionGrants = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { limit, offset } = getLimitValues(paginationParameters);
 
@@ -126,6 +127,7 @@ const postPermissionGrant = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const body = req.body as unknown;
 	if (!isWritablePermissionGrant(body)) {
@@ -152,6 +154,7 @@ const getPermissionGrant = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { permissionGrantId } = coerceParams(req.params);
 	if (!isId(permissionGrantId)) {
 		throw new InputValidationError(
@@ -175,6 +178,7 @@ const deletePermissionGrant = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { permissionGrantId } = coerceParams(req.params);
 	if (!isId(permissionGrantId)) {
 		throw new InputValidationError(

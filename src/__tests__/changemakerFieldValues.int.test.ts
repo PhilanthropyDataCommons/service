@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createOrUpdateBaseField,
 	createSource,
 	createChangemakerFieldValueBatch,
@@ -29,7 +29,8 @@ import {
 
 describe('POST /changemakerFieldValues', () => {
 	it('Successfully creates a changemaker field value', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -76,7 +77,8 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Allows multiple values for same changemaker+field+batch combination', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -167,7 +169,8 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Accepts null for goodAsOf', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -228,7 +231,8 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 422 when user does not have create permission on changemakerFieldValue', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -272,9 +276,10 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Allows non-admin user with create permission on changemakerFieldValue to create', async () => {
+		const db = getDatabase();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
-		const testUser = await loadTestUser();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -329,7 +334,8 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 409 when base field does not exist', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -368,7 +374,8 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 422 when base field is not organization category', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -416,7 +423,8 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 422 when base field is forbidden', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -464,6 +472,7 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 409 when batch does not exist', async () => {
+		const db = getDatabase();
 		const changemaker = await createTestChangemaker(db, null);
 
 		const baseField = await createTestBaseField(db, null);
@@ -488,7 +497,8 @@ describe('POST /changemakerFieldValues', () => {
 	});
 
 	it('Returns 409 when changemaker does not exist', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -531,7 +541,8 @@ describe('POST /changemakerFieldValues', () => {
 
 describe('GET /changemakerFieldValues', () => {
 	it('Returns paginated field values for admin user', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -582,9 +593,10 @@ describe('GET /changemakerFieldValues', () => {
 	});
 
 	it('Only returns field values for changemakers user has view permission on', async () => {
+		const db = getDatabase();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
-		const testUser = await loadTestUser();
+		const testUser = await loadTestUser(db);
 
 		const visibleChangemaker = await createTestChangemaker(db, null, {
 			name: 'Visible Organization',
@@ -666,9 +678,10 @@ describe('GET /changemakerFieldValues', () => {
 	});
 
 	it('Returns empty entries when user has no permissions', async () => {
+		const db = getDatabase();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser, true);
-		const testUser = await loadTestUser();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -727,7 +740,8 @@ describe('GET /changemakerFieldValues', () => {
 	});
 
 	it('Filters by changemakerFieldValueBatch', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -787,7 +801,8 @@ describe('GET /changemakerFieldValues', () => {
 	});
 
 	it('Filters by changemaker', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker1 = await createTestChangemaker(db, null, {
@@ -858,7 +873,8 @@ describe('GET /changemakerFieldValues', () => {
 	});
 
 	it('Filters by both changemakerFieldValueBatch and changemaker', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -937,7 +953,8 @@ describe('GET /changemakerFieldValues', () => {
 
 describe('GET /changemakerFieldValues/:fieldValueId', () => {
 	it('Returns a specific field value for admin user', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);
@@ -976,9 +993,10 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 	});
 
 	it('Returns field value when user has view permission on changemaker', async () => {
+		const db = getDatabase();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
-		const testUser = await loadTestUser();
+		const testUser = await loadTestUser(db);
 
 		const changemaker = await createTestChangemaker(db, null);
 
@@ -1028,9 +1046,10 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 	});
 
 	it('Returns 404 when user lacks view permission on changemaker', async () => {
+		const db = getDatabase();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser, true);
-		const testUser = await loadTestUser();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
 		const changemaker = await createTestChangemaker(db, null);

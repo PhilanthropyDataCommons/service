@@ -1,9 +1,10 @@
 import { createChangemaker, updateChangemaker } from '..';
 import { stringToKeycloakId } from '../../../../types';
-import { db } from '../../../db';
+import { getDatabase } from '../../../db';
 
 describe('updateChangemaker', () => {
 	it('Successfully sets a keycloakOrganizationId where previously null', async () => {
+		const db = getDatabase();
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '4833091201209397622311990956044204588593',
 			name: 'Changemaker 4833091201209397622311990956044204588593',
@@ -25,6 +26,7 @@ describe('updateChangemaker', () => {
 	});
 
 	it('Successfully sets a keycloakOrganizationId where previously non-null', async () => {
+		const db = getDatabase();
 		const changemaker = await createChangemaker(db, null, {
 			taxId: '1099594605318784561881495063299923285326',
 			name: 'Changemaker 1099594605318784561881495063299923285326',
@@ -46,6 +48,7 @@ describe('updateChangemaker', () => {
 	});
 
 	it('Throws Error when the changemaker id does not exist', async () => {
+		const db = getDatabase();
 		const newOrganizationId = stringToKeycloakId(
 			'1377aea8-0ef5-4e0f-8beb-a799a93e898b',
 		);

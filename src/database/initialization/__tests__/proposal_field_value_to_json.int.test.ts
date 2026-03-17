@@ -7,7 +7,7 @@ import {
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
-	db,
+	getDatabase,
 	loadSystemSource,
 } from '../..';
 import { createTestOpportunity } from '../../../test/factories';
@@ -21,7 +21,8 @@ import type { ProposalFieldValue, JsonResultSet } from '../../../types';
 
 describe('/proposal_field_value_to_json', () => {
 	it('returns a db error if attempting to load a forbidden proposal_field_value_to_json', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, null);
@@ -86,7 +87,8 @@ describe('/proposal_field_value_to_json', () => {
 	});
 
 	it('returns a File object for file field values when creators match', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, null);
@@ -166,7 +168,8 @@ describe('/proposal_field_value_to_json', () => {
 	});
 
 	it('returns a string for file field values when creators do not match', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		// Create a different user for the file
 		const otherUser = await createOrUpdateUser(db, null, {
@@ -253,7 +256,8 @@ describe('/proposal_field_value_to_json', () => {
 	});
 
 	it('returns a string for file field values when file does not exist', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, null);
@@ -326,7 +330,8 @@ describe('/proposal_field_value_to_json', () => {
 	});
 
 	it('returns a string for file field values with non-integer values', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, null);
@@ -399,7 +404,8 @@ describe('/proposal_field_value_to_json', () => {
 	});
 
 	it('returns a string for non-file field values', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, null);

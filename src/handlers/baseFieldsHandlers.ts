@@ -1,7 +1,7 @@
 import { HTTP_STATUS } from '../constants';
 import { InputValidationError } from '../errors';
 import {
-	db,
+	getDatabase,
 	createOrUpdateBaseField,
 	loadBaseFields,
 	createOrUpdateBaseFieldLocalization,
@@ -21,17 +21,20 @@ import {
 import { extractBaseFieldSensitivityClassificationsParameter } from '../queryParameters/extractBaseFieldSensitivityClassificationsParameter';
 import type { Request, Response } from 'express';
 import type { ShortCode } from '../types';
+import type { TinyPg } from 'tinypg';
 
 const assertBaseFieldExists = async (
+	db: Pick<TinyPg, 'sql'>,
 	baseFieldShortCode: ShortCode,
 ): Promise<void> => {
 	await loadBaseField(db, null, baseFieldShortCode);
 };
 
 const getBaseFields = async (req: Request, res: Response): Promise<void> => {
+	const db = getDatabase();
 	const sensitivityClassificationFilter =
 		extractBaseFieldSensitivityClassificationsParameter(req);
-	const baseFields = await loadBaseFields(sensitivityClassificationFilter);
+	const baseFields = await loadBaseFields(db, sensitivityClassificationFilter);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')
@@ -42,6 +45,7 @@ const putBaseField = async (
 	req: Request<{ baseFieldShortCode: string }>,
 	res: Response,
 ): Promise<void> => {
+	const db = getDatabase();
 	const { baseFieldShortCode } = coerceParams(req.params);
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
@@ -85,6 +89,7 @@ const getBaseFieldLocalizationsByBaseFieldShortCode = async (
 	req: Request<{ baseFieldShortCode: ShortCode }>,
 	res: Response,
 ): Promise<void> => {
+	const db = getDatabase();
 	const { baseFieldShortCode } = coerceParams(req.params);
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
@@ -94,7 +99,7 @@ const getBaseFieldLocalizationsByBaseFieldShortCode = async (
 	}
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	await assertBaseFieldExists(baseFieldShortCode);
+	await assertBaseFieldExists(db, baseFieldShortCode);
 	const baseFieldLocalizations =
 		await loadBaseFieldLocalizationsBundleByBaseFieldShortCode(
 			db,
@@ -113,6 +118,7 @@ const putBaseFieldLocalization = async (
 	req: Request<{ baseFieldShortCode: ShortCode; language: string }>,
 	res: Response,
 ): Promise<void> => {
+	const db = getDatabase();
 	const { baseFieldShortCode, language } = coerceParams(req.params);
 	if (!isShortCode(baseFieldShortCode)) {
 		throw new InputValidationError(
@@ -136,7 +142,7 @@ const putBaseFieldLocalization = async (
 		);
 	}
 	const { label, description } = body;
-	await assertBaseFieldExists(baseFieldShortCode);
+	await assertBaseFieldExists(db, baseFieldShortCode);
 	const baseFieldLocalization = await createOrUpdateBaseFieldLocalization(
 		db,
 		null,

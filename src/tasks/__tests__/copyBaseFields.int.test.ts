@@ -2,7 +2,7 @@ import nock from 'nock';
 import { fetchBaseFieldsFromRemote, copyBaseFields } from '../index';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import {
-	db,
+	getDatabase,
 	loadBaseFieldsCopyTask,
 	createBaseFieldsCopyTask,
 	loadSystemUser,
@@ -19,6 +19,7 @@ import {
 } from '../../types';
 import { getAuthContext } from '../../test/utils';
 import { expectTimestamp } from '../../test/asymettricMatchers';
+import type { TinyPg } from 'tinypg';
 import type {
 	BaseField,
 	InternallyWritableBaseFieldsCopyTask,
@@ -29,6 +30,7 @@ import type {
 const MOCK_API_URL = 'https://example.com';
 
 const createTestBaseFieldsCopyTask = async (
+	db: TinyPg,
 	authContext: AuthContext,
 	overrideValues?: Partial<InternallyWritableBaseFieldsCopyTask>,
 ): Promise<BaseFieldsCopyTask> => {
@@ -178,9 +180,11 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should not process or modify processing status if the task is not PENDING', async () => {
+		const db = getDatabase();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.IN_PROGRESS,
@@ -206,9 +210,11 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should fail if the remote url is unavailable', async () => {
+		const db = getDatabase();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -234,9 +240,11 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should fail if the remote url is available, but sends back invalid basefield data', async () => {
+		const db = getDatabase();
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -269,11 +277,13 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should not insert any remote basefields if there are no basefields in the remote instance', async () => {
-		const before = await loadTableMetrics('base_fields');
+		const db = getDatabase();
+		const before = await loadTableMetrics(db, 'base_fields');
 
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -291,7 +301,7 @@ describe('copyBaseFields', () => {
 			null,
 			baseFieldsCopyTask.id,
 		);
-		const after = await loadTableMetrics('base_fields');
+		const after = await loadTableMetrics(db, 'base_fields');
 
 		expect(before.count).toEqual(0);
 		expect(after.count).toEqual(0);
@@ -301,11 +311,13 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should insert all remote basefields to an empty local database', async () => {
-		const before = await loadTableMetrics('base_fields');
+		const db = getDatabase();
+		const before = await loadTableMetrics(db, 'base_fields');
 
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -330,7 +342,7 @@ describe('copyBaseFields', () => {
 			null,
 			baseFieldsCopyTask.id,
 		);
-		const after = await loadTableMetrics('base_fields');
+		const after = await loadTableMetrics(db, 'base_fields');
 
 		expect(before.count).toEqual(0);
 		expect(after.count).toEqual(1);
@@ -373,6 +385,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should insert all remote basefields, without updating any local basefields, assuming there is no overlap on shortcode', async () => {
+		const db = getDatabase();
 		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Local BaseField',
 			description: 'This basefield should not be updated on basefield copy',
@@ -383,11 +396,12 @@ describe('copyBaseFields', () => {
 			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		});
 
-		const before = await loadTableMetrics('base_fields');
+		const before = await loadTableMetrics(db, 'base_fields');
 
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -407,7 +421,7 @@ describe('copyBaseFields', () => {
 			null,
 			baseFieldsCopyTask.id,
 		);
-		const after = await loadTableMetrics('base_fields');
+		const after = await loadTableMetrics(db, 'base_fields');
 
 		expect(before.count).toEqual(1);
 		expect(after.count).toEqual(3);
@@ -425,6 +439,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should update local basefields when they match on remote basefield shortcodes, even if the basefields have identical data', async () => {
+		const db = getDatabase();
 		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Local Data',
 			description: 'This is local data',
@@ -447,11 +462,12 @@ describe('copyBaseFields', () => {
 			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		};
 
-		const before = await loadTableMetrics('base_fields');
+		const before = await loadTableMetrics(db, 'base_fields');
 
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -472,7 +488,7 @@ describe('copyBaseFields', () => {
 			baseFieldsCopyTask.id,
 		);
 
-		const after = await loadTableMetrics('base_fields');
+		const after = await loadTableMetrics(db, 'base_fields');
 
 		const updatedBaseField = await loadBaseField(
 			db,
@@ -500,6 +516,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should update local basefields when they match on remote basefield shortcodes, and insert all other remote basefields', async () => {
+		const db = getDatabase();
 		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Local Data',
 			description: 'This is local data',
@@ -523,11 +540,12 @@ describe('copyBaseFields', () => {
 			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		};
 
-		const before = await loadTableMetrics('base_fields');
+		const before = await loadTableMetrics(db, 'base_fields');
 
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -548,7 +566,7 @@ describe('copyBaseFields', () => {
 			baseFieldsCopyTask.id,
 		);
 
-		const after = await loadTableMetrics('base_fields');
+		const after = await loadTableMetrics(db, 'base_fields');
 
 		const updatedBaseField = await loadBaseField(
 			db,
@@ -609,6 +627,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should preserve localizations for a local basefield with localizations, when there is a remote basefield with no localizations that matches on shortcode', async () => {
+		const db = getDatabase();
 		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Update me',
 			description: 'This is a field to be updated',
@@ -633,6 +652,7 @@ describe('copyBaseFields', () => {
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -681,6 +701,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should add localizations to a local basefield from a remote basefield with matching shortcode', async () => {
+		const db = getDatabase();
 		const localBaseField = await createOrUpdateBaseField(db, null, {
 			label: 'Update me',
 			description: 'This is a field to be updated',
@@ -705,6 +726,7 @@ describe('copyBaseFields', () => {
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -767,11 +789,13 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should insert all valid remote basefields into the database, and have status set as completed', async () => {
-		const before = await loadTableMetrics('base_fields');
+		const db = getDatabase();
+		const before = await loadTableMetrics(db, 'base_fields');
 
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -791,7 +815,7 @@ describe('copyBaseFields', () => {
 			null,
 			baseFieldsCopyTask.id,
 		);
-		const after = await loadTableMetrics('base_fields');
+		const after = await loadTableMetrics(db, 'base_fields');
 
 		expect(before.count).toEqual(0);
 		expect(after.count).toEqual(2);
@@ -801,6 +825,7 @@ describe('copyBaseFields', () => {
 	});
 
 	it('should update any existing local basefields that match on shortcode, and have status set as completed', async () => {
+		const db = getDatabase();
 		const baseField = await createOrUpdateBaseField(db, null, {
 			label: 'Old First Name',
 			description: 'This should be replaced',
@@ -811,11 +836,12 @@ describe('copyBaseFields', () => {
 			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		});
 
-		const before = await loadTableMetrics('base_fields');
+		const before = await loadTableMetrics(db, 'base_fields');
 
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const baseFieldsCopyTask = await createTestBaseFieldsCopyTask(
+			db,
 			systemUserAuthContext,
 			{
 				status: TaskStatus.PENDING,
@@ -836,7 +862,7 @@ describe('copyBaseFields', () => {
 			baseFieldsCopyTask.id,
 		);
 
-		const after = await loadTableMetrics('base_fields');
+		const after = await loadTableMetrics(db, 'base_fields');
 
 		const updatedBaseField = await loadBaseField(db, null, baseField.shortCode);
 

@@ -1,5 +1,5 @@
 import { requireEnv } from 'require-env-variable';
-import { db, loadSystemUser, loadOrCreateS3Bucket } from './database';
+import { getDatabase, loadSystemUser, loadOrCreateS3Bucket } from './database';
 import { InternalValidationError } from './errors';
 import type { User, S3Bucket } from './types';
 
@@ -13,6 +13,7 @@ let systemUser: User | null = null;
 let defaultS3Bucket: S3Bucket | null = null;
 
 export const loadConfig = async (): Promise<void> => {
+	const db = getDatabase();
 	systemUser = await loadSystemUser(db, null);
 	defaultS3Bucket = await loadOrCreateS3Bucket(db, null, {
 		name: S3_BUCKET,

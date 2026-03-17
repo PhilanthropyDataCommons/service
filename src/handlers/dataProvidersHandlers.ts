@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	getLimitValues,
 	createOrUpdateDataProvider,
 	loadDataProviderBundle,
@@ -17,6 +17,7 @@ const getDataProviders = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const dataProviderBundle = await loadDataProviderBundle(
@@ -33,6 +34,7 @@ const getDataProviders = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getDataProvider = async (req: Request, res: Response): Promise<void> => {
+	const db = getDatabase();
 	const { dataProviderShortCode } = coerceParams(req.params);
 	if (!isShortCode(dataProviderShortCode)) {
 		throw new InputValidationError(
@@ -51,6 +53,7 @@ const putDataProvider = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { dataProviderShortCode: shortCode } = coerceParams(req.params);
 	if (!isShortCode(shortCode)) {
 		throw new InputValidationError(

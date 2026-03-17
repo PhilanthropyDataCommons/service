@@ -6,17 +6,36 @@ import { getLogger } from '../logger';
 const initializationDirectory = path.join(__dirname, 'initialization');
 const logger = getLogger('db');
 
-const db = new TinyPg({
-	root_dir: [path.resolve(__dirname, 'queries')],
-});
+let db: TinyPg | null = null;
 
-db.pool.on('connect', (client) => {
-	client.query("SET TIME ZONE 'UTC';").catch((err: unknown) => {
-		logger.error({ err }, 'Failed to set timezone');
+const getDatabase = (): TinyPg => {
+	if (db === null) {
+		throw new Error(
+			'Database has not been initialized. Call setDatabase() first.',
+		);
+	}
+	return db;
+};
+
+const setDatabase = (newDb: TinyPg): void => {
+	db = newDb;
+};
+
+const createDatabase = (): TinyPg => {
+	const newDb = new TinyPg({
+		root_dir: [path.resolve(__dirname, 'queries')],
 	});
-});
 
-const initializeDatabase = async (): Promise<void> => {
+	newDb.pool.on('connect', (client) => {
+		client.query("SET TIME ZONE 'UTC';").catch((err: unknown) => {
+			logger.error({ err }, 'Failed to set timezone');
+		});
+	});
+
+	return newDb;
+};
+
+const initializeDatabase = async (db: TinyPg): Promise<TinyPg> => {
 	const initializationFiles = (
 		await fs.readdir(initializationDirectory)
 	).filter((file) => file.endsWith('.sql'));
@@ -28,6 +47,8 @@ const initializeDatabase = async (): Promise<void> => {
 			await db.query(sql);
 		}),
 	);
+
+	return db;
 };
 
-export { initializeDatabase, db };
+export { createDatabase, initializeDatabase, setDatabase, getDatabase };

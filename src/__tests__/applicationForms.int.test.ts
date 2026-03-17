@@ -5,7 +5,7 @@ import {
 	createApplicationFormField,
 	createOrUpdateBaseField,
 	createPermissionGrant,
-	db,
+	getDatabase,
 	loadSystemUser,
 	loadTableMetrics,
 } from '../database';
@@ -25,10 +25,11 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
+import type { TinyPg } from 'tinypg';
 
 const logger = getLogger(__filename);
 
-const createTestBaseFields = async () => {
+const createTestBaseFields = async (db: TinyPg) => {
 	await createOrUpdateBaseField(db, null, {
 		label: 'Organization Name',
 		description: 'The organizational name of the applicant',
@@ -74,6 +75,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns all application forms present in the database when the user is an administrator', async () => {
+			const db = getDatabase();
 			const opportunity1 = await createTestOpportunity(db, null);
 			const opportunity2 = await createTestOpportunity(db, null);
 			await createApplicationForm(db, null, {
@@ -124,10 +126,11 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns only application forms that the user is allowed to view', async () => {
+			const db = getDatabase();
 			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -172,6 +175,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns an application form with its fields when the user is an administrator', async () => {
+			const db = getDatabase();
 			const opportunity1 = await createTestOpportunity(db, null);
 			const opportunity2 = await createTestOpportunity(db, null);
 			await createApplicationForm(db, null, {
@@ -186,7 +190,7 @@ describe('/applicationForms', () => {
 				opportunityId: opportunity2.id,
 				name: null,
 			});
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm3.id,
 				baseFieldShortCode: 'yearsOfWork',
@@ -264,10 +268,11 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns an application form with its fields when the user has read access to the relevant funder', async () => {
+			const db = getDatabase();
 			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -283,7 +288,7 @@ describe('/applicationForms', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'organizationName',
@@ -346,10 +351,11 @@ describe('/applicationForms', () => {
 			});
 		});
 		it('returns an application form with its fields when the user has read access to the relevant funder, and the instructions are null', async () => {
+			const db = getDatabase();
 			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -365,7 +371,7 @@ describe('/applicationForms', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'organizationName',
@@ -429,6 +435,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('does not return formFields associated with `FORBIDDEN` BaseFields', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -471,6 +478,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('should return 404 when the user does not have view opportunity permission', async () => {
+			const db = getDatabase();
 			const testFunder = await createTestFunder(db, null);
 			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: testFunder.shortCode,
@@ -503,10 +511,11 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns a CSV with labels matching the application form fields', async () => {
+			const db = getDatabase();
 			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -522,7 +531,7 @@ describe('/applicationForms', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'organizationName',
@@ -553,10 +562,11 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns fields in position order', async () => {
+			const db = getDatabase();
 			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -572,7 +582,7 @@ describe('/applicationForms', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -600,10 +610,11 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns an empty row for a form with no fields', async () => {
+			const db = getDatabase();
 			const visibleFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -640,6 +651,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 404 when the user does not have access to the funder', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -659,10 +671,11 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly one application form as a user with proper permissions', async () => {
+			const db = getDatabase();
 			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -682,7 +695,7 @@ describe('/applicationForms', () => {
 			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: testFunder.shortCode,
 			});
-			const before = await loadTableMetrics('application_forms');
+			const before = await loadTableMetrics(db, 'application_forms');
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -693,7 +706,7 @@ describe('/applicationForms', () => {
 					fields: [],
 				})
 				.expect(201);
-			const after = await loadTableMetrics('application_forms');
+			const after = await loadTableMetrics(db, 'application_forms');
 			expect(before.count).toEqual(1);
 			expect(result.body).toMatchObject({
 				opportunityId: opportunity.id,
@@ -706,8 +719,9 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates exactly one application form as an administrator', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
-			const before = await loadTableMetrics('application_forms');
+			const before = await loadTableMetrics(db, 'application_forms');
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -718,7 +732,7 @@ describe('/applicationForms', () => {
 					fields: [],
 				})
 				.expect(201);
-			const after = await loadTableMetrics('application_forms');
+			const after = await loadTableMetrics(db, 'application_forms');
 			expect(result.body).toMatchObject({
 				opportunityId: opportunity.id,
 				name: null,
@@ -730,6 +744,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates an application form with a name', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
 			const result = await request(app)
 				.post('/applicationForms')
@@ -751,6 +766,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('creates an application form with null name', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
 			const result = await request(app)
 				.post('/applicationForms')
@@ -784,10 +800,11 @@ describe('/applicationForms', () => {
 		});
 
 		it(`returns 401 unauthorized if the user does not have edit permission on the associated opportunity's funder`, async () => {
+			const db = getDatabase();
 			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -807,7 +824,7 @@ describe('/applicationForms', () => {
 			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: testFunder.shortCode,
 			});
-			const before = await loadTableMetrics('application_forms');
+			const before = await loadTableMetrics(db, 'application_forms');
 			await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -818,15 +835,16 @@ describe('/applicationForms', () => {
 					fields: [],
 				})
 				.expect(401);
-			const after = await loadTableMetrics('application_forms');
+			const after = await loadTableMetrics(db, 'application_forms');
 			expect(before.count).toEqual(1);
 			expect(after.count).toEqual(1);
 		});
 
 		it('creates exactly the number of provided fields', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
-			await createTestBaseFields();
-			const before = await loadTableMetrics('application_form_fields');
+			await createTestBaseFields(db);
+			const before = await loadTableMetrics(db, 'application_form_fields');
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -845,7 +863,7 @@ describe('/applicationForms', () => {
 					],
 				})
 				.expect(201);
-			const after = await loadTableMetrics('application_form_fields');
+			const after = await loadTableMetrics(db, 'application_form_fields');
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -867,6 +885,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('increments version when creating a second form for an opportunity', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -894,6 +913,7 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 400 when attempting to create a form field using a forbidden base field', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
 			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 				label: 'Forbidden Field',
@@ -905,7 +925,7 @@ describe('/applicationForms', () => {
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});
 
-			const before = await loadTableMetrics('application_forms');
+			const before = await loadTableMetrics(db, 'application_forms');
 			await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -924,7 +944,7 @@ describe('/applicationForms', () => {
 					],
 				})
 				.expect(400);
-			const after = await loadTableMetrics('application_forms');
+			const after = await loadTableMetrics(db, 'application_forms');
 			expect(after.count).toEqual(before.count);
 		});
 
@@ -989,8 +1009,9 @@ describe('/applicationForms', () => {
 		});
 
 		it('returns 500 UnknownError if a generic Error is thrown when inserting the field', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			jest
 				.spyOn(db, 'sql')
 				.mockReturnValueOnce(

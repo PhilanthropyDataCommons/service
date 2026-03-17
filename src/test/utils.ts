@@ -1,7 +1,8 @@
 import { setImmediate } from 'node:timers/promises';
-import { db, createOrUpdateUser, loadUserByKeycloakUserId } from '../database';
+import { createOrUpdateUser, loadUserByKeycloakUserId } from '../database';
 import { stringToKeycloakId } from '../types';
 import type { AuthContext, KeycloakId, User } from '../types';
+import type { TinyPg } from 'tinypg';
 
 // Because expressjwt does not synchronously call next, but rather calls setImmediate(next),
 // send another call to setImmediate to make sure previous calls to setImmediate have made it
@@ -40,13 +41,13 @@ export const getMockedUser = (): User => ({
 	createdAt: '',
 });
 
-export const createTestUser = async (): Promise<User> =>
+export const createTestUser = async (db: Pick<TinyPg, 'sql'>): Promise<User> =>
 	await createOrUpdateUser(db, null, {
 		keycloakUserId: getTestUserKeycloakUserId(),
 		keycloakUserName: getTestUserKeycloakUserName(),
 	});
 
-export const loadTestUser = async (): Promise<User> => {
+export const loadTestUser = async (db: Pick<TinyPg, 'sql'>): Promise<User> => {
 	const testUserKeycloakUserId = getTestUserKeycloakUserId();
 	return await loadUserByKeycloakUserId(
 		db,
@@ -69,9 +70,10 @@ export const getAuthContext = (
 });
 
 export const getTestAuthContext = async (
+	db: Pick<TinyPg, 'sql'>,
 	isAdministrator = true,
 ): Promise<AuthContext> =>
-	getAuthContext(await loadTestUser(), isAdministrator);
+	getAuthContext(await loadTestUser(db), isAdministrator);
 
 export const getMockNextFunction = (): jest.Mock<void, unknown[]> =>
 	jest.fn((): void => undefined);

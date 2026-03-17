@@ -1,6 +1,6 @@
 import { addUserContext } from '../addUserContext';
 import {
-	db,
+	getDatabase,
 	loadUserByKeycloakUserId,
 	loadTableMetrics,
 	loadEphemeralUserGroupAssociationsByUserKeycloakUserId,
@@ -17,14 +17,15 @@ import type { AuthenticatedRequest } from '../../types';
 
 describe('addUserContext', () => {
 	it('does not creates or assign a user when auth is not provided', (done) => {
+		const db = getDatabase();
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 
-		loadTableMetrics('users')
+		loadTableMetrics(db, 'users')
 			.then(({ count: baselineUserCount }) => {
 				const runAssertions = async (err: unknown) => {
 					expect(err).toBe(undefined);
-					const { count: userCount } = await loadTableMetrics('users');
+					const { count: userCount } = await loadTableMetrics(db, 'users');
 					expect(userCount).toEqual(baselineUserCount);
 					expect(req.user).toBe(undefined);
 				};
@@ -38,6 +39,7 @@ describe('addUserContext', () => {
 	});
 
 	it('creates and assigns a user when a keycloakUserId is provided', (done) => {
+		const db = getDatabase();
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.auth = {
@@ -45,11 +47,11 @@ describe('addUserContext', () => {
 			name: 'Olivia',
 		};
 
-		loadTableMetrics('users')
+		loadTableMetrics(db, 'users')
 			.then(({ count: baselineUserCount }) => {
 				const runAssertions = async (err: unknown) => {
 					expect(err).toBe(undefined);
-					const { count: userCount } = await loadTableMetrics('users');
+					const { count: userCount } = await loadTableMetrics(db, 'users');
 					const user = await loadUserByKeycloakUserId(
 						db,
 						null,
@@ -68,6 +70,7 @@ describe('addUserContext', () => {
 	});
 
 	it('creates ephemeral user group associations when organizations are provided', (done) => {
+		const db = getDatabase();
 		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
 		const mockName = 'Provolone';
 		const mockAuthExp = Math.round(new Date().getTime() / 1000) + 3600;
@@ -86,12 +89,12 @@ describe('addUserContext', () => {
 			},
 		};
 
-		loadTableMetrics('ephemeral_user_group_associations')
+		loadTableMetrics(db, 'ephemeral_user_group_associations')
 			.then(({ count: baselineEphemeralUserGroupAssociationCount }) => {
 				const runAssertions = async (err: unknown) => {
 					expect(err).toBe(undefined);
 					const { count: ephemeralUserGroupAssociationCount } =
-						await loadTableMetrics('ephemeral_user_group_associations');
+						await loadTableMetrics(db, 'ephemeral_user_group_associations');
 					const ephemeralUserGroupAssociations =
 						await loadEphemeralUserGroupAssociationsByUserKeycloakUserId(
 							db,
@@ -138,6 +141,7 @@ describe('addUserContext', () => {
 	});
 
 	it('passes an error and does not creates or assign a user when an invalid keycloakUserId is provided', (done) => {
+		const db = getDatabase();
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.auth = {
@@ -145,10 +149,10 @@ describe('addUserContext', () => {
 			name: 'Qualita',
 		};
 
-		loadTableMetrics('users')
+		loadTableMetrics(db, 'users')
 			.then(({ count: baselineUserCount }) => {
 				const runAssertions = async (err: unknown) => {
-					const { count: userCount } = await loadTableMetrics('users');
+					const { count: userCount } = await loadTableMetrics(db, 'users');
 					expect(userCount).toEqual(baselineUserCount);
 					expect(req.user).toBe(undefined);
 					expect(err).toBeInstanceOf(InputValidationError);
@@ -170,16 +174,17 @@ describe('addUserContext', () => {
 	});
 
 	it('does not create or assign a user when no keycloakUserId is provided', (done) => {
+		const db = getDatabase();
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.auth = {
 			name: 'Robert',
 		};
 
-		loadTableMetrics('users')
+		loadTableMetrics(db, 'users')
 			.then(({ count: baselineUserCount }) => {
 				const runAssertions = async () => {
-					const metrics = await loadTableMetrics('users');
+					const metrics = await loadTableMetrics(db, 'users');
 					expect(metrics.count).toEqual(baselineUserCount);
 					expect(req.user).toBe(undefined);
 				};

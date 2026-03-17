@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createEphemeralUserGroupAssociation,
 	loadTableMetrics,
 	loadSystemFunder,
@@ -22,7 +22,6 @@ import {
 	PermissionGrantVerb,
 	stringToKeycloakId,
 } from '../types';
-
 describe('/opportunities', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
@@ -30,6 +29,7 @@ describe('/opportunities', () => {
 		});
 
 		it('returns the system opportunity when no other data is present', async () => {
+			const db = getDatabase();
 			const systemOpportunity = await loadSystemOpportunity(db, null);
 			await request(app)
 				.get('/opportunities')
@@ -41,6 +41,7 @@ describe('/opportunities', () => {
 		});
 
 		it('returns all opportunities present in the database for an admin user', async () => {
+			const db = getDatabase();
 			const systemOpportunity = await loadSystemOpportunity(db, null);
 			const opportunity1 = await createTestOpportunity(db, null, {
 				title: 'Tremendous opportunity 👌',
@@ -59,9 +60,10 @@ describe('/opportunities', () => {
 		});
 
 		it('returns only opportunities the user is allowed to view', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const visibleFunder = await loadSystemFunder(db, null);
 			const systemOpportunity = await loadSystemOpportunity(db, null);
 			const anotherFunder = await createTestFunder(db, null);
@@ -97,6 +99,7 @@ describe('/opportunities', () => {
 		});
 
 		it('returns exactly one opportunity selected by id', async () => {
+			const db = getDatabase();
 			await createTestOpportunity(db, null);
 			const secondOpportunity = await createTestOpportunity(db, null);
 			await createTestOpportunity(db, null);
@@ -109,9 +112,10 @@ describe('/opportunities', () => {
 		});
 
 		it('returns an opportunity when the user has funder permission', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const visibleFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -154,6 +158,7 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 404 when id is not found', async () => {
+			const db = getDatabase();
 			await createTestOpportunity(db, null);
 			await request(app)
 				.get('/opportunities/9001')
@@ -162,9 +167,10 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 404 when the user does not have view permission', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const opportunity = await createTestOpportunity(db, null);
 
 			// Also create a userGroup permission grant with an EXPIRED association
@@ -197,9 +203,10 @@ describe('/opportunities', () => {
 		});
 
 		it('creates and returns exactly one opportunity when create opportunity permission is set', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -209,7 +216,7 @@ describe('/opportunities', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.CREATE],
 			});
-			const before = await loadTableMetrics('opportunities');
+			const before = await loadTableMetrics(db, 'opportunities');
 			const result = await request(app)
 				.post('/opportunities')
 				.type('application/json')
@@ -219,7 +226,7 @@ describe('/opportunities', () => {
 					funderShortCode: systemFunder.shortCode,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('opportunities');
+			const after = await loadTableMetrics(db, 'opportunities');
 			expect(before.count).toEqual(1);
 			expect(result.body).toMatchObject({
 				id: 2,
@@ -230,9 +237,10 @@ describe('/opportunities', () => {
 		});
 
 		it('returns 401 unauthorized if the user does not have create opportunity permission on the associated funder', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -250,7 +258,7 @@ describe('/opportunities', () => {
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.MANAGE],
 			});
-			const before = await loadTableMetrics('opportunities');
+			const before = await loadTableMetrics(db, 'opportunities');
 			await request(app)
 				.post('/opportunities')
 				.type('application/json')
@@ -260,12 +268,13 @@ describe('/opportunities', () => {
 					funderShortCode: systemFunder.shortCode,
 				})
 				.expect(401);
-			const after = await loadTableMetrics('opportunities');
+			const after = await loadTableMetrics(db, 'opportunities');
 			expect(before.count).toEqual(1);
 			expect(after.count).toEqual(1);
 		});
 
 		it('returns 400 bad request when no title sent', async () => {
+			const db = getDatabase();
 			const systemFunder = await loadSystemFunder(db, null);
 			const result = await request(app)
 				.post('/opportunities')

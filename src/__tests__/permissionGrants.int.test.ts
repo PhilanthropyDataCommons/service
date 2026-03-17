@@ -3,7 +3,7 @@ import { app } from '../app';
 import {
 	createOrUpdateFunder,
 	createSource,
-	db,
+	getDatabase,
 	loadTableMetrics,
 	removeSource,
 } from '../database';
@@ -28,7 +28,6 @@ import {
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
 } from '../types';
-
 const agent = request.agent(app);
 
 const testUserKeycloakUserId = nonNullKeycloakIdToString(
@@ -57,7 +56,8 @@ describe('/permissionGrants', () => {
 		});
 
 		it('returns all permission grants for an admin user', async () => {
-			const authContext = await getTestAuthContext();
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
 			const permissionGrant = await createTestPermissionGrant(db, authContext);
 
 			const response = await agent
@@ -85,7 +85,8 @@ describe('/permissionGrants', () => {
 		});
 
 		it('supports pagination', async () => {
-			const authContext = await getTestAuthContext();
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
 			await createTestPermissionGrant(db, authContext);
 			const funder = await createTestFunder(db, null);
 			await createTestPermissionGrant(db, authContext, {
@@ -124,7 +125,8 @@ describe('/permissionGrants', () => {
 		});
 
 		it('returns exactly one permission grant by id', async () => {
-			const authContext = await getTestAuthContext();
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
 			const permissionGrant = await createTestPermissionGrant(db, authContext);
 
 			const response = await agent
@@ -182,6 +184,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('requires administrator role', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			await agent
 				.post('/permissionGrants')
@@ -200,8 +203,9 @@ describe('/permissionGrants', () => {
 		});
 
 		it('creates and returns a permission grant for a user', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
-			const before = await loadTableMetrics('permission_grants');
+			const before = await loadTableMetrics(db, 'permission_grants');
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -215,7 +219,7 @@ describe('/permissionGrants', () => {
 					verbs: ['view', 'edit'],
 				})
 				.expect(201);
-			const after = await loadTableMetrics('permission_grants');
+			const after = await loadTableMetrics(db, 'permission_grants');
 
 			expect(result.body).toMatchObject({
 				id: expectNumber(),
@@ -232,9 +236,10 @@ describe('/permissionGrants', () => {
 		});
 
 		it('creates and returns a permission grant for a user group', async () => {
+			const db = getDatabase();
 			const userGroupKeycloakId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
 			const funder = await createTestFunder(db, null);
-			const before = await loadTableMetrics('permission_grants');
+			const before = await loadTableMetrics(db, 'permission_grants');
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -248,7 +253,7 @@ describe('/permissionGrants', () => {
 					verbs: ['view', 'create'],
 				})
 				.expect(201);
-			const after = await loadTableMetrics('permission_grants');
+			const after = await loadTableMetrics(db, 'permission_grants');
 
 			expect(result.body).toMatchObject({
 				id: expectNumber(),
@@ -265,6 +270,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('creates a permission grant for a user not in the users table', async () => {
+			const db = getDatabase();
 			const arbitraryUserKeycloakUserId =
 				'b4e46c13-0abc-4a7e-9d72-a1b2c3d4e5f6';
 			const changemaker = await createTestChangemaker(db, null);
@@ -517,6 +523,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('returns 400 bad request when scope contains entity type not allowed for context', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			const result = await agent
 				.post('/permissionGrants')
@@ -538,6 +545,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('returns 400 bad request when scope contains mix of allowed and disallowed types', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			const result = await agent
 				.post('/permissionGrants')
@@ -621,6 +629,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('creates and returns a permission grant with conditions', async () => {
+			const db = getDatabase();
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'condFunder',
 				name: 'Conditions Test Funder',
@@ -669,6 +678,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('creates a permission grant with null conditions', async () => {
+			const db = getDatabase();
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'nullCondFunder',
 				name: 'Null Conditions Funder',
@@ -696,6 +706,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('creates a permission grant with in operator condition', async () => {
+			const db = getDatabase();
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'eqCondFunder',
 				name: 'In Condition Funder',
@@ -735,6 +746,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('returns 400 when conditions has invalid property name', async () => {
+			const db = getDatabase();
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'badFieldFunder',
 				name: 'Bad Field Funder',
@@ -768,6 +780,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('returns 400 when conditions has invalid operator', async () => {
+			const db = getDatabase();
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'badOpFunder',
 				name: 'Bad Op Funder',
@@ -801,6 +814,7 @@ describe('/permissionGrants', () => {
 		});
 
 		it('returns 400 when condition key is not in scope', async () => {
+			const db = getDatabase();
 			const funder = await createOrUpdateFunder(db, null, {
 				shortCode: 'noScopeFunder',
 				name: 'No Scope Funder',
@@ -843,21 +857,23 @@ describe('/permissionGrants', () => {
 		});
 
 		it('deletes exactly one permission grant', async () => {
-			const authContext = await getTestAuthContext();
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
 			const permissionGrant = await createTestPermissionGrant(db, authContext);
-			const before = await loadTableMetrics('permission_grants');
+			const before = await loadTableMetrics(db, 'permission_grants');
 
 			await agent
 				.delete(`/permissionGrants/${permissionGrant.id}`)
 				.set(adminUserAuthHeader)
 				.expect(204);
 
-			const after = await loadTableMetrics('permission_grants');
+			const after = await loadTableMetrics(db, 'permission_grants');
 			expect(after.count).toEqual(before.count - 1);
 		});
 
 		it('cascades deletion when the referenced entity is deleted', async () => {
-			const authContext = await getTestAuthContext();
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
 			const changemaker = await createTestChangemaker(db, null);
 			const source = await createSource(db, null, {
 				label: 'Cascade Test Source',
@@ -871,11 +887,11 @@ describe('/permissionGrants', () => {
 				scope: [PermissionGrantEntityType.SOURCE],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const before = await loadTableMetrics('permission_grants');
+			const before = await loadTableMetrics(db, 'permission_grants');
 
 			await removeSource(db, null, source.id);
 
-			const after = await loadTableMetrics('permission_grants');
+			const after = await loadTableMetrics(db, 'permission_grants');
 			expect(after.count).toEqual(before.count - 1);
 		});
 

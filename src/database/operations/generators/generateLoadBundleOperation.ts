@@ -31,7 +31,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 ) => {
 	const generatedParameterNames = [...parameterNames, 'limit', 'offset'];
 	return async (
-		db: Pick<TinyPg, 'sql'>,
+		db: Pick<TinyPg, 'sql' | 'query'>,
 		authContext: AuthIdentityAndRole | null,
 		...args: [...P, limit: number | undefined, offset: number | undefined]
 	): Promise<Bundle<T>> => {
@@ -51,7 +51,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 		const entries = await Promise.all(
 			result.rows.map(async (row) => await itemPostProcessor(row.object)),
 		);
-		const metrics = await loadTableMetrics(tableName);
+		const metrics = await loadTableMetrics(db, tableName);
 		await createServiceQueryAuditLog(db, authContext, {
 			queryName,
 			queryParameters,

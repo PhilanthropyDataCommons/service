@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	createChangemakerProposal,
 	getLimitValues,
 	hasFunderPermission,
@@ -34,6 +34,7 @@ const getChangemakerProposals = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { changemakerId } = extractChangemakerParameters(req);
@@ -60,6 +61,7 @@ const postChangemakerProposal = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const body = req.body as unknown;
 	if (!isWritableChangemakerProposal(body)) {

@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	createProposal,
 	getLimitValues,
 	hasOpportunityPermission,
@@ -35,6 +35,7 @@ const getProposals = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { search } = extractSearchParameters(req);
@@ -63,6 +64,7 @@ const getProposal = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const { proposalId } = coerceParams(req.params);
 	if (!isId(proposalId)) {
@@ -79,6 +81,7 @@ const postProposal = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const body = req.body as unknown;
 	if (!isWritableProposal(body)) {

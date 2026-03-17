@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	createOpportunity,
 	getLimitValues,
 	hasFunderPermission,
@@ -27,6 +27,7 @@ const getOpportunities = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const opportunityBundle = await loadOpportunityBundle(db, req, limit, offset);
@@ -40,6 +41,7 @@ const getOpportunity = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { opportunityId } = coerceParams(req.params);
 	if (!isId(opportunityId)) {
 		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
@@ -55,6 +57,7 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	if (!isWritableOpportunity(req.body)) {
 		throw new InputValidationError(
 			'Invalid request body.',

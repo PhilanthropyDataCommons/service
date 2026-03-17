@@ -13,7 +13,7 @@
  * If any of the checks fail, the middleware will pass an appropriate error to the next middleware.
  */
 import { coerceParams } from '../coercion';
-import { db } from '../database';
+import { getDatabase } from '../database';
 import { hasChangemakerPermission } from '../database/operations';
 import { InputValidationError, UnauthorizedError } from '../errors';
 import { isAuthContext, isId, PermissionGrantEntityType } from '../types';
@@ -32,6 +32,7 @@ const requireChangemakerPermission =
 				next();
 				return;
 			}
+			const db = getDatabase();
 			const { changemakerId } = coerceParams(req.params);
 			if (!isId(changemakerId)) {
 				next(

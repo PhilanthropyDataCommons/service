@@ -2,7 +2,7 @@ import { HTTP_STATUS } from '../constants';
 import {
 	createProposalFieldValue,
 	createProposalVersion,
-	db,
+	getDatabase,
 	hasProposalPermission,
 	loadApplicationForm,
 	loadApplicationFormField,
@@ -31,8 +31,10 @@ import type {
 	WritableProposalFieldValueWithProposalVersionContext,
 	AuthContext,
 } from '../types';
+import type { TinyPg } from 'tinypg';
 
 const assertApplicationFormExistsForProposal = async (
+	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
 	applicationFormId: number,
 	proposalId: number,
@@ -79,6 +81,7 @@ const assertApplicationFormExistsForProposal = async (
 };
 
 const assertProposalFieldValuesMapToApplicationForm = async (
+	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
 	applicationFormId: number,
 	proposalFieldValues: WritableProposalFieldValueWithProposalVersionContext[],
@@ -127,6 +130,7 @@ const postProposalVersion = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const body = req.body as unknown;
 	if (!isWritableProposalVersionWithFieldValues(body)) {
@@ -151,11 +155,13 @@ const postProposalVersion = async (
 			);
 		}
 		await assertApplicationFormExistsForProposal(
+			db,
 			req,
 			applicationFormId,
 			proposalId,
 		);
 		await assertProposalFieldValuesMapToApplicationForm(
+			db,
 			req,
 			applicationFormId,
 			fieldValues,
@@ -170,7 +176,7 @@ const postProposalVersion = async (
 				fieldValues.map(async (fieldValue) => {
 					const { value, applicationFormFieldId } = fieldValue;
 					const applicationFormField = await loadApplicationFormField(
-						db,
+						transactionDb,
 						req,
 						applicationFormFieldId,
 					);
@@ -225,6 +231,7 @@ const getProposalVersion = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const { proposalVersionId } = coerceParams(req.params);
 	if (!isId(proposalVersionId)) {

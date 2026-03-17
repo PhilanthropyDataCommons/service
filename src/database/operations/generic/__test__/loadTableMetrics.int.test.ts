@@ -1,10 +1,11 @@
 import { loadTableMetrics } from '..';
-import { db } from '../../..';
+import { getDatabase } from '../../..';
 import { expectDate } from '../../../../test/asymettricMatchers';
 
 describe('loadTableMetrics', () => {
 	it('Should reflect metrics properly for an empty table', async () => {
-		const metrics = await loadTableMetrics('changemakers');
+		const db = getDatabase();
+		const metrics = await loadTableMetrics(db, 'changemakers');
 		expect(metrics).toMatchObject({
 			count: 0,
 			now: expectDate(),
@@ -12,6 +13,7 @@ describe('loadTableMetrics', () => {
 	});
 
 	it('Should throw an error if no metrics were returned by the database', async () => {
+		const db = getDatabase();
 		jest.spyOn(db, 'query').mockReturnValueOnce(
 			Promise.resolve({
 				rows: [],
@@ -20,7 +22,7 @@ describe('loadTableMetrics', () => {
 			}),
 		);
 
-		await expect(loadTableMetrics('changemakers')).rejects.toThrow(
+		await expect(loadTableMetrics(db, 'changemakers')).rejects.toThrow(
 			'Something went wrong collecting table metrics for changemakers',
 		);
 	});

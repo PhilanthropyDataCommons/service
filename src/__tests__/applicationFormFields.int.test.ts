@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createApplicationForm,
 	createApplicationFormField,
 	createOrUpdateBaseField,
@@ -20,11 +20,11 @@ import {
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
 } from '../types';
-
 describe('/applicationFormFields', () => {
 	describe('PATCH /:applicationFormFieldId', () => {
 		it('successfully updates the label only', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
@@ -88,7 +88,8 @@ describe('/applicationFormFields', () => {
 		});
 
 		it('successfully updates the instructions only', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
@@ -152,7 +153,8 @@ describe('/applicationFormFields', () => {
 		});
 
 		it('successfully updates both label and instructions', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
@@ -218,7 +220,8 @@ describe('/applicationFormFields', () => {
 		});
 
 		it('successfully updates instructions to null', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
@@ -282,7 +285,8 @@ describe('/applicationFormFields', () => {
 		});
 
 		it('successfully updates label to null', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
@@ -346,7 +350,8 @@ describe('/applicationFormFields', () => {
 		});
 
 		it('successfully updates inputType', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
@@ -410,7 +415,8 @@ describe('/applicationFormFields', () => {
 		});
 
 		it('returns 400 for empty request body', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
@@ -467,7 +473,8 @@ describe('/applicationFormFields', () => {
 		});
 
 		it('returns 400 for attempting to update read-only fields', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
@@ -536,7 +543,8 @@ describe('/applicationFormFields', () => {
 		});
 
 		it('returns 401 for user without funder EDIT permission', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const funder = await createTestFunder(db, null);
@@ -589,7 +597,8 @@ describe('/applicationFormFields', () => {
 		});
 
 		it('returns 404 for non-existent applicationFormFieldId', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 

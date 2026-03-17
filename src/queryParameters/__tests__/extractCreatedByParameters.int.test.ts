@@ -1,4 +1,5 @@
 import { extractCreatedByParameters } from '..';
+import { getDatabase } from '../../database';
 import { InputValidationError } from '../../errors';
 import { loadTestUser } from '../../test/utils';
 
@@ -33,7 +34,8 @@ describe('extractCreatedByParameters', () => {
 	});
 
 	it('should return the current user when passed `me` and an auth context', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const createdByParameters = extractCreatedByParameters({
 			query: { createdBy: 'me' },
 			user: testUser,

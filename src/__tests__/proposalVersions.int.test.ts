@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createApplicationForm,
 	createApplicationFormField,
 	createOpportunity,
@@ -42,10 +42,11 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
+import type { TinyPg } from 'tinypg';
 
 const logger = getLogger(__filename);
 
-const createTestBaseFields = async () => {
+const createTestBaseFields = async (db: TinyPg): Promise<void> => {
 	await createOrUpdateBaseField(db, null, {
 		label: 'First Name',
 		description: 'The first name of the applicant',
@@ -73,7 +74,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns exactly one proposal version selected by id', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -103,9 +105,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns the proposal version if they have access via funder', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const visibleFunder = await createTestFunder(db, null);
@@ -149,9 +152,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns the proposal version if they have access via changemaker', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const visibleChangemaker = await createTestChangemaker(db, null, {
@@ -227,7 +231,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 404 when the user has no access to the proposal version', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -261,7 +266,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('creates exactly one proposal version for an admin user', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -273,7 +279,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			const before = await loadTableMetrics('proposal_versions');
+			const before = await loadTableMetrics(db, 'proposal_versions');
 			logger.debug('before: %o', before);
 			const result = await request(app)
 				.post('/proposalVersions')
@@ -286,7 +292,7 @@ describe('/proposalVersions', () => {
 					fieldValues: [],
 				})
 				.expect(201);
-			const after = await loadTableMetrics('proposal_versions');
+			const after = await loadTableMetrics(db, 'proposal_versions');
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -297,9 +303,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('creates exactly one proposal version for a user with read and write permissions on the funder', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const testFunder = await createTestFunder(db, null);
@@ -326,7 +333,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			const before = await loadTableMetrics('proposal_versions');
+			const before = await loadTableMetrics(db, 'proposal_versions');
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
@@ -338,7 +345,7 @@ describe('/proposalVersions', () => {
 					fieldValues: [],
 				})
 				.expect(201);
-			const after = await loadTableMetrics('proposal_versions');
+			const after = await loadTableMetrics(db, 'proposal_versions');
 			expect(result.body).toMatchObject({
 				proposalId: proposal.id,
 				fieldValues: [],
@@ -347,9 +354,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 422 when user has edit|funder but not edit|proposal scope', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const testFunder = await createTestFunder(db, null);
@@ -401,9 +409,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('creates a proposal version for a user with edit|proposal on the opportunity', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -426,7 +435,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			const before = await loadTableMetrics('proposal_versions');
+			const before = await loadTableMetrics(db, 'proposal_versions');
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
@@ -438,7 +447,7 @@ describe('/proposalVersions', () => {
 					fieldValues: [],
 				})
 				.expect(201);
-			const after = await loadTableMetrics('proposal_versions');
+			const after = await loadTableMetrics(db, 'proposal_versions');
 			expect(result.body).toMatchObject({
 				proposalId: proposal.id,
 				fieldValues: [],
@@ -447,7 +456,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('creates exactly the number of provided field values', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -459,7 +469,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			const firstNameField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
 				baseFieldShortCode: 'firstName',
@@ -476,7 +486,7 @@ describe('/proposalVersions', () => {
 				instructions: 'Please enter the last name of the applicant.',
 				inputType: null,
 			});
-			const before = await loadTableMetrics('proposal_field_values');
+			const before = await loadTableMetrics(db, 'proposal_field_values');
 			const result = await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
@@ -503,7 +513,7 @@ describe('/proposalVersions', () => {
 					],
 				})
 				.expect(201);
-			const after = await loadTableMetrics('proposal_field_values');
+			const after = await loadTableMetrics(db, 'proposal_field_values');
 
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -533,7 +543,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 400 bad request when attempting to provide data for a forbidden field', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -589,7 +600,7 @@ describe('/proposalVersions', () => {
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});
 
-			const before = await loadTableMetrics('proposal_versions');
+			const before = await loadTableMetrics(db, 'proposal_versions');
 			await request(app)
 				.post('/proposalVersions')
 				.type('application/json')
@@ -608,7 +619,7 @@ describe('/proposalVersions', () => {
 					],
 				})
 				.expect(400);
-			const after = await loadTableMetrics('proposal_versions');
+			const after = await loadTableMetrics(db, 'proposal_versions');
 			expect(after.count).toEqual(before.count);
 		});
 
@@ -665,7 +676,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 409 Conflict when the provided proposal does not exist', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -702,7 +714,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns 422 Unprocessable Entity when the provided source does not exist', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
 			const proposal = await createProposal(db, testUserAuthContext, {
@@ -727,7 +740,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if the provided application form does not exist', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -739,7 +753,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			const before = await loadTableMetrics('proposal_field_values');
+			const before = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('before: %o', before);
 			const result = await request(app)
 				.post('/proposalVersions')
@@ -752,7 +766,7 @@ describe('/proposalVersions', () => {
 					fieldValues: [],
 				})
 				.expect(409);
-			const after = await loadTableMetrics('proposal_field_values');
+			const after = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -768,7 +782,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if the provided application form ID is not associated with the proposal opportunity', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity1 = await createTestOpportunity(db, null);
@@ -785,7 +800,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity2.id,
 				name: null,
 			});
-			const before = await loadTableMetrics('proposal_field_values');
+			const before = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('before: %o', before);
 			const result = await request(app)
 				.post('/proposalVersions')
@@ -798,7 +813,7 @@ describe('/proposalVersions', () => {
 					fieldValues: [],
 				})
 				.expect(409);
-			const after = await loadTableMetrics('proposal_field_values');
+			const after = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -816,7 +831,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if a provided application form field ID does not exist', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -829,7 +845,7 @@ describe('/proposalVersions', () => {
 				name: null,
 			});
 			const nonExistentFieldId = 99999;
-			const before = await loadTableMetrics('proposal_field_values');
+			const before = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('before: %o', before);
 			const result = await request(app)
 				.post('/proposalVersions')
@@ -850,7 +866,7 @@ describe('/proposalVersions', () => {
 					],
 				})
 				.expect(409);
-			const after = await loadTableMetrics('proposal_field_values');
+			const after = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -866,7 +882,8 @@ describe('/proposalVersions', () => {
 		});
 
 		it('Returns 409 Conflict if a provided application form field ID is not associated with the supplied application form ID', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, null);
@@ -882,7 +899,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			const firstNameField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm1.id,
 				baseFieldShortCode: 'firstName',
@@ -899,7 +916,7 @@ describe('/proposalVersions', () => {
 				instructions: 'Please enter the last name of the applicant.',
 				inputType: null,
 			});
-			const before = await loadTableMetrics('proposal_field_values');
+			const before = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('before: %o', before);
 			const result = await request(app)
 				.post('/proposalVersions')
@@ -920,7 +937,7 @@ describe('/proposalVersions', () => {
 					],
 				})
 				.expect(409);
-			const after = await loadTableMetrics('proposal_field_values');
+			const after = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -940,9 +957,10 @@ describe('/proposalVersions', () => {
 
 	describe('conditional permissions on proposal field values', () => {
 		it('returns only field values matching the condition category', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
@@ -1067,9 +1085,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns all field values when grant has no conditions', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
@@ -1181,9 +1200,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('returns no field values when condition excludes all present categories', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
@@ -1274,9 +1294,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('filters field values correctly with in operator and single value', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
@@ -1398,9 +1419,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('does not expose field values from a different funder', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 
@@ -1485,9 +1507,10 @@ describe('/proposalVersions', () => {
 		});
 
 		it('does not expose field values across funders when one has conditional access', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 

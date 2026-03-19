@@ -805,4 +805,162 @@ describe('processBulkUploadTask', () => {
 			total: 2,
 		});
 	});
+
+	it('should resolve file attachment paths when archive has a single root folder and CSV uses stripped paths', async () => {
+		await createTestBaseFields();
+		const testAuthContext = await getTestAuthContext();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const attachmentsArchiveFile = await createTestFile(
+			db,
+			systemUserAuthContext,
+		);
+		const { applicationFormId } = await createTestApplicationForm(
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'favorite_file'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			proposalsDataFile.id,
+			applicationFormId,
+			{
+				attachmentsArchiveFileId: attachmentsArchiveFile.id,
+			},
+		);
+
+		s3Mock
+			.on(GetObjectCommand, { Key: proposalsDataFile.storageKey })
+			.resolves({
+				Body: sdkStreamMixin(
+					fs.createReadStream(
+						path.join(
+							__dirname,
+							'fixtures',
+							'processBulkUploadTask',
+							'validCsvTemplateWithNestedArchive.csv',
+						),
+					),
+				),
+			});
+
+		s3Mock
+			.on(GetObjectCommand, { Key: attachmentsArchiveFile.storageKey })
+			.resolves({
+				Body: sdkStreamMixin(
+					fs.createReadStream(
+						path.join(
+							__dirname,
+							'fixtures',
+							'processBulkUploadTask',
+							'attachments-nested-root-folder.zip',
+						),
+					),
+				),
+			});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const fileBundle = await loadFileBundle(
+			db,
+			testAuthContext,
+			systemUser.keycloakUserId,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		const oneTxtFile = fileBundle.entries.find((f) => f.name === 'one.txt');
+		const twoTxtFile = fileBundle.entries.find((f) => f.name === 'two.txt');
+		if (oneTxtFile === undefined || twoTxtFile === undefined) {
+			throw new Error('The attachment files were not created');
+		}
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
+	});
+
+	it('should resolve file attachment paths when archive has a single root folder and CSV uses full paths', async () => {
+		await createTestBaseFields();
+		const testAuthContext = await getTestAuthContext();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const attachmentsArchiveFile = await createTestFile(
+			db,
+			systemUserAuthContext,
+		);
+		const { applicationFormId } = await createTestApplicationForm(
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'favorite_file'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			systemUserAuthContext,
+			proposalsDataFile.id,
+			applicationFormId,
+			{
+				attachmentsArchiveFileId: attachmentsArchiveFile.id,
+			},
+		);
+
+		s3Mock
+			.on(GetObjectCommand, { Key: proposalsDataFile.storageKey })
+			.resolves({
+				Body: sdkStreamMixin(
+					fs.createReadStream(
+						path.join(
+							__dirname,
+							'fixtures',
+							'processBulkUploadTask',
+							'validCsvTemplateWithNestedArchiveFullPaths.csv',
+						),
+					),
+				),
+			});
+
+		s3Mock
+			.on(GetObjectCommand, { Key: attachmentsArchiveFile.storageKey })
+			.resolves({
+				Body: sdkStreamMixin(
+					fs.createReadStream(
+						path.join(
+							__dirname,
+							'fixtures',
+							'processBulkUploadTask',
+							'attachments-nested-root-folder.zip',
+						),
+					),
+				),
+			});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const fileBundle = await loadFileBundle(
+			db,
+			testAuthContext,
+			systemUser.keycloakUserId,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		const oneTxtFile = fileBundle.entries.find((f) => f.name === 'one.txt');
+		const twoTxtFile = fileBundle.entries.find((f) => f.name === 'two.txt');
+		if (oneTxtFile === undefined || twoTxtFile === undefined) {
+			throw new Error('The attachment files were not created');
+		}
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
+	});
 });

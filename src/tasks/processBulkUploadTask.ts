@@ -235,10 +235,48 @@ const uploadFileDataToS3 = async (
 	return file;
 };
 
+const METADATA_ROOT_DIRECTORIES = new Set<string>(['__MACOSX']);
+
+export const detectNestedRootFolder = (
+	entries: Record<string, { isDirectory: boolean }>,
+): string | null => {
+	const rootNames = new Set<string>();
+	let hasRootLevelFile = false;
+
+	for (const relativePath of Object.keys(entries)) {
+		const [firstComponent] = relativePath.split('/');
+		const rootComponent = firstComponent ?? relativePath;
+
+		if (METADATA_ROOT_DIRECTORIES.has(rootComponent)) {
+			continue;
+		}
+
+		if (relativePath.includes('/')) {
+			rootNames.add(rootComponent);
+		} else {
+			if (entries[relativePath]?.isDirectory !== true) {
+				hasRootLevelFile = true;
+			}
+			rootNames.add(rootComponent);
+		}
+	}
+
+	if (rootNames.size === SINGLE_STEP && !hasRootLevelFile) {
+		const [rootName] = rootNames;
+		return rootName ?? null;
+	}
+	return null;
+};
+
+interface ProposalAttachmentsResult {
+	temporaryFileMap: Map<string, FileResult>;
+	nestedRootFolder: string | null;
+}
+
 const prepareProposalAttachments = async (
 	bulkUploadTask: BulkUploadTask,
 	graphileLogger: GraphileLogger,
-): Promise<Map<string, FileResult>> => {
+): Promise<ProposalAttachmentsResult> => {
 	const temporaryFileMap = new Map<string, FileResult>();
 
 	if (bulkUploadTask.attachmentsArchiveFile !== null) {
@@ -269,6 +307,10 @@ const prepareProposalAttachments = async (
 						);
 					});
 
+				const nestedRootFolder = detectNestedRootFolder(
+					attachmentsArchiveEntries,
+				);
+
 				await allNoLeaks(
 					Object.keys(attachmentsArchiveEntries).map(async (relativePath) => {
 						const { [relativePath]: archiveEntry } = attachmentsArchiveEntries;
@@ -288,6 +330,8 @@ const prepareProposalAttachments = async (
 						temporaryFileMap.set(relativePath, temporaryFile);
 					}),
 				);
+
+				return { temporaryFileMap, nestedRootFolder };
 			} finally {
 				await attachmentsArchiveZip.close();
 			}
@@ -303,7 +347,7 @@ const prepareProposalAttachments = async (
 		}
 	}
 
-	return temporaryFileMap;
+	return { temporaryFileMap, nestedRootFolder: null };
 };
 
 /**
@@ -322,7 +366,7 @@ class AttachmentsManager {
 	constructor(
 		private readonly dbConnection: TinyPg,
 		private readonly authContext: AuthContext,
-		private readonly attachmentTemporaryFiles: Map<string, FileResult>,
+		private readonly proposalAttachments: ProposalAttachmentsResult,
 		private readonly graphileLogger: GraphileLogger,
 	) {}
 
@@ -332,7 +376,22 @@ class AttachmentsManager {
 			return cachedAttachmentFile;
 		}
 
-		const temporaryFile = this.attachmentTemporaryFiles.get(relativePath);
+		let temporaryFile =
+			this.proposalAttachments.temporaryFileMap.get(relativePath);
+		let resolvedPath = relativePath;
+
+		if (
+			temporaryFile === undefined &&
+			this.proposalAttachments.nestedRootFolder !== null
+		) {
+			const prefixedPath = `${this.proposalAttachments.nestedRootFolder}/${relativePath}`;
+			temporaryFile =
+				this.proposalAttachments.temporaryFileMap.get(prefixedPath);
+			if (temporaryFile !== undefined) {
+				resolvedPath = prefixedPath;
+			}
+		}
+
 		if (temporaryFile === undefined) {
 			throw new Error(
 				`No file found for attachment with path "${relativePath}"`,
@@ -340,9 +399,9 @@ class AttachmentsManager {
 		}
 
 		const { size } = await stat(temporaryFile.path);
-		const mimeType = getMimeType(relativePath);
+		const mimeType = getMimeType(resolvedPath);
 		const s3Bucket = getDefaultS3Bucket();
-		const fileName = getFileNameFromPath(relativePath);
+		const fileName = getFileNameFromPath(resolvedPath);
 		const attachmentFile = await createFile(
 			this.dbConnection,
 			this.authContext,
@@ -357,7 +416,7 @@ class AttachmentsManager {
 		await uploadFileDataToS3(
 			attachmentFile,
 			temporaryFile,
-			relativePath,
+			resolvedPath,
 			this.graphileLogger,
 		);
 		this.cachedAttachmentFiles.set(relativePath, attachmentFile);
@@ -599,7 +658,7 @@ export const processBulkUploadTask = async (
 
 	try {
 		await cleanupTemporaryFileMap(
-			temporaryProposalAttachmentFiles,
+			temporaryProposalAttachmentFiles.temporaryFileMap,
 			graphileLogger,
 		);
 	} catch (err) {

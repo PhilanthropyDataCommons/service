@@ -1,6 +1,10 @@
 import request from 'supertest';
 import { app } from '../app';
-import { db, createPermissionGrant, loadSystemUser } from '../database';
+import {
+	getDatabase,
+	createPermissionGrant,
+	loadSystemUser,
+} from '../database';
 import { expectArray } from '../test/asymettricMatchers';
 import {
 	createTestChangemaker,
@@ -20,7 +24,6 @@ import {
 	stringToKeycloakId,
 } from '../types';
 import { getAuthContext, getTestAuthContext } from '../test/utils';
-
 const agent = request.agent(app);
 
 describe('/organizations', () => {
@@ -32,6 +35,7 @@ describe('/organizations', () => {
 		});
 
 		it('returns changemaker, data provider, and funder selected by keycloak org id for admins', async () => {
+			const db = getDatabase();
 			const keycloakOrganizationId = stringToKeycloakId(
 				'bde830f0-d590-467a-8431-cdf9d6af1b87',
 			);
@@ -82,6 +86,7 @@ describe('/organizations', () => {
 		});
 
 		it('returns only the funder on which I have view permission', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const keycloakOrganizationId = 'b5465297-d63a-4371-8054-f94d95f1aace';
@@ -95,7 +100,7 @@ describe('/organizations', () => {
 				shortCode: 'funderdome',
 				keycloakOrganizationId,
 			});
-			const authContext = await getTestAuthContext(false);
+			const authContext = await getTestAuthContext(db, false);
 			// Grant myself view access to this organization
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -131,6 +136,7 @@ describe('/organizations', () => {
 		});
 
 		it('returns only the data provider on which my org has view permission', async () => {
+			const db = getDatabase();
 			const keycloakOrganizationId = stringToKeycloakId(mockOrgId);
 
 			await createTestDataProvider(db, null, {

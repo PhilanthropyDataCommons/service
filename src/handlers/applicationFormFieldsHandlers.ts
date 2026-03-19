@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	hasOpportunityPermission,
 	loadApplicationForm,
 	loadApplicationFormField,
@@ -22,8 +22,10 @@ import {
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 import type { AuthContext } from '../types';
+import type { TinyPg } from 'tinypg';
 
 const checkApplicationFormFieldPermission = async (
+	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
 	applicationFormFieldId: number,
 	permission: PermissionGrantVerb,
@@ -64,6 +66,7 @@ const patchApplicationFormField = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { applicationFormFieldId } = coerceParams(req.params);
 	if (!isId(applicationFormFieldId)) {
 		throw new InputValidationError(
@@ -80,6 +83,7 @@ const patchApplicationFormField = async (
 	}
 
 	await checkApplicationFormFieldPermission(
+		db,
 		req,
 		applicationFormFieldId,
 		PermissionGrantVerb.EDIT,

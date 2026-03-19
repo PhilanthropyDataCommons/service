@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import { ajv } from '../ajv';
-import { db } from '../database';
+import { getDatabase } from '../database';
 import { isTinyPgErrorWithQueryContext } from '../types';
 import { DatabaseError, InputValidationError } from '../errors';
 import type { Request, Response, NextFunction } from 'express';
@@ -37,6 +37,7 @@ const getPlatformProviderResponsesByExternalId = (
 		);
 		return;
 	}
+	const db = getDatabase();
 	db.sql<PlatformProviderResponse>(
 		'platformProviderResponses.selectByExternalId',
 		{ externalId: req.query.externalId },
@@ -97,6 +98,7 @@ const postPlatformProviderResponse = (
 		);
 		return;
 	}
+	const db = getDatabase();
 
 	db.sql<PlatformProviderResponse>(
 		'platformProviderResponses.insertOne',

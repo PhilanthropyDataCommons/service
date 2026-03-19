@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	createBulkUploadTask,
 	getLimitValues,
 	hasOpportunityPermission,
@@ -30,8 +30,10 @@ import {
 import { addProcessBulkUploadJob } from '../jobQueue';
 import type { Request, Response } from 'express';
 import type { AuthContext } from '../types';
+import type { TinyPg } from 'tinypg';
 
 const validateApplicationFormCreatePermission = async (
+	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
 	applicationFormId: number,
 ): Promise<void> => {
@@ -68,6 +70,7 @@ const validateApplicationFormCreatePermission = async (
 };
 
 const validateFileOwnership = async (
+	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
 	fileId: number,
 	errorMessage: string,
@@ -94,6 +97,7 @@ const postBulkUploadTask = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const body = req.body as unknown;
 	if (!isWritableBulkUploadTask(body)) {
@@ -110,9 +114,10 @@ const postBulkUploadTask = async (
 		attachmentsArchiveFileId,
 	} = body;
 
-	await validateApplicationFormCreatePermission(req, applicationFormId);
+	await validateApplicationFormCreatePermission(db, req, applicationFormId);
 
 	await validateFileOwnership(
+		db,
 		req,
 		proposalsDataFileId,
 		'You must be the owner of the file specified by proposalsDataFileId.',
@@ -120,6 +125,7 @@ const postBulkUploadTask = async (
 
 	if (attachmentsArchiveFileId !== null) {
 		await validateFileOwnership(
+			db,
 			req,
 			attachmentsArchiveFileId,
 			'You must be the owner of the file specified by attachmentsArchiveFileId.',
@@ -161,6 +167,7 @@ const getBulkUploadTasks = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { createdBy } = extractCreatedByParameters(req);

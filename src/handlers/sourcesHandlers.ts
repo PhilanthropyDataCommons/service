@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	createSource,
 	getLimitValues,
 	hasChangemakerPermission,
@@ -30,6 +30,7 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	if (!isWritableSource(req.body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
@@ -87,6 +88,7 @@ const getSources = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const bundle = await loadSourceBundle(db, req, limit, offset);
@@ -98,6 +100,7 @@ const getSources = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getSource = async (req: Request, res: Response): Promise<void> => {
+	const db = getDatabase();
 	const { sourceId } = coerceParams(req.params);
 	if (!isId(sourceId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
@@ -110,6 +113,7 @@ const getSource = async (req: Request, res: Response): Promise<void> => {
 };
 
 const deleteSource = async (req: Request, res: Response): Promise<void> => {
+	const db = getDatabase();
 	const { sourceId } = coerceParams(req.params);
 	if (!isId(sourceId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);

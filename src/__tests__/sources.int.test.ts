@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createEphemeralUserGroupAssociation,
 	createSource,
 	loadSystemSource,
@@ -31,7 +31,6 @@ import {
 	PostgresErrorCode,
 	stringToKeycloakId,
 } from '../types';
-
 const agent = request.agent(app);
 
 describe('/sources', () => {
@@ -41,6 +40,7 @@ describe('/sources', () => {
 		});
 
 		it('returns the system source when no data has been added', async () => {
+			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
 			await agent
 				.get('/sources')
@@ -52,6 +52,7 @@ describe('/sources', () => {
 		});
 
 		it('returns all sources present in the database', async () => {
+			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
 			const changemaker = await createTestChangemaker(db, null);
 			const source = await createSource(db, null, {
@@ -72,6 +73,7 @@ describe('/sources', () => {
 		});
 
 		it('returns exactly one source selected by id', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			const source = await createSource(db, null, {
 				label: 'Example Inc.',
@@ -105,6 +107,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 404 when id is not found', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			await createSource(db, null, {
 				label: 'not to be returned',
@@ -120,8 +123,9 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one changemaker source for an admin user', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -131,7 +135,7 @@ describe('/sources', () => {
 					changemakerId: changemaker.id,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 			expect(before.count).toEqual(1);
 			// Source response includes a shallow changemaker (no fields/fiscalSponsors)
 			expect(result.body).toMatchObject({
@@ -151,6 +155,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 409 conflict when label is not unique on changemaker foreign key', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			await createSource(db, null, {
 				label: 'Example Corp',
@@ -176,6 +181,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 409 conflict when label is not unique on data provider foreign key', async () => {
+			const db = getDatabase();
 			const dataProvider = await createTestDataProvider(db, null);
 			await createSource(db, null, {
 				label: 'Example Corp',
@@ -201,6 +207,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 409 conflict when label is not unique on funder foreign key', async () => {
+			const db = getDatabase();
 			const funder = await createTestFunder(db, null);
 			await createSource(db, null, {
 				label: 'Example Corp',
@@ -226,9 +233,10 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one changemaker source for a user with edit permissions on that changemaker', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const changemaker = await createTestChangemaker(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -238,7 +246,7 @@ describe('/sources', () => {
 				scope: [PermissionGrantEntityType.CHANGEMAKER],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -248,7 +256,7 @@ describe('/sources', () => {
 					changemakerId: changemaker.id,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 			// Source response includes a shallow changemaker (no fields/fiscalSponsors)
 			expect(result.body).toMatchObject({
 				id: 2,
@@ -267,9 +275,10 @@ describe('/sources', () => {
 		});
 
 		it('returns 422 if the user does not have edit permission on the changemaker', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const changemaker = await createTestChangemaker(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -305,7 +314,7 @@ describe('/sources', () => {
 				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
 			});
 
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -315,7 +324,7 @@ describe('/sources', () => {
 					changemakerId: changemaker.id,
 				})
 				.expect(422);
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 			expect(result.body).toEqual({
 				details: [{ name: 'UnprocessableEntityError' }],
 				message:
@@ -326,8 +335,9 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one funder source for an admin user', async () => {
+			const db = getDatabase();
 			const funder = await createTestFunder(db, null);
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -337,7 +347,7 @@ describe('/sources', () => {
 					funderShortCode: funder.shortCode,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 			expect(before.count).toEqual(1);
 			expect(result.body).toMatchObject({
 				id: 2,
@@ -350,9 +360,10 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one funder source for a user with edit permissions on that funder', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const funder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -362,7 +373,7 @@ describe('/sources', () => {
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -372,7 +383,7 @@ describe('/sources', () => {
 					funderShortCode: funder.shortCode,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 			expect(result.body).toMatchObject({
 				id: 2,
 				label: 'Example Corp',
@@ -384,9 +395,10 @@ describe('/sources', () => {
 		});
 
 		it('returns 422 if the user does not have edit permission on the funder', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const funder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -422,7 +434,7 @@ describe('/sources', () => {
 				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
 			});
 
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -432,7 +444,7 @@ describe('/sources', () => {
 					funderShortCode: funder.shortCode,
 				})
 				.expect(422);
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 			expect(result.body).toEqual({
 				details: [{ name: 'UnprocessableEntityError' }],
 				message:
@@ -443,8 +455,9 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one data provider source for an admin user', async () => {
+			const db = getDatabase();
 			const dataProvider = await createTestDataProvider(db, null);
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -454,7 +467,7 @@ describe('/sources', () => {
 					dataProviderShortCode: dataProvider.shortCode,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 			expect(before.count).toEqual(1);
 			expect(result.body).toMatchObject({
 				id: 2,
@@ -467,9 +480,10 @@ describe('/sources', () => {
 		});
 
 		it('creates and returns exactly one data provider source for a user with edit permissions on the data provider', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const dataProvider = await createTestDataProvider(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -479,7 +493,7 @@ describe('/sources', () => {
 				scope: [PermissionGrantEntityType.DATA_PROVIDER],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -489,7 +503,7 @@ describe('/sources', () => {
 					dataProviderShortCode: dataProvider.shortCode,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 			expect(result.body).toMatchObject({
 				id: 2,
 				label: 'Example Corp',
@@ -501,9 +515,10 @@ describe('/sources', () => {
 		});
 
 		it('returns 422 if the user does not have edit permission on the data provider', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const dataProvider = await createTestDataProvider(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -531,7 +546,7 @@ describe('/sources', () => {
 				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
 			});
 
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -541,7 +556,7 @@ describe('/sources', () => {
 					dataProviderShortCode: dataProvider.shortCode,
 				})
 				.expect(422);
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 			expect(result.body).toEqual({
 				details: [{ name: 'UnprocessableEntityError' }],
 				message:
@@ -552,6 +567,7 @@ describe('/sources', () => {
 		});
 
 		it('returns 400 bad request when no label sent', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			const result = await agent
 				.post('/sources')
@@ -592,12 +608,13 @@ describe('/sources', () => {
 		});
 
 		it('deletes exactly one source that has no proposals associated with it', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			const localSource = await createSource(db, null, {
 				changemakerId: changemaker.id,
 				label: 'Example Inc.',
 			});
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 
 			await agent
 				.delete(`/sources/${localSource.id}`)
@@ -605,13 +622,14 @@ describe('/sources', () => {
 				.set(adminUserAuthHeader)
 				.expect(200);
 
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 
 			expect(before.count).toEqual(2);
 			expect(after.count).toEqual(1);
 		});
 
 		it('Returns 422 Unprocessable Content when it tries to delete a source that is associated with a proposal', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const changemaker = await createTestChangemaker(db, null);
@@ -637,7 +655,7 @@ describe('/sources', () => {
 				applicationFormId: applicationForm.id,
 				sourceId: localSource.id,
 			});
-			const before = await loadTableMetrics('sources');
+			const before = await loadTableMetrics(db, 'sources');
 
 			await agent
 				.delete(`/sources/${localSource.id}`)
@@ -645,7 +663,7 @@ describe('/sources', () => {
 				.set(adminUserAuthHeader)
 				.expect(422);
 
-			const after = await loadTableMetrics('sources');
+			const after = await loadTableMetrics(db, 'sources');
 
 			expect(before.count).toEqual(after.count);
 		});

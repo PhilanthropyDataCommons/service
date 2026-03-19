@@ -1,6 +1,10 @@
 import { requireDataProviderPermission } from '../requireDataProviderPermission';
 import { InputValidationError, UnauthorizedError } from '../../errors';
-import { db, createPermissionGrant, loadSystemUser } from '../../database';
+import {
+	getDatabase,
+	createPermissionGrant,
+	loadSystemUser,
+} from '../../database';
 import { createTestDataProvider } from '../../test/factories';
 import { getAuthContext, getMockedUser, loadTestUser } from '../../test/utils';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
@@ -71,7 +75,8 @@ describe('requireDataProviderPermission', () => {
 
 	it('calls next with an UnauthorizedError when user lacks permission', (done) => {
 		void (async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const dataProvider = await createTestDataProvider(db, null);
 
 			const req = getMockRequest() as AuthenticatedRequest;
@@ -98,9 +103,10 @@ describe('requireDataProviderPermission', () => {
 
 	it('calls next without error when user has the required permission', (done) => {
 		void (async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const dataProvider = await createTestDataProvider(db, null);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -132,9 +138,10 @@ describe('requireDataProviderPermission', () => {
 
 	it('calls next with an UnauthorizedError when user has a different permission than required', (done) => {
 		void (async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const dataProvider = await createTestDataProvider(db, null);
 
 			await createPermissionGrant(db, systemUserAuthContext, {

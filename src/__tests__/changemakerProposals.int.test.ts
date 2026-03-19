@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createChangemakerFieldValue,
 	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
@@ -41,8 +41,9 @@ import {
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
 } from '../types';
+import type { TinyPg } from 'tinypg';
 
-const insertTestChangemakers = async () => {
+const insertTestChangemakers = async (db: TinyPg) => {
 	await createTestChangemaker(db, null, {
 		taxId: '11-1111111',
 		name: 'Example Inc.',
@@ -61,10 +62,11 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('only returns the ChangemakerProposals that the user has rights to view', async () => {
+			const db = getDatabase();
 			const anotherFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const visibleFunder = await createTestFunder(db, null, {
 				name: 'Visible Funder',
@@ -157,10 +159,11 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns the ChangemakerProposals for the specified changemaker', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
-			await insertTestChangemakers();
+			await insertTestChangemakers(db);
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: '1',
@@ -237,10 +240,11 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns the ProposalChangemakers for the specified proposal', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
-			await insertTestChangemakers();
+			await insertTestChangemakers(db);
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: '1',
@@ -293,7 +297,8 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns a 400 bad request when a non-integer ID is sent', async () => {
-			await insertTestChangemakers();
+			const db = getDatabase();
+			await insertTestChangemakers(db);
 			await request(app)
 				.get('/changemakerProposals?changemaker=foo')
 				.set(authHeader)
@@ -301,6 +306,7 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('decorates proposal version file field values with downloadUrl', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testFunder = await createTestFunder(db, null);
@@ -415,6 +421,7 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('decorates changemaker field values with downloadUrl', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
@@ -514,15 +521,16 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('creates exactly one ChangemakerProposal when the user is an administrator', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
-			await insertTestChangemakers();
+			await insertTestChangemakers(db);
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: '1',
 			});
-			const before = await loadTableMetrics('changemakers_proposals');
+			const before = await loadTableMetrics(db, 'changemakers_proposals');
 			const result = await request(app)
 				.post('/changemakerProposals')
 				.type('application/json')
@@ -532,7 +540,7 @@ describe('/changemakerProposals', () => {
 					proposalId: 1,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('changemakers_proposals');
+			const after = await loadTableMetrics(db, 'changemakers_proposals');
 			expect(before.count).toEqual(0);
 			expect(result.body).toStrictEqual({
 				id: 1,
@@ -562,9 +570,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('creates exactly one ChangemakerProposal when the user has write and view permission on the funder associated with the proposal opportunity', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const testFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -582,12 +591,12 @@ describe('/changemakerProposals', () => {
 			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: testFunder.shortCode,
 			});
-			await insertTestChangemakers();
+			await insertTestChangemakers(db);
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: '1',
 			});
-			const before = await loadTableMetrics('changemakers_proposals');
+			const before = await loadTableMetrics(db, 'changemakers_proposals');
 			const result = await request(app)
 				.post('/changemakerProposals')
 				.type('application/json')
@@ -597,7 +606,7 @@ describe('/changemakerProposals', () => {
 					proposalId: 1,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('changemakers_proposals');
+			const after = await loadTableMetrics(db, 'changemakers_proposals');
 			expect(result.body).toStrictEqual({
 				id: 1,
 				changemakerId: 1,
@@ -626,9 +635,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 422 Unprocessable Content if the user does not have edit permission on the funder associated with the proposal opportunity', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const testFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -646,12 +656,12 @@ describe('/changemakerProposals', () => {
 			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: testFunder.shortCode,
 			});
-			await insertTestChangemakers();
+			await insertTestChangemakers(db);
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: '1',
 			});
-			const before = await loadTableMetrics('changemakers_proposals');
+			const before = await loadTableMetrics(db, 'changemakers_proposals');
 			const result = await request(app)
 				.post('/changemakerProposals')
 				.type('application/json')
@@ -661,7 +671,7 @@ describe('/changemakerProposals', () => {
 					proposalId: 1,
 				})
 				.expect(422);
-			const after = await loadTableMetrics('changemakers_proposals');
+			const after = await loadTableMetrics(db, 'changemakers_proposals');
 			expect(result.body).toEqual({
 				details: [
 					{
@@ -676,10 +686,11 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 400 bad request when no proposalId is sent', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
-			await insertTestChangemakers();
+			await insertTestChangemakers(db);
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: '1',
@@ -699,10 +710,11 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 400 bad request when no changemakerId is sent', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
-			await insertTestChangemakers();
+			await insertTestChangemakers(db);
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: '1',
@@ -722,8 +734,9 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 422 Unprocessable Content when a non-existent proposal is sent', async () => {
+			const db = getDatabase();
 			await createTestOpportunity(db, null);
-			await insertTestChangemakers();
+			await insertTestChangemakers(db);
 			const result = await request(app)
 				.post('/changemakerProposals')
 				.type('application/json')
@@ -745,9 +758,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 422 Unprocessable Content when a non-existent changemaker is sent', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const testFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -780,9 +794,10 @@ describe('/changemakerProposals', () => {
 		});
 
 		it('returns 409 Conflict when attempting to create a duplicate ChangemakerProposal', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const testFunder = await createTestFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -796,7 +811,7 @@ describe('/changemakerProposals', () => {
 			const opportunity = await createTestOpportunity(db, null, {
 				funderShortCode: testFunder.shortCode,
 			});
-			await insertTestChangemakers();
+			await insertTestChangemakers(db);
 			await createProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: '1',

@@ -12,7 +12,7 @@
  *
  * If any of the checks fail, the middleware will pass an appropriate error to the next middleware.
  */
-import { db } from '../database';
+import { getDatabase } from '../database';
 import { hasFunderPermission } from '../database/operations';
 import { InputValidationError, UnauthorizedError } from '../errors';
 import {
@@ -35,6 +35,7 @@ const requireFunderPermission =
 				next();
 				return;
 			}
+			const db = getDatabase();
 			const {
 				params: { funderShortCode },
 			} = req;

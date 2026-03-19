@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createBaseFieldsCopyTask,
 	createOrUpdateUser,
 	loadTableMetrics,
@@ -42,7 +42,8 @@ describe('/tasks/baseFieldsCopy', () => {
 		});
 
 		it('returns all BaseFieldsCopy Tasks for administrative users', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -90,7 +91,8 @@ describe('/tasks/baseFieldsCopy', () => {
 		});
 
 		it('supports pagination', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			await Array.from(Array(20)).reduce(async (p) => {
 				await p;
@@ -197,7 +199,8 @@ describe('/tasks/baseFieldsCopy', () => {
 		});
 
 		it('creates exactly one BaseField copy task', async () => {
-			const before = await loadTableMetrics('base_fields_copy_tasks');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'base_fields_copy_tasks');
 			const result = await request(app)
 				.post('/tasks/baseFieldsCopy')
 				.type('application/json')
@@ -206,8 +209,8 @@ describe('/tasks/baseFieldsCopy', () => {
 					pdcApiUrl: MOCK_API_URL,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('base_fields_copy_tasks');
-			const testUser = await loadTestUser();
+			const after = await loadTableMetrics(db, 'base_fields_copy_tasks');
+			const testUser = await loadTestUser(db);
 
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({

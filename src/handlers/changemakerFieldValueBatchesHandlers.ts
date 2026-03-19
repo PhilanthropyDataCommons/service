@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	createChangemakerFieldValueBatch,
 	getLimitValues,
 	loadChangemakerFieldValueBatch,
@@ -29,6 +29,7 @@ const postChangemakerFieldValueBatch = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const body = req.body as unknown;
 	if (!isWritableChangemakerFieldValueBatch(body)) {
@@ -73,6 +74,7 @@ const getChangemakerFieldValueBatches = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const bundle = await loadChangemakerFieldValueBatchBundle(
@@ -95,6 +97,7 @@ const getChangemakerFieldValueBatch = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { batchId } = coerceParams(req.params);
 	if (!isId(batchId)) {
 		throw new InputValidationError(

@@ -3,7 +3,7 @@ import { migrate as pgMigrate } from 'postgres-schema-migrations';
 import { requireEnv } from 'require-env-variable';
 import { runJobQueueMigrations } from '../jobQueue';
 import { getLogger } from '../logger';
-import { db } from './db';
+import type { TinyPg } from 'tinypg';
 import type { PoolClient } from 'pg';
 
 const logger = getLogger(__filename);
@@ -42,7 +42,7 @@ const setPsqlSettingsForMigrations = async (
 	);
 };
 
-export const migrate = async (schema = 'public'): Promise<void> => {
+export const migrate = async (db: TinyPg, schema = 'public'): Promise<void> => {
 	const client = await db.getClient();
 	try {
 		await setPsqlSettingsForMigrations(client);
@@ -52,7 +52,7 @@ export const migrate = async (schema = 'public'): Promise<void> => {
 			},
 			schema,
 		});
-		await runJobQueueMigrations();
+		await runJobQueueMigrations(db);
 	} finally {
 		client.release();
 	}

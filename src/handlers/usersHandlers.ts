@@ -1,5 +1,5 @@
 import { HTTP_STATUS } from '../constants';
-import { db, getLimitValues, loadUserBundle } from '../database';
+import { getDatabase, getLimitValues, loadUserBundle } from '../database';
 import { isAuthContext } from '../types';
 import { FailedMiddlewareError } from '../errors';
 import {
@@ -12,6 +12,7 @@ const getUsers = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { keycloakUserId } = extractKeycloakUserIdParameters(req);

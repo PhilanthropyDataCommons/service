@@ -1,7 +1,7 @@
 import { requireChangemakerPermission } from '../requireChangemakerPermission';
 import { InputValidationError, UnauthorizedError } from '../../errors';
 import {
-	db,
+	getDatabase,
 	createChangemaker,
 	createPermissionGrant,
 	loadSystemUser,
@@ -75,7 +75,8 @@ describe('requireChangemakerPermission', () => {
 
 	it('calls next with an UnauthorizedError when user lacks permission', (done) => {
 		void (async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Test Changemaker',
@@ -106,9 +107,10 @@ describe('requireChangemakerPermission', () => {
 
 	it('calls next without error when user has the required permission', (done) => {
 		void (async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '22-2222222',
 				name: 'Permitted Changemaker',
@@ -144,9 +146,10 @@ describe('requireChangemakerPermission', () => {
 
 	it('calls next with an UnauthorizedError when user has a different permission than required', (done) => {
 		void (async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const changemaker = await createChangemaker(db, null, {
 				taxId: '33-3333333',
 				name: 'View Only Changemaker',

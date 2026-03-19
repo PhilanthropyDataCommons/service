@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createApplicationForm,
 	createApplicationFormField,
 	createOrUpdateBaseField,
@@ -51,8 +51,9 @@ import {
 	PostgresErrorCode,
 	stringToKeycloakId,
 } from '../types';
+import type { TinyPg } from 'tinypg';
 
-const insertTestChangemakers = async () => {
+const insertTestChangemakers = async (db: TinyPg) => {
 	await createChangemaker(db, null, {
 		taxId: '11-1111111',
 		name: 'Example Inc.',
@@ -65,11 +66,11 @@ const insertTestChangemakers = async () => {
 	});
 };
 
-const setupTestContext = async () => {
+const setupTestContext = async (db: TinyPg) => {
 	const systemSource = await loadSystemSource(db, null);
 	const systemUser = await loadSystemUser(db, null);
 	const systemUserAuthContext = getAuthContext(systemUser, true);
-	const testUser = await loadTestUser();
+	const testUser = await loadTestUser(db);
 	const baseFieldEmail = await createOrUpdateBaseField(db, null, {
 		label: 'Fifty one fifty three',
 		shortCode: 'fifty_one_fifty_three',
@@ -181,7 +182,8 @@ describe('/changemakers', () => {
 		});
 
 		it('returns changemakers present in the database', async () => {
-			await insertTestChangemakers();
+			const db = getDatabase();
+			await insertTestChangemakers(db);
 			await request(app)
 				.get('/changemakers')
 				.set(authHeader)
@@ -214,6 +216,7 @@ describe('/changemakers', () => {
 		});
 
 		it('returns according to pagination parameters', async () => {
+			const db = getDatabase();
 			await Array.from(Array(20)).reduce(async (p, _, i) => {
 				await p;
 				await createChangemaker(db, null, {
@@ -285,7 +288,8 @@ describe('/changemakers', () => {
 		});
 
 		it('returns a subset of changemakers present in the database when a proposal filter is provided', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
 			await createProposal(db, testUserAuthContext, {
@@ -327,7 +331,8 @@ describe('/changemakers', () => {
 		});
 
 		it('does not return duplicate changemakers when a changemaker has multiple proposals', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
 			await createProposal(db, testUserAuthContext, {
@@ -385,7 +390,8 @@ describe('/changemakers', () => {
 
 	describe('GET /:id', () => {
 		it('does not require authentication', async () => {
-			await insertTestChangemakers();
+			const db = getDatabase();
+			await insertTestChangemakers(db);
 			await request(app).get('/changemakers/1').expect(200);
 		});
 
@@ -394,7 +400,8 @@ describe('/changemakers', () => {
 		});
 
 		it('returns the specified changemaker', async () => {
-			await insertTestChangemakers();
+			const db = getDatabase();
+			await insertTestChangemakers(db);
 			await request(app)
 				.get('/changemakers/2')
 				.set(authHeader)
@@ -425,13 +432,14 @@ describe('/changemakers', () => {
 
 		describe('tests that find gold data among proposals and share a common db', () => {
 			it('returns the latest valid value for a base field when auth id is sent', async () => {
+				const db = getDatabase();
 				const {
 					firstChangemaker,
 					firstFunderOpportunity,
 					baseFieldEmail,
 					systemUserAuthContext,
 					systemSource,
-				} = await setupTestContext();
+				} = await setupTestContext(db);
 				// Associate a base field associated with one opportunity/org, and add three responses.
 				const { shortCode: baseFieldShortCode } = baseFieldEmail;
 				const { id: changemakerId } = firstChangemaker;
@@ -562,6 +570,7 @@ describe('/changemakers', () => {
 			});
 
 			it('returns older changemaker data when newer funder data is present', async () => {
+				const db = getDatabase();
 				const {
 					secondChangemaker: changemaker,
 					secondChangemakerSourceId: changemakerSourceId,
@@ -569,7 +578,7 @@ describe('/changemakers', () => {
 					firstFunderOpportunity: opportunity,
 					baseFieldPhone,
 					systemUserAuthContext,
-				} = await setupTestContext();
+				} = await setupTestContext(db);
 
 				const { shortCode: baseFieldShortCode } = baseFieldPhone;
 				const { id: proposalId } = await createProposal(
@@ -662,6 +671,7 @@ describe('/changemakers', () => {
 			});
 
 			it('returns older funder data when newer data platform provider data is present', async () => {
+				const db = getDatabase();
 				const {
 					secondChangemaker: changemaker,
 					firstFunderSourceId: funderSourceId,
@@ -669,7 +679,7 @@ describe('/changemakers', () => {
 					baseFieldPhone,
 					firstFunderOpportunity: opportunity,
 					systemUserAuthContext,
-				} = await setupTestContext();
+				} = await setupTestContext(db);
 
 				const { shortCode: baseFieldShortCode } = baseFieldPhone;
 				const { id: proposalId } = await createProposal(
@@ -758,6 +768,7 @@ describe('/changemakers', () => {
 			});
 
 			it('returns newer data when only data platform provider data is present', async () => {
+				const db = getDatabase();
 				const {
 					secondChangemaker: changemaker,
 					systemUserAuthContext,
@@ -765,7 +776,7 @@ describe('/changemakers', () => {
 					firstDataProviderSourceId,
 					baseFieldWebsite,
 					secondDataProviderSourceId,
-				} = await setupTestContext();
+				} = await setupTestContext(db);
 
 				// Set up data platform provider sources.
 				// Associate one opportunity, one changemaker, and two responses with a base field.
@@ -857,12 +868,13 @@ describe('/changemakers', () => {
 			});
 
 			it('does not return forbidden base field data', async () => {
+				const db = getDatabase();
 				const {
 					secondChangemaker: changemaker,
 					systemUserAuthContext,
 					firstFunderOpportunity,
 					firstFunderSourceId: funderSourceId,
-				} = await setupTestContext();
+				} = await setupTestContext(db);
 
 				const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 					label: 'Forbidden Field',
@@ -943,7 +955,8 @@ describe('/changemakers', () => {
 		});
 
 		it('creates exactly one changemaker', async () => {
-			const before = await loadTableMetrics('changemakers');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'changemakers');
 			const result = await request(app)
 				.post('/changemakers')
 				.type('application/json')
@@ -954,7 +967,7 @@ describe('/changemakers', () => {
 					keycloakOrganizationId: null,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('changemakers');
+			const after = await loadTableMetrics(db, 'changemakers');
 			expect(before.count).toEqual(0);
 			expect(result.body).toStrictEqual({
 				id: 1,
@@ -999,6 +1012,7 @@ describe('/changemakers', () => {
 		});
 
 		it('returns 409 conflict when an existing EIN + name combination is submitted', async () => {
+			const db = getDatabase();
 			await createChangemaker(db, null, {
 				taxId: '11-1111111',
 				name: 'Example Inc.',
@@ -1027,6 +1041,7 @@ describe('/changemakers', () => {
 
 	describe('PATCH /:id', () => {
 		it('Successfully sets a keycloakOrganizationId where previously null', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null, {
 				keycloakOrganizationId: null,
 			});
@@ -1050,6 +1065,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Successfully changes a taxId', async () => {
+			const db = getDatabase();
 			const originalTaxId = '9804410587598905789786443694633460095646';
 			const changemaker = await createTestChangemaker(db, null, {
 				taxId: originalTaxId,
@@ -1072,6 +1088,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Successfully changes a name and Keycloak organization ID', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null, {
 				name: 'Original Name',
 				keycloakOrganizationId: stringToKeycloakId(
@@ -1158,6 +1175,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Returns user error when no fields are sent', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			await request(app)
 				.patch(`/changemakers/${changemaker.id}`)
@@ -1168,6 +1186,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Returns 400 validation error when taxId is set to null', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			const result = await request(app)
 				.patch(`/changemakers/${changemaker.id}`)
@@ -1184,6 +1203,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Returns 400 validation error when name is set to null', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			const result = await request(app)
 				.patch(`/changemakers/${changemaker.id}`)
@@ -1200,6 +1220,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Successfully sets keycloakOrganizationId to null', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null, {
 				keycloakOrganizationId: stringToKeycloakId(
 					'12345678-1234-1234-1234-123456789abc',
@@ -1222,6 +1243,7 @@ describe('/changemakers', () => {
 
 	describe('PUT /:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId', () => {
 		it('Successfully adds and reflects two fiscal sponsorships', async () => {
+			const db = getDatabase();
 			const fiscalSponsee = await createTestChangemaker(db, null, {
 				name: 'Fiscal Sponsee',
 			});
@@ -1288,6 +1310,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires authentication', async () => {
+			const db = getDatabase();
 			const fiscalSponsee = await createTestChangemaker(db, null, {
 				name: 'Fiscal Sponsee',
 			});
@@ -1304,6 +1327,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires sponsor to differ from sponsee', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null);
 			await request(app)
 				.put(`/changemakers/${changemaker.id}/fiscalSponsors/${changemaker.id}`)
@@ -1314,6 +1338,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires integer fiscal sponsee changemaker ID', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null, {
 				name: 'Fiscal Sponsee',
 			});
@@ -1331,6 +1356,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires integer fiscal sponsor changemaker ID', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null, {
 				name: 'Fiscal Sponsee',
 			});
@@ -1350,6 +1376,7 @@ describe('/changemakers', () => {
 
 	describe('DELETE /:changemakerId/fiscalSponsors/:fiscalSponsorChangemakerId', () => {
 		it('Successfully deletes and reflects fiscal sponsorship deletion', async () => {
+			const db = getDatabase();
 			const fiscalSponsee = await createTestChangemaker(db, null, {
 				name: 'Fiscal Sponsee',
 			});
@@ -1403,6 +1430,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires integer fiscal sponsee changemaker ID', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null, {
 				name: 'Fiscal Sponsee',
 			});
@@ -1420,6 +1448,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Requires integer fiscal sponsor changemaker ID', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null, {
 				name: 'Fiscal Sponsee',
 			});
@@ -1437,6 +1466,7 @@ describe('/changemakers', () => {
 		});
 
 		it('Returns 404 on non-existent row', async () => {
+			const db = getDatabase();
 			const changemaker = await createTestChangemaker(db, null, {
 				name: 'Fiscal Sponsee',
 			});
@@ -1456,9 +1486,10 @@ describe('/changemakers', () => {
 
 	describe('GET /:id with ChangemakerFieldValues', () => {
 		it('returns ChangemakerFieldValue when no ProposalFieldValue exists', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const baseField = await createOrUpdateBaseField(db, null, {
 				label: 'Organization Mission',
 				shortCode: 'org_mission_cfv_test',
@@ -1519,9 +1550,10 @@ describe('/changemakers', () => {
 		});
 
 		it('returns changemaker-sourced ChangemakerFieldValue over funder-sourced ProposalFieldValue', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const baseField = await createOrUpdateBaseField(db, null, {
 				label: 'Organization Website',
 				shortCode: 'org_website_priority_test',
@@ -1633,9 +1665,10 @@ describe('/changemakers', () => {
 		});
 
 		it('returns newer ChangemakerFieldValue when both have same source priority', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const baseField = await createOrUpdateBaseField(db, null, {
 				label: 'Organization Phone',
 				shortCode: 'org_phone_recency_test',
@@ -1718,6 +1751,7 @@ describe('/changemakers', () => {
 		});
 
 		it('does not return invalid ChangemakerFieldValues', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const baseField = await createOrUpdateBaseField(db, null, {
@@ -1768,9 +1802,10 @@ describe('/changemakers', () => {
 		});
 
 		it('returns both ProposalFieldValue and ChangemakerFieldValue for different base fields', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const baseFieldEmail = await createOrUpdateBaseField(db, null, {
 				label: 'Org Email Multi',
 				shortCode: 'org_email_multi_test',
@@ -1909,9 +1944,10 @@ describe('/changemakers', () => {
 		});
 
 		it('only returns ProposalFieldValues from proposals where user has proposalFieldValue scope', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 
 			const baseFieldEmail = await createOrUpdateBaseField(db, null, {
 				label: 'Org Email Perm Test',
@@ -2080,9 +2116,10 @@ describe('/changemakers', () => {
 		});
 
 		it('only returns ChangemakerFieldValues when user has changemakerFieldValue scope or field is public', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 
 			// Create a restricted field (requires permission)
 			const restrictedBaseField = await createOrUpdateBaseField(db, null, {
@@ -2201,9 +2238,10 @@ describe('/changemakers', () => {
 		});
 
 		it('decorates ChangemakerFieldValue file fields with downloadUrl', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 
 			// Create a file-type base field
 			const baseFieldFile = await createOrUpdateBaseField(db, null, {
@@ -2288,9 +2326,10 @@ describe('/changemakers', () => {
 		});
 
 		it('decorates ProposalFieldValue file fields with downloadUrl', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 
 			// Create a file-type base field (must be ORGANIZATION category to appear in changemaker fields)
 			const baseFieldFile = await createOrUpdateBaseField(db, null, {

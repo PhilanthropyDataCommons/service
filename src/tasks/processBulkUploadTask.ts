@@ -11,7 +11,7 @@ import { async as AsyncZip } from 'node-stream-zip';
 import { lookup } from 'mime-types';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getS3Client } from '../s3';
-import { db } from '../database/db';
+import { getDatabase } from '../database/db';
 import { getDefaultS3Bucket } from '../config';
 import {
 	createBulkUploadLog,
@@ -152,7 +152,9 @@ const getChangemakerNameIndex = (fields: ApplicationFormField[]): number =>
 // for the task runner.  Currently this means the task runner is functioning as an administrative system user.
 // This creates risk where a task could behave in ways with escalated privileges, although currently
 // the implementation of the bulk upload processer should be safe.
-const loadSystemUserAuthContext = async (): Promise<AuthContext> => ({
+const loadSystemUserAuthContext = async (
+	db: Pick<TinyPg, 'sql'>,
+): Promise<AuthContext> => ({
 	user: await loadSystemUser(db, null),
 	role: {
 		isAdministrator: true,
@@ -160,6 +162,7 @@ const loadSystemUserAuthContext = async (): Promise<AuthContext> => ({
 });
 
 const loadTaskAuthContext = async (
+	db: Pick<TinyPg, 'sql'>,
 	bulkUploadTask: BulkUploadTask,
 ): Promise<AuthContext> => ({
 	user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
@@ -380,7 +383,8 @@ export const processBulkUploadTask = async (
 		});
 		return;
 	}
-	const systemUserAuthContext = await loadSystemUserAuthContext();
+	const db = getDatabase();
+	const systemUserAuthContext = await loadSystemUserAuthContext(db);
 	graphileLogger.debug(
 		`Started processBulkUpload Job for Bulk Upload ID ${payload.bulkUploadId}`,
 	);
@@ -390,7 +394,7 @@ export const processBulkUploadTask = async (
 		payload.bulkUploadId,
 	);
 
-	const taskAuthContext = await loadTaskAuthContext(bulkUploadTask);
+	const taskAuthContext = await loadTaskAuthContext(db, bulkUploadTask);
 	if (bulkUploadTask.status !== TaskStatus.PENDING) {
 		graphileLogger.warn(
 			'Bulk upload cannot be processed because it is not in a PENDING state',

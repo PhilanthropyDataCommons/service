@@ -14,7 +14,7 @@ commonProjectConfig = {
 module.exports = {
 	...config,
 	collectCoverage: true,
-	collectCoverageFrom: ['src/**/*.ts', '!src/**/*.test.*'],
+	collectCoverageFrom: ['src/**/*.ts', '!src/**/*.test.*', '!src/test/**'],
 	projects: [
 		{
 			...commonProjectConfig,

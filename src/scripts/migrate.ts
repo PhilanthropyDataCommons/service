@@ -1,11 +1,13 @@
 import { getLogger } from '../logger';
-import { db, migrate } from '../database';
+import { createDatabase, migrate } from '../database';
 import { EXIT_CODE_FAILURE } from '../constants';
 
 const logger = getLogger(__filename);
 
+const db = createDatabase();
+
 logger.info('Starting migrations...');
-migrate()
+migrate(db)
 	.then(async () => {
 		logger.info('Migrations complete.');
 		await db.close();

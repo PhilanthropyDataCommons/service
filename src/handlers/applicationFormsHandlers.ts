@@ -1,5 +1,5 @@
 import {
-	db,
+	getDatabase,
 	createApplicationForm,
 	createApplicationFormField,
 	getLimitValues,
@@ -34,6 +34,7 @@ const getApplicationForms = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const applicationFormBundle = await loadApplicationFormBundle(
@@ -55,6 +56,7 @@ const getApplicationForm = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const { applicationFormId } = coerceParams(req.params);
 	if (!isId(applicationFormId)) {
@@ -75,6 +77,7 @@ const postApplicationForms = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const body = req.body as unknown;
 	if (!isWritableApplicationFormWithFields(body)) {
@@ -134,6 +137,7 @@ const getApplicationFormProposalDataCsv = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const { applicationFormId } = coerceParams(req.params);
 	if (!isId(applicationFormId)) {

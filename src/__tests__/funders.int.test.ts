@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	loadFunder,
 	loadTableMetrics,
 	loadSystemFunder,
@@ -24,22 +24,26 @@ import {
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
 } from '../types';
+import type { TinyPg } from 'tinypg';
 
-const createTestFunders = async ({
-	theFundFund,
-	theFoundationFoundation,
-	theFundersWhoFund,
-	theFundingFathers,
-	theFunnyFunders,
-	theFungibleFund,
-}: {
-	theFundFund: boolean;
-	theFoundationFoundation: boolean;
-	theFundersWhoFund: boolean;
-	theFundingFathers: boolean;
-	theFunnyFunders: boolean;
-	theFungibleFund: boolean;
-}) => {
+const createTestFunders = async (
+	db: TinyPg,
+	{
+		theFundFund,
+		theFoundationFoundation,
+		theFundersWhoFund,
+		theFundingFathers,
+		theFunnyFunders,
+		theFungibleFund,
+	}: {
+		theFundFund: boolean;
+		theFoundationFoundation: boolean;
+		theFundersWhoFund: boolean;
+		theFundingFathers: boolean;
+		theFunnyFunders: boolean;
+		theFungibleFund: boolean;
+	},
+) => {
 	await createTestFunder(db, null, {
 		shortCode: 'theFundFund',
 		name: 'The Fund Fund',
@@ -81,6 +85,7 @@ describe('/funders', () => {
 		});
 
 		it('returns all funders present in the database', async () => {
+			const db = getDatabase();
 			const systemFunder = await loadSystemFunder(db, null);
 			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
@@ -121,6 +126,7 @@ describe('/funders', () => {
 		});
 
 		it('returns exactly one funder selected by short code', async () => {
+			const db = getDatabase();
 			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
@@ -145,6 +151,7 @@ describe('/funders', () => {
 		});
 
 		it('returns 404 when short code is not found', async () => {
+			const db = getDatabase();
 			await createTestFunder(db, null, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
@@ -163,14 +170,15 @@ describe('/funders', () => {
 		});
 
 		it('creates and returns exactly one funder', async () => {
-			const before = await loadTableMetrics('funders');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'funders');
 			const result = await agent
 				.put('/funders/firework')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({ name: '🎆', isCollaborative: false })
 				.expect(201);
-			const after = await loadTableMetrics('funders');
+			const after = await loadTableMetrics(db, 'funders');
 			expect(result.body).toMatchObject({
 				shortCode: 'firework',
 				name: '🎆',
@@ -190,6 +198,7 @@ describe('/funders', () => {
 		});
 
 		it('updates an existing funder and no others', async () => {
+			const db = getDatabase();
 			await createTestFunder(db, null, {
 				shortCode: 'firework',
 				name: 'boring text-based firework',
@@ -198,14 +207,14 @@ describe('/funders', () => {
 				shortCode: 'anotherFirework',
 				name: 'another boring text based firework',
 			});
-			const before = await loadTableMetrics('data_providers');
+			const before = await loadTableMetrics(db, 'data_providers');
 			const result = await agent
 				.put('/funders/firework')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({ name: '🎆', isCollaborative: false })
 				.expect(201);
-			const after = await loadTableMetrics('data_providers');
+			const after = await loadTableMetrics(db, 'data_providers');
 			const anotherFunderAfter = await loadFunder(db, null, 'anotherFirework');
 			expect(result.body).toStrictEqual({
 				shortCode: 'firework',
@@ -232,14 +241,15 @@ describe('/funders', () => {
 		});
 
 		it('returns 400 bad request when disallowed characters are included', async () => {
-			const before = await loadTableMetrics('funders');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'funders');
 			await agent
 				.put('/funders/my funder')
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({ name: '🎆' })
 				.expect(400);
-			const after = await loadTableMetrics('funders');
+			const after = await loadTableMetrics(db, 'funders');
 			expect(after.count).toEqual(before.count);
 		});
 	});
@@ -257,10 +267,11 @@ describe('/funders', () => {
 			});
 
 			it('returns all members of a collaborative funder', async () => {
-				const testUser = await loadTestUser();
+				const db = getDatabase();
+				const testUser = await loadTestUser(db);
 				const testUserAuthContext = getAuthContext(testUser);
 
-				await createTestFunders({
+				await createTestFunders(db, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -333,7 +344,8 @@ describe('/funders', () => {
 			});
 
 			it('requires MANAGE permission on the funder', async () => {
-				await createTestFunders({
+				const db = getDatabase();
+				await createTestFunders(db, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -353,11 +365,12 @@ describe('/funders', () => {
 			});
 
 			it('returns exactly one funder collaborative member selected by short code', async () => {
-				const testUser = await loadTestUser();
+				const db = getDatabase();
+				const testUser = await loadTestUser(db);
 				const testUserAuthContext = getAuthContext(testUser);
 				const systemUser = await loadSystemUser(db, null);
 				const systemUserAuthContext = getAuthContext(systemUser);
-				await createTestFunders({
+				await createTestFunders(db, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -391,10 +404,11 @@ describe('/funders', () => {
 				});
 			});
 			it('throws a 404 when the funder collaborative member does not exist', async () => {
-				const testUser = await loadTestUser();
+				const db = getDatabase();
+				const testUser = await loadTestUser(db);
 				const systemUser = await loadSystemUser(db, null);
 				const systemUserAuthContext = getAuthContext(systemUser);
-				await createTestFunders({
+				await createTestFunders(db, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -449,8 +463,9 @@ describe('/funders', () => {
 			});
 
 			it('creates and returns exactly one funder collaborative member', async () => {
-				const adminUser = await loadTestUser();
-				await createTestFunders({
+				const db = getDatabase();
+				const adminUser = await loadTestUser(db);
+				await createTestFunders(db, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -471,7 +486,8 @@ describe('/funders', () => {
 			});
 
 			it('returns 400 when the funder is not collaborative', async () => {
-				await createTestFunders({
+				const db = getDatabase();
+				await createTestFunders(db, {
 					theFundFund: false,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -519,10 +535,11 @@ describe('/funders', () => {
 			});
 
 			it('deletes and returns exactly one funder collaborative member', async () => {
-				const adminUser = await loadTestUser();
+				const db = getDatabase();
+				const adminUser = await loadTestUser(db);
 				const adminUserAuthContext = getAuthContext(adminUser);
 
-				await createTestFunders({
+				await createTestFunders(db, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -572,7 +589,8 @@ describe('/funders', () => {
 	});
 	describe('POST /:shortCode/invitations/sent/:invitedFunderShortCode', () => {
 		it('requires authentication', async () => {
-			await createTestFunders({
+			const db = getDatabase();
+			await createTestFunders(db, {
 				theFundFund: true,
 				theFoundationFoundation: false,
 				theFundersWhoFund: false,
@@ -599,6 +617,7 @@ describe('/funders', () => {
 		});
 
 		it('requires MANAGE permission on the funder', async () => {
+			const db = getDatabase();
 			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
@@ -624,11 +643,12 @@ describe('/funders', () => {
 		});
 
 		it('creates an invitation to a non-collaborative funder from a collaborative funder, and returns it', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			await createTestFunders({
+			await createTestFunders(db, {
 				theFundFund: false,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -660,7 +680,8 @@ describe('/funders', () => {
 			});
 		});
 		it('returns a 400 error when the source funder is not collaborative', async () => {
-			await createTestFunders({
+			const db = getDatabase();
+			await createTestFunders(db, {
 				theFundFund: false,
 				theFoundationFoundation: false,
 				theFundersWhoFund: false,
@@ -681,7 +702,8 @@ describe('/funders', () => {
 			});
 		});
 		it('returns a 400 bad request error when the invited funder is collaborative', async () => {
-			await createTestFunders({
+			const db = getDatabase();
+			await createTestFunders(db, {
 				theFundFund: true,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -716,6 +738,7 @@ describe('/funders', () => {
 		});
 
 		it('requires MANAGE permission on the funder', async () => {
+			const db = getDatabase();
 			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
@@ -736,11 +759,12 @@ describe('/funders', () => {
 		});
 
 		it('returns all (and only) invitations sent by the funder when the user has MANAGE permission on the funder', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			await createTestFunders({
+			await createTestFunders(db, {
 				theFundFund: true,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -813,6 +837,7 @@ describe('/funders', () => {
 		});
 
 		it('requires MANAGE permission on the funder', async () => {
+			const db = getDatabase();
 			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
@@ -833,11 +858,12 @@ describe('/funders', () => {
 		});
 
 		it('returns all (and only) invitations received by the funder when the user has MANAGE permission on the funder', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			await createTestFunders({
+			await createTestFunders(db, {
 				theFundFund: false,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -926,6 +952,7 @@ describe('/funders', () => {
 		});
 
 		it('requires MANAGE permission on the invited funder', async () => {
+			const db = getDatabase();
 			await createTestFunder(db, null, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
@@ -940,11 +967,12 @@ describe('/funders', () => {
 		});
 
 		it('successfully updates the invitation status to accepted, and creates a funder collaborative member', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			await createTestFunders({
+			await createTestFunders(db, {
 				theFundFund: false,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -1002,11 +1030,12 @@ describe('/funders', () => {
 			});
 		});
 		it('successfully updates the invitation status to rejected, and does not create a funder collaborative member', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			await createTestFunders({
+			await createTestFunders(db, {
 				theFundFund: false,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -1054,17 +1083,19 @@ describe('/funders', () => {
 			});
 
 			const tableMetrics = await loadTableMetrics(
+				db,
 				'funder_collaborative_invitations',
 			);
 			expect(tableMetrics.count).toEqual(1);
 		});
 	});
 	it('throws a 400 error if the invitation status is updated after it has been accepted', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 
-		await createTestFunders({
+		await createTestFunders(db, {
 			theFundFund: false,
 			theFoundationFoundation: true,
 			theFundersWhoFund: false,
@@ -1110,11 +1141,12 @@ describe('/funders', () => {
 		});
 	});
 	it('throws a 400 error if the invitation status is updated after it has rejected', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 
-		await createTestFunders({
+		await createTestFunders(db, {
 			theFundFund: false,
 			theFoundationFoundation: true,
 			theFundersWhoFund: false,
@@ -1160,11 +1192,12 @@ describe('/funders', () => {
 		});
 	});
 	it('throws a 400 error if the invitation status is updated to an invalid value', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 
-		await createTestFunders({
+		await createTestFunders(db, {
 			theFundFund: false,
 			theFoundationFoundation: true,
 			theFundersWhoFund: false,
@@ -1211,11 +1244,12 @@ describe('/funders', () => {
 	});
 
 	it('throws a 400 error if the invitation status is set to null', async () => {
-		const testUser = await loadTestUser();
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 
-		await createTestFunders({
+		await createTestFunders(db, {
 			theFundFund: false,
 			theFoundationFoundation: true,
 			theFundersWhoFund: false,

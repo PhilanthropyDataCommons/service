@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	createOrUpdateFunder,
 	getLimitValues,
 	loadFunderBundle,
@@ -17,6 +17,7 @@ const getFunders = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const funderBundle = await loadFunderBundle(db, req, limit, offset);
@@ -28,6 +29,7 @@ const getFunders = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getFunder = async (req: Request, res: Response): Promise<void> => {
+	const db = getDatabase();
 	const { funderShortCode } = coerceParams(req.params);
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(
@@ -46,6 +48,7 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { funderShortCode: shortCode } = coerceParams(req.params);
 	if (!isShortCode(shortCode)) {
 		throw new InputValidationError(

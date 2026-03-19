@@ -1,4 +1,4 @@
-import { initializeDatabase } from './database';
+import { createDatabase, initializeDatabase, setDatabase } from './database';
 import { app } from './app';
 import { startJobQueue } from './jobQueue';
 import { getLogger } from './logger';
@@ -12,7 +12,9 @@ const host = process.env.HOST ?? 'localhost';
 
 const start = async (): Promise<void> => {
 	try {
-		await initializeDatabase();
+		const db = createDatabase();
+		await initializeDatabase(db);
+		setDatabase(db);
 	} catch (err) {
 		logger.error(err, 'Database failed to initialize');
 		throw err;

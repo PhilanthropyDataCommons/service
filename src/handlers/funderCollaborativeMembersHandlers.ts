@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
-	db,
+	getDatabase,
 	getLimitValues,
 	loadFunderCollaborativeMember,
 	loadFunderCollaborativeMemberBundle,
@@ -21,6 +21,7 @@ const getFunderCollaborativeMember = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { funderShortCode, memberFunderShortCode } = coerceParams(req.params);
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(
@@ -53,6 +54,7 @@ const getFunderCollaborativeMembers = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { funderShortCode } = coerceParams(req.params);
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(
@@ -84,6 +86,7 @@ const postFunderCollaborativeMember = async (
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const { funderShortCode, memberFunderShortCode } = coerceParams(req.params);
 
 	if (!isShortCode(funderShortCode)) {
@@ -113,6 +116,7 @@ const deleteFunderCollaborativeMember = async (
 	req: Request,
 	res: Response,
 ): Promise<void> => {
+	const db = getDatabase();
 	const { funderShortCode, memberFunderShortCode } = coerceParams(req.params);
 	if (!isShortCode(funderShortCode)) {
 		throw new InputValidationError(

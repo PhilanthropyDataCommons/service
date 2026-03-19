@@ -10,7 +10,7 @@ import {
 	createProposalFieldValue,
 	createProposalVersion,
 	createOrUpdateUser,
-	db,
+	getDatabase,
 	loadSystemSource,
 	loadTableMetrics,
 	loadSystemFunder,
@@ -43,8 +43,9 @@ import {
 	PermissionGrantVerb,
 	stringToKeycloakId,
 } from '../types';
+import type { TinyPg } from 'tinypg';
 
-const createTestBaseFields = async () => {
+const createTestBaseFields = async (db: TinyPg): Promise<void> => {
 	await createOrUpdateBaseField(db, null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
@@ -83,9 +84,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns proposals the user has permission to view', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherFunder = await loadSystemFunder(db, null);
 			const visibleFunder = await createTestFunder(db, null, {
@@ -123,7 +125,7 @@ describe('/proposals', () => {
 			const anotherOpportunity = await createTestOpportunity(db, null, {
 				funderShortCode: anotherFunder.shortCode,
 			});
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			const funderVisibleProposal = await createProposal(
 				db,
 				testUserAuthContext,
@@ -159,11 +161,12 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when a changemaker filter is provided', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
 
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -200,10 +203,11 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when a funder filter is provided', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const testFunder = await createTestFunder(db, null);
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 
 			const systemOpportunity = await createTestOpportunity(db, null);
 			const testFunderOpportunity = await createTestOpportunity(db, null, {
@@ -252,7 +256,7 @@ describe('/proposals', () => {
 
 		it('returns a 400 error if an invalid funder filter is provided', async () => {
 			const response = await request(app)
-				.get(`/proposals?funder=😀`)
+				.get(`/proposals?funder=\u{1F600}`)
 				.set(authHeader)
 				.expect(400);
 			expect(response.body).toMatchObject({
@@ -273,12 +277,13 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when search is provided', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
 
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -393,7 +398,8 @@ describe('/proposals', () => {
 		});
 
 		it('does not return proposals where there is a search match against a forbidden base field', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
 			const systemSource = await loadSystemSource(db, null);
@@ -457,7 +463,8 @@ describe('/proposals', () => {
 		});
 
 		it('returns all proposals present in the database regardless of createdBy value when loading as an administrator', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -466,7 +473,7 @@ describe('/proposals', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, null);
 
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -505,7 +512,8 @@ describe('/proposals', () => {
 		});
 
 		it('returns a correct subset of proposals when createdBy is provided as an administrator', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -514,7 +522,7 @@ describe('/proposals', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, null);
 
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -546,7 +554,8 @@ describe('/proposals', () => {
 		});
 
 		it("returns just the administrator's proposals when createdBy is set to `me` as an administrator", async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
@@ -555,7 +564,7 @@ describe('/proposals', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, null);
 
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -585,14 +594,15 @@ describe('/proposals', () => {
 		});
 
 		it('returns a subset of proposals present in the database when search is provided - tscfg simple', async () => {
+			const db = getDatabase();
 			// This should pass even if the default text search config is 'simple'.
 			// See https://github.com/PhilanthropyDataCommons/service/issues/336
 			await db.query("set default_text_search_config = 'simple';");
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-4999',
 				opportunityId: opportunity.id,
@@ -707,7 +717,8 @@ describe('/proposals', () => {
 		});
 
 		it('returns according to pagination parameters', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
 
@@ -785,7 +796,8 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when given id is not present', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const response = await request(app)
 				.get('/proposals/9001')
 				.set(authHeader)
@@ -810,9 +822,10 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when the current user does not have permission to view the provided id', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 				keycloakUserName: 'Georgina',
@@ -877,7 +890,8 @@ describe('/proposals', () => {
 		});
 
 		it('returns the one proposal asked for', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
 
@@ -906,10 +920,11 @@ describe('/proposals', () => {
 		});
 
 		it('returns one proposal with deep fields', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, null);
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
 				name: null,
@@ -1155,10 +1170,11 @@ describe('/proposals', () => {
 		});
 
 		it('returns the proposal if an administrator requests a proposal they do not own', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			const opportunity = await createTestOpportunity(db, null);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -1404,16 +1420,17 @@ describe('/proposals', () => {
 		});
 
 		it('returns empty fieldValues array when user has proposal scope but not proposalFieldValue scope', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const testFunder = await createTestFunder(db, null, {
 				name: 'Test Funder',
 				shortCode: 'testFunder',
 			});
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 
 			// Grant only proposal scope (not proposalFieldValue)
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -1479,10 +1496,11 @@ describe('/proposals', () => {
 		});
 
 		it('does not return proposal field values associated with forbidden base fields', async () => {
-			const testUser = await loadTestUser();
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields();
+			await createTestBaseFields(db);
 			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 				shortCode: 'forbiddenField',
 				dataType: BaseFieldDataType.STRING,
@@ -1624,9 +1642,10 @@ describe('/proposals', () => {
 		});
 
 		it('creates exactly one proposal when the user is an administrator', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
-			const before = await loadTableMetrics('proposals');
-			const testUser = await loadTestUser();
+			const before = await loadTableMetrics(db, 'proposals');
+			const testUser = await loadTestUser(db);
 			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
@@ -1636,7 +1655,7 @@ describe('/proposals', () => {
 					opportunityId: opportunity.id,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('proposals');
+			const after = await loadTableMetrics(db, 'proposals');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				id: 1,
@@ -1649,9 +1668,10 @@ describe('/proposals', () => {
 		});
 
 		it('creates exactly one proposal when the user has write permissions on the opportunity funder', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const systemFunder = await loadSystemFunder(db, null);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -1662,7 +1682,7 @@ describe('/proposals', () => {
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 			const opportunity = await createTestOpportunity(db, null);
-			const before = await loadTableMetrics('proposals');
+			const before = await loadTableMetrics(db, 'proposals');
 			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
@@ -1672,7 +1692,7 @@ describe('/proposals', () => {
 					opportunityId: opportunity.id,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('proposals');
+			const after = await loadTableMetrics(db, 'proposals');
 			expect(result.body).toMatchObject({
 				id: 1,
 				externalId: 'proposal123',
@@ -1684,8 +1704,9 @@ describe('/proposals', () => {
 		});
 
 		it('returns 422 if the user does not have permission', async () => {
+			const db = getDatabase();
 			const opportunity = await createTestOpportunity(db, null);
-			const before = await loadTableMetrics('proposals');
+			const before = await loadTableMetrics(db, 'proposals');
 			await request(app)
 				.post('/proposals')
 				.type('application/json')
@@ -1695,14 +1716,15 @@ describe('/proposals', () => {
 					opportunityId: opportunity.id,
 				})
 				.expect(422);
-			const after = await loadTableMetrics('proposals');
+			const after = await loadTableMetrics(db, 'proposals');
 			expect(after.count).toEqual(before.count);
 		});
 
 		it('creates exactly one proposal when the user has create_proposal and view permissions on the opportunity', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
-			const testUser = await loadTestUser();
+			const testUser = await loadTestUser(db);
 			const opportunity = await createTestOpportunity(db, null);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -1722,7 +1744,7 @@ describe('/proposals', () => {
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 
-			const before = await loadTableMetrics('proposals');
+			const before = await loadTableMetrics(db, 'proposals');
 			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
@@ -1732,7 +1754,7 @@ describe('/proposals', () => {
 					opportunityId: opportunity.id,
 				})
 				.expect(201);
-			const after = await loadTableMetrics('proposals');
+			const after = await loadTableMetrics(db, 'proposals');
 			expect(result.body).toMatchObject({
 				id: 1,
 				externalId: 'proposal123',

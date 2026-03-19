@@ -5,7 +5,7 @@ import {
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type { AuthIdentityAndRole, JsonResultSet } from '../../../types';
-import type TinyPg from 'tinypg';
+import type { TinyPg } from 'tinypg';
 
 /**
  * Generates an item loader function for a specific query and table.
@@ -27,7 +27,7 @@ const generateLoadItemOperation =
 		itemPostProcessor: (item: T) => T | Promise<T> = (item: T) => item,
 	) =>
 	async (
-		db: TinyPg,
+		db: Pick<TinyPg, 'sql'>,
 		authContext: AuthIdentityAndRole | null,
 		...args: [...P]
 	): Promise<T> => {

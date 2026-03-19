@@ -2,7 +2,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { S3Client } from '@aws-sdk/client-s3';
 import request from 'supertest';
 import { app } from '../app';
-import { db, loadSystemUser } from '../database';
+import { getDatabase, loadSystemUser } from '../database';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -16,7 +16,6 @@ import {
 } from '../test/asymettricMatchers';
 import { getAuthContext } from '../test/utils';
 import { createTestFile } from '../test/factories';
-
 const s3Mock = mockClient(S3Client);
 
 describe('/files', () => {
@@ -139,6 +138,7 @@ describe('/files', () => {
 		});
 
 		it('does not return files created by other users for non-admin users', async () => {
+			const db = getDatabase();
 			// Create a file as the system user (different from the test user)
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -162,6 +162,7 @@ describe('/files', () => {
 		});
 
 		it('returns files created by other users for admin users', async () => {
+			const db = getDatabase();
 			// Create a file as the system user (different from the test user)
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);

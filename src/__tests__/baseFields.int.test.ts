@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createOrUpdateBaseField,
 	createOrUpdateBaseFieldLocalization,
 	loadBaseFieldLocalizationsBundleByBaseFieldShortCode,
@@ -19,8 +19,9 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
+import type { TinyPg } from 'tinypg';
 
-const createTestBaseField = async () =>
+const createTestBaseField = async (db: TinyPg) =>
 	await createOrUpdateBaseField(db, null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
@@ -31,7 +32,7 @@ const createTestBaseField = async () =>
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 
-const createTestBaseFieldWithLocalization = async () => {
+const createTestBaseFieldWithLocalization = async (db: TinyPg) => {
 	const baseField = await createOrUpdateBaseField(db, null, {
 		label: 'Summary',
 		description: 'A summary of the proposal',
@@ -65,6 +66,7 @@ describe('/baseFields', () => {
 		});
 
 		it('returns non-forbidden base fields present in the database by default', async () => {
+			const db = getDatabase();
 			const baseFieldOne = await createOrUpdateBaseField(db, null, {
 				label: 'First Name',
 				description: 'The first name of the applicant',
@@ -165,7 +167,8 @@ describe('/baseFields', () => {
 		});
 
 		it('creates exactly one base field', async () => {
-			const before = await loadTableMetrics('base_fields');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'base_fields');
 			const result = await request(app)
 				.put('/baseFields/shorts')
 				.type('application/json')
@@ -179,7 +182,7 @@ describe('/baseFields', () => {
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(200);
-			const after = await loadTableMetrics('base_fields');
+			const after = await loadTableMetrics(db, 'base_fields');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				label: '🏷️',
@@ -196,7 +199,8 @@ describe('/baseFields', () => {
 		});
 
 		it('supports creation of file-type base fields', async () => {
-			const before = await loadTableMetrics('base_fields');
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'base_fields');
 			const result = await request(app)
 				.put('/baseFields/shorts')
 				.type('application/json')
@@ -210,7 +214,7 @@ describe('/baseFields', () => {
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(200);
-			const after = await loadTableMetrics('base_fields');
+			const after = await loadTableMetrics(db, 'base_fields');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
 				label: '🏷️',
@@ -373,6 +377,7 @@ describe('/baseFields', () => {
 		});
 
 		it('updates the specified base field', async () => {
+			const db = getDatabase();
 			// Not using the helper here because observing a change in values is explicitly
 			// the point of the test, so having full explicit control of the original value
 			// seems important.  Some day when we add better test tooling we can have it all.
@@ -399,7 +404,7 @@ describe('/baseFields', () => {
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(200);
-			const baseFields = await loadBaseFields();
+			const baseFields = await loadBaseFields(db);
 			expect(baseFields[0]).toEqual({
 				label: '🏷️',
 				description: '😍',
@@ -414,7 +419,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no label is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 
 			const result = await request(app)
 				.put('/baseFields/summary')
@@ -435,7 +441,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no description is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 			const result = await request(app)
 				.put('/baseFields/summary')
 				.type('application/json')
@@ -455,7 +462,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no dataType is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 			const result = await request(app)
 				.put('/baseFields/summary')
 				.type('application/json')
@@ -475,7 +483,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no category is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 			const result = await request(app)
 				.put('/baseFields/summary')
 				.type('application/json')
@@ -495,7 +504,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no valueRelevanceHours is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 			const result = await request(app)
 				.put('/baseFields/summary')
 				.type('application/json')
@@ -515,7 +525,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no sensitivityClassification is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 			const result = await request(app)
 				.put('/baseFields/summary')
 				.type('application/json')
@@ -537,11 +548,13 @@ describe('/baseFields', () => {
 
 	describe('GET /:baseFieldShortCode/localizations', () => {
 		it('does not require authentication', async () => {
-			await createTestBaseFieldWithLocalization();
+			const db = getDatabase();
+			await createTestBaseFieldWithLocalization(db);
 			await request(app).get(`/baseFields/summary/localizations`).expect(200);
 		});
 
 		it('returns all base field localizations related to the given baseFieldShortCode', async () => {
+			const db = getDatabase();
 			const baseField = await createOrUpdateBaseField(db, null, {
 				label: 'First Name',
 				description: 'The first name of the applicant',
@@ -630,8 +643,9 @@ describe('/baseFields', () => {
 		});
 
 		it('creates the specified base field localization if it does not exist', async () => {
-			const testBaseField = await createTestBaseField();
-			const before = await loadTableMetrics('base_field_localizations');
+			const db = getDatabase();
+			const testBaseField = await createTestBaseField(db);
+			const before = await loadTableMetrics(db, 'base_field_localizations');
 			await request(app)
 				.put(`/baseFields/${testBaseField.shortCode}/localizations/fr`)
 				.type('application/json')
@@ -641,7 +655,7 @@ describe('/baseFields', () => {
 					description: 'Le Résume de proposal',
 				})
 				.expect(200);
-			const after = await loadTableMetrics('base_field_localizations');
+			const after = await loadTableMetrics(db, 'base_field_localizations');
 			const baseFieldLocalizations =
 				await loadBaseFieldLocalizationsBundleByBaseFieldShortCode(
 					db,
@@ -661,7 +675,8 @@ describe('/baseFields', () => {
 		});
 
 		it('updates only the specified base field if it does exist', async () => {
-			const baseField = await createTestBaseField();
+			const db = getDatabase();
+			const baseField = await createTestBaseField(db);
 			await createOrUpdateBaseFieldLocalization(db, null, {
 				baseFieldShortCode: baseField.shortCode,
 				language: 'fr',
@@ -674,7 +689,7 @@ describe('/baseFields', () => {
 				label: 'Summary',
 				description: 'The Summary of a proposal',
 			});
-			const before = await loadTableMetrics('base_field_localizations');
+			const before = await loadTableMetrics(db, 'base_field_localizations');
 			await request(app)
 				.put(`/baseFields/${baseField.shortCode}/localizations/fr`)
 				.type('application/json')
@@ -684,7 +699,7 @@ describe('/baseFields', () => {
 					description: 'Le grand Résume de proposal',
 				})
 				.expect(200);
-			const after = await loadTableMetrics('base_field_localizations');
+			const after = await loadTableMetrics(db, 'base_field_localizations');
 			const baseFieldLocalizations =
 				await loadBaseFieldLocalizationsBundleByBaseFieldShortCode(
 					db,
@@ -710,7 +725,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 when an invalid shortcode is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 			const result = await request(app)
 				.put('/baseFields/invalid-shortcode!!!!!/localizations/en')
 				.type('application/json')
@@ -727,7 +743,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no label is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 
 			const result = await request(app)
 				.put('/baseFields/summary/localizations/fr')
@@ -744,7 +761,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 bad request when no description is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 			const result = await request(app)
 				.put('/baseFields/summary/localizations/fr')
 				.type('application/json')
@@ -760,7 +778,8 @@ describe('/baseFields', () => {
 		});
 
 		it('returns 400 when an invalid IETF language tag is sent', async () => {
-			await createTestBaseField();
+			const db = getDatabase();
+			await createTestBaseField(db);
 			const result = await request(app)
 				.put(
 					'/baseFields/summary/localizations/theLanguageKlingonWhichIsNotARealLanguage',

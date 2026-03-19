@@ -5,7 +5,7 @@ import {
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type { AuthIdentityAndRole, JsonResultSet } from '../../../types';
-import type TinyPg from 'tinypg';
+import type { TinyPg } from 'tinypg';
 
 // This may seem silly but it is necessary to get all keys of all
 // possible types in the event the type is a Union (e.g. A | B | C)
@@ -30,7 +30,7 @@ const generateCreateOrUpdateItemOperation =
 		itemPostProcessor: (item: T) => T | Promise<T> = (item: T) => item,
 	) =>
 	async (
-		db: TinyPg,
+		db: Pick<TinyPg, 'sql'>,
 		authContext: AuthIdentityAndRole | null,
 		createValues: I,
 		...args: [...P]

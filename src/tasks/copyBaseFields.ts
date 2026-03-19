@@ -1,5 +1,5 @@
 import { isCopyBaseFieldsJobPayload, TaskStatus, isBaseField } from '../types';
-import { db } from '../database/db';
+import { getDatabase } from '../database/db';
 import {
 	createOrUpdateBaseField,
 	createOrUpdateBaseFieldLocalization,
@@ -8,6 +8,7 @@ import {
 } from '../database/operations';
 import type { BaseField } from '../types';
 import type { JobHelpers, Logger as GraphileLogger } from 'graphile-worker';
+import type { TinyPg } from 'tinypg';
 
 export const fetchBaseFieldsFromRemote = async (
 	pdcApiUrl: string,
@@ -55,7 +56,10 @@ export const fetchBaseFieldsFromRemote = async (
 	}
 };
 
-const copyBaseField = async (targetBaseField: BaseField): Promise<void> => {
+const copyBaseField = async (
+	db: Pick<TinyPg, 'sql'>,
+	targetBaseField: BaseField,
+): Promise<void> => {
 	const {
 		category,
 		dataType,
@@ -99,6 +103,7 @@ export const copyBaseFields = async (
 		});
 		return;
 	}
+	const db = getDatabase();
 	graphileLogger.debug(
 		`Started BasefieldsCopy Job for BaseFieldsCopyTask ID ${payload.baseFieldsCopyTaskId}`,
 	);
@@ -149,7 +154,7 @@ export const copyBaseFields = async (
 	try {
 		await Promise.all(
 			remoteBaseFields.map<Promise<void>>(async (baseField) => {
-				await copyBaseField(baseField);
+				await copyBaseField(db, baseField);
 			}),
 		);
 	} catch (err) {

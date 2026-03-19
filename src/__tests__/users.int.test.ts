@@ -2,7 +2,7 @@ import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 import { app } from '../app';
 import {
-	db,
+	getDatabase,
 	createOrUpdateUser,
 	loadSystemUser,
 	loadTableMetrics,
@@ -14,8 +14,9 @@ import {
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
 import { keycloakIdToString, stringToKeycloakId } from '../types';
+import type { TinyPg } from 'tinypg';
 
-const createAdditionalTestUser = async () =>
+const createAdditionalTestUser = async (db: TinyPg) =>
 	await createOrUpdateUser(db, null, {
 		keycloakUserId: stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
 		keycloakUserName: 'Call me Ishmael',
@@ -28,9 +29,10 @@ describe('/users', () => {
 		});
 
 		it('returns the user associated with the requesting user', async () => {
-			const testUser = await loadTestUser();
-			await createAdditionalTestUser();
-			const { count: userCount } = await loadTableMetrics('users');
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			await createAdditionalTestUser(db);
+			const { count: userCount } = await loadTableMetrics(db, 'users');
 
 			const response = await request(app)
 				.get('/users')
@@ -48,10 +50,11 @@ describe('/users', () => {
 		});
 
 		it('returns all users when the user is an administrator', async () => {
+			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
-			const testUser = await loadTestUser();
-			const anotherUser = await createAdditionalTestUser();
-			const { count: userCount } = await loadTableMetrics('users');
+			const testUser = await loadTestUser(db);
+			const anotherUser = await createAdditionalTestUser(db);
+			const { count: userCount } = await loadTableMetrics(db, 'users');
 
 			const response = await request(app)
 				.get('/users')
@@ -64,8 +67,9 @@ describe('/users', () => {
 		});
 
 		it('returns a specific user when a keycloakUserId is provided', async () => {
-			const anotherUser = await createAdditionalTestUser();
-			const { count: userCount } = await loadTableMetrics('users');
+			const db = getDatabase();
+			const anotherUser = await createAdditionalTestUser(db);
+			const { count: userCount } = await loadTableMetrics(db, 'users');
 
 			const response = await request(app)
 				.get(
@@ -87,6 +91,7 @@ describe('/users', () => {
 		});
 
 		it('returns according to pagination parameters', async () => {
+			const db = getDatabase();
 			const uuids = Array.from(Array(20)).map(() => uuidv4());
 			await uuids.reduce(async (p, uuid) => {
 				await p;
@@ -95,7 +100,7 @@ describe('/users', () => {
 					keycloakUserName: 'Alice',
 				});
 			}, Promise.resolve());
-			const { count: userCount } = await loadTableMetrics('users');
+			const { count: userCount } = await loadTableMetrics(db, 'users');
 
 			const response = await request(app)
 				.get('/users')

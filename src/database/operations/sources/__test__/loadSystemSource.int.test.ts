@@ -1,4 +1,4 @@
-import { db } from '../../../db';
+import { getDatabase } from '../../../db';
 import { loadSystemSource } from '..';
 import {
 	expectNumber,
@@ -7,6 +7,7 @@ import {
 
 describe('loadSystemSource', () => {
 	it('loads the expected system source', async () => {
+		const db = getDatabase();
 		const systemSource = await loadSystemSource(db, null);
 		expect(systemSource).toMatchObject({
 			createdAt: expectTimestamp(),

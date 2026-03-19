@@ -1,4 +1,5 @@
 import { requireAuthentication } from '../requireAuthentication';
+import { getDatabase } from '../../database';
 import { UnauthorizedError } from '../../errors';
 import {
 	allowNextToResolve,
@@ -25,10 +26,11 @@ describe('requireAuthentication', () => {
 	});
 
 	it('calls next with an UnauthorizedError when no auth sub is provided', async () => {
+		const db = getDatabase();
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.auth = {};
-		req.user = await loadTestUser();
+		req.user = await loadTestUser(db);
 		const nextMock = getMockNextFunction();
 		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
@@ -43,12 +45,13 @@ describe('requireAuthentication', () => {
 	});
 
 	it('calls next with an UnauthorizedError when a blank auth sub is provided', async () => {
+		const db = getDatabase();
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.auth = {
 			sub: '',
 		};
-		req.user = await loadTestUser();
+		req.user = await loadTestUser(db);
 		const nextMock = getMockNextFunction();
 		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();
@@ -82,6 +85,7 @@ describe('requireAuthentication', () => {
 	});
 
 	it('calls next when an auth value is provided', async () => {
+		const db = getDatabase();
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.auth = {
@@ -91,7 +95,7 @@ describe('requireAuthentication', () => {
 		req.role = {
 			isAdministrator: false,
 		};
-		req.user = await loadTestUser();
+		req.user = await loadTestUser(db);
 		const nextMock = getMockNextFunction();
 		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();

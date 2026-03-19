@@ -1,4 +1,11 @@
-import { db, migrate, initializeDatabase } from '../database';
+import {
+	createDatabase,
+	getDatabase,
+	initializeDatabase,
+	migrate,
+	setDatabase,
+} from '../database';
+import type { TinyPg } from 'tinypg';
 
 const generateSchemaName = (workerId: string): string => `test_${workerId}`;
 
@@ -16,11 +23,12 @@ const getSchemaNameForCurrentTestWorker = (): string => {
 	return generateSchemaName(process.env.JEST_WORKER_ID);
 };
 
-const createSchema = async (schemaName: string): Promise<void> => {
+const createSchema = async (db: TinyPg, schemaName: string): Promise<void> => {
 	await db.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName};`);
 };
 
 const setSchemaForCurrentPoolConnection = async (
+	db: TinyPg,
 	schemaName: string,
 ): Promise<void> => {
 	await db.query(`SET search_path TO ${schemaName};`);
@@ -30,24 +38,30 @@ const setSchemaForFuturePoolConnections = (schemaName: string): void => {
 	process.env.PGOPTIONS = `-c search_path=${schemaName}`;
 };
 
-const setSchema = async (schemaName: string): Promise<void> => {
-	await setSchemaForCurrentPoolConnection(schemaName);
+const setSchema = async (db: TinyPg, schemaName: string): Promise<void> => {
+	await setSchemaForCurrentPoolConnection(db, schemaName);
 	setSchemaForFuturePoolConnections(schemaName);
 };
 
-const dropSchema = async (schemaName: string): Promise<void> => {
+const dropSchema = async (db: TinyPg, schemaName: string): Promise<void> => {
 	await db.query(`DROP SCHEMA ${schemaName} CASCADE;`);
 };
 
+export const createAndSetDatabase = (): void => {
+	const db = createDatabase();
+	setDatabase(db);
+};
+
 export const prepareDatabaseForCurrentWorker = async (): Promise<void> => {
+	const db = getDatabase();
 	const schemaName = getSchemaNameForCurrentTestWorker();
-	await createSchema(schemaName);
-	await setSchema(schemaName);
-	await migrate(schemaName);
-	await initializeDatabase();
+	await createSchema(db, schemaName);
+	await setSchema(db, schemaName);
+	await migrate(db, schemaName);
+	await initializeDatabase(db);
 };
 
 export const cleanupDatabaseForCurrentWorker = async (): Promise<void> => {
 	const schemaName = getSchemaNameForCurrentTestWorker();
-	await dropSchema(schemaName);
+	await dropSchema(getDatabase(), schemaName);
 };

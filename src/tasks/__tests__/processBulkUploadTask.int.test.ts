@@ -4,7 +4,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { sdkStreamMixin } from '@smithy/util-stream';
 import {
-	db,
+	getDatabase,
 	createOrUpdateBaseField,
 	createApplicationForm,
 	createApplicationFormField,
@@ -38,6 +38,7 @@ import {
 	expectTimestamp,
 } from '../../test/asymettricMatchers';
 import { createTestFile, createTestOpportunity } from '../../test/factories';
+import type { TinyPg } from 'tinypg';
 import type {
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
@@ -48,6 +49,7 @@ import type {
 const s3Mock = mockClient(S3Client);
 
 const createTestApplicationForm = async (
+	db: TinyPg,
 	authContext: AuthContext,
 	shortCodes: string[],
 ): Promise<{ applicationFormId: number; opportunity: Opportunity }> => {
@@ -73,11 +75,15 @@ const createTestApplicationForm = async (
 };
 
 const createTestBulkUploadTask = async (
+	db: TinyPg,
 	authContext: AuthContext,
-	proposalsDataFileId: number,
-	applicationFormId: number,
-	overrideValues?: Partial<InternallyWritableBulkUploadTask>,
+	options: {
+		proposalsDataFileId: number;
+		applicationFormId: number;
+		overrideValues?: Partial<InternallyWritableBulkUploadTask>;
+	},
 ): Promise<BulkUploadTask> => {
+	const { proposalsDataFileId, applicationFormId, overrideValues } = options;
 	const systemSource = await loadSystemSource(db, null);
 	const defaultValues = {
 		sourceId: systemSource.id,
@@ -92,7 +98,7 @@ const createTestBulkUploadTask = async (
 	});
 };
 
-const createTestBaseFields = async (): Promise<void> => {
+const createTestBaseFields = async (db: TinyPg): Promise<void> => {
 	await createOrUpdateBaseField(db, null, {
 		label: 'Proposal Submitter Email',
 		description: 'The email address of the person who submitted the proposal.',
@@ -136,18 +142,23 @@ describe('processBulkUploadTask', () => {
 		s3Mock.reset();
 	});
 	it('should attempt to access the contents of the file associated with the specified bulk upload', async () => {
-		await createTestBaseFields();
+		const db = getDatabase();
+		await createTestBaseFields(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
 		const { applicationFormId } = await createTestApplicationForm(
+			db,
 			systemUserAuthContext,
 			['proposal_submitter_email', 'organization_name'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
 			systemUserAuthContext,
-			proposalsDataFile.id,
-			applicationFormId,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
 		);
 
 		s3Mock.on(GetObjectCommand).resolves({
@@ -174,19 +185,24 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should fail if the proposalsDataFile is not accessible', async () => {
-		await createTestBaseFields();
-		const testAuthContext = await getTestAuthContext();
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
 		const { applicationFormId } = await createTestApplicationForm(
+			db,
 			systemUserAuthContext,
 			['proposal_submitter_email', 'organization_name'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
 			systemUserAuthContext,
-			proposalsDataFile.id,
-			applicationFormId,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
 		);
 
 		s3Mock.on(GetObjectCommand).rejects(new Error('NoSuchKey'));
@@ -209,21 +225,26 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should not process or modify processing status if the bulk upload is not PENDING', async () => {
-		await createTestBaseFields();
-		const testAuthContext = await getTestAuthContext();
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
 		const { applicationFormId } = await createTestApplicationForm(
+			db,
 			systemUserAuthContext,
 			['proposal_submitter_email', 'organization_name'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
 			systemUserAuthContext,
-			proposalsDataFile.id,
-			applicationFormId,
 			{
-				status: TaskStatus.IN_PROGRESS,
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+				overrideValues: {
+					status: TaskStatus.IN_PROGRESS,
+				},
 			},
 		);
 
@@ -255,19 +276,24 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should fail if the csv does not match the application form fields', async () => {
-		await createTestBaseFields();
-		const testAuthContext = await getTestAuthContext();
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
 		const { applicationFormId } = await createTestApplicationForm(
+			db,
 			systemUserAuthContext,
 			['proposal_submitter_email', 'organization_name'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
 			systemUserAuthContext,
-			proposalsDataFile.id,
-			applicationFormId,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
 		);
 
 		s3Mock.on(GetObjectCommand).resolves({
@@ -302,19 +328,24 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should have a proper failed state if the csv is empty', async () => {
-		await createTestBaseFields();
-		const testAuthContext = await getTestAuthContext();
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
 		const { applicationFormId } = await createTestApplicationForm(
+			db,
 			systemUserAuthContext,
 			['proposal_submitter_email', 'organization_name'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
 			systemUserAuthContext,
-			proposalsDataFile.id,
-			applicationFormId,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
 		);
 
 		s3Mock.on(GetObjectCommand).resolves({
@@ -347,8 +378,9 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should download, process, and resolve the bulk upload if the sourceKey is accessible and contains a valid CSV bulk upload', async () => {
-		await createTestBaseFields();
-		const testAuthContext = await getTestAuthContext();
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
 		const systemSource = await loadSystemSource(db, null);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
@@ -358,15 +390,19 @@ describe('processBulkUploadTask', () => {
 			systemUserAuthContext,
 		);
 		const { applicationFormId, opportunity } = await createTestApplicationForm(
+			db,
 			systemUserAuthContext,
 			['proposal_submitter_email', 'organization_name', 'favorite_file'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
 			systemUserAuthContext,
-			proposalsDataFile.id,
-			applicationFormId,
 			{
-				attachmentsArchiveFileId: attachmentsArchiveFile.id,
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+				overrideValues: {
+					attachmentsArchiveFileId: attachmentsArchiveFile.id,
+				},
 			},
 		);
 
@@ -717,19 +753,24 @@ describe('processBulkUploadTask', () => {
 	});
 
 	it('should create changemakers and changemaker-proposal relationships', async () => {
-		await createTestBaseFields();
-		const testAuthContext = await getTestAuthContext();
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
 		const { applicationFormId } = await createTestApplicationForm(
+			db,
 			systemUserAuthContext,
 			['proposal_submitter_email', 'organization_name', 'organization_tax_id'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
 			systemUserAuthContext,
-			proposalsDataFile.id,
-			applicationFormId,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
 		);
 
 		s3Mock.on(GetObjectCommand).resolves({

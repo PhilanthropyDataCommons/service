@@ -1,7 +1,7 @@
 import { HTTP_STATUS } from '../constants';
 import { isAuthContext, isWritableFile } from '../types';
 import { createFile, loadFileBundle } from '../database/operations';
-import { db, getLimitValues } from '../database';
+import { getDatabase, getLimitValues } from '../database';
 import { InputValidationError, FailedMiddlewareError } from '../errors';
 import { generatePresignedPost } from '../s3';
 import { getDefaultS3Bucket } from '../config';
@@ -15,6 +15,7 @@ const getFiles = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { createdBy } = extractCreatedByParameters(req);
@@ -30,6 +31,7 @@ const postFile = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
+	const db = getDatabase();
 
 	const body = req.body as unknown;
 	if (!isWritableFile(body)) {

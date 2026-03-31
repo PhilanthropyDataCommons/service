@@ -49,6 +49,7 @@ import type {
 
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
 const CHANGEMAKER_NAME_SHORT_CODE = 'organization_name';
+const SINGLE_ENTRY = 1;
 
 const downloadFileDataToTemporaryStorage = async (
 	file: File,
@@ -238,10 +239,69 @@ const uploadFileDataToS3 = async (
 	return file;
 };
 
+const ROOT_DIRECTORIES_TO_IGNORE = new Set<string>(['__MACOSX']);
+
+const getRootPaths = (
+	entries: Record<string, { isDirectory: boolean }>,
+): Array<{ name: string; isDirectory: boolean }> => {
+	const rootNames = new Set(
+		Object.keys(entries)
+			.map((relativePath) => {
+				const [firstComponent] = relativePath.split('/');
+				return firstComponent ?? relativePath;
+			})
+			.filter((name) => !ROOT_DIRECTORIES_TO_IGNORE.has(name)),
+	);
+	return [...rootNames].map((name) => ({
+		name,
+		isDirectory:
+			entries[name]?.isDirectory === true ||
+			entries[`${name}/`]?.isDirectory === true,
+	}));
+};
+
+export const getAlternativeRootPath = (
+	entries: Record<string, { isDirectory: boolean }>,
+): string | null => {
+	const rootPaths = getRootPaths(entries);
+	if (rootPaths.length !== SINGLE_ENTRY) {
+		return null;
+	}
+	const [rootPath] = rootPaths;
+	if (rootPath?.isDirectory !== true) {
+		return null;
+	}
+	return rootPath.name;
+};
+
+interface ProposalAttachmentsResult {
+	temporaryFileMap: Map<string, FileResult>;
+	nestedRootFolder: string | null;
+}
+
+const getTemporaryFileByPath = (
+	relativePath: string,
+	temporaryFileMap: Map<string, FileResult>,
+	nestedRootFolder: string | null,
+): { temporaryFile: FileResult; resolvedPath: string } => {
+	const directMatch = temporaryFileMap.get(relativePath);
+	if (directMatch !== undefined) {
+		return { temporaryFile: directMatch, resolvedPath: relativePath };
+	}
+	if (nestedRootFolder !== null) {
+		const prefixedPath = `${nestedRootFolder}/${relativePath}`;
+		const prefixedMatch = temporaryFileMap.get(prefixedPath);
+		if (prefixedMatch !== undefined) {
+			return { temporaryFile: prefixedMatch, resolvedPath: prefixedPath };
+		}
+	}
+	throw new Error(`No file found for attachment with path "${relativePath}"`);
+};
+
 const prepareProposalAttachments = async (
 	bulkUploadTask: BulkUploadTask,
 	graphileLogger: GraphileLogger,
-): Promise<Map<string, FileResult>> => {
+): Promise<ProposalAttachmentsResult> => {
 	const temporaryFileMap = new Map<string, FileResult>();
 
 	if (bulkUploadTask.attachmentsArchiveFile !== null) {
@@ -272,6 +332,10 @@ const prepareProposalAttachments = async (
 						);
 					});
 
+				const nestedRootFolder = getAlternativeRootPath(
+					attachmentsArchiveEntries,
+				);
+
 				await allNoLeaks(
 					Object.keys(attachmentsArchiveEntries).map(async (relativePath) => {
 						const { [relativePath]: archiveEntry } = attachmentsArchiveEntries;
@@ -291,6 +355,8 @@ const prepareProposalAttachments = async (
 						temporaryFileMap.set(relativePath, temporaryFile);
 					}),
 				);
+
+				return { temporaryFileMap, nestedRootFolder };
 			} finally {
 				await attachmentsArchiveZip.close();
 			}
@@ -306,7 +372,7 @@ const prepareProposalAttachments = async (
 		}
 	}
 
-	return temporaryFileMap;
+	return { temporaryFileMap, nestedRootFolder: null };
 };
 
 /**
@@ -325,7 +391,7 @@ class AttachmentsManager {
 	constructor(
 		private readonly dbConnection: TinyPg,
 		private readonly authContext: AuthContext,
-		private readonly attachmentTemporaryFiles: Map<string, FileResult>,
+		private readonly proposalAttachments: ProposalAttachmentsResult,
 		private readonly graphileLogger: GraphileLogger,
 	) {}
 
@@ -335,17 +401,16 @@ class AttachmentsManager {
 			return cachedAttachmentFile;
 		}
 
-		const temporaryFile = this.attachmentTemporaryFiles.get(relativePath);
-		if (temporaryFile === undefined) {
-			throw new Error(
-				`No file found for attachment with path "${relativePath}"`,
-			);
-		}
+		const { temporaryFile, resolvedPath } = getTemporaryFileByPath(
+			relativePath,
+			this.proposalAttachments.temporaryFileMap,
+			this.proposalAttachments.nestedRootFolder,
+		);
 
 		const { size } = await stat(temporaryFile.path);
-		const mimeType = getMimeType(relativePath);
+		const mimeType = getMimeType(resolvedPath);
 		const s3Bucket = getDefaultS3Bucket();
-		const fileName = getFileNameFromPath(relativePath);
+		const fileName = getFileNameFromPath(resolvedPath);
 		const attachmentFile = await createFile(
 			this.dbConnection,
 			this.authContext,
@@ -360,7 +425,7 @@ class AttachmentsManager {
 		await uploadFileDataToS3(
 			attachmentFile,
 			temporaryFile,
-			relativePath,
+			resolvedPath,
 			this.graphileLogger,
 		);
 		this.cachedAttachmentFiles.set(relativePath, attachmentFile);
@@ -603,7 +668,7 @@ export const processBulkUploadTask = async (
 
 	try {
 		await cleanupTemporaryFileMap(
-			temporaryProposalAttachmentFiles,
+			temporaryProposalAttachmentFiles.temporaryFileMap,
 			graphileLogger,
 		);
 	} catch (err) {

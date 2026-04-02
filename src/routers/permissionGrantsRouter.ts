@@ -25,6 +25,13 @@ permissionGrantsRouter.get(
 	permissionGrantsHandlers.getPermissionGrant,
 );
 
+permissionGrantsRouter.put(
+	'/:permissionGrantId',
+	requireAuthentication,
+	requireAdministratorRole,
+	permissionGrantsHandlers.putPermissionGrant,
+);
+
 permissionGrantsRouter.delete(
 	'/:permissionGrantId',
 	requireAuthentication,

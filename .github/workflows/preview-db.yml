@@ -42,6 +42,16 @@ jobs:
         DB_NAME: ${{ env.DATABASE_NAME }}
         PGSSLMODE: verify-full
     steps:
+      - name: Wait for preview app delete before dropping preview DB
+        uses: kachick/wait-other-jobs@v4
+        timeout-minutes: 24
+        with:
+          wait-list: |
+            [
+              {
+                "workflowFile": "preview-db.yml"
+              }
+            ]
       - name: Drop a database for this PR on the "deploy previews" cluster
         run: |
           psql "${CONNECTION}" -c "DROP DATABASE IF EXISTS ${DB_NAME};"

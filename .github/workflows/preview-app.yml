@@ -1,0 +1,315 @@
+name: Delete and post preview apps
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+env:
+  TOKEN: ${{ secrets.DIGITAL_OCEAN_PROXY_TOKEN }}
+  URL: ${{ vars.DIGITAL_OCEAN_PROXY_URL }}
+  PGHOST: ${{ vars.DEPLOY_PREVIEWS_PGHOST }}
+  PGPORT: ${{ vars.DEPLOY_PREVIEWS_PGPORT }}
+  PGPASSWORD: ${{ secrets.DEPLOY_PREVIEWS_PGPASSWORD }}
+  # Database name is a shared convention between `preview-db.yml` and this one:
+  DATABASE_NAME: preview_${{ github.event.pull_request.number }}
+  APP_NAME: pdc-deploy-preview-${{ github.event.pull_request.number }}
+  # IMAGE_TAG needs to match docker.yml's PREVIEW_TAG
+  IMAGE_TAG: preview-${{ github.event.pull_request.number }}
+  PROJECT_ID: ${{ secrets.DIGITAL_OCEAN_PROJECT_ID }}
+  S3_HOST: ${{ vars.DEPLOY_PREVIEWS_S3_HOST }}
+  S3_ACCESS_KEY_ID: ${{ secrets.DEPLOY_PREVIEWS_S3_ACCESS_KEY_ID }}
+  S3_ACCESS_SECRET: ${{ secrets.DEPLOY_PREVIEWS_S3_ACCESS_SECRET }}
+  S3_BUCKET: pdc-service-previews
+
+concurrency:
+  group: preview-app-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  post-app:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action)
+    steps:
+      - name: Wait for preview DB, CI, build, and other workflows to succeed
+        uses: kachick/wait-other-jobs@v4
+        timeout-minutes: 24
+        with:
+          wait-list: |
+            [
+              {
+                "workflowFile": "preview-db.yml"
+              },
+              {
+                "workflowFile": "ci.yml"
+              },
+              {
+                "workflowFile": "sdk.yml"
+              },
+              {
+                "workflowFile": "docker.yml"
+              }
+            ]
+      - name: Create or recreate a preview app for this PR
+        run: |
+          set -eo pipefail
+          app_spec=$(cat <<EOF
+          project_id: ${{ env.PROJECT_ID }}
+          spec:
+            alerts:
+            - rule: DEPLOYMENT_FAILED
+            - rule: DOMAIN_FAILED
+            - rule: DEPLOYMENT_LIVE
+            ingress:
+              rules:
+              - component:
+                  name: service
+                match:
+                  path:
+                    prefix: /
+            name: ${{ env.APP_NAME }}
+            features:
+              - buildpack-stack=ubuntu-22
+            region: nyc
+            services:
+              - envs:
+                - key: AUTH_SERVER_ISSUER
+                  scope: RUN_AND_BUILD_TIME
+                  value: https://auth.philanthropydatacommons.org/realms/pdc
+                - key: OPENAPI_DOCS_AUTH_CLIENT_ID
+                  scope: RUN_AND_BUILD_TIME
+                  value: pdc-openapi-docs-previews
+                - key: HOST
+                  scope: RUN_AND_BUILD_TIME
+                  value: 0.0.0.0
+                - key: S3_ACCESS_KEY_ID
+                  scope: RUN_AND_BUILD_TIME
+                  value: ${{ env.S3_ACCESS_KEY_ID }}
+                - key: S3_BUCKET
+                  scope: RUN_AND_BUILD_TIME
+                  value: ${{ env.S3_BUCKET }}
+                - key: S3_ENDPOINT
+                  scope: RUN_AND_BUILD_TIME
+                  value: https://nyc3.digitaloceanspaces.com
+                - key: S3_PATH_STYLE
+                  scope: RUN_AND_BUILD_TIME
+                  value: "false"
+                - key: S3_REGION
+                  scope: RUN_AND_BUILD_TIME
+                  value: us-east-1
+                - key: PGHOST
+                  scope: RUN_AND_BUILD_TIME
+                  value: ${{ env.PGHOST }}
+                - key: PGPORT
+                  scope: RUN_AND_BUILD_TIME
+                  value: "${{ env.PGPORT }}"
+                - key: PGUSER
+                  scope: RUN_AND_BUILD_TIME
+                  value: pdc
+                - key: PGPASSWORD
+                  scope: RUN_AND_BUILD_TIME
+                  value: ${{ env.PGPASSWORD }}
+                - key: PGSSLMODE
+                  scope: RUN_AND_BUILD_TIME
+                  value: no-verify
+                - key: PGDATABASE
+                  scope: RUN_AND_BUILD_TIME
+                  value: ${{ env.DATABASE_NAME }}
+                - key: S3_ACCESS_SECRET
+                  scope: RUN_AND_BUILD_TIME
+                  type: SECRET
+                  value: ${{ env.S3_ACCESS_SECRET }}
+                health_check:
+                  http_path: /
+                http_port: 8080
+                image:
+                  registry: ghcr.io
+                  registry_type: GHCR
+                  repository: philanthropydatacommons/service
+                  tag: ${{ env.IMAGE_TAG }}
+                instance_count: 1
+                instance_size_slug: apps-s-1vcpu-0.5gb
+                name: service
+          EOF
+          )
+          # Find existing ID if it exists
+          app_id=$(curl --fail-with-body -X GET \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            --url "${URL}/v2/apps" |
+            jq '.apps[] | select (.spec.name == "${{ env.APP_NAME }}") | .id')
+          http_method=""
+          http_url=""
+          if [ "${app_id}" == "" ]; then
+            # New app needed, POST a new spec. This is for PR open and reopen events.
+            echo "New app needed"
+            http_method=POST
+            http_url="${URL}/v2/apps"
+          else
+            # Existing app, PUT a new spec. This is for PR resynchronize events.
+            echo "Existing app ${app_id} found."
+            http_method=PUT
+            http_url="${URL}/v2/apps/${app_id}"
+            # The PUT app spec forbids the `project_id` element so filter it out.
+            app_spec=$(echo "${app_spec}" | grep -v "project_id:")
+          fi
+
+          if ! app_response=$(curl --fail-with-body -X "${http_method}" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/yaml" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            --url "${http_url}" \
+            -d "${app_spec}")
+          then
+            echo "App could not be created. Response:"
+            echo "${app_response}"
+            exit 150
+          fi
+
+          echo "App creation response body:"
+          echo "${app_response}"
+
+          app_id=$(echo "${app_response}" | jq '.app.id')
+          pending_deployment_id=$(echo "${app_response}" | jq '.app.pending_deployment.id')
+          live_url=$(echo "${app_response}" | jq '.app.live_url')
+
+          if [ "${app_id}" == "" ] || [ "${app_id}" == "null" ]; then
+            echo "App ID could not be found"
+            exit 151
+          fi
+
+          echo "New app named ${{ env.APP_NAME }} created successfully."
+          echo "app_id: ${app_id}"
+          echo "live_url: ${live_url}"
+          echo "pending_deployment_id: ${pending_deployment_id}"
+
+          echo "Getting the deployment momentarily..."
+
+          for i in {1..12}; do
+            sleep 10
+            echo "Poll attempt ${i}"
+            if ! deployment_response=$(curl --fail-with-body -X GET \
+              -H "Accept: application/json" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              --url "${URL}/v2/apps/${app_id}/deployments/${pending_deployment_id}")
+            then
+              echo "Failed to get a deployment response from DO."
+              exit 152
+            fi
+            phase=$(echo "${deployment_response}" | jq '.deployment.phase')
+            echo "Deployment ${phase}"
+            if [ "${phase}" == "SUCCEEDED" ]; then
+              break
+            elif [ "${phase}" == "FAILED" ]; then
+              exit 153
+            fi
+          done
+
+          if [ "${phase}" != "SUCCEEDED" ]; then
+            echo "Deployment did not succeed in a reasonable amount of time."
+            echo "Attempting to get DEPLOY logs, if possible. The task fails regardless."
+            if logs_list_response=$(curl --fail-with-body -X GET \
+              -H "Accept: application/json" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              --url "${URL}/v2/apps/${app_id}/deployments/${pending_deployment_id}/components/service/logs?type=DEPLOY")
+            then
+              # Docs are ambiguous, experimentation shows `historic_urls` to be a key.
+              # Sometimes `url` and `live_url` are here, matching.
+              # This is best effort, so far with little success.
+              echo "What URLs are available? Response:"
+              echo "${logs_list_response}"
+              if logs_url=$(echo "${logs_list_response}" | jq -r -c '.url')
+              then
+                if logs_response=$(curl --fail-with-body -X GET \
+                  --url "${logs_url}")
+                then
+                  echo "Deploy log file found:"
+                else
+                  echo "Failed to get a log file. Response:"
+                fi
+                echo "${logs_response}"
+              fi
+            else
+              echo "Failed to get the list of DEPLOY logs. Response:"
+              echo "${logs_list_response}"
+            fi
+            echo "Attempting to cancel the deployment. The task fails regardless."
+            curl --fail-with-body -X POST \
+              -H "Accept: application/json" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              --url "${URL}/v2/apps/${app_id}/deployments/${pending_deployment_id}/cancel"
+            exit 154
+          fi
+          # TODO: comment in the PR with a link to the preview env
+
+  find-s3-objects:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action == 'closed'
+    container:
+      image: alpine/psql:latest
+      env:
+        DB_NAME: ${{ env.DATABASE_NAME }}
+        PGSSLMODE: no-verify
+        PGHOST: ${{ env.PGHOST }}
+        PGUSER: ${{ env.PGUSER }}
+        PGPASSWORD: ${{ env.PGPASSWORD }}
+        PGPORT: ${{ env.PGPORT }}
+    outputs:
+      object_keys: ${{ steps.db-query-files.outputs.object_keys }}
+    steps:
+      - name: Find S3 object keys in DB
+        id: db-query-files
+        run: |
+          set -eo pipefail
+          # Strip all the cruft, separate by a space to ease a `for` loop.
+          psql -d "${{ env.DB_NAME }}" -t -A -R' ' -c "SELECT storage_key FROM files;" >> "$GITHUB_OUTPUT"
+
+  delete-s3-objects:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action == 'closed'
+    needs: find-s3-objects
+    container:
+      image: pgsty/mc:latest
+      env:
+        MC_HOST_PDC: 'https://${{ env.S3_ACCESS_KEY_ID }}:${{ env.S3_ACCESS_SECRET }}@${{ env.S3_HOST}}'
+        OBJECTS_TO_DELETE: needs.jobs.find-s3-objects.outputs.object_keys
+    steps:
+      - name: Remove files
+        run: |
+          set -xe
+          for f in ${{ env.OBJECTS_TO_DELETE }}; do
+            mc rm "pdc/${{ env.S3_BUCKET }}/${f}"
+          done
+
+  delete-app:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action == 'closed'
+    needs: delete-s3-objects
+    steps:
+      - name: Delete a preview app for this PR if it exists
+        run: |
+          set -eo pipefail
+          # Find app ID if it exists
+          if ! app_response=$(curl --fail-with-body -X GET \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            --url "${URL}/v2/apps")
+          then
+            echo "App could not be found. Response:"
+            echo "${app_response}"
+            exit 153
+          fi
+          app_id=$(echo "${app_response}" |
+            jq '.apps[] | select (.spec.name == "${{ env.APP_NAME }}") | .id')
+          # Found the app, delete it.
+          curl --fail-with-body -X DELETE \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            --url "${URL}/v2/apps/${app_id}"

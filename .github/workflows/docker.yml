@@ -1,23 +1,32 @@
 name: Docker
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: philanthropydatacommons/service
-
 on:
   push:
     branches:
       - 'main'
   pull_request:
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: philanthropydatacommons/service
+  # PREVIEW_TAG needs to match preview-app.yml's IMAGE_TAG
+  PREVIEW_TAG: preview-${{ github.event.pull_request.number }}
+
 jobs:
-  test-build-image:
+  build-and-push-preview-image:
     # This job should run only on pull requests, not on main
-    if: ${{ github.ref != 'refs/heads/main' }}
+    if: |
+      github.ref != 'refs/heads/main' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action)
+    needs: delete-preview-image-on-sync
+    concurrency:
+      group: preview-image-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read
+      packages: write
     steps:
       - name: Check out code
         uses: actions/checkout@v6
@@ -37,13 +46,52 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build but do not push and do not write to cache
+      - name: Build and push preview image but do not write to cache
         uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: false
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PREVIEW_TAG }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+
+  delete-preview-image-on-sync:
+    name: Delete preview image from ghcr.io on resync
+    if: |
+      github.ref != 'refs/heads/main' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action == 'synchronize'
+    concurrency:
+      group: preview-image-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete image
+        uses: bots-house/ghcr-delete-image-action@v1.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          name: service
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.PREVIEW_TAG }}
+
+  delete-preview-image:
+    name: Delete preview image from ghcr.io
+    if: |
+      github.ref != 'refs/heads/main' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action == 'closed'
+    concurrency:
+      group: preview-image-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete image
+        uses: bots-house/ghcr-delete-image-action@v1.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          name: service
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.PREVIEW_TAG }}
 
   build-and-publish-image:
     # This job should run only on main, not on pull requests

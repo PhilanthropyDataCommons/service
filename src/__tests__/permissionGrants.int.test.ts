@@ -847,6 +847,332 @@ describe('/permissionGrants', () => {
 		});
 	});
 
+	describe('PUT /:permissionGrantId', () => {
+		it('requires authentication', async () => {
+			await agent.put('/permissionGrants/1').expect(401);
+		});
+
+		it('requires administrator role', async () => {
+			await agent
+				.put('/permissionGrants/1')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: 1,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(401);
+		});
+
+		it('updates and returns the permission grant', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, null);
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view', 'edit'],
+				})
+				.expect(200);
+
+			expect(response.body).toMatchObject({
+				id: permissionGrant.id,
+				granteeType: 'user',
+				granteeUserKeycloakUserId: testUserKeycloakUserId,
+				contextEntityType: 'changemaker',
+				changemakerId: changemaker.id,
+				scope: ['changemaker'],
+				verbs: ['view', 'edit'],
+				createdBy: testUserKeycloakUserId,
+				createdAt: expectTimestamp(),
+			});
+		});
+
+		it('updates the context entity of a permission grant', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, null);
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const funder = await createTestFunder(db, null);
+
+			const response = await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'funder',
+					funderShortCode: funder.shortCode,
+					scope: ['funder'],
+					verbs: ['view'],
+				})
+				.expect(200);
+
+			expect(response.body).toMatchObject({
+				id: permissionGrant.id,
+				granteeType: 'user',
+				granteeUserKeycloakUserId: testUserKeycloakUserId,
+				contextEntityType: 'funder',
+				funderShortCode: funder.shortCode,
+				scope: ['funder'],
+				verbs: ['view'],
+			});
+		});
+
+		it('updates the grantee of a permission grant', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, null);
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const userGroupKeycloakId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
+
+			const response = await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'userGroup',
+					granteeKeycloakOrganizationId: userGroupKeycloakId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(200);
+
+			expect(response.body).toMatchObject({
+				id: permissionGrant.id,
+				granteeType: 'userGroup',
+				granteeKeycloakOrganizationId: userGroupKeycloakId,
+				contextEntityType: 'changemaker',
+				changemakerId: changemaker.id,
+				scope: ['changemaker'],
+				verbs: ['view'],
+			});
+		});
+
+		it('updates conditions on a permission grant', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const funder = await createTestFunder(db, null);
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL_FIELD_VALUE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'funder',
+					funderShortCode: funder.shortCode,
+					scope: ['proposalFieldValue'],
+					verbs: ['view'],
+					conditions: {
+						proposalFieldValue: {
+							property: 'baseFieldCategory',
+							operator: 'in',
+							value: ['budget'],
+						},
+					},
+				})
+				.expect(200);
+
+			expect(response.body).toMatchObject({
+				id: permissionGrant.id,
+				conditions: {
+					proposalFieldValue: {
+						property: 'baseFieldCategory',
+						operator: 'in',
+						value: ['budget'],
+					},
+				},
+			});
+		});
+
+		it('does not create a new row when updating', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, null);
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const before = await loadTableMetrics(db, 'permission_grants');
+
+			await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view', 'edit'],
+				})
+				.expect(200);
+
+			const after = await loadTableMetrics(db, 'permission_grants');
+			expect(after.count).toEqual(before.count);
+		});
+
+		it('returns 400 bad request when id is a letter', async () => {
+			const result = await agent
+				.put('/permissionGrants/a')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: 1,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('returns 400 bad request when body is invalid', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const permissionGrant = await createTestPermissionGrant(db, authContext);
+
+			const result = await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'invalid',
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('returns 400 bad request when scope is not valid for context entity type', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, null);
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const result = await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['funder'],
+					verbs: ['view'],
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+			});
+		});
+
+		it('returns 404 when id is not found', async () => {
+			const db = getDatabase();
+			const changemaker = await createTestChangemaker(db, null);
+			await agent
+				.put('/permissionGrants/9001')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(404);
+		});
+
+		it('returns 422 when referenced entity does not exist', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const permissionGrant = await createTestPermissionGrant(db, authContext);
+
+			await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: 9999,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(422);
+		});
+	});
+
 	describe('DELETE /:permissionGrantId', () => {
 		it('requires authentication', async () => {
 			await agent.delete('/permissionGrants/1').expect(401);

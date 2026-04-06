@@ -56,6 +56,76 @@
 			}
 		}
 	},
+	"put": {
+		"operationId": "updatePermissionGrantById",
+		"summary": "Updates a specific permission grant.",
+		"description": "Replaces all mutable fields of a permission grant by ID. Requires administrator role.",
+		"tags": ["PermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "permissionGrantId",
+				"description": "The PDC-generated ID of a permission grant.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/PermissionGrant.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"200": {
+				"description": "The updated permission grant.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PermissionGrant.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"description": "The request was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"description": "Authentication was not provided or was invalid.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/PdcError.json"
+						}
+					}
+				}
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"422": {
+				"$ref": "../components/responses/UnprocessableEntity.json"
+			}
+		}
+	},
 	"delete": {
 		"operationId": "deletePermissionGrantById",
 		"summary": "Deletes a specific permission grant.",

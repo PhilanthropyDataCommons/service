@@ -7,8 +7,14 @@ import {
 	loadPermissionGrant,
 	loadPermissionGrantBundle,
 	removePermissionGrant,
+	updatePermissionGrant,
 } from '../database';
-import { FailedMiddlewareError, InputValidationError } from '../errors';
+import {
+	FailedMiddlewareError,
+	InputValidationError,
+	NoDataReturnedError,
+	NotFoundError,
+} from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import {
 	getConditionsForScope,
@@ -171,6 +177,61 @@ const getPermissionGrant = async (
 		.send(permissionGrant);
 };
 
+const putPermissionGrant = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
+	const db = getDatabase();
+	const { permissionGrantId } = coerceParams(req.params);
+	if (!isId(permissionGrantId)) {
+		throw new InputValidationError(
+			'Invalid permissionGrantId parameter.',
+			isId.errors ?? [],
+		);
+	}
+
+	const body = req.body as unknown;
+	if (!isWritablePermissionGrant(body)) {
+		throw new InputValidationError(
+			'Invalid request body.',
+			isWritablePermissionGrant.errors ?? [],
+		);
+	}
+
+	assertPermissionGrantHasValidScope(body);
+	assertPermissionGrantHasValidConditions(body);
+
+	try {
+		const permissionGrant = await updatePermissionGrant(
+			db,
+			req,
+			body,
+			permissionGrantId,
+		);
+		res
+			.status(HTTP_STATUS.SUCCESSFUL.OK)
+			.contentType('application/json')
+			.send(permissionGrant);
+	} catch (error: unknown) {
+		if (error instanceof NoDataReturnedError) {
+			throw new NotFoundError(
+				'The given permission grant was not found.',
+				{
+					entityType: 'PermissionGrant',
+					entityPrimaryKey: {
+						permissionGrantId,
+					},
+				},
+				{ cause: error },
+			);
+		}
+		throw error;
+	}
+};
+
 const deletePermissionGrant = async (
 	req: Request,
 	res: Response,
@@ -200,6 +261,7 @@ const permissionGrantsHandlers = {
 	getPermissionGrant,
 	getPermissionGrants,
 	postPermissionGrant,
+	putPermissionGrant,
 };
 
 export { permissionGrantsHandlers };

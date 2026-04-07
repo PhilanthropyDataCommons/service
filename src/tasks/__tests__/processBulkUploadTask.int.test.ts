@@ -597,6 +597,7 @@ describe('processBulkUploadTask', () => {
 							version: 1,
 						},
 					],
+					changemakers: [],
 				},
 				{
 					createdAt: expectTimestamp(),
@@ -719,6 +720,7 @@ describe('processBulkUploadTask', () => {
 							version: 1,
 						},
 					],
+					changemakers: [],
 				},
 			],
 			total: 2,

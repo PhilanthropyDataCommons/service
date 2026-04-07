@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `BaseField` can now be of type `date` and `date_time`.
 - `GET /changemakers` now supports the `_content` query parameter to search changemakers by name using full-text search.
+- Proposals now include a `changemakers` array containing shallow changemaker data for all associated changemakers.
 - Permission grants now support optional `conditions` that restrict which entities the grant applies to based on entity data. The initial implementation supports filtering `proposalFieldValue` scope by `baseFieldCategory` using the `in` operator.
 - Permission grants can now be updated via `PUT /permissionGrants/:permissionGrantId`. All mutable fields are replaced with the provided values.
 

@@ -25,6 +25,13 @@
 			},
 			"readOnly": true
 		},
+		"changemakers": {
+			"type": "array",
+			"items": {
+				"$ref": "./ShallowChangemaker.json"
+			},
+			"readOnly": true
+		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",
@@ -42,6 +49,7 @@
 		"opportunityId",
 		"externalId",
 		"versions",
+		"changemakers",
 		"createdAt",
 		"createdBy"
 	]

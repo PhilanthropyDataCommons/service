@@ -24,6 +24,7 @@ import {
 import {
 	extractPaginationParameters,
 	extractProposalParameters,
+	extractSearchParameters,
 } from '../queryParameters';
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
@@ -48,11 +49,13 @@ const getChangemakers = async (req: Request, res: Response): Promise<void> => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { limit, offset } = getLimitValues(paginationParameters);
 	const { proposalId } = extractProposalParameters(req);
+	const { search } = extractSearchParameters(req);
 	const authContext = isAuthContext(req) ? req : null;
 	const changemakerBundle = await loadChangemakerBundle(
 		db,
 		authContext,
 		proposalId,
+		search,
 		limit,
 		offset,
 	);

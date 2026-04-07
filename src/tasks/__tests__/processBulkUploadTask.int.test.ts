@@ -728,6 +728,7 @@ describe('processBulkUploadTask', () => {
 			db,
 			null,
 			undefined,
+			undefined,
 			NO_LIMIT,
 			NO_OFFSET,
 		);
@@ -796,6 +797,7 @@ describe('processBulkUploadTask', () => {
 		const changemakerBundle = await loadChangemakerBundle(
 			db,
 			null,
+			undefined,
 			undefined,
 			NO_LIMIT,
 			NO_OFFSET,

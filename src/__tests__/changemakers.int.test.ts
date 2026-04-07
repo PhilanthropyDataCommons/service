@@ -376,6 +376,98 @@ describe('/changemakers', () => {
 			});
 		});
 
+		it('returns a subset of changemakers present in the database when search is provided', async () => {
+			const db = getDatabase();
+			await createChangemaker(db, null, {
+				taxId: '11-1111111',
+				name: 'Community Garden Foundation',
+				keycloakOrganizationId: null,
+			});
+			await createChangemaker(db, null, {
+				taxId: '22-2222222',
+				name: 'Tech Innovation Labs',
+				keycloakOrganizationId: null,
+			});
+			const response = await request(app)
+				.get('/changemakers?_content=garden')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 1,
+						taxId: '11-1111111',
+						name: 'Community Garden Foundation',
+						keycloakOrganizationId: null,
+						createdAt: expectTimestamp(),
+						fiscalSponsors: [],
+						fields: [],
+					},
+				],
+			});
+		});
+
+		it('returns no changemakers when search does not match', async () => {
+			const db = getDatabase();
+			await insertTestChangemakers(db);
+			const response = await request(app)
+				.get('/changemakers?_content=xyznonexistent')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [],
+			});
+		});
+
+		it('returns changemakers matching both search and proposal filter', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, null);
+			await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+			});
+			await createChangemaker(db, null, {
+				taxId: '11-1111111',
+				name: 'Community Garden Foundation',
+				keycloakOrganizationId: null,
+			});
+			await createChangemaker(db, null, {
+				taxId: '22-2222222',
+				name: 'Tech Innovation Labs',
+				keycloakOrganizationId: null,
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: 1,
+				proposalId: 1,
+			});
+			await createChangemakerProposal(db, null, {
+				changemakerId: 2,
+				proposalId: 1,
+			});
+			const response = await request(app)
+				.get('/changemakers?_content=garden&proposal=1')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: [
+					{
+						id: 1,
+						taxId: '11-1111111',
+						name: 'Community Garden Foundation',
+						keycloakOrganizationId: null,
+						createdAt: expectTimestamp(),
+						fiscalSponsors: [],
+						fields: [],
+					},
+				],
+			});
+		});
+
 		it('returns a 400 error if an invalid changemaker filter is provided', async () => {
 			const response = await request(app)
 				.get(`/proposals?changemaker=foo`)

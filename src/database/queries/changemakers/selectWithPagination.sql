@@ -14,5 +14,15 @@ WHERE
 		ELSE
 			op.proposal_id = :proposalId
 	END
+	AND CASE
+		WHEN (
+			:search::text IS NULL
+			OR :search = ''
+		) THEN
+			TRUE
+		ELSE
+			o.name_search
+			@@ websearch_to_tsquery('english', :search::text)
+	END
 ORDER BY o.id DESC
 LIMIT :limit OFFSET :offset;

@@ -230,6 +230,70 @@ describe('/baseFields', () => {
 			expect(after.count).toEqual(1);
 		});
 
+		it('supports creation of date-type base fields', async () => {
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'base_fields');
+			const result = await request(app)
+				.put('/baseFields/shorts')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: '🏷️',
+					description: '😍',
+					dataType: BaseFieldDataType.DATE,
+					category: BaseFieldCategory.PROJECT,
+					valueRelevanceHours: null,
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
+				})
+				.expect(200);
+			const after = await loadTableMetrics(db, 'base_fields');
+			expect(before.count).toEqual(0);
+			expect(result.body).toMatchObject({
+				label: '🏷️',
+				description: '😍',
+				shortCode: 'shorts',
+				dataType: BaseFieldDataType.DATE,
+				category: BaseFieldCategory.PROJECT,
+				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
+				localizations: {},
+				createdAt: expectTimestamp(),
+			});
+			expect(after.count).toEqual(1);
+		});
+
+		it('supports creation of date_time-type base fields', async () => {
+			const db = getDatabase();
+			const before = await loadTableMetrics(db, 'base_fields');
+			const result = await request(app)
+				.put('/baseFields/shorts')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: '🏷️',
+					description: '😍',
+					dataType: BaseFieldDataType.DATETIME,
+					category: BaseFieldCategory.PROJECT,
+					valueRelevanceHours: null,
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
+				})
+				.expect(200);
+			const after = await loadTableMetrics(db, 'base_fields');
+			expect(before.count).toEqual(0);
+			expect(result.body).toMatchObject({
+				label: '🏷️',
+				description: '😍',
+				shortCode: 'shorts',
+				dataType: BaseFieldDataType.DATETIME,
+				category: BaseFieldCategory.PROJECT,
+				valueRelevanceHours: null,
+				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
+				localizations: {},
+				createdAt: expectTimestamp(),
+			});
+			expect(after.count).toEqual(1);
+		});
+
 		it('returns 400 bad request when no label is sent', async () => {
 			const result = await request(app)
 				.put('/baseFields/shorts')

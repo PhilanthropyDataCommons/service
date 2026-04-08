@@ -14,6 +14,8 @@ export enum BaseFieldDataType {
 	BOOLEAN = 'boolean',
 	CURRENCY = 'currency',
 	FILE = 'file',
+	DATE = 'date',
+	DATETIME = 'date_time',
 }
 
 enum BaseFieldCategory {

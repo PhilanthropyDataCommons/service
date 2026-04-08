@@ -61,6 +61,7 @@ logic based on `baseField.dataType`. For instance:
 - `url` → URL input
 - `phone_number` → telephone input
 - `file` → file upload control
+- `date` or `date_time` → date picker
 
 ## API Usage
 

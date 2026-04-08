@@ -7,6 +7,37 @@ describe('field value validation against BaseFieldDataType', () => {
 			true,
 		);
 	});
+	test('validate a valid date-only string as DATE', () => {
+		expect(fieldValueIsValid('2014-12-01', BaseFieldDataType.DATE)).toBe(true);
+	});
+	test('validate a invalid date-only string as DATE', () => {
+		expect(fieldValueIsValid('10-12-01', BaseFieldDataType.DATE)).toBe(false);
+		expect(fieldValueIsValid('2025-02-30', BaseFieldDataType.DATE)).toBe(false);
+		expect(fieldValueIsValid('2005', BaseFieldDataType.DATE)).toBe(false);
+		expect(fieldValueIsValid('12/1/2001', BaseFieldDataType.DATE)).toBe(false);
+		expect(fieldValueIsValid('March 5, 1999', BaseFieldDataType.DATE)).toBe(
+			false,
+		);
+	});
+	test('validate a valid date-time string as DATETIME', () => {
+		expect(
+			fieldValueIsValid('1985-04-12T23:20:50.52Z', BaseFieldDataType.DATETIME),
+		).toBe(true);
+		expect(
+			fieldValueIsValid(
+				'1996-12-19T16:39:57-08:00',
+				BaseFieldDataType.DATETIME,
+			),
+		).toBe(true);
+	});
+	test('validate a invalid date-time string as DATETIME', () => {
+		expect(
+			fieldValueIsValid('2025-01-30T00:10:39', BaseFieldDataType.DATETIME),
+		).toBe(false);
+		expect(
+			fieldValueIsValid('2025-02-30 10pm', BaseFieldDataType.DATETIME),
+		).toBe(false);
+	});
 	test('validate a valid numeric string as NUMBER', () => {
 		expect(fieldValueIsValid('123456', BaseFieldDataType.NUMBER)).toBe(true);
 		expect(fieldValueIsValid(' 123456 ', BaseFieldDataType.NUMBER)).toBe(true);

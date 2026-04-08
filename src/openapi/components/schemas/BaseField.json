@@ -31,7 +31,9 @@
 				"url",
 				"boolean",
 				"currency",
-				"file"
+				"file",
+				"date",
+				"date_time"
 			],
 			"example": "string"
 		},

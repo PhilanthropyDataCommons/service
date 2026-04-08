@@ -2,6 +2,16 @@ import validator from 'validator';
 import { BaseFieldDataType, isId } from './types';
 import { ajv } from './ajv';
 
+const isDateString = ajv.compile({
+	type: 'string',
+	format: 'date',
+});
+
+const isDateTimeString = ajv.compile({
+	type: 'string',
+	format: 'date-time',
+});
+
 const isEmailString = ajv.compile({
 	type: 'string',
 	format: 'email',
@@ -85,6 +95,10 @@ export const fieldValueIsValid = (
 			return isCurrencyWithCodeString(fieldValue);
 		case BaseFieldDataType.FILE:
 			return isIdString(fieldValue);
+		case BaseFieldDataType.DATE:
+			return isDateString(fieldValue);
+		case BaseFieldDataType.DATETIME:
+			return isDateTimeString(fieldValue);
 		default:
 			return isString(fieldValue);
 	}

@@ -21,6 +21,6 @@ ajv.addKeyword({
 });
 
 ajvKeywords(ajv, 'instanceof');
-addFormats(ajv, ['email', 'uri', 'uuid']);
+addFormats(ajv, ['email', 'uri', 'uuid', 'date', 'date-time']);
 
 export { ajv, type TypeGuardWithAjvErrors };

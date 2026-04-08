@@ -10,7 +10,8 @@
 		],
 		"parameters": [
 			{ "$ref": "../components/parameters/pageParam.json" },
-			{ "$ref": "../components/parameters/countParam.json" }
+			{ "$ref": "../components/parameters/countParam.json" },
+			{ "$ref": "../components/parameters/searchParam.json" }
 		],
 		"responses": {
 			"200": {

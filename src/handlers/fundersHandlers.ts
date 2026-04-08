@@ -8,7 +8,10 @@ import {
 } from '../database';
 import { isAuthContext, isWritableFunder } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
-import { extractPaginationParameters } from '../queryParameters';
+import {
+	extractPaginationParameters,
+	extractSearchParameters,
+} from '../queryParameters';
 import { coerceParams } from '../coercion';
 import { isShortCode } from '../types/ShortCode';
 import type { Request, Response } from 'express';
@@ -20,7 +23,8 @@ const getFunders = async (req: Request, res: Response): Promise<void> => {
 	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	const funderBundle = await loadFunderBundle(db, req, limit, offset);
+	const { search } = extractSearchParameters(req);
+	const funderBundle = await loadFunderBundle(db, req, search, limit, offset);
 
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)

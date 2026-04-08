@@ -4,11 +4,11 @@ import type { Changemaker } from '../../../types';
 
 const loadChangemakerBundle = generateLoadBundleOperation<
 	Changemaker,
-	[proposalId: number | undefined]
+	[proposalId: number | undefined, search: string | undefined]
 >(
 	'changemakers.selectWithPagination',
 	'changemakers',
-	['proposalId'],
+	['proposalId', 'search'],
 	decorateWithFileDownloadUrls,
 );
 

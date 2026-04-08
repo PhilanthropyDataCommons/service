@@ -1,5 +1,6 @@
 import { ajv } from '../ajv';
 import type { JSONSchemaType } from 'ajv';
+import type { ShallowChangemaker } from './Changemaker';
 import type { ProposalVersion } from './ProposalVersion';
 import type { Writable } from './Writable';
 import type { KeycloakId } from './KeycloakId';
@@ -11,6 +12,7 @@ interface Proposal {
 	readonly opportunity: Opportunity;
 	externalId: string;
 	readonly versions: ProposalVersion[];
+	readonly changemakers: ShallowChangemaker[];
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
 }

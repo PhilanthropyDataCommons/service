@@ -156,7 +156,18 @@ describe('/proposals', () => {
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 3,
-				entries: [changemakerVisibleProposal, funderVisibleProposal],
+				entries: [
+					{
+						...changemakerVisibleProposal,
+						changemakers: [
+							expect.objectContaining({
+								id: visibleChangemaker.id,
+								name: 'Visible Changemaker',
+							}),
+						],
+					},
+					funderVisibleProposal,
+				],
 			});
 		});
 
@@ -197,6 +208,15 @@ describe('/proposals', () => {
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
+						changemakers: [
+							{
+								id: changemaker.id,
+								taxId: changemaker.taxId,
+								name: changemaker.name,
+								keycloakOrganizationId: null,
+								createdAt: expectTimestamp(),
+							},
+						],
 					},
 				],
 			});
@@ -238,6 +258,7 @@ describe('/proposals', () => {
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
+						changemakers: [],
 					},
 				],
 			});
@@ -392,6 +413,7 @@ describe('/proposals', () => {
 								],
 							},
 						],
+						changemakers: [],
 					},
 				],
 			});
@@ -497,6 +519,7 @@ describe('/proposals', () => {
 						createdAt: expectTimestamp(),
 						createdBy: anotherUser.keycloakUserId,
 						versions: [],
+						changemakers: [],
 					},
 					{
 						id: 1,
@@ -506,6 +529,7 @@ describe('/proposals', () => {
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
+						changemakers: [],
 					},
 				],
 			});
@@ -548,6 +572,7 @@ describe('/proposals', () => {
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
+						changemakers: [],
 					},
 				],
 			});
@@ -588,6 +613,7 @@ describe('/proposals', () => {
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 						versions: [],
+						changemakers: [],
 					},
 				],
 			});
@@ -711,6 +737,7 @@ describe('/proposals', () => {
 								],
 							},
 						],
+						changemakers: [],
 					},
 				],
 			});
@@ -746,6 +773,7 @@ describe('/proposals', () => {
 						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
+						changemakers: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
@@ -755,6 +783,7 @@ describe('/proposals', () => {
 						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
+						changemakers: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
@@ -764,6 +793,7 @@ describe('/proposals', () => {
 						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
+						changemakers: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
@@ -773,6 +803,7 @@ describe('/proposals', () => {
 						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
+						changemakers: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
@@ -782,6 +813,7 @@ describe('/proposals', () => {
 						opportunityId: opportunity.id,
 						opportunity,
 						versions: [],
+						changemakers: [],
 						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
@@ -912,6 +944,7 @@ describe('/proposals', () => {
 				id: 2,
 				externalId: 'proposal-2',
 				versions: [],
+				changemakers: [],
 				opportunityId: opportunity.id,
 				opportunity,
 				createdAt: expectTimestamp(),
@@ -1166,6 +1199,7 @@ describe('/proposals', () => {
 						],
 					},
 				],
+				changemakers: [],
 			});
 		});
 
@@ -1416,6 +1450,7 @@ describe('/proposals', () => {
 						],
 					},
 				],
+				changemakers: [],
 			});
 		});
 
@@ -1625,6 +1660,7 @@ describe('/proposals', () => {
 						],
 					},
 				],
+				changemakers: [],
 			});
 		});
 	});

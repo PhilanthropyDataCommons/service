@@ -9,6 +9,7 @@ RETURNS jsonb AS $$
 DECLARE
   proposal_versions_json JSONB;
   opportunity_json JSONB;
+  changemakers_json JSONB;
 BEGIN
   SELECT jsonb_agg(
     proposal_version_to_json(
@@ -27,12 +28,28 @@ BEGIN
   FROM opportunities
   WHERE opportunities.id = proposal.opportunity_id;
 
+  SELECT jsonb_agg(
+    changemaker_to_json(
+      changemakers.*,
+      auth_context_keycloak_user_id,
+      auth_context_is_administrator,
+      TRUE
+    )
+    ORDER BY changemakers.id ASC
+  )
+  INTO changemakers_json
+  FROM changemakers
+  INNER JOIN changemakers_proposals
+    ON changemakers.id = changemakers_proposals.changemaker_id
+  WHERE changemakers_proposals.proposal_id = proposal.id;
+
   RETURN jsonb_build_object(
     'id', proposal.id,
     'opportunityId', proposal.opportunity_id,
     'opportunity', opportunity_json,
     'externalId', proposal.external_id,
     'versions', COALESCE(proposal_versions_json, '[]'::JSONB),
+    'changemakers', COALESCE(changemakers_json, '[]'::JSONB),
     'createdAt', proposal.created_at,
     'createdBy', proposal.created_by
   );

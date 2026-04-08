@@ -1,4 +1,10 @@
-import { createDatabase, initializeDatabase, setDatabase } from './database';
+import {
+	closeDatabase,
+	createAndSetDatabase,
+	getDatabaseName,
+	initializeDatabase,
+} from './database';
+import { TEST_DATABASE_PREFIX } from './constants';
 import { app } from './app';
 import { startJobQueue } from './jobQueue';
 import { getLogger } from './logger';
@@ -12,11 +18,21 @@ const host = process.env.HOST ?? 'localhost';
 
 const start = async (): Promise<void> => {
 	try {
-		const db = createDatabase();
+		const db = createAndSetDatabase();
+		const dbName = await getDatabaseName(db);
+		if (dbName.startsWith(TEST_DATABASE_PREFIX)) {
+			throw new Error(
+				`Connected to database "${dbName}" which starts with test prefix ` +
+					`"${TEST_DATABASE_PREFIX}". Refusing to start to avoid ` +
+					`operating on a test database.`,
+			);
+		}
 		await initializeDatabase(db);
-		setDatabase(db);
 	} catch (err) {
 		logger.error(err, 'Database failed to initialize');
+		await closeDatabase().catch((closeErr: unknown) => {
+			logger.error(closeErr, 'Failed to close database during error cleanup');
+		});
 		throw err;
 	}
 	try {

@@ -124,6 +124,11 @@ jobs:
           PGPORT: 5432
           PGUSER: postgres
           PGPASSWORD: postgres
+          PGDATABASE: postgres
+          TEST_PGHOST: localhost
+          TEST_PGPORT: 5432
+          TEST_PGUSER: postgres
+          TEST_PGPASSWORD: postgres
           AUTH_SERVER_ISSUER: https://totally-fake-server-name/realms/pdc
           OPENAPI_DOCS_AUTH_CLIENT_ID: pdc-fake-client-id
           S3_ACCESS_KEY_ID: fake-access-key-id

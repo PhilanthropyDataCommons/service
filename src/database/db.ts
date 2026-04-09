@@ -17,13 +17,26 @@ const getDatabase = (): TinyPg => {
 	return db;
 };
 
-const setDatabase = (newDb: TinyPg): void => {
+const createAndSetDatabase = (connectionString?: string): TinyPg => {
+	const newDb = createDatabase(connectionString);
 	db = newDb;
+	return newDb;
 };
 
-const createDatabase = (): TinyPg => {
+const closeDatabase = async (): Promise<void> => {
+	const current = db;
+	if (current !== null) {
+		db = null;
+		await current.close();
+	}
+};
+
+const createDatabase = (connectionString?: string): TinyPg => {
 	const newDb = new TinyPg({
 		root_dir: [path.resolve(__dirname, 'queries')],
+		...(connectionString === undefined
+			? {}
+			: { connection_string: connectionString }),
 	});
 
 	newDb.pool.on('connect', (client) => {
@@ -33,6 +46,14 @@ const createDatabase = (): TinyPg => {
 	});
 
 	return newDb;
+};
+
+const getDatabaseName = async (db: TinyPg): Promise<string> => {
+	const { rows } = await db.query<{ current_database: string }>(
+		'SELECT current_database()',
+	);
+	const [row] = rows;
+	return row?.current_database ?? '';
 };
 
 const initializeDatabase = async (db: TinyPg): Promise<TinyPg> => {
@@ -51,4 +72,11 @@ const initializeDatabase = async (db: TinyPg): Promise<TinyPg> => {
 	return db;
 };
 
-export { createDatabase, initializeDatabase, setDatabase, getDatabase };
+export {
+	closeDatabase,
+	createAndSetDatabase,
+	createDatabase,
+	getDatabase,
+	getDatabaseName,
+	initializeDatabase,
+};

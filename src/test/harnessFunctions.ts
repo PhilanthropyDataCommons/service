@@ -1,67 +1,79 @@
+import { closeDatabase, createAndSetDatabase } from '../database';
+import { TEST_DATABASE_PREFIX } from '../constants';
 import {
-	createDatabase,
-	getDatabase,
-	initializeDatabase,
-	migrate,
-	setDatabase,
-} from '../database';
-import type { TinyPg } from 'tinypg';
+	assertTestDatabaseName,
+	createTestAdminClient,
+	getTestPgConfig,
+	GOLD_DATABASE_NAME,
+} from './testDatabase';
+import type { Client } from 'pg';
 
-const generateSchemaName = (workerId: string): string => `test_${workerId}`;
+const buildConnectionString = (database: string): string => {
+	const config = getTestPgConfig();
+	const user = encodeURIComponent(config.user);
+	const password = encodeURIComponent(config.password);
+	return `postgresql://${user}:${password}@${config.host}:${config.port}/${database}`;
+};
 
-const getSchemaNameForCurrentTestWorker = (): string => {
-	if (process.env.NODE_ENV !== 'test') {
+const getWorkerDatabaseName = (): string => {
+	const {
+		env: { JEST_WORKER_ID },
+	} = process;
+	if (JEST_WORKER_ID === undefined || JEST_WORKER_ID === '') {
 		throw new Error(
-			'You cannot get a test schema name outside of a test environment.',
+			'JEST_WORKER_ID is not set. This function must be called within a Jest worker.',
 		);
 	}
-	if (process.env.JEST_WORKER_ID === undefined) {
+	return `${TEST_DATABASE_PREFIX}_worker_${JEST_WORKER_ID}`;
+};
+
+let adminClient: Client | null = null;
+
+const initializeWorker = async (): Promise<void> => {
+	adminClient = createTestAdminClient();
+	await adminClient.connect();
+};
+
+const createWorkerDatabase = async (): Promise<void> => {
+	if (adminClient === null) {
 		throw new Error(
-			'You cannot get a test schema name if jest has not specified a worker ID.',
+			'Admin client not initialized. Call initializeWorker first.',
 		);
 	}
-	return generateSchemaName(process.env.JEST_WORKER_ID);
+	const workerDbName = getWorkerDatabaseName();
+	assertTestDatabaseName(workerDbName);
+	await adminClient.query(`DROP DATABASE IF EXISTS ${workerDbName}`);
+	await adminClient.query(
+		`CREATE DATABASE ${workerDbName} TEMPLATE ${GOLD_DATABASE_NAME}`,
+	);
+	const connectionString = buildConnectionString(workerDbName);
+	createAndSetDatabase(connectionString);
 };
 
-const createSchema = async (db: TinyPg, schemaName: string): Promise<void> => {
-	await db.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName};`);
+const destroyWorkerDatabase = async (): Promise<void> => {
+	if (adminClient === null) {
+		throw new Error(
+			'Admin client not initialized. Call initializeWorker first.',
+		);
+	}
+	await closeDatabase();
+	const workerDbName = getWorkerDatabaseName();
+	assertTestDatabaseName(workerDbName);
+	await adminClient.query(`DROP DATABASE IF EXISTS ${workerDbName}`);
 };
 
-const setSchemaForCurrentPoolConnection = async (
-	db: TinyPg,
-	schemaName: string,
-): Promise<void> => {
-	await db.query(`SET search_path TO ${schemaName};`);
+const closeAdminClient = async (): Promise<void> => {
+	const client = adminClient;
+	if (client !== null) {
+		adminClient = null;
+		await client.end();
+	}
 };
 
-const setSchemaForFuturePoolConnections = (schemaName: string): void => {
-	process.env.PGOPTIONS = `-c search_path=${schemaName}`;
-};
-
-const setSchema = async (db: TinyPg, schemaName: string): Promise<void> => {
-	await setSchemaForCurrentPoolConnection(db, schemaName);
-	setSchemaForFuturePoolConnections(schemaName);
-};
-
-const dropSchema = async (db: TinyPg, schemaName: string): Promise<void> => {
-	await db.query(`DROP SCHEMA ${schemaName} CASCADE;`);
-};
-
-export const createAndSetDatabase = (): void => {
-	const db = createDatabase();
-	setDatabase(db);
-};
-
-export const prepareDatabaseForCurrentWorker = async (): Promise<void> => {
-	const db = getDatabase();
-	const schemaName = getSchemaNameForCurrentTestWorker();
-	await createSchema(db, schemaName);
-	await setSchema(db, schemaName);
-	await migrate(db, schemaName);
-	await initializeDatabase(db);
-};
-
-export const cleanupDatabaseForCurrentWorker = async (): Promise<void> => {
-	const schemaName = getSchemaNameForCurrentTestWorker();
-	await dropSchema(getDatabase(), schemaName);
+export {
+	buildConnectionString,
+	closeAdminClient,
+	createWorkerDatabase,
+	destroyWorkerDatabase,
+	initializeWorker,
 };

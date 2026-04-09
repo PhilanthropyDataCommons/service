@@ -3,46 +3,36 @@ import nock from 'nock';
  * This file is loaded by jest, as specified by the integration test jest configuration file
  * via `setupFilesAfterEnv`.
  */
-import { getDatabase } from '../database';
 import { loadConfig } from '../config';
 import { resetTestPermissionGrantFactory } from './factories';
 import {
-	createAndSetDatabase,
-	prepareDatabaseForCurrentWorker,
-	cleanupDatabaseForCurrentWorker,
+	closeAdminClient,
+	createWorkerDatabase,
+	destroyWorkerDatabase,
+	initializeWorker,
 } from './harnessFunctions';
 import { mockJwks } from './mockJwt';
-import { createTestUser } from './utils';
 
-// This mock prevents our queue manager from actually being invoked.
-// It's necessary because of the way we leverage PGOPTIONS to specify
-// the schema / search path when preparing the test worker to interact
-// with specific schemas.
-//
-// We may eventually want to be able to write tests that interact with the queue
-// and we may eventually face issues with blunt mocking of graphile-worker.
-// When that happens, we'll need to remove this mock and change the way we're
-// setting the schema / path.
+// This mock prevents graphile-worker from running background jobs during tests.
 jest.mock('graphile-worker');
 
-beforeAll(() => {
-	createAndSetDatabase();
+beforeAll(async () => {
+	await initializeWorker();
 });
 
 afterAll(async () => {
-	await getDatabase().close();
+	await closeAdminClient();
 });
 
 beforeEach(async () => {
 	resetTestPermissionGrantFactory();
 	mockJwks.start();
-	await prepareDatabaseForCurrentWorker();
+	await createWorkerDatabase();
 	await loadConfig();
-	await createTestUser(getDatabase());
 });
 
 afterEach(async () => {
-	await cleanupDatabaseForCurrentWorker();
+	await destroyWorkerDatabase();
 	jest.restoreAllMocks();
 	mockJwks.stop();
 	nock.cleanAll();

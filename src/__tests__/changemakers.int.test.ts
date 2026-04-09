@@ -315,7 +315,7 @@ describe('/changemakers', () => {
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 2,
+				total: 1,
 				entries: [
 					{
 						id: 1,
@@ -393,7 +393,7 @@ describe('/changemakers', () => {
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 2,
+				total: 1,
 				entries: [
 					{
 						id: 1,
@@ -416,7 +416,7 @@ describe('/changemakers', () => {
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 2,
+				total: 0,
 				entries: [],
 			});
 		});
@@ -453,7 +453,7 @@ describe('/changemakers', () => {
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 2,
+				total: 1,
 				entries: [
 					{
 						id: 1,

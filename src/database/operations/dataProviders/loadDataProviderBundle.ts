@@ -3,7 +3,6 @@ import type { DataProvider } from '../../../types';
 
 const loadDataProviderBundle = generateLoadBundleOperation<DataProvider, []>(
 	'dataProviders.selectWithPagination',
-	'data_providers',
 	[],
 );
 

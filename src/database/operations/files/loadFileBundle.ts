@@ -5,11 +5,6 @@ import type { File, KeycloakId } from '../../../types';
 const loadFileBundle = generateLoadBundleOperation<
 	File,
 	[createdBy: KeycloakId | undefined]
->(
-	'files.selectWithPagination',
-	'files',
-	['createdBy'],
-	decorateWithDownloadUrl,
-);
+>('files.selectWithPagination', ['createdBy'], decorateWithDownloadUrl);
 
 export { loadFileBundle };

@@ -4,6 +4,10 @@ templater = placeholder
 exclude_rules =
   # allow use of keywords as identifiers when unambiguous
   references.keywords,
+  # TinyPg :paramName syntax conflicts with column qualification rules
+  references.consistent,
+  # paginated_entries.*::table_type cast not recognized as a table reference
+  structure.unused_join,
 
 [sqlfluff:indentation]
 indent_unit = tab

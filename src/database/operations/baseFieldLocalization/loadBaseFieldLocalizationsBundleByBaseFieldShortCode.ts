@@ -5,8 +5,6 @@ const loadBaseFieldLocalizationsBundleByBaseFieldShortCode =
 	generateLoadBundleOperation<
 		BaseFieldLocalization,
 		[baseFieldShortCode: ShortCode]
-	>('baseFieldLocalizations.selectWithPagination', 'base_field_localizations', [
-		'baseFieldShortCode',
-	]);
+	>('baseFieldLocalizations.selectWithPagination', ['baseFieldShortCode']);
 
 export { loadBaseFieldLocalizationsBundleByBaseFieldShortCode };

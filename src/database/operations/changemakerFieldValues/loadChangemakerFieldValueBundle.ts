@@ -7,7 +7,6 @@ const loadChangemakerFieldValueBundle = generateLoadBundleOperation<
 	[batchId: number | undefined, changemakerId: number | undefined]
 >(
 	'changemakerFieldValues.selectWithPagination',
-	'changemaker_field_values',
 	['batchId', 'changemakerId'],
 	decorateWithFileDownloadUrl,
 );

@@ -3,7 +3,6 @@ import type { Source } from '../../../types';
 
 const loadSourceBundle = generateLoadBundleOperation<Source, []>(
 	'sources.selectWithPagination',
-	'sources',
 	[],
 );
 

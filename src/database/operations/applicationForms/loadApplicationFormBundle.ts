@@ -4,4 +4,4 @@ import type { ApplicationForm } from '../../../types';
 export const loadApplicationFormBundle = generateLoadBundleOperation<
 	ApplicationForm,
 	[]
->('applicationForms.selectWithPagination', 'application_forms', []);
+>('applicationForms.selectWithPagination', []);

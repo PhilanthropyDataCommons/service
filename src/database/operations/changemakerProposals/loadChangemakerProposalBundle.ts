@@ -7,7 +7,6 @@ const loadChangemakerProposalBundle = generateLoadBundleOperation<
 	[changemakerId: number | undefined, proposalId: number | undefined]
 >(
 	'changemakersProposals.selectWithPagination',
-	'changemakers_proposals',
 	['changemakerId', 'proposalId'],
 	decorateWithFileDownloadUrls,
 );

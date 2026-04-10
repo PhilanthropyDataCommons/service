@@ -88,7 +88,7 @@ describe('/opportunities', () => {
 				.expect(200);
 			expect(response.body).toEqual({
 				entries: [systemOpportunity, visibleOpportunity],
-				total: 3,
+				total: 2,
 			});
 		});
 	});

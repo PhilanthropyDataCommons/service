@@ -7,10 +7,9 @@ const loadFunderCollaborativeMemberBundle = generateLoadBundleOperation<
 		funderCollaborativeShortCode: ShortCode | undefined,
 		memberFunderShortCode: ShortCode | undefined,
 	]
->(
-	'funderCollaborativeMembers.selectWithPagination',
-	'funder_collaborative_members',
-	['funderCollaborativeShortCode', 'memberFunderShortCode'],
-);
+>('funderCollaborativeMembers.selectWithPagination', [
+	'funderCollaborativeShortCode',
+	'memberFunderShortCode',
+]);
 
 export { loadFunderCollaborativeMemberBundle };

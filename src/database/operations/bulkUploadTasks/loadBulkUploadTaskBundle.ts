@@ -4,6 +4,6 @@ import type { BulkUploadTask, KeycloakId } from '../../../types';
 const loadBulkUploadTaskBundle = generateLoadBundleOperation<
 	BulkUploadTask,
 	[createdBy: KeycloakId | undefined]
->('bulkUploadTasks.selectWithPagination', 'bulk_upload_tasks', ['createdBy']);
+>('bulkUploadTasks.selectWithPagination', ['createdBy']);
 
 export { loadBulkUploadTaskBundle };

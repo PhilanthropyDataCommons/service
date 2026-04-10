@@ -2,4 +2,9 @@ interface JsonResultSet<T> {
 	object: T;
 }
 
-export { type JsonResultSet };
+interface PaginatedJsonResultSet<T> {
+	object: T | null;
+	total: string;
+}
+
+export { type JsonResultSet, type PaginatedJsonResultSet };

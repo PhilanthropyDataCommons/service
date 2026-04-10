@@ -154,7 +154,7 @@ describe('/changemakerProposals', () => {
 					funderVisibleChangemakerProposal,
 					changemakerVisibleChangemakerProposal,
 				],
-				total: 3,
+				total: 2,
 			});
 		});
 
@@ -319,7 +319,7 @@ describe('/changemakerProposals', () => {
 						createdAt: expectTimestamp(),
 					},
 				],
-				total: 2,
+				total: 1,
 			});
 		});
 

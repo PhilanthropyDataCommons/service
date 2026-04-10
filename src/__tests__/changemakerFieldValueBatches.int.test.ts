@@ -213,7 +213,7 @@ describe('GET /changemakerFieldValueBatches', () => {
 			.expect(200);
 
 		expect(result.body).toStrictEqual({
-			total: 2,
+			total: 1,
 			entries: [testUserBatch],
 		});
 	});

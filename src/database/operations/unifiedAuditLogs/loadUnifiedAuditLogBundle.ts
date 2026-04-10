@@ -4,6 +4,6 @@ import type { UnifiedAuditLog } from '../../../types';
 const loadUnifiedAuditLogBundle = generateLoadBundleOperation<
 	UnifiedAuditLog,
 	[]
->('unifiedAuditLogs.selectWithPagination', 'unified_audit_logs', []);
+>('unifiedAuditLogs.selectWithPagination', []);
 
 export { loadUnifiedAuditLogBundle };

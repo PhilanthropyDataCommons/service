@@ -5,10 +5,8 @@ const loadEphemeralUserGroupAssociationsByUserKeycloakUserId =
 	generateLoadBundleOperation<
 		EphemeralUserGroupAssociation,
 		[userKeycloakUserId: KeycloakId]
-	>(
-		'ephemeralUserGroupAssociations.selectByUserKeycloakUserId',
-		'ephemeral_user_group_associations',
-		['userKeycloakUserId'],
-	);
+	>('ephemeralUserGroupAssociations.selectByUserKeycloakUserId', [
+		'userKeycloakUserId',
+	]);
 
 export { loadEphemeralUserGroupAssociationsByUserKeycloakUserId };

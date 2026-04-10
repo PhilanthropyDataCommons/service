@@ -155,7 +155,7 @@ describe('/proposals', () => {
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 3,
+				total: 2,
 				entries: [
 					{
 						...changemakerVisibleProposal,
@@ -198,7 +198,7 @@ describe('/proposals', () => {
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toStrictEqual({
-				total: 2,
+				total: 1,
 				entries: [
 					{
 						id: 1,
@@ -248,7 +248,7 @@ describe('/proposals', () => {
 				.expect(200);
 
 			expect(response.body).toStrictEqual({
-				total: 2,
+				total: 1,
 				entries: [
 					{
 						id: testFunderProposal.id,
@@ -356,7 +356,7 @@ describe('/proposals', () => {
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 2,
+				total: 1,
 				entries: [
 					{
 						id: 1,
@@ -479,7 +479,7 @@ describe('/proposals', () => {
 				.expect(200);
 
 			expect(response.body).toEqual({
-				total: 1,
+				total: 0,
 				entries: [],
 			});
 		});
@@ -562,7 +562,7 @@ describe('/proposals', () => {
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 2,
+				total: 1,
 				entries: [
 					{
 						id: 1,
@@ -603,7 +603,7 @@ describe('/proposals', () => {
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 2,
+				total: 1,
 				entries: [
 					{
 						id: 1,
@@ -680,7 +680,7 @@ describe('/proposals', () => {
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: 2,
+				total: 1,
 				entries: [
 					{
 						id: 1,

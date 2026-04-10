@@ -3,7 +3,6 @@ import type { Opportunity } from '../../../types';
 
 const loadOpportunityBundle = generateLoadBundleOperation<Opportunity, []>(
 	'opportunities.selectWithPagination',
-	'opportunities',
 	[],
 );
 

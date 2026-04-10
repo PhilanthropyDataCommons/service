@@ -12,7 +12,6 @@ const loadProposalBundle = generateLoadBundleOperation<
 	]
 >(
 	'proposals.selectWithPagination',
-	'proposals',
 	['createdBy', 'changemakerId', 'funderShortCode', 'search'],
 	decorateWithFileDownloadUrls,
 );

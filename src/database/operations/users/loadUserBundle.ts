@@ -4,6 +4,6 @@ import type { User, KeycloakId } from '../../../types';
 const loadUserBundle = generateLoadBundleOperation<
 	User,
 	[keycloakUserId: KeycloakId | undefined]
->('users.selectWithPagination', 'users', ['keycloakUserId']);
+>('users.selectWithPagination', ['keycloakUserId']);
 
 export { loadUserBundle };

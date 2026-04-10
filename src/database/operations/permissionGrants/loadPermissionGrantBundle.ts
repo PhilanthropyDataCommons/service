@@ -4,6 +4,6 @@ import type { PermissionGrant } from '../../../types';
 const loadPermissionGrantBundle = generateLoadBundleOperation<
 	PermissionGrant,
 	[]
->('permissionGrants.selectWithPagination', 'permission_grants', []);
+>('permissionGrants.selectWithPagination', []);
 
 export { loadPermissionGrantBundle };

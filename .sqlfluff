@@ -4,6 +4,10 @@ templater = placeholder
 exclude_rules =
   # allow use of keywords as identifiers when unambiguous
   references.keywords,
+  # TinyPg :paramName syntax conflicts with column qualification rules
+  references.consistent,
+  # paginated_entries.*::table_type cast not recognized as a table reference
+  structure.unused_join,
 
 [sqlfluff:indentation]
 indent_unit = tab
@@ -27,3 +31,19 @@ param_style = colon
 # placeholder values
 limit = 20
 offset = 0
+authContextKeycloakUserId = '00000000-0000-0000-0000-000000000000'
+authContextIsAdministrator = false
+proposalId = 1
+search = ''
+createdBy = '00000000-0000-0000-0000-000000000000'
+keycloakUserId = '00000000-0000-0000-0000-000000000000'
+applicationFormId = 1
+batchId = 1
+changemakerId = 1
+funderShortCode = 'placeholder'
+funderCollaborativeShortCode = 'placeholder'
+invitedFunderShortCode = 'placeholder'
+status = 'pending'
+memberFunderShortCode = 'placeholder'
+baseFieldShortCode = 'placeholder'
+userKeycloakUserId = '00000000-0000-0000-0000-000000000000'

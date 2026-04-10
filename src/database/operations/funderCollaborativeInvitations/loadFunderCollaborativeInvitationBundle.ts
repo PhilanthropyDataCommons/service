@@ -12,10 +12,10 @@ const loadFunderCollaborativeInvitiationBundle = generateLoadBundleOperation<
 		invitedFunderShortCode: ShortCode | undefined,
 		status: FunderCollaborativeInvitationStatus | undefined,
 	]
->(
-	'funderCollaborativeInvitations.selectWithPagination',
-	'funder_collaborative_invitations',
-	['funderCollaborativeShortCode', 'invitedFunderShortCode', 'status'],
-);
+>('funderCollaborativeInvitations.selectWithPagination', [
+	'funderCollaborativeShortCode',
+	'invitedFunderShortCode',
+	'status',
+]);
 
 export { loadFunderCollaborativeInvitiationBundle };

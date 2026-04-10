@@ -164,7 +164,7 @@ describe('/applicationForms', () => {
 				.expect(200);
 			expect(response.body).toEqual({
 				entries: [visibleApplicationForm1, visibleApplicationForm2],
-				total: 4,
+				total: 2,
 			});
 		});
 	});

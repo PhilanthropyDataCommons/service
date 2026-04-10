@@ -819,7 +819,7 @@ describe('/funders', () => {
 						createdAt: expectTimestamp(),
 					},
 				],
-				total: 3,
+				total: 2,
 			});
 		});
 	});
@@ -920,7 +920,7 @@ describe('/funders', () => {
 						createdAt: expectTimestamp(),
 					},
 				],
-				total: 3,
+				total: 2,
 			});
 		});
 	});

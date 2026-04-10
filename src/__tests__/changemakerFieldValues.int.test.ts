@@ -672,7 +672,7 @@ describe('GET /changemakerFieldValues', () => {
 			.expect(200);
 
 		expect(result.body).toStrictEqual({
-			total: 2,
+			total: 1,
 			entries: [visibleValue],
 		});
 	});
@@ -734,7 +734,7 @@ describe('GET /changemakerFieldValues', () => {
 			.expect(200);
 
 		expect(result.body).toStrictEqual({
-			total: 1,
+			total: 0,
 			entries: [],
 		});
 	});
@@ -795,7 +795,7 @@ describe('GET /changemakerFieldValues', () => {
 			.expect(200);
 
 		expect(result.body).toStrictEqual({
-			total: 2,
+			total: 1,
 			entries: [valueInBatch1],
 		});
 	});
@@ -867,7 +867,7 @@ describe('GET /changemakerFieldValues', () => {
 			.expect(200);
 
 		expect(result.body).toStrictEqual({
-			total: 2,
+			total: 1,
 			entries: [valueForChangemaker1],
 		});
 	});
@@ -930,7 +930,7 @@ describe('GET /changemakerFieldValues', () => {
 			.expect(200);
 
 		expect(result.body).toStrictEqual({
-			total: 2,
+			total: 1,
 			entries: [targetValue],
 		});
 	});

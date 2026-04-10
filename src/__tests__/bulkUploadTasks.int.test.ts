@@ -138,7 +138,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect(200)
 				.expect((res) => {
 					expect(res.body).toEqual({
-						total: 2,
+						total: 1,
 						entries: [visibleBulkUpload],
 					});
 				});
@@ -265,7 +265,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect(200)
 				.expect((res) => {
 					expect(res.body).toEqual({
-						total: 2,
+						total: 1,
 						entries: [visibleBulkUploadTask],
 					});
 				});
@@ -327,7 +327,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect(200)
 				.expect((res) => {
 					expect(res.body).toEqual({
-						total: 2,
+						total: 1,
 						entries: [visibleBulkUploadTask],
 					});
 				});

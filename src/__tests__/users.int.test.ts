@@ -32,14 +32,13 @@ describe('/users', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			await createAdditionalTestUser(db);
-			const { count: userCount } = await loadTableMetrics(db, 'users');
 
 			const response = await request(app)
 				.get('/users')
 				.set(authHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: userCount,
+				total: 1,
 				entries: [
 					{
 						...testUser,
@@ -69,7 +68,6 @@ describe('/users', () => {
 		it('returns a specific user when a keycloakUserId is provided', async () => {
 			const db = getDatabase();
 			const anotherUser = await createAdditionalTestUser(db);
-			const { count: userCount } = await loadTableMetrics(db, 'users');
 
 			const response = await request(app)
 				.get(
@@ -78,7 +76,7 @@ describe('/users', () => {
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				total: userCount,
+				total: 1,
 				entries: [anotherUser],
 			});
 		});

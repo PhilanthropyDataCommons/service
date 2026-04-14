@@ -12,7 +12,12 @@ import {
 	createPermissionGrant,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
-import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import {
+	expectArray,
+	expectArrayContaining,
+	expectObjectContaining,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import { createTestFunder } from '../test/factories';
 import {
 	mockJwt as authHeader,
@@ -116,6 +121,93 @@ describe('/funders', () => {
 					systemFunder,
 				],
 				total: 3,
+			});
+		});
+
+		it('returns a subset of funders when search is provided', async () => {
+			const db = getDatabase();
+			await createTestFunder(db, null, {
+				shortCode: 'greenFund',
+				name: 'Green Environment Fund',
+			});
+			await createTestFunder(db, null, {
+				shortCode: 'techGrants',
+				name: 'Tech Innovation Grants',
+			});
+
+			const response = await agent
+				.get('/funders?_content=environment')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 1,
+				entries: [
+					{
+						shortCode: 'greenFund',
+						createdAt: expectTimestamp(),
+						name: 'Green Environment Fund',
+						keycloakOrganizationId: null,
+						isCollaborative: false,
+					},
+				],
+			});
+		});
+
+		it('returns no funders when search does not match', async () => {
+			const db = getDatabase();
+			await createTestFunder(db, null, {
+				shortCode: 'greenFund',
+				name: 'Green Environment Fund',
+			});
+
+			const response = await agent
+				.get('/funders?_content=xyznonexistent')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 0,
+				entries: [],
+			});
+		});
+
+		it('returns a collaborative funder when search matches a member funder name', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const collaborative = await createTestFunder(db, null, {
+				shortCode: 'climateCollab',
+				name: 'Climate Collaborative',
+				isCollaborative: true,
+			});
+			const memberFunder = await createTestFunder(db, null, {
+				shortCode: 'solarFund',
+				name: 'Solar Energy Fund',
+			});
+			await createTestFunder(db, null, {
+				shortCode: 'unrelatedFund',
+				name: 'Unrelated Fund',
+			});
+			await createOrUpdateFunderCollaborativeMember(db, systemUserAuthContext, {
+				funderCollaborativeShortCode: collaborative.shortCode,
+				memberFunderShortCode: memberFunder.shortCode,
+			});
+
+			const response = await agent
+				.get('/funders?_content=solar')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: expectArrayContaining([
+					expectObjectContaining({
+						shortCode: 'solarFund',
+						name: 'Solar Energy Fund',
+					}),
+					expectObjectContaining({
+						shortCode: 'climateCollab',
+						name: 'Climate Collaborative',
+					}),
+				]),
 			});
 		});
 	});

@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"type": "boolean"
+	},
+	"in": "query",
+	"name": "isCollaborative",
+	"required": false,
+	"description": "When provided, limits results to funders whose `isCollaborative` flag matches the given value."
+}

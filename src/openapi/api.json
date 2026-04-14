@@ -39,6 +39,9 @@
 			},
 			"createdByParam": {
 				"$ref": "./components/parameters/createdByParam.json"
+			},
+			"isCollaborativeParam": {
+				"$ref": "./components/parameters/isCollaborativeParam.json"
 			}
 		},
 		"securitySchemes": {

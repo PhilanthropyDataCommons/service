@@ -33,11 +33,11 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -81,11 +81,11 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -173,11 +173,11 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -235,11 +235,11 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -282,7 +282,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		// Grant create permission on changemakerFieldValue scope
 		await createPermissionGrant(db, systemUserAuthContext, {
@@ -296,7 +296,7 @@ describe('POST /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -338,9 +338,9 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -378,7 +378,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const proposalField = await createOrUpdateBaseField(db, null, {
 			shortCode: 'test_proposal_field',
@@ -390,7 +390,7 @@ describe('POST /changemakerFieldValues', () => {
 			valueRelevanceHours: null,
 		});
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -427,7 +427,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const forbiddenField = await createOrUpdateBaseField(db, null, {
 			shortCode: 'forbidden_field_test',
@@ -439,7 +439,7 @@ describe('POST /changemakerFieldValues', () => {
 			valueRelevanceHours: null,
 		});
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -473,7 +473,10 @@ describe('POST /changemakerFieldValues', () => {
 
 	it('Returns 409 when batch does not exist', async () => {
 		const db = getDatabase();
-		const changemaker = await createTestChangemaker(db, null);
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser, true);
+
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
@@ -501,11 +504,11 @@ describe('POST /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -545,11 +548,11 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -563,23 +566,31 @@ describe('GET /changemakerFieldValues', () => {
 			},
 		);
 
-		const firstValue = await createChangemakerFieldValue(db, null, {
-			changemakerId: changemaker.id,
-			baseFieldShortCode: baseField.shortCode,
-			batchId: batch.id,
-			value: 'First value',
-			isValid: true,
-			goodAsOf: '2024-01-01T00:00:00Z',
-		});
+		const firstValue = await createChangemakerFieldValue(
+			db,
+			testUserAuthContext,
+			{
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch.id,
+				value: 'First value',
+				isValid: true,
+				goodAsOf: '2024-01-01T00:00:00Z',
+			},
+		);
 
-		const secondValue = await createChangemakerFieldValue(db, null, {
-			changemakerId: changemaker.id,
-			baseFieldShortCode: baseField.shortCode,
-			batchId: batch.id,
-			value: 'Second value',
-			isValid: true,
-			goodAsOf: '2024-02-01T00:00:00Z',
-		});
+		const secondValue = await createChangemakerFieldValue(
+			db,
+			testUserAuthContext,
+			{
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch.id,
+				value: 'Second value',
+				isValid: true,
+				goodAsOf: '2024-02-01T00:00:00Z',
+			},
+		);
 
 		const result = await request(app)
 			.get('/changemakerFieldValues')
@@ -597,14 +608,23 @@ describe('GET /changemakerFieldValues', () => {
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const visibleChangemaker = await createTestChangemaker(db, null, {
-			name: 'Visible Organization',
-		});
+		const visibleChangemaker = await createTestChangemaker(
+			db,
+			testUserAuthContext,
+			{
+				name: 'Visible Organization',
+			},
+		);
 
-		const hiddenChangemaker = await createTestChangemaker(db, null, {
-			name: 'Hidden Organization',
-		});
+		const hiddenChangemaker = await createTestChangemaker(
+			db,
+			testUserAuthContext,
+			{
+				name: 'Hidden Organization',
+			},
+		);
 
 		await createPermissionGrant(db, systemUserAuthContext, {
 			granteeType: PermissionGrantGranteeType.USER,
@@ -620,12 +640,12 @@ describe('GET /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const visibleSource = await createSource(db, null, {
+		const visibleSource = await createSource(db, testUserAuthContext, {
 			label: 'Visible Source',
 			changemakerId: visibleChangemaker.id,
 		});
 
-		const hiddenSource = await createSource(db, null, {
+		const hiddenSource = await createSource(db, testUserAuthContext, {
 			label: 'Hidden Source',
 			changemakerId: hiddenChangemaker.id,
 		});
@@ -648,14 +668,18 @@ describe('GET /changemakerFieldValues', () => {
 			},
 		);
 
-		const visibleValue = await createChangemakerFieldValue(db, null, {
-			changemakerId: visibleChangemaker.id,
-			baseFieldShortCode: baseField.shortCode,
-			batchId: visibleBatch.id,
-			value: 'Visible value',
-			isValid: true,
-			goodAsOf: '2024-01-01T00:00:00Z',
-		});
+		const visibleValue = await createChangemakerFieldValue(
+			db,
+			testUserAuthContext,
+			{
+				changemakerId: visibleChangemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: visibleBatch.id,
+				value: 'Visible value',
+				isValid: true,
+				goodAsOf: '2024-01-01T00:00:00Z',
+			},
+		);
 
 		await createChangemakerFieldValue(db, null, {
 			changemakerId: hiddenChangemaker.id,
@@ -684,11 +708,11 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -744,11 +768,11 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -771,14 +795,18 @@ describe('GET /changemakerFieldValues', () => {
 			},
 		);
 
-		const valueInBatch1 = await createChangemakerFieldValue(db, null, {
-			changemakerId: changemaker.id,
-			baseFieldShortCode: baseField.shortCode,
-			batchId: batch1.id,
-			value: 'Value in batch 1',
-			isValid: true,
-			goodAsOf: '2024-01-01T00:00:00Z',
-		});
+		const valueInBatch1 = await createChangemakerFieldValue(
+			db,
+			testUserAuthContext,
+			{
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch1.id,
+				value: 'Value in batch 1',
+				isValid: true,
+				goodAsOf: '2024-01-01T00:00:00Z',
+			},
+		);
 
 		await createChangemakerFieldValue(db, null, {
 			changemakerId: changemaker.id,
@@ -805,22 +833,22 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker1 = await createTestChangemaker(db, null, {
+		const changemaker1 = await createTestChangemaker(db, testUserAuthContext, {
 			name: 'First Organization',
 		});
 
-		const changemaker2 = await createTestChangemaker(db, null, {
+		const changemaker2 = await createTestChangemaker(db, testUserAuthContext, {
 			name: 'Second Organization',
 		});
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source1 = await createSource(db, null, {
+		const source1 = await createSource(db, testUserAuthContext, {
 			label: 'Source 1',
 			changemakerId: changemaker1.id,
 		});
 
-		const source2 = await createSource(db, null, {
+		const source2 = await createSource(db, testUserAuthContext, {
 			label: 'Source 2',
 			changemakerId: changemaker2.id,
 		});
@@ -843,14 +871,18 @@ describe('GET /changemakerFieldValues', () => {
 			},
 		);
 
-		const valueForChangemaker1 = await createChangemakerFieldValue(db, null, {
-			changemakerId: changemaker1.id,
-			baseFieldShortCode: baseField.shortCode,
-			batchId: batch1.id,
-			value: 'Value for changemaker 1',
-			isValid: true,
-			goodAsOf: '2024-01-01T00:00:00Z',
-		});
+		const valueForChangemaker1 = await createChangemakerFieldValue(
+			db,
+			testUserAuthContext,
+			{
+				changemakerId: changemaker1.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch1.id,
+				value: 'Value for changemaker 1',
+				isValid: true,
+				goodAsOf: '2024-01-01T00:00:00Z',
+			},
+		);
 
 		await createChangemakerFieldValue(db, null, {
 			changemakerId: changemaker2.id,
@@ -877,11 +909,11 @@ describe('GET /changemakerFieldValues', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -904,14 +936,18 @@ describe('GET /changemakerFieldValues', () => {
 			},
 		);
 
-		const targetValue = await createChangemakerFieldValue(db, null, {
-			changemakerId: changemaker.id,
-			baseFieldShortCode: baseField.shortCode,
-			batchId: batch1.id,
-			value: 'Target value',
-			isValid: true,
-			goodAsOf: '2024-01-01T00:00:00Z',
-		});
+		const targetValue = await createChangemakerFieldValue(
+			db,
+			testUserAuthContext,
+			{
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch1.id,
+				value: 'Target value',
+				isValid: true,
+				goodAsOf: '2024-01-01T00:00:00Z',
+			},
+		);
 
 		await createChangemakerFieldValue(db, null, {
 			changemakerId: changemaker.id,
@@ -957,11 +993,11 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -975,14 +1011,18 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 			},
 		);
 
-		const fieldValue = await createChangemakerFieldValue(db, null, {
-			changemakerId: changemaker.id,
-			baseFieldShortCode: baseField.shortCode,
-			batchId: batch.id,
-			value: 'Test value',
-			isValid: true,
-			goodAsOf: '2024-01-01T00:00:00Z',
-		});
+		const fieldValue = await createChangemakerFieldValue(
+			db,
+			testUserAuthContext,
+			{
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch.id,
+				value: 'Test value',
+				isValid: true,
+				goodAsOf: '2024-01-01T00:00:00Z',
+			},
+		);
 
 		const result = await request(app)
 			.get(`/changemakerFieldValues/${fieldValue.id}`)
@@ -997,8 +1037,9 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		await createPermissionGrant(db, systemUserAuthContext, {
 			granteeType: PermissionGrantGranteeType.USER,
@@ -1014,7 +1055,7 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -1028,14 +1069,18 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 			},
 		);
 
-		const fieldValue = await createChangemakerFieldValue(db, null, {
-			changemakerId: changemaker.id,
-			baseFieldShortCode: baseField.shortCode,
-			batchId: batch.id,
-			value: 'Test value',
-			isValid: true,
-			goodAsOf: '2024-01-01T00:00:00Z',
-		});
+		const fieldValue = await createChangemakerFieldValue(
+			db,
+			testUserAuthContext,
+			{
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch.id,
+				value: 'Test value',
+				isValid: true,
+				goodAsOf: '2024-01-01T00:00:00Z',
+			},
+		);
 
 		const result = await request(app)
 			.get(`/changemakerFieldValues/${fieldValue.id}`)
@@ -1052,11 +1097,11 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -1070,14 +1115,18 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 			},
 		);
 
-		const fieldValue = await createChangemakerFieldValue(db, null, {
-			changemakerId: changemaker.id,
-			baseFieldShortCode: baseField.shortCode,
-			batchId: batch.id,
-			value: 'Test value',
-			isValid: true,
-			goodAsOf: '2024-01-01T00:00:00Z',
-		});
+		const fieldValue = await createChangemakerFieldValue(
+			db,
+			testUserAuthContext,
+			{
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch.id,
+				value: 'Test value',
+				isValid: true,
+				goodAsOf: '2024-01-01T00:00:00Z',
+			},
+		);
 
 		// Also create a userGroup permission grant with an EXPIRED association
 		// to verify that expired associations don't grant access

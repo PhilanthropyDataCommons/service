@@ -31,13 +31,16 @@ import type { Request, Response } from 'express';
 
 const postChangemaker = async (req: Request, res: Response): Promise<void> => {
 	const db = getDatabase();
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
 	if (!isWritableChangemaker(req.body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableChangemaker.errors ?? [],
 		);
 	}
-	const changemaker = await createChangemaker(db, null, req.body);
+	const changemaker = await createChangemaker(db, req, req.body);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
@@ -101,7 +104,7 @@ const patchChangemaker = async (req: Request, res: Response): Promise<void> => {
 	try {
 		const changemaker = await updateChangemaker(
 			db,
-			null,
+			req,
 			req.body,
 			changemakerId,
 		);

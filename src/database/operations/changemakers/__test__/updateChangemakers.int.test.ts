@@ -1,11 +1,14 @@
 import { createChangemaker, updateChangemaker } from '..';
 import { stringToKeycloakId } from '../../../../types';
 import { getDatabase } from '../../../db';
+import { getAuthContext, loadTestUser } from '../../../../test/utils';
 
 describe('updateChangemaker', () => {
 	it('Successfully sets a keycloakOrganizationId where previously null', async () => {
 		const db = getDatabase();
-		const changemaker = await createChangemaker(db, null, {
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const changemaker = await createChangemaker(db, testUserAuthContext, {
 			taxId: '4833091201209397622311990956044204588593',
 			name: 'Changemaker 4833091201209397622311990956044204588593',
 			keycloakOrganizationId: null,
@@ -27,7 +30,9 @@ describe('updateChangemaker', () => {
 
 	it('Successfully sets a keycloakOrganizationId where previously non-null', async () => {
 		const db = getDatabase();
-		const changemaker = await createChangemaker(db, null, {
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const changemaker = await createChangemaker(db, testUserAuthContext, {
 			taxId: '1099594605318784561881495063299923285326',
 			name: 'Changemaker 1099594605318784561881495063299923285326',
 			keycloakOrganizationId: '7733cef4-8a08-4089-a699-9be1e5536733',

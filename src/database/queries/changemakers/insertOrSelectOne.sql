@@ -1,11 +1,13 @@
 INSERT INTO changemakers (
 	tax_id,
 	name,
-	keycloak_organization_id
+	keycloak_organization_id,
+	created_by
 ) VALUES (
 	:taxId,
 	:name,
-	:keycloakOrganizationId
+	:keycloakOrganizationId,
+	:authContextKeycloakUserId
 )
 ON CONFLICT (tax_id, name)
 -- The no-op update is required to make RETURNING work on conflicts.

@@ -54,14 +54,14 @@ const createTestApplicationForm = async (
 	shortCodes: string[],
 ): Promise<{ applicationFormId: number; opportunity: Opportunity }> => {
 	const opportunity = await createTestOpportunity(db, authContext);
-	const applicationForm = await createApplicationForm(db, authContext, {
+	const applicationForm = await createApplicationForm(db, null, {
 		opportunityId: opportunity.id,
 		name: null,
 	});
 	await Promise.all(
 		shortCodes.map(
 			async (shortCode, index) =>
-				await createApplicationFormField(db, authContext, {
+				await createApplicationFormField(db, null, {
 					applicationFormId: applicationForm.id,
 					baseFieldShortCode: shortCode,
 					position: index,
@@ -818,12 +818,13 @@ describe('processBulkUploadTask', () => {
 			entries: [
 				{
 					createdAt: expectTimestamp(),
+					createdBy: systemUser.keycloakUserId,
 					taxId: '51-2144346',
 					id: 1,
 					name: 'Foo LLC.',
 					keycloakOrganizationId: null,
-					fiscalSponsors: [],
 					fields: [],
+					fiscalSponsors: [],
 				},
 			],
 			total: 1,

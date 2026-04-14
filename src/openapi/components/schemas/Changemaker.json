@@ -20,6 +20,7 @@
 							"taxId": "US123456789",
 							"fields": [],
 							"createdAt": "2025-02-07T13:16:16.191509-06:00",
+							"createdBy": "adace57c-25c2-40b1-9228-c48939f39f98",
 							"fiscalSponsors": [],
 							"keycloakOrganizationId": "f16a71f8-e67b-43ab-a258-31cd8a99a97a"
 						}

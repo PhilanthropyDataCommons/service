@@ -78,7 +78,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -111,7 +111,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const visibleFunder = await createTestFunder(db, null);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -123,7 +123,7 @@ describe('/proposalVersions', () => {
 				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: visibleFunder.shortCode,
 			});
 			const proposal = await createProposal(db, testUserAuthContext, {
@@ -158,9 +158,13 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const visibleChangemaker = await createTestChangemaker(db, null, {
-				name: 'Visible Changemaker',
-			});
+			const visibleChangemaker = await createTestChangemaker(
+				db,
+				testUserAuthContext,
+				{
+					name: 'Visible Changemaker',
+				},
+			);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -172,7 +176,7 @@ describe('/proposalVersions', () => {
 				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -235,7 +239,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -270,7 +274,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -309,7 +313,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const testFunder = await createTestFunder(db, null);
+			const testFunder = await createTestFunder(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -322,7 +326,7 @@ describe('/proposalVersions', () => {
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
 			const proposal = await createProposal(db, testUserAuthContext, {
@@ -360,7 +364,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const testFunder = await createTestFunder(db, null);
+			const testFunder = await createTestFunder(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -384,7 +388,7 @@ describe('/proposalVersions', () => {
 				],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
 			const proposal = await createProposal(db, testUserAuthContext, {
@@ -415,7 +419,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -460,7 +464,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -547,7 +551,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -680,7 +684,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -717,7 +721,7 @@ describe('/proposalVersions', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -744,7 +748,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -786,8 +790,8 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity1 = await createTestOpportunity(db, null);
-			const opportunity2 = await createTestOpportunity(db, null);
+			const opportunity1 = await createTestOpportunity(db, testUserAuthContext);
+			const opportunity2 = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity1.id,
@@ -835,7 +839,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -886,7 +890,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -987,7 +991,7 @@ describe('/proposalVersions', () => {
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
-			const opportunity = await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, testUserAuthContext, {
 				title: 'Conditional Test Opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -1114,7 +1118,7 @@ describe('/proposalVersions', () => {
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
-			const opportunity = await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, testUserAuthContext, {
 				title: 'No Conditions Test Opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -1219,7 +1223,7 @@ describe('/proposalVersions', () => {
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
-			const opportunity = await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, testUserAuthContext, {
 				title: 'Exclusion Test Opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -1323,7 +1327,7 @@ describe('/proposalVersions', () => {
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
-			const opportunity = await createOpportunity(db, null, {
+			const opportunity = await createOpportunity(db, testUserAuthContext, {
 				title: 'Equals Test Opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
@@ -1426,8 +1430,8 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 
-			const grantedFunder = await createTestFunder(db, null);
-			const otherFunder = await createTestFunder(db, null);
+			const grantedFunder = await createTestFunder(db, testUserAuthContext);
+			const otherFunder = await createTestFunder(db, testUserAuthContext);
 
 			await createOrUpdateBaseField(db, null, {
 				label: 'Budget Amount',
@@ -1441,10 +1445,14 @@ describe('/proposalVersions', () => {
 			});
 
 			// Set up opportunity + proposal + field values for the OTHER funder
-			const otherOpportunity = await createOpportunity(db, null, {
-				title: 'Other Funder Opportunity',
-				funderShortCode: otherFunder.shortCode,
-			});
+			const otherOpportunity = await createOpportunity(
+				db,
+				testUserAuthContext,
+				{
+					title: 'Other Funder Opportunity',
+					funderShortCode: otherFunder.shortCode,
+				},
+			);
 			const otherProposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'other-funder-proposal-1',
 				opportunityId: otherOpportunity.id,
@@ -1514,8 +1522,8 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 
-			const grantedFunder = await createTestFunder(db, null);
-			const otherFunder = await createTestFunder(db, null);
+			const grantedFunder = await createTestFunder(db, testUserAuthContext);
+			const otherFunder = await createTestFunder(db, testUserAuthContext);
 
 			await createOrUpdateBaseField(db, null, {
 				label: 'Budget Amount',
@@ -1539,10 +1547,14 @@ describe('/proposalVersions', () => {
 			});
 
 			// Set up data for the GRANTED funder
-			const grantedOpportunity = await createOpportunity(db, null, {
-				title: 'Granted Funder Opportunity',
-				funderShortCode: grantedFunder.shortCode,
-			});
+			const grantedOpportunity = await createOpportunity(
+				db,
+				testUserAuthContext,
+				{
+					title: 'Granted Funder Opportunity',
+					funderShortCode: grantedFunder.shortCode,
+				},
+			);
 			const grantedProposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'granted-funder-proposal-1',
 				opportunityId: grantedOpportunity.id,
@@ -1594,10 +1606,14 @@ describe('/proposalVersions', () => {
 			});
 
 			// Set up data for the OTHER funder
-			const otherOpportunity = await createOpportunity(db, null, {
-				title: 'Other Funder Opportunity',
-				funderShortCode: otherFunder.shortCode,
-			});
+			const otherOpportunity = await createOpportunity(
+				db,
+				testUserAuthContext,
+				{
+					title: 'Other Funder Opportunity',
+					funderShortCode: otherFunder.shortCode,
+				},
+			);
 			const otherProposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'other-funder-proposal-1',
 				opportunityId: otherOpportunity.id,

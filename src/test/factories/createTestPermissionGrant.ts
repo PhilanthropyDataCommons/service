@@ -17,8 +17,9 @@ let systemChangemakerPromise: Promise<Changemaker> | null = null;
 
 const getOrCreateSystemChangemaker = async (
 	db: TinyPg,
+	authContext: AuthContext,
 ): Promise<Changemaker> => {
-	systemChangemakerPromise ??= createChangemaker(db, null, {
+	systemChangemakerPromise ??= createChangemaker(db, authContext, {
 		taxId: '99-9999999',
 		name: 'System Test Changemaker',
 		keycloakOrganizationId: null,
@@ -32,13 +33,13 @@ const resetTestPermissionGrantFactory = (): void => {
 
 const createTestPermissionGrant = async (
 	db: TinyPg,
-	authContext: AuthContext | null,
+	authContext: AuthContext,
 	overrideValues?: WritablePermissionGrant,
 ): Promise<PermissionGrant> => {
 	if (overrideValues !== undefined) {
 		return await createPermissionGrant(db, authContext, overrideValues);
 	}
-	const changemaker = await getOrCreateSystemChangemaker(db);
+	const changemaker = await getOrCreateSystemChangemaker(db, authContext);
 	const defaultValues: WritablePermissionGrant = {
 		granteeType: PermissionGrantGranteeType.USER,
 		granteeUserKeycloakUserId: getTestUserKeycloakUserId(),

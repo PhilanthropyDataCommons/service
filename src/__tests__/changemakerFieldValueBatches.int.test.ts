@@ -17,9 +17,11 @@ import { getAuthContext, loadTestUser } from '../test/utils';
 describe('POST /changemakerFieldValueBatches', () => {
 	it('Successfully creates a changemaker field value batch', async () => {
 		const db = getDatabase();
-		const changemaker = await createTestChangemaker(db, null);
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -48,9 +50,11 @@ describe('POST /changemakerFieldValueBatches', () => {
 
 	it('Accepts null for notes', async () => {
 		const db = getDatabase();
-		const changemaker = await createTestChangemaker(db, null);
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -140,9 +144,9 @@ describe('GET /changemakerFieldValueBatches', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -186,9 +190,9 @@ describe('GET /changemakerFieldValueBatches', () => {
 		});
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -228,9 +232,9 @@ describe('GET /changemakerFieldValueBatches', () => {
 		});
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -275,9 +279,9 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -301,15 +305,17 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 
 	it('Returns 404 when batch belongs to another user', async () => {
 		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
 		const anotherUser = await createOrUpdateUser(db, null, {
 			keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			keycloakUserName: 'Nancy',
 		});
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});
@@ -335,15 +341,17 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 
 	it('Returns another users batch when user is an administrator', async () => {
 		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
 		const anotherUser = await createOrUpdateUser(db, null, {
 			keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
 			keycloakUserName: 'Oscar',
 		});
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createTestChangemaker(db, null);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, null, {
+		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
 		});

@@ -77,7 +77,8 @@ describe('requireChangemakerPermission', () => {
 		void (async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
-			const changemaker = await createChangemaker(db, null, {
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createChangemaker(db, testUserAuthContext, {
 				taxId: '11-1111111',
 				name: 'Test Changemaker',
 				keycloakOrganizationId: null,
@@ -111,7 +112,8 @@ describe('requireChangemakerPermission', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
-			const changemaker = await createChangemaker(db, null, {
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createChangemaker(db, testUserAuthContext, {
 				taxId: '22-2222222',
 				name: 'Permitted Changemaker',
 				keycloakOrganizationId: null,
@@ -150,7 +152,8 @@ describe('requireChangemakerPermission', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
-			const changemaker = await createChangemaker(db, null, {
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createChangemaker(db, testUserAuthContext, {
 				taxId: '33-3333333',
 				name: 'View Only Changemaker',
 				keycloakOrganizationId: null,

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `createdBy` field to funders, sources, opportunities, changemakers, and data providers.
 - `BaseField` can now be of type `date` and `date_time`.
 - `GET /changemakers` now supports the `_content` query parameter to search changemakers by name using full-text search.
 - Proposals now include a `changemakers` array containing shallow changemaker data for all associated changemakers.

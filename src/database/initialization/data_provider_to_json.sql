@@ -7,7 +7,8 @@ BEGIN
     'shortCode', data_provider.short_code,
     'name', data_provider.name,
     'keycloakOrganizationId', data_provider.keycloak_organization_id,
-    'createdAt', data_provider.created_at
+    'createdAt', data_provider.created_at,
+    'createdBy', data_provider.created_by
   );
 END;
 $$ LANGUAGE plpgsql;

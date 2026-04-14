@@ -13,6 +13,7 @@ interface DataProvider {
 	// https://github.com/ajv-validator/ajv/issues/2163.
 	keycloakOrganizationId: KeycloakId | null | undefined;
 	readonly createdAt: string;
+	readonly createdBy: KeycloakId;
 }
 
 type WritableDataProvider = Writable<DataProvider>;

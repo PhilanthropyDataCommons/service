@@ -77,7 +77,11 @@ describe('requireDataProviderPermission', () => {
 		void (async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
-			const dataProvider = await createTestDataProvider(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const dataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
@@ -107,7 +111,11 @@ describe('requireDataProviderPermission', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
-			const dataProvider = await createTestDataProvider(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const dataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -142,7 +150,11 @@ describe('requireDataProviderPermission', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
-			const dataProvider = await createTestDataProvider(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const dataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,

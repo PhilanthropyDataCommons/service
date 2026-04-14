@@ -28,6 +28,7 @@ erDiagram
     string name
     uuid keycloakOrganizationId
     datetime createdAt
+    uuid createdBy FK
   }
   ChangemakerFieldValue {
     int id PK
@@ -70,6 +71,7 @@ erDiagram
     string title
     string funderShortCode FK
     datetime createdAt
+    uuid createdBy FK
   }
   ApplicationForm {
     int id PK
@@ -110,6 +112,7 @@ erDiagram
     string name
     uuid keycloakOrganizationId
     datetime createdAt
+    uuid createdBy FK
   }
   Funder {
     string shortCode PK
@@ -117,6 +120,7 @@ erDiagram
     uuid keycloakOrganizationId
     boolean isCollaborative
     datetime createdAt
+    uuid createdBy FK
   }
   Source {
     int id PK
@@ -125,6 +129,7 @@ erDiagram
     int changemakerId FK
     string dataProviderShortCode FK
     datetime createdAt
+    uuid createdBy FK
   }
   File {
     int id PK

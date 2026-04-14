@@ -26,7 +26,6 @@ const getDataProviders = async (req: Request, res: Response): Promise<void> => {
 		limit,
 		offset,
 	);
-
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')
@@ -70,7 +69,7 @@ const putDataProvider = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 	const { name, keycloakOrganizationId } = body;
-	const dataProvider = await createOrUpdateDataProvider(db, null, {
+	const dataProvider = await createOrUpdateDataProvider(db, req, {
 		shortCode,
 		name,
 		keycloakOrganizationId,

@@ -47,7 +47,8 @@ BEGIN
     ('funder', funder_json),
     ('changemakerId', to_jsonb(source.changemaker_id)),
     ('changemaker', changemaker_json),
-    ('createdAt', to_jsonb(source.created_at))
+    ('createdAt', to_jsonb(source.created_at)),
+		('createdBy', to_jsonb(source.created_by))
   ) AS props(name, value)
   WHERE value IS NOT NULL;
 

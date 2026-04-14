@@ -53,9 +53,11 @@ describe('/sources', () => {
 
 		it('returns all sources present in the database', async () => {
 			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const changemaker = await createTestChangemaker(db, null);
-			const source = await createSource(db, null, {
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const source = await createSource(db, testUserAuthContext, {
 				label: 'Example Inc.',
 				changemakerId: changemaker.id,
 			});
@@ -74,8 +76,10 @@ describe('/sources', () => {
 
 		it('returns exactly one source selected by id', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
-			const source = await createSource(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const source = await createSource(db, testUserAuthContext, {
 				label: 'Example Inc.',
 				changemakerId: changemaker.id,
 			});
@@ -108,8 +112,10 @@ describe('/sources', () => {
 
 		it('returns 404 when id is not found', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
-			await createSource(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createSource(db, testUserAuthContext, {
 				label: 'not to be returned',
 				changemakerId: changemaker.id,
 			});
@@ -124,7 +130,9 @@ describe('/sources', () => {
 
 		it('creates and returns exactly one changemaker source for an admin user', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
@@ -150,14 +158,17 @@ describe('/sources', () => {
 					createdAt: changemaker.createdAt,
 				},
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(2);
 		});
 
 		it('returns 409 conflict when label is not unique on changemaker foreign key', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
-			await createSource(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createSource(db, testUserAuthContext, {
 				label: 'Example Corp',
 				changemakerId: changemaker.id,
 			});
@@ -182,8 +193,13 @@ describe('/sources', () => {
 
 		it('returns 409 conflict when label is not unique on data provider foreign key', async () => {
 			const db = getDatabase();
-			const dataProvider = await createTestDataProvider(db, null);
-			await createSource(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const dataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
+			await createSource(db, testUserAuthContext, {
 				label: 'Example Corp',
 				dataProviderShortCode: dataProvider.shortCode,
 			});
@@ -208,8 +224,10 @@ describe('/sources', () => {
 
 		it('returns 409 conflict when label is not unique on funder foreign key', async () => {
 			const db = getDatabase();
-			const funder = await createTestFunder(db, null);
-			await createSource(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
+			await createSource(db, testUserAuthContext, {
 				label: 'Example Corp',
 				funderShortCode: funder.shortCode,
 			});
@@ -237,7 +255,8 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
-			const changemaker = await createTestChangemaker(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -254,8 +273,8 @@ describe('/sources', () => {
 				.send({
 					label: 'Example Corp',
 					changemakerId: changemaker.id,
-				})
-				.expect(201);
+				});
+			expect(result.status).toEqual(201);
 			const after = await loadTableMetrics(db, 'sources');
 			// Source response includes a shallow changemaker (no fields/fiscalSponsors)
 			expect(result.body).toMatchObject({
@@ -270,6 +289,7 @@ describe('/sources', () => {
 					createdAt: changemaker.createdAt,
 				},
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -279,7 +299,8 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
-			const changemaker = await createTestChangemaker(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -336,7 +357,9 @@ describe('/sources', () => {
 
 		it('creates and returns exactly one funder source for an admin user', async () => {
 			const db = getDatabase();
-			const funder = await createTestFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
 			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
@@ -355,6 +378,7 @@ describe('/sources', () => {
 				funderShortCode: funder.shortCode,
 				funder,
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(2);
 		});
@@ -364,7 +388,8 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
-			const funder = await createTestFunder(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -390,6 +415,7 @@ describe('/sources', () => {
 				funderShortCode: funder.shortCode,
 				funder,
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -399,7 +425,8 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
-			const funder = await createTestFunder(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -456,7 +483,12 @@ describe('/sources', () => {
 
 		it('creates and returns exactly one data provider source for an admin user', async () => {
 			const db = getDatabase();
-			const dataProvider = await createTestDataProvider(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const dataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
 			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
 				.post('/sources')
@@ -475,6 +507,7 @@ describe('/sources', () => {
 				dataProviderShortCode: dataProvider.shortCode,
 				dataProvider,
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(2);
 		});
@@ -484,7 +517,11 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
-			const dataProvider = await createTestDataProvider(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const dataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -510,6 +547,7 @@ describe('/sources', () => {
 				dataProviderShortCode: dataProvider.shortCode,
 				dataProvider,
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(before.count + 1);
 		});
@@ -519,7 +557,11 @@ describe('/sources', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
-			const dataProvider = await createTestDataProvider(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const dataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -568,7 +610,9 @@ describe('/sources', () => {
 
 		it('returns 400 bad request when no label sent', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 			const result = await agent
 				.post('/sources')
 				.type('application/json')
@@ -609,8 +653,10 @@ describe('/sources', () => {
 
 		it('deletes exactly one source that has no proposals associated with it', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
-			const localSource = await createSource(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const localSource = await createSource(db, testUserAuthContext, {
 				changemakerId: changemaker.id,
 				label: 'Example Inc.',
 			});
@@ -630,14 +676,16 @@ describe('/sources', () => {
 
 		it('Returns 422 Unprocessable Content when it tries to delete a source that is associated with a proposal', async () => {
 			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const changemaker = await createTestChangemaker(db, null);
-			const localSource = await createSource(db, null, {
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const localSource = await createSource(db, testUserAuthContext, {
 				changemakerId: changemaker.id,
 				label: 'Example Inc.',
 			});
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, systemUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,

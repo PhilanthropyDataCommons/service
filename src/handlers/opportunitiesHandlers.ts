@@ -73,7 +73,7 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 	) {
 		throw new UnauthorizedError();
 	}
-	const opportunity = await createOpportunity(db, null, req.body);
+	const opportunity = await createOpportunity(db, req, req.body);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')

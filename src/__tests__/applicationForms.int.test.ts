@@ -76,8 +76,10 @@ describe('/applicationForms', () => {
 
 		it('returns all application forms present in the database when the user is an administrator', async () => {
 			const db = getDatabase();
-			const opportunity1 = await createTestOpportunity(db, null);
-			const opportunity2 = await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity1 = await createTestOpportunity(db, testUserAuthContext);
+			const opportunity2 = await createTestOpportunity(db, testUserAuthContext);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity1.id,
 				name: null,
@@ -127,10 +129,11 @@ describe('/applicationForms', () => {
 
 		it('returns only application forms that the user is allowed to view', async () => {
 			const db = getDatabase();
-			const visibleFunder = await createTestFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -139,21 +142,37 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const otherFunder = await createTestFunder(db, null);
-			const visibleOpportunity = await createTestOpportunity(db, null, {
-				funderShortCode: visibleFunder.shortCode,
-			});
-			const hiddenOpportunity = await createTestOpportunity(db, null, {
-				funderShortCode: otherFunder.shortCode,
-			});
-			const visibleApplicationForm1 = await createApplicationForm(db, null, {
-				opportunityId: visibleOpportunity.id,
-				name: null,
-			});
-			const visibleApplicationForm2 = await createApplicationForm(db, null, {
-				opportunityId: visibleOpportunity.id,
-				name: null,
-			});
+			const otherFunder = await createTestFunder(db, testUserAuthContext);
+			const visibleOpportunity = await createTestOpportunity(
+				db,
+				testUserAuthContext,
+				{
+					funderShortCode: visibleFunder.shortCode,
+				},
+			);
+			const hiddenOpportunity = await createTestOpportunity(
+				db,
+				testUserAuthContext,
+				{
+					funderShortCode: otherFunder.shortCode,
+				},
+			);
+			const visibleApplicationForm1 = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: visibleOpportunity.id,
+					name: null,
+				},
+			);
+			const visibleApplicationForm2 = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: visibleOpportunity.id,
+					name: null,
+				},
+			);
 			await createApplicationForm(db, null, {
 				opportunityId: hiddenOpportunity.id,
 				name: null,
@@ -176,20 +195,30 @@ describe('/applicationForms', () => {
 
 		it('returns an application form with its fields when the user is an administrator', async () => {
 			const db = getDatabase();
-			const opportunity1 = await createTestOpportunity(db, null);
-			const opportunity2 = await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity1 = await createTestOpportunity(db, testUserAuthContext);
+			const opportunity2 = await createTestOpportunity(db, testUserAuthContext);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity1.id,
 				name: null,
 			});
-			const applicationForm2 = await createApplicationForm(db, null, {
-				opportunityId: opportunity1.id,
-				name: null,
-			});
-			const applicationForm3 = await createApplicationForm(db, null, {
-				opportunityId: opportunity2.id,
-				name: null,
-			});
+			const applicationForm2 = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity1.id,
+					name: null,
+				},
+			);
+			const applicationForm3 = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity2.id,
+					name: null,
+				},
+			);
 			await createTestBaseFields(db);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm3.id,
@@ -269,10 +298,11 @@ describe('/applicationForms', () => {
 
 		it('returns an application form with its fields when the user has read access to the relevant funder', async () => {
 			const db = getDatabase();
-			const visibleFunder = await createTestFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -281,13 +311,17 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: visibleFunder.shortCode,
 			});
-			const applicationForm = await createApplicationForm(db, null, {
-				opportunityId: opportunity.id,
-				name: null,
-			});
+			const applicationForm = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
 			await createTestBaseFields(db);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -352,10 +386,11 @@ describe('/applicationForms', () => {
 		});
 		it('returns an application form with its fields when the user has read access to the relevant funder, and the instructions are null', async () => {
 			const db = getDatabase();
-			const visibleFunder = await createTestFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -364,13 +399,17 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: visibleFunder.shortCode,
 			});
-			const applicationForm = await createApplicationForm(db, null, {
-				opportunityId: opportunity.id,
-				name: null,
-			});
+			const applicationForm = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
 			await createTestBaseFields(db);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -436,11 +475,17 @@ describe('/applicationForms', () => {
 
 		it('does not return formFields associated with `FORBIDDEN` BaseFields', async () => {
 			const db = getDatabase();
-			const opportunity = await createTestOpportunity(db, null);
-			const applicationForm = await createApplicationForm(db, null, {
-				opportunityId: opportunity.id,
-				name: null,
-			});
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+			const applicationForm = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
 			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 				label: 'Forbidden Field',
 				description: 'This field should not be used in application forms',
@@ -479,14 +524,20 @@ describe('/applicationForms', () => {
 
 		it('should return 404 when the user does not have view opportunity permission', async () => {
 			const db = getDatabase();
-			const testFunder = await createTestFunder(db, null);
-			const opportunity = await createTestOpportunity(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, testUserAuthContext);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
-			const applicationForm = await createApplicationForm(db, null, {
-				opportunityId: opportunity.id,
-				name: null,
-			});
+			const applicationForm = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
 			await request(app)
 				.get(`/applicationForms/${applicationForm.id}`)
 				.set(authHeader)
@@ -512,10 +563,11 @@ describe('/applicationForms', () => {
 
 		it('returns a CSV with labels matching the application form fields', async () => {
 			const db = getDatabase();
-			const visibleFunder = await createTestFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -524,13 +576,17 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: visibleFunder.shortCode,
 			});
-			const applicationForm = await createApplicationForm(db, null, {
-				opportunityId: opportunity.id,
-				name: null,
-			});
+			const applicationForm = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
 			await createTestBaseFields(db);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -563,10 +619,11 @@ describe('/applicationForms', () => {
 
 		it('returns fields in position order', async () => {
 			const db = getDatabase();
-			const visibleFunder = await createTestFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -575,13 +632,17 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: visibleFunder.shortCode,
 			});
-			const applicationForm = await createApplicationForm(db, null, {
-				opportunityId: opportunity.id,
-				name: null,
-			});
+			const applicationForm = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
 			await createTestBaseFields(db);
 
 			await createApplicationFormField(db, null, {
@@ -611,10 +672,11 @@ describe('/applicationForms', () => {
 
 		it('returns an empty row for a form with no fields', async () => {
 			const db = getDatabase();
-			const visibleFunder = await createTestFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -623,13 +685,17 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: visibleFunder.shortCode,
 			});
-			const applicationForm = await createApplicationForm(db, null, {
-				opportunityId: opportunity.id,
-				name: null,
-			});
+			const applicationForm = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
 
 			const result = await request(app)
 				.get(`/applicationForms/${applicationForm.id}/proposalDataCsv`)
@@ -652,11 +718,17 @@ describe('/applicationForms', () => {
 
 		it('returns 404 when the user does not have access to the funder', async () => {
 			const db = getDatabase();
-			const opportunity = await createTestOpportunity(db, null);
-			const applicationForm = await createApplicationForm(db, null, {
-				opportunityId: opportunity.id,
-				name: null,
-			});
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+			const applicationForm = await createApplicationForm(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
 
 			await request(app)
 				.get(`/applicationForms/${applicationForm.id}/proposalDataCsv`)
@@ -672,10 +744,11 @@ describe('/applicationForms', () => {
 
 		it('creates exactly one application form as a user with proper permissions', async () => {
 			const db = getDatabase();
-			const testFunder = await createTestFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, testUserAuthContext);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -692,7 +765,7 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
 			const before = await loadTableMetrics(db, 'application_forms');
@@ -720,7 +793,9 @@ describe('/applicationForms', () => {
 
 		it('creates exactly one application form as an administrator', async () => {
 			const db = getDatabase();
-			const opportunity = await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const before = await loadTableMetrics(db, 'application_forms');
 			const result = await request(app)
 				.post('/applicationForms')
@@ -745,7 +820,9 @@ describe('/applicationForms', () => {
 
 		it('creates an application form with a name', async () => {
 			const db = getDatabase();
-			const opportunity = await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -767,7 +844,9 @@ describe('/applicationForms', () => {
 
 		it('creates an application form with null name', async () => {
 			const db = getDatabase();
-			const opportunity = await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -801,10 +880,11 @@ describe('/applicationForms', () => {
 
 		it(`returns 401 unauthorized if the user does not have edit permission on the associated opportunity's funder`, async () => {
 			const db = getDatabase();
-			const testFunder = await createTestFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, testUserAuthContext);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const testUser = await loadTestUser(db);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -821,7 +901,7 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.MANAGE],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
 			const before = await loadTableMetrics(db, 'application_forms');
@@ -842,7 +922,9 @@ describe('/applicationForms', () => {
 
 		it('creates exactly the number of provided fields', async () => {
 			const db = getDatabase();
-			const opportunity = await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await createTestBaseFields(db);
 			const before = await loadTableMetrics(db, 'application_form_fields');
 			const result = await request(app)
@@ -886,7 +968,9 @@ describe('/applicationForms', () => {
 
 		it('increments version when creating a second form for an opportunity', async () => {
 			const db = getDatabase();
-			const opportunity = await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
 				name: null,
@@ -914,7 +998,9 @@ describe('/applicationForms', () => {
 
 		it('returns 400 when attempting to create a form field using a forbidden base field', async () => {
 			const db = getDatabase();
-			const opportunity = await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
 				label: 'Forbidden Field',
 				description: 'This field should not be used in application forms',
@@ -1010,7 +1096,9 @@ describe('/applicationForms', () => {
 
 		it('returns 500 UnknownError if a generic Error is thrown when inserting the field', async () => {
 			const db = getDatabase();
-			const opportunity = await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await createTestBaseFields(db);
 			jest
 				.spyOn(db, 'sql')

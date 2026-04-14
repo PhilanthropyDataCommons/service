@@ -25,10 +25,11 @@ describe('/applicationFormFields', () => {
 		it('successfully updates the label only', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -90,10 +91,11 @@ describe('/applicationFormFields', () => {
 		it('successfully updates the instructions only', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -155,10 +157,11 @@ describe('/applicationFormFields', () => {
 		it('successfully updates both label and instructions', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -222,10 +225,11 @@ describe('/applicationFormFields', () => {
 		it('successfully updates instructions to null', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -287,10 +291,11 @@ describe('/applicationFormFields', () => {
 		it('successfully updates label to null', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -352,10 +357,11 @@ describe('/applicationFormFields', () => {
 		it('successfully updates inputType', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -417,10 +423,11 @@ describe('/applicationFormFields', () => {
 		it('returns 400 for empty request body', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -475,10 +482,11 @@ describe('/applicationFormFields', () => {
 		it('returns 400 for attempting to update read-only fields', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			const applicationForm = await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -545,11 +553,12 @@ describe('/applicationFormFields', () => {
 		it('returns 401 for user without funder EDIT permission', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const funder = await createTestFunder(db, null);
+			const funder = await createTestFunder(db, testUserAuthContext);
 
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: funder.shortCode,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -599,10 +608,11 @@ describe('/applicationFormFields', () => {
 		it('returns 404 for non-existent applicationFormFieldId', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			const opportunity = await createTestOpportunity(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,

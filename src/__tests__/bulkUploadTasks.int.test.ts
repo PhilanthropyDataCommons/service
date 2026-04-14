@@ -63,8 +63,8 @@ describe('/tasks/bulkUploads', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const visibleFunder = await createTestFunder(db, null);
-			const anotherFunder = await createTestFunder(db, null);
+			const visibleFunder = await createTestFunder(db, systemUserAuthContext);
+			const anotherFunder = await createTestFunder(db, systemUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -410,11 +410,11 @@ describe('/tasks/bulkUploads', () => {
 		it('creates exactly one bulk upload task', async () => {
 			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
-			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -489,11 +489,11 @@ describe('/tasks/bulkUploads', () => {
 		it('creates a bulk upload task with attachments archive file', async () => {
 			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
-			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -571,11 +571,11 @@ describe('/tasks/bulkUploads', () => {
 		it('returns 422 unprocessable entity when the user does not have create proposal permission for the associated opportunity', async () => {
 			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
-			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -638,10 +638,10 @@ describe('/tasks/bulkUploads', () => {
 		it('returns 400 bad request when no proposalDataFileId is provided', async () => {
 			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
-			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -688,10 +688,10 @@ describe('/tasks/bulkUploads', () => {
 		it('returns 400 bad request when an invalid proposalDataFileId is provided', async () => {
 			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
-			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -740,10 +740,10 @@ describe('/tasks/bulkUploads', () => {
 		it('returns 422 unprocessable entity when user tries to use a file they do not own for proposal data', async () => {
 			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
-			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -811,11 +811,11 @@ describe('/tasks/bulkUploads', () => {
 		it('returns 422 unprocessable entity when the user is not the owner of the attachments archive file', async () => {
 			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
-			const testFunder = await createTestFunder(db, null);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
 			const anotherUser = await createOrUpdateUser(db, null, {
 				keycloakUserId: '123e4567-e89b-12d3-a456-426614174001',
 				keycloakUserName: 'Alice',

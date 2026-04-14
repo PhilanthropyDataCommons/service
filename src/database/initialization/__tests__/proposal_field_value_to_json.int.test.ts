@@ -25,7 +25,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
-		const opportunity = await createTestOpportunity(db, null);
+		const opportunity = await createTestOpportunity(db, testUserAuthContext);
 		const proposal = await createProposal(db, testUserAuthContext, {
 			externalId: 'proposal-1',
 			opportunityId: opportunity.id,
@@ -91,7 +91,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
-		const opportunity = await createTestOpportunity(db, null);
+		const opportunity = await createTestOpportunity(db, testUserAuthContext);
 		const proposal = await createProposal(db, testUserAuthContext, {
 			externalId: 'proposal-with-file',
 			opportunityId: opportunity.id,
@@ -178,7 +178,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 		const otherUserAuthContext = getAuthContext(otherUser);
 		const systemSource = await loadSystemSource(db, null);
-		const opportunity = await createTestOpportunity(db, null);
+		const opportunity = await createTestOpportunity(db, testUserAuthContext);
 		const proposal = await createProposal(db, testUserAuthContext, {
 			externalId: 'proposal-with-other-file',
 			opportunityId: opportunity.id,
@@ -260,7 +260,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
-		const opportunity = await createTestOpportunity(db, null);
+		const opportunity = await createTestOpportunity(db, testUserAuthContext);
 		const proposal = await createProposal(db, testUserAuthContext, {
 			externalId: 'proposal-with-missing-file',
 			opportunityId: opportunity.id,
@@ -334,7 +334,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
-		const opportunity = await createTestOpportunity(db, null);
+		const opportunity = await createTestOpportunity(db, testUserAuthContext);
 		const proposal = await createProposal(db, testUserAuthContext, {
 			externalId: 'proposal-with-invalid-file-id',
 			opportunityId: opportunity.id,
@@ -408,7 +408,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
-		const opportunity = await createTestOpportunity(db, null);
+		const opportunity = await createTestOpportunity(db, testUserAuthContext);
 		const proposal = await createProposal(db, testUserAuthContext, {
 			externalId: 'proposal-with-string',
 			opportunityId: opportunity.id,

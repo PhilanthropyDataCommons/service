@@ -16,6 +16,17 @@ jobs:
       - name: Lint GitHub Action workflows
         uses: raven-actions/actionlint@v2
 
+  npm-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - run: git diff --exit-code package-lock.json
+
   eslint:
     runs-on: ubuntu-latest
     steps:

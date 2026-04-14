@@ -97,7 +97,7 @@
 		"ajv-formats": "^3.0.1",
 		"ajv-keywords": "^5.1.0",
 		"cors": "^2.8.6",
-		"csv-parse": "^6.1.0",
+		"csv-parse": "^6.2.1",
 		"express": "^5.2.1",
 		"express-jwt": "^8.5.1",
 		"graphile-worker": "^0.16.6",

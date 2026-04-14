@@ -14,6 +14,7 @@ interface Funder {
 	keycloakOrganizationId: KeycloakId | null | undefined;
 	isCollaborative: boolean;
 	readonly createdAt: string;
+	readonly createdBy: KeycloakId;
 }
 
 type WritableFunder = Writable<Funder>;

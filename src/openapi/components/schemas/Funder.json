@@ -17,10 +17,16 @@
 			"format": "date-time",
 			"readOnly": true
 		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that created this funder",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		},
 		"isCollaborative": {
 			"type": "boolean",
 			"default": false
 		}
 	},
-	"required": ["shortCode", "name", "createdAt", "isCollaborative"]
+	"required": ["shortCode", "name", "createdAt", "createdBy", "isCollaborative"]
 }

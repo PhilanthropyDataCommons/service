@@ -25,7 +25,6 @@ const getFunders = async (req: Request, res: Response): Promise<void> => {
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { search } = extractSearchParameters(req);
 	const funderBundle = await loadFunderBundle(db, req, search, limit, offset);
-
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')
@@ -70,7 +69,7 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 	}
 
 	const { name, keycloakOrganizationId, isCollaborative } = body;
-	const funder = await createOrUpdateFunder(db, null, {
+	const funder = await createOrUpdateFunder(db, req, {
 		shortCode,
 		name,
 		keycloakOrganizationId,

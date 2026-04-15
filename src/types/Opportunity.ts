@@ -4,6 +4,7 @@ import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { ShortCode } from './ShortCode';
 import type { Funder } from './Funder';
+import type { KeycloakId } from './KeycloakId';
 
 interface Opportunity {
 	readonly id: number;
@@ -11,6 +12,7 @@ interface Opportunity {
 	funderShortCode: ShortCode;
 	readonly funder: Funder;
 	readonly createdAt: string;
+	readonly createdBy: KeycloakId;
 }
 
 type WritableOpportunity = Writable<Opportunity>;

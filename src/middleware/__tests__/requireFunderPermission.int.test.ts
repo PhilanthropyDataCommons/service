@@ -65,7 +65,8 @@ describe('requireFunderPermission', () => {
 		void (async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
-			await createOrUpdateFunder(db, null, {
+			const testUserAuthContext = getAuthContext(testUser);
+			await createOrUpdateFunder(db, testUserAuthContext, {
 				shortCode: 'test_funder_no_perm',
 				name: 'Test Funder No Permission',
 				keycloakOrganizationId: null,
@@ -100,7 +101,8 @@ describe('requireFunderPermission', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
-			const funder = await createOrUpdateFunder(db, null, {
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createOrUpdateFunder(db, testUserAuthContext, {
 				shortCode: 'test_funder_with_perm',
 				name: 'Permitted Funder',
 				keycloakOrganizationId: null,
@@ -140,7 +142,8 @@ describe('requireFunderPermission', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
-			const funder = await createOrUpdateFunder(db, null, {
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createOrUpdateFunder(db, testUserAuthContext, {
 				shortCode: 'test_funder_view_only',
 				name: 'View Only Funder',
 				keycloakOrganizationId: null,

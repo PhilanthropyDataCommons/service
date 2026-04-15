@@ -2,12 +2,14 @@ INSERT INTO funders (
 	short_code,
 	name,
 	keycloak_organization_id,
-	is_collaborative
+	is_collaborative,
+	created_by
 ) VALUES (
 	:shortCode,
 	:name,
 	:keycloakOrganizationId,
-	:isCollaborative
+	:isCollaborative,
+	:authContextKeycloakUserId
 )
 ON CONFLICT (short_code)
 DO UPDATE

@@ -42,13 +42,24 @@ describe('/opportunities', () => {
 
 		it('returns all opportunities present in the database for an admin user', async () => {
 			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+
 			const systemOpportunity = await loadSystemOpportunity(db, null);
-			const opportunity1 = await createTestOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-			});
-			const opportunity2 = await createTestOpportunity(db, null, {
-				title: 'Terrific opportunity 👐',
-			});
+			const opportunity1 = await createTestOpportunity(
+				db,
+				testUserAuthContext,
+				{
+					title: 'Tremendous opportunity 👌',
+				},
+			);
+			const opportunity2 = await createTestOpportunity(
+				db,
+				testUserAuthContext,
+				{
+					title: 'Terrific opportunity 👐',
+				},
+			);
 			const response = await request(app)
 				.get('/opportunities')
 				.set(authHeaderWithAdminRole)
@@ -64,9 +75,10 @@ describe('/opportunities', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const visibleFunder = await loadSystemFunder(db, null);
 			const systemOpportunity = await loadSystemOpportunity(db, null);
-			const anotherFunder = await createTestFunder(db, null);
+			const anotherFunder = await createTestFunder(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -75,11 +87,15 @@ describe('/opportunities', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const visibleOpportunity = await createTestOpportunity(db, null, {
-				title: 'Tremendous opportunity 👌',
-				funderShortCode: visibleFunder.shortCode,
-			});
-			await createTestOpportunity(db, null, {
+			const visibleOpportunity = await createTestOpportunity(
+				db,
+				testUserAuthContext,
+				{
+					title: 'Tremendous opportunity 👌',
+					funderShortCode: visibleFunder.shortCode,
+				},
+			);
+			await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: anotherFunder.shortCode,
 			});
 			const response = await request(app)
@@ -100,9 +116,15 @@ describe('/opportunities', () => {
 
 		it('returns exactly one opportunity selected by id', async () => {
 			const db = getDatabase();
-			await createTestOpportunity(db, null);
-			const secondOpportunity = await createTestOpportunity(db, null);
-			await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+
+			await createTestOpportunity(db, testUserAuthContext);
+			const secondOpportunity = await createTestOpportunity(
+				db,
+				testUserAuthContext,
+			);
+			await createTestOpportunity(db, testUserAuthContext);
 
 			const response = await request(app)
 				.get(`/opportunities/${secondOpportunity.id}`)
@@ -116,7 +138,8 @@ describe('/opportunities', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
-			const visibleFunder = await createTestFunder(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -125,7 +148,7 @@ describe('/opportunities', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const opportunity = await createTestOpportunity(db, null, {
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: visibleFunder.shortCode,
 			});
 			const response = await request(app)
@@ -159,7 +182,9 @@ describe('/opportunities', () => {
 
 		it('returns 404 when id is not found', async () => {
 			const db = getDatabase();
-			await createTestOpportunity(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestOpportunity(db, testUserAuthContext);
 			await request(app)
 				.get('/opportunities/9001')
 				.set(authHeaderWithAdminRole)
@@ -171,7 +196,8 @@ describe('/opportunities', () => {
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
-			const opportunity = await createTestOpportunity(db, null);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			// Also create a userGroup permission grant with an EXPIRED association
 			// to verify that expired associations don't grant access
@@ -232,6 +258,7 @@ describe('/opportunities', () => {
 				id: 2,
 				title: '🎆',
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(2);
 		});

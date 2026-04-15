@@ -11,7 +11,11 @@ import {
 	loadFunderCollaborativeMember,
 	createPermissionGrant,
 } from '../database';
-import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	getAuthContext,
+	loadTestUser,
+	getTestUserKeycloakUserId,
+} from '../test/utils';
 import {
 	expectArray,
 	expectArrayContaining,
@@ -30,9 +34,11 @@ import {
 	PermissionGrantVerb,
 } from '../types';
 import type { TinyPg } from 'tinypg';
+import type { AuthContext } from '../types';
 
 const createTestFunders = async (
 	db: TinyPg,
+	authContext: AuthContext,
 	{
 		theFundFund,
 		theFoundationFoundation,
@@ -49,32 +55,32 @@ const createTestFunders = async (
 		theFungibleFund: boolean;
 	},
 ) => {
-	await createTestFunder(db, null, {
+	await createTestFunder(db, authContext, {
 		shortCode: 'theFundFund',
 		name: 'The Fund Fund',
 		isCollaborative: theFundFund,
 	});
-	await createTestFunder(db, null, {
+	await createTestFunder(db, authContext, {
 		shortCode: 'theFoundationFoundation',
 		name: 'The Foundation Foundation',
 		isCollaborative: theFoundationFoundation,
 	});
-	await createTestFunder(db, null, {
+	await createTestFunder(db, authContext, {
 		shortCode: 'theFundersWhoFund',
 		name: 'The Funders Who Fund',
 		isCollaborative: theFundersWhoFund,
 	});
-	await createTestFunder(db, null, {
+	await createTestFunder(db, authContext, {
 		shortCode: 'theFundingFathers',
 		name: 'The Funding Fathers',
 		isCollaborative: theFundingFathers,
 	});
-	await createTestFunder(db, null, {
+	await createTestFunder(db, authContext, {
 		shortCode: 'theFunnyFunders',
 		name: 'The Funny Funders',
 		isCollaborative: theFunnyFunders,
 	});
-	await createTestFunder(db, null, {
+	await createTestFunder(db, authContext, {
 		shortCode: 'theFungibleFund',
 		name: 'The Fungible Fund',
 		isCollaborative: theFungibleFund,
@@ -92,11 +98,13 @@ describe('/funders', () => {
 		it('returns all funders present in the database', async () => {
 			const db = getDatabase();
 			const systemFunder = await loadSystemFunder(db, null);
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 			});
-			await createTestFunder(db, null, {
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 			});
@@ -107,6 +115,7 @@ describe('/funders', () => {
 					{
 						shortCode: 'theFoundationFoundation',
 						createdAt: expectTimestamp(),
+						createdBy: testUser.keycloakUserId,
 						name: 'The Foundation Foundation',
 						keycloakOrganizationId: null,
 						isCollaborative: false,
@@ -114,6 +123,7 @@ describe('/funders', () => {
 					{
 						shortCode: 'theFundFund',
 						createdAt: expectTimestamp(),
+						createdBy: testUser.keycloakUserId,
 						name: 'The Fund Fund',
 						keycloakOrganizationId: null,
 						isCollaborative: false,
@@ -126,11 +136,13 @@ describe('/funders', () => {
 
 		it('returns a subset of funders when search is provided', async () => {
 			const db = getDatabase();
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'greenFund',
 				name: 'Green Environment Fund',
 			});
-			await createTestFunder(db, null, {
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'techGrants',
 				name: 'Tech Innovation Grants',
 			});
@@ -145,6 +157,7 @@ describe('/funders', () => {
 					{
 						shortCode: 'greenFund',
 						createdAt: expectTimestamp(),
+						createdBy: testUser.keycloakUserId,
 						name: 'Green Environment Fund',
 						keycloakOrganizationId: null,
 						isCollaborative: false,
@@ -155,7 +168,9 @@ describe('/funders', () => {
 
 		it('returns no funders when search does not match', async () => {
 			const db = getDatabase();
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'greenFund',
 				name: 'Green Environment Fund',
 			});
@@ -172,18 +187,20 @@ describe('/funders', () => {
 
 		it('returns a collaborative funder when search matches a member funder name', async () => {
 			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const collaborative = await createTestFunder(db, null, {
+			const collaborative = await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'climateCollab',
 				name: 'Climate Collaborative',
 				isCollaborative: true,
 			});
-			const memberFunder = await createTestFunder(db, null, {
+			const memberFunder = await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'solarFund',
 				name: 'Solar Energy Fund',
 			});
-			await createTestFunder(db, null, {
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'unrelatedFund',
 				name: 'Unrelated Fund',
 			});
@@ -219,11 +236,13 @@ describe('/funders', () => {
 
 		it('returns exactly one funder selected by short code', async () => {
 			const db = getDatabase();
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 			});
-			await createTestFunder(db, null, {
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
@@ -236,6 +255,7 @@ describe('/funders', () => {
 			expect(response.body).toStrictEqual({
 				shortCode: 'theFoundationFoundation',
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
 				isCollaborative: false,
@@ -244,7 +264,9 @@ describe('/funders', () => {
 
 		it('returns 404 when short code is not found', async () => {
 			const db = getDatabase();
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 			});
@@ -275,6 +297,7 @@ describe('/funders', () => {
 				shortCode: 'firework',
 				name: '🎆',
 				createdAt: expectTimestamp(),
+				createdBy: getTestUserKeycloakUserId(),
 				isCollaborative: false,
 			});
 			expect(after.count).toEqual(before.count + 1);
@@ -291,14 +314,20 @@ describe('/funders', () => {
 
 		it('updates an existing funder and no others', async () => {
 			const db = getDatabase();
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'firework',
 				name: 'boring text-based firework',
 			});
-			const anotherFunderBefore = await createTestFunder(db, null, {
-				shortCode: 'anotherFirework',
-				name: 'another boring text based firework',
-			});
+			const anotherFunderBefore = await createTestFunder(
+				db,
+				testUserAuthContext,
+				{
+					shortCode: 'anotherFirework',
+					name: 'another boring text based firework',
+				},
+			);
 			const before = await loadTableMetrics(db, 'data_providers');
 			const result = await agent
 				.put('/funders/firework')
@@ -313,6 +342,7 @@ describe('/funders', () => {
 				name: '🎆',
 				keycloakOrganizationId: null,
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 				isCollaborative: false,
 			});
 			expect(after.count).toEqual(before.count);
@@ -362,8 +392,7 @@ describe('/funders', () => {
 				const db = getDatabase();
 				const testUser = await loadTestUser(db);
 				const testUserAuthContext = getAuthContext(testUser);
-
-				await createTestFunders(db, {
+				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -437,7 +466,9 @@ describe('/funders', () => {
 
 			it('requires MANAGE permission on the funder', async () => {
 				const db = getDatabase();
-				await createTestFunders(db, {
+				const testUser = await loadTestUser(db);
+				const testUserAuthContext = getAuthContext(testUser);
+				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -462,7 +493,7 @@ describe('/funders', () => {
 				const testUserAuthContext = getAuthContext(testUser);
 				const systemUser = await loadSystemUser(db, null);
 				const systemUserAuthContext = getAuthContext(systemUser);
-				await createTestFunders(db, {
+				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -498,9 +529,10 @@ describe('/funders', () => {
 			it('throws a 404 when the funder collaborative member does not exist', async () => {
 				const db = getDatabase();
 				const testUser = await loadTestUser(db);
+				const testUserAuthContext = getAuthContext(testUser);
 				const systemUser = await loadSystemUser(db, null);
 				const systemUserAuthContext = getAuthContext(systemUser);
-				await createTestFunders(db, {
+				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -557,7 +589,9 @@ describe('/funders', () => {
 			it('creates and returns exactly one funder collaborative member', async () => {
 				const db = getDatabase();
 				const adminUser = await loadTestUser(db);
-				await createTestFunders(db, {
+				const testUser = await loadTestUser(db);
+				const testUserAuthContext = getAuthContext(testUser);
+				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -579,7 +613,9 @@ describe('/funders', () => {
 
 			it('returns 400 when the funder is not collaborative', async () => {
 				const db = getDatabase();
-				await createTestFunders(db, {
+				const testUser = await loadTestUser(db);
+				const testUserAuthContext = getAuthContext(testUser);
+				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: false,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -630,8 +666,9 @@ describe('/funders', () => {
 				const db = getDatabase();
 				const adminUser = await loadTestUser(db);
 				const adminUserAuthContext = getAuthContext(adminUser);
-
-				await createTestFunders(db, {
+				const testUser = await loadTestUser(db);
+				const testUserAuthContext = getAuthContext(testUser);
+				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: true,
 					theFoundationFoundation: false,
 					theFundersWhoFund: false,
@@ -682,7 +719,9 @@ describe('/funders', () => {
 	describe('POST /:shortCode/invitations/sent/:invitedFunderShortCode', () => {
 		it('requires authentication', async () => {
 			const db = getDatabase();
-			await createTestFunders(db, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunders(db, testUserAuthContext, {
 				theFundFund: true,
 				theFoundationFoundation: false,
 				theFundersWhoFund: false,
@@ -710,12 +749,14 @@ describe('/funders', () => {
 
 		it('requires MANAGE permission on the funder', async () => {
 			const db = getDatabase();
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 				isCollaborative: true,
 			});
-			await createTestFunder(db, null, {
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFoundationFoundation',
 				name: 'The Foundation Foundation',
 			});
@@ -737,10 +778,10 @@ describe('/funders', () => {
 		it('creates an invitation to a non-collaborative funder from a collaborative funder, and returns it', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-
-			await createTestFunders(db, {
+			await createTestFunders(db, testUserAuthContext, {
 				theFundFund: false,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -773,7 +814,9 @@ describe('/funders', () => {
 		});
 		it('returns a 400 error when the source funder is not collaborative', async () => {
 			const db = getDatabase();
-			await createTestFunders(db, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunders(db, testUserAuthContext, {
 				theFundFund: false,
 				theFoundationFoundation: false,
 				theFundersWhoFund: false,
@@ -795,7 +838,9 @@ describe('/funders', () => {
 		});
 		it('returns a 400 bad request error when the invited funder is collaborative', async () => {
 			const db = getDatabase();
-			await createTestFunders(db, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunders(db, testUserAuthContext, {
 				theFundFund: true,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -831,7 +876,9 @@ describe('/funders', () => {
 
 		it('requires MANAGE permission on the funder', async () => {
 			const db = getDatabase();
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 				isCollaborative: true,
@@ -852,11 +899,11 @@ describe('/funders', () => {
 
 		it('returns all (and only) invitations sent by the funder when the user has MANAGE permission on the funder', async () => {
 			const db = getDatabase();
-			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-
-			await createTestFunders(db, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunders(db, testUserAuthContext, {
 				theFundFund: true,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -930,7 +977,9 @@ describe('/funders', () => {
 
 		it('requires MANAGE permission on the funder', async () => {
 			const db = getDatabase();
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 				isCollaborative: true,
@@ -952,10 +1001,11 @@ describe('/funders', () => {
 		it('returns all (and only) invitations received by the funder when the user has MANAGE permission on the funder', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			await createTestFunders(db, {
+			await createTestFunders(db, testUserAuthContext, {
 				theFundFund: false,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -1045,7 +1095,9 @@ describe('/funders', () => {
 
 		it('requires MANAGE permission on the invited funder', async () => {
 			const db = getDatabase();
-			await createTestFunder(db, null, {
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
 				shortCode: 'theFundFund',
 				name: 'The Fund Fund',
 				isCollaborative: true,
@@ -1061,10 +1113,11 @@ describe('/funders', () => {
 		it('successfully updates the invitation status to accepted, and creates a funder collaborative member', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			await createTestFunders(db, {
+			await createTestFunders(db, testUserAuthContext, {
 				theFundFund: false,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -1124,10 +1177,11 @@ describe('/funders', () => {
 		it('successfully updates the invitation status to rejected, and does not create a funder collaborative member', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
 
-			await createTestFunders(db, {
+			await createTestFunders(db, testUserAuthContext, {
 				theFundFund: false,
 				theFoundationFoundation: true,
 				theFundersWhoFund: false,
@@ -1184,10 +1238,11 @@ describe('/funders', () => {
 	it('throws a 400 error if the invitation status is updated after it has been accepted', async () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 
-		await createTestFunders(db, {
+		await createTestFunders(db, testUserAuthContext, {
 			theFundFund: false,
 			theFoundationFoundation: true,
 			theFundersWhoFund: false,
@@ -1235,10 +1290,11 @@ describe('/funders', () => {
 	it('throws a 400 error if the invitation status is updated after it has rejected', async () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 
-		await createTestFunders(db, {
+		await createTestFunders(db, testUserAuthContext, {
 			theFundFund: false,
 			theFoundationFoundation: true,
 			theFundersWhoFund: false,
@@ -1286,10 +1342,11 @@ describe('/funders', () => {
 	it('throws a 400 error if the invitation status is updated to an invalid value', async () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 
-		await createTestFunders(db, {
+		await createTestFunders(db, testUserAuthContext, {
 			theFundFund: false,
 			theFoundationFoundation: true,
 			theFundersWhoFund: false,
@@ -1338,10 +1395,11 @@ describe('/funders', () => {
 	it('throws a 400 error if the invitation status is set to null', async () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
 
-		await createTestFunders(db, {
+		await createTestFunders(db, testUserAuthContext, {
 			theFundFund: false,
 			theFoundationFoundation: true,
 			theFundersWhoFund: false,

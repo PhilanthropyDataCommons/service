@@ -4,11 +4,13 @@ import type { Changemaker } from './Changemaker';
 import type { DataProvider } from './DataProvider';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
+import type { KeycloakId } from './KeycloakId';
 
 interface SourceBase {
 	readonly id: number;
 	label: string;
 	readonly createdAt: string;
+	readonly createdBy: KeycloakId;
 }
 
 interface DataProviderSource extends SourceBase {

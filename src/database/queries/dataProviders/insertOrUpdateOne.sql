@@ -1,11 +1,13 @@
 INSERT INTO data_providers (
 	short_code,
 	name,
-	keycloak_organization_id
+	keycloak_organization_id,
+	created_by
 ) VALUES (
 	:shortCode,
 	:name,
-	:keycloakOrganizationId
+	:keycloakOrganizationId,
+	:authContextKeycloakUserId
 )
 ON CONFLICT (short_code)
 DO UPDATE

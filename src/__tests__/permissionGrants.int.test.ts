@@ -88,7 +88,7 @@ describe('/permissionGrants', () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
 			await createTestPermissionGrant(db, authContext);
-			const funder = await createTestFunder(db, null);
+			const funder = await createTestFunder(db, authContext);
 			await createTestPermissionGrant(db, authContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
@@ -185,7 +185,8 @@ describe('/permissionGrants', () => {
 
 		it('requires administrator role', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
 			await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -204,7 +205,8 @@ describe('/permissionGrants', () => {
 
 		it('creates and returns a permission grant for a user', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
 			const before = await loadTableMetrics(db, 'permission_grants');
 			const result = await agent
 				.post('/permissionGrants')
@@ -238,7 +240,8 @@ describe('/permissionGrants', () => {
 		it('creates and returns a permission grant for a user group', async () => {
 			const db = getDatabase();
 			const userGroupKeycloakId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
-			const funder = await createTestFunder(db, null);
+			const authContext = await getTestAuthContext(db);
+			const funder = await createTestFunder(db, authContext);
 			const before = await loadTableMetrics(db, 'permission_grants');
 			const result = await agent
 				.post('/permissionGrants')
@@ -273,7 +276,8 @@ describe('/permissionGrants', () => {
 			const db = getDatabase();
 			const arbitraryUserKeycloakUserId =
 				'b4e46c13-0abc-4a7e-9d72-a1b2c3d4e5f6';
-			const changemaker = await createTestChangemaker(db, null);
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -524,7 +528,8 @@ describe('/permissionGrants', () => {
 
 		it('returns 400 bad request when scope contains entity type not allowed for context', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -546,7 +551,8 @@ describe('/permissionGrants', () => {
 
 		it('returns 400 bad request when scope contains mix of allowed and disallowed types', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -630,7 +636,8 @@ describe('/permissionGrants', () => {
 
 		it('creates and returns a permission grant with conditions', async () => {
 			const db = getDatabase();
-			const funder = await createOrUpdateFunder(db, null, {
+			const authContext = await getTestAuthContext(db);
+			const funder = await createOrUpdateFunder(db, authContext, {
 				shortCode: 'condFunder',
 				name: 'Conditions Test Funder',
 				keycloakOrganizationId: null,
@@ -679,7 +686,8 @@ describe('/permissionGrants', () => {
 
 		it('creates a permission grant with null conditions', async () => {
 			const db = getDatabase();
-			const funder = await createOrUpdateFunder(db, null, {
+			const authContext = await getTestAuthContext(db);
+			const funder = await createOrUpdateFunder(db, authContext, {
 				shortCode: 'nullCondFunder',
 				name: 'Null Conditions Funder',
 				keycloakOrganizationId: null,
@@ -707,7 +715,8 @@ describe('/permissionGrants', () => {
 
 		it('creates a permission grant with in operator condition', async () => {
 			const db = getDatabase();
-			const funder = await createOrUpdateFunder(db, null, {
+			const authContext = await getTestAuthContext(db);
+			const funder = await createOrUpdateFunder(db, authContext, {
 				shortCode: 'eqCondFunder',
 				name: 'In Condition Funder',
 				keycloakOrganizationId: null,
@@ -747,7 +756,8 @@ describe('/permissionGrants', () => {
 
 		it('returns 400 when conditions has invalid property name', async () => {
 			const db = getDatabase();
-			const funder = await createOrUpdateFunder(db, null, {
+			const authContext = await getTestAuthContext(db);
+			const funder = await createOrUpdateFunder(db, authContext, {
 				shortCode: 'badFieldFunder',
 				name: 'Bad Field Funder',
 				keycloakOrganizationId: null,
@@ -781,7 +791,8 @@ describe('/permissionGrants', () => {
 
 		it('returns 400 when conditions has invalid operator', async () => {
 			const db = getDatabase();
-			const funder = await createOrUpdateFunder(db, null, {
+			const authContext = await getTestAuthContext(db);
+			const funder = await createOrUpdateFunder(db, authContext, {
 				shortCode: 'badOpFunder',
 				name: 'Bad Op Funder',
 				keycloakOrganizationId: null,
@@ -815,7 +826,8 @@ describe('/permissionGrants', () => {
 
 		it('returns 400 when condition key is not in scope', async () => {
 			const db = getDatabase();
-			const funder = await createOrUpdateFunder(db, null, {
+			const authContext = await getTestAuthContext(db);
+			const funder = await createOrUpdateFunder(db, authContext, {
 				shortCode: 'noScopeFunder',
 				name: 'No Scope Funder',
 				keycloakOrganizationId: null,
@@ -871,7 +883,7 @@ describe('/permissionGrants', () => {
 		it('updates and returns the permission grant', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const changemaker = await createTestChangemaker(db, null);
+			const changemaker = await createTestChangemaker(db, authContext);
 			const permissionGrant = await createTestPermissionGrant(db, authContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
@@ -911,7 +923,7 @@ describe('/permissionGrants', () => {
 		it('updates the context entity of a permission grant', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const changemaker = await createTestChangemaker(db, null);
+			const changemaker = await createTestChangemaker(db, authContext);
 			const permissionGrant = await createTestPermissionGrant(db, authContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
@@ -920,7 +932,7 @@ describe('/permissionGrants', () => {
 				scope: [PermissionGrantEntityType.CHANGEMAKER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			const funder = await createTestFunder(db, null);
+			const funder = await createTestFunder(db, authContext);
 
 			const response = await agent
 				.put(`/permissionGrants/${permissionGrant.id}`)
@@ -950,7 +962,7 @@ describe('/permissionGrants', () => {
 		it('updates the grantee of a permission grant', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const changemaker = await createTestChangemaker(db, null);
+			const changemaker = await createTestChangemaker(db, authContext);
 			const permissionGrant = await createTestPermissionGrant(db, authContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
@@ -989,7 +1001,7 @@ describe('/permissionGrants', () => {
 		it('updates conditions on a permission grant', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const funder = await createTestFunder(db, null);
+			const funder = await createTestFunder(db, authContext);
 			const permissionGrant = await createTestPermissionGrant(db, authContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
@@ -1035,7 +1047,7 @@ describe('/permissionGrants', () => {
 		it('does not create a new row when updating', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const changemaker = await createTestChangemaker(db, null);
+			const changemaker = await createTestChangemaker(db, authContext);
 			const permissionGrant = await createTestPermissionGrant(db, authContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
@@ -1106,7 +1118,7 @@ describe('/permissionGrants', () => {
 		it('returns 400 bad request when scope is not valid for context entity type', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const changemaker = await createTestChangemaker(db, null);
+			const changemaker = await createTestChangemaker(db, authContext);
 			const permissionGrant = await createTestPermissionGrant(db, authContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
@@ -1136,7 +1148,8 @@ describe('/permissionGrants', () => {
 
 		it('returns 404 when id is not found', async () => {
 			const db = getDatabase();
-			const changemaker = await createTestChangemaker(db, null);
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
 			await agent
 				.put('/permissionGrants/9001')
 				.type('application/json')
@@ -1200,8 +1213,8 @@ describe('/permissionGrants', () => {
 		it('cascades deletion when the referenced entity is deleted', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const changemaker = await createTestChangemaker(db, null);
-			const source = await createSource(db, null, {
+			const changemaker = await createTestChangemaker(db, authContext);
+			const source = await createSource(db, authContext, {
 				label: 'Cascade Test Source',
 				changemakerId: changemaker.id,
 			});

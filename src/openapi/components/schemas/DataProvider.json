@@ -16,7 +16,19 @@
 			"type": "string",
 			"format": "date-time",
 			"readOnly": true
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that created this data provider",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
 		}
 	},
-	"required": ["shortCode", "name", "keycloakOrganizationId", "createdAt"]
+	"required": [
+		"shortCode",
+		"name",
+		"keycloakOrganizationId",
+		"createdAt",
+		"createdBy"
+	]
 }

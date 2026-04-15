@@ -23,7 +23,13 @@
 			"type": "string",
 			"format": "date-time",
 			"readOnly": true
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that created this changemaker",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
 		}
 	},
-	"required": ["id", "taxId", "name", "createdAt"]
+	"required": ["id", "taxId", "name", "createdAt", "createdBy"]
 }

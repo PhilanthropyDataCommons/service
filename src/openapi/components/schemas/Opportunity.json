@@ -22,7 +22,13 @@
 			"type": "string",
 			"format": "date-time",
 			"readOnly": true
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that created this opportunity",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
 		}
 	},
-	"required": ["id", "title", "createdAt"]
+	"required": ["id", "title", "createdAt", "createdBy"]
 }

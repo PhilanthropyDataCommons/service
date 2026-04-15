@@ -17,9 +17,15 @@
 					"type": "string",
 					"format": "date-time",
 					"readOnly": true
+				},
+				"createdBy": {
+					"description": "The keycloak user id of the PDC user that created this source",
+					"type": "string",
+					"format": "uuid",
+					"readOnly": true
 				}
 			},
-			"required": ["id", "label", "relatedEntityId", "createdAt"]
+			"required": ["id", "label", "relatedEntityId", "createdAt", "createdBy"]
 		},
 		{
 			"oneOf": [

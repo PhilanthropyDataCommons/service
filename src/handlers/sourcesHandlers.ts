@@ -77,7 +77,7 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 	// Normally we try to avoid passing the body directly vs extracting the values and passing them.
 	// Because because writableSource is a union type it is hard to extract the values directly without
 	// losing type context that the union provided.
-	const source = await createSource(db, null, req.body);
+	const source = await createSource(db, req, req.body);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
@@ -92,7 +92,6 @@ const getSources = async (req: Request, res: Response): Promise<void> => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const bundle = await loadSourceBundle(db, req, limit, offset);
-
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')

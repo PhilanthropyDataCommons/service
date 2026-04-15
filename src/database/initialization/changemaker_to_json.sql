@@ -139,7 +139,8 @@ BEGIN
 		'taxId', changemaker.tax_id,
 		'name', changemaker.name,
 		'keycloakOrganizationId', changemaker.keycloak_organization_id,
-		'createdAt', changemaker.created_at
+		'createdAt', changemaker.created_at,
+		'createdBy', changemaker.created_by
 	) INTO changemaker_json;
 
 	RETURN

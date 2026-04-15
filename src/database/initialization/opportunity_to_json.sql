@@ -15,7 +15,8 @@ BEGIN
     'title', opportunity.title,
     'funderShortCode', opportunity.funder_short_code,
     'funder', funder_json,
-    'createdAt', to_json(opportunity.created_at)::jsonb
+    'createdAt', to_json(opportunity.created_at),
+    'createdBy', to_json(opportunity.created_by)
   );
 END;
 $$ LANGUAGE plpgsql;

@@ -15,7 +15,7 @@ const createTestOpportunity = async (
 ): Promise<Opportunity> => {
 	const funderShortCode =
 		overrideValues?.funderShortCode ??
-		(await createTestFunder(db, null)).shortCode;
+		(await createTestFunder(db, authContext)).shortCode;
 	const defaultValues: WritableOpportunity = {
 		title: `Test Opportunity ${uuidv4()}`,
 		funderShortCode,

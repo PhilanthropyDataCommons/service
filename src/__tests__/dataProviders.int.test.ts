@@ -12,6 +12,11 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
+import {
+	loadTestUser,
+	getTestUserKeycloakUserId,
+	getAuthContext,
+} from '../test/utils';
 const agent = request.agent(app);
 
 describe('/dataProviders', () => {
@@ -22,9 +27,18 @@ describe('/dataProviders', () => {
 
 		it('returns all data providers present in the database', async () => {
 			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+
 			const systemDataProvider = await loadSystemDataProvider(db, null);
-			const firstDataProvider = await createTestDataProvider(db, null);
-			const secondDataProvider = await createTestDataProvider(db, null);
+			const firstDataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
+			const secondDataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
 
 			const response = await agent
 				.get('/dataProviders')
@@ -44,8 +58,13 @@ describe('/dataProviders', () => {
 
 		it('returns exactly one data provider selected by short code', async () => {
 			const db = getDatabase();
-			await createTestDataProvider(db, null);
-			const expectedDataProvider = await createTestDataProvider(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestDataProvider(db, testUserAuthContext);
+			const expectedDataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
 
 			const response = await agent
 				.get(`/dataProviders/${expectedDataProvider.shortCode}`)
@@ -56,7 +75,9 @@ describe('/dataProviders', () => {
 
 		it('returns 404 when short code is not found', async () => {
 			const db = getDatabase();
-			await createTestDataProvider(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestDataProvider(db, testUserAuthContext);
 			await agent.get('/dataProviders/nonexistent').set(authHeader).expect(404);
 		});
 	});
@@ -84,6 +105,7 @@ describe('/dataProviders', () => {
 				shortCode: 'firework',
 				name: '🎆',
 				createdAt: expectTimestamp(),
+				createdBy: getTestUserKeycloakUserId(),
 				keycloakOrganizationId: null,
 			});
 			expect(after.count).toEqual(before.count + 1);
@@ -100,10 +122,20 @@ describe('/dataProviders', () => {
 
 		it('updates an existing data provider and no others', async () => {
 			const db = getDatabase();
-			const targetDataProvider = await createTestDataProvider(db, null, {
-				name: 'Original Name',
-			});
-			const otherDataProviderBefore = await createTestDataProvider(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+
+			const targetDataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+				{
+					name: 'Original Name',
+				},
+			);
+			const otherDataProviderBefore = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
 			const before = await loadTableMetrics(db, 'data_providers');
 			const result = await agent
 				.put(`/dataProviders/${targetDataProvider.shortCode}`)
@@ -125,6 +157,7 @@ describe('/dataProviders', () => {
 				name: '🎆',
 				keycloakOrganizationId: '8b0163ac-bd91-11ef-8579-9fa8ab9f4b7d',
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(before.count);
 			expect(otherDataProviderAfter).toEqual(otherDataProviderBefore);

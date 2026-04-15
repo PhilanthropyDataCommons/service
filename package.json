@@ -53,7 +53,7 @@
 		"@eslint/js": "^9.39.2",
 		"@jest/globals": "^30.3.0",
 		"@redocly/cli": "^2.15.0",
-		"@smithy/util-stream": "^4.5.4",
+		"@smithy/util-stream": "^4.5.22",
 		"@tsconfig/node24": "^24.0.4",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",

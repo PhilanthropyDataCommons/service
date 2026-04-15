@@ -3,7 +3,7 @@ import type { Funder } from '../../../types';
 
 const loadFunderBundle = generateLoadBundleOperation<
 	Funder,
-	[search: string | undefined]
->('funders.selectWithPagination', ['search']);
+	[search: string | undefined, isCollaborative: boolean | undefined]
+>('funders.selectWithPagination', ['search', 'isCollaborative']);
 
 export { loadFunderBundle };

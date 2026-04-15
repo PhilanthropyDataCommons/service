@@ -9,6 +9,7 @@ import {
 import { isAuthContext, isWritableFunder } from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
 import {
+	extractIsCollaborativeParameters,
 	extractPaginationParameters,
 	extractSearchParameters,
 } from '../queryParameters';
@@ -24,7 +25,15 @@ const getFunders = async (req: Request, res: Response): Promise<void> => {
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const { search } = extractSearchParameters(req);
-	const funderBundle = await loadFunderBundle(db, req, search, limit, offset);
+	const { isCollaborative } = extractIsCollaborativeParameters(req);
+	const funderBundle = await loadFunderBundle(
+		db,
+		req,
+		search,
+		isCollaborative,
+		limit,
+		offset,
+	);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')

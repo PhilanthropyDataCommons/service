@@ -11,7 +11,8 @@
 		"parameters": [
 			{ "$ref": "../components/parameters/pageParam.json" },
 			{ "$ref": "../components/parameters/countParam.json" },
-			{ "$ref": "../components/parameters/searchParam.json" }
+			{ "$ref": "../components/parameters/searchParam.json" },
+			{ "$ref": "../components/parameters/isCollaborativeParam.json" }
 		],
 		"responses": {
 			"200": {

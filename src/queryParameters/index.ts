@@ -3,6 +3,7 @@ export * from './extractChangemakerFieldValueBatchParameters';
 export * from './extractChangemakerParameters';
 export * from './extractCreatedByParameters';
 export * from './extractFunderParameters';
+export * from './extractIsCollaborativeParameters';
 export * from './extractKeycloakUserIdParameters';
 export * from './extractPaginationParameters';
 export * from './extractProposalParameters';

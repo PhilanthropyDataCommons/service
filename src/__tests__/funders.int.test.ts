@@ -185,6 +185,115 @@ describe('/funders', () => {
 			});
 		});
 
+		it('returns only collaborative funders when isCollaborative=true is provided', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
+				shortCode: 'collabA',
+				name: 'Collaborative A',
+				isCollaborative: true,
+			});
+			await createTestFunder(db, testUserAuthContext, {
+				shortCode: 'collabB',
+				name: 'Collaborative B',
+				isCollaborative: true,
+			});
+			await createTestFunder(db, testUserAuthContext, {
+				shortCode: 'soloFund',
+				name: 'Solo Fund',
+				isCollaborative: false,
+			});
+
+			const response = await agent
+				.get('/funders?isCollaborative=true')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: expectArrayContaining([
+					expectObjectContaining({
+						shortCode: 'collabA',
+						isCollaborative: true,
+					}),
+					expectObjectContaining({
+						shortCode: 'collabB',
+						isCollaborative: true,
+					}),
+				]),
+			});
+		});
+
+		it('returns only non-collaborative funders when isCollaborative=false is provided', async () => {
+			const db = getDatabase();
+			const systemFunder = await loadSystemFunder(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
+				shortCode: 'collabA',
+				name: 'Collaborative A',
+				isCollaborative: true,
+			});
+			await createTestFunder(db, testUserAuthContext, {
+				shortCode: 'soloFund',
+				name: 'Solo Fund',
+				isCollaborative: false,
+			});
+
+			const response = await agent
+				.get('/funders?isCollaborative=false')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 2,
+				entries: expectArrayContaining([
+					expectObjectContaining({
+						shortCode: 'soloFund',
+						isCollaborative: false,
+					}),
+					expectObjectContaining({
+						shortCode: systemFunder.shortCode,
+						isCollaborative: false,
+					}),
+				]),
+			});
+		});
+
+		it('combines isCollaborative and search filters', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
+				shortCode: 'greenCollab',
+				name: 'Green Collaborative',
+				isCollaborative: true,
+			});
+			await createTestFunder(db, testUserAuthContext, {
+				shortCode: 'greenFund',
+				name: 'Green Fund',
+				isCollaborative: false,
+			});
+			await createTestFunder(db, testUserAuthContext, {
+				shortCode: 'climateCollab',
+				name: 'Climate Collaborative',
+				isCollaborative: true,
+			});
+
+			const response = await agent
+				.get('/funders?isCollaborative=true&_content=green')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 1,
+				entries: [
+					expectObjectContaining({
+						shortCode: 'greenCollab',
+						isCollaborative: true,
+					}),
+				],
+			});
+		});
+
 		it('returns a collaborative funder when search matches a member funder name', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);

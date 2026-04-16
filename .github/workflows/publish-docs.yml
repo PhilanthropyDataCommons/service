@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - 'docs/**/*.md'
+      - 'CHANGELOG.md'
   workflow_dispatch:
     inputs:
       force_publish:
@@ -24,6 +25,7 @@ jobs:
         uses: OpenTechStrategies/wp-post-gfm@main
         with:
           directory: 'docs'
+          extra_files: 'CHANGELOG.md'
           default_status: 'publish'
           force_publish: ${{ inputs.force_publish }}
         env:

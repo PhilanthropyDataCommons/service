@@ -34,12 +34,34 @@ const isString = ajv.compile({
 	type: 'string',
 });
 
+const splitPhoneNumberAndExtensionCandidates = (
+	value: string,
+): [baseNumber: string, extension: string | undefined] => {
+	const match = /^(?<baseNumber>.+?)(?:(?:,+|;ext=)(?<extension>.*))?$/v.exec(
+		value,
+	);
+	return [match?.groups?.baseNumber ?? '', match?.groups?.extension];
+};
+
+const isValidBasePhoneNumber = (candidate: string): boolean =>
+	candidate.trim() === candidate &&
+	validator.isMobilePhone(candidate, 'any', { strictMode: true });
+
+const isValidExtension = (candidate: string): boolean =>
+	/^\d+$/v.test(candidate);
+
 // The validator package has only one phone number validator function,
 // 'isMobilePhone.' but the PDC does not currently have any requirement
 // for a phone number to be a mobile number, nor does the function seem
 // to discriminate on landline numbers.
-const isPhoneNumberString = (value: string): boolean =>
-	validator.isMobilePhone(value);
+const isPhoneNumberString = (value: string): boolean => {
+	const [baseNumberCandidate, extensionCandidate] =
+		splitPhoneNumberAndExtensionCandidates(value);
+	return (
+		isValidBasePhoneNumber(baseNumberCandidate) &&
+		(extensionCandidate === undefined || isValidExtension(extensionCandidate))
+	);
+};
 
 const isCurrencyWithCodeString = (value: string): boolean => {
 	const [currency, code] = value.split(' ');

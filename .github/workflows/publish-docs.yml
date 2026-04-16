@@ -9,7 +9,8 @@ on:
     inputs:
       force_publish:
         description: 'Force republish all posts'
-        default: 'true'
+        type: boolean
+        default: 'false'
 
 jobs:
   publish:
@@ -24,6 +25,7 @@ jobs:
         with:
           directory: 'docs'
           default_status: 'publish'
+          force_publish: ${{ inputs.force_publish }}
         env:
           WP_URL: ${{ secrets.WP_URL }}
           WP_USERNAME: ${{ secrets.WP_USERNAME }}

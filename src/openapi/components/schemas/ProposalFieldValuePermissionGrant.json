@@ -9,8 +9,7 @@
 					"const": "proposalFieldValue"
 				},
 				"proposalFieldValueId": {
-					"type": "integer",
-					"description": "The ID of the proposal field value.",
+					"$ref": "./id.json",
 					"example": 600
 				},
 				"scope": {

@@ -1,13 +1,14 @@
 import { ajv } from '../ajv';
 import { keycloakIdSchema } from './KeycloakId';
 import type { ChangemakerFieldValue } from './ChangemakerFieldValue';
+import type { Id } from './Id';
 import type { KeycloakId } from './KeycloakId';
 import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { ProposalFieldValue } from './ProposalFieldValue';
 
 interface ShallowChangemaker {
-	readonly id: number;
+	readonly id: Id;
 	taxId: string;
 	name: string;
 	// We do not really want "undefined" here, only null. See

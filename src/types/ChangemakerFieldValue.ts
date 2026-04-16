@@ -1,4 +1,6 @@
 import { ajv } from '../ajv';
+import { idSchema } from './Id';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 import type { BaseField } from './BaseField';
 import type { ChangemakerFieldValueBatch } from './ChangemakerFieldValueBatch';
@@ -6,9 +8,9 @@ import type { FieldValueBase } from './FieldValueBase';
 import type { Writable } from './Writable';
 
 interface ChangemakerFieldValue extends FieldValueBase {
-	changemakerId: number;
+	changemakerId: Id;
 	baseFieldShortCode: string;
-	batchId: number;
+	batchId: Id;
 	readonly baseField: BaseField;
 	readonly batch: ChangemakerFieldValueBatch;
 }
@@ -19,15 +21,11 @@ const writableChangemakerFieldValueSchema: JSONSchemaType<WritableChangemakerFie
 	{
 		type: 'object',
 		properties: {
-			changemakerId: {
-				type: 'integer',
-			},
+			changemakerId: idSchema,
 			baseFieldShortCode: {
 				type: 'string',
 			},
-			batchId: {
-				type: 'integer',
-			},
+			batchId: idSchema,
 			value: {
 				type: 'string',
 			},

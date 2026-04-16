@@ -9,8 +9,7 @@
 					"const": "source"
 				},
 				"sourceId": {
-					"type": "integer",
-					"description": "The ID of the source.",
+					"$ref": "./id.json",
 					"example": 700
 				},
 				"scope": {

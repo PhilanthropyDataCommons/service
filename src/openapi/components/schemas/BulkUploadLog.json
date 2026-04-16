@@ -2,7 +2,7 @@
 	"type": "object",
 	"properties": {
 		"bulkUploadTaskId": {
-			"type": "integer",
+			"allOf": [{ "$ref": "./id.json" }],
 			"readOnly": true
 		},
 		"createdAt": {

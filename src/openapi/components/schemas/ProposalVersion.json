@@ -2,23 +2,23 @@
 	"type": "object",
 	"properties": {
 		"id": {
-			"type": "integer",
+			"allOf": [{ "$ref": "./id.json" }],
 			"readOnly": true,
 			"example": 3821
 		},
 		"proposalId": {
-			"type": "integer",
+			"allOf": [{ "$ref": "./id.json" }],
 			"example": 3709
 		},
 		"sourceId": {
-			"type": "integer"
+			"$ref": "./id.json"
 		},
 		"source": {
 			"$ref": "./Source.json",
 			"readOnly": true
 		},
 		"applicationFormId": {
-			"type": "integer",
+			"allOf": [{ "$ref": "./id.json" }],
 			"example": 3529
 		},
 		"version": {

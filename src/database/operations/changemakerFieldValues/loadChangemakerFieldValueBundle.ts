@@ -1,10 +1,10 @@
 import { generateLoadBundleOperation } from '../generators';
 import { decorateWithFileDownloadUrl } from '../../../decorators/changemakerFieldValue';
-import type { ChangemakerFieldValue } from '../../../types';
+import type { ChangemakerFieldValue, Id } from '../../../types';
 
 const loadChangemakerFieldValueBundle = generateLoadBundleOperation<
 	ChangemakerFieldValue,
-	[batchId: number | undefined, changemakerId: number | undefined]
+	[batchId: Id | undefined, changemakerId: Id | undefined]
 >(
 	'changemakerFieldValues.selectWithPagination',
 	['batchId', 'changemakerId'],

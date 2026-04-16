@@ -2,12 +2,12 @@
 	"type": "object",
 	"properties": {
 		"id": {
-			"type": "integer",
+			"allOf": [{ "$ref": "./id.json" }],
 			"readOnly": true,
 			"example": 3613
 		},
 		"applicationFormId": {
-			"type": "integer",
+			"allOf": [{ "$ref": "./id.json" }],
 			"readOnly": true,
 			"example": 3529
 		},

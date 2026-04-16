@@ -30,14 +30,15 @@ import type { Request, Response } from 'express';
 import type {
 	WritableProposalFieldValueWithProposalVersionContext,
 	AuthContext,
+	Id,
 } from '../types';
 import type { TinyPg } from 'tinypg';
 
 const assertApplicationFormExistsForProposal = async (
 	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
-	applicationFormId: number,
-	proposalId: number,
+	applicationFormId: Id,
+	proposalId: Id,
 ): Promise<void> => {
 	const applicationForm = await loadApplicationForm(
 		db,
@@ -83,7 +84,7 @@ const assertApplicationFormExistsForProposal = async (
 const assertProposalFieldValuesMapToApplicationForm = async (
 	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
-	applicationFormId: number,
+	applicationFormId: Id,
 	proposalFieldValues: WritableProposalFieldValueWithProposalVersionContext[],
 ): Promise<void> => {
 	const applicationFormFieldQueries = proposalFieldValues.map(

@@ -1,5 +1,7 @@
 import { ajv } from '../ajv';
 import { writableProposalFieldValueWithProposalVersionContextSchema } from './ProposalFieldValue';
+import { idSchema } from './Id';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 import type {
 	ProposalFieldValue,
@@ -10,12 +12,12 @@ import type { Source } from './Source';
 import type { KeycloakId } from './KeycloakId';
 
 interface ProposalVersion {
-	readonly id: number;
-	proposalId: number;
-	sourceId: number;
+	readonly id: Id;
+	proposalId: Id;
+	sourceId: Id;
 	readonly source: Source;
 	readonly version: number;
-	applicationFormId: number;
+	applicationFormId: Id;
 	readonly fieldValues: ProposalFieldValue[];
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
@@ -31,15 +33,9 @@ const writableProposalVersionWithFieldValuesSchema: JSONSchemaType<WritablePropo
 	{
 		type: 'object',
 		properties: {
-			proposalId: {
-				type: 'integer',
-			},
-			sourceId: {
-				type: 'integer',
-			},
-			applicationFormId: {
-				type: 'integer',
-			},
+			proposalId: idSchema,
+			sourceId: idSchema,
+			applicationFormId: idSchema,
 			fieldValues: {
 				type: 'array',
 				items: writableProposalFieldValueWithProposalVersionContextSchema,

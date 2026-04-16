@@ -1,17 +1,17 @@
 import { ajv } from '../ajv';
+import { idSchema } from './Id';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 
 interface CopyBaseFieldsJobPayload {
-	baseFieldsCopyTaskId: number;
+	baseFieldsCopyTaskId: Id;
 }
 
 const copyBaseFieldsJobPayloadSchema: JSONSchemaType<CopyBaseFieldsJobPayload> =
 	{
 		type: 'object',
 		properties: {
-			baseFieldsCopyTaskId: {
-				type: 'integer',
-			},
+			baseFieldsCopyTaskId: idSchema,
 		},
 		required: ['baseFieldsCopyTaskId'],
 	};

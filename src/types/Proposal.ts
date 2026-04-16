@@ -1,4 +1,6 @@
 import { ajv } from '../ajv';
+import { idSchema } from './Id';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 import type { ShallowChangemaker } from './Changemaker';
 import type { ProposalVersion } from './ProposalVersion';
@@ -7,8 +9,8 @@ import type { KeycloakId } from './KeycloakId';
 import type { Opportunity } from './Opportunity';
 
 interface Proposal {
-	readonly id: number;
-	opportunityId: number;
+	readonly id: Id;
+	opportunityId: Id;
 	readonly opportunity: Opportunity;
 	externalId: string;
 	readonly versions: ProposalVersion[];
@@ -22,9 +24,7 @@ type WritableProposal = Writable<Proposal>;
 const writableProposalSchema: JSONSchemaType<WritableProposal> = {
 	type: 'object',
 	properties: {
-		opportunityId: {
-			type: 'integer',
-		},
+		opportunityId: idSchema,
 		externalId: {
 			type: 'string',
 			pattern: '.+',

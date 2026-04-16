@@ -5,7 +5,7 @@
 			"description": "A labeled dataset from the changemaker, funder, or data provider that adds data to the PDC. The Source is intended to be the 'last hop' prior to entering the PDC, not the ultimate origin of the data.",
 			"properties": {
 				"id": {
-					"type": "integer",
+					"allOf": [{ "$ref": "./id.json" }],
 					"readOnly": true
 				},
 				"label": {

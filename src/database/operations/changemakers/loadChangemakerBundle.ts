@@ -1,10 +1,10 @@
 import { generateLoadBundleOperation } from '../generators';
 import { decorateWithFileDownloadUrls } from '../../../decorators/changemaker';
-import type { Changemaker } from '../../../types';
+import type { Changemaker, Id } from '../../../types';
 
 const loadChangemakerBundle = generateLoadBundleOperation<
 	Changemaker,
-	[proposalId: number | undefined, search: string | undefined]
+	[proposalId: Id | undefined, search: string | undefined]
 >(
 	'changemakers.selectWithPagination',
 	['proposalId', 'search'],

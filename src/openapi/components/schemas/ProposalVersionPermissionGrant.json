@@ -9,8 +9,7 @@
 					"const": "proposalVersion"
 				},
 				"proposalVersionId": {
-					"type": "integer",
-					"description": "The ID of the proposal version.",
+					"$ref": "./id.json",
 					"example": 300
 				},
 				"scope": {

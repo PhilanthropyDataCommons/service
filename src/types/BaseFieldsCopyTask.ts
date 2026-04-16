@@ -1,11 +1,12 @@
 import { ajv } from '../ajv';
+import type { Id } from './Id';
 import type { TaskStatus } from './TaskStatus';
 import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { KeycloakId } from './KeycloakId';
 
 interface BaseFieldsCopyTask {
-	readonly id: number;
+	readonly id: Id;
 	readonly status: TaskStatus;
 	pdcApiUrl: string;
 	readonly statusUpdatedAt: string;

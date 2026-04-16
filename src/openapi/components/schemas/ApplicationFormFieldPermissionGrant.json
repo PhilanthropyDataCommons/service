@@ -9,8 +9,7 @@
 					"const": "applicationFormField"
 				},
 				"applicationFormFieldId": {
-					"type": "integer",
-					"description": "The ID of the application form field.",
+					"$ref": "./id.json",
 					"example": 500
 				},
 				"scope": {

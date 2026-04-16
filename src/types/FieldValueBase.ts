@@ -1,7 +1,8 @@
 import type { File } from './File';
+import type { Id } from './Id';
 
 interface FieldValueBase {
-	readonly id: number;
+	readonly id: Id;
 	value: string;
 	readonly file: File | null;
 	goodAsOf: string | null;

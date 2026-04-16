@@ -21,13 +21,13 @@ import {
 } from '../errors';
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
-import type { AuthContext } from '../types';
+import type { AuthContext, Id } from '../types';
 import type { TinyPg } from 'tinypg';
 
 const checkApplicationFormFieldPermission = async (
 	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
-	applicationFormFieldId: number,
+	applicationFormFieldId: Id,
 	permission: PermissionGrantVerb,
 ): Promise<void> => {
 	const applicationFormField = await loadApplicationFormField(

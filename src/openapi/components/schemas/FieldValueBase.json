@@ -3,7 +3,7 @@
 	"description": "Base properties shared by all field value types.",
 	"properties": {
 		"id": {
-			"type": "integer",
+			"allOf": [{ "$ref": "./id.json" }],
 			"readOnly": true
 		},
 		"value": {

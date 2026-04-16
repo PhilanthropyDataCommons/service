@@ -38,13 +38,14 @@ import {
 	expectTimestamp,
 } from '../../test/asymettricMatchers';
 import { createTestFile, createTestOpportunity } from '../../test/factories';
-import type { TinyPg } from 'tinypg';
 import type {
+	Id,
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
 	AuthContext,
 	Opportunity,
 } from '../../types';
+import type { TinyPg } from 'tinypg';
 
 const s3Mock = mockClient(S3Client);
 
@@ -52,7 +53,7 @@ const createTestApplicationForm = async (
 	db: TinyPg,
 	authContext: AuthContext,
 	shortCodes: string[],
-): Promise<{ applicationFormId: number; opportunity: Opportunity }> => {
+): Promise<{ applicationFormId: Id; opportunity: Opportunity }> => {
 	const opportunity = await createTestOpportunity(db, authContext);
 	const applicationForm = await createApplicationForm(db, null, {
 		opportunityId: opportunity.id,
@@ -78,8 +79,8 @@ const createTestBulkUploadTask = async (
 	db: TinyPg,
 	authContext: AuthContext,
 	options: {
-		proposalsDataFileId: number;
-		applicationFormId: number;
+		proposalsDataFileId: Id;
+		applicationFormId: Id;
 		overrideValues?: Partial<InternallyWritableBulkUploadTask>;
 	},
 ): Promise<BulkUploadTask> => {

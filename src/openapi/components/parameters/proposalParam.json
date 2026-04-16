@@ -1,6 +1,6 @@
 {
 	"schema": {
-		"type": "integer"
+		"$ref": "../schemas/id.json"
 	},
 	"in": "query",
 	"name": "proposal",

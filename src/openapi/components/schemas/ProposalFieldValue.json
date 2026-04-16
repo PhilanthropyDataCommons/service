@@ -5,12 +5,12 @@
 			"type": "object",
 			"properties": {
 				"proposalVersionId": {
-					"type": "integer",
+					"allOf": [{ "$ref": "./id.json" }],
 					"readOnly": true,
 					"example": 3709
 				},
 				"applicationFormFieldId": {
-					"type": "integer",
+					"allOf": [{ "$ref": "./id.json" }],
 					"example": 3613
 				},
 				"applicationFormField": {

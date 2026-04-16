@@ -1,9 +1,11 @@
+import type { Id } from '../types';
+
 interface ConflictErrorDetails {
 	entityType: string;
-	entityId?: number;
+	entityId?: Id;
 	entityShortCode?: string;
 	contextEntityType?: string;
-	contextEntityId?: number;
+	contextEntityId?: Id;
 	contextEntityShortCode?: string;
 }
 

@@ -9,8 +9,7 @@
 					"const": "changemakerFieldValue"
 				},
 				"changemakerFieldValueId": {
-					"type": "integer",
-					"description": "The ID of the changemaker field value.",
+					"$ref": "./id.json",
 					"example": 900
 				},
 				"scope": {

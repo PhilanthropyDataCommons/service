@@ -9,8 +9,7 @@
 					"const": "bulkUpload"
 				},
 				"bulkUploadTaskId": {
-					"type": "integer",
-					"description": "The ID of the bulk upload task.",
+					"$ref": "./id.json",
 					"example": 800
 				},
 				"scope": {

@@ -12,7 +12,7 @@ together describe how a field should be handled:
 
 - **`baseField.dataType`** — describes the _semantic type_ of the data being
   collected (e.g., `string`, `number`, `email`, `url`). The PDC service uses
-  this for data validation.
+  this for [data validation](./DATA_VALIDATION.md).
 - **`inputType`** — describes the _preferred UI control_ for collecting that
   data. This is purely a rendering hint; the service does not enforce
   constraints based on `inputType`.

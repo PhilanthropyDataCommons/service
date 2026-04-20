@@ -1,5 +1,7 @@
 import { ajv } from '../ajv';
 import { writableApplicationFormFieldWithApplicationContextSchema } from './ApplicationFormField';
+import { idSchema } from './Id';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 import type {
 	ApplicationFormField,
@@ -8,8 +10,8 @@ import type {
 import type { Writable } from './Writable';
 
 interface ApplicationForm {
-	readonly id: number;
-	opportunityId: number;
+	readonly id: Id;
+	opportunityId: Id;
 	name: string | null;
 	readonly version: number;
 	readonly fields: ApplicationFormField[];
@@ -26,9 +28,7 @@ const writableApplicationFormWithFieldsSchema: JSONSchemaType<WritableApplicatio
 	{
 		type: 'object',
 		properties: {
-			opportunityId: {
-				type: 'number',
-			},
+			opportunityId: idSchema,
 			name: {
 				type: 'string',
 				/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --

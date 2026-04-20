@@ -2,18 +2,18 @@
 	"type": "object",
 	"properties": {
 		"id": {
-			"type": "integer",
+			"allOf": [{ "$ref": "./id.json" }],
 			"readOnly": true
 		},
 		"changemakerId": {
-			"type": "integer"
+			"$ref": "./id.json"
 		},
 		"changemaker": {
 			"$ref": "./Changemaker.json",
 			"readOnly": true
 		},
 		"proposalId": {
-			"type": "integer"
+			"$ref": "./id.json"
 		},
 		"proposal": {
 			"$ref": "./Proposal.json",

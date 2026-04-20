@@ -1,13 +1,15 @@
 import { ajv } from '../ajv';
+import { idSchema } from './Id';
 import type { Funder } from './Funder';
 import type { Changemaker } from './Changemaker';
 import type { DataProvider } from './DataProvider';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { KeycloakId } from './KeycloakId';
 
 interface SourceBase {
-	readonly id: number;
+	readonly id: Id;
 	label: string;
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
@@ -24,7 +26,7 @@ interface FunderSource extends SourceBase {
 }
 
 interface ChangemakerSource extends SourceBase {
-	changemakerId: number;
+	changemakerId: Id;
 	readonly changemaker: Changemaker;
 }
 
@@ -63,7 +65,7 @@ const writableSourceSchema: JSONSchemaType<WritableSource> = {
 				{
 					type: 'object',
 					properties: {
-						changemakerId: { type: 'number' },
+						changemakerId: idSchema,
 					},
 					required: ['changemakerId'],
 				},

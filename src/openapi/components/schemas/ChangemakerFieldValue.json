@@ -5,7 +5,7 @@
 			"type": "object",
 			"properties": {
 				"changemakerId": {
-					"type": "integer",
+					"allOf": [{ "$ref": "./id.json" }],
 					"example": 123
 				},
 				"baseFieldShortCode": {
@@ -17,7 +17,7 @@
 					"readOnly": true
 				},
 				"batchId": {
-					"type": "integer",
+					"allOf": [{ "$ref": "./id.json" }],
 					"example": 456
 				},
 				"batch": {

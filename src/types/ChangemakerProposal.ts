@@ -1,13 +1,15 @@
 import { ajv } from '../ajv';
+import { idSchema } from './Id';
 import type { Changemaker } from './Changemaker';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 import type { Proposal } from './Proposal';
 import type { Writable } from './Writable';
 
 interface ChangemakerProposal {
-	readonly id: number;
-	changemakerId: number;
-	proposalId: number;
+	readonly id: Id;
+	changemakerId: Id;
+	proposalId: Id;
 	readonly changemaker: Changemaker;
 	readonly proposal: Proposal;
 	readonly createdAt: string;
@@ -19,12 +21,8 @@ const writableChangemakerProposalSchema: JSONSchemaType<WritableChangemakerPropo
 	{
 		type: 'object',
 		properties: {
-			changemakerId: {
-				type: 'number',
-			},
-			proposalId: {
-				type: 'number',
-			},
+			changemakerId: idSchema,
+			proposalId: idSchema,
 		},
 		required: ['changemakerId', 'proposalId'],
 	};

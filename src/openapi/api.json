@@ -65,6 +65,9 @@
 			"BulkUploadTaskLogDetails": {
 				"$ref": "./components/schemas/BulkUploadLogDetails.json"
 			},
+			"id": {
+				"$ref": "./components/schemas/id.json"
+			},
 			"keycloakOrganizationId": {
 				"$ref": "./components/schemas/keycloakOrganizationId.json"
 			},

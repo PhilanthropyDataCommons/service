@@ -1,11 +1,13 @@
+import { idSchema } from './Id';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 import type { ApplicationFormField } from './ApplicationFormField';
 import type { FieldValueBase } from './FieldValueBase';
 import type { Writable } from './Writable';
 
 interface ProposalFieldValue extends FieldValueBase {
-	proposalVersionId: number;
-	applicationFormFieldId: number;
+	proposalVersionId: Id;
+	applicationFormFieldId: Id;
 	position: number;
 	readonly applicationFormField: ApplicationFormField;
 }
@@ -21,9 +23,7 @@ const writableProposalFieldValueWithProposalVersionContextSchema: JSONSchemaType
 	{
 		type: 'object',
 		properties: {
-			applicationFormFieldId: {
-				type: 'integer',
-			},
+			applicationFormFieldId: idSchema,
 			position: {
 				type: 'integer',
 			},

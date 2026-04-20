@@ -8,6 +8,7 @@ import {
 } from './PermissionGrantGranteeType';
 import { permissionGrantVerbSchema } from './PermissionGrantVerb';
 import type { TypeGuardWithAjvErrors } from '../ajv';
+import type { Id } from './Id';
 import type { KeycloakId } from './KeycloakId';
 import type { PermissionGrantVerb } from './PermissionGrantVerb';
 import type { Writable } from './Writable';
@@ -34,7 +35,7 @@ enum PermissionGrantEntityKeyType {
 }
 
 interface PermissionGrantEntityKeyValueType {
-	[PermissionGrantEntityKeyType.ID]: number;
+	[PermissionGrantEntityKeyType.ID]: Id;
 	[PermissionGrantEntityKeyType.SHORT_CODE]: string;
 }
 
@@ -183,7 +184,7 @@ const scopeConditions = {
 >;
 
 interface UnkeyedPermissionGrant {
-	readonly id: number;
+	readonly id: Id;
 	verbs: PermissionGrantVerb[];
 	readonly createdBy: KeycloakId;
 	readonly createdAt: string;

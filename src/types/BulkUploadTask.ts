@@ -12,7 +12,7 @@ import type { Id } from './Id';
 import type { User } from './User';
 
 interface BulkUploadTask {
-	readonly id: number;
+	readonly id: Id;
 	sourceId: Id;
 	readonly source: Source;
 	applicationFormId: Id;

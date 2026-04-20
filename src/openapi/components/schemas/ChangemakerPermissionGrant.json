@@ -9,8 +9,7 @@
 					"const": "changemaker"
 				},
 				"changemakerId": {
-					"type": "integer",
-					"description": "The ID of the changemaker.",
+					"$ref": "./id.json",
 					"example": 15
 				},
 				"scope": {

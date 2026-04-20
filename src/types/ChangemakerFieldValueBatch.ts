@@ -1,12 +1,14 @@
 import { ajv } from '../ajv';
+import { idSchema } from './Id';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 import type { KeycloakId } from './KeycloakId';
 import type { Source } from './Source';
 import type { Writable } from './Writable';
 
 interface ChangemakerFieldValueBatch {
-	readonly id: number;
-	sourceId: number;
+	readonly id: Id;
+	sourceId: Id;
 	notes: string | null;
 	readonly createdBy: KeycloakId;
 	readonly createdAt: string;
@@ -19,9 +21,7 @@ const writableChangemakerFieldValueBatchSchema: JSONSchemaType<WritableChangemak
 	{
 		type: 'object',
 		properties: {
-			sourceId: {
-				type: 'integer',
-			},
+			sourceId: idSchema,
 			notes: {
 				type: 'string',
 				/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --

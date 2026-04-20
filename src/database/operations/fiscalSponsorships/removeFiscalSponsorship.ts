@@ -1,9 +1,9 @@
 import { generateRemoveItemOperation } from '../generators';
-import type { FiscalSponsorship } from '../../../types';
+import type { FiscalSponsorship, Id } from '../../../types';
 
 const removeFiscalSponsorship = generateRemoveItemOperation<
 	FiscalSponsorship,
-	[fiscalSponseeChangemakerId: number, fiscalSponsorChangemakerId: number]
+	[fiscalSponseeChangemakerId: Id, fiscalSponsorChangemakerId: Id]
 >('fiscalSponsorships.deleteOne', 'FiscalSponsorship', [
 	'fiscalSponseeChangemakerId',
 	'fiscalSponsorChangemakerId',

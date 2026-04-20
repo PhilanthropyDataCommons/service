@@ -1,4 +1,5 @@
 import { ajv } from '../ajv';
+import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
 import type { BaseField } from './BaseField';
 import type { Writable } from './Writable';
@@ -14,8 +15,8 @@ enum ApplicationFormFieldInputType {
 }
 
 interface ApplicationFormField {
-	readonly id: number;
-	applicationFormId: number;
+	readonly id: Id;
+	applicationFormId: Id;
 	baseFieldShortCode: ShortCode;
 	readonly baseField: BaseField;
 	position: number;

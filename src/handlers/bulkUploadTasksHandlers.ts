@@ -29,13 +29,13 @@ import {
 } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
 import type { Request, Response } from 'express';
-import type { AuthContext } from '../types';
+import type { AuthContext, Id } from '../types';
 import type { TinyPg } from 'tinypg';
 
 const validateApplicationFormCreatePermission = async (
 	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
-	applicationFormId: number,
+	applicationFormId: Id,
 ): Promise<void> => {
 	try {
 		const applicationForm = await loadApplicationForm(
@@ -72,7 +72,7 @@ const validateApplicationFormCreatePermission = async (
 const validateFileOwnership = async (
 	db: Pick<TinyPg, 'sql'>,
 	authContext: AuthContext,
-	fileId: number,
+	fileId: Id,
 	errorMessage: string,
 ): Promise<void> => {
 	try {

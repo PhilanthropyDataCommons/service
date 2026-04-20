@@ -1,3 +1,5 @@
+import type { Id } from '../types';
+
 interface NotFoundErrorDetailsWithShortCode {
 	entityType: string;
 	entityShortCode: string;
@@ -5,12 +7,12 @@ interface NotFoundErrorDetailsWithShortCode {
 
 interface NotFoundErrorDetailsWithId {
 	entityType: string;
-	entityId: number;
+	entityId: Id;
 }
 
 interface NotFoundErrorDetailsWithComplexPrimaryKey {
 	entityType: string;
-	entityPrimaryKey: Record<string, number | string>;
+	entityPrimaryKey: Record<string, Id | string>;
 }
 
 interface NotFoundErrorDetailsWithLookupValues {

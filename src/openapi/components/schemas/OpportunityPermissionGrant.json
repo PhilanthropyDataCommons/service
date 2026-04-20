@@ -9,8 +9,7 @@
 					"const": "opportunity"
 				},
 				"opportunityId": {
-					"type": "integer",
-					"description": "The ID of the opportunity.",
+					"$ref": "./id.json",
 					"example": 100
 				},
 				"scope": {

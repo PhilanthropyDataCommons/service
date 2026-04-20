@@ -15,7 +15,7 @@
 				"in": "path",
 				"required": true,
 				"schema": {
-					"type": "integer"
+					"$ref": "../components/schemas/id.json"
 				}
 			}
 		],
@@ -51,7 +51,7 @@
 				"in": "path",
 				"required": true,
 				"schema": {
-					"type": "integer"
+					"$ref": "../components/schemas/id.json"
 				}
 			}
 		],

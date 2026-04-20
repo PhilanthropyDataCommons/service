@@ -887,7 +887,7 @@ describe('processBulkUploadTask', () => {
 
 		const grantBundle = await loadPermissionGrantBundle(
 			db,
-			systemUserAuthContext,
+			getAuthContext(systemUser, true),
 			NO_LIMIT,
 			NO_OFFSET,
 		);

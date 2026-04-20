@@ -483,7 +483,6 @@ describe('/funders', () => {
 		it('grants the creator a manage permission on the new funder', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
 			await agent
 				.put('/funders/self_grant_funder')
 				.type('application/json')
@@ -492,7 +491,7 @@ describe('/funders', () => {
 				.expect(201);
 			const grants = await loadPermissionGrantBundle(
 				db,
-				systemUserAuthContext,
+				getAuthContext(systemUser, true),
 				NO_LIMIT,
 				NO_OFFSET,
 			);

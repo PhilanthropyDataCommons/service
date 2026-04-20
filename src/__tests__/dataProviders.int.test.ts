@@ -194,7 +194,6 @@ describe('/dataProviders', () => {
 		it('grants the creator a manage permission on the new data provider', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
 			await agent
 				.put('/dataProviders/self_grant_dp')
 				.type('application/json')
@@ -203,7 +202,7 @@ describe('/dataProviders', () => {
 				.expect(201);
 			const grants = await loadPermissionGrantBundle(
 				db,
-				systemUserAuthContext,
+				getAuthContext(systemUser, true),
 				NO_LIMIT,
 				NO_OFFSET,
 			);

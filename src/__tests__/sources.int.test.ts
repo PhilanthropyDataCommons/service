@@ -380,7 +380,6 @@ describe('/sources', () => {
 		it('grants the creator a manage permission on the new source', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
@@ -395,7 +394,7 @@ describe('/sources', () => {
 				.expect(201);
 			const grants = await loadPermissionGrantBundle(
 				db,
-				systemUserAuthContext,
+				getAuthContext(systemUser, true),
 				NO_LIMIT,
 				NO_OFFSET,
 			);

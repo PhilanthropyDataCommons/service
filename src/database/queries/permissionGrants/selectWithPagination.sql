@@ -2,6 +2,11 @@ WITH
 	candidate_entries AS NOT MATERIALIZED (
 		SELECT permission_grants.*
 		FROM permission_grants
+		WHERE can_manage_permission_grant(
+			:authContextKeycloakUserId,
+			:authContextIsAdministrator,
+			permission_grants.*::permission_grants
+		)
 	),
 
 	entry_count AS (

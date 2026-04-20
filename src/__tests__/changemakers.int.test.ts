@@ -1117,7 +1117,6 @@ describe('/changemakers', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
 			await request(app)
 				.post('/changemakers')
 				.type('application/json')
@@ -1130,7 +1129,7 @@ describe('/changemakers', () => {
 				.expect(201);
 			const grants = await loadPermissionGrantBundle(
 				db,
-				systemUserAuthContext,
+				getAuthContext(systemUser, true),
 				NO_LIMIT,
 				NO_OFFSET,
 			);

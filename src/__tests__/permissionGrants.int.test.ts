@@ -53,8 +53,75 @@ describe('/permissionGrants', () => {
 			await agent.get('/permissionGrants').expect(401);
 		});
 
-		it('requires administrator role', async () => {
-			await agent.get('/permissionGrants').set(authHeader).expect(401);
+		it('returns an empty list for a non-admin without any manage permissions', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			await createTestPermissionGrant(db, authContext);
+
+			const response = await agent
+				.get('/permissionGrants')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				entries: [],
+				total: 0,
+			});
+		});
+
+		it('returns only grants whose context entity the non-admin can manage', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const manageableChangemaker = await createTestChangemaker(
+				db,
+				authContext,
+			);
+			const unmanageableChangemaker = await createTestChangemaker(
+				db,
+				authContext,
+			);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: manageableChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+			const visibleGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: manageableChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: unmanageableChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get('/permissionGrants')
+				.set(authHeader)
+				.expect(200);
+
+			expect(response.body).toMatchObject({
+				total: 2,
+				entries: [
+					expect.objectContaining({
+						id: visibleGrant.id,
+						changemakerId: manageableChangemaker.id,
+					}),
+					expect.objectContaining({
+						changemakerId: manageableChangemaker.id,
+						verbs: ['manage'],
+					}),
+				],
+			});
 		});
 
 		it('returns an empty list when no permission grants exist', async () => {
@@ -135,8 +202,47 @@ describe('/permissionGrants', () => {
 			await agent.get('/permissionGrants/1').expect(401);
 		});
 
-		it('requires administrator role', async () => {
-			await agent.get('/permissionGrants/1').set(authHeader).expect(401);
+		it('returns 404 to a non-admin without manage permission on the context entity', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const permissionGrant = await createTestPermissionGrant(db, authContext);
+			await agent
+				.get(`/permissionGrants/${permissionGrant.id}`)
+				.set(authHeader)
+				.expect(404);
+		});
+
+		it('allows non-admin with manage permission on the context entity', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+			const targetGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get(`/permissionGrants/${targetGrant.id}`)
+				.set(authHeader)
+				.expect(200);
+
+			expect(response.body).toMatchObject({
+				id: targetGrant.id,
+				contextEntityType: 'changemaker',
+				changemakerId: changemaker.id,
+			});
 		});
 
 		it('returns exactly one permission grant by id', async () => {
@@ -200,7 +306,7 @@ describe('/permissionGrants', () => {
 			await agent.post('/permissionGrants').expect(401);
 		});
 
-		it('requires administrator role', async () => {
+		it('returns 401 to a non-admin who has no permission on the context entity', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
 			const changemaker = await createTestChangemaker(db, authContext);
@@ -211,13 +317,89 @@ describe('/permissionGrants', () => {
 				.send({
 					granteeType: 'user',
 					granteeUserKeycloakUserId: testUserKeycloakUserId,
-					granteeKeycloakOrganizationId: null,
 					contextEntityType: 'changemaker',
 					changemakerId: changemaker.id,
 					scope: ['changemaker'],
 					verbs: ['view'],
 				})
 				.expect(401);
+		});
+
+		it('returns 401 to a non-admin with view but not manage permission on the context entity', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(401);
+		});
+
+		it('returns 401 to a non-admin when the context entity does not exist', async () => {
+			await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: 9001,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(401);
+		});
+
+		it('allows non-admin with manage permission to create a grant', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(201);
+
+			expect(result.body).toMatchObject({
+				contextEntityType: 'changemaker',
+				changemakerId: changemaker.id,
+				verbs: ['view'],
+			});
 		});
 
 		it('creates and returns a permission grant for a user', async () => {
@@ -878,20 +1060,115 @@ describe('/permissionGrants', () => {
 			await agent.put('/permissionGrants/1').expect(401);
 		});
 
-		it('requires administrator role', async () => {
+		it('returns 404 to a non-admin without manage permission on the existing context entity', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
 			await agent
-				.put('/permissionGrants/1')
+				.put(`/permissionGrants/${permissionGrant.id}`)
 				.type('application/json')
 				.set(authHeader)
 				.send({
 					granteeType: 'user',
 					granteeUserKeycloakUserId: testUserKeycloakUserId,
 					contextEntityType: 'changemaker',
-					changemakerId: 1,
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(404);
+		});
+
+		it('rejects non-admin who can manage the existing entity but not the proposed entity', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const manageableChangemaker = await createTestChangemaker(
+				db,
+				authContext,
+			);
+			const unmanageableChangemaker = await createTestChangemaker(
+				db,
+				authContext,
+			);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: manageableChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: manageableChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: unmanageableChangemaker.id,
 					scope: ['changemaker'],
 					verbs: ['view'],
 				})
 				.expect(401);
+		});
+
+		it('allows non-admin with manage permission to update a grant', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view', 'edit'],
+				})
+				.expect(200);
+
+			expect(response.body).toMatchObject({
+				id: permissionGrant.id,
+				verbs: ['view', 'edit'],
+			});
 		});
 
 		it('updates and returns the permission grant', async () => {
@@ -1207,8 +1484,45 @@ describe('/permissionGrants', () => {
 			await agent.delete('/permissionGrants/1').expect(401);
 		});
 
-		it('requires administrator role', async () => {
-			await agent.delete('/permissionGrants/1').set(authHeader).expect(401);
+		it('returns 404 to a non-admin without manage permission on the context entity', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const permissionGrant = await createTestPermissionGrant(db, authContext);
+			await agent
+				.delete(`/permissionGrants/${permissionGrant.id}`)
+				.set(authHeader)
+				.expect(404);
+		});
+
+		it('allows non-admin with manage permission to delete a grant', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const before = await loadTableMetrics(db, 'permission_grants');
+
+			await agent
+				.delete(`/permissionGrants/${permissionGrant.id}`)
+				.set(authHeader)
+				.expect(204);
+
+			const after = await loadTableMetrics(db, 'permission_grants');
+			expect(after.count).toEqual(before.count - 1);
 		});
 
 		it('deletes exactly one permission grant', async () => {

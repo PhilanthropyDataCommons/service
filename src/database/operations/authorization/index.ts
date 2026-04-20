@@ -1,3 +1,5 @@
+export { canManagePermissionGrantByContext } from './canManagePermissionGrantByContext';
+export { canManagePermissionGrantById } from './canManagePermissionGrantById';
 export { hasApplicationFormPermission } from './hasApplicationFormPermission';
 export { hasChangemakerFieldValuePermission } from './hasChangemakerFieldValuePermission';
 export { hasChangemakerPermission } from './hasChangemakerPermission';

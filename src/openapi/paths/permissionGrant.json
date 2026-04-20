@@ -2,7 +2,7 @@
 	"get": {
 		"operationId": "getPermissionGrantById",
 		"summary": "Gets a specific permission grant.",
-		"description": "Returns a permission grant by ID. Requires administrator role.",
+		"description": "Returns a permission grant by ID. Requires administrator role or the `manage` verb on the grant's context entity.",
 		"tags": ["PermissionGrants"],
 		"security": [
 			{
@@ -59,7 +59,7 @@
 	"put": {
 		"operationId": "updatePermissionGrantById",
 		"summary": "Updates a specific permission grant.",
-		"description": "Replaces all mutable fields of a permission grant by ID. Requires administrator role.",
+		"description": "Replaces all mutable fields of a permission grant by ID. Requires administrator role or the `manage` verb on both the existing and proposed context entity.",
 		"tags": ["PermissionGrants"],
 		"security": [
 			{
@@ -129,7 +129,7 @@
 	"delete": {
 		"operationId": "deletePermissionGrantById",
 		"summary": "Deletes a specific permission grant.",
-		"description": "Deletes a permission grant by ID. Requires administrator role.",
+		"description": "Deletes a permission grant by ID. Requires administrator role or the `manage` verb on the grant's context entity.",
 		"tags": ["PermissionGrants"],
 		"security": [
 			{

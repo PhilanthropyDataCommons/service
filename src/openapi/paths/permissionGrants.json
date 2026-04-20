@@ -2,7 +2,7 @@
 	"get": {
 		"operationId": "getPermissionGrants",
 		"summary": "Gets a list of permission grants.",
-		"description": "Returns all permission grants. Requires administrator role.",
+		"description": "Returns permission grants visible to the caller. Administrators see all grants; other authenticated users see grants whose context entity they hold the `manage` verb on.",
 		"tags": ["PermissionGrants"],
 		"security": [
 			{
@@ -43,7 +43,7 @@
 	"post": {
 		"operationId": "createPermissionGrant",
 		"summary": "Creates a new permission grant.",
-		"description": "Creates a permission grant for a user or user group. Requires administrator role.",
+		"description": "Creates a permission grant for a user or user group. Requires administrator role or the `manage` verb on the grant's context entity.",
 		"tags": ["PermissionGrants"],
 		"security": [
 			{

@@ -4,6 +4,7 @@ import {
 	createPermissionGrant,
 	getDatabase,
 	getLimitValues,
+	hasPermission,
 	loadPermissionGrant,
 	loadPermissionGrantBundle,
 	removePermissionGrant,
@@ -14,6 +15,7 @@ import {
 	InputValidationError,
 	NoDataReturnedError,
 	NotFoundError,
+	UnauthorizedError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import {
@@ -22,6 +24,7 @@ import {
 	isAuthContext,
 	isId,
 	isWritablePermissionGrant,
+	PermissionGrantVerb,
 	type PermissionGrantEntityType,
 	type PermissionGrantCondition,
 	type WritableUnkeyedPermissionGrant,
@@ -145,6 +148,17 @@ const postPermissionGrant = async (
 
 	assertPermissionGrantHasValidScope(body);
 	assertPermissionGrantHasValidConditions(body);
+
+	if (
+		!(await hasPermission(db, req, body, {
+			permission: PermissionGrantVerb.MANAGE,
+		}))
+	) {
+		throw new UnauthorizedError(
+			'Authenticated user does not have permission to manage permission grants on the specified context entity.',
+		);
+	}
+
 	const permissionGrant = await createPermissionGrant(db, req, body);
 
 	res
@@ -170,6 +184,16 @@ const getPermissionGrant = async (
 	}
 
 	const permissionGrant = await loadPermissionGrant(db, req, permissionGrantId);
+
+	if (
+		!(await hasPermission(db, req, permissionGrant, {
+			permission: PermissionGrantVerb.MANAGE,
+		}))
+	) {
+		throw new UnauthorizedError(
+			'Authenticated user does not have permission to manage this permission grant.',
+		);
+	}
 
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
@@ -203,6 +227,30 @@ const putPermissionGrant = async (
 
 	assertPermissionGrantHasValidScope(body);
 	assertPermissionGrantHasValidConditions(body);
+
+	const existingPermissionGrant = await loadPermissionGrant(
+		db,
+		req,
+		permissionGrantId,
+	);
+	if (
+		!(await hasPermission(db, req, existingPermissionGrant, {
+			permission: PermissionGrantVerb.MANAGE,
+		}))
+	) {
+		throw new UnauthorizedError(
+			'Authenticated user does not have permission to manage this permission grant.',
+		);
+	}
+	if (
+		!(await hasPermission(db, req, body, {
+			permission: PermissionGrantVerb.MANAGE,
+		}))
+	) {
+		throw new UnauthorizedError(
+			'Authenticated user does not have permission to manage permission grants on the specified context entity.',
+		);
+	}
 
 	try {
 		const permissionGrant = await updatePermissionGrant(
@@ -245,6 +293,21 @@ const deletePermissionGrant = async (
 		throw new InputValidationError(
 			'Invalid permissionGrantId parameter.',
 			isId.errors ?? [],
+		);
+	}
+
+	const existingPermissionGrant = await loadPermissionGrant(
+		db,
+		req,
+		permissionGrantId,
+	);
+	if (
+		!(await hasPermission(db, req, existingPermissionGrant, {
+			permission: PermissionGrantVerb.MANAGE,
+		}))
+	) {
+		throw new UnauthorizedError(
+			'Authenticated user does not have permission to manage this permission grant.',
 		);
 	}
 

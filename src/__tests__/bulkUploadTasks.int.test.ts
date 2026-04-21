@@ -5,12 +5,14 @@ import {
 	createApplicationForm,
 	createBulkUploadTask,
 	createOrUpdateUser,
+	createSource,
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
 	createPermissionGrant,
 } from '../database';
 import {
+	createTestDataProvider,
 	createTestFile,
 	createTestFunder,
 	createTestOpportunity,
@@ -431,6 +433,14 @@ describe('/tasks/bulkUploads', () => {
 				scope: [PermissionGrantEntityType.PROPOSAL],
 				verbs: [PermissionGrantVerb.CREATE],
 			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: systemSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.REFERENCE],
+			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 
 			const opportunity = await createTestOpportunity(
@@ -510,6 +520,14 @@ describe('/tasks/bulkUploads', () => {
 				scope: [PermissionGrantEntityType.PROPOSAL],
 				verbs: [PermissionGrantVerb.CREATE],
 			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: systemSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.REFERENCE],
+			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 			const attachmentsArchiveFile = await createTestFile(
 				db,
@@ -566,6 +584,144 @@ describe('/tasks/bulkUploads', () => {
 				logs: [],
 			});
 			expect(after.count).toEqual(1);
+		});
+
+		it('returns 422 unprocessable entity when the user lacks reference permission on the source', async () => {
+			const db = getDatabase();
+			const systemSource = await loadSystemSource(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: testFunder.shortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: testFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.CREATE],
+			});
+			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
+
+			const opportunity = await createTestOpportunity(
+				db,
+				systemUserAuthContext,
+				{
+					funderShortCode: testFunder.shortCode,
+				},
+			);
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
+
+			const testData: WritableBulkUploadTask = {
+				sourceId: systemSource.id,
+				applicationFormId: applicationForm.id,
+				proposalsDataFileId: proposalsDataFile.id,
+				attachmentsArchiveFileId: null,
+			};
+			const before = await loadTableMetrics(db, 'bulk_upload_tasks');
+			const result = await request(app)
+				.post('/tasks/bulkUploads/')
+				.type('application/json')
+				.set(authHeader)
+				.send(testData)
+				.expect(422);
+			const after = await loadTableMetrics(db, 'bulk_upload_tasks');
+
+			expect(before.count).toEqual(0);
+			expect(result.body).toEqual({
+				details: [{ name: 'UnprocessableEntityError' }],
+				message:
+					'You do not have permission to reference the specified source.',
+				name: 'UnprocessableEntityError',
+			});
+			expect(after.count).toEqual(0);
+		});
+
+		it('allows creation when reference permission on the source is inherited from the source data provider', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
+			const dataProvider = await createTestDataProvider(
+				db,
+				systemUserAuthContext,
+			);
+			const dataProviderSource = await createSource(db, systemUserAuthContext, {
+				label: 'Provider-owned Source',
+				dataProviderShortCode: dataProvider.shortCode,
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: testFunder.shortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: testFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.CREATE],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
+				dataProviderShortCode: dataProvider.shortCode,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.REFERENCE],
+			});
+			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
+
+			const opportunity = await createTestOpportunity(
+				db,
+				systemUserAuthContext,
+				{
+					funderShortCode: testFunder.shortCode,
+				},
+			);
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
+
+			const testData: WritableBulkUploadTask = {
+				sourceId: dataProviderSource.id,
+				applicationFormId: applicationForm.id,
+				proposalsDataFileId: proposalsDataFile.id,
+				attachmentsArchiveFileId: null,
+			};
+			await request(app)
+				.post('/tasks/bulkUploads/')
+				.type('application/json')
+				.set(authHeader)
+				.send(testData)
+				.expect(201);
 		});
 
 		it('returns 422 unprocessable entity when the user does not have create proposal permission for the associated opportunity', async () => {
@@ -761,6 +917,14 @@ describe('/tasks/bulkUploads', () => {
 				scope: [PermissionGrantEntityType.PROPOSAL],
 				verbs: [PermissionGrantVerb.CREATE],
 			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: systemSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.REFERENCE],
+			});
 
 			const fileOwnedByAnotherUser = await createTestFile(
 				db,
@@ -836,6 +1000,14 @@ describe('/tasks/bulkUploads', () => {
 				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.PROPOSAL],
 				verbs: [PermissionGrantVerb.CREATE],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: systemSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.REFERENCE],
 			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 			const attachmentsArchiveFileOwnedByAnotherUser = await createTestFile(

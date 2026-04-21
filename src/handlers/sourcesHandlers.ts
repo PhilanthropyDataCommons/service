@@ -41,36 +41,36 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 		'funderShortCode' in req.body &&
 		!(await hasFunderPermission(db, req, {
 			funderShortCode: req.body.funderShortCode,
-			permission: PermissionGrantVerb.EDIT,
-			scope: PermissionGrantEntityType.FUNDER,
+			permission: PermissionGrantVerb.CREATE,
+			scope: PermissionGrantEntityType.SOURCE,
 		}))
 	) {
 		throw new UnprocessableEntityError(
-			'You do not have write permissions on a funder with the specified short code.',
+			'You do not have permission to create a source for the specified funder.',
 		);
 	}
 	if (
 		'dataProviderShortCode' in req.body &&
 		!(await hasDataProviderPermission(db, req, {
 			dataProviderShortCode: req.body.dataProviderShortCode,
-			permission: PermissionGrantVerb.EDIT,
-			scope: PermissionGrantEntityType.DATA_PROVIDER,
+			permission: PermissionGrantVerb.CREATE,
+			scope: PermissionGrantEntityType.SOURCE,
 		}))
 	) {
 		throw new UnprocessableEntityError(
-			'You do not have write permissions on a data provider with the specified short code.',
+			'You do not have permission to create a source for the specified data provider.',
 		);
 	}
 	if (
 		'changemakerId' in req.body &&
 		!(await hasChangemakerPermission(db, req, {
 			changemakerId: req.body.changemakerId,
-			permission: PermissionGrantVerb.EDIT,
-			scope: PermissionGrantEntityType.CHANGEMAKER,
+			permission: PermissionGrantVerb.CREATE,
+			scope: PermissionGrantEntityType.SOURCE,
 		}))
 	) {
 		throw new UnprocessableEntityError(
-			'You do not have write permissions on a changemaker with the specified id.',
+			'You do not have permission to create a source for the specified changemaker.',
 		);
 	}
 
@@ -99,12 +99,15 @@ const getSources = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getSource = async (req: Request, res: Response): Promise<void> => {
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
 	const db = getDatabase();
 	const { sourceId } = coerceParams(req.params);
 	if (!isId(sourceId)) {
 		throw new InputValidationError('Invalid request body.', isId.errors ?? []);
 	}
-	const source = await loadSource(db, null, sourceId);
+	const source = await loadSource(db, req, sourceId);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')

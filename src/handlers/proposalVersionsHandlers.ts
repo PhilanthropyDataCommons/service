@@ -4,6 +4,7 @@ import {
 	createProposalVersion,
 	getDatabase,
 	hasProposalPermission,
+	hasSourcePermission,
 	loadApplicationForm,
 	loadApplicationFormField,
 	loadProposal,
@@ -155,6 +156,17 @@ const postProposalVersion = async (
 				'You do not have write permissions on this proposal.',
 			);
 		}
+		if (
+			!(await hasSourcePermission(db, req, {
+				sourceId,
+				permission: PermissionGrantVerb.REFERENCE,
+				scope: PermissionGrantEntityType.SOURCE,
+			}))
+		) {
+			throw new UnprocessableEntityError(
+				'You do not have permission to reference the specified source.',
+			);
+		}
 		await assertApplicationFormExistsForProposal(
 			db,
 			req,
@@ -208,12 +220,6 @@ const postProposalVersion = async (
 			.send(finalProposalVersion);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
-			if (error.details.entityType === 'Source') {
-				throw new InputConflictError(`The related entity does not exist`, {
-					entityType: 'Source',
-					entityId: sourceId,
-				});
-			}
 			if (error.details.entityType === 'Proposal') {
 				throw new InputConflictError(`The related entity does not exist`, {
 					entityType: 'Proposal',

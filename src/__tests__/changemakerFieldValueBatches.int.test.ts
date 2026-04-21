@@ -4,7 +4,9 @@ import {
 	getDatabase,
 	createChangemakerFieldValueBatch,
 	createOrUpdateUser,
+	createPermissionGrant,
 	createSource,
+	loadSystemUser,
 } from '../database';
 import { expectNumber, expectTimestamp } from '../test/asymettricMatchers';
 import { createTestChangemaker } from '../test/factories';
@@ -13,10 +15,17 @@ import {
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
 import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
+} from '../types';
 
 describe('POST /changemakerFieldValueBatches', () => {
 	it('Successfully creates a changemaker field value batch', async () => {
 		const db = getDatabase();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
@@ -24,6 +33,14 @@ describe('POST /changemakerFieldValueBatches', () => {
 		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
+		});
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.SOURCE,
+			sourceId: source.id,
+			scope: [PermissionGrantEntityType.SOURCE],
+			verbs: [PermissionGrantVerb.REFERENCE],
 		});
 
 		const result = await request(app)
@@ -50,6 +67,8 @@ describe('POST /changemakerFieldValueBatches', () => {
 
 	it('Accepts null for notes', async () => {
 		const db = getDatabase();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
@@ -57,6 +76,14 @@ describe('POST /changemakerFieldValueBatches', () => {
 		const source = await createSource(db, testUserAuthContext, {
 			label: 'Test Source',
 			changemakerId: changemaker.id,
+		});
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.SOURCE,
+			sourceId: source.id,
+			scope: [PermissionGrantEntityType.SOURCE],
+			verbs: [PermissionGrantVerb.REFERENCE],
 		});
 
 		const result = await request(app)
@@ -120,7 +147,69 @@ describe('POST /changemakerFieldValueBatches', () => {
 			.expect(401);
 	});
 
-	it('Returns 409 when source does not exist', async () => {
+	it('Returns 422 when the user lacks reference permission on the source', async () => {
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
+
+		const source = await createSource(db, testUserAuthContext, {
+			label: 'Test Source',
+			changemakerId: changemaker.id,
+		});
+
+		const result = await request(app)
+			.post('/changemakerFieldValueBatches')
+			.type('application/json')
+			.set(authHeader)
+			.send({
+				sourceId: source.id,
+				notes: 'Test notes',
+			})
+			.expect(422);
+
+		expect(result.body).toMatchObject({
+			name: 'UnprocessableEntityError',
+		});
+	});
+
+	it('Allows creation when reference permission is inherited from the source changemaker', async () => {
+		const db = getDatabase();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
+
+		const source = await createSource(db, testUserAuthContext, {
+			label: 'Test Source',
+			changemakerId: changemaker.id,
+		});
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+			changemakerId: changemaker.id,
+			scope: [PermissionGrantEntityType.SOURCE],
+			verbs: [PermissionGrantVerb.REFERENCE],
+		});
+
+		const result = await request(app)
+			.post('/changemakerFieldValueBatches')
+			.type('application/json')
+			.set(authHeader)
+			.send({
+				sourceId: source.id,
+				notes: 'Test notes',
+			})
+			.expect(201);
+
+		expect(result.body).toMatchObject({
+			sourceId: source.id,
+		});
+	});
+
+	it('Returns 422 when source does not exist', async () => {
 		const result = await request(app)
 			.post('/changemakerFieldValueBatches')
 			.type('application/json')
@@ -129,11 +218,10 @@ describe('POST /changemakerFieldValueBatches', () => {
 				sourceId: 999999,
 				notes: 'Test notes',
 			})
-			.expect(409);
+			.expect(422);
 
 		expect(result.body).toMatchObject({
-			name: 'InputConflictError',
-			message: 'The source does not exist.',
+			name: 'UnprocessableEntityError',
 		});
 	});
 });

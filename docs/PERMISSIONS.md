@@ -242,8 +242,9 @@ context key).
 |        |                    | Create bulk upload tasks for the funder's opportunities           |
 | edit   | opportunity        | Create or update application forms and fields for the funder      |
 | edit   | funder             | Create or update changemaker-proposal associations                |
-|        |                    | Create sources associated with the funder                         |
 | edit   | proposal           | Create or update proposal versions for the funder's proposals     |
+| view   | source             | View the funder's sources                                         |
+| create | source             | Create sources associated with the funder                         |
 | manage | funder             | View, send, and respond to funder collaborative invitations       |
 |        |                    | View collaborative members for the funder                         |
 
@@ -252,16 +253,17 @@ context key).
 Permissions granted against a changemaker (using the changemaker's `id` as the
 context key).
 
-| Verb | Scope              | What It Enables                                                    |
-| ---- | ------------------ | ------------------------------------------------------------------ |
-| view | changemaker        | View changemaker field values for the changemaker                  |
-| view | proposal           | View proposals associated with the changemaker                     |
-|      |                    | View proposal versions associated with the changemaker             |
-|      |                    | View changemaker-proposal associations for the changemaker         |
-| view | proposalFieldValue | View proposal field values for the changemaker's proposals         |
-| edit | changemaker        | Create or update changemaker field values                          |
-|      |                    | Create sources associated with the changemaker                     |
-| edit | proposal           | Create or update proposal versions for the changemaker's proposals |
+| Verb   | Scope              | What It Enables                                                    |
+| ------ | ------------------ | ------------------------------------------------------------------ |
+| view   | changemaker        | View changemaker field values for the changemaker                  |
+| view   | proposal           | View proposals associated with the changemaker                     |
+|        |                    | View proposal versions associated with the changemaker             |
+|        |                    | View changemaker-proposal associations for the changemaker         |
+| view   | proposalFieldValue | View proposal field values for the changemaker's proposals         |
+| edit   | changemaker        | Create or update changemaker field values                          |
+| edit   | proposal           | Create or update proposal versions for the changemaker's proposals |
+| view   | source             | View the changemaker's sources                                     |
+| create | source             | Create sources associated with the changemaker                     |
 
 ### Opportunity Permissions
 
@@ -324,9 +326,28 @@ can still view proposals but will see empty `fieldValues` arrays.
 Permissions granted against a data provider (using the data provider's
 `shortCode` as the context key).
 
-| Verb | Scope         | What It Enables                                  |
-| ---- | ------------- | ------------------------------------------------ |
-| edit | data_provider | Create sources associated with the data provider |
+| Verb   | Scope  | What It Enables                                  |
+| ------ | ------ | ------------------------------------------------ |
+| view   | source | View the data provider's sources                 |
+| create | source | Create sources associated with the data provider |
+
+### Source Permissions
+
+Permissions granted directly against a source (using the source's `id` as the
+context key). Source permissions inherit from the source's parent entity, so a
+`view | source` or `reference | source` grant on the source's funder,
+changemaker, or data provider automatically applies to all of that parent's
+sources. Source-level grants provide more granular control for specific
+sources.
+
+| Verb      | Scope  | What It Enables                                                                    |
+| --------- | ------ | ---------------------------------------------------------------------------------- |
+| view      | source | View the specific source                                                           |
+| reference | source | Cite the source when creating proposal versions, bulk upload tasks, or CFV batches |
+
+The `reference | source` check is applied when a source is provided as an
+attribute of data being created — currently when posting to
+`/proposalVersions`, `/tasks/bulkUploads`, or `/changemakerFieldValueBatches`.
 
 ### Conditional Permissions
 
@@ -376,8 +397,8 @@ included in the scope.
 ### Other Contexts
 
 The permission system data model includes additional contexts (`proposalVersion`,
-`applicationForm`, `applicationFormField`, `proposalFieldValue`, `source`,
-`bulkUpload`, `changemakerFieldValue`) that can have permission grants created.
-However, these contexts do not currently have permission checks enforced in the
+`applicationForm`, `applicationFormField`, `proposalFieldValue`, `bulkUpload`,
+`changemakerFieldValue`) that can have permission grants created. However,
+these contexts do not currently have permission checks enforced in the
 codebase. Access to these entities is controlled through the parent entity
 permissions described above (funder, changemaker, opportunity, or proposal).

@@ -5,4 +5,12 @@ SELECT
 		:authContextIsAdministrator
 	) AS object
 FROM sources
-WHERE id = :sourceId;
+WHERE
+	id = :sourceId
+	AND has_source_permission(
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator,
+		sources.id,
+		'view',
+		'source'
+	);

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add extension support in phone number validation.
 - Add changelog to documents that auto-publish to WordPress.
 - `GET /funders` now supports the `isCollaborative` query parameter to filter funders by their collaborative status.
 

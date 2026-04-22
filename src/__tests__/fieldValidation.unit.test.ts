@@ -58,19 +58,16 @@ describe('field value validation against BaseFieldDataType', () => {
 	});
 	test('validate a valid phone number as PHONE_NUMBER', () => {
 		expect(
-			fieldValueIsValid('18005555555', BaseFieldDataType.PHONE_NUMBER),
+			fieldValueIsValid('+18005555555', BaseFieldDataType.PHONE_NUMBER),
 		).toBe(true);
 		expect(
 			fieldValueIsValid('+1(800)-555-5555', BaseFieldDataType.PHONE_NUMBER),
 		).toBe(true);
 		expect(
-			fieldValueIsValid('800-555-5555', BaseFieldDataType.PHONE_NUMBER),
-		).toBe(true);
-		expect(
-			fieldValueIsValid('800-555-5555', BaseFieldDataType.PHONE_NUMBER),
+			fieldValueIsValid('+1800-555-5555', BaseFieldDataType.PHONE_NUMBER),
 		).toBe(true);
 	});
-	test('validate an invalid phone number as PHONE_NUMBER', () => {
+	test('validate non-phone number strings as PHONE_NUMBER', () => {
 		expect(
 			fieldValueIsValid(
 				'112345678901234567890',
@@ -83,6 +80,68 @@ describe('field value validation against BaseFieldDataType', () => {
 		expect(fieldValueIsValid('      ', BaseFieldDataType.PHONE_NUMBER)).toBe(
 			false,
 		);
+	});
+	test('validate otherwise valid phone number without +country code as PHONE_NUMBER', () => {
+		expect(
+			fieldValueIsValid('18005555555', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(false);
+		expect(
+			fieldValueIsValid('8005555555', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(false);
+	});
+	test('validate a valid phone number with no extension as PHONE_NUMBER', () => {
+		expect(
+			fieldValueIsValid('+18005555555', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(true);
+	});
+	test('validate a phone number with visual markers as PHONE_NUMBER', () => {
+		expect(
+			fieldValueIsValid('+1 (800) 555-5555', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(true);
+		expect(
+			fieldValueIsValid('+1800-555-5555', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(true);
+	});
+	test('validate a valid phone number with ;ext= extension as PHONE_NUMBER', () => {
+		expect(
+			fieldValueIsValid(
+				'+1 (800) 555-5555;ext=100',
+				BaseFieldDataType.PHONE_NUMBER,
+			),
+		).toBe(true);
+	});
+	test('validate a valid phone number with comma extension as PHONE_NUMBER', () => {
+		expect(
+			fieldValueIsValid(
+				'+1 (800) 555-5555,100',
+				BaseFieldDataType.PHONE_NUMBER,
+			),
+		).toBe(true);
+		expect(
+			fieldValueIsValid('+1800-555-5555,,2', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(true);
+	});
+	test('validate an invalid phone number with valid extension as PHONE_NUMBER', () => {
+		expect(
+			fieldValueIsValid('(800) 555-5555,,090', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(false);
+		expect(
+			fieldValueIsValid(
+				'1(800)555-55555;ext=5',
+				BaseFieldDataType.PHONE_NUMBER,
+			),
+		).toBe(false);
+	});
+	test('validate a valid phone number with invalid extension as PHONE_NUMBER', () => {
+		expect(
+			fieldValueIsValid('+18005555555;;5', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(false);
+		expect(
+			fieldValueIsValid('+18005555555x254', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(false);
+		expect(
+			fieldValueIsValid('+18005555555,', BaseFieldDataType.PHONE_NUMBER),
+		).toBe(false);
 	});
 	test('validate a valid boolean as BOOLEAN', () => {
 		expect(fieldValueIsValid('true', BaseFieldDataType.BOOLEAN)).toBe(true);

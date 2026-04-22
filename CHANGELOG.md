@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add extension support in phone number validation.
 - Add changelog to documents that auto-publish to WordPress.
 - `GET /funders` now supports the `isCollaborative` query parameter to filter funders by their collaborative status.
+- Added a new `reference` verb to the permission grant verb set. Reference is intended to gate whether a user may cite an entity as a pointer in data they are creating, separate from `view` (which only grants read access) and `create` (which grants the ability to author new instances of an entity type).
 
 ### Changed
 

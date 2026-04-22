@@ -176,17 +176,23 @@ The PDC permission system uses four concepts:
 
 The permission system supports the following verbs:
 
-| Verb   | Description                                       |
-| ------ | ------------------------------------------------- |
-| view   | Read access to data                               |
-| create | Create new data                                   |
-| edit   | Modify existing data                              |
-| delete | Delete data                                       |
-| manage | Manage permission grants associated with the data |
+| Verb      | Description                                         |
+| --------- | --------------------------------------------------- |
+| view      | Read access to data                                 |
+| create    | Create new data                                     |
+| edit      | Modify existing data                                |
+| delete    | Delete data                                         |
+| manage    | Manage permission grants associated with the data   |
+| reference | Use an entity as a pointer in data you are creating |
 
 Note: The current implementation uses `edit` for both creation and modification
 operations in most contexts. This is a known semantic mismatch with the intended
 meaning of the verb.
+
+The `reference` verb is separate from `view` and `create` so that permission to
+see an entity does not automatically imply permission to cite it from elsewhere,
+and permission to create entities in one context does not automatically imply
+permission to tag that creation with arbitrary related entities.
 
 For example, "User X can view proposals of changemaker foo" breaks down as:
 

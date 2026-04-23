@@ -14,14 +14,18 @@ BEGIN
 	END IF;
 
 	-- Check if the user has the specified permission on the specified changemaker
-	-- via direct user grant or group membership
+	-- via direct user grant or group membership. A granted 'manage' verb
+	-- satisfies any verb check.
 	SELECT EXISTS (
 		SELECT 1
 		FROM permission_grants pg
 		WHERE pg.context_entity_type = 'changemaker'
 			AND pg.changemaker_id
 				= has_changemaker_permission.changemaker_id
-			AND has_changemaker_permission.permission = ANY(pg.verbs)
+			AND (
+				has_changemaker_permission.permission = ANY(pg.verbs)
+				OR 'manage' = ANY(pg.verbs)
+			)
 			AND has_changemaker_permission.scope = ANY(pg.scope)
 			AND (
 				(

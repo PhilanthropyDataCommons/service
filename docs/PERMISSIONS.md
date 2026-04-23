@@ -182,12 +182,20 @@ The permission system supports the following verbs:
 | create    | Create new data                                     |
 | edit      | Modify existing data                                |
 | delete    | Delete data                                         |
-| manage    | Manage permission grants associated with the data   |
+| manage    | Full permissions, including permission management   |
 | reference | Use an entity as a pointer in data you are creating |
 
 Note: The current implementation uses `edit` for both creation and modification
 operations in most contexts. This is a known semantic mismatch with the intended
 meaning of the verb.
+
+A `manage` grant is treated as satisfying any verb check on the same scope.
+A grant of `manage | proposal` on a funder context, for example, lets the
+grantee view, create, edit, delete, and reference proposals for that funder
+without naming each verb separately. `manage` does not expand the scope set;
+a grantee holding `manage | proposal` does not gain access to `funder`-,
+`opportunity`-, or `source`-scoped data unless those scopes are also
+included in the grant.
 
 The `reference` verb is separate from `view` and `create` so that permission to
 see an entity does not automatically imply permission to cite it from elsewhere,

@@ -34,7 +34,8 @@ BEGIN
 	END IF;
 
 	-- Check if the user has the specified permission on the specified proposal field value
-	-- via direct user grant, group membership, or inherited from parent entities
+	-- via direct user grant, group membership, or inherited from parent entities.
+	-- A granted 'manage' verb satisfies any verb check.
 	SELECT EXISTS (
 		SELECT 1
 		FROM proposal_field_values pfv
@@ -75,7 +76,10 @@ BEGIN
 			)
 		)
 		WHERE pfv.id = has_proposal_field_value_permission.proposal_field_value_id
-			AND has_proposal_field_value_permission.permission = ANY(pg.verbs)
+			AND (
+				has_proposal_field_value_permission.permission = ANY(pg.verbs)
+				OR 'manage' = ANY(pg.verbs)
+			)
 			AND (
 				(
 					pg.grantee_type = 'user'
@@ -95,21 +99,21 @@ BEGIN
 					)
 				)
 			)
-		AND (
-			pg.conditions IS NULL
-			OR NOT pg.conditions ? 'proposalFieldValue'
-			OR (
-				pg.conditions #>> '{proposalFieldValue,property}'
-					= 'baseFieldCategory'
-				AND pg.conditions #>> '{proposalFieldValue,operator}'
-					= 'in'
-				AND base_field_category::text IN (
-					SELECT jsonb_array_elements_text(
-						pg.conditions #> '{proposalFieldValue,value}'
+			AND (
+				pg.conditions IS NULL
+				OR NOT pg.conditions ? 'proposalFieldValue'
+				OR (
+					pg.conditions #>> '{proposalFieldValue,property}'
+						= 'baseFieldCategory'
+					AND pg.conditions #>> '{proposalFieldValue,operator}'
+						= 'in'
+					AND base_field_category::text IN (
+						SELECT jsonb_array_elements_text(
+							pg.conditions #> '{proposalFieldValue,value}'
+						)
 					)
 				)
 			)
-		)
 	) INTO has_permission;
 
 	RETURN has_permission;

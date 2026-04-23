@@ -32,7 +32,8 @@ BEGIN
 	END IF;
 
 	-- Check if the user has the specified permission on the specified changemaker field value
-	-- via direct user grant, group membership, or inherited from parent entities
+	-- via direct user grant, group membership, or inherited from parent entities.
+	-- A granted 'manage' verb satisfies any verb check.
 	SELECT EXISTS (
 		SELECT 1
 		FROM changemaker_field_values cfv
@@ -51,7 +52,10 @@ BEGIN
 			)
 		)
 		WHERE cfv.id = has_changemaker_field_value_permission.changemaker_field_value_id
-			AND has_changemaker_field_value_permission.permission = ANY(pg.verbs)
+			AND (
+				has_changemaker_field_value_permission.permission = ANY(pg.verbs)
+				OR 'manage' = ANY(pg.verbs)
+			)
 			AND (
 				(
 					pg.grantee_type = 'user'

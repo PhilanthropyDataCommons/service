@@ -31,7 +31,11 @@ BEGIN
 			)
 		)
 		WHERE o.id = has_opportunity_permission.opportunity_id
-			AND has_opportunity_permission.permission = ANY(pg.verbs)
+			-- A granted 'manage' verb satisfies any verb check.
+			AND (
+				has_opportunity_permission.permission = ANY(pg.verbs)
+				OR 'manage' = ANY(pg.verbs)
+			)
 			AND has_opportunity_permission.scope = ANY(pg.scope)
 			AND (
 				(

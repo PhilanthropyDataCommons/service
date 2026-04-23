@@ -14,7 +14,8 @@ BEGIN
 	END IF;
 
 	-- Check if the user has the specified permission on the specified proposal
-	-- via direct user grant, group membership, or inherited from parent entities
+	-- via direct user grant, group membership, or inherited from parent entities.
+	-- A granted 'manage' verb satisfies any verb check.
 	SELECT EXISTS (
 		SELECT 1
 		FROM proposals p
@@ -47,7 +48,10 @@ BEGIN
 			)
 		)
 		WHERE p.id = has_proposal_permission.proposal_id
-			AND has_proposal_permission.permission = ANY(pg.verbs)
+			AND (
+				has_proposal_permission.permission = ANY(pg.verbs)
+				OR 'manage' = ANY(pg.verbs)
+			)
 			AND (
 				(
 					pg.grantee_type = 'user'

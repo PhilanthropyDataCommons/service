@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- The `manage` permission verb now satisfies any verb check on the scope to which it is granted. A grantee with `manage` on a given scope no longer needs the other verbs listed alongside it to perform view, create, edit, delete, or reference operations at that scope. Scope matching is unchanged: `manage` does not grant access to scopes that are not explicitly included in the grant.
+
 ## 0.34.0 2026-04-23
 
 ### Added

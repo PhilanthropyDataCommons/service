@@ -43,7 +43,11 @@ BEGIN
 			)
 		)
 		WHERE s.id = has_source_permission.source_id
-			AND has_source_permission.permission = ANY(pg.verbs)
+			-- A granted 'manage' verb satisfies any verb check.
+			AND (
+				has_source_permission.permission = ANY(pg.verbs)
+				OR 'manage' = ANY(pg.verbs)
+			)
 			AND has_source_permission.scope = ANY(pg.scope)
 			AND (
 				(

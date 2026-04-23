@@ -2,6 +2,13 @@ WITH
 	candidate_entries AS NOT MATERIALIZED (
 		SELECT sources.*
 		FROM sources
+		WHERE has_source_permission(
+			:authContextKeycloakUserId,
+			:authContextIsAdministrator,
+			sources.id,
+			'view',
+			'source'
+		)
 	),
 
 	entry_count AS (

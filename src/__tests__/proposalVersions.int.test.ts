@@ -8,6 +8,7 @@ import {
 	createOrUpdateBaseField,
 	createProposal,
 	createProposalVersion,
+	createSource,
 	loadSystemFunder,
 	loadSystemSource,
 	loadTableMetrics,
@@ -326,6 +327,14 @@ describe('/proposalVersions', () => {
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
 			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: systemSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.REFERENCE],
+			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
@@ -431,6 +440,14 @@ describe('/proposalVersions', () => {
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
 			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: systemSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.REFERENCE],
+			});
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -457,6 +474,103 @@ describe('/proposalVersions', () => {
 				fieldValues: [],
 			});
 			expect(after.count).toEqual(before.count + 1);
+		});
+
+		it('returns 422 when the user lacks reference permission on the source', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+				opportunityId: opportunity.id,
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.PROPOSAL,
+				],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			const result = await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+					fieldValues: [],
+				})
+				.expect(422);
+			expect(result.body).toMatchObject({
+				name: 'UnprocessableEntityError',
+				message:
+					'You do not have permission to reference the specified source.',
+			});
+		});
+
+		it('allows creation when reference permission on the source is inherited from the source funder', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const sourceFunder = await createTestFunder(db, systemUserAuthContext);
+			const funderSource = await createSource(db, systemUserAuthContext, {
+				label: 'Funder-owned Source',
+				funderShortCode: sourceFunder.shortCode,
+			});
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+				opportunityId: opportunity.id,
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.PROPOSAL,
+				],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: sourceFunder.shortCode,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.REFERENCE],
+			});
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'proposal-1',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: funderSource.id,
+					fieldValues: [],
+				})
+				.expect(201);
 		});
 
 		it('creates exactly the number of provided field values', async () => {

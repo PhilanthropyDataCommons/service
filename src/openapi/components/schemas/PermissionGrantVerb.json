@@ -1,4 +1,4 @@
 {
 	"type": "string",
-	"enum": ["view", "create", "edit", "delete", "manage"]
+	"enum": ["view", "create", "edit", "delete", "manage", "reference"]
 }

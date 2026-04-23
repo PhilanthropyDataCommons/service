@@ -39,19 +39,7 @@ describe('/sources', () => {
 			await agent.get('/sources').expect(401);
 		});
 
-		it('returns the system source when no data has been added', async () => {
-			const db = getDatabase();
-			const systemSource = await loadSystemSource(db, null);
-			await agent
-				.get('/sources')
-				.set(authHeader)
-				.expect(200, {
-					entries: [systemSource],
-					total: 1,
-				});
-		});
-
-		it('returns all sources present in the database', async () => {
+		it('returns all sources for an administrator', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -61,10 +49,167 @@ describe('/sources', () => {
 				label: 'Example Inc.',
 				changemakerId: changemaker.id,
 			});
-			const response = await agent.get('/sources').set(authHeader).expect(200);
+			const response = await agent
+				.get('/sources')
+				.set(adminUserAuthHeader)
+				.expect(200);
 			expect(response.body).toEqual({
 				entries: [source, systemSource],
 				total: 2,
+			});
+		});
+
+		it('returns no sources when the user has no view permission on any source', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createSource(db, testUserAuthContext, {
+				label: 'Example Inc.',
+				changemakerId: changemaker.id,
+			});
+			await agent.get('/sources').set(authHeader).expect(200, {
+				entries: [],
+				total: 0,
+			});
+		});
+
+		it('returns only sources the user has view permission on via a direct grant', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const visibleSource = await createSource(db, testUserAuthContext, {
+				label: 'Visible Inc.',
+				changemakerId: changemaker.id,
+			});
+			await createSource(db, testUserAuthContext, {
+				label: 'Hidden Inc.',
+				changemakerId: changemaker.id,
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: visibleSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent.get('/sources').set(authHeader).expect(200);
+			expect(response.body).toEqual({
+				entries: [visibleSource],
+				total: 1,
+			});
+		});
+
+		it('returns sources the user has view permission on via an inherited changemaker grant', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleChangemaker = await createTestChangemaker(
+				db,
+				testUserAuthContext,
+			);
+			const hiddenChangemaker = await createTestChangemaker(
+				db,
+				testUserAuthContext,
+			);
+			const visibleSource = await createSource(db, testUserAuthContext, {
+				label: 'Visible Inc.',
+				changemakerId: visibleChangemaker.id,
+			});
+			await createSource(db, testUserAuthContext, {
+				label: 'Hidden Inc.',
+				changemakerId: hiddenChangemaker.id,
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: visibleChangemaker.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent.get('/sources').set(authHeader).expect(200);
+			expect(response.body).toEqual({
+				entries: [visibleSource],
+				total: 1,
+			});
+		});
+
+		it('returns sources the user has view permission on via an inherited funder grant', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
+			const hiddenFunder = await createTestFunder(db, testUserAuthContext);
+			const visibleSource = await createSource(db, testUserAuthContext, {
+				label: 'Visible Inc.',
+				funderShortCode: visibleFunder.shortCode,
+			});
+			await createSource(db, testUserAuthContext, {
+				label: 'Hidden Inc.',
+				funderShortCode: hiddenFunder.shortCode,
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: visibleFunder.shortCode,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent.get('/sources').set(authHeader).expect(200);
+			expect(response.body).toEqual({
+				entries: [visibleSource],
+				total: 1,
+			});
+		});
+
+		it('returns sources the user has view permission on via an inherited data provider grant', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleDataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
+			const hiddenDataProvider = await createTestDataProvider(
+				db,
+				testUserAuthContext,
+			);
+			const visibleSource = await createSource(db, testUserAuthContext, {
+				label: 'Visible Inc.',
+				dataProviderShortCode: visibleDataProvider.shortCode,
+			});
+			await createSource(db, testUserAuthContext, {
+				label: 'Hidden Inc.',
+				dataProviderShortCode: hiddenDataProvider.shortCode,
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
+				dataProviderShortCode: visibleDataProvider.shortCode,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent.get('/sources').set(authHeader).expect(200);
+			expect(response.body).toEqual({
+				entries: [visibleSource],
+				total: 1,
 			});
 		});
 	});
@@ -74,7 +219,7 @@ describe('/sources', () => {
 			await agent.get('/sources/1').expect(401);
 		});
 
-		it('returns exactly one source selected by id', async () => {
+		it('returns the source to an administrator', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -82,6 +227,60 @@ describe('/sources', () => {
 			const source = await createSource(db, testUserAuthContext, {
 				label: 'Example Inc.',
 				changemakerId: changemaker.id,
+			});
+
+			const response = await agent
+				.get(`/sources/${source.id}`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toEqual(source);
+		});
+
+		it('returns the source to a user with a direct view grant', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const source = await createSource(db, testUserAuthContext, {
+				label: 'Example Inc.',
+				changemakerId: changemaker.id,
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: source.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get(`/sources/${source.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(source);
+		});
+
+		it('returns the source to a user with an inherited changemaker view grant', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const source = await createSource(db, testUserAuthContext, {
+				label: 'Example Inc.',
+				changemakerId: changemaker.id,
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 
 			const response = await agent
@@ -111,15 +310,19 @@ describe('/sources', () => {
 		});
 
 		it('returns 404 when id is not found', async () => {
+			await agent.get('/sources/9001').set(adminUserAuthHeader).expect(404);
+		});
+
+		it('returns 404 when the user does not have view permission on the source', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			await createSource(db, testUserAuthContext, {
-				label: 'not to be returned',
+			const source = await createSource(db, testUserAuthContext, {
+				label: 'Example Inc.',
 				changemakerId: changemaker.id,
 			});
-			await agent.get('/sources/9001').set(authHeader).expect(404);
+			await agent.get(`/sources/${source.id}`).set(authHeader).expect(404);
 		});
 	});
 
@@ -250,7 +453,7 @@ describe('/sources', () => {
 			});
 		});
 
-		it('creates and returns exactly one changemaker source for a user with edit permissions on that changemaker', async () => {
+		it('creates and returns exactly one changemaker source for a user with create source permissions on that changemaker', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -262,8 +465,8 @@ describe('/sources', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
-				scope: [PermissionGrantEntityType.CHANGEMAKER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
@@ -294,7 +497,7 @@ describe('/sources', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 if the user does not have edit permission on the changemaker', async () => {
+		it('returns 422 if the user does not have create source permission on the changemaker', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -306,8 +509,8 @@ describe('/sources', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
-				scope: [PermissionGrantEntityType.CHANGEMAKER],
-				verbs: [PermissionGrantVerb.MANAGE],
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.MANAGE, PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -315,10 +518,10 @@ describe('/sources', () => {
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
 				scope: [PermissionGrantEntityType.CHANGEMAKER],
-				verbs: [PermissionGrantVerb.VIEW],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 
-			// Also create a userGroup permission grant with EDIT verb but an EXPIRED association
+			// Also create a userGroup permission grant with CREATE|source but an EXPIRED association
 			// to verify that expired associations don't grant access
 			const expiredOrgId = 'eeeeeeee-1111-2222-3333-444444444444';
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -326,8 +529,8 @@ describe('/sources', () => {
 				granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
-				scope: [PermissionGrantEntityType.CHANGEMAKER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			await createEphemeralUserGroupAssociation(db, null, {
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -349,7 +552,7 @@ describe('/sources', () => {
 			expect(result.body).toEqual({
 				details: [{ name: 'UnprocessableEntityError' }],
 				message:
-					'You do not have write permissions on a changemaker with the specified id.',
+					'You do not have permission to create a source for the specified changemaker.',
 				name: 'UnprocessableEntityError',
 			});
 			expect(after.count).toEqual(before.count);
@@ -383,7 +586,7 @@ describe('/sources', () => {
 			expect(after.count).toEqual(2);
 		});
 
-		it('creates and returns exactly one funder source for a user with edit permissions on that funder', async () => {
+		it('creates and returns exactly one funder source for a user with create source permissions on that funder', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -395,8 +598,8 @@ describe('/sources', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
@@ -420,7 +623,7 @@ describe('/sources', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 if the user does not have edit permission on the funder', async () => {
+		it('returns 422 if the user does not have create source permission on the funder', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -432,8 +635,8 @@ describe('/sources', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.MANAGE],
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.MANAGE, PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -441,10 +644,10 @@ describe('/sources', () => {
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.VIEW],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 
-			// Also create a userGroup permission grant with EDIT verb but an EXPIRED association
+			// Also create a userGroup permission grant with CREATE|source but an EXPIRED association
 			// to verify that expired associations don't grant access
 			const expiredOrgId = 'ffffffff-1111-2222-3333-444444444444';
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -452,8 +655,8 @@ describe('/sources', () => {
 				granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
-				scope: [PermissionGrantEntityType.FUNDER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			await createEphemeralUserGroupAssociation(db, null, {
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -475,7 +678,7 @@ describe('/sources', () => {
 			expect(result.body).toEqual({
 				details: [{ name: 'UnprocessableEntityError' }],
 				message:
-					'You do not have write permissions on a funder with the specified short code.',
+					'You do not have permission to create a source for the specified funder.',
 				name: 'UnprocessableEntityError',
 			});
 			expect(after.count).toEqual(before.count);
@@ -512,7 +715,7 @@ describe('/sources', () => {
 			expect(after.count).toEqual(2);
 		});
 
-		it('creates and returns exactly one data provider source for a user with edit permissions on the data provider', async () => {
+		it('creates and returns exactly one data provider source for a user with create source permissions on the data provider', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -527,8 +730,8 @@ describe('/sources', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
 				dataProviderShortCode: dataProvider.shortCode,
-				scope: [PermissionGrantEntityType.DATA_PROVIDER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
@@ -552,7 +755,7 @@ describe('/sources', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 if the user does not have edit permission on the data provider', async () => {
+		it('returns 422 if the user does not have create source permission on the data provider', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -567,11 +770,11 @@ describe('/sources', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
 				dataProviderShortCode: dataProvider.shortCode,
-				scope: [PermissionGrantEntityType.DATA_PROVIDER],
+				scope: [PermissionGrantEntityType.SOURCE],
 				verbs: [PermissionGrantVerb.MANAGE, PermissionGrantVerb.VIEW],
 			});
 
-			// Also create a userGroup permission grant with EDIT verb but an EXPIRED association
+			// Also create a userGroup permission grant with CREATE|source but an EXPIRED association
 			// to verify that expired associations don't grant access
 			const expiredOrgId = '11111111-aaaa-bbbb-cccc-dddddddddddd';
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -579,8 +782,8 @@ describe('/sources', () => {
 				granteeKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
 				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
 				dataProviderShortCode: dataProvider.shortCode,
-				scope: [PermissionGrantEntityType.DATA_PROVIDER],
-				verbs: [PermissionGrantVerb.EDIT],
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.CREATE],
 			});
 			await createEphemeralUserGroupAssociation(db, null, {
 				userKeycloakUserId: testUser.keycloakUserId,
@@ -602,7 +805,7 @@ describe('/sources', () => {
 			expect(result.body).toEqual({
 				details: [{ name: 'UnprocessableEntityError' }],
 				message:
-					'You do not have write permissions on a data provider with the specified short code.',
+					'You do not have permission to create a source for the specified data provider.',
 				name: 'UnprocessableEntityError',
 			});
 			expect(after.count).toEqual(before.count);

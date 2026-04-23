@@ -7,15 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.34.0 2026-04-23
+
 ### Added
 
 - Add extension support in phone number validation.
 - Add changelog to documents that auto-publish to WordPress.
 - `GET /funders` now supports the `isCollaborative` query parameter to filter funders by their collaborative status.
+- Added a new `reference` verb to the permission grant verb set. Reference is intended to gate whether a user may cite an entity as a pointer in data they are creating, separate from `view` (which only grants read access) and `create` (which grants the ability to author new instances of an entity type).
 
 ### Changed
 
 - All ID fields in the OpenAPI specification now reference a shared `id` schema with constraints (minimum: 1, maximum: 2147483647) instead of using bare `integer` types.
+- `GET /sources` and `GET /sources/:sourceId` now filter results by `view | source` permission; sources are no longer universally visible to authenticated users.
+- Source creation now requires `create | source` scope (previously required `edit | funder`, `edit | changemaker`, or `edit | dataProvider`). Existing permission grants with the parent entity's scope have been migrated to also include `source` scope, and new `create | source` grants have been created for users who previously had `edit` verb on the parent entity.
+- `POST /proposalVersions`, `POST /tasks/bulkUploads`, and `POST /changemakerFieldValueBatches` now require a `reference | source` grant on the supplied source. Grants can be made directly on the source or inherited from the source's funder, changemaker, or data provider. This is a breaking change: previous behavior allowed any authenticated user to supply any source, so existing users will need new `reference | source` grants before they can use these endpoints.
 
 ### Fixed
 

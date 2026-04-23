@@ -4,6 +4,7 @@ import {
 	createBulkUploadTask,
 	getLimitValues,
 	hasOpportunityPermission,
+	hasSourcePermission,
 	loadApplicationForm,
 	loadBulkUploadTaskBundle,
 	loadFileIfCreatedBy,
@@ -18,7 +19,6 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
-	InputConflictError,
 	InputValidationError,
 	NotFoundError,
 	UnprocessableEntityError,
@@ -116,6 +116,18 @@ const postBulkUploadTask = async (
 
 	await validateApplicationFormCreatePermission(db, req, applicationFormId);
 
+	if (
+		!(await hasSourcePermission(db, req, {
+			sourceId,
+			permission: PermissionGrantVerb.REFERENCE,
+			scope: PermissionGrantEntityType.SOURCE,
+		}))
+	) {
+		throw new UnprocessableEntityError(
+			'You do not have permission to reference the specified source.',
+		);
+	}
+
 	await validateFileOwnership(
 		db,
 		req,
@@ -132,32 +144,20 @@ const postBulkUploadTask = async (
 		);
 	}
 
-	try {
-		const bulkUploadTask = await createBulkUploadTask(db, req, {
-			sourceId,
-			applicationFormId,
-			proposalsDataFileId,
-			attachmentsArchiveFileId,
-			status: TaskStatus.PENDING,
-		});
-		await addProcessBulkUploadJob({
-			bulkUploadId: bulkUploadTask.id,
-		});
-		res
-			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
-			.contentType('application/json')
-			.send(bulkUploadTask);
-	} catch (error: unknown) {
-		if (error instanceof NotFoundError) {
-			if (error.details.entityType === 'Source') {
-				throw new InputConflictError(`The related entity does not exist`, {
-					entityType: 'Source',
-					entityId: sourceId,
-				});
-			}
-		}
-		throw error;
-	}
+	const bulkUploadTask = await createBulkUploadTask(db, req, {
+		sourceId,
+		applicationFormId,
+		proposalsDataFileId,
+		attachmentsArchiveFileId,
+		status: TaskStatus.PENDING,
+	});
+	await addProcessBulkUploadJob({
+		bulkUploadId: bulkUploadTask.id,
+	});
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.contentType('application/json')
+		.send(bulkUploadTask);
 };
 
 const getBulkUploadTasks = async (

@@ -3,20 +3,21 @@ import {
 	getDatabase,
 	createChangemakerFieldValueBatch,
 	getLimitValues,
+	hasSourcePermission,
 	loadChangemakerFieldValueBatch,
 	loadChangemakerFieldValueBatchBundle,
-	loadSource,
 } from '../database';
 import {
 	isAuthContext,
 	isId,
 	isWritableChangemakerFieldValueBatch,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 } from '../types';
 import {
 	FailedMiddlewareError,
 	InputValidationError,
-	InputConflictError,
-	NotFoundError,
+	UnprocessableEntityError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
@@ -41,16 +42,17 @@ const postChangemakerFieldValueBatch = async (
 
 	const { sourceId, notes } = body;
 
-	// Verify source exists
-	await loadSource(db, req, sourceId).catch((error: unknown) => {
-		if (error instanceof NotFoundError) {
-			throw new InputConflictError('The source does not exist.', {
-				entityType: 'Source',
-				entityId: sourceId,
-			});
-		}
-		throw error;
-	});
+	if (
+		!(await hasSourcePermission(db, req, {
+			sourceId,
+			permission: PermissionGrantVerb.REFERENCE,
+			scope: PermissionGrantEntityType.SOURCE,
+		}))
+	) {
+		throw new UnprocessableEntityError(
+			'You do not have permission to reference the specified source.',
+		);
+	}
 
 	const changemakerFieldValueBatch = await createChangemakerFieldValueBatch(
 		db,

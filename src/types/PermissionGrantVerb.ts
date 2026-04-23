@@ -7,6 +7,7 @@ enum PermissionGrantVerb {
 	EDIT = 'edit',
 	DELETE = 'delete',
 	MANAGE = 'manage',
+	REFERENCE = 'reference',
 }
 
 const permissionGrantVerbSchema: JSONSchemaType<PermissionGrantVerb> = {

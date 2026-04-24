@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION has_data_provider_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	data_provider_short_code short_code_t,
-	permission permission_grant_verb_t,
+	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t
 ) RETURNS boolean AS $$
 DECLARE
@@ -13,18 +13,16 @@ BEGIN
 		RETURN TRUE;
 	END IF;
 
-	-- Check if the user has the specified permission on the specified data provider
-	-- via direct user grant or group membership. A granted 'manage' verb
-	-- satisfies any verb check.
+	-- Check if the user has the specified verb on the specified data provider
+	-- via direct user grant or group membership.
 	SELECT EXISTS (
 		SELECT 1
 		FROM permission_grants pg
 		WHERE pg.context_entity_type = 'dataProvider'
 			AND pg.data_provider_short_code
 				= has_data_provider_permission.data_provider_short_code
-			AND (
-				has_data_provider_permission.permission = ANY(pg.verbs)
-				OR 'manage' = ANY(pg.verbs)
+			AND verb_set_permits_verb(
+				pg.verbs, has_data_provider_permission.verb
 			)
 			AND has_data_provider_permission.scope = ANY(pg.scope)
 			AND (

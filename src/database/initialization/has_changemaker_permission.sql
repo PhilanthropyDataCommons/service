@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION has_changemaker_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	changemaker_id int,
-	permission permission_grant_verb_t,
+	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t
 ) RETURNS boolean AS $$
 DECLARE
@@ -13,18 +13,16 @@ BEGIN
 		RETURN TRUE;
 	END IF;
 
-	-- Check if the user has the specified permission on the specified changemaker
-	-- via direct user grant or group membership. A granted 'manage' verb
-	-- satisfies any verb check.
+	-- Check if the user has the specified verb on the specified changemaker
+	-- via direct user grant or group membership.
 	SELECT EXISTS (
 		SELECT 1
 		FROM permission_grants pg
 		WHERE pg.context_entity_type = 'changemaker'
 			AND pg.changemaker_id
 				= has_changemaker_permission.changemaker_id
-			AND (
-				has_changemaker_permission.permission = ANY(pg.verbs)
-				OR 'manage' = ANY(pg.verbs)
+			AND verb_set_permits_verb(
+				pg.verbs, has_changemaker_permission.verb
 			)
 			AND has_changemaker_permission.scope = ANY(pg.scope)
 			AND (

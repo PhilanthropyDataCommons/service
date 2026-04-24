@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION has_source_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	source_id int,
-	permission permission_grant_verb_t,
+	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t
 ) RETURNS boolean AS $$
 DECLARE
@@ -13,7 +13,7 @@ BEGIN
 		RETURN TRUE;
 	END IF;
 
-	-- Check if the user has the specified permission on the specified source
+	-- Check if the user has the specified verb on the specified source
 	-- via direct user grant, group membership, or inherited from parent entities.
 	-- Inherited grants are treated the same as direct source grants: the grant's
 	-- scope array must include the requested scope.
@@ -43,10 +43,8 @@ BEGIN
 			)
 		)
 		WHERE s.id = has_source_permission.source_id
-			-- A granted 'manage' verb satisfies any verb check.
-			AND (
-				has_source_permission.permission = ANY(pg.verbs)
-				OR 'manage' = ANY(pg.verbs)
+			AND verb_set_permits_verb(
+				pg.verbs, has_source_permission.verb
 			)
 			AND has_source_permission.scope = ANY(pg.scope)
 			AND (

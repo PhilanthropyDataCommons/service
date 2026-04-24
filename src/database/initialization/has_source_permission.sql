@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION has_source_permission(
+SELECT drop_function('has_source_permission');
+
+CREATE FUNCTION has_source_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	source_id int,

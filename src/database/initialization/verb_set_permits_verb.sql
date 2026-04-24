@@ -1,6 +1,8 @@
+SELECT drop_function('verb_set_permits_verb');
+
 -- Returns TRUE when `verb` is in `verbs`, or when `verbs` contains 'manage'
 -- (a granted 'manage' verb satisfies any verb check).
-CREATE OR REPLACE FUNCTION verb_set_permits_verb(
+CREATE FUNCTION verb_set_permits_verb(
 	verbs permission_grant_verb_t [],
 	verb permission_grant_verb_t
 ) RETURNS boolean AS $$

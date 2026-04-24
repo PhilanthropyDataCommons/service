@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION has_funder_permission(
+SELECT drop_function('has_funder_permission');
+
+CREATE FUNCTION has_funder_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	funder_short_code short_code_t,

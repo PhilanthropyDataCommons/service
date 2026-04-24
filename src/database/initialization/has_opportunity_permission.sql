@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION has_opportunity_permission(
+SELECT drop_function('has_opportunity_permission');
+
+CREATE FUNCTION has_opportunity_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	opportunity_id int,

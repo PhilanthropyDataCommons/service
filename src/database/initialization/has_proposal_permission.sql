@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION has_proposal_permission(
+SELECT drop_function('has_proposal_permission');
+
+CREATE FUNCTION has_proposal_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	proposal_id int,

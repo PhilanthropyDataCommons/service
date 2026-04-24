@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION has_changemaker_field_value_permission(
+SELECT drop_function('has_changemaker_field_value_permission');
+
+CREATE FUNCTION has_changemaker_field_value_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	changemaker_field_value_id int,

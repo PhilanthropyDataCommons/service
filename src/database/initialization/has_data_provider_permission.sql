@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION has_data_provider_permission(
+SELECT drop_function('has_data_provider_permission');
+
+CREATE FUNCTION has_data_provider_permission(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
 	data_provider_short_code short_code_t,

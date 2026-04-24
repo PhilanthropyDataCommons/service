@@ -510,7 +510,7 @@ describe('/sources', () => {
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
 				scope: [PermissionGrantEntityType.SOURCE],
-				verbs: [PermissionGrantVerb.MANAGE, PermissionGrantVerb.VIEW],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -636,7 +636,7 @@ describe('/sources', () => {
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
 				scope: [PermissionGrantEntityType.SOURCE],
-				verbs: [PermissionGrantVerb.MANAGE, PermissionGrantVerb.VIEW],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
@@ -771,7 +771,7 @@ describe('/sources', () => {
 				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
 				dataProviderShortCode: dataProvider.shortCode,
 				scope: [PermissionGrantEntityType.SOURCE],
-				verbs: [PermissionGrantVerb.MANAGE, PermissionGrantVerb.VIEW],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 
 			// Also create a userGroup permission grant with CREATE|source but an EXPIRED association

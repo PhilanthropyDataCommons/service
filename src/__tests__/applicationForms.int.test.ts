@@ -893,14 +893,6 @@ describe('/applicationForms', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createPermissionGrant(db, systemUserAuthContext, {
-				granteeType: PermissionGrantGranteeType.USER,
-				granteeUserKeycloakUserId: testUser.keycloakUserId,
-				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
-				verbs: [PermissionGrantVerb.MANAGE],
-			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});

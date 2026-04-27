@@ -9,6 +9,8 @@
 			}
 		],
 		"parameters": [
+			{ "$ref": "../components/parameters/pageParam.json" },
+			{ "$ref": "../components/parameters/countParam.json" },
 			{
 				"$ref": "../components/parameters/baseFieldSensitivityClassificationParam.json"
 			}
@@ -19,10 +21,7 @@
 				"content": {
 					"application/json": {
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "../components/schemas/BaseField.json"
-							}
+							"$ref": "../components/schemas/BaseFieldBundle.json"
 						}
 					}
 				}

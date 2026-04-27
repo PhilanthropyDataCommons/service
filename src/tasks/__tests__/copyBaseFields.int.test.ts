@@ -142,17 +142,20 @@ describe('fetchBaseFieldsFromRemote', () => {
 		expect(request.isDone()).toEqual(true);
 	});
 
-	it('should throw an error if the http request to the synchronization url succeeds, provides valid json, but the json is not an array of basefields', async () => {
+	it('should throw an error if the http request to the synchronization url succeeds, provides valid json, but the entries are not base fields', async () => {
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, [
-				{
-					hello: 'how ya doing',
-					may: 'i be inserted into your database?',
-					pretty: 'please?',
-					idont: 'have any escape sequences in me i swear',
-				},
-			]);
+			.reply(200, {
+				entries: [
+					{
+						hello: 'how ya doing',
+						may: 'i be inserted into your database?',
+						pretty: 'please?',
+						idont: 'have any escape sequences in me i swear',
+					},
+				],
+				total: 1,
+			});
 
 		await expect(
 			fetchBaseFieldsFromRemote(MOCK_API_URL, getMockJobHelpers().logger),
@@ -164,7 +167,7 @@ describe('fetchBaseFieldsFromRemote', () => {
 	it('should resolve a valid response', async () => {
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, mockBaseFields);
+			.reply(200, { entries: mockBaseFields, total: mockBaseFields.length });
 
 		await expect(
 			fetchBaseFieldsFromRemote(MOCK_API_URL, getMockJobHelpers().logger),
@@ -192,7 +195,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, mockBaseFields);
+			.reply(200, { entries: mockBaseFields, total: mockBaseFields.length });
 
 		await copyBaseFields(
 			{ BaseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -252,14 +255,17 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, [
-				{
-					hello: 'how ya doing',
-					may: 'i be inserted into your database?',
-					pretty: 'please?',
-					imjust: 'a friendly piece of data, believe me',
-				},
-			]);
+			.reply(200, {
+				entries: [
+					{
+						hello: 'how ya doing',
+						may: 'i be inserted into your database?',
+						pretty: 'please?',
+						imjust: 'a friendly piece of data, believe me',
+					},
+				],
+				total: 1,
+			});
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -289,7 +295,9 @@ describe('copyBaseFields', () => {
 				status: TaskStatus.PENDING,
 			},
 		);
-		const request = nock(MOCK_API_URL).get('/baseFields').reply(200, []);
+		const request = nock(MOCK_API_URL)
+			.get('/baseFields')
+			.reply(200, { entries: [], total: 0 });
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -325,12 +333,15 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, [
-				{
-					...mockFirstNameBaseField,
-					valueRelevanceHours: 9001,
-				},
-			]);
+			.reply(200, {
+				entries: [
+					{
+						...mockFirstNameBaseField,
+						valueRelevanceHours: 9001,
+					},
+				],
+				total: 1,
+			});
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -409,7 +420,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, mockBaseFields);
+			.reply(200, { entries: mockBaseFields, total: mockBaseFields.length });
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -475,7 +486,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, [mockRemoteBaseField]);
+			.reply(200, { entries: [mockRemoteBaseField], total: 1 });
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -553,7 +564,10 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, [mockRemoteBaseField, mockFirstNameBaseField]);
+			.reply(200, {
+				entries: [mockRemoteBaseField, mockFirstNameBaseField],
+				total: 2,
+			});
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -647,7 +661,10 @@ describe('copyBaseFields', () => {
 
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, [mockFirstNameBaseFieldWithNoLocalizations]);
+			.reply(200, {
+				entries: [mockFirstNameBaseFieldWithNoLocalizations],
+				total: 1,
+			});
 
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
@@ -721,7 +738,7 @@ describe('copyBaseFields', () => {
 
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, [mockFirstNameBaseField]);
+			.reply(200, { entries: [mockFirstNameBaseField], total: 1 });
 
 		const systemUser = await loadSystemUser(db, null);
 		const systemUserAuthContext = getAuthContext(systemUser);
@@ -803,7 +820,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, mockBaseFields);
+			.reply(200, { entries: mockBaseFields, total: mockBaseFields.length });
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },
@@ -849,7 +866,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
-			.reply(200, [mockFirstNameBaseField]);
+			.reply(200, { entries: [mockFirstNameBaseField], total: 1 });
 
 		await copyBaseFields(
 			{ baseFieldsCopyTaskId: baseFieldsCopyTask.id },

@@ -1,4 +1,8 @@
-import { isCopyBaseFieldsJobPayload, TaskStatus, isBaseField } from '../types';
+import {
+	isBaseFieldBundle,
+	isCopyBaseFieldsJobPayload,
+	TaskStatus,
+} from '../types';
 import { getDatabase } from '../database/db';
 import {
 	createOrUpdateBaseField,
@@ -30,19 +34,17 @@ export const fetchBaseFieldsFromRemote = async (
 			);
 		}
 
-		const data = await response.json();
+		const payload: unknown = await response.json();
 
-		if (!Array.isArray(data) || !data.every((item) => isBaseField(item))) {
+		if (!isBaseFieldBundle(payload)) {
 			graphileLogger.error(
 				'Invalid basefield data received from remote PDC instance',
-				{
-					data,
-				},
+				{ errors: isBaseFieldBundle.errors ?? [], payload },
 			);
 			throw new Error('Invalid data received from remote PDC instance');
 		}
 
-		return data;
+		return payload.entries;
 	} catch (err) {
 		graphileLogger.error(
 			'Error fetching base fields from remote PDC instance',

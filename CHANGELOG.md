@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `GET /baseFields` is now paginated in the same manner as all other `GET` endpoints. This is a breaking change. The endpoint can now take pagination parameters (`_count`, `_page`) and will return `{ entries , total }` where `entries` is an array of base fields,
 - The `manage` permission verb now satisfies any verb check on the scope to which it is granted. A grantee with `manage` on a given scope no longer needs the other verbs listed alongside it to perform view, create, edit, delete, or reference operations at that scope. Scope matching is unchanged: `manage` does not grant access to scopes that are not explicitly included in the grant.
 
 ## 0.34.0 2026-04-23

@@ -27,28 +27,25 @@ BEGIN
 			(
 				pg.context_entity_type = 'proposal'
 				AND pg.proposal_id = p.id
-				AND has_proposal_permission.scope = ANY(pg.scope)
 			)
-			-- Inherited from opportunity with proposal scope
+			-- Inherited from opportunity
 			OR (
 				pg.context_entity_type = 'opportunity'
 				AND pg.opportunity_id = p.opportunity_id
-				AND 'proposal' = ANY(pg.scope)
 			)
-			-- Inherited from funder with proposal scope
+			-- Inherited from funder
 			OR (
 				pg.context_entity_type = 'funder'
 				AND pg.funder_short_code = o.funder_short_code
-				AND 'proposal' = ANY(pg.scope)
 			)
-			-- Inherited from changemaker with proposal scope
+			-- Inherited from changemaker
 			OR (
 				pg.context_entity_type = 'changemaker'
 				AND pg.changemaker_id = cp.changemaker_id
-				AND 'proposal' = ANY(pg.scope)
 			)
 		)
 		WHERE p.id = has_proposal_permission.proposal_id
+			AND has_proposal_permission.scope = ANY(pg.scope)
 			AND verb_set_permits_verb(
 				pg.verbs, has_proposal_permission.verb
 			)

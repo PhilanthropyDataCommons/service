@@ -43,16 +43,15 @@ BEGIN
 			(
 				pg.context_entity_type = 'changemakerFieldValue'
 				AND pg.changemaker_field_value_id = cfv.id
-				AND has_changemaker_field_value_permission.scope = ANY(pg.scope)
 			)
-			-- Inherited from changemaker with changemakerFieldValue scope
+			-- Inherited from changemaker
 			OR (
 				pg.context_entity_type = 'changemaker'
 				AND pg.changemaker_id = cfv.changemaker_id
-				AND 'changemakerFieldValue' = ANY(pg.scope)
 			)
 		)
 		WHERE cfv.id = has_changemaker_field_value_permission.changemaker_field_value_id
+			AND has_changemaker_field_value_permission.scope = ANY(pg.scope)
 			AND verb_set_permits_verb(
 				pg.verbs, has_changemaker_field_value_permission.verb
 			)

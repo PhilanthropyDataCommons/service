@@ -12,6 +12,7 @@
 		"proposalFieldValue",
 		"source",
 		"bulkUpload",
-		"changemakerFieldValue"
+		"changemakerFieldValue",
+		"any"
 	]
 }

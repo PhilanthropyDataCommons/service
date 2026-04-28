@@ -51,7 +51,9 @@ BEGIN
 			)
 		)
 		WHERE cfv.id = has_changemaker_field_value_permission.changemaker_field_value_id
-			AND has_changemaker_field_value_permission.scope = ANY(pg.scope)
+			AND scope_set_permits_scope(
+				pg.scope, has_changemaker_field_value_permission.scope
+			)
 			AND verb_set_permits_verb(
 				pg.verbs, has_changemaker_field_value_permission.verb
 			)

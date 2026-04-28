@@ -45,7 +45,9 @@ BEGIN
 			)
 		)
 		WHERE p.id = has_proposal_permission.proposal_id
-			AND has_proposal_permission.scope = ANY(pg.scope)
+			AND scope_set_permits_scope(
+				pg.scope, has_proposal_permission.scope
+			)
 			AND verb_set_permits_verb(
 				pg.verbs, has_proposal_permission.verb
 			)

@@ -16,7 +16,7 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["source"]
+						"enum": ["source", "any"]
 					},
 					"minItems": 1
 				}

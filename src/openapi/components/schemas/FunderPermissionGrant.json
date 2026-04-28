@@ -17,7 +17,13 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["funder", "opportunity", "proposal", "proposalFieldValue"]
+						"enum": [
+							"funder",
+							"opportunity",
+							"proposal",
+							"proposalFieldValue",
+							"any"
+						]
 					},
 					"minItems": 1
 				}

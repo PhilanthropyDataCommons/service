@@ -16,7 +16,7 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["applicationFormField"]
+						"enum": ["applicationFormField", "any"]
 					},
 					"minItems": 1
 				}

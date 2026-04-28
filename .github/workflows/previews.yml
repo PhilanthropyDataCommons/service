@@ -1,0 +1,468 @@
+name: Previews
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+env:
+  ADMIN_CONNECTION_STRING: ${{ secrets.DEPLOY_PREVIEWS_PSQL_CONNECTION_STRING }}
+  TOKEN: ${{ secrets.DIGITAL_OCEAN_PROXY_TOKEN }}
+  URL: ${{ vars.DIGITAL_OCEAN_PROXY_URL }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME: philanthropydatacommons/service
+  PGHOST: ${{ vars.DEPLOY_PREVIEWS_PGHOST }}
+  PGPORT: ${{ vars.DEPLOY_PREVIEWS_PGPORT }}
+  PGPASSWORD: ${{ secrets.DEPLOY_PREVIEWS_PGPASSWORD }}
+  DATABASE_NAME: preview_${{ github.event.pull_request.number }}
+  APP_NAME: pdc-service-preview-${{ github.event.pull_request.number }}
+  IMAGE_TAG: preview-${{ github.event.pull_request.number }}
+  PROJECT_ID: ${{ secrets.DIGITAL_OCEAN_PROJECT_ID }}
+  S3_HOST: ${{ vars.DEPLOY_PREVIEWS_S3_HOST }}
+  S3_ACCESS_KEY_ID: ${{ secrets.DEPLOY_PREVIEWS_S3_ACCESS_KEY_ID }}
+  S3_ACCESS_SECRET: ${{ secrets.DEPLOY_PREVIEWS_S3_ACCESS_SECRET }}
+  S3_BUCKET: pdc-service-previews
+
+jobs:
+  create-db:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: preview-db-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    if: |
+      !cancelled() &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action)
+    needs: [drop-db, sleepy-task]
+    container:
+      image: alpine/psql:latest
+      env:
+        CONNECTION: ${{ env.ADMIN_CONNECTION_STRING }}
+        DB_NAME: ${{ env.DATABASE_NAME }}
+        PGSSLMODE: verify-full
+    steps:
+      - name: Create a database for this PR on the "deploy previews" cluster
+        run: |
+          psql "${CONNECTION}" -c "CREATE DATABASE ${DB_NAME} TEMPLATE pdc;"
+
+  sleepy-task:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action == 'reopened'
+    steps:
+      - name: Wait in case a PR was closed and reopened quickly
+        run: |
+          # Using sleep here is terrible but this works around PR close/reopen.
+          # It allows drop-db to finish in a "close" flow before "reopen" flow.
+          sleep 30
+
+  drop-db:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: preview-db-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository
+    needs: [find-s3-objects-in-db, delete-app]
+    container:
+      image: alpine/psql:latest
+      env:
+        CONNECTION: ${{ env.ADMIN_CONNECTION_STRING }}
+        DB_NAME: ${{ env.DATABASE_NAME }}
+        PGSSLMODE: verify-full
+    steps:
+      - name: Drop a database for this PR on the "deploy previews" cluster
+        run: |
+          # Even though we wait until delete app is successfully called, it may
+          # not have finished shutting down, so forcibly drop the DB.
+          psql "${CONNECTION}" -c "DROP DATABASE IF EXISTS ${DB_NAME} WITH (FORCE);"
+
+  build-and-push-preview-image:
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action)
+    runs-on: ubuntu-latest
+    concurrency:
+      group: preview-image-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+      - name: Build with node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - run: npm prune --omit=dev
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push preview image but do not write to cache
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+
+  delete-preview-image:
+    # When create fails, we lack the image with tag and this would fail if on
+    # we were to make it happen on synchronize and also set the above
+    # build-and-push-preview-image action to depend on this action. There does
+    # not appear to be another "delete image" action with idempotence available.
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action == 'closed'
+    concurrency:
+      group: preview-image-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Delete image
+        uses: bots-house/ghcr-delete-image-action@v1.1.0
+        with:
+          owner: ${{ github.repository_owner }}
+          name: service
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.IMAGE_TAG }}
+
+  post-app:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    if: |
+      !cancelled() &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action)
+    concurrency:
+      group: preview-app-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    needs:
+      [create-db, build-and-push-preview-image, delete-app, delete-s3-objects]
+    steps:
+      - name: Create or recreate a preview app for this PR
+        id: create-app-get-url
+        run: |
+          set -eo pipefail
+          app_spec=$(cat <<EOF
+          project_id: ${{ env.PROJECT_ID }}
+          spec:
+            alerts:
+            - rule: DEPLOYMENT_FAILED
+            - rule: DOMAIN_FAILED
+            - rule: DEPLOYMENT_LIVE
+            ingress:
+              rules:
+              - component:
+                  name: service
+                match:
+                  path:
+                    prefix: /
+            name: ${{ env.APP_NAME }}
+            features:
+              - buildpack-stack=ubuntu-22
+            region: nyc
+            services:
+              - envs:
+                - key: AUTH_SERVER_ISSUER
+                  scope: RUN_AND_BUILD_TIME
+                  value: https://auth.philanthropydatacommons.org/realms/pdc
+                - key: OPENAPI_DOCS_AUTH_CLIENT_ID
+                  scope: RUN_AND_BUILD_TIME
+                  value: pdc-openapi-docs-previews
+                - key: HOST
+                  scope: RUN_AND_BUILD_TIME
+                  value: 0.0.0.0
+                - key: S3_ACCESS_KEY_ID
+                  scope: RUN_AND_BUILD_TIME
+                  value: ${{ env.S3_ACCESS_KEY_ID }}
+                - key: S3_BUCKET
+                  scope: RUN_AND_BUILD_TIME
+                  value: ${{ env.S3_BUCKET }}
+                - key: S3_ENDPOINT
+                  scope: RUN_AND_BUILD_TIME
+                  value: https://nyc3.digitaloceanspaces.com
+                - key: S3_PATH_STYLE
+                  scope: RUN_AND_BUILD_TIME
+                  value: "false"
+                - key: S3_REGION
+                  scope: RUN_AND_BUILD_TIME
+                  value: us-east-1
+                - key: PGHOST
+                  scope: RUN_AND_BUILD_TIME
+                  value: ${{ env.PGHOST }}
+                - key: PGPORT
+                  scope: RUN_AND_BUILD_TIME
+                  value: "${{ env.PGPORT }}"
+                - key: PGUSER
+                  scope: RUN_AND_BUILD_TIME
+                  value: pdc
+                - key: PGPASSWORD
+                  scope: RUN_AND_BUILD_TIME
+                  type: SECRET
+                  value: ${{ env.PGPASSWORD }}
+                - key: PGSSLMODE
+                  scope: RUN_AND_BUILD_TIME
+                  value: no-verify
+                - key: PGDATABASE
+                  scope: RUN_AND_BUILD_TIME
+                  value: ${{ env.DATABASE_NAME }}
+                - key: S3_ACCESS_SECRET
+                  scope: RUN_AND_BUILD_TIME
+                  type: SECRET
+                  value: ${{ env.S3_ACCESS_SECRET }}
+                health_check:
+                  http_path: /
+                http_port: 8080
+                image:
+                  registry: ghcr.io
+                  registry_type: GHCR
+                  repository: philanthropydatacommons/service
+                  tag: ${{ env.IMAGE_TAG }}
+                instance_count: 1
+                instance_size_slug: apps-s-1vcpu-0.5gb
+                name: service
+          EOF
+          )
+          # Find existing ID if it exists
+          app_id=$(curl --fail-with-body -X GET \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            --url "${URL}/v2/apps" |
+            jq -r -c '.apps[] | select (.spec.name == "${{ env.APP_NAME }}") | .id')
+          http_method=""
+          http_url=""
+          if [ "${app_id}" == "" ] || [ "${app_id}" == "null" ]; then
+            # New app needed, POST a new spec. This is for PR open and reopen events.
+            echo "New app needed"
+            http_method=POST
+            http_url="${URL}/v2/apps"
+          else
+            # Existing app, PUT a new spec. This should be a rare case, where the
+            # DELETE was not correctly called on resynchronize before this.
+            echo "Existing app ${app_id} found."
+            http_method=PUT
+            http_url="${URL}/v2/apps/${app_id}"
+            # The PUT app spec forbids the `project_id` element so filter it out.
+            app_spec=$(echo "${app_spec}" | grep -v "project_id:")
+          fi
+
+          if ! app_response=$(curl --fail-with-body -X "${http_method}" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/yaml" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            --url "${http_url}" \
+            -d "${app_spec}")
+          then
+            echo "App could not be created. Response:"
+            echo "${app_response}"
+            exit 150
+          fi
+
+          echo "App creation response body:"
+          echo "${app_response}"
+
+          app_id=$(echo "${app_response}" | jq -r -c '.app.id')
+          pending_deployment_id=$(echo "${app_response}" | jq -r -c '.app.pending_deployment.id')
+          live_url=$(echo "${app_response}" | jq -r -c '.app.live_url')
+
+          if [ "${app_id}" == "" ] || [ "${app_id}" == "null" ]; then
+            echo "App ID could not be found"
+            exit 151
+          fi
+
+          echo "New app named ${{ env.APP_NAME }} created successfully."
+          echo "app_id: ${app_id}"
+          echo "live_url: ${live_url}"
+          echo "pending_deployment_id: ${pending_deployment_id}"
+
+          echo "Getting the deployment momentarily..."
+
+          for i in {1..12}; do
+            sleep 10
+            echo "Poll attempt ${i}"
+            if ! deployment_response=$(curl --fail-with-body -X GET \
+              -H "Accept: application/json" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              --url "${URL}/v2/apps/${app_id}/deployments/${pending_deployment_id}")
+            then
+              echo "Failed to get a deployment response from DO."
+              exit 152
+            fi
+            phase=$(echo "${deployment_response}" | jq -r -c '.deployment.phase')
+            echo "Deployment ${phase}"
+            if [ "${phase}" == "ACTIVE" ]; then
+              # You might expect to get the live URL from response, no.
+              break
+            elif [ "${phase}" == "FAILED" ]; then
+              exit 153
+            fi
+          done
+
+          if [ "${phase}" != "ACTIVE" ]; then
+            echo "Deployment did not succeed in a reasonable amount of time."
+            echo "Attempting to get DEPLOY logs, if possible. The task fails regardless."
+            if logs_list_response=$(curl --fail-with-body -X GET \
+              -H "Accept: application/json" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              --url "${URL}/v2/apps/${app_id}/deployments/${pending_deployment_id}/components/service/logs?type=DEPLOY")
+            then
+              # Docs are ambiguous, experimentation shows `historic_urls` to be a key.
+              # Sometimes `url` and `live_url` are here, matching.
+              # This is best effort, so far with little success.
+              echo "What URLs are available? Response:"
+              echo "${logs_list_response}"
+              if logs_url=$(echo "${logs_list_response}" | jq -r -c '.url')
+              then
+                if logs_response=$(curl --fail-with-body -X GET \
+                  --url "${logs_url}")
+                then
+                  echo "Deploy log file found:"
+                else
+                  echo "Failed to get a log file. Response:"
+                fi
+                echo "${logs_response}"
+              fi
+            else
+              echo "Failed to get the list of DEPLOY logs. Response:"
+              echo "${logs_list_response}"
+            fi
+            echo "Attempting to cancel the deployment. The task fails regardless."
+            curl --fail-with-body -X POST \
+              -H "Accept: application/json" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              --url "${URL}/v2/apps/${app_id}/deployments/${pending_deployment_id}/cancel"
+            exit 154
+          fi
+
+          # Now that the app is live, we should be able to get the URL.
+          live_url=$(curl --fail-with-body -X GET \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            --url "${URL}/v2/apps/${app_id}" |
+            jq -r -c '.app.live_url')
+          if [ "${live_url}" != "" ] && [ "${live_url}" != "null" ]; then
+            # Save live_url for the next step.
+            echo "live_url=${live_url}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "The deployment of a deploy preview succeeded but couldn't find the URL."
+            exit 155
+          fi
+      - name: Add deploy preview URL to the PR comments
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          message: |
+            🔎 A preview deployment of this pull request is available at ${{ steps.create-app-get-url.outputs.live_url }} assuming this PR is still open. 🔍
+          comment-tag: deploy-preview-url
+
+  find-s3-objects-in-db:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["closed", "synchronize"]'), github.event.action)
+    concurrency:
+      # This depends on the database, not on S3.
+      group: preview-db-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    container:
+      image: alpine/psql:latest
+      env:
+        DB_NAME: ${{ env.DATABASE_NAME }}
+        PGSSLMODE: require
+        PGUSER: pdc
+        PGPASSWORD: ${{ env.PGPASSWORD }}
+        PGHOST: ${{ env.PGHOST }}
+        PGPORT: ${{ env.PGPORT }}
+    outputs:
+      keys: ${{ steps.db-query-files.outputs.object_keys }}
+    steps:
+      - name: Find S3 object keys in DB
+        id: db-query-files
+        run: |
+          set -eo pipefail
+          if the_keys=$(psql -d "${{ env.DB_NAME }}" -t -A -R' ' -c "SELECT storage_key FROM files;" | tr -d '\n')
+          then
+            echo "object_keys=${the_keys}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "Failed to find S3 object keys in DB."
+            exit 154
+          fi
+
+  delete-s3-objects:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["closed", "synchronize"]'), github.event.action)
+    concurrency:
+      # There is no corresponding create except API calls that create files.
+      group: preview-delete-s3-objects-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    needs: find-s3-objects-in-db
+    container:
+      image: pgsty/mc:latest
+      env:
+        OBJECTS_TO_DELETE: ${{ needs.find-s3-objects-in-db.outputs.keys }}
+    steps:
+      - name: Remove files from S3 when they exist
+        run: |
+          # Make sure S3_HOST does **NOT** include a bucket-named subdomain!!
+          mc alias set pdc https://${{ env.S3_HOST}} ${{ env.S3_ACCESS_KEY_ID }} ${{ env.S3_ACCESS_SECRET }}
+          for f in ${OBJECTS_TO_DELETE}; do
+            object_name="pdc/${{ env.S3_BUCKET }}/${f}"
+            if mc stat "${object_name}"; then
+              mc rm "${object_name}"
+            else
+              echo "WARNING: failed to find ${object_name}, not deleting it."
+            fi
+          done
+
+  delete-app:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["closed", "synchronize"]'), github.event.action)
+    concurrency:
+      group: preview-app-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    steps:
+      - name: Delete a preview app for this PR if it exists
+        run: |
+          set -eo pipefail
+          # Get the list of applications (there is no filter by name call)
+          if ! app_response=$(curl --fail-with-body -X GET \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            --url "${URL}/v2/apps")
+          then
+            echo "App list could not be found. Response:"
+            echo "${app_response}"
+            # Failure to GET a list of apps should fail the task.
+            exit 153
+          fi
+          app_id=$(echo "${app_response}" |
+            jq -r -c '.apps[] | select (.spec.name == "${{ env.APP_NAME }}") | .id')
+          if [ "${app_id}" != "" ] && [ "${app_id}" != "null" ]; then
+            # Found the app, delete it. Failure on DELETE should fail the task.
+            curl --fail-with-body -X DELETE \
+              -H "Accept: application/json" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              --url "${URL}/v2/apps/${app_id}"
+          else
+            # Failure to find the app in a successfully-gotten list should not
+            # fail the task. And we cannot print the list because secrets show.
+            echo "WARNING: ${{ env.APP_NAME }} was not found in the list."
+          fi

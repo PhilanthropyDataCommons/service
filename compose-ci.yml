@@ -121,7 +121,7 @@ services:
             -d '{"pdcApiUrl": "'${PDC_SYNC_URL:-https://api.philanthropydatacommons.org}'"}'
         user: '999'
   pdc-auth:
-    image: docker.io/keycloak/keycloak:26.3
+    image: docker.io/keycloak/keycloak:26.6
     depends_on:
       pdc-databases:
         condition: service_healthy
@@ -219,7 +219,7 @@ services:
             --username 'user@pdc.local' --new-password 'password'
         user: ${UID:-1000}
   pdc-databases:
-    image: docker.io/postgres:17
+    image: docker.io/postgres:18
     depends_on:
       init-volumes:
         condition: service_completed_successfully
@@ -264,7 +264,7 @@ services:
   pdc-s3:
     # minio does not tag major versions so allow latest here.
     # dclint disable-line service-image-require-explicit-tag
-    image: docker.io/minio/minio:latest
+    image: docker.io/pgsty/minio:latest
     depends_on:
       init-volumes:
         condition: service_completed_successfully

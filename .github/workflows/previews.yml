@@ -143,6 +143,7 @@ jobs:
   post-app:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
     if: |
       !cancelled() &&

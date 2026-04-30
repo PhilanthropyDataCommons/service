@@ -9,6 +9,11 @@
 			"url": "https://spdx.org/licenses/AGPL-3.0-only.html"
 		}
 	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	],
 	"components": {
 		"responses": {
 			"NotFound": {

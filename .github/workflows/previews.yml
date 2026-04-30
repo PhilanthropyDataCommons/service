@@ -29,6 +29,7 @@ jobs:
       group: preview-db-${{ github.event.pull_request.number }}
       cancel-in-progress: false
     if: |
+      github.actor != 'dependabot[bot]' &&
       !cancelled() &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action)
@@ -47,6 +48,7 @@ jobs:
   sleepy-task:
     runs-on: ubuntu-latest
     if: |
+      github.actor != 'dependabot[bot]' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.action == 'reopened'
     steps:
@@ -62,6 +64,7 @@ jobs:
       group: preview-db-${{ github.event.pull_request.number }}
       cancel-in-progress: false
     if: |
+      github.actor != 'dependabot[bot]' &&
       github.event.pull_request.head.repo.full_name == github.repository
     needs: [find-s3-objects-in-db, delete-app]
     container:
@@ -79,6 +82,7 @@ jobs:
 
   build-and-push-preview-image:
     if: |
+      github.actor != 'dependabot[bot]' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action)
     runs-on: ubuntu-latest
@@ -122,6 +126,7 @@ jobs:
     # build-and-push-preview-image action to depend on this action. There does
     # not appear to be another "delete image" action with idempotence available.
     if: |
+      github.actor != 'dependabot[bot]' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.action == 'closed'
     concurrency:
@@ -145,6 +150,7 @@ jobs:
     permissions:
       pull-requests: write
     if: |
+      github.actor != 'dependabot[bot]' &&
       !cancelled() &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action)
@@ -372,6 +378,7 @@ jobs:
   find-s3-objects-in-db:
     runs-on: ubuntu-latest
     if: |
+      github.actor != 'dependabot[bot]' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(fromJSON('["closed", "synchronize"]'), github.event.action)
     concurrency:
@@ -405,6 +412,7 @@ jobs:
   delete-s3-objects:
     runs-on: ubuntu-latest
     if: |
+      github.actor != 'dependabot[bot]' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(fromJSON('["closed", "synchronize"]'), github.event.action)
     concurrency:
@@ -433,6 +441,7 @@ jobs:
   delete-app:
     runs-on: ubuntu-latest
     if: |
+      github.actor != 'dependabot[bot]' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(fromJSON('["closed", "synchronize"]'), github.event.action)
     concurrency:

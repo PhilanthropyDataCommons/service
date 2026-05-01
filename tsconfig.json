@@ -2,10 +2,12 @@
 	"extends": "@tsconfig/node24/tsconfig.json",
 	"compilerOptions": {
 		"outDir": "dist",
+		"rootDir": "src",
 		"declaration": true,
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
-		"noUncheckedIndexedAccess": true
+		"noUncheckedIndexedAccess": true,
+		"types": ["node"]
 	},
 	"include": ["src"],
 	"exclude": ["**/*.test.ts", "**/src/test"]

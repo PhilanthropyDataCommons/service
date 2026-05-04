@@ -122,6 +122,7 @@ const contextEntityTypeScopes = {
 		PermissionGrantEntityType.OPPORTUNITY,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+		PermissionGrantEntityType.APPLICATION_FORM_FIELD,
 	],
 	[PermissionGrantEntityType.DATA_PROVIDER]: [
 		PermissionGrantEntityType.DATA_PROVIDER,
@@ -130,6 +131,7 @@ const contextEntityTypeScopes = {
 		PermissionGrantEntityType.OPPORTUNITY,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+		PermissionGrantEntityType.APPLICATION_FORM_FIELD,
 	],
 	[PermissionGrantEntityType.PROPOSAL]: [
 		PermissionGrantEntityType.PROPOSAL,
@@ -140,6 +142,7 @@ const contextEntityTypeScopes = {
 	],
 	[PermissionGrantEntityType.APPLICATION_FORM]: [
 		PermissionGrantEntityType.APPLICATION_FORM,
+		PermissionGrantEntityType.APPLICATION_FORM_FIELD,
 	],
 	[PermissionGrantEntityType.APPLICATION_FORM_FIELD]: [
 		PermissionGrantEntityType.APPLICATION_FORM_FIELD,
@@ -221,10 +224,12 @@ type PermissionGrantContextEntityKeyVariant<
 	contextEntityType: C;
 };
 
+type PermissionGrantContextEntity = {
+	[C in PermissionGrantEntityType]: PermissionGrantContextEntityKeyVariant<C>;
+}[PermissionGrantEntityType];
+
 type PermissionGrant = UnkeyedPermissionGrant &
-	{
-		[C in PermissionGrantEntityType]: PermissionGrantContextEntityKeyVariant<C>;
-	}[PermissionGrantEntityType] &
+	PermissionGrantContextEntity &
 	{
 		[G in PermissionGrantGranteeType]: PermissionGrantGranteeKeyVariant<G>;
 	}[PermissionGrantGranteeType];
@@ -424,6 +429,7 @@ export {
 	PermissionGrantGranteeType,
 	type PermissionGrant,
 	type PermissionGrantCondition,
+	type PermissionGrantContextEntity,
 	type WritablePermissionGrant,
 	type WritableUnkeyedPermissionGrant,
 };

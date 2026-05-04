@@ -221,9 +221,15 @@ checks. This role grants full administrative access to the PDC service.
 
 ### Permission Grant Management
 
-All CRUD operations on permission grants require the `pdc-admin` role.
-Non-administrators cannot directly create, view, or delete permission grants
-through the API.
+CRUD operations on permission grants require either the `pdc-admin` role or the
+`manage` verb on the grant's context entity. Administrators may act on any
+grant. Non-administrators holding `manage` on a given context entity may list,
+read, create, update, and delete grants whose `contextEntityType` and
+corresponding key identify that entity. `GET /permissionGrants` filters results
+for non-administrators so they see only grants whose context entity they can
+manage. `PUT /permissionGrants/:id` additionally requires `manage` on the
+proposed context entity when the caller re-points a grant at a different
+entity.
 
 ## Implemented Permissions
 

@@ -1,8 +1,13 @@
+export { hasApplicationFormFieldPermission } from './hasApplicationFormFieldPermission';
+export { hasApplicationFormPermission } from './hasApplicationFormPermission';
+export { hasBulkUploadPermission } from './hasBulkUploadPermission';
 export { hasChangemakerFieldValuePermission } from './hasChangemakerFieldValuePermission';
 export { hasChangemakerPermission } from './hasChangemakerPermission';
 export { hasDataProviderPermission } from './hasDataProviderPermission';
 export { hasFunderPermission } from './hasFunderPermission';
 export { hasOpportunityPermission } from './hasOpportunityPermission';
+export { hasPermission } from './hasPermission';
 export { hasProposalFieldValuePermission } from './hasProposalFieldValuePermission';
 export { hasProposalPermission } from './hasProposalPermission';
+export { hasProposalVersionPermission } from './hasProposalVersionPermission';
 export { hasSourcePermission } from './hasSourcePermission';

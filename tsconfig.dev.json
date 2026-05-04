@@ -4,7 +4,8 @@
 		"noEmit": true,
 		"resolveJsonModule": true,
 		"noUncheckedIndexedAccess": true,
-		"isolatedModules": true
+		"isolatedModules": true,
+		"types": ["jest", "node"]
 	},
 	"include": ["src"]
 }

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Permission grant responses now include a `createdByUser` field containing the full user entity, similar to what we've
+  implemented for Bulk Uploads.
+
 ### Changed
 
 - Upsert endpoints now distinguish a created row from an updated one via the HTTP response status: a fresh insert returns `201 Created`, while updating an existing row returns `200 OK`. This applies to `PUT /baseFields/:shortCode`, `PUT /baseFields/:shortCode/localizations/:language`, `PUT /changemakers/:id/fiscalSponsors/:fiscalSponsorChangemakerId`, `PUT /dataProviders/:shortCode`, `PUT /funders/:shortCode`, `POST /funders/:shortCode/members/:memberFunderShortCode`, and `POST /funders/:shortCode/invitations/sent/:invitedFunderShortCode`. Previously each endpoint returned a fixed status (some `200`, some `201`) regardless of whether a row was inserted or updated.

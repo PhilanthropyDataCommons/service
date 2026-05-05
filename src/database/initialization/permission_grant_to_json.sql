@@ -2,7 +2,14 @@ SELECT drop_function('permission_grant_to_json');
 
 CREATE FUNCTION permission_grant_to_json(permission_grant permission_grants)
 RETURNS jsonb AS $$
+DECLARE
+	created_by_user_json JSONB;
 BEGIN
+	SELECT user_to_json(users.*, NULL::uuid, FALSE)
+	INTO created_by_user_json
+	FROM users
+	WHERE users.keycloak_user_id = permission_grant.created_by;
+
 	RETURN jsonb_build_object(
 		'id', permission_grant.id,
 		'granteeType', permission_grant.grantee_type,
@@ -13,6 +20,7 @@ BEGIN
 		'scope', permission_grant.scope,
 		'verbs', permission_grant.verbs,
 		'createdBy', permission_grant.created_by,
+		'createdByUser', created_by_user_json,
 		'conditions', permission_grant.conditions,
 		'createdAt', permission_grant.created_at
 	) || CASE permission_grant.context_entity_type

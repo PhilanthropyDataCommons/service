@@ -40,6 +40,11 @@
 			"description": "The Keycloak user ID of the user who created this grant.",
 			"example": "770e8400-e29b-41d4-a716-446655440002"
 		},
+		"createdByUser": {
+			"$ref": "./User.json",
+			"readOnly": true,
+			"description": "The user record for the user who created this grant."
+		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",

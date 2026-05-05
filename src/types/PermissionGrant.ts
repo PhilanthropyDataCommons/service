@@ -11,6 +11,7 @@ import type { TypeGuardWithAjvErrors } from '../ajv';
 import type { Id } from './Id';
 import type { KeycloakId } from './KeycloakId';
 import type { PermissionGrantVerb } from './PermissionGrantVerb';
+import type { User } from './User';
 import type { Writable } from './Writable';
 import type { ValidateFunction } from 'ajv';
 
@@ -187,6 +188,7 @@ interface UnkeyedPermissionGrant {
 	readonly id: Id;
 	verbs: PermissionGrantVerb[];
 	readonly createdBy: KeycloakId;
+	readonly createdByUser: User;
 	readonly createdAt: string;
 	contextEntityType: PermissionGrantEntityType;
 	granteeType: PermissionGrantGranteeType;

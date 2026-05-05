@@ -4,9 +4,9 @@ import {
 	getDatabase,
 	createOrUpdateBaseField,
 	createOrUpdateBaseFieldLocalization,
+	loadBaseFieldBundle,
 	loadBaseFieldLocalizationsBundleByBaseFieldShortCode,
 	loadTableMetrics,
-	loadBaseFields,
 } from '../database';
 import {
 	BaseFieldDataType,
@@ -31,6 +31,47 @@ const createTestBaseField = async (db: TinyPg) =>
 		valueRelevanceHours: null,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
+
+const createTestBaseFields = async (
+	db: TinyPg,
+	{
+		firstField,
+		secondField,
+		thirdField,
+	}: {
+		firstField: BaseFieldSensitivityClassification;
+		secondField: BaseFieldSensitivityClassification;
+		thirdField: BaseFieldSensitivityClassification;
+	},
+) => {
+	await createOrUpdateBaseField(db, null, {
+		label: 'First Field',
+		description: 'first',
+		shortCode: 'firstField',
+		dataType: BaseFieldDataType.STRING,
+		category: BaseFieldCategory.PROJECT,
+		valueRelevanceHours: null,
+		sensitivityClassification: firstField,
+	});
+	await createOrUpdateBaseField(db, null, {
+		label: 'Second Field',
+		description: 'second',
+		shortCode: 'secondField',
+		dataType: BaseFieldDataType.STRING,
+		category: BaseFieldCategory.PROJECT,
+		valueRelevanceHours: null,
+		sensitivityClassification: secondField,
+	});
+	await createOrUpdateBaseField(db, null, {
+		label: 'Third Field',
+		description: 'third',
+		shortCode: 'thirdField',
+		dataType: BaseFieldDataType.STRING,
+		category: BaseFieldCategory.PROJECT,
+		valueRelevanceHours: null,
+		sensitivityClassification: thirdField,
+	});
+};
 
 const createTestBaseFieldWithLocalization = async (db: TinyPg) => {
 	const baseField = await createOrUpdateBaseField(db, null, {
@@ -61,8 +102,11 @@ describe('/baseFields', () => {
 			await request(app).get('/baseFields').expect(200);
 		});
 
-		it('returns an empty array when no data is present', async () => {
-			await request(app).get('/baseFields').expect(200, []);
+		it('returns an empty bundle when no data is present', async () => {
+			await request(app).get('/baseFields').expect(200, {
+				entries: [],
+				total: 0,
+			});
 		});
 
 		it('returns non-forbidden base fields present in the database by default', async () => {
@@ -112,48 +156,187 @@ describe('/baseFields', () => {
 			});
 
 			const result = await request(app).get('/baseFields').expect(200);
-			expect(result.body).toStrictEqual([
-				{
-					label: 'First Name',
-					description: 'The first name of the applicant',
-					shortCode: 'firstName',
-					dataType: BaseFieldDataType.STRING,
-					category: BaseFieldCategory.PROJECT,
-					valueRelevanceHours: null,
-					sensitivityClassification:
-						BaseFieldSensitivityClassification.RESTRICTED,
-					localizations: {
-						fr: {
-							label: 'prenom',
-							language: 'fr',
-							createdAt: expectTimestamp(),
-							baseFieldShortCode: 'firstName',
-							description: 'le prenom',
+			expect(result.body).toStrictEqual({
+				total: 2,
+				entries: [
+					{
+						label: 'Last Name',
+						description: 'The last name of the applicant',
+						shortCode: 'lastName',
+						dataType: BaseFieldDataType.STRING,
+						category: BaseFieldCategory.PROJECT,
+						valueRelevanceHours: null,
+						sensitivityClassification:
+							BaseFieldSensitivityClassification.RESTRICTED,
+						localizations: {
+							fr: {
+								label: 'postnom',
+								language: 'fr',
+								createdAt: expectTimestamp(),
+								baseFieldShortCode: 'lastName',
+								description: 'le postnom',
+							},
 						},
+						createdAt: expectTimestamp(),
 					},
-					createdAt: expectTimestamp(),
-				},
-				{
-					label: 'Last Name',
-					description: 'The last name of the applicant',
-					shortCode: 'lastName',
-					dataType: BaseFieldDataType.STRING,
-					category: BaseFieldCategory.PROJECT,
-					valueRelevanceHours: null,
-					sensitivityClassification:
-						BaseFieldSensitivityClassification.RESTRICTED,
-					localizations: {
-						fr: {
-							label: 'postnom',
-							language: 'fr',
-							createdAt: expectTimestamp(),
-							baseFieldShortCode: 'lastName',
-							description: 'le postnom',
+					{
+						label: 'First Name',
+						description: 'The first name of the applicant',
+						shortCode: 'firstName',
+						dataType: BaseFieldDataType.STRING,
+						category: BaseFieldCategory.PROJECT,
+						valueRelevanceHours: null,
+						sensitivityClassification:
+							BaseFieldSensitivityClassification.RESTRICTED,
+						localizations: {
+							fr: {
+								label: 'prenom',
+								language: 'fr',
+								createdAt: expectTimestamp(),
+								baseFieldShortCode: 'firstName',
+								description: 'le prenom',
+							},
 						},
+						createdAt: expectTimestamp(),
 					},
-					createdAt: expectTimestamp(),
-				},
-			]);
+				],
+			});
+		});
+
+		it('returns only matching base fields when sensitivityClassifications is a positive list', async () => {
+			const db = getDatabase();
+			await createTestBaseFields(db, {
+				firstField: BaseFieldSensitivityClassification.PUBLIC,
+				secondField: BaseFieldSensitivityClassification.RESTRICTED,
+				thirdField: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+
+			const result = await request(app)
+				.get('/baseFields?sensitivityClassifications=%5B%22public%22%5D')
+				.expect(200);
+			expect(result.body).toEqual({
+				total: 1,
+				entries: [
+					{
+						label: 'First Field',
+						description: 'first',
+						shortCode: 'firstField',
+						dataType: BaseFieldDataType.STRING,
+						category: BaseFieldCategory.PROJECT,
+						valueRelevanceHours: null,
+						sensitivityClassification:
+							BaseFieldSensitivityClassification.PUBLIC,
+						localizations: {},
+						createdAt: expectTimestamp(),
+					},
+				],
+			});
+		});
+
+		it('returns all base fields including forbidden when sensitivityClassifications=all', async () => {
+			const db = getDatabase();
+			await createTestBaseFields(db, {
+				firstField: BaseFieldSensitivityClassification.PUBLIC,
+				secondField: BaseFieldSensitivityClassification.RESTRICTED,
+				thirdField: BaseFieldSensitivityClassification.FORBIDDEN,
+			});
+
+			const result = await request(app)
+				.get('/baseFields?sensitivityClassifications=all')
+				.expect(200);
+			expect(result.body).toEqual({
+				total: 3,
+				entries: [
+					{
+						label: 'Third Field',
+						description: 'third',
+						shortCode: 'thirdField',
+						dataType: BaseFieldDataType.STRING,
+						category: BaseFieldCategory.PROJECT,
+						valueRelevanceHours: null,
+						sensitivityClassification:
+							BaseFieldSensitivityClassification.FORBIDDEN,
+						localizations: {},
+						createdAt: expectTimestamp(),
+					},
+					{
+						label: 'Second Field',
+						description: 'second',
+						shortCode: 'secondField',
+						dataType: BaseFieldDataType.STRING,
+						category: BaseFieldCategory.PROJECT,
+						valueRelevanceHours: null,
+						sensitivityClassification:
+							BaseFieldSensitivityClassification.RESTRICTED,
+						localizations: {},
+						createdAt: expectTimestamp(),
+					},
+					{
+						label: 'First Field',
+						description: 'first',
+						shortCode: 'firstField',
+						dataType: BaseFieldDataType.STRING,
+						category: BaseFieldCategory.PROJECT,
+						valueRelevanceHours: null,
+						sensitivityClassification:
+							BaseFieldSensitivityClassification.PUBLIC,
+						localizations: {},
+						createdAt: expectTimestamp(),
+					},
+				],
+			});
+		});
+
+		it('returns 400 when sensitivityClassifications is unparseable', async () => {
+			const result = await request(app)
+				.get('/baseFields?sensitivityClassifications=not-json')
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('paginates with _page and _count', async () => {
+			const db = getDatabase();
+			await createTestBaseFields(db, {
+				firstField: BaseFieldSensitivityClassification.PUBLIC,
+				secondField: BaseFieldSensitivityClassification.PUBLIC,
+				thirdField: BaseFieldSensitivityClassification.PUBLIC,
+			});
+
+			const result = await request(app)
+				.get('/baseFields?_page=1&_count=2')
+				.expect(200);
+			expect(result.body).toEqual({
+				total: 3,
+				entries: [
+					{
+						label: 'Third Field',
+						description: 'third',
+						shortCode: 'thirdField',
+						dataType: BaseFieldDataType.STRING,
+						category: BaseFieldCategory.PROJECT,
+						valueRelevanceHours: null,
+						sensitivityClassification:
+							BaseFieldSensitivityClassification.PUBLIC,
+						localizations: {},
+						createdAt: expectTimestamp(),
+					},
+					{
+						label: 'Second Field',
+						description: 'second',
+						shortCode: 'secondField',
+						dataType: BaseFieldDataType.STRING,
+						category: BaseFieldCategory.PROJECT,
+						valueRelevanceHours: null,
+						sensitivityClassification:
+							BaseFieldSensitivityClassification.PUBLIC,
+						localizations: {},
+						createdAt: expectTimestamp(),
+					},
+				],
+			});
 		});
 	});
 
@@ -455,7 +638,7 @@ describe('/baseFields', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			await request(app)
+			const result = await request(app)
 				.put(`/baseFields/${baseField.shortCode}`)
 				.type('application/json')
 				.set(adminUserAuthHeader)
@@ -468,8 +651,7 @@ describe('/baseFields', () => {
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
 				.expect(200);
-			const baseFields = await loadBaseFields(db);
-			expect(baseFields[0]).toEqual({
+			expect(result.body).toMatchObject({
 				label: '🏷️',
 				description: '😍',
 				shortCode: 'summary',
@@ -479,6 +661,33 @@ describe('/baseFields', () => {
 				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				localizations: {},
 				createdAt: expectTimestamp(),
+			});
+			const baseFields = await loadBaseFieldBundle(
+				db,
+				null,
+				{
+					negated: false,
+					list: [BaseFieldSensitivityClassification.PUBLIC],
+				},
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(baseFields).toMatchObject({
+				total: 1,
+				entries: [
+					{
+						label: '🏷️',
+						description: '😍',
+						shortCode: 'summary',
+						dataType: BaseFieldDataType.NUMBER,
+						category: BaseFieldCategory.ORGANIZATION,
+						valueRelevanceHours: 9001,
+						sensitivityClassification:
+							BaseFieldSensitivityClassification.PUBLIC,
+						localizations: {},
+						createdAt: expectTimestamp(),
+					},
+				],
 			});
 		});
 

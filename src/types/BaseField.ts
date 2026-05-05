@@ -4,6 +4,7 @@ import type { BaseFieldLocalization } from './BaseFieldLocalization';
 import type { JSONSchemaType } from 'ajv';
 import type { Writable } from './Writable';
 import type { ShortCode } from './ShortCode';
+import type { Bundle } from './Bundle';
 
 export enum BaseFieldDataType {
 	STRING = 'string',
@@ -159,6 +160,17 @@ const isBaseFieldSensitivityClassification = ajv.compile(
 	baseFieldSensitivityClassificationSchema,
 );
 
+const baseFieldBundleSchema: JSONSchemaType<Bundle<BaseField>> = {
+	type: 'object',
+	properties: {
+		entries: { type: 'array', items: baseFieldSchema },
+		total: { type: 'number' },
+	},
+	required: ['entries', 'total'],
+};
+
+const isBaseFieldBundle = ajv.compile(baseFieldBundleSchema);
+
 export {
 	type BaseField,
 	BaseFieldSensitivityClassification,
@@ -170,4 +182,5 @@ export {
 	type WritableBaseField,
 	isWritableBaseField,
 	writableBaseFieldSchema,
+	isBaseFieldBundle,
 };

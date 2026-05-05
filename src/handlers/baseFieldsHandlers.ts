@@ -3,7 +3,7 @@ import { InputValidationError } from '../errors';
 import {
 	getDatabase,
 	createOrUpdateBaseField,
-	loadBaseFields,
+	loadBaseFieldBundle,
 	createOrUpdateBaseFieldLocalization,
 	loadBaseFieldLocalizationsBundleByBaseFieldShortCode,
 	loadBaseField,
@@ -12,6 +12,7 @@ import {
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
 import {
+	isAuthContext,
 	isValidLanguageTag,
 	isWritableBaseField,
 	isWritableBaseFieldLocalization,
@@ -32,13 +33,22 @@ const assertBaseFieldExists = async (
 
 const getBaseFields = async (req: Request, res: Response): Promise<void> => {
 	const db = getDatabase();
+	const authContext = isAuthContext(req) ? req : null;
+	const paginationParameters = extractPaginationParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
 	const sensitivityClassificationFilter =
 		extractBaseFieldSensitivityClassificationsParameter(req);
-	const baseFields = await loadBaseFields(db, sensitivityClassificationFilter);
+	const baseFieldBundle = await loadBaseFieldBundle(
+		db,
+		authContext,
+		sensitivityClassificationFilter,
+		limit,
+		offset,
+	);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')
-		.send(baseFields);
+		.send(baseFieldBundle);
 };
 
 const putBaseField = async (

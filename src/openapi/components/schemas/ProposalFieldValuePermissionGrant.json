@@ -16,7 +16,7 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["proposalFieldValue"]
+						"enum": ["proposalFieldValue", "any"]
 					},
 					"minItems": 1
 				}

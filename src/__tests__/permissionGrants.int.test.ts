@@ -2,8 +2,15 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	createOrUpdateFunder,
+	createProposal,
 	createSource,
 	getDatabase,
+	hasChangemakerPermission,
+	hasDataProviderPermission,
+	hasFunderPermission,
+	hasOpportunityPermission,
+	hasProposalPermission,
+	hasSourcePermission,
 	loadTableMetrics,
 	removeSource,
 } from '../database';
@@ -14,14 +21,21 @@ import {
 } from '../test/asymettricMatchers';
 import {
 	createTestChangemaker,
+	createTestDataProvider,
 	createTestFunder,
+	createTestOpportunity,
 	createTestPermissionGrant,
 } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
-import { getTestAuthContext, getTestUserKeycloakUserId } from '../test/utils';
+import {
+	getAuthContext,
+	getTestAuthContext,
+	getTestUserKeycloakUserId,
+	loadTestUser,
+} from '../test/utils';
 import {
 	nonNullKeycloakIdToString,
 	PermissionGrantEntityType,
@@ -441,6 +455,25 @@ describe('/permissionGrants', () => {
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
 				details: expectArray(),
+			});
+		});
+
+		it('returns 400 bad request when contextEntityType is `any`', async () => {
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					granteeKeycloakOrganizationId: null,
+					contextEntityType: 'any',
+					scope: ['any'],
+					verbs: ['view'],
+				})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
 			});
 		});
 
@@ -1262,5 +1295,308 @@ describe('/permissionGrants', () => {
 				.set(adminUserAuthHeader)
 				.expect(404);
 		});
+	});
+});
+
+describe('`any` scope semantics', () => {
+	const expectAllTrue = async (
+		checks: Array<Promise<boolean>>,
+	): Promise<void> => {
+		const results = await Promise.all(checks);
+		results.forEach((result) => {
+			expect(result).toBe(true);
+		});
+	};
+
+	it('satisfies any scope check on a funder grant', async () => {
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const funder = await createTestFunder(db, testUserAuthContext);
+
+		await agent
+			.post('/permissionGrants')
+			.type('application/json')
+			.set(adminUserAuthHeader)
+			.send({
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.VIEW],
+			})
+			.expect(201);
+
+		await expectAllTrue([
+			hasFunderPermission(db, testUserAuthContext, {
+				funderShortCode: funder.shortCode,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.FUNDER,
+			}),
+			hasFunderPermission(db, testUserAuthContext, {
+				funderShortCode: funder.shortCode,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.OPPORTUNITY,
+			}),
+			hasFunderPermission(db, testUserAuthContext, {
+				funderShortCode: funder.shortCode,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.PROPOSAL,
+			}),
+			hasFunderPermission(db, testUserAuthContext, {
+				funderShortCode: funder.shortCode,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+			}),
+		]);
+	});
+
+	it('satisfies any scope check on a changemaker grant', async () => {
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
+
+		await agent
+			.post('/permissionGrants')
+			.type('application/json')
+			.set(adminUserAuthHeader)
+			.send({
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.VIEW],
+			})
+			.expect(201);
+
+		await expectAllTrue([
+			hasChangemakerPermission(db, testUserAuthContext, {
+				changemakerId: changemaker.id,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.CHANGEMAKER,
+			}),
+			hasChangemakerPermission(db, testUserAuthContext, {
+				changemakerId: changemaker.id,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.PROPOSAL,
+			}),
+			hasChangemakerPermission(db, testUserAuthContext, {
+				changemakerId: changemaker.id,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+			}),
+		]);
+	});
+
+	it('does not extend `any` scope to a different context', async () => {
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const ownedFunder = await createTestFunder(db, testUserAuthContext);
+		const otherFunder = await createTestFunder(db, testUserAuthContext);
+
+		await agent
+			.post('/permissionGrants')
+			.type('application/json')
+			.set(adminUserAuthHeader)
+			.send({
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: ownedFunder.shortCode,
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.VIEW],
+			})
+			.expect(201);
+
+		expect(
+			await hasFunderPermission(db, testUserAuthContext, {
+				funderShortCode: otherFunder.shortCode,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.FUNDER,
+			}),
+		).toBe(false);
+	});
+
+	it('does not satisfy a verb that is not in the grant', async () => {
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const funder = await createTestFunder(db, testUserAuthContext);
+
+		await agent
+			.post('/permissionGrants')
+			.type('application/json')
+			.set(adminUserAuthHeader)
+			.send({
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.VIEW],
+			})
+			.expect(201);
+
+		expect(
+			await hasFunderPermission(db, testUserAuthContext, {
+				funderShortCode: funder.shortCode,
+				permission: PermissionGrantVerb.EDIT,
+				scope: PermissionGrantEntityType.FUNDER,
+			}),
+		).toBe(false);
+	});
+
+	it('combined with `manage` grants every verb on every scope', async () => {
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const funder = await createTestFunder(db, testUserAuthContext);
+
+		await agent
+			.post('/permissionGrants')
+			.type('application/json')
+			.set(adminUserAuthHeader)
+			.send({
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.MANAGE],
+			})
+			.expect(201);
+
+		await expectAllTrue(
+			[
+				PermissionGrantVerb.VIEW,
+				PermissionGrantVerb.CREATE,
+				PermissionGrantVerb.EDIT,
+				PermissionGrantVerb.DELETE,
+				PermissionGrantVerb.REFERENCE,
+			].flatMap((verb) => [
+				hasFunderPermission(db, testUserAuthContext, {
+					funderShortCode: funder.shortCode,
+					permission: verb,
+					scope: PermissionGrantEntityType.FUNDER,
+				}),
+				hasFunderPermission(db, testUserAuthContext, {
+					funderShortCode: funder.shortCode,
+					permission: verb,
+					scope: PermissionGrantEntityType.OPPORTUNITY,
+				}),
+				hasFunderPermission(db, testUserAuthContext, {
+					funderShortCode: funder.shortCode,
+					permission: verb,
+					scope: PermissionGrantEntityType.PROPOSAL,
+				}),
+			]),
+		);
+	});
+
+	it('extends to opportunities inherited from a funder', async () => {
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const funder = await createTestFunder(db, testUserAuthContext);
+		const opportunity = await createTestOpportunity(db, testUserAuthContext, {
+			funderShortCode: funder.shortCode,
+		});
+
+		await agent
+			.post('/permissionGrants')
+			.type('application/json')
+			.set(adminUserAuthHeader)
+			.send({
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.VIEW],
+			})
+			.expect(201);
+
+		expect(
+			await hasOpportunityPermission(db, testUserAuthContext, {
+				opportunityId: opportunity.id,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.OPPORTUNITY,
+			}),
+		).toBe(true);
+	});
+
+	it('extends to sources inherited from a data provider', async () => {
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const dataProvider = await createTestDataProvider(db, testUserAuthContext);
+		const source = await createSource(db, testUserAuthContext, {
+			label: 'DP-owned Source',
+			dataProviderShortCode: dataProvider.shortCode,
+		});
+
+		await agent
+			.post('/permissionGrants')
+			.type('application/json')
+			.set(adminUserAuthHeader)
+			.send({
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
+				dataProviderShortCode: dataProvider.shortCode,
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.VIEW],
+			})
+			.expect(201);
+
+		await expectAllTrue([
+			hasDataProviderPermission(db, testUserAuthContext, {
+				dataProviderShortCode: dataProvider.shortCode,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.DATA_PROVIDER,
+			}),
+			hasSourcePermission(db, testUserAuthContext, {
+				sourceId: source.id,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.SOURCE,
+			}),
+		]);
+	});
+
+	it('extends to a proposal inherited from an opportunity', async () => {
+		const db = getDatabase();
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser);
+		const opportunity = await createTestOpportunity(db, testUserAuthContext);
+		const proposal = await createProposal(db, testUserAuthContext, {
+			externalId: 'any-scope-inherited-proposal',
+			opportunityId: opportunity.id,
+		});
+
+		await agent
+			.post('/permissionGrants')
+			.type('application/json')
+			.set(adminUserAuthHeader)
+			.send({
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+				opportunityId: opportunity.id,
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.VIEW],
+			})
+			.expect(201);
+
+		expect(
+			await hasProposalPermission(db, testUserAuthContext, {
+				proposalId: proposal.id,
+				permission: PermissionGrantVerb.VIEW,
+				scope: PermissionGrantEntityType.PROPOSAL,
+			}),
+		).toBe(true);
 	});
 });

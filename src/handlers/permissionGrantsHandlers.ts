@@ -22,12 +22,23 @@ import {
 	isAuthContext,
 	isId,
 	isWritablePermissionGrant,
-	type PermissionGrantEntityType,
+	PermissionGrantEntityType,
 	type PermissionGrantCondition,
 	type WritableUnkeyedPermissionGrant,
 } from '../types';
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
+
+const assertPermissionGrantContextEntityTypeIsSupported = (
+	permissionGrant: WritableUnkeyedPermissionGrant,
+): void => {
+	if (permissionGrant.contextEntityType === PermissionGrantEntityType.ANY) {
+		throw new InputValidationError(
+			`Context entity type "${PermissionGrantEntityType.ANY}" is not currently supported.`,
+			[],
+		);
+	}
+};
 
 const assertPermissionGrantHasValidScope = (
 	permissionGrant: WritableUnkeyedPermissionGrant,
@@ -143,6 +154,7 @@ const postPermissionGrant = async (
 		);
 	}
 
+	assertPermissionGrantContextEntityTypeIsSupported(body);
 	assertPermissionGrantHasValidScope(body);
 	assertPermissionGrantHasValidConditions(body);
 	const permissionGrant = await createPermissionGrant(db, req, body);
@@ -201,6 +213,7 @@ const putPermissionGrant = async (
 		);
 	}
 
+	assertPermissionGrantContextEntityTypeIsSupported(body);
 	assertPermissionGrantHasValidScope(body);
 	assertPermissionGrantHasValidConditions(body);
 

@@ -26,7 +26,9 @@ BEGIN
 			AND verb_set_permits_verb(
 				pg.verbs, has_funder_permission.verb
 			)
-			AND has_funder_permission.scope = ANY(pg.scope)
+			AND scope_set_permits_scope(
+				pg.scope, has_funder_permission.scope
+			)
 			AND (
 				(
 					pg.grantee_type = 'user'

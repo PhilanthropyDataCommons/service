@@ -17,7 +17,7 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["dataProvider"]
+						"enum": ["dataProvider", "any"]
 					},
 					"minItems": 1
 				}

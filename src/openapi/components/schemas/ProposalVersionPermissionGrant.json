@@ -16,7 +16,7 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["proposalVersion"]
+						"enum": ["proposalVersion", "any"]
 					},
 					"minItems": 1
 				}

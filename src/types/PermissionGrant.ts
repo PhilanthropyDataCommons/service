@@ -27,6 +27,7 @@ enum PermissionGrantEntityType {
 	SOURCE = 'source',
 	BULK_UPLOAD = 'bulkUpload',
 	CHANGEMAKER_FIELD_VALUE = 'changemakerFieldValue',
+	ANY = 'any',
 }
 
 enum PermissionGrantEntityKeyType {
@@ -105,12 +106,22 @@ const contextEntityKeyProperties = {
 		keyName: 'changemakerFieldValueId',
 		keyType: PermissionGrantEntityKeyType.ID,
 	},
-} as const satisfies Record<
-	PermissionGrantEntityType,
-	{ keyName: string; keyType: PermissionGrantEntityKeyType }
+} as const satisfies Omit<
+	Record<
+		PermissionGrantEntityType,
+		{ keyName: string; keyType: PermissionGrantEntityKeyType }
+	>,
+	PermissionGrantEntityType.ANY
 >;
 
-const contextEntityTypeScopes = {
+type PermissionGrantKeyedContextEntityType =
+	keyof typeof contextEntityKeyProperties;
+
+// Scopes that are valid against any context entity type, appended to a
+// context's native scopes by `getScopesForContextEntityType` below.
+const universalScopes = [PermissionGrantEntityType.ANY] as const;
+
+const contextEntityTypeNativeScopes = {
 	[PermissionGrantEntityType.CHANGEMAKER]: [
 		PermissionGrantEntityType.CHANGEMAKER,
 		PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
@@ -154,6 +165,7 @@ const contextEntityTypeScopes = {
 	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: [
 		PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
 	],
+	[PermissionGrantEntityType.ANY]: [],
 } as const satisfies Record<
 	PermissionGrantEntityType,
 	readonly PermissionGrantEntityType[]
@@ -178,6 +190,7 @@ const scopeConditions = {
 	[PermissionGrantEntityType.SOURCE]: [],
 	[PermissionGrantEntityType.BULK_UPLOAD]: [],
 	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: [],
+	[PermissionGrantEntityType.ANY]: [],
 } as const satisfies Record<
 	PermissionGrantEntityType,
 	readonly PermissionGrantCondition[]
@@ -204,7 +217,7 @@ type GranteeKeysByGranteeType = {
 };
 
 type ContextEntityKeysByContextEntityType = {
-	[T in PermissionGrantEntityType]: Record<
+	[T in PermissionGrantKeyedContextEntityType]: Record<
 		(typeof contextEntityKeyProperties)[T]['keyName'],
 		PermissionGrantEntityKeyValueType[(typeof contextEntityKeyProperties)[T]['keyType']]
 	>;
@@ -217,9 +230,11 @@ type PermissionGrantGranteeKeyVariant<G extends PermissionGrantGranteeType> =
 
 type PermissionGrantContextEntityKeyVariant<
 	C extends PermissionGrantEntityType,
-> = ContextEntityKeysByContextEntityType[C] & {
-	contextEntityType: C;
-};
+> = C extends PermissionGrantKeyedContextEntityType
+	? ContextEntityKeysByContextEntityType[C] & {
+			contextEntityType: C;
+		}
+	: { contextEntityType: C };
 
 type PermissionGrant = UnkeyedPermissionGrant &
 	{
@@ -294,12 +309,12 @@ const isWritableUnkeyedPermissionGrant =
 	});
 
 const contextKeyValidatorCache = new Map<
-	PermissionGrantEntityType,
+	PermissionGrantKeyedContextEntityType,
 	ValidateFunction
 >();
 
 const getContextKeyValidator = (
-	contextEntityType: PermissionGrantEntityType,
+	contextEntityType: PermissionGrantKeyedContextEntityType,
 ): ValidateFunction => {
 	const existing = contextKeyValidatorCache.get(contextEntityType);
 	if (existing !== undefined) {
@@ -355,12 +370,19 @@ const coreWritableKeys = new Set([
 	'conditions',
 ]);
 
+const isPermissionGrantKeyedContextEntityType = (
+	contextEntityType: PermissionGrantEntityType,
+): contextEntityType is PermissionGrantKeyedContextEntityType =>
+	contextEntityType in contextEntityKeyProperties;
+
 const getAllowedKeys = (
 	contextEntityType: PermissionGrantEntityType,
 	granteeType: PermissionGrantGranteeType,
 ): Set<string> => {
 	const allowed = new Set(coreWritableKeys);
-	allowed.add(contextEntityKeyProperties[contextEntityType].keyName);
+	if (isPermissionGrantKeyedContextEntityType(contextEntityType)) {
+		allowed.add(contextEntityKeyProperties[contextEntityType].keyName);
+	}
 	allowed.add(granteeKeyProperties[granteeType].keyName);
 	return allowed;
 };
@@ -376,10 +398,12 @@ const isWritablePermissionGrant: TypeGuardWithAjvErrors<
 
 	const { contextEntityType, granteeType } = data;
 
-	const validateContextKey = getContextKeyValidator(contextEntityType);
-	if (!validateContextKey(data)) {
-		isWritablePermissionGrant.errors = validateContextKey.errors ?? null;
-		return false;
+	if (isPermissionGrantKeyedContextEntityType(contextEntityType)) {
+		const validateContextKey = getContextKeyValidator(contextEntityType);
+		if (!validateContextKey(data)) {
+			isWritablePermissionGrant.errors = validateContextKey.errors ?? null;
+			return false;
+		}
 	}
 
 	const validateGranteeKey = getGranteeKeyValidator(granteeType);
@@ -409,8 +433,10 @@ const isWritablePermissionGrant: TypeGuardWithAjvErrors<
 
 const getScopesForContextEntityType = (
 	contextEntityType: PermissionGrantEntityType,
-): readonly PermissionGrantEntityType[] =>
-	contextEntityTypeScopes[contextEntityType];
+): readonly PermissionGrantEntityType[] => [
+	...contextEntityTypeNativeScopes[contextEntityType],
+	...universalScopes,
+];
 
 const getConditionsForScope = (
 	scopeKey: PermissionGrantEntityType,

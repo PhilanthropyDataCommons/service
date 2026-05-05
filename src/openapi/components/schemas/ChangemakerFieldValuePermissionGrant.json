@@ -16,7 +16,7 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["changemakerFieldValue"]
+						"enum": ["changemakerFieldValue", "any"]
 					},
 					"minItems": 1
 				}

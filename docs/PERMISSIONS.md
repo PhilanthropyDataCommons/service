@@ -197,6 +197,15 @@ a grantee holding `manage | proposal` does not gain access to `funder`-,
 `opportunity`-, or `source`-scoped data unless those scopes are also
 included in the grant.
 
+The `any` scope is treated as satisfying any scope check on the same context.
+A grant of `view | any` on a funder context, for example, lets the grantee
+view funder-, opportunity-, proposal-, and proposal-field-value-scoped data
+for that funder without naming each scope separately. The `any` scope is
+useful for "owner" or "admin"-style grants that should automatically extend
+to scope types added in the future. Combining `any` with `manage` (e.g.,
+`manage | any`) effectively grants full administrative access on the given
+context.
+
 The `reference` verb is separate from `view` and `create` so that permission to
 see an entity does not automatically imply permission to cite it from elsewhere,
 and permission to create entities in one context does not automatically imply

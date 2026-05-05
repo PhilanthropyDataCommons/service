@@ -16,7 +16,7 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["changemaker"]
+						"enum": ["changemaker", "any"]
 					},
 					"minItems": 1
 				}

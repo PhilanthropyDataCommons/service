@@ -49,34 +49,32 @@ BEGIN
 			(
 				pg.context_entity_type = 'proposalFieldValue'
 				AND pg.proposal_field_value_id = pfv.id
-				AND has_proposal_field_value_permission.scope = ANY(pg.scope)
 			)
-			-- Inherited from proposal with proposalFieldValue scope
+			-- Inherited from proposal
 			OR (
 				pg.context_entity_type = 'proposal'
 				AND pg.proposal_id = pv.proposal_id
-				AND 'proposalFieldValue' = ANY(pg.scope)
 			)
-			-- Inherited from opportunity with proposalFieldValue scope
+			-- Inherited from opportunity
 			OR (
 				pg.context_entity_type = 'opportunity'
 				AND pg.opportunity_id = p.opportunity_id
-				AND 'proposalFieldValue' = ANY(pg.scope)
 			)
-			-- Inherited from funder with proposalFieldValue scope
+			-- Inherited from funder
 			OR (
 				pg.context_entity_type = 'funder'
 				AND pg.funder_short_code = o.funder_short_code
-				AND 'proposalFieldValue' = ANY(pg.scope)
 			)
-			-- Inherited from changemaker with proposalFieldValue scope
+			-- Inherited from changemaker
 			OR (
 				pg.context_entity_type = 'changemaker'
 				AND pg.changemaker_id = cp.changemaker_id
-				AND 'proposalFieldValue' = ANY(pg.scope)
 			)
 		)
 		WHERE pfv.id = has_proposal_field_value_permission.proposal_field_value_id
+			AND scope_set_permits_scope(
+				pg.scope, has_proposal_field_value_permission.scope
+			)
 			AND verb_set_permits_verb(
 				pg.verbs, has_proposal_field_value_permission.verb
 			)

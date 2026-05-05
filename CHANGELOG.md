@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Added `any` to the permission grant entity type set. When `any` is included in a grant's `scope` array, that grant satisfies any scope check on its context (e.g., `view | any` on a funder context grants view access for funder-, opportunity-, proposal-, and proposal-field-value-scoped data on that funder, including scope types added in the future). `any` is also recognized as a context entity type for forward compatibility but is not yet accepted by the API as a context.
+
 ### Changed
 
 - The `manage` permission verb now satisfies any verb check on the scope to which it is granted. A grantee with `manage` on a given scope no longer needs the other verbs listed alongside it to perform view, create, edit, delete, or reference operations at that scope. Scope matching is unchanged: `manage` does not grant access to scopes that are not explicitly included in the grant.

@@ -16,7 +16,7 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["bulkUpload"]
+						"enum": ["bulkUpload", "any"]
 					},
 					"minItems": 1
 				}

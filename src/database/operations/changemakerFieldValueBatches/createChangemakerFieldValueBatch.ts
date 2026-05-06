@@ -1,10 +1,10 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import type {
 	ChangemakerFieldValueBatch,
 	WritableChangemakerFieldValueBatch,
 } from '../../../types';
 
-const createChangemakerFieldValueBatch = generateCreateOrUpdateItemOperation<
+const createChangemakerFieldValueBatch = generateCreateItemOperation<
 	ChangemakerFieldValueBatch,
 	WritableChangemakerFieldValueBatch,
 	[]

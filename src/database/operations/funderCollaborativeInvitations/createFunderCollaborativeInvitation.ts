@@ -1,10 +1,10 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpsertItemOperation } from '../generators';
 import type {
 	FunderCollaborativeInvitation,
 	InternallyWritableFunderCollaborativeInvitation,
 } from '../../../types';
 
-const createFunderCollaborativeInvitation = generateCreateOrUpdateItemOperation<
+const createFunderCollaborativeInvitation = generateUpsertItemOperation<
 	FunderCollaborativeInvitation,
 	InternallyWritableFunderCollaborativeInvitation,
 	[]

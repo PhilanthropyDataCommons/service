@@ -1,10 +1,10 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpsertItemOperation } from '../generators';
 import type {
 	EphemeralUserGroupAssociation,
 	InternallyWritableEphemeralUserGroupAssociation,
 } from '../../../types';
 
-const createEphemeralUserGroupAssociation = generateCreateOrUpdateItemOperation<
+const createEphemeralUserGroupAssociation = generateUpsertItemOperation<
 	EphemeralUserGroupAssociation,
 	InternallyWritableEphemeralUserGroupAssociation,
 	[]

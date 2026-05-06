@@ -1,11 +1,11 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpdateItemOperation } from '../generators';
 import type {
 	FunderCollaborativeInvitation,
 	ShortCode,
 	WritableFunderCollaborativeInvitation,
 } from '../../../types';
 
-const updateFunderCollaborativeInvitation = generateCreateOrUpdateItemOperation<
+const updateFunderCollaborativeInvitation = generateUpdateItemOperation<
 	FunderCollaborativeInvitation,
 	Partial<WritableFunderCollaborativeInvitation>,
 	[funderCollaborativeShortCode: ShortCode, invitedFunderShortCode: ShortCode]

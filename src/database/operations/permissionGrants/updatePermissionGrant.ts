@@ -1,11 +1,11 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpdateItemOperation } from '../generators';
 import type {
 	Id,
 	PermissionGrant,
 	WritablePermissionGrant,
 } from '../../../types';
 
-const updatePermissionGrant = generateCreateOrUpdateItemOperation<
+const updatePermissionGrant = generateUpdateItemOperation<
 	PermissionGrant,
 	WritablePermissionGrant,
 	[permissionGrantId: Id]

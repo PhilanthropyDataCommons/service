@@ -18,10 +18,11 @@ const createTestFunder = async (
 		keycloakOrganizationId: null,
 		isCollaborative: false,
 	};
-	return await createOrUpdateFunder(db, authContext, {
+	const { item } = await createOrUpdateFunder(db, authContext, {
 		...defaultValues,
 		...overrideValues,
 	});
+	return item;
 };
 
 export { createTestFunder };

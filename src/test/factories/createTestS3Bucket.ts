@@ -23,10 +23,11 @@ const createTestS3Bucket = async (
 		region: S3_REGION,
 		endpoint: S3_ENDPOINT,
 	};
-	return await loadOrCreateS3Bucket(db, authContext, {
+	const { item } = await loadOrCreateS3Bucket(db, authContext, {
 		...defaultValues,
 		...overrideValues,
 	});
+	return item;
 };
 
 export { createTestS3Bucket };

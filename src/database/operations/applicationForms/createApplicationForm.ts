@@ -1,7 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import type { ApplicationForm, WritableApplicationForm } from '../../../types';
 
-const createApplicationForm = generateCreateOrUpdateItemOperation<
+const createApplicationForm = generateCreateItemOperation<
 	ApplicationForm,
 	WritableApplicationForm,
 	[]

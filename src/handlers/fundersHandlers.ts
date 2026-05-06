@@ -78,14 +78,16 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 	}
 
 	const { name, keycloakOrganizationId, isCollaborative } = body;
-	const funder = await createOrUpdateFunder(db, req, {
+	const { item: funder, wasInserted } = await createOrUpdateFunder(db, req, {
 		shortCode,
 		name,
 		keycloakOrganizationId,
 		isCollaborative,
 	});
 	res
-		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.status(
+			wasInserted ? HTTP_STATUS.SUCCESSFUL.CREATED : HTTP_STATUS.SUCCESSFUL.OK,
+		)
 		.contentType('application/json')
 		.send(funder);
 };

@@ -1,0 +1,38 @@
+{
+	"type": "object",
+	"properties": {
+		"fiscalSponseeChangemakerId": {
+			"allOf": [{ "$ref": "./id.json" }],
+			"example": 43
+		},
+		"fiscalSponsorChangemakerId": {
+			"allOf": [{ "$ref": "./id.json" }],
+			"example": 42
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that added this fiscal sponsorship record.",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		},
+		"notAfter": {
+			"description": "For internal use. This will always be null in a response from this endpoint.",
+			"type": ["string", "null"],
+			"format": "date-time",
+			"readOnly": true,
+			"example": null
+		}
+	},
+	"required": [
+		"fiscalSponseeChangemakerId",
+		"fiscalSponsorChangemakerId",
+		"createdAt",
+		"createdBy",
+		"notAfter"
+	]
+}

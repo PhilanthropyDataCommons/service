@@ -1,20 +1,35 @@
-INSERT INTO funders (
+MERGE INTO funders
+USING (VALUES (
+	:shortCode::short_code_t,
+	:name::varchar,
+	:keycloakOrganizationId::uuid,
+	:isCollaborative::boolean,
+	:authContextKeycloakUserId::uuid
+)) AS source (
+	short_code,
+	name,
+	keycloak_organization_id,
+	is_collaborative,
+	created_by
+)
+ON funders.short_code = source.short_code
+WHEN MATCHED THEN UPDATE SET
+	name = source.name,
+	keycloak_organization_id = source.keycloak_organization_id,
+	is_collaborative = source.is_collaborative
+WHEN NOT MATCHED THEN INSERT (
 	short_code,
 	name,
 	keycloak_organization_id,
 	is_collaborative,
 	created_by
 ) VALUES (
-	:shortCode,
-	:name,
-	:keycloakOrganizationId,
-	:isCollaborative,
-	:authContextKeycloakUserId
+	source.short_code,
+	source.name,
+	source.keycloak_organization_id,
+	source.is_collaborative,
+	source.created_by
 )
-ON CONFLICT (short_code)
-DO UPDATE
-	SET
-		name = excluded.name,
-		keycloak_organization_id = excluded.keycloak_organization_id,
-		is_collaborative = excluded.is_collaborative
-RETURNING funder_to_json(funders) AS object;
+RETURNING
+	funder_to_json(funders) AS object,
+	merge_action() = 'INSERT' AS "wasInserted";

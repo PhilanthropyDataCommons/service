@@ -1,10 +1,10 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import type {
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
 } from '../../../types';
 
-const createBulkUploadTask = generateCreateOrUpdateItemOperation<
+const createBulkUploadTask = generateCreateItemOperation<
 	BulkUploadTask,
 	InternallyWritableBulkUploadTask,
 	[]

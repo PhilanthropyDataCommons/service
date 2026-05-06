@@ -1,11 +1,11 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import { decorateWithFileDownloadUrl } from '../../../decorators/changemakerFieldValue';
 import type {
 	ChangemakerFieldValue,
 	InternallyWritableChangemakerFieldValue,
 } from '../../../types';
 
-const createChangemakerFieldValue = generateCreateOrUpdateItemOperation<
+const createChangemakerFieldValue = generateCreateItemOperation<
 	ChangemakerFieldValue,
 	InternallyWritableChangemakerFieldValue,
 	[]

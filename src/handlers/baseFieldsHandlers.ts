@@ -80,17 +80,23 @@ const putBaseField = async (
 		valueRelevanceHours,
 		sensitivityClassification,
 	} = body;
-	const baseField = await createOrUpdateBaseField(db, null, {
-		label,
-		description,
-		dataType,
-		category,
-		valueRelevanceHours,
-		sensitivityClassification,
-		shortCode: baseFieldShortCode,
-	});
+	const { item: baseField, wasInserted } = await createOrUpdateBaseField(
+		db,
+		null,
+		{
+			label,
+			description,
+			dataType,
+			category,
+			valueRelevanceHours,
+			sensitivityClassification,
+			shortCode: baseFieldShortCode,
+		},
+	);
 	res
-		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.status(
+			wasInserted ? HTTP_STATUS.SUCCESSFUL.CREATED : HTTP_STATUS.SUCCESSFUL.OK,
+		)
 		.contentType('application/json')
 		.send(baseField);
 };
@@ -153,18 +159,17 @@ const putBaseFieldLocalization = async (
 	}
 	const { label, description } = body;
 	await assertBaseFieldExists(db, baseFieldShortCode);
-	const baseFieldLocalization = await createOrUpdateBaseFieldLocalization(
-		db,
-		null,
-		{
+	const { item: baseFieldLocalization, wasInserted } =
+		await createOrUpdateBaseFieldLocalization(db, null, {
 			label,
 			description,
 			baseFieldShortCode,
 			language,
-		},
-	);
+		});
 	res
-		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.status(
+			wasInserted ? HTTP_STATUS.SUCCESSFUL.CREATED : HTTP_STATUS.SUCCESSFUL.OK,
+		)
 		.contentType('application/json')
 		.send(baseFieldLocalization);
 };

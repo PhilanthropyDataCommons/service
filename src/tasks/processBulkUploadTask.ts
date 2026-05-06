@@ -583,7 +583,7 @@ export const processBulkUploadTask = async (
 					[changemakerTaxIdIndex]: changemakerTaxId,
 				} = record;
 				if (changemakerTaxId !== undefined) {
-					const changemaker = await loadOrCreateChangemaker(
+					const { item: changemaker } = await loadOrCreateChangemaker(
 						transactionDb,
 						taskAuthContext,
 						{

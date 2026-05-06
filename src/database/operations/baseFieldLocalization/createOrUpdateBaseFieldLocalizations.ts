@@ -1,10 +1,10 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpsertItemOperation } from '../generators';
 import type {
 	BaseFieldLocalization,
 	InternallyWritableBaseFieldLocalization,
 } from '../../../types';
 
-const createOrUpdateBaseFieldLocalization = generateCreateOrUpdateItemOperation<
+const createOrUpdateBaseFieldLocalization = generateUpsertItemOperation<
 	BaseFieldLocalization,
 	InternallyWritableBaseFieldLocalization,
 	[]

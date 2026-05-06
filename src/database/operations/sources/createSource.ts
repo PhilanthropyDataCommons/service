@@ -1,11 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import type { Source, WritableSource } from '../../../types';
 
-const createSource = generateCreateOrUpdateItemOperation<
-	Source,
-	WritableSource,
-	[]
->(
+const createSource = generateCreateItemOperation<Source, WritableSource, []>(
 	'sources.insertOne',
 	['label', 'dataProviderShortCode', 'funderShortCode', 'changemakerId'],
 	[],

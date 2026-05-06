@@ -1,7 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpsertItemOperation } from '../generators';
 import type { S3Bucket, InternallyWritableS3Bucket } from '../../../types';
 
-const loadOrCreateS3Bucket = generateCreateOrUpdateItemOperation<
+const loadOrCreateS3Bucket = generateUpsertItemOperation<
 	S3Bucket,
 	InternallyWritableS3Bucket,
 	[]

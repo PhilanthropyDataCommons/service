@@ -39,6 +39,16 @@
 			}
 		},
 		"responses": {
+			"200": {
+				"description": "The existing base field localization that was updated.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/BaseFieldLocalization.json"
+						}
+					}
+				}
+			},
 			"201": {
 				"description": "The new base field localization that was created.",
 				"content": {

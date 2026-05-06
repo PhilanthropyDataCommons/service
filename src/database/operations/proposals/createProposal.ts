@@ -1,8 +1,8 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import { decorateWithFileDownloadUrls } from '../../../decorators/proposal';
 import type { Proposal, WritableProposal } from '../../../types';
 
-const createProposal = generateCreateOrUpdateItemOperation<
+const createProposal = generateCreateItemOperation<
 	Proposal,
 	WritableProposal,
 	[]

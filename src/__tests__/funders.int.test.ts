@@ -443,7 +443,7 @@ describe('/funders', () => {
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send({ name: '🎆', isCollaborative: false })
-				.expect(201);
+				.expect(200);
 			const after = await loadTableMetrics(db, 'data_providers');
 			const anotherFunderAfter = await loadFunder(db, null, 'anotherFirework');
 			expect(result.body).toStrictEqual({
@@ -456,6 +456,25 @@ describe('/funders', () => {
 			});
 			expect(after.count).toEqual(before.count);
 			expect(anotherFunderAfter).toEqual(anotherFunderBefore);
+		});
+
+		it('returns 201 on first PUT and 200 on subsequent PUT to the same shortCode', async () => {
+			await agent
+				.put('/funders/repeatable')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ name: 'first', isCollaborative: false })
+				.expect(201);
+			const second = await agent
+				.put('/funders/repeatable')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ name: 'second', isCollaborative: false })
+				.expect(200);
+			expect(second.body).toMatchObject({
+				shortCode: 'repeatable',
+				name: 'second',
+			});
 		});
 
 		it('returns 400 bad request when no name is sent', async () => {
@@ -720,6 +739,28 @@ describe('/funders', () => {
 				});
 			});
 
+			it('returns 201 on first POST and 200 on subsequent POST for the same member', async () => {
+				const db = getDatabase();
+				const testUser = await loadTestUser(db);
+				const testUserAuthContext = getAuthContext(testUser);
+				await createTestFunders(db, testUserAuthContext, {
+					theFundFund: true,
+					theFoundationFoundation: false,
+					theFundersWhoFund: false,
+					theFundingFathers: false,
+					theFunnyFunders: false,
+					theFungibleFund: false,
+				});
+				await agent
+					.post('/funders/theFundFund/members/theFoundationFoundation')
+					.set(adminUserAuthHeader)
+					.expect(201);
+				await agent
+					.post('/funders/theFundFund/members/theFoundationFoundation')
+					.set(adminUserAuthHeader)
+					.expect(200);
+			});
+
 			it('returns 400 when the funder is not collaborative', async () => {
 				const db = getDatabase();
 				const testUser = await loadTestUser(db);
@@ -920,6 +961,31 @@ describe('/funders', () => {
 				invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
 				createdAt: expectTimestamp(),
 			});
+		});
+		it('returns 201 on first invitation and 200 on a subsequent re-invitation', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunders(db, testUserAuthContext, {
+				theFundFund: true,
+				theFoundationFoundation: false,
+				theFundersWhoFund: false,
+				theFundingFathers: false,
+				theFunnyFunders: false,
+				theFungibleFund: false,
+			});
+			await agent
+				.post('/funders/theFundFund/invitations/sent/theFoundationFoundation')
+				.type('application/json')
+				.send({})
+				.set(adminUserAuthHeader)
+				.expect(201);
+			await agent
+				.post('/funders/theFundFund/invitations/sent/theFoundationFoundation')
+				.type('application/json')
+				.send({})
+				.set(adminUserAuthHeader)
+				.expect(200);
 		});
 		it('returns a 400 error when the source funder is not collaborative', async () => {
 			const db = getDatabase();

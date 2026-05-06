@@ -145,7 +145,7 @@ describe('/dataProviders', () => {
 					name: '🎆',
 					keycloakOrganizationId: '8b0163ac-bd91-11ef-8579-9fa8ab9f4b7d',
 				})
-				.expect(201);
+				.expect(200);
 			const otherDataProviderAfter = await loadDataProvider(
 				db,
 				null,
@@ -161,6 +161,25 @@ describe('/dataProviders', () => {
 			});
 			expect(after.count).toEqual(before.count);
 			expect(otherDataProviderAfter).toEqual(otherDataProviderBefore);
+		});
+
+		it('returns 201 on first PUT and 200 on subsequent PUT to the same shortCode', async () => {
+			await agent
+				.put('/dataProviders/repeatable')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ name: 'first' })
+				.expect(201);
+			const second = await agent
+				.put('/dataProviders/repeatable')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ name: 'second' })
+				.expect(200);
+			expect(second.body).toMatchObject({
+				shortCode: 'repeatable',
+				name: 'second',
+			});
 		});
 
 		it('returns 400 bad request when no name is sent', async () => {

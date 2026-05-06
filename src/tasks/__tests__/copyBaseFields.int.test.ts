@@ -397,7 +397,7 @@ describe('copyBaseFields', () => {
 
 	it('should insert all remote basefields, without updating any local basefields, assuming there is no overlap on shortcode', async () => {
 		const db = getDatabase();
-		const localBaseField = await createOrUpdateBaseField(db, null, {
+		const { item: localBaseField } = await createOrUpdateBaseField(db, null, {
 			label: 'Local BaseField',
 			description: 'This basefield should not be updated on basefield copy',
 			shortCode: 'local',
@@ -451,7 +451,7 @@ describe('copyBaseFields', () => {
 
 	it('should update local basefields when they match on remote basefield shortcodes, even if the basefields have identical data', async () => {
 		const db = getDatabase();
-		const localBaseField = await createOrUpdateBaseField(db, null, {
+		const { item: localBaseField } = await createOrUpdateBaseField(db, null, {
 			label: 'Local Data',
 			description: 'This is local data',
 			shortCode: 'ld',
@@ -528,7 +528,7 @@ describe('copyBaseFields', () => {
 
 	it('should update local basefields when they match on remote basefield shortcodes, and insert all other remote basefields', async () => {
 		const db = getDatabase();
-		const localBaseField = await createOrUpdateBaseField(db, null, {
+		const { item: localBaseField } = await createOrUpdateBaseField(db, null, {
 			label: 'Local Data',
 			description: 'This is local data',
 			shortCode: 'ld',
@@ -642,7 +642,7 @@ describe('copyBaseFields', () => {
 
 	it('should preserve localizations for a local basefield with localizations, when there is a remote basefield with no localizations that matches on shortcode', async () => {
 		const db = getDatabase();
-		const localBaseField = await createOrUpdateBaseField(db, null, {
+		const { item: localBaseField } = await createOrUpdateBaseField(db, null, {
 			label: 'Update me',
 			description: 'This is a field to be updated',
 			shortCode: mockFirstNameBaseField.shortCode,
@@ -719,7 +719,7 @@ describe('copyBaseFields', () => {
 
 	it('should add localizations to a local basefield from a remote basefield with matching shortcode', async () => {
 		const db = getDatabase();
-		const localBaseField = await createOrUpdateBaseField(db, null, {
+		const { item: localBaseField } = await createOrUpdateBaseField(db, null, {
 			label: 'Update me',
 			description: 'This is a field to be updated',
 			shortCode: mockFirstNameBaseField.shortCode,
@@ -843,7 +843,7 @@ describe('copyBaseFields', () => {
 
 	it('should update any existing local basefields that match on shortcode, and have status set as completed', async () => {
 		const db = getDatabase();
-		const baseField = await createOrUpdateBaseField(db, null, {
+		const { item: baseField } = await createOrUpdateBaseField(db, null, {
 			label: 'Old First Name',
 			description: 'This should be replaced',
 			shortCode: mockFirstNameBaseField.shortCode,

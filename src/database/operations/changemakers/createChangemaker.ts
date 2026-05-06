@@ -1,8 +1,8 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import { decorateWithFileDownloadUrls } from '../../../decorators/changemaker';
 import type { Changemaker, WritableChangemaker } from '../../../types';
 
-const createChangemaker = generateCreateOrUpdateItemOperation<
+const createChangemaker = generateCreateItemOperation<
 	Changemaker,
 	WritableChangemaker,
 	[]

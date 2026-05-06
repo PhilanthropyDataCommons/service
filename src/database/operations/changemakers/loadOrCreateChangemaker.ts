@@ -1,7 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpsertItemOperation } from '../generators';
 import type { Changemaker, WritableChangemaker } from '../../../types';
 
-const loadOrCreateChangemaker = generateCreateOrUpdateItemOperation<
+const loadOrCreateChangemaker = generateUpsertItemOperation<
 	Changemaker,
 	WritableChangemaker,
 	[]

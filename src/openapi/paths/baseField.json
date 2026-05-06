@@ -31,7 +31,17 @@
 		},
 		"responses": {
 			"200": {
-				"description": "The updated base field.",
+				"description": "The existing base field that was updated.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/BaseField.json"
+						}
+					}
+				}
+			},
+			"201": {
+				"description": "The new base field that was created.",
 				"content": {
 					"application/json": {
 						"schema": {

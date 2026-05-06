@@ -49,3 +49,17 @@ src/database/migrations/0043-alter-data_providers-add-keycloak_organization_id.s
 src/database/migrations/0044-alter-funders-add-keycloak_organization_id.sql
 src/database/migrations/0045-alter-changemakers-add-keycloak_organization_id.sql
 src/database/migrations/0058-create-db-operation-audit-logs.sql
+
+# SQLFluff 4.1.0 does not yet parse MERGE ... RETURNING (PG 17+). Once it does
+# (https://github.com/sqlfluff/sqlfluff/), these can be removed.
+src/database/queries/baseFieldLocalizations/createOrUpdateByPrimaryKey.sql
+src/database/queries/baseFields/createOrUpdateOne.sql
+src/database/queries/changemakers/insertOrSelectOne.sql
+src/database/queries/dataProviders/insertOrUpdateOne.sql
+src/database/queries/ephemeralUserGroupAssociations/insertOne.sql
+src/database/queries/fiscalSponsorships/insertOrUpdateOne.sql
+src/database/queries/funderCollaborativeInvitations/insertOne.sql
+src/database/queries/funderCollaborativeMembers/insertOrUpdateOne.sql
+src/database/queries/funders/insertOrUpdateOne.sql
+src/database/queries/s3Buckets/selectOrCreateOne.sql
+src/database/queries/users/insertOrUpdateOne.sql

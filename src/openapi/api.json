@@ -83,6 +83,9 @@
 			"DataProviderPermissionGrant": {
 				"$ref": "./components/schemas/DataProviderPermissionGrant.json"
 			},
+			"FiscalSponsorship": {
+				"$ref": "./components/schemas/FiscalSponsorship.json"
+			},
 			"Funder": {
 				"$ref": "./components/schemas/Funder.json"
 			},

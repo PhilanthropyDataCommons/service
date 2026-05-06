@@ -48,14 +48,16 @@ const postFunderCollaborativeInvitation = async (
 		);
 	}
 
-	const funderCollaborativeInvitation =
+	const { item: funderCollaborativeInvitation, wasInserted } =
 		await createFunderCollaborativeInvitation(db, req, {
 			funderCollaborativeShortCode: funderShortCode,
 			invitedFunderShortCode,
 			invitationStatus: FunderCollaborativeInvitationStatus.PENDING,
 		});
 	res
-		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.status(
+			wasInserted ? HTTP_STATUS.SUCCESSFUL.CREATED : HTTP_STATUS.SUCCESSFUL.OK,
+		)
 		.contentType('application/json')
 		.send(funderCollaborativeInvitation);
 };

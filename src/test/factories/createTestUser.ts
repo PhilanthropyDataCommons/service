@@ -14,10 +14,11 @@ const createTestUser = async (
 		keycloakUserId: stringToKeycloakId(id),
 		keycloakUserName: `Test User ${id}`,
 	};
-	return await createOrUpdateUser(db, authContext, {
+	const { item } = await createOrUpdateUser(db, authContext, {
 		...defaultValues,
 		...overrideValues,
 	});
+	return item;
 };
 
 export { createTestUser };

@@ -12,17 +12,19 @@ import type { TinyPg } from 'tinypg';
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 
 /**
- * Generates a function that will invoke a specific query for data insertion
+ * Generates an item creation function for a specific query.
  *
  * @template T - The type of the item being created.
  * @template I - The type of object to be passed for data insertion.
+ * @template P - The type of the parameters for the query. Use labeled tuples so the generated function has a pretty type definition.
  *
  * @param {string} queryName - The name of the query to execute.
- * @param {Object} savedAttributes - A list of the attribute names which should be converted to query parameters.
+ * @param {Array<string>} saveItemAttributes - The attribute names which should be converted to query parameters.
+ * @param {Array<string>} parameterNames - A tuple of parameter names, positionally aligned with the query's positional arguments.
  *
- * @returns {Function} A function that takes query parameters, limit, and offset, and returns a promise that resolves to a bundle of entries and total count.
+ * @returns {Function} An asynchronous function that takes query parameters, creates an item, and returns the created item.
  */
-const generateCreateOrUpdateItemOperation =
+const generateCreateItemOperation =
 	<T, I extends Record<string, unknown>, P extends [...args: unknown[]]>(
 		queryName: string,
 		saveItemAttributes: Array<KeysOfUnion<I>>,
@@ -88,4 +90,4 @@ const generateCreateOrUpdateItemOperation =
 		return await itemPostProcessor(wrappedObject.object);
 	};
 
-export { generateCreateOrUpdateItemOperation };
+export { generateCreateItemOperation };

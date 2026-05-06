@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	getDatabase,
 	createOpportunity,
 	getLimitValues,
@@ -8,6 +9,7 @@ import {
 	loadOpportunityBundle,
 } from '../database';
 import {
+	getSelfManageGrantFragment,
 	isAuthContext,
 	isId,
 	isWritableOpportunity,
@@ -74,11 +76,19 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 	) {
 		throw new UnauthorizedError();
 	}
-	const opportunity = await createOpportunity(db, req, body);
+	const committedOpportunity = await db.transaction(async (txDb) => {
+		const opportunity = await createOpportunity(txDb, req, body);
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+			opportunityId: opportunity.id,
+		});
+		return opportunity;
+	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(opportunity);
+		.send(committedOpportunity);
 };
 
 export const opportunitiesHandlers = {

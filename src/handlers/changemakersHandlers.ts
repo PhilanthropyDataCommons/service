@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	getDatabase,
 	getLimitValues,
 	loadChangemakerBundle,
@@ -10,10 +11,12 @@ import {
 	removeFiscalSponsorship,
 } from '../database';
 import {
+	getSelfManageGrantFragment,
 	isId,
 	isWritableChangemaker,
 	isAuthContext,
 	isPartialWritableChangemaker,
+	PermissionGrantEntityType,
 } from '../types';
 import {
 	FailedMiddlewareError,
@@ -41,11 +44,19 @@ const postChangemaker = async (req: Request, res: Response): Promise<void> => {
 			isWritableChangemaker.errors ?? [],
 		);
 	}
-	const changemaker = await createChangemaker(db, req, body);
+	const committedChangemaker = await db.transaction(async (txDb) => {
+		const changemaker = await createChangemaker(txDb, req, body);
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+			changemakerId: changemaker.id,
+		});
+		return changemaker;
+	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(changemaker);
+		.send(committedChangemaker);
 };
 
 const getChangemakers = async (req: Request, res: Response): Promise<void> => {

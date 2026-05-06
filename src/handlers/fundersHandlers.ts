@@ -2,11 +2,17 @@ import { HTTP_STATUS } from '../constants';
 import {
 	getDatabase,
 	createOrUpdateFunder,
+	createPermissionGrant,
 	getLimitValues,
 	loadFunderBundle,
 	loadFunder,
 } from '../database';
-import { isAuthContext, isWritableFunder } from '../types';
+import {
+	getSelfManageGrantFragment,
+	isAuthContext,
+	isWritableFunder,
+	PermissionGrantEntityType,
+} from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
 import {
 	extractIsCollaborativeParameters,
@@ -78,18 +84,32 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 	}
 
 	const { name, keycloakOrganizationId, isCollaborative } = body;
-	const { item: funder, wasInserted } = await createOrUpdateFunder(db, req, {
-		shortCode,
-		name,
-		keycloakOrganizationId,
-		isCollaborative,
-	});
+	const { committedFunder, committedFunderWasInserted } = await db.transaction(
+		async (txDb) => {
+			const { item, wasInserted } = await createOrUpdateFunder(txDb, req, {
+				shortCode,
+				name,
+				keycloakOrganizationId,
+				isCollaborative,
+			});
+			if (wasInserted) {
+				await createPermissionGrant(txDb, req, {
+					...getSelfManageGrantFragment(req),
+					contextEntityType: PermissionGrantEntityType.FUNDER,
+					funderShortCode: item.shortCode,
+				});
+			}
+			return { committedFunder: item, committedFunderWasInserted: wasInserted };
+		},
+	);
 	res
 		.status(
-			wasInserted ? HTTP_STATUS.SUCCESSFUL.CREATED : HTTP_STATUS.SUCCESSFUL.OK,
+			committedFunderWasInserted
+				? HTTP_STATUS.SUCCESSFUL.CREATED
+				: HTTP_STATUS.SUCCESSFUL.OK,
 		)
 		.contentType('application/json')
-		.send(funder);
+		.send(committedFunder);
 };
 
 export const fundersHandlers = {

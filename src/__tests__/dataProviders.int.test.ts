@@ -3,10 +3,17 @@ import { app } from '../app';
 import {
 	getDatabase,
 	loadDataProvider,
+	loadPermissionGrantBundle,
 	loadSystemDataProvider,
+	loadSystemUser,
 	loadTableMetrics,
 } from '../database';
-import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import {
+	expectArray,
+	expectArrayContaining,
+	expectObjectContaining,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import { createTestDataProvider } from '../test/factories';
 import {
 	mockJwt as authHeader,
@@ -16,6 +23,8 @@ import {
 	loadTestUser,
 	getTestUserKeycloakUserId,
 	getAuthContext,
+	NO_LIMIT,
+	NO_OFFSET,
 } from '../test/utils';
 const agent = request.agent(app);
 
@@ -180,6 +189,64 @@ describe('/dataProviders', () => {
 				shortCode: 'repeatable',
 				name: 'second',
 			});
+		});
+
+		it('grants the creator a manage permission on the new data provider', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			await agent
+				.put('/dataProviders/self_grant_dp')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ name: 'Self-grant DP' })
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+						contextEntityType: 'dataProvider',
+						dataProviderShortCode: 'self_grant_dp',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
+		});
+
+		it('does not grant a permission when the PUT updates an existing data provider', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const existing = await createTestDataProvider(db, testUserAuthContext);
+			const before = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			await agent
+				.put(`/dataProviders/${existing.shortCode}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ name: 'Renamed' })
+				.expect(200);
+			const after = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(after.total).toEqual(before.total);
 		});
 
 		it('returns 400 bad request when no name is sent', async () => {

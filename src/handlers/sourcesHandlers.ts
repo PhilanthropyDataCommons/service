@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	getDatabase,
 	createSource,
 	getLimitValues,
@@ -11,6 +12,7 @@ import {
 	removeSource,
 } from '../database';
 import {
+	getSelfManageGrantFragment,
 	isAuthContext,
 	isId,
 	isWritableSource,
@@ -78,11 +80,19 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 	// Normally we try to avoid passing the body directly vs extracting the values and passing them.
 	// Because because writableSource is a union type it is hard to extract the values directly without
 	// losing type context that the union provided.
-	const source = await createSource(db, req, body);
+	const committedSource = await db.transaction(async (txDb) => {
+		const source = await createSource(txDb, req, body);
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.SOURCE,
+			sourceId: source.id,
+		});
+		return source;
+	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(source);
+		.send(committedSource);
 };
 
 const getSources = async (req: Request, res: Response): Promise<void> => {

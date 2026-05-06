@@ -4,6 +4,7 @@ import {
 	getDatabase,
 	createEphemeralUserGroupAssociation,
 	createSource,
+	loadPermissionGrantBundle,
 	loadSystemSource,
 	loadTableMetrics,
 	loadSystemUser,
@@ -12,14 +13,24 @@ import {
 	createApplicationForm,
 	createPermissionGrant,
 } from '../database';
-import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import {
+	expectArray,
+	expectArrayContaining,
+	expectObjectContaining,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	createTestChangemaker,
 	createTestDataProvider,
 	createTestFunder,
 	createTestOpportunity,
 } from '../test/factories';
-import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	getAuthContext,
+	loadTestUser,
+	NO_LIMIT,
+	NO_OFFSET,
+} from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -364,6 +375,41 @@ describe('/sources', () => {
 				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(2);
+		});
+
+		it('grants the creator a manage permission on the new source', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await agent
+				.post('/sources')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					label: 'Self-grant source',
+					changemakerId: changemaker.id,
+				})
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'source',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
 		});
 
 		it('returns 409 conflict when label is not unique on changemaker foreign key', async () => {

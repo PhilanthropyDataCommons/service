@@ -1,4 +1,5 @@
 import {
+	createPermissionGrant,
 	getDatabase,
 	createApplicationForm,
 	createApplicationFormField,
@@ -10,6 +11,7 @@ import {
 } from '../database';
 import { HTTP_STATUS } from '../constants';
 import {
+	getSelfManageGrantPartial,
 	isWritableApplicationFormWithFields,
 	isId,
 	isAuthContext,
@@ -99,29 +101,50 @@ const postApplicationForms = async (
 		) {
 			throw new UnauthorizedError();
 		}
-		const finalApplicationForm = await db.transaction(async (transactionDb) => {
-			const applicationForm = await createApplicationForm(transactionDb, null, {
-				opportunityId,
-				name,
-			});
-			const applicationFormFields = await Promise.all(
-				fields.map(
-					async (field) =>
-						await createApplicationFormField(transactionDb, null, {
-							...field,
-							applicationFormId: applicationForm.id,
-						}),
-				),
-			);
-			return {
-				...applicationForm,
-				fields: applicationFormFields,
-			};
-		});
+		const committedApplicationForm = await db.transaction(
+			async (transactionDb) => {
+				const applicationForm = await createApplicationForm(
+					transactionDb,
+					null,
+					{
+						opportunityId,
+						name,
+					},
+				);
+				await createPermissionGrant(transactionDb, req, {
+					...getSelfManageGrantPartial(req),
+					contextEntityType: PermissionGrantEntityType.APPLICATION_FORM,
+					applicationFormId: applicationForm.id,
+				});
+				const applicationFormFields = await Promise.all(
+					fields.map(async (field) => {
+						const applicationFormField = await createApplicationFormField(
+							transactionDb,
+							null,
+							{
+								...field,
+								applicationFormId: applicationForm.id,
+							},
+						);
+						await createPermissionGrant(transactionDb, req, {
+							...getSelfManageGrantPartial(req),
+							contextEntityType:
+								PermissionGrantEntityType.APPLICATION_FORM_FIELD,
+							applicationFormFieldId: applicationFormField.id,
+						});
+						return applicationFormField;
+					}),
+				);
+				return {
+					...applicationForm,
+					fields: applicationFormFields,
+				};
+			},
+		);
 		res
 			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 			.contentType('application/json')
-			.send(finalApplicationForm);
+			.send(committedApplicationForm);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			throw new UnprocessableEntityError('A related entity was not found');

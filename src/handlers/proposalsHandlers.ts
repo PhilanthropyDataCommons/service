@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	getDatabase,
 	createProposal,
 	getLimitValues,
@@ -9,6 +10,7 @@ import {
 	loadOpportunity,
 } from '../database';
 import {
+	getSelfManageGrantPartial,
 	isId,
 	isAuthContext,
 	isWritableProposal,
@@ -105,14 +107,22 @@ const postProposal = async (req: Request, res: Response): Promise<void> => {
 				'You do not have permission to create a proposal for this opportunity.',
 			);
 		}
-		const proposal = await createProposal(db, req, {
-			opportunityId,
-			externalId,
+		const committedProposal = await db.transaction(async (txDb) => {
+			const proposal = await createProposal(txDb, req, {
+				opportunityId,
+				externalId,
+			});
+			await createPermissionGrant(txDb, req, {
+				...getSelfManageGrantPartial(req),
+				contextEntityType: PermissionGrantEntityType.PROPOSAL,
+				proposalId: proposal.id,
+			});
+			return proposal;
 		});
 		res
 			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 			.contentType('application/json')
-			.send(proposal);
+			.send(committedProposal);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			throw new UnprocessableEntityError(

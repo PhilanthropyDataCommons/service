@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	getDatabase,
 	createChangemakerFieldValue,
 	getLimitValues,
@@ -11,6 +12,7 @@ import {
 	loadChangemakerFieldValueBundle,
 } from '../database';
 import {
+	getSelfManageGrantPartial,
 	isAuthContext,
 	isId,
 	isWritableChangemakerFieldValue,
@@ -122,19 +124,27 @@ const postChangemakerFieldValue = async (
 
 	const isValid = fieldValueIsValid(value, baseField.dataType);
 
-	const changemakerFieldValue = await createChangemakerFieldValue(db, req, {
-		changemakerId,
-		baseFieldShortCode,
-		batchId,
-		value,
-		isValid,
-		goodAsOf,
+	const committedChangemakerFieldValue = await db.transaction(async (txDb) => {
+		const changemakerFieldValue = await createChangemakerFieldValue(txDb, req, {
+			changemakerId,
+			baseFieldShortCode,
+			batchId,
+			value,
+			isValid,
+			goodAsOf,
+		});
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantPartial(req),
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+			changemakerFieldValueId: changemakerFieldValue.id,
+		});
+		return changemakerFieldValue;
 	});
 
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(changemakerFieldValue);
+		.send(committedChangemakerFieldValue);
 };
 
 const getChangemakerFieldValues = async (

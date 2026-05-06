@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	getDatabase,
 	createOpportunity,
 	getLimitValues,
@@ -8,6 +9,7 @@ import {
 	loadOpportunityBundle,
 } from '../database';
 import {
+	getSelfManageGrantPartial,
 	isAuthContext,
 	isId,
 	isWritableOpportunity,
@@ -58,7 +60,8 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const db = getDatabase();
-	if (!isWritableOpportunity(req.body)) {
+	const body = req.body as unknown;
+	if (!isWritableOpportunity(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableOpportunity.errors ?? [],
@@ -66,18 +69,26 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 	}
 	if (
 		!(await hasFunderPermission(db, req, {
-			funderShortCode: req.body.funderShortCode,
+			funderShortCode: body.funderShortCode,
 			permission: PermissionGrantVerb.CREATE,
 			scope: PermissionGrantEntityType.OPPORTUNITY,
 		}))
 	) {
 		throw new UnauthorizedError();
 	}
-	const opportunity = await createOpportunity(db, req, req.body);
+	const committedOpportunity = await db.transaction(async (txDb) => {
+		const opportunity = await createOpportunity(txDb, req, body);
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantPartial(req),
+			contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+			opportunityId: opportunity.id,
+		});
+		return opportunity;
+	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(opportunity);
+		.send(committedOpportunity);
 };
 
 export const opportunitiesHandlers = {

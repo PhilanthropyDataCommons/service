@@ -6,11 +6,16 @@ import {
 	createOrUpdateBaseField,
 	createPermissionGrant,
 	getDatabase,
+	loadPermissionGrantBundle,
 	loadSystemUser,
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { createTestFunder, createTestOpportunity } from '../test/factories';
+import {
+	createTestBaseField,
+	createTestFunder,
+	createTestOpportunity,
+} from '../test/factories';
 import {
 	BaseFieldDataType,
 	BaseFieldCategory,
@@ -19,8 +24,18 @@ import {
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
 } from '../types';
-import { getAuthContext, loadTestUser } from '../test/utils';
-import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import {
+	getAuthContext,
+	loadTestUser,
+	NO_LIMIT,
+	NO_OFFSET,
+} from '../test/utils';
+import {
+	expectArray,
+	expectArrayContaining,
+	expectObjectContaining,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -816,6 +831,60 @@ describe('/applicationForms', () => {
 				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
+		});
+
+		it('grants the creator a manage permission on the new form and each field', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+			const baseField = await createTestBaseField(db, null, {
+				shortCode: 'self_grant_field',
+			});
+			await request(app)
+				.post('/applicationForms')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					opportunityId: opportunity.id,
+					name: 'Self-grant Form',
+					fields: [
+						{
+							baseFieldShortCode: baseField.shortCode,
+							label: 'Field Label',
+							position: 1,
+							instructions: null,
+							inputType: null,
+						},
+					],
+				})
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'applicationForm',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'applicationFormField',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
 		});
 
 		it('creates an application form with a name', async () => {

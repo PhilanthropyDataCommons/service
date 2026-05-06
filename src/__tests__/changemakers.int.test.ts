@@ -14,6 +14,7 @@ import {
 	createProposalFieldValue,
 	createProposalVersion,
 	createSource,
+	loadPermissionGrantBundle,
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
@@ -29,6 +30,8 @@ import {
 	getAuthContext,
 	getTestUserKeycloakUserId,
 	loadTestUser,
+	NO_LIMIT,
+	NO_OFFSET,
 } from '../test/utils';
 import {
 	expectArray,
@@ -1129,6 +1132,40 @@ describe('/changemakers', () => {
 				fields: [],
 			});
 			expect(after.count).toEqual(1);
+		});
+
+		it('grants the creator a manage permission on the new changemaker', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			await request(app)
+				.post('/changemakers')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					taxId: '22-2222222',
+					name: 'Self-grant Co.',
+					keycloakOrganizationId: null,
+				})
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'changemaker',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
 		});
 
 		it('returns 400 bad request when no taxId is sent', async () => {

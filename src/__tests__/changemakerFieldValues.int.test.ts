@@ -7,12 +7,23 @@ import {
 	createChangemakerFieldValueBatch,
 	createChangemakerFieldValue,
 	createEphemeralUserGroupAssociation,
+	loadPermissionGrantBundle,
 	loadSystemUser,
 	createPermissionGrant,
 } from '../database';
-import { expectNumber, expectTimestamp } from '../test/asymettricMatchers';
+import {
+	expectArrayContaining,
+	expectNumber,
+	expectObjectContaining,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import { createTestBaseField, createTestChangemaker } from '../test/factories';
-import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	getAuthContext,
+	loadTestUser,
+	NO_LIMIT,
+	NO_OFFSET,
+} from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
@@ -74,6 +85,57 @@ describe('POST /changemakerFieldValues', () => {
 			isValid: true,
 			createdAt: expectTimestamp(),
 		});
+	});
+
+	it('grants the creator a manage permission on the new changemaker field value', async () => {
+		const db = getDatabase();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const testUser = await loadTestUser(db);
+		const testUserAuthContext = getAuthContext(testUser, true);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
+		const baseField = await createTestBaseField(db, null);
+		const source = await createSource(db, testUserAuthContext, {
+			label: 'Self-grant Source',
+			changemakerId: changemaker.id,
+		});
+		const batch = await createChangemakerFieldValueBatch(
+			db,
+			testUserAuthContext,
+			{
+				sourceId: source.id,
+				notes: null,
+			},
+		);
+		await request(app)
+			.post('/changemakerFieldValues')
+			.type('application/json')
+			.set(adminUserAuthHeader)
+			.send({
+				changemakerId: changemaker.id,
+				baseFieldShortCode: baseField.shortCode,
+				batchId: batch.id,
+				value: 'Self-grant value',
+				goodAsOf: '2024-01-01T00:00:00Z',
+			})
+			.expect(201);
+		const grants = await loadPermissionGrantBundle(
+			db,
+			systemUserAuthContext,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		expect(grants.entries).toEqual(
+			expectArrayContaining([
+				expectObjectContaining({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUser.keycloakUserId,
+					contextEntityType: 'changemakerFieldValue',
+					scope: ['any'],
+					verbs: ['manage'],
+				}),
+			]),
+		);
 	});
 
 	it('Allows multiple values for same changemaker+field+batch combination', async () => {

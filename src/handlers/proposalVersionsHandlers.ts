@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	createProposalFieldValue,
 	createProposalVersion,
 	getDatabase,
@@ -11,6 +12,7 @@ import {
 	loadProposalVersion,
 } from '../database';
 import {
+	getSelfManageGrantPartial,
 	isAuthContext,
 	isWritableProposalVersionWithFieldValues,
 	isId,
@@ -179,45 +181,61 @@ const postProposalVersion = async (
 			applicationFormId,
 			fieldValues,
 		);
-		const finalProposalVersion = await db.transaction(async (transactionDb) => {
-			const proposalVersion = await createProposalVersion(transactionDb, req, {
-				proposalId,
-				applicationFormId,
-				sourceId,
-			});
-			const proposalFieldValues = await allNoLeaks(
-				fieldValues.map(async (fieldValue) => {
-					const { value, applicationFormFieldId } = fieldValue;
-					const applicationFormField = await loadApplicationFormField(
-						transactionDb,
-						req,
-						applicationFormFieldId,
-					);
-					const isValid = fieldValueIsValid(
-						value,
-						applicationFormField.baseField.dataType,
-					);
-					const proposalFieldValue = await createProposalFieldValue(
-						transactionDb,
-						req,
-						{
-							...fieldValue,
-							proposalVersionId: proposalVersion.id,
-							isValid,
-						},
-					);
-					return proposalFieldValue;
-				}),
-			);
-			return {
-				...proposalVersion,
-				fieldValues: proposalFieldValues,
-			};
-		});
+		const committedProposalVersion = await db.transaction(
+			async (transactionDb) => {
+				const proposalVersion = await createProposalVersion(
+					transactionDb,
+					req,
+					{
+						proposalId,
+						applicationFormId,
+						sourceId,
+					},
+				);
+				await createPermissionGrant(transactionDb, req, {
+					...getSelfManageGrantPartial(req),
+					contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION,
+					proposalVersionId: proposalVersion.id,
+				});
+				const proposalFieldValues = await allNoLeaks(
+					fieldValues.map(async (fieldValue) => {
+						const { value, applicationFormFieldId } = fieldValue;
+						const applicationFormField = await loadApplicationFormField(
+							transactionDb,
+							req,
+							applicationFormFieldId,
+						);
+						const isValid = fieldValueIsValid(
+							value,
+							applicationFormField.baseField.dataType,
+						);
+						const proposalFieldValue = await createProposalFieldValue(
+							transactionDb,
+							req,
+							{
+								...fieldValue,
+								proposalVersionId: proposalVersion.id,
+								isValid,
+							},
+						);
+						await createPermissionGrant(transactionDb, req, {
+							...getSelfManageGrantPartial(req),
+							contextEntityType: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+							proposalFieldValueId: proposalFieldValue.id,
+						});
+						return proposalFieldValue;
+					}),
+				);
+				return {
+					...proposalVersion,
+					fieldValues: proposalFieldValues,
+				};
+			},
+		);
 		res
 			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 			.contentType('application/json')
-			.send(finalProposalVersion);
+			.send(committedProposalVersion);
 	} catch (error: unknown) {
 		if (error instanceof NotFoundError) {
 			if (error.details.entityType === 'Proposal') {

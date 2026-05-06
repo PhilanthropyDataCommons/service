@@ -3,6 +3,7 @@ import { app } from '../app';
 import {
 	getDatabase,
 	createEphemeralUserGroupAssociation,
+	loadPermissionGrantBundle,
 	loadTableMetrics,
 	loadSystemFunder,
 	loadSystemOpportunity,
@@ -10,8 +11,18 @@ import {
 	loadSystemUser,
 } from '../database';
 import { createTestFunder, createTestOpportunity } from '../test/factories';
-import { getAuthContext, loadTestUser } from '../test/utils';
-import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import {
+	getAuthContext,
+	loadTestUser,
+	NO_LIMIT,
+	NO_OFFSET,
+} from '../test/utils';
+import {
+	expectArray,
+	expectArrayContaining,
+	expectObjectContaining,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -261,6 +272,48 @@ describe('/opportunities', () => {
 				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(2);
+		});
+
+		it('grants the creator a manage permission on the new opportunity', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const systemFunder = await loadSystemFunder(db, null);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.CREATE],
+			});
+			await request(app)
+				.post('/opportunities')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					title: 'Self-grant test',
+					funderShortCode: systemFunder.shortCode,
+				})
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'opportunity',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
 		});
 
 		it('returns 401 unauthorized if the user does not have create opportunity permission on the associated funder', async () => {

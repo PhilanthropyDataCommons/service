@@ -11,6 +11,7 @@ import {
 	createProposalVersion,
 	createOrUpdateUser,
 	getDatabase,
+	loadPermissionGrantBundle,
 	loadSystemSource,
 	loadTableMetrics,
 	loadSystemFunder,
@@ -22,9 +23,16 @@ import {
 	createTestFunder,
 	createTestOpportunity,
 } from '../test/factories';
-import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	getAuthContext,
+	loadTestUser,
+	NO_LIMIT,
+	NO_OFFSET,
+} from '../test/utils';
 import {
 	expectArray,
+	expectArrayContaining,
+	expectObjectContaining,
 	expectString,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
@@ -1723,6 +1731,41 @@ describe('/proposals', () => {
 				createdBy: testUser.keycloakUserId,
 			});
 			expect(after.count).toEqual(1);
+		});
+
+		it('grants the creator a manage permission on the new proposal', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+			await request(app)
+				.post('/proposals')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					externalId: 'self-grant-proposal',
+					opportunityId: opportunity.id,
+				})
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'proposal',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
 		});
 
 		it('creates exactly one proposal when the user has write permissions on the opportunity funder', async () => {

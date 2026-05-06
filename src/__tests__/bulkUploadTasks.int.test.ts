@@ -6,6 +6,7 @@ import {
 	createBulkUploadTask,
 	createOrUpdateUser,
 	createSource,
+	loadPermissionGrantBundle,
 	loadSystemSource,
 	loadSystemUser,
 	loadTableMetrics,
@@ -17,11 +18,18 @@ import {
 	createTestFunder,
 	createTestOpportunity,
 } from '../test/factories';
-import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	getAuthContext,
+	loadTestUser,
+	NO_LIMIT,
+	NO_OFFSET,
+} from '../test/utils';
 import {
 	expectArray,
+	expectArrayContaining,
 	expectNumber,
 	expectObject,
+	expectObjectContaining,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
 import {
@@ -494,6 +502,84 @@ describe('/tasks/bulkUploads', () => {
 				createdByUser: expectedCreatedByUser,
 			});
 			expect(after.count).toEqual(1);
+		});
+
+		it('grants the creator a manage permission on the new bulk upload task', async () => {
+			const db = getDatabase();
+			const systemSource = await loadSystemSource(db, null);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, systemUserAuthContext);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: testFunder.shortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: testFunder.shortCode,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.CREATE],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: systemSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.REFERENCE],
+			});
+			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
+			const opportunity = await createTestOpportunity(
+				db,
+				systemUserAuthContext,
+				{
+					funderShortCode: testFunder.shortCode,
+				},
+			);
+			const applicationForm = await createApplicationForm(
+				db,
+				systemUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+					name: null,
+				},
+			);
+			await request(app)
+				.post('/tasks/bulkUploads/')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					sourceId: systemSource.id,
+					applicationFormId: applicationForm.id,
+					proposalsDataFileId: proposalsDataFile.id,
+					attachmentsArchiveFileId: null,
+				})
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'bulkUpload',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
 		});
 
 		it('creates a bulk upload task with attachments archive file', async () => {

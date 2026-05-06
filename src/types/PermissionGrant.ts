@@ -6,11 +6,14 @@ import {
 	PermissionGrantGranteeType,
 	permissionGrantGranteeTypeSchema,
 } from './PermissionGrantGranteeType';
-import { permissionGrantVerbSchema } from './PermissionGrantVerb';
+import {
+	PermissionGrantVerb,
+	permissionGrantVerbSchema,
+} from './PermissionGrantVerb';
 import type { TypeGuardWithAjvErrors } from '../ajv';
+import type { AuthContext } from './AuthContext';
 import type { Id } from './Id';
 import type { KeycloakId } from './KeycloakId';
-import type { PermissionGrantVerb } from './PermissionGrantVerb';
 import type { Writable } from './Writable';
 import type { ValidateFunction } from 'ajv';
 
@@ -442,14 +445,38 @@ const getConditionsForScope = (
 	scopeKey: PermissionGrantEntityType,
 ): readonly PermissionGrantCondition[] => scopeConditions[scopeKey];
 
+// Returns the grantee + scope + verbs portion of a permission grant that
+// gives the auth user `manage` against `any` scope. Spread into a grant
+// alongside `contextEntityType` and the entity-specific key field.
+const getSelfManageGrantPartial = (
+	authContext: AuthContext,
+): Pick<
+	Extract<
+		WritablePermissionGrant,
+		{ granteeType: PermissionGrantGranteeType.USER }
+	>,
+	'granteeType' | 'granteeUserKeycloakUserId' | 'scope' | 'verbs'
+> => ({
+	granteeType: PermissionGrantGranteeType.USER,
+	granteeUserKeycloakUserId: authContext.user.keycloakUserId,
+	scope: [PermissionGrantEntityType.ANY],
+	verbs: [PermissionGrantVerb.MANAGE],
+});
+
 export {
+	contextEntityKeyProperties,
 	getConditionsForScope,
 	getScopesForContextEntityType,
+	getSelfManageGrantPartial,
+	isPermissionGrantKeyedContextEntityType,
 	isWritablePermissionGrant,
+	PermissionGrantEntityKeyType,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	type PermissionGrant,
 	type PermissionGrantCondition,
+	type PermissionGrantEntityKeyValueType,
+	type PermissionGrantKeyedContextEntityType,
 	type WritablePermissionGrant,
 	type WritableUnkeyedPermissionGrant,
 };

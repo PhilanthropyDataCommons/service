@@ -11,6 +11,7 @@ import {
 	loadBulkUploadTask,
 	loadProposalBundle,
 	createBulkUploadTask,
+	loadPermissionGrantBundle,
 	loadSystemUser,
 	loadChangemakerBundle,
 	loadChangemakerProposalBundle,
@@ -32,8 +33,10 @@ import {
 	NO_OFFSET,
 } from '../../test/utils';
 import {
+	expectArrayContaining,
 	expectNumber,
 	expectObject,
+	expectObjectContaining,
 	expectString,
 	expectTimestamp,
 } from '../../test/asymettricMatchers';
@@ -851,6 +854,80 @@ describe('processBulkUploadTask', () => {
 			],
 			total: 2,
 		});
+	});
+
+	it('should grant the upload-initiating user manage permissions on every entity it creates', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'organization_tax_id'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
+		);
+
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'validCsvTemplateWithChangemakers.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{
+				bulkUploadId: bulkUploadTask.id,
+			},
+			getMockJobHelpers(),
+		);
+
+		const grantBundle = await loadPermissionGrantBundle(
+			db,
+			systemUserAuthContext,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		const granteeMatch = {
+			granteeType: 'user',
+			granteeUserKeycloakUserId: systemUser.keycloakUserId,
+			scope: ['any'],
+			verbs: ['manage'],
+		};
+		expect(grantBundle.entries).toEqual(
+			expectArrayContaining([
+				expectObjectContaining({
+					...granteeMatch,
+					contextEntityType: 'proposal',
+				}),
+				expectObjectContaining({
+					...granteeMatch,
+					contextEntityType: 'proposalVersion',
+				}),
+				expectObjectContaining({
+					...granteeMatch,
+					contextEntityType: 'proposalFieldValue',
+				}),
+				expectObjectContaining({
+					...granteeMatch,
+					contextEntityType: 'changemaker',
+				}),
+			]),
+		);
 	});
 
 	it('should resolve file attachment paths when archive has a single root folder and CSV uses stripped paths', async () => {

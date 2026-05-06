@@ -9,6 +9,7 @@ import {
 	createProposal,
 	createProposalVersion,
 	createSource,
+	loadPermissionGrantBundle,
 	loadSystemFunder,
 	loadSystemSource,
 	loadTableMetrics,
@@ -31,7 +32,12 @@ import {
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
 } from '../types';
-import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	getAuthContext,
+	loadTestUser,
+	NO_LIMIT,
+	NO_OFFSET,
+} from '../test/utils';
 import {
 	expectArray,
 	expectArrayContaining,
@@ -305,6 +311,76 @@ describe('/proposalVersions', () => {
 				fieldValues: [],
 			});
 			expect(after.count).toEqual(1);
+		});
+
+		it('grants the creator a manage permission on the new proposal version and field values', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemSource = await loadSystemSource(db, null);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+			const proposal = await createProposal(db, testUserAuthContext, {
+				externalId: 'self-grant-proposal',
+				opportunityId: opportunity.id,
+			});
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+			await createTestBaseFields(db);
+			const firstNameField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: 'firstName',
+				position: 1,
+				label: 'First Name',
+				instructions: null,
+				inputType: null,
+			});
+			await request(app)
+				.post('/proposalVersions')
+				.type('application/json')
+				.set(authHeaderWithAdminRole)
+				.send({
+					proposalId: proposal.id,
+					applicationFormId: applicationForm.id,
+					sourceId: systemSource.id,
+					fieldValues: [
+						{
+							applicationFormFieldId: firstNameField.id,
+							position: 1,
+							value: 'Self-grant',
+							isValid: true,
+							goodAsOf: null,
+						},
+					],
+				})
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'proposalVersion',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'proposalFieldValue',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
 		});
 
 		it('creates exactly one proposal version for a user with read and write permissions on the funder', async () => {

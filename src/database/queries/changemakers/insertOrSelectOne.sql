@@ -14,8 +14,13 @@ ON CONFLICT (tax_id, name)
 -- PostgreSQL's RETURNING clause only returns rows for DO UPDATE.
 -- See: https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT
 DO UPDATE SET tax_id = excluded.tax_id
-RETURNING changemaker_to_json(
-	changemakers,
-	:authContextKeycloakUserId,
-	FALSE
+RETURNING jsonb_build_object(
+	-- xmax is zero on a fresh INSERT and non-zero on an ON CONFLICT update,
+	-- letting callers detect whether the changemaker was newly created.
+	'wasInserted', xmax = 0,
+	'changemaker', changemaker_to_json(
+		changemakers,
+		:authContextKeycloakUserId,
+		FALSE
+	)
 ) AS object;

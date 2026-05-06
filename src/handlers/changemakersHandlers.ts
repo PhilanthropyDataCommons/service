@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	getDatabase,
 	getLimitValues,
 	loadChangemakerBundle,
@@ -10,10 +11,12 @@ import {
 	removeFiscalSponsorship,
 } from '../database';
 import {
+	getSelfManageGrantPartial,
 	isId,
 	isWritableChangemaker,
 	isAuthContext,
 	isPartialWritableChangemaker,
+	PermissionGrantEntityType,
 } from '../types';
 import {
 	FailedMiddlewareError,
@@ -34,17 +37,26 @@ const postChangemaker = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	if (!isWritableChangemaker(req.body)) {
+	const body = req.body as unknown;
+	if (!isWritableChangemaker(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableChangemaker.errors ?? [],
 		);
 	}
-	const changemaker = await createChangemaker(db, req, req.body);
+	const committedChangemaker = await db.transaction(async (txDb) => {
+		const changemaker = await createChangemaker(txDb, req, body);
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantPartial(req),
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+			changemakerId: changemaker.id,
+		});
+		return changemaker;
+	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(changemaker);
+		.send(committedChangemaker);
 };
 
 const getChangemakers = async (req: Request, res: Response): Promise<void> => {

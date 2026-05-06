@@ -161,7 +161,7 @@ const patchFunderCollaborativeInvitation = async (
 	}
 
 	const { invitationStatus } = body;
-	const finalFunderCollaborativeInvitation = await db.transaction(
+	const committedFunderCollaborativeInvitation = await db.transaction(
 		async (transactionDb) => {
 			const funderCollaborativeInvitation =
 				await updateFunderCollaborativeInvitation(
@@ -187,7 +187,7 @@ const patchFunderCollaborativeInvitation = async (
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')
-		.send(finalFunderCollaborativeInvitation);
+		.send(committedFunderCollaborativeInvitation);
 };
 
 export const funderCollaborativeInvitationsHandlers = {

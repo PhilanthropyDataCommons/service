@@ -1,8 +1,13 @@
 import { generateCreateOrUpdateItemOperation } from '../generators';
 import type { Changemaker, WritableChangemaker } from '../../../types';
 
+interface LoadOrCreateChangemakerResult {
+	changemaker: Changemaker;
+	wasInserted: boolean;
+}
+
 const loadOrCreateChangemaker = generateCreateOrUpdateItemOperation<
-	Changemaker,
+	LoadOrCreateChangemakerResult,
 	WritableChangemaker,
 	[]
 >(
@@ -12,3 +17,4 @@ const loadOrCreateChangemaker = generateCreateOrUpdateItemOperation<
 );
 
 export { loadOrCreateChangemaker };
+export type { LoadOrCreateChangemakerResult };

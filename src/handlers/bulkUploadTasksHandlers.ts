@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	getDatabase,
 	createBulkUploadTask,
 	getLimitValues,
@@ -11,6 +12,7 @@ import {
 	loadOpportunity,
 } from '../database';
 import {
+	getSelfManageGrantPartial,
 	PermissionGrantEntityType,
 	PermissionGrantVerb,
 	TaskStatus,
@@ -144,20 +146,28 @@ const postBulkUploadTask = async (
 		);
 	}
 
-	const bulkUploadTask = await createBulkUploadTask(db, req, {
-		sourceId,
-		applicationFormId,
-		proposalsDataFileId,
-		attachmentsArchiveFileId,
-		status: TaskStatus.PENDING,
+	const committedBulkUploadTask = await db.transaction(async (txDb) => {
+		const bulkUploadTask = await createBulkUploadTask(txDb, req, {
+			sourceId,
+			applicationFormId,
+			proposalsDataFileId,
+			attachmentsArchiveFileId,
+			status: TaskStatus.PENDING,
+		});
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantPartial(req),
+			contextEntityType: PermissionGrantEntityType.BULK_UPLOAD,
+			bulkUploadTaskId: bulkUploadTask.id,
+		});
+		return bulkUploadTask;
 	});
 	await addProcessBulkUploadJob({
-		bulkUploadId: bulkUploadTask.id,
+		bulkUploadId: committedBulkUploadTask.id,
 	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(bulkUploadTask);
+		.send(committedBulkUploadTask);
 };
 
 const getBulkUploadTasks = async (

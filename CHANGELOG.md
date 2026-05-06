@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+
+- Creating an entity now automatically grants the creator a `manage` permission with `any` scope on the new entity. This applies to opportunities, changemakers, proposals, sources, bulk upload tasks, application forms (and their fields), proposal versions (and their field values), and changemaker field values created via the HTTP API, as well as proposals, proposal versions, proposal field values, and newly inserted changemakers created during bulk upload processing.
+
 ## 0.35.0 2026-05-05
 
 ### Added

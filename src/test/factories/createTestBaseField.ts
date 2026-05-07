@@ -17,10 +17,11 @@ const createTestBaseField = async (
 	authContext: AuthContext | null,
 	overrideValues?: Partial<InternallyWritableBaseField>,
 ): Promise<BaseField> => {
+	const id = uuidv4();
 	const defaultValues: InternallyWritableBaseField = {
-		shortCode: `test_field_${uuidv4()}`,
-		label: 'Test Field',
-		description: 'A test field for integration tests',
+		shortCode: `test_field_${id}`,
+		label: `Test Field ${id}`,
+		description: `A test field for integration tests (${id})`,
 		category: BaseFieldCategory.ORGANIZATION,
 		dataType: BaseFieldDataType.STRING,
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,

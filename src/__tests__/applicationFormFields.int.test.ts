@@ -4,18 +4,18 @@ import {
 	getDatabase,
 	createApplicationForm,
 	createApplicationFormField,
-	createOrUpdateBaseField,
 	createPermissionGrant,
 	loadSystemUser,
 } from '../database';
-import { createTestFunder, createTestOpportunity } from '../test/factories';
+import {
+	createTestBaseField,
+	createTestFunder,
+	createTestOpportunity,
+} from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import { mockJwt as authHeader } from '../test/mockJwt';
 import {
 	ApplicationFormFieldInputType,
-	BaseFieldDataType,
-	BaseFieldCategory,
-	BaseFieldSensitivityClassification,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
@@ -36,16 +36,7 @@ describe('/applicationFormFields', () => {
 				name: null,
 			});
 
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Organization Name',
-				shortCode: 'org_name_test_1',
-				description: 'The name of the organization',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -102,16 +93,7 @@ describe('/applicationFormFields', () => {
 				name: null,
 			});
 
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Email Address',
-				shortCode: 'email_address_test_2',
-				description: 'Email contact',
-				dataType: BaseFieldDataType.EMAIL,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -168,16 +150,7 @@ describe('/applicationFormFields', () => {
 				name: null,
 			});
 
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Phone Number',
-				shortCode: 'phone_number_test_3',
-				description: 'Phone contact',
-				dataType: BaseFieldDataType.PHONE_NUMBER,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -236,16 +209,7 @@ describe('/applicationFormFields', () => {
 				name: null,
 			});
 
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Website',
-				shortCode: 'website_url_test_4',
-				description: 'Organization website',
-				dataType: BaseFieldDataType.URL,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -302,16 +266,7 @@ describe('/applicationFormFields', () => {
 				name: null,
 			});
 
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Organization Type',
-				shortCode: 'org_type_test_9',
-				description: 'Type of organization',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -368,16 +323,7 @@ describe('/applicationFormFields', () => {
 				name: null,
 			});
 
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Input Type Test Field',
-				shortCode: 'input_type_test_10',
-				description: 'Field for testing inputType updates',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -434,16 +380,7 @@ describe('/applicationFormFields', () => {
 				name: null,
 			});
 
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Test Field',
-				shortCode: 'test_field_5',
-				description: 'Test',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -493,16 +430,7 @@ describe('/applicationFormFields', () => {
 				name: null,
 			});
 
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Test Field',
-				shortCode: 'test_field_7',
-				description: 'Test',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
@@ -566,16 +494,7 @@ describe('/applicationFormFields', () => {
 				name: null,
 			});
 
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Test Field',
-				shortCode: 'test_field_8',
-				description: 'Test',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,

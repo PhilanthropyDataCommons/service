@@ -10,7 +10,10 @@ import {
 	getDatabase,
 	loadSystemSource,
 } from '../..';
-import { createTestOpportunity } from '../../../test/factories';
+import {
+	createTestBaseField,
+	createTestOpportunity,
+} from '../../../test/factories';
 import { getAuthContext, loadTestUser } from '../../../test/utils';
 import {
 	BaseFieldDataType,
@@ -34,27 +37,18 @@ describe('/proposal_field_value_to_json', () => {
 			opportunityId: opportunity.id,
 			name: null,
 		});
-		const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
-			label: 'Forbidden Field',
-			description: 'This field should not be used in proposal versions',
-			shortCode: 'forbiddenField',
-			dataType: BaseFieldDataType.STRING,
+		const baseField = await createTestBaseField(db, null, {
 			category: BaseFieldCategory.PROJECT,
-			valueRelevanceHours: null,
 			sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		});
-		const forbiddenApplicationFormField = await createApplicationFormField(
-			db,
-			null,
-			{
-				applicationFormId: applicationForm.id,
-				baseFieldShortCode: forbiddenBaseField.shortCode,
-				position: 1,
-				label: 'Forbidden Field',
-				instructions: 'This field should not be used in proposal versions',
-				inputType: null,
-			},
-		);
+		const applicationFormField = await createApplicationFormField(db, null, {
+			applicationFormId: applicationForm.id,
+			baseFieldShortCode: baseField.shortCode,
+			position: 1,
+			label: 'Forbidden Field',
+			instructions: 'This field should not be used in proposal versions',
+			inputType: null,
+		});
 		const proposalVersion = await createProposalVersion(
 			db,
 			testUserAuthContext,
@@ -66,14 +60,14 @@ describe('/proposal_field_value_to_json', () => {
 		);
 		await createProposalFieldValue(db, null, {
 			proposalVersionId: proposalVersion.id,
-			applicationFormFieldId: forbiddenApplicationFormField.id,
+			applicationFormFieldId: applicationFormField.id,
 			position: 1,
 			value: 'Should not be returned',
 			isValid: true,
 			goodAsOf: null,
 		});
 		await createOrUpdateBaseField(db, null, {
-			...forbiddenBaseField,
+			...baseField,
 			sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 		});
 
@@ -101,14 +95,10 @@ describe('/proposal_field_value_to_json', () => {
 			name: null,
 		});
 
-		const fileBaseField = await createOrUpdateBaseField(db, null, {
-			label: 'File Upload',
-			description: 'A field for file uploads',
+		const fileBaseField = await createTestBaseField(db, null, {
 			shortCode: 'fileUpload',
 			dataType: BaseFieldDataType.FILE,
 			category: BaseFieldCategory.PROJECT,
-			valueRelevanceHours: null,
-			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		});
 
 		const fileApplicationFormField = await createApplicationFormField(
@@ -189,14 +179,10 @@ describe('/proposal_field_value_to_json', () => {
 		});
 
 		// Create a file base field
-		const fileBaseField = await createOrUpdateBaseField(db, null, {
-			label: 'File Upload',
-			description: 'A field for file uploads',
+		const fileBaseField = await createTestBaseField(db, null, {
 			shortCode: 'fileUpload2',
 			dataType: BaseFieldDataType.FILE,
 			category: BaseFieldCategory.PROJECT,
-			valueRelevanceHours: null,
-			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		});
 
 		const fileApplicationFormField = await createApplicationFormField(
@@ -271,14 +257,10 @@ describe('/proposal_field_value_to_json', () => {
 		});
 
 		// Create a file base field
-		const fileBaseField = await createOrUpdateBaseField(db, null, {
-			label: 'File Upload',
-			description: 'A field for file uploads',
+		const fileBaseField = await createTestBaseField(db, null, {
 			shortCode: 'fileUpload3',
 			dataType: BaseFieldDataType.FILE,
 			category: BaseFieldCategory.PROJECT,
-			valueRelevanceHours: null,
-			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		});
 
 		const fileApplicationFormField = await createApplicationFormField(
@@ -345,14 +327,10 @@ describe('/proposal_field_value_to_json', () => {
 		});
 
 		// Create a file base field
-		const fileBaseField = await createOrUpdateBaseField(db, null, {
-			label: 'File Upload',
-			description: 'A field for file uploads',
+		const fileBaseField = await createTestBaseField(db, null, {
 			shortCode: 'fileUpload4',
 			dataType: BaseFieldDataType.FILE,
 			category: BaseFieldCategory.PROJECT,
-			valueRelevanceHours: null,
-			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		});
 
 		const fileApplicationFormField = await createApplicationFormField(
@@ -419,14 +397,9 @@ describe('/proposal_field_value_to_json', () => {
 		});
 
 		// Create a string base field
-		const stringBaseField = await createOrUpdateBaseField(db, null, {
-			label: 'Text Field',
-			description: 'A regular text field',
+		const stringBaseField = await createTestBaseField(db, null, {
 			shortCode: 'textField',
-			dataType: BaseFieldDataType.STRING,
 			category: BaseFieldCategory.PROJECT,
-			valueRelevanceHours: null,
-			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		});
 
 		const stringApplicationFormField = await createApplicationFormField(

@@ -19,12 +19,12 @@ import {
 } from '../database';
 import { getLogger } from '../logger';
 import {
+	createTestBaseField,
 	createTestChangemaker,
 	createTestFunder,
 	createTestOpportunity,
 } from '../test/factories';
 import {
-	BaseFieldDataType,
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	PermissionGrantEntityType,
@@ -43,30 +43,7 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import type { TinyPg } from 'tinypg';
-
 const logger = getLogger(__filename);
-
-const createTestBaseFields = async (db: TinyPg): Promise<void> => {
-	await createOrUpdateBaseField(db, null, {
-		label: 'First Name',
-		description: 'The first name of the applicant',
-		shortCode: 'firstName',
-		dataType: BaseFieldDataType.STRING,
-		category: BaseFieldCategory.PROJECT,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
-	});
-	await createOrUpdateBaseField(db, null, {
-		label: 'Last Name',
-		description: 'The last name of the applicant',
-		shortCode: 'lastName',
-		dataType: BaseFieldDataType.STRING,
-		category: BaseFieldCategory.PROJECT,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
-	});
-};
 
 describe('/proposalVersions', () => {
 	describe('GET /:proposalVersionId', () => {
@@ -587,10 +564,11 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			await createTestBaseFields(db);
+			const firstNameBaseField = await createTestBaseField(db, null);
+			const lastNameBaseField = await createTestBaseField(db, null);
 			const firstNameField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'firstName',
+				baseFieldShortCode: firstNameBaseField.shortCode,
 				position: 1,
 				label: 'First Name',
 				instructions: 'Please enter the first name of the applicant.',
@@ -598,7 +576,7 @@ describe('/proposalVersions', () => {
 			});
 			const lastNameField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'lastName',
+				baseFieldShortCode: lastNameBaseField.shortCode,
 				position: 2,
 				label: 'Last Name',
 				instructions: 'Please enter the last name of the applicant.',
@@ -674,28 +652,19 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
-				label: 'Forbidden Field',
-				description: 'This field should not be used in proposal versions',
-				shortCode: 'forbiddenField',
-				dataType: BaseFieldDataType.STRING,
+			const baseField = await createTestBaseField(db, null, {
 				category: BaseFieldCategory.PROJECT,
-				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const forbiddenApplicationFormField = await createApplicationFormField(
-				db,
-				null,
-				{
-					applicationFormId: applicationForm.id,
-					baseFieldShortCode: forbiddenBaseField.shortCode,
-					position: 1,
-					label: 'Forbidden Field',
-					instructions: 'This field should not be used in proposal versions',
-					inputType: null,
-				},
-			);
+			const applicationFormField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: baseField.shortCode,
+				position: 1,
+				label: 'Forbidden Field',
+				instructions: 'This field should not be used in proposal versions',
+				inputType: null,
+			});
 			const proposalVersion = await createProposalVersion(
 				db,
 				testUserAuthContext,
@@ -707,14 +676,14 @@ describe('/proposalVersions', () => {
 			);
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: proposalVersion.id,
-				applicationFormFieldId: forbiddenApplicationFormField.id,
+				applicationFormFieldId: applicationFormField.id,
 				position: 1,
 				value: 'Should not be returned',
 				isValid: true,
 				goodAsOf: null,
 			});
 			await createOrUpdateBaseField(db, null, {
-				...forbiddenBaseField,
+				...baseField,
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});
 
@@ -729,7 +698,7 @@ describe('/proposalVersions', () => {
 					sourceId: systemSource.id,
 					fieldValues: [
 						{
-							applicationFormFieldId: forbiddenApplicationFormField.id,
+							applicationFormFieldId: applicationFormField.id,
 							position: 1,
 							value: 'This should not be allowed',
 							goodAsOf: null,
@@ -1017,10 +986,11 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				name: null,
 			});
-			await createTestBaseFields(db);
+			const firstNameBaseField = await createTestBaseField(db, null);
+			const lastNameBaseField = await createTestBaseField(db, null);
 			const firstNameField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm1.id,
-				baseFieldShortCode: 'firstName',
+				baseFieldShortCode: firstNameBaseField.shortCode,
 				position: 1,
 				label: 'First Name',
 				instructions: 'Please enter the first name of the applicant.',
@@ -1028,7 +998,7 @@ describe('/proposalVersions', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm1.id,
-				baseFieldShortCode: 'lastName',
+				baseFieldShortCode: lastNameBaseField.shortCode,
 				position: 2,
 				label: 'Last Name',
 				instructions: 'Please enter the last name of the applicant.',
@@ -1084,25 +1054,12 @@ describe('/proposalVersions', () => {
 			const systemFunder = await loadSystemFunder(db, null);
 
 			// Create base fields with different categories
-			await createOrUpdateBaseField(db, null, {
-				label: 'Budget Amount',
-				description: 'The budget amount',
+			await createTestBaseField(db, null, {
 				shortCode: 'budgetAmount',
-				dataType: BaseFieldDataType.STRING,
 				category: BaseFieldCategory.BUDGET,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			await createOrUpdateBaseField(db, null, {
-				label: 'Org Name',
-				description: 'The organization name',
+			await createTestBaseField(db, null, {
 				shortCode: 'orgName',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			const opportunity = await createOpportunity(db, testUserAuthContext, {
@@ -1211,25 +1168,12 @@ describe('/proposalVersions', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 
-			await createOrUpdateBaseField(db, null, {
-				label: 'Budget Amount',
-				description: 'The budget amount',
+			await createTestBaseField(db, null, {
 				shortCode: 'budgetAmount',
-				dataType: BaseFieldDataType.STRING,
 				category: BaseFieldCategory.BUDGET,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			await createOrUpdateBaseField(db, null, {
-				label: 'Org Name',
-				description: 'The organization name',
+			await createTestBaseField(db, null, {
 				shortCode: 'orgName',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			const opportunity = await createOpportunity(db, testUserAuthContext, {
@@ -1326,15 +1270,8 @@ describe('/proposalVersions', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 
-			await createOrUpdateBaseField(db, null, {
-				label: 'Org Name',
-				description: 'The organization name',
+			await createTestBaseField(db, null, {
 				shortCode: 'orgName',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			const opportunity = await createOpportunity(db, testUserAuthContext, {
@@ -1420,25 +1357,12 @@ describe('/proposalVersions', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const systemFunder = await loadSystemFunder(db, null);
 
-			await createOrUpdateBaseField(db, null, {
-				label: 'Budget Amount',
-				description: 'The budget amount',
+			await createTestBaseField(db, null, {
 				shortCode: 'budgetAmount',
-				dataType: BaseFieldDataType.STRING,
 				category: BaseFieldCategory.BUDGET,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			await createOrUpdateBaseField(db, null, {
-				label: 'Org Name',
-				description: 'The organization name',
+			await createTestBaseField(db, null, {
 				shortCode: 'orgName',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			const opportunity = await createOpportunity(db, testUserAuthContext, {
@@ -1547,15 +1471,9 @@ describe('/proposalVersions', () => {
 			const grantedFunder = await createTestFunder(db, testUserAuthContext);
 			const otherFunder = await createTestFunder(db, testUserAuthContext);
 
-			await createOrUpdateBaseField(db, null, {
-				label: 'Budget Amount',
-				description: 'The budget amount',
+			await createTestBaseField(db, null, {
 				shortCode: 'budgetAmount',
-				dataType: BaseFieldDataType.STRING,
 				category: BaseFieldCategory.BUDGET,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			// Set up opportunity + proposal + field values for the OTHER funder
@@ -1639,25 +1557,12 @@ describe('/proposalVersions', () => {
 			const grantedFunder = await createTestFunder(db, testUserAuthContext);
 			const otherFunder = await createTestFunder(db, testUserAuthContext);
 
-			await createOrUpdateBaseField(db, null, {
-				label: 'Budget Amount',
-				description: 'The budget amount',
+			await createTestBaseField(db, null, {
 				shortCode: 'budgetAmount',
-				dataType: BaseFieldDataType.STRING,
 				category: BaseFieldCategory.BUDGET,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			await createOrUpdateBaseField(db, null, {
-				label: 'Org Name',
-				description: 'The organization name',
+			await createTestBaseField(db, null, {
 				shortCode: 'orgName',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			// Set up data for the GRANTED funder

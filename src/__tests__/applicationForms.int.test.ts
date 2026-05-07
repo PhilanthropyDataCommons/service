@@ -10,10 +10,12 @@ import {
 	loadTableMetrics,
 } from '../database';
 import { getLogger } from '../logger';
-import { createTestFunder, createTestOpportunity } from '../test/factories';
 import {
-	BaseFieldDataType,
-	BaseFieldCategory,
+	createTestBaseField,
+	createTestFunder,
+	createTestOpportunity,
+} from '../test/factories';
+import {
 	BaseFieldSensitivityClassification,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
@@ -25,30 +27,7 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import type { TinyPg } from 'tinypg';
-
 const logger = getLogger(__filename);
-
-const createTestBaseFields = async (db: TinyPg) => {
-	await createOrUpdateBaseField(db, null, {
-		label: 'Organization Name',
-		description: 'The organizational name of the applicant',
-		shortCode: 'organizationName',
-		dataType: BaseFieldDataType.STRING,
-		category: BaseFieldCategory.ORGANIZATION,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
-	});
-	await createOrUpdateBaseField(db, null, {
-		label: 'Years of work',
-		description: 'The number of years the project will take to complete',
-		shortCode: 'yearsOfWork',
-		dataType: BaseFieldDataType.STRING,
-		category: BaseFieldCategory.PROJECT,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
-	});
-};
 
 describe('/applicationForms', () => {
 	describe('GET /', () => {
@@ -219,10 +198,11 @@ describe('/applicationForms', () => {
 					name: null,
 				},
 			);
-			await createTestBaseFields(db);
+			const organizationField = await createTestBaseField(db, null);
+			const yearsField = await createTestBaseField(db, null);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm3.id,
-				baseFieldShortCode: 'yearsOfWork',
+				baseFieldShortCode: yearsField.shortCode,
 				position: 1,
 				label: 'Anni Worki',
 				instructions: 'Please enter the number of years of work.',
@@ -230,7 +210,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm3.id,
-				baseFieldShortCode: 'organizationName',
+				baseFieldShortCode: organizationField.shortCode,
 				position: 2,
 				label: 'Org Nomen',
 				instructions: 'Please enter the name of the organization.',
@@ -238,7 +218,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm2.id,
-				baseFieldShortCode: 'organizationName',
+				baseFieldShortCode: organizationField.shortCode,
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
@@ -246,7 +226,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm2.id,
-				baseFieldShortCode: 'yearsOfWork',
+				baseFieldShortCode: yearsField.shortCode,
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
@@ -264,29 +244,16 @@ describe('/applicationForms', () => {
 				fields: [
 					{
 						applicationFormId: applicationForm2.id,
-						baseFieldShortCode: 'yearsOfWork',
-						baseField: {
-							label: 'Years of work',
-							description:
-								'The number of years the project will take to complete',
-							shortCode: 'yearsOfWork',
-							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp(),
-						},
+						baseFieldShortCode: yearsField.shortCode,
+						baseField: yearsField,
 						position: 1,
 						label: 'Duration of work in years',
 						createdAt: expectTimestamp(),
 					},
 					{
 						applicationFormId: applicationForm2.id,
-						baseFieldShortCode: 'organizationName',
-						baseField: {
-							label: 'Organization Name',
-							description: 'The organizational name of the applicant',
-							shortCode: 'organizationName',
-							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp(),
-						},
+						baseFieldShortCode: organizationField.shortCode,
+						baseField: organizationField,
 						position: 2,
 						label: 'Name of Organization',
 						createdAt: expectTimestamp(),
@@ -322,10 +289,11 @@ describe('/applicationForms', () => {
 					name: null,
 				},
 			);
-			await createTestBaseFields(db);
+			const organizationField = await createTestBaseField(db, null);
+			const yearsField = await createTestBaseField(db, null);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'organizationName',
+				baseFieldShortCode: organizationField.shortCode,
 				position: 2,
 				label: 'Name of Organization',
 				instructions: 'Please enter the name of the organization.',
@@ -333,7 +301,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'yearsOfWork',
+				baseFieldShortCode: yearsField.shortCode,
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: 'Please enter the number of years of work.',
@@ -351,15 +319,8 @@ describe('/applicationForms', () => {
 				fields: [
 					{
 						applicationFormId: applicationForm.id,
-						baseFieldShortCode: 'yearsOfWork',
-						baseField: {
-							label: 'Years of work',
-							description:
-								'The number of years the project will take to complete',
-							shortCode: 'yearsOfWork',
-							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp(),
-						},
+						baseFieldShortCode: yearsField.shortCode,
+						baseField: yearsField,
 						position: 1,
 						label: 'Duration of work in years',
 						instructions: 'Please enter the number of years of work.',
@@ -367,14 +328,8 @@ describe('/applicationForms', () => {
 					},
 					{
 						applicationFormId: applicationForm.id,
-						baseFieldShortCode: 'organizationName',
-						baseField: {
-							label: 'Organization Name',
-							description: 'The organizational name of the applicant',
-							shortCode: 'organizationName',
-							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp(),
-						},
+						baseFieldShortCode: organizationField.shortCode,
+						baseField: organizationField,
 						position: 2,
 						label: 'Name of Organization',
 						instructions: 'Please enter the name of the organization.',
@@ -410,10 +365,11 @@ describe('/applicationForms', () => {
 					name: null,
 				},
 			);
-			await createTestBaseFields(db);
+			const organizationField = await createTestBaseField(db, null);
+			const yearsField = await createTestBaseField(db, null);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'organizationName',
+				baseFieldShortCode: organizationField.shortCode,
 				position: 2,
 				label: 'Name of Organization',
 				instructions: null,
@@ -421,7 +377,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'yearsOfWork',
+				baseFieldShortCode: yearsField.shortCode,
 				position: 1,
 				label: 'Duration of work in years',
 				instructions: null,
@@ -439,15 +395,8 @@ describe('/applicationForms', () => {
 				fields: [
 					{
 						applicationFormId: applicationForm.id,
-						baseFieldShortCode: 'yearsOfWork',
-						baseField: {
-							label: 'Years of work',
-							description:
-								'The number of years the project will take to complete',
-							shortCode: 'yearsOfWork',
-							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp(),
-						},
+						baseFieldShortCode: yearsField.shortCode,
+						baseField: yearsField,
 						position: 1,
 						label: 'Duration of work in years',
 						instructions: null,
@@ -455,14 +404,8 @@ describe('/applicationForms', () => {
 					},
 					{
 						applicationFormId: applicationForm.id,
-						baseFieldShortCode: 'organizationName',
-						baseField: {
-							label: 'Organization Name',
-							description: 'The organizational name of the applicant',
-							shortCode: 'organizationName',
-							dataType: BaseFieldDataType.STRING,
-							createdAt: expectTimestamp(),
-						},
+						baseFieldShortCode: organizationField.shortCode,
+						baseField: organizationField,
 						position: 2,
 						label: 'Name of Organization',
 						instructions: null,
@@ -486,26 +429,20 @@ describe('/applicationForms', () => {
 					name: null,
 				},
 			);
-			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
-				label: 'Forbidden Field',
-				description: 'This field should not be used in application forms',
-				shortCode: 'forbiddenField',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
+			const baseField = await createTestBaseField(db, null, {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: forbiddenBaseField.shortCode,
+				baseFieldShortCode: baseField.shortCode,
 				position: 1,
 				label: 'Anni Worki',
 				instructions: 'Please enter the number of years of work.',
 				inputType: null,
 			});
 			await createOrUpdateBaseField(db, null, {
-				...forbiddenBaseField,
+				...baseField,
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});
 			const result = await request(app)
@@ -587,10 +524,11 @@ describe('/applicationForms', () => {
 					name: null,
 				},
 			);
-			await createTestBaseFields(db);
+			const organizationField = await createTestBaseField(db, null);
+			const yearsField = await createTestBaseField(db, null);
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'organizationName',
+				baseFieldShortCode: organizationField.shortCode,
 				position: 1,
 				label: 'Organization Name',
 				instructions: 'Please enter the name of the organization.',
@@ -598,7 +536,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'yearsOfWork',
+				baseFieldShortCode: yearsField.shortCode,
 				position: 2,
 				label: 'Years of Work',
 				instructions: 'Please enter the number of years of work.',
@@ -643,11 +581,12 @@ describe('/applicationForms', () => {
 					name: null,
 				},
 			);
-			await createTestBaseFields(db);
+			const organizationField = await createTestBaseField(db, null);
+			const yearsField = await createTestBaseField(db, null);
 
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'yearsOfWork',
+				baseFieldShortCode: yearsField.shortCode,
 				position: 2,
 				label: 'Years of Work',
 				instructions: null,
@@ -655,7 +594,7 @@ describe('/applicationForms', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'organizationName',
+				baseFieldShortCode: organizationField.shortCode,
 				position: 1,
 				label: 'Organization Name',
 				instructions: null,
@@ -917,7 +856,7 @@ describe('/applicationForms', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			await createTestBaseFields(db);
+			const organizationField = await createTestBaseField(db, null);
 			const before = await loadTableMetrics(db, 'application_form_fields');
 			const result = await request(app)
 				.post('/applicationForms')
@@ -928,7 +867,7 @@ describe('/applicationForms', () => {
 					name: null,
 					fields: [
 						{
-							baseFieldShortCode: 'organizationName',
+							baseFieldShortCode: organizationField.shortCode,
 							position: 1,
 							label: 'Organization Name',
 							instructions: 'Please enter the name of the organization.',
@@ -946,7 +885,7 @@ describe('/applicationForms', () => {
 				version: 1,
 				fields: [
 					{
-						baseFieldShortCode: 'organizationName',
+						baseFieldShortCode: organizationField.shortCode,
 						createdAt: expectTimestamp(),
 						label: 'Organization Name',
 						instructions: 'Please enter the name of the organization.',
@@ -993,13 +932,8 @@ describe('/applicationForms', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
-				label: 'Forbidden Field',
-				description: 'This field should not be used in application forms',
+			const forbiddenBaseField = await createTestBaseField(db, null, {
 				shortCode: 'forbiddenField',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});
 
@@ -1091,7 +1025,7 @@ describe('/applicationForms', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			await createTestBaseFields(db);
+			const organizationField = await createTestBaseField(db, null);
 			jest
 				.spyOn(db, 'sql')
 				.mockReturnValueOnce(
@@ -1118,7 +1052,7 @@ describe('/applicationForms', () => {
 					name: null,
 					fields: [
 						{
-							baseFieldShortCode: 'organizationName',
+							baseFieldShortCode: organizationField.shortCode,
 							position: 1,
 							label: 'Organization Name',
 							instructions: null,

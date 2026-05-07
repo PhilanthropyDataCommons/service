@@ -9,7 +9,6 @@ import {
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
-	createOrUpdateUser,
 	getDatabase,
 	loadSystemSource,
 	loadTableMetrics,
@@ -22,6 +21,7 @@ import {
 	createTestChangemaker,
 	createTestFunder,
 	createTestOpportunity,
+	createTestUser,
 } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -465,10 +465,7 @@ describe('/proposals', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-				keycloakUserName: 'Dave',
-			});
+			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
@@ -515,10 +512,7 @@ describe('/proposals', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-				keycloakUserName: 'Erin',
-			});
+			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
@@ -557,10 +551,7 @@ describe('/proposals', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-				keycloakUserName: 'Fulton',
-			});
+			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
@@ -822,10 +813,7 @@ describe('/proposals', () => {
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-				keycloakUserName: 'Georgina',
-			});
+			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, anotherUserAuthContext, {

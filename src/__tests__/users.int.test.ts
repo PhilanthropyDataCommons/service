@@ -1,26 +1,15 @@
 import request from 'supertest';
-import { v4 as uuidv4 } from 'uuid';
 import { app } from '../app';
-import {
-	getDatabase,
-	createOrUpdateUser,
-	loadSystemUser,
-	loadTableMetrics,
-} from '../database';
+import { getDatabase, loadSystemUser, loadTableMetrics } from '../database';
 import { loadTestUser } from '../test/utils';
+import { createTestUser } from '../test/factories';
 import { expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
-import { keycloakIdToString, stringToKeycloakId } from '../types';
-import type { TinyPg } from 'tinypg';
-
-const createAdditionalTestUser = async (db: TinyPg) =>
-	await createOrUpdateUser(db, null, {
-		keycloakUserId: stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
-		keycloakUserName: 'Call me Ishmael',
-	});
+import { keycloakIdToString } from '../types';
+import type { User } from '../types';
 
 describe('/users', () => {
 	describe('GET /', () => {
@@ -31,7 +20,7 @@ describe('/users', () => {
 		it('returns the user associated with the requesting user', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
-			await createAdditionalTestUser(db);
+			await createTestUser(db, null);
 
 			const response = await request(app)
 				.get('/users')
@@ -52,7 +41,7 @@ describe('/users', () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const testUser = await loadTestUser(db);
-			const anotherUser = await createAdditionalTestUser(db);
+			const anotherUser = await createTestUser(db, null);
 			const { count: userCount } = await loadTableMetrics(db, 'users');
 
 			const response = await request(app)
@@ -67,7 +56,7 @@ describe('/users', () => {
 
 		it('returns a specific user when a keycloakUserId is provided', async () => {
 			const db = getDatabase();
-			const anotherUser = await createAdditionalTestUser(db);
+			const anotherUser = await createTestUser(db, null);
 
 			const response = await request(app)
 				.get(
@@ -90,14 +79,14 @@ describe('/users', () => {
 
 		it('returns according to pagination parameters', async () => {
 			const db = getDatabase();
-			const uuids = Array.from(Array(20)).map(() => uuidv4());
-			await uuids.reduce(async (p, uuid) => {
-				await p;
-				await createOrUpdateUser(db, null, {
-					keycloakUserId: uuid,
-					keycloakUserName: 'Alice',
-				});
-			}, Promise.resolve());
+			const createdUsers = await Array.from(Array(20)).reduce<Promise<User[]>>(
+				async (p) => {
+					const acc = await p;
+					const user = await createTestUser(db, null);
+					return [...acc, user];
+				},
+				Promise.resolve([]),
+			);
 			const { count: userCount } = await loadTableMetrics(db, 'users');
 
 			const response = await request(app)
@@ -111,31 +100,11 @@ describe('/users', () => {
 			expect(response.body).toEqual({
 				total: userCount,
 				entries: [
-					{
-						keycloakUserId: uuids[14],
-						keycloakUserName: 'Alice',
-						createdAt: expectTimestamp(),
-					},
-					{
-						keycloakUserId: uuids[13],
-						keycloakUserName: 'Alice',
-						createdAt: expectTimestamp(),
-					},
-					{
-						keycloakUserId: uuids[12],
-						keycloakUserName: 'Alice',
-						createdAt: expectTimestamp(),
-					},
-					{
-						keycloakUserId: uuids[11],
-						keycloakUserName: 'Alice',
-						createdAt: expectTimestamp(),
-					},
-					{
-						keycloakUserId: uuids[10],
-						keycloakUserName: 'Alice',
-						createdAt: expectTimestamp(),
-					},
+					createdUsers[14],
+					createdUsers[13],
+					createdUsers[12],
+					createdUsers[11],
+					createdUsers[10],
 				],
 			});
 		});

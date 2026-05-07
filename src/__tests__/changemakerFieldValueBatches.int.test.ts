@@ -3,13 +3,12 @@ import { app } from '../app';
 import {
 	getDatabase,
 	createChangemakerFieldValueBatch,
-	createOrUpdateUser,
 	createPermissionGrant,
 	createSource,
 	loadSystemUser,
 } from '../database';
 import { expectNumber, expectTimestamp } from '../test/asymettricMatchers';
-import { createTestChangemaker } from '../test/factories';
+import { createTestChangemaker, createTestUser } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -272,10 +271,7 @@ describe('GET /changemakerFieldValueBatches', () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
-		const anotherUser = await createOrUpdateUser(db, null, {
-			keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			keycloakUserName: 'Larry',
-		});
+		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
@@ -314,10 +310,7 @@ describe('GET /changemakerFieldValueBatches', () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
-		const anotherUser = await createOrUpdateUser(db, null, {
-			keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			keycloakUserName: 'Martin',
-		});
+		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
@@ -395,10 +388,7 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
-		const anotherUser = await createOrUpdateUser(db, null, {
-			keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			keycloakUserName: 'Nancy',
-		});
+		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
@@ -431,10 +421,7 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
-		const anotherUser = await createOrUpdateUser(db, null, {
-			keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-			keycloakUserName: 'Oscar',
-		});
+		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);

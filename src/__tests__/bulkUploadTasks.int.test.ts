@@ -4,7 +4,6 @@ import {
 	getDatabase,
 	createApplicationForm,
 	createBulkUploadTask,
-	createOrUpdateUser,
 	createSource,
 	loadSystemSource,
 	loadSystemUser,
@@ -16,6 +15,7 @@ import {
 	createTestFile,
 	createTestFunder,
 	createTestOpportunity,
+	createTestUser,
 } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -153,10 +153,7 @@ describe('/tasks/bulkUploads', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-				keycloakUserName: 'Joe',
-			});
+			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const firstProposal = await createTestFile(db, testUserAuthContext);
 			const secondProposal = await createTestFile(db, testUserAuthContext);
@@ -216,10 +213,7 @@ describe('/tasks/bulkUploads', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-				keycloakUserName: 'Karen',
-			});
+			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const firstProposalsFile = await createTestFile(db, testUserAuthContext);
 			const secondProposalsFile = await createTestFile(
@@ -280,10 +274,7 @@ describe('/tasks/bulkUploads', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-				keycloakUserName: 'Larry',
-			});
+			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const firstProposalsFile = await createTestFile(db, testUserAuthContext);
 			const secondProposalsFile = await createTestFile(
@@ -980,10 +971,7 @@ describe('/tasks/bulkUploads', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const testFunder = await createTestFunder(db, systemUserAuthContext);
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174001',
-				keycloakUserName: 'Alice',
-			});
+			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,

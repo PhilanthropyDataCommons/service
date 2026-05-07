@@ -1,5 +1,5 @@
 import { setImmediate } from 'node:timers/promises';
-import { createOrUpdateUser, loadUserByKeycloakUserId } from '../database';
+import { loadUserByKeycloakUserId } from '../database';
 import { stringToKeycloakId } from '../types';
 import type { AuthContext, KeycloakId, User } from '../types';
 import type { TinyPg } from 'tinypg';
@@ -40,12 +40,6 @@ export const getMockedUser = (): User => ({
 	keycloakUserName: getTestUserKeycloakUserName(),
 	createdAt: '',
 });
-
-export const createTestUser = async (db: Pick<TinyPg, 'sql'>): Promise<User> =>
-	await createOrUpdateUser(db, null, {
-		keycloakUserId: getTestUserKeycloakUserId(),
-		keycloakUserName: getTestUserKeycloakUserName(),
-	});
 
 export const loadTestUser = async (db: Pick<TinyPg, 'sql'>): Promise<User> => {
 	const testUserKeycloakUserId = getTestUserKeycloakUserId();

@@ -3,7 +3,6 @@ import {
 	createApplicationFormField,
 	createFile,
 	createOrUpdateBaseField,
-	createOrUpdateUser,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
@@ -13,6 +12,7 @@ import {
 import {
 	createTestBaseField,
 	createTestOpportunity,
+	createTestUser,
 } from '../../../test/factories';
 import { getAuthContext, loadTestUser } from '../../../test/utils';
 import {
@@ -162,10 +162,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		// Create a different user for the file
-		const otherUser = await createOrUpdateUser(db, null, {
-			keycloakUserId: '22222222-2222-2222-2222-222222222222',
-			keycloakUserName: 'OtherUser',
-		});
+		const otherUser = await createTestUser(db, null);
 		const otherUserAuthContext = getAuthContext(otherUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, testUserAuthContext);

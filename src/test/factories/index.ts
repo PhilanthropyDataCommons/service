@@ -6,3 +6,4 @@ export * from './createTestFunder';
 export * from './createTestOpportunity';
 export * from './createTestPermissionGrant';
 export * from './createTestS3Bucket';
+export * from './createTestUser';

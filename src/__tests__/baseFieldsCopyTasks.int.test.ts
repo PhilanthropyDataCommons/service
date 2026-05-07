@@ -3,10 +3,10 @@ import { app } from '../app';
 import {
 	getDatabase,
 	createBaseFieldsCopyTask,
-	createOrUpdateUser,
 	loadTableMetrics,
 } from '../database';
 import { getAuthContext, loadTestUser } from '../test/utils';
+import { createTestUser } from '../test/factories';
 import {
 	expectArray,
 	expectNumber,
@@ -45,10 +45,7 @@ describe('/tasks/baseFieldsCopy', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const anotherUser = await createOrUpdateUser(db, null, {
-				keycloakUserId: '123e4567-e89b-12d3-a456-426614174000',
-				keycloakUserName: 'Henry',
-			});
+			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 
 			await createBaseFieldsCopyTask(db, testUserAuthContext, {

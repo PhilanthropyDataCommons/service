@@ -2,11 +2,11 @@ import { requireFunderPermission } from '../requireFunderPermission';
 import { InputValidationError, UnauthorizedError } from '../../errors';
 import {
 	getDatabase,
-	createOrUpdateFunder,
 	createPermissionGrant,
 	loadSystemUser,
 } from '../../database';
 import { getAuthContext, getMockedUser, loadTestUser } from '../../test/utils';
+import { createTestFunder } from '../../test/factories';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import {
 	PermissionGrantEntityType,
@@ -66,18 +66,13 @@ describe('requireFunderPermission', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			await createOrUpdateFunder(db, testUserAuthContext, {
-				shortCode: 'test_funder_no_perm',
-				name: 'Test Funder No Permission',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const unpermittedFunder = await createTestFunder(db, testUserAuthContext);
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
 			req.user = testUser;
 			req.role = { isAdministrator: false };
-			req.params = { funderShortCode: 'test_funder_no_perm' };
+			req.params = { funderShortCode: unpermittedFunder.shortCode };
 			const nextMock = jest.fn((error: unknown) => {
 				expect(error).toBeInstanceOf(UnauthorizedError);
 				expect(error).toMatchObject({
@@ -102,18 +97,13 @@ describe('requireFunderPermission', () => {
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const funder = await createOrUpdateFunder(db, testUserAuthContext, {
-				shortCode: 'test_funder_with_perm',
-				name: 'Permitted Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const permittedFunder = await createTestFunder(db, testUserAuthContext);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: funder.shortCode,
+				funderShortCode: permittedFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
@@ -122,7 +112,7 @@ describe('requireFunderPermission', () => {
 			const res = getMockResponse();
 			req.user = testUser;
 			req.role = { isAdministrator: false };
-			req.params = { funderShortCode: funder.shortCode };
+			req.params = { funderShortCode: permittedFunder.shortCode };
 			const nextMock = jest.fn((error: unknown) => {
 				expect(error).toBe(undefined);
 				done();
@@ -143,18 +133,13 @@ describe('requireFunderPermission', () => {
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const funder = await createOrUpdateFunder(db, testUserAuthContext, {
-				shortCode: 'test_funder_view_only',
-				name: 'View Only Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const viewOnlyFunder = await createTestFunder(db, testUserAuthContext);
 
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
-				funderShortCode: funder.shortCode,
+				funderShortCode: viewOnlyFunder.shortCode,
 				scope: [PermissionGrantEntityType.FUNDER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
@@ -163,7 +148,7 @@ describe('requireFunderPermission', () => {
 			const res = getMockResponse();
 			req.user = testUser;
 			req.role = { isAdministrator: false };
-			req.params = { funderShortCode: funder.shortCode };
+			req.params = { funderShortCode: viewOnlyFunder.shortCode };
 			const nextMock = jest.fn((error: unknown) => {
 				expect(error).toBeInstanceOf(UnauthorizedError);
 				expect(error).toMatchObject({

@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	createOrUpdateFunder,
 	createProposal,
 	createSource,
 	getDatabase,
@@ -670,12 +669,7 @@ describe('/permissionGrants', () => {
 		it('creates and returns a permission grant with conditions', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const funder = await createOrUpdateFunder(db, authContext, {
-				shortCode: 'condFunder',
-				name: 'Conditions Test Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, authContext);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -720,12 +714,7 @@ describe('/permissionGrants', () => {
 		it('creates a permission grant with null conditions', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const funder = await createOrUpdateFunder(db, authContext, {
-				shortCode: 'nullCondFunder',
-				name: 'Null Conditions Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, authContext);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -749,12 +738,7 @@ describe('/permissionGrants', () => {
 		it('creates a permission grant with in operator condition', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const funder = await createOrUpdateFunder(db, authContext, {
-				shortCode: 'eqCondFunder',
-				name: 'In Condition Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, authContext);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -790,12 +774,7 @@ describe('/permissionGrants', () => {
 		it('returns 400 when conditions has invalid property name', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const funder = await createOrUpdateFunder(db, authContext, {
-				shortCode: 'badFieldFunder',
-				name: 'Bad Field Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, authContext);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -825,12 +804,7 @@ describe('/permissionGrants', () => {
 		it('returns 400 when conditions has invalid operator', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const funder = await createOrUpdateFunder(db, authContext, {
-				shortCode: 'badOpFunder',
-				name: 'Bad Op Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, authContext);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -860,12 +834,7 @@ describe('/permissionGrants', () => {
 		it('returns 400 when condition key is not in scope', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
-			const funder = await createOrUpdateFunder(db, authContext, {
-				shortCode: 'noScopeFunder',
-				name: 'No Scope Funder',
-				keycloakOrganizationId: null,
-				isCollaborative: false,
-			});
+			const funder = await createTestFunder(db, authContext);
 			const result = await agent
 				.post('/permissionGrants')
 				.type('application/json')

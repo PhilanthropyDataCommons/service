@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	getDatabase,
-	createOrUpdateBaseField,
 	createSource,
 	createChangemakerFieldValueBatch,
 	createChangemakerFieldValue,
@@ -18,7 +17,6 @@ import {
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
 import {
-	BaseFieldDataType,
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	PermissionGrantEntityType,
@@ -380,14 +378,9 @@ describe('POST /changemakerFieldValues', () => {
 
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const proposalField = await createOrUpdateBaseField(db, null, {
-			shortCode: 'test_proposal_field',
-			label: 'Test Proposal Field',
-			description: 'A test field for proposals',
+		const proposalField = await createTestBaseField(db, null, {
 			category: BaseFieldCategory.PROJECT,
-			dataType: BaseFieldDataType.STRING,
 			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
-			valueRelevanceHours: null,
 		});
 
 		const source = await createSource(db, testUserAuthContext, {
@@ -429,14 +422,8 @@ describe('POST /changemakerFieldValues', () => {
 
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const forbiddenField = await createOrUpdateBaseField(db, null, {
-			shortCode: 'forbidden_field_test',
-			label: 'Forbidden Field',
-			description: 'A forbidden field',
-			category: BaseFieldCategory.ORGANIZATION,
-			dataType: BaseFieldDataType.STRING,
+		const forbiddenField = await createTestBaseField(db, null, {
 			sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
-			valueRelevanceHours: null,
 		});
 
 		const source = await createSource(db, testUserAuthContext, {

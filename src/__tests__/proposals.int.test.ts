@@ -18,6 +18,7 @@ import {
 	createPermissionGrant,
 } from '../database';
 import {
+	createTestBaseField,
 	createTestChangemaker,
 	createTestFunder,
 	createTestOpportunity,
@@ -34,8 +35,6 @@ import {
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
 import {
-	BaseFieldDataType,
-	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	keycloakIdToString,
 	PermissionGrantEntityType,
@@ -43,28 +42,6 @@ import {
 	PermissionGrantVerb,
 	stringToKeycloakId,
 } from '../types';
-import type { TinyPg } from 'tinypg';
-
-const createTestBaseFields = async (db: TinyPg): Promise<void> => {
-	await createOrUpdateBaseField(db, null, {
-		label: 'Summary',
-		description: 'A summary of the proposal',
-		shortCode: 'summary',
-		dataType: BaseFieldDataType.STRING,
-		category: BaseFieldCategory.PROJECT,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
-	});
-	await createOrUpdateBaseField(db, null, {
-		label: 'Title',
-		description: 'The title of the proposal',
-		shortCode: 'title',
-		dataType: BaseFieldDataType.STRING,
-		category: BaseFieldCategory.PROJECT,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
-	});
-};
 
 describe('/proposals', () => {
 	describe('GET /', () => {
@@ -137,7 +114,6 @@ describe('/proposals', () => {
 					funderShortCode: anotherFunder.shortCode,
 				},
 			);
-			await createTestBaseFields(db);
 			const funderVisibleProposal = await createProposal(
 				db,
 				testUserAuthContext,
@@ -189,7 +165,6 @@ describe('/proposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			await createTestBaseFields(db);
 			const proposal = await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -240,7 +215,6 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const testFunder = await createTestFunder(db, testUserAuthContext);
-			await createTestBaseFields(db);
 
 			const systemOpportunity = await createTestOpportunity(
 				db,
@@ -324,7 +298,7 @@ describe('/proposals', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields(db);
+			const summaryField = await createTestBaseField(db, null);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -349,7 +323,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldShortCode: 'summary',
+				baseFieldShortCode: summaryField.shortCode,
 				position: 1,
 				label: 'Short summary',
 				instructions: 'Please enter a short summary of the proposal.',
@@ -409,21 +383,10 @@ describe('/proposals', () => {
 										applicationFormField: {
 											id: 1,
 											applicationFormId: 1,
-											baseFieldShortCode: 'summary',
+											baseFieldShortCode: summaryField.shortCode,
 											instructions:
 												'Please enter a short summary of the proposal.',
-											baseField: {
-												createdAt: expectTimestamp(),
-												dataType: 'string',
-												description: 'A summary of the proposal',
-												label: 'Summary',
-												category: 'project',
-												valueRelevanceHours: null,
-												shortCode: 'summary',
-												sensitivityClassification:
-													BaseFieldSensitivityClassification.RESTRICTED,
-												localizations: {},
-											},
+											baseField: summaryField,
 											label: 'Short summary',
 											position: 1,
 											inputType: null,
@@ -445,13 +408,7 @@ describe('/proposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const systemSource = await loadSystemSource(db, null);
-			const forbiddenField = await createOrUpdateBaseField(db, null, {
-				label: 'Forbidden Field',
-				description: 'A field that should not be searchable',
-				shortCode: 'forbidden',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.PROJECT,
-				valueRelevanceHours: null,
+			const baseField = await createTestBaseField(db, null, {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
@@ -474,7 +431,7 @@ describe('/proposals', () => {
 			);
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: forbiddenField.shortCode,
+				baseFieldShortCode: baseField.shortCode,
 				position: 1,
 				label: 'Not Allowed',
 				instructions: 'This field should not be used in proposal versions',
@@ -489,7 +446,7 @@ describe('/proposals', () => {
 				goodAsOf: null,
 			});
 			await createOrUpdateBaseField(db, null, {
-				...forbiddenField,
+				...baseField,
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});
 
@@ -515,7 +472,6 @@ describe('/proposals', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			await createTestBaseFields(db);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -566,7 +522,6 @@ describe('/proposals', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			await createTestBaseFields(db);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -609,7 +564,6 @@ describe('/proposals', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			await createTestBaseFields(db);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
@@ -648,7 +602,7 @@ describe('/proposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields(db);
+			const summaryField = await createTestBaseField(db, null);
 			await createProposal(db, testUserAuthContext, {
 				externalId: 'proposal-4999',
 				opportunityId: opportunity.id,
@@ -673,7 +627,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldShortCode: 'summary',
+				baseFieldShortCode: summaryField.shortCode,
 				position: 1,
 				label: 'Concise summary',
 				instructions: 'Please enter a concise summary of the proposal.',
@@ -733,19 +687,8 @@ describe('/proposals', () => {
 										applicationFormField: {
 											id: 1,
 											applicationFormId: 1,
-											baseFieldShortCode: 'summary',
-											baseField: {
-												createdAt: expectTimestamp(),
-												dataType: 'string',
-												description: 'A summary of the proposal',
-												label: 'Summary',
-												category: 'project',
-												valueRelevanceHours: null,
-												sensitivityClassification:
-													BaseFieldSensitivityClassification.RESTRICTED,
-												shortCode: 'summary',
-												localizations: {},
-											},
+											baseFieldShortCode: summaryField.shortCode,
+											baseField: summaryField,
 											label: 'Concise summary',
 											instructions:
 												'Please enter a concise summary of the proposal.',
@@ -978,14 +921,15 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			await createTestBaseFields(db);
+			const titleField = await createTestBaseField(db, null);
+			const summaryField = await createTestBaseField(db, null);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
 				name: null,
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldShortCode: 'title',
+				baseFieldShortCode: titleField.shortCode,
 				position: 1,
 				label: 'Short summary or title',
 				instructions: 'Please enter a short summary or title of the proposal.',
@@ -993,7 +937,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldShortCode: 'summary',
+				baseFieldShortCode: summaryField.shortCode,
 				position: 2,
 				label: 'Long summary or abstract',
 				instructions:
@@ -1082,19 +1026,8 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
-									baseFieldShortCode: 'title',
-									baseField: {
-										createdAt: expectTimestamp(),
-										dataType: 'string',
-										description: 'The title of the proposal',
-										label: 'Title',
-										category: 'project',
-										valueRelevanceHours: null,
-										shortCode: 'title',
-										sensitivityClassification:
-											BaseFieldSensitivityClassification.RESTRICTED,
-										localizations: {},
-									},
+									baseFieldShortCode: titleField.shortCode,
+									baseField: titleField,
 									position: 1,
 									label: 'Short summary or title',
 									instructions:
@@ -1116,19 +1049,8 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
-									baseFieldShortCode: 'summary',
-									baseField: {
-										createdAt: expectTimestamp(),
-										dataType: 'string',
-										description: 'A summary of the proposal',
-										label: 'Summary',
-										category: 'project',
-										valueRelevanceHours: null,
-										sensitivityClassification:
-											BaseFieldSensitivityClassification.RESTRICTED,
-										shortCode: 'summary',
-										localizations: {},
-									},
+									baseFieldShortCode: summaryField.shortCode,
+									baseField: summaryField,
 									position: 2,
 									label: 'Long summary or abstract',
 									instructions:
@@ -1162,19 +1084,8 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
-									baseFieldShortCode: 'title',
-									baseField: {
-										createdAt: expectTimestamp(),
-										dataType: 'string',
-										description: 'The title of the proposal',
-										label: 'Title',
-										category: 'project',
-										valueRelevanceHours: null,
-										sensitivityClassification:
-											BaseFieldSensitivityClassification.RESTRICTED,
-										shortCode: 'title',
-										localizations: {},
-									},
+									baseFieldShortCode: titleField.shortCode,
+									baseField: titleField,
 									position: 1,
 									label: 'Short summary or title',
 									instructions:
@@ -1196,19 +1107,8 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
-									baseFieldShortCode: 'summary',
-									baseField: {
-										createdAt: expectTimestamp(),
-										dataType: 'string',
-										description: 'A summary of the proposal',
-										label: 'Summary',
-										category: 'project',
-										valueRelevanceHours: null,
-										sensitivityClassification:
-											BaseFieldSensitivityClassification.RESTRICTED,
-										shortCode: 'summary',
-										localizations: {},
-									},
+									baseFieldShortCode: summaryField.shortCode,
+									baseField: summaryField,
 									position: 2,
 									label: 'Long summary or abstract',
 									instructions:
@@ -1229,7 +1129,8 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields(db);
+			const titleField = await createTestBaseField(db, null);
+			const summaryField = await createTestBaseField(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await createApplicationForm(db, null, {
 				opportunityId: opportunity.id,
@@ -1237,7 +1138,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldShortCode: 'title',
+				baseFieldShortCode: titleField.shortCode,
 				position: 1,
 				label: 'Short summary or title',
 				instructions: 'Please enter a short summary or title of the proposal.',
@@ -1245,7 +1146,7 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldShortCode: 'summary',
+				baseFieldShortCode: summaryField.shortCode,
 				position: 2,
 				label: 'Long summary or abstract',
 				instructions:
@@ -1333,19 +1234,8 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
-									baseFieldShortCode: 'title',
-									baseField: {
-										createdAt: expectTimestamp(),
-										dataType: 'string',
-										description: 'The title of the proposal',
-										label: 'Title',
-										category: 'project',
-										valueRelevanceHours: null,
-										sensitivityClassification:
-											BaseFieldSensitivityClassification.RESTRICTED,
-										shortCode: 'title',
-										localizations: {},
-									},
+									baseFieldShortCode: titleField.shortCode,
+									baseField: titleField,
 									position: 1,
 									label: 'Short summary or title',
 									instructions:
@@ -1367,19 +1257,8 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
-									baseFieldShortCode: 'summary',
-									baseField: {
-										createdAt: expectTimestamp(),
-										dataType: 'string',
-										description: 'A summary of the proposal',
-										label: 'Summary',
-										category: 'project',
-										valueRelevanceHours: null,
-										sensitivityClassification:
-											BaseFieldSensitivityClassification.RESTRICTED,
-										shortCode: 'summary',
-										localizations: {},
-									},
+									baseFieldShortCode: summaryField.shortCode,
+									baseField: summaryField,
 									position: 2,
 									label: 'Long summary or abstract',
 									instructions:
@@ -1413,19 +1292,8 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
-									baseFieldShortCode: 'title',
-									baseField: {
-										createdAt: expectTimestamp(),
-										dataType: 'string',
-										description: 'The title of the proposal',
-										label: 'Title',
-										category: 'project',
-										valueRelevanceHours: null,
-										sensitivityClassification:
-											BaseFieldSensitivityClassification.RESTRICTED,
-										shortCode: 'title',
-										localizations: {},
-									},
+									baseFieldShortCode: titleField.shortCode,
+									baseField: titleField,
 									position: 1,
 									label: 'Short summary or title',
 									instructions:
@@ -1447,19 +1315,8 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 2,
 									applicationFormId: 1,
-									baseFieldShortCode: 'summary',
-									baseField: {
-										createdAt: expectTimestamp(),
-										dataType: 'string',
-										description: 'A summary of the proposal',
-										label: 'Summary',
-										category: 'project',
-										valueRelevanceHours: null,
-										sensitivityClassification:
-											BaseFieldSensitivityClassification.RESTRICTED,
-										shortCode: 'summary',
-										localizations: {},
-									},
+									baseFieldShortCode: summaryField.shortCode,
+									baseField: summaryField,
 									position: 2,
 									label: 'Long summary or abstract',
 									instructions:
@@ -1486,7 +1343,7 @@ describe('/proposals', () => {
 				shortCode: 'testFunder',
 			});
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields(db);
+			const summaryField = await createTestBaseField(db, null);
 
 			// Grant only proposal scope (not proposalFieldValue)
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -1507,7 +1364,7 @@ describe('/proposals', () => {
 			});
 			const applicationFormField = await createApplicationFormField(db, null, {
 				applicationFormId: applicationForm.id,
-				baseFieldShortCode: 'summary',
+				baseFieldShortCode: summaryField.shortCode,
 				position: 1,
 				label: 'Summary',
 				instructions: 'Enter a summary',
@@ -1556,14 +1413,8 @@ describe('/proposals', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			await createTestBaseFields(db);
-			const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
-				shortCode: 'forbiddenField',
-				dataType: BaseFieldDataType.STRING,
-				label: 'Forbidden Field',
-				description: 'This field should not be returned',
-				category: BaseFieldCategory.PROJECT,
-				valueRelevanceHours: null,
+			const titleField = await createTestBaseField(db, null);
+			const baseField = await createTestBaseField(db, null, {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
@@ -1574,24 +1425,20 @@ describe('/proposals', () => {
 			});
 			await createApplicationFormField(db, null, {
 				applicationFormId: 1,
-				baseFieldShortCode: 'title',
+				baseFieldShortCode: titleField.shortCode,
 				position: 1,
 				label: 'Short summary or title',
 				instructions: 'Please enter a short summary or title of the proposal.',
 				inputType: null,
 			});
-			const forbiddenApplicationFormField = await createApplicationFormField(
-				db,
-				null,
-				{
-					applicationFormId: 1,
-					baseFieldShortCode: forbiddenBaseField.shortCode,
-					position: 2,
-					label: 'forbidden field',
-					instructions: 'This field should not be used in proposal versions',
-					inputType: null,
-				},
-			);
+			const applicationFormField = await createApplicationFormField(db, null, {
+				applicationFormId: 1,
+				baseFieldShortCode: baseField.shortCode,
+				position: 2,
+				label: 'forbidden field',
+				instructions: 'This field should not be used in proposal versions',
+				inputType: null,
+			});
 			await createProposal(db, testUserAuthContext, {
 				externalId: `proposal-2525-01-04T00Z`,
 				opportunityId: opportunity.id,
@@ -1611,14 +1458,14 @@ describe('/proposals', () => {
 			});
 			await createProposalFieldValue(db, null, {
 				proposalVersionId: 1,
-				applicationFormFieldId: forbiddenApplicationFormField.id,
+				applicationFormFieldId: applicationFormField.id,
 				position: 1,
 				value: 'Should not be returned',
 				isValid: true,
 				goodAsOf: null,
 			});
 			await createOrUpdateBaseField(db, null, {
-				...forbiddenBaseField,
+				...baseField,
 				sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 			});
 
@@ -1657,19 +1504,8 @@ describe('/proposals', () => {
 								applicationFormField: {
 									id: 1,
 									applicationFormId: 1,
-									baseFieldShortCode: 'title',
-									baseField: {
-										createdAt: expectTimestamp(),
-										dataType: 'string',
-										description: 'The title of the proposal',
-										label: 'Title',
-										category: 'project',
-										valueRelevanceHours: null,
-										sensitivityClassification:
-											BaseFieldSensitivityClassification.RESTRICTED,
-										shortCode: 'title',
-										localizations: {},
-									},
+									baseFieldShortCode: titleField.shortCode,
+									baseField: titleField,
 									position: 1,
 									label: 'Short summary or title',
 									instructions:

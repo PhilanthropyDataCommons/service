@@ -19,6 +19,7 @@ import {
 	loadTableMetrics,
 } from '../database';
 import {
+	createTestBaseField,
 	createTestChangemaker,
 	createTestDataProvider,
 	createTestFile,
@@ -43,7 +44,6 @@ import {
 } from '../test/mockJwt';
 import {
 	BaseFieldDataType,
-	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
@@ -73,32 +73,17 @@ const setupTestContext = async (db: TinyPg) => {
 	const systemUserAuthContext = getAuthContext(systemUser, true);
 	const testUser = await loadTestUser(db);
 	const testUserAuthContext = getAuthContext(testUser);
-	const baseFieldEmail = await createOrUpdateBaseField(db, null, {
-		label: 'Fifty one fifty three',
+	const baseFieldEmail = await createTestBaseField(db, null, {
 		shortCode: 'fifty_one_fifty_three',
-		description: 'Five thousand one hundred fifty three.',
 		dataType: BaseFieldDataType.EMAIL,
-		category: BaseFieldCategory.ORGANIZATION,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
-	const baseFieldPhone = await createOrUpdateBaseField(db, null, {
-		label: 'Fifty three ninety nine',
+	const baseFieldPhone = await createTestBaseField(db, null, {
 		shortCode: 'fifty_three_ninety_nine',
-		description: 'Five thousand three hundred ninety nine.',
 		dataType: BaseFieldDataType.PHONE_NUMBER,
-		category: BaseFieldCategory.ORGANIZATION,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
-	const baseFieldWebsite = await createOrUpdateBaseField(db, null, {
-		label: 'Fifty four seventy one 5471',
+	const baseFieldWebsite = await createTestBaseField(db, null, {
 		shortCode: 'fifty_four_seventy_one',
-		description: 'Five thousand four hundred seventy one.',
 		dataType: BaseFieldDataType.URL,
-		category: BaseFieldCategory.ORGANIZATION,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 	const firstChangemaker = await createChangemaker(db, testUserAuthContext, {
 		name: 'Five thousand one hundred forty seven reasons',
@@ -1024,15 +1009,9 @@ describe('/changemakers', () => {
 					firstFunderSourceId: funderSourceId,
 				} = await setupTestContext(db);
 
-				const forbiddenBaseField = await createOrUpdateBaseField(db, null, {
-					label: 'Forbidden Field',
-					shortCode: 'forbiddenField',
-					description: 'This field is forbidden',
+				const baseField = await createTestBaseField(db, null, {
 					sensitivityClassification:
 						BaseFieldSensitivityClassification.RESTRICTED,
-					dataType: BaseFieldDataType.STRING,
-					valueRelevanceHours: null,
-					category: BaseFieldCategory.ORGANIZATION,
 				});
 				const opportunity = firstFunderOpportunity;
 				const proposal = await createProposal(db, systemUserAuthContext, {
@@ -1053,7 +1032,7 @@ describe('/changemakers', () => {
 					{
 						label: 'Forbidden',
 						applicationFormId: applicationForm.id,
-						baseFieldShortCode: forbiddenBaseField.shortCode,
+						baseFieldShortCode: baseField.shortCode,
 						position: 1,
 						instructions: 'Please enter the forbidden field.',
 						inputType: null,
@@ -1077,7 +1056,7 @@ describe('/changemakers', () => {
 					goodAsOf: null,
 				});
 				await createOrUpdateBaseField(db, null, {
-					...forbiddenBaseField,
+					...baseField,
 					sensitivityClassification:
 						BaseFieldSensitivityClassification.FORBIDDEN,
 				});
@@ -1734,16 +1713,7 @@ describe('/changemakers', () => {
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Organization Mission',
-				shortCode: 'org_mission_cfv_test',
-				description: 'The mission of the organization.',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
-			});
+			const baseField = await createTestBaseField(db, null);
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 			// Create a changemaker-sourced source
 			const changemakerSource = await createSource(db, testUserAuthContext, {
@@ -1799,15 +1769,8 @@ describe('/changemakers', () => {
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Organization Website',
-				shortCode: 'org_website_priority_test',
-				description: 'The website of the organization.',
+			const baseField = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.URL,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
@@ -1915,15 +1878,8 @@ describe('/changemakers', () => {
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Organization Phone',
-				shortCode: 'org_phone_recency_test',
-				description: 'The phone of the organization.',
+			const baseField = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.PHONE_NUMBER,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
@@ -2000,15 +1956,8 @@ describe('/changemakers', () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const baseField = await createOrUpdateBaseField(db, null, {
-				label: 'Organization Email',
-				shortCode: 'org_email_validity_test',
-				description: 'The email of the organization.',
+			const baseField = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.EMAIL,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -2055,25 +2004,11 @@ describe('/changemakers', () => {
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const baseFieldEmail = await createOrUpdateBaseField(db, null, {
-				label: 'Org Email Multi',
-				shortCode: 'org_email_multi_test',
-				description: 'The email of the organization.',
+			const baseFieldEmail = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.EMAIL,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const baseFieldPhone = await createOrUpdateBaseField(db, null, {
-				label: 'Org Phone Multi',
-				shortCode: 'org_phone_multi_test',
-				description: 'The phone of the organization.',
+			const baseFieldPhone = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.PHONE_NUMBER,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
@@ -2198,23 +2133,13 @@ describe('/changemakers', () => {
 			const systemUserAuthContext = getAuthContext(systemUser, true);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const baseFieldEmail = await createOrUpdateBaseField(db, null, {
-				label: 'Org Email Perm Test',
-				shortCode: 'org_email_perm_test',
-				description: 'The email of the organization.',
+			const baseFieldEmail = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.EMAIL,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const baseFieldPhone = await createOrUpdateBaseField(db, null, {
-				label: 'Org Phone Perm Test',
-				shortCode: 'org_phone_perm_test',
-				description: 'The phone of the organization.',
+			const baseFieldPhone = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.PHONE_NUMBER,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
@@ -2388,25 +2313,13 @@ describe('/changemakers', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 
 			// Create a restricted field (requires permission)
-			const restrictedBaseField = await createOrUpdateBaseField(db, null, {
-				label: 'Restricted Org Field',
-				shortCode: 'restricted_org_cfv_perm_test',
-				description: 'A restricted organization field.',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
+			const restrictedBaseField = await createTestBaseField(db, null, {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			// Create a public field (visible to all authenticated users)
-			const publicBaseField = await createOrUpdateBaseField(db, null, {
-				label: 'Public Org Field',
-				shortCode: 'public_org_cfv_perm_test',
-				description: 'A public organization field.',
-				dataType: BaseFieldDataType.STRING,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
+			const publicBaseField = await createTestBaseField(db, null, {
 				sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 			});
 
@@ -2511,15 +2424,8 @@ describe('/changemakers', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 
 			// Create a file-type base field
-			const baseFieldFile = await createOrUpdateBaseField(db, null, {
-				label: 'Organization Document',
-				shortCode: 'org_document_download_url_test',
-				description: 'A document associated with the organization.',
+			const baseFieldFile = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.FILE,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			const changemaker = await createChangemaker(db, testUserAuthContext, {
@@ -2599,15 +2505,8 @@ describe('/changemakers', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			// Create a file-type base field (must be ORGANIZATION category to appear in changemaker fields)
-			const baseFieldFile = await createOrUpdateBaseField(db, null, {
-				label: 'Organization Attachment',
-				shortCode: 'org_attachment_download_url_test',
-				description: 'An attachment associated with the organization.',
+			const baseFieldFile = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.FILE,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			const changemaker = await createChangemaker(db, testUserAuthContext, {

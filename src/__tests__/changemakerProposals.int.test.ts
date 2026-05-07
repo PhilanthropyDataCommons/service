@@ -10,13 +10,13 @@ import {
 	createProposalFieldValue,
 	createApplicationForm,
 	createApplicationFormField,
-	createOrUpdateBaseField,
 	createSource,
 	loadTableMetrics,
 	loadSystemUser,
 	createPermissionGrant,
 } from '../database';
 import {
+	createTestBaseField,
 	createTestChangemaker,
 	createTestFile,
 	createTestFunder,
@@ -36,7 +36,6 @@ import {
 import {
 	BaseFieldCategory,
 	BaseFieldDataType,
-	BaseFieldSensitivityClassification,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
@@ -369,15 +368,9 @@ describe('/changemakerProposals', () => {
 			const testFunder = await createTestFunder(db, testUserAuthContext);
 
 			// Create a file-type base field (PROJECT category for proposal-only field)
-			const baseFieldFile = await createOrUpdateBaseField(db, null, {
-				label: 'Project Attachment',
-				shortCode: 'project_attachment_cmp_test',
-				description: 'An attachment for the project.',
+			const baseFieldFile = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.FILE,
 				category: BaseFieldCategory.PROJECT,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			const changemaker = await createTestChangemaker(db, testUserAuthContext, {
@@ -485,15 +478,8 @@ describe('/changemakerProposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 
 			// Create a file-type base field (ORGANIZATION category for changemaker fields)
-			const baseFieldFile = await createOrUpdateBaseField(db, null, {
-				label: 'Org Document CMP',
-				shortCode: 'org_document_cmp_test',
-				description: 'A document associated with the organization.',
+			const baseFieldFile = await createTestBaseField(db, null, {
 				dataType: BaseFieldDataType.FILE,
-				category: BaseFieldCategory.ORGANIZATION,
-				valueRelevanceHours: null,
-				sensitivityClassification:
-					BaseFieldSensitivityClassification.RESTRICTED,
 			});
 
 			const changemaker = await createTestChangemaker(db, testUserAuthContext, {

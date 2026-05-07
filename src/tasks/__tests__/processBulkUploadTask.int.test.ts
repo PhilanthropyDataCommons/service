@@ -5,7 +5,6 @@ import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { sdkStreamMixin } from '@smithy/util-stream';
 import {
 	getDatabase,
-	createOrUpdateBaseField,
 	createApplicationForm,
 	createApplicationFormField,
 	loadBulkUploadTask,
@@ -37,7 +36,11 @@ import {
 	expectString,
 	expectTimestamp,
 } from '../../test/asymettricMatchers';
-import { createTestFile, createTestOpportunity } from '../../test/factories';
+import {
+	createTestBaseField,
+	createTestFile,
+	createTestOpportunity,
+} from '../../test/factories';
 import type {
 	Id,
 	BulkUploadTask,
@@ -100,41 +103,27 @@ const createTestBulkUploadTask = async (
 };
 
 const createTestBaseFields = async (db: TinyPg): Promise<void> => {
-	await createOrUpdateBaseField(db, null, {
+	await createTestBaseField(db, null, {
 		label: 'Proposal Submitter Email',
 		description: 'The email address of the person who submitted the proposal.',
 		shortCode: 'proposal_submitter_email',
-		dataType: BaseFieldDataType.STRING,
 		category: BaseFieldCategory.PROJECT,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
-	await createOrUpdateBaseField(db, null, {
+	await createTestBaseField(db, null, {
 		label: 'Organization Name',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_name',
-		dataType: BaseFieldDataType.STRING,
-		category: BaseFieldCategory.ORGANIZATION,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
-	await createOrUpdateBaseField(db, null, {
+	await createTestBaseField(db, null, {
 		label: 'Organization EIN',
 		description: 'The name of the applying organization.',
 		shortCode: 'organization_tax_id',
-		dataType: BaseFieldDataType.STRING,
-		category: BaseFieldCategory.ORGANIZATION,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
-	await createOrUpdateBaseField(db, null, {
+	await createTestBaseField(db, null, {
 		label: 'Favorite File',
 		description: 'Just a file we want to attach.',
 		shortCode: 'favorite_file',
 		dataType: BaseFieldDataType.FILE,
-		category: BaseFieldCategory.ORGANIZATION,
-		valueRelevanceHours: null,
-		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 	});
 };
 

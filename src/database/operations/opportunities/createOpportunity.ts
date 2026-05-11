@@ -1,7 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import type { WritableOpportunity, Opportunity } from '../../../types';
 
-const createOpportunity = generateCreateOrUpdateItemOperation<
+const createOpportunity = generateCreateItemOperation<
 	Opportunity,
 	WritableOpportunity,
 	[]

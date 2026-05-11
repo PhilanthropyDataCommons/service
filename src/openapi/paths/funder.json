@@ -66,6 +66,16 @@
 			}
 		},
 		"responses": {
+			"200": {
+				"description": "The existing funder that was updated.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Funder.json"
+						}
+					}
+				}
+			},
 			"201": {
 				"description": "The new funder that was created.",
 				"content": {

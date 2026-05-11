@@ -1422,7 +1422,7 @@ describe('/changemakers', () => {
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send()
-				.expect(200);
+				.expect(201);
 			expect(result.body).toStrictEqual({
 				fiscalSponseeChangemakerId: fiscalSponsee.id,
 				fiscalSponsorChangemakerId: fiscalSponsor.id,
@@ -1437,13 +1437,25 @@ describe('/changemakers', () => {
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send()
-				.expect(200);
+				.expect(201);
 			expect(resultTwo.body).toStrictEqual({
 				fiscalSponseeChangemakerId: fiscalSponsee.id,
 				fiscalSponsorChangemakerId: fiscalSponsorTwo.id,
 				createdAt: expectTimestamp(),
 				notAfter: null,
 				createdBy: testUser.keycloakUserId,
+			});
+			const resultRepeated = await request(app)
+				.put(
+					`/changemakers/${fiscalSponsee.id}/fiscalSponsors/${fiscalSponsor.id}`,
+				)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send()
+				.expect(200);
+			expect(resultRepeated.body).toMatchObject({
+				fiscalSponseeChangemakerId: fiscalSponsee.id,
+				fiscalSponsorChangemakerId: fiscalSponsor.id,
 			});
 			const changemakerResult = await request(app)
 				.get(`/changemakers/${fiscalSponsee.id}`)
@@ -1596,7 +1608,7 @@ describe('/changemakers', () => {
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send()
-				.expect(200);
+				.expect(201);
 			await request(app)
 				.put(
 					`/changemakers/${fiscalSponsee.id}/fiscalSponsors/${fiscalSponsorToKeep.id}`,
@@ -1604,7 +1616,7 @@ describe('/changemakers', () => {
 				.type('application/json')
 				.set(adminUserAuthHeader)
 				.send()
-				.expect(200);
+				.expect(201);
 			await request(app)
 				.delete(
 					`/changemakers/${fiscalSponsee.id}/fiscalSponsors/${fiscalSponsorToRemove.id}`,

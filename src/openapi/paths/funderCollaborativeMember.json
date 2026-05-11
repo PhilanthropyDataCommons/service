@@ -84,6 +84,16 @@
 			}
 		},
 		"responses": {
+			"200": {
+				"description": "The existing funder collaborative member that was updated.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/FunderCollaborativeMember.json"
+						}
+					}
+				}
+			},
 			"201": {
 				"description": "The new funder collaborative member that was created.",
 				"content": {

@@ -50,6 +50,7 @@ export * from './TableMetrics';
 export * from './TaskStatus';
 export * from './TinyPgErrorWithQueryContext';
 export * from './UnifiedAuditLog';
+export * from './UpsertResult';
 export * from './User';
 export * from './Uuid';
 export * from './Writable';

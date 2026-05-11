@@ -1,10 +1,10 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpsertItemOperation } from '../generators';
 import type {
 	DataProvider,
 	InternallyWritableDataProvider,
 } from '../../../types';
 
-const createOrUpdateDataProvider = generateCreateOrUpdateItemOperation<
+const createOrUpdateDataProvider = generateUpsertItemOperation<
 	DataProvider,
 	InternallyWritableDataProvider,
 	[]

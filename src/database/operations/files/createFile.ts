@@ -1,7 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import type { File, InternallyWritableFile } from '../../../types';
 
-const createFile = generateCreateOrUpdateItemOperation<
+const createFile = generateCreateItemOperation<
 	File,
 	InternallyWritableFile,
 	[]

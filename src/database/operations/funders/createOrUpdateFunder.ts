@@ -1,7 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpsertItemOperation } from '../generators';
 import type { Funder, InternallyWritableFunder } from '../../../types';
 
-const createOrUpdateFunder = generateCreateOrUpdateItemOperation<
+const createOrUpdateFunder = generateUpsertItemOperation<
 	Funder,
 	InternallyWritableFunder,
 	[]

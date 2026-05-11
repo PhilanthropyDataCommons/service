@@ -1,7 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import type { PermissionGrant, WritablePermissionGrant } from '../../../types';
 
-const createPermissionGrant = generateCreateOrUpdateItemOperation<
+const createPermissionGrant = generateCreateItemOperation<
 	PermissionGrant,
 	WritablePermissionGrant,
 	[]

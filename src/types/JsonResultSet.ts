@@ -7,4 +7,13 @@ interface PaginatedJsonResultSet<T> {
 	total: string;
 }
 
-export { type JsonResultSet, type PaginatedJsonResultSet };
+interface UpsertJsonResultSet<T> {
+	object: T;
+	wasInserted: boolean;
+}
+
+export {
+	type JsonResultSet,
+	type PaginatedJsonResultSet,
+	type UpsertJsonResultSet,
+};

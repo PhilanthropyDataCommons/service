@@ -1,11 +1,11 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateCreateItemOperation } from '../generators';
 import { decorateWithFileDownloadUrl } from '../../../decorators/proposalFieldValue';
 import type {
 	ProposalFieldValue,
 	InternallyWritableProposalFieldValue,
 } from '../../../types';
 
-const createProposalFieldValue = generateCreateOrUpdateItemOperation<
+const createProposalFieldValue = generateCreateItemOperation<
 	ProposalFieldValue,
 	InternallyWritableProposalFieldValue,
 	[]

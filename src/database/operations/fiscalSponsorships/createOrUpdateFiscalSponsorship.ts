@@ -1,7 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpsertItemOperation } from '../generators';
 import type { FiscalSponsorship, Writable } from '../../../types';
 
-const createOrUpdateFiscalSponsorship = generateCreateOrUpdateItemOperation<
+const createOrUpdateFiscalSponsorship = generateUpsertItemOperation<
 	FiscalSponsorship,
 	Writable<FiscalSponsorship>,
 	[]

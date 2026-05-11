@@ -66,6 +66,16 @@
 			}
 		},
 		"responses": {
+			"200": {
+				"description": "The existing data provider that was updated.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/DataProvider.json"
+						}
+					}
+				}
+			},
 			"201": {
 				"description": "The new data provider that was created.",
 				"content": {

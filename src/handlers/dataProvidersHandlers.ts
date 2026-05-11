@@ -69,13 +69,19 @@ const putDataProvider = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 	const { name, keycloakOrganizationId } = body;
-	const dataProvider = await createOrUpdateDataProvider(db, req, {
-		shortCode,
-		name,
-		keycloakOrganizationId,
-	});
+	const { item: dataProvider, wasInserted } = await createOrUpdateDataProvider(
+		db,
+		req,
+		{
+			shortCode,
+			name,
+			keycloakOrganizationId,
+		},
+	);
 	res
-		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.status(
+			wasInserted ? HTTP_STATUS.SUCCESSFUL.CREATED : HTTP_STATUS.SUCCESSFUL.OK,
+		)
 		.contentType('application/json')
 		.send(dataProvider);
 };

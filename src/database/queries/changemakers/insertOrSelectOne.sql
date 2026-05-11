@@ -1,21 +1,35 @@
-INSERT INTO changemakers (
+MERGE INTO changemakers
+USING (VALUES (
+	:taxId::varchar,
+	:name::varchar,
+	:keycloakOrganizationId::uuid,
+	:authContextKeycloakUserId::uuid
+)) AS source (
+	tax_id,
+	name,
+	keycloak_organization_id,
+	created_by
+)
+ON
+	changemakers.tax_id = source.tax_id
+	AND changemakers.name = source.name
+-- No-op SET so RETURNING fires for existing rows (insertOrSelect semantics).
+WHEN MATCHED THEN UPDATE SET tax_id = source.tax_id
+WHEN NOT MATCHED THEN INSERT (
 	tax_id,
 	name,
 	keycloak_organization_id,
 	created_by
 ) VALUES (
-	:taxId,
-	:name,
-	:keycloakOrganizationId,
-	:authContextKeycloakUserId
+	source.tax_id,
+	source.name,
+	source.keycloak_organization_id,
+	source.created_by
 )
-ON CONFLICT (tax_id, name)
--- The no-op update is required to make RETURNING work on conflicts.
--- PostgreSQL's RETURNING clause only returns rows for DO UPDATE.
--- See: https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT
-DO UPDATE SET tax_id = excluded.tax_id
-RETURNING changemaker_to_json(
-	changemakers,
-	:authContextKeycloakUserId,
-	FALSE
-) AS object;
+RETURNING
+	changemaker_to_json(
+		changemakers,
+		:authContextKeycloakUserId,
+		FALSE
+	) AS object,
+	merge_action() = 'INSERT' AS "wasInserted";

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+
+- Upsert endpoints now distinguish a created row from an updated one via the HTTP response status: a fresh insert returns `201 Created`, while updating an existing row returns `200 OK`. This applies to `PUT /baseFields/:shortCode`, `PUT /baseFields/:shortCode/localizations/:language`, `PUT /changemakers/:id/fiscalSponsors/:fiscalSponsorChangemakerId`, `PUT /dataProviders/:shortCode`, `PUT /funders/:shortCode`, `POST /funders/:shortCode/members/:memberFunderShortCode`, and `POST /funders/:shortCode/invitations/sent/:invitedFunderShortCode`. Previously each endpoint returned a fixed status (some `200`, some `201`) regardless of whether a row was inserted or updated.
+
 ## 0.35.0 2026-05-05
 
 ### Added

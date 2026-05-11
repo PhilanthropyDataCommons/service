@@ -1,17 +1,30 @@
-INSERT INTO data_providers (
+MERGE INTO data_providers
+USING (VALUES (
+	:shortCode::short_code_t,
+	:name::varchar,
+	:keycloakOrganizationId::uuid,
+	:authContextKeycloakUserId::uuid
+)) AS source (
+	short_code,
+	name,
+	keycloak_organization_id,
+	created_by
+)
+ON data_providers.short_code = source.short_code
+WHEN MATCHED THEN UPDATE SET
+	name = source.name,
+	keycloak_organization_id = source.keycloak_organization_id
+WHEN NOT MATCHED THEN INSERT (
 	short_code,
 	name,
 	keycloak_organization_id,
 	created_by
 ) VALUES (
-	:shortCode,
-	:name,
-	:keycloakOrganizationId,
-	:authContextKeycloakUserId
+	source.short_code,
+	source.name,
+	source.keycloak_organization_id,
+	source.created_by
 )
-ON CONFLICT (short_code)
-DO UPDATE
-	SET
-		name = excluded.name,
-		keycloak_organization_id = excluded.keycloak_organization_id
-RETURNING data_provider_to_json(data_providers) AS object;
+RETURNING
+	data_provider_to_json(data_providers) AS object,
+	merge_action() = 'INSERT' AS "wasInserted";

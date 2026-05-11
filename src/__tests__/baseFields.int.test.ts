@@ -317,7 +317,7 @@ describe('/baseFields', () => {
 					valueRelevanceHours: null,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
-				.expect(200);
+				.expect(201);
 			const after = await loadTableMetrics(db, 'base_fields');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -349,7 +349,7 @@ describe('/baseFields', () => {
 					valueRelevanceHours: null,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
-				.expect(200);
+				.expect(201);
 			const after = await loadTableMetrics(db, 'base_fields');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -381,7 +381,7 @@ describe('/baseFields', () => {
 					valueRelevanceHours: null,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
-				.expect(200);
+				.expect(201);
 			const after = await loadTableMetrics(db, 'base_fields');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -413,7 +413,7 @@ describe('/baseFields', () => {
 					valueRelevanceHours: null,
 					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 				})
-				.expect(200);
+				.expect(201);
 			const after = await loadTableMetrics(db, 'base_fields');
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
@@ -880,7 +880,7 @@ describe('/baseFields', () => {
 					label: 'Résume',
 					description: 'Le Résume de proposal',
 				})
-				.expect(200);
+				.expect(201);
 			const after = await loadTableMetrics(db, 'base_field_localizations');
 			const baseFieldLocalizations =
 				await loadBaseFieldLocalizationsBundleByBaseFieldShortCode(

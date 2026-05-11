@@ -71,7 +71,7 @@ const copyBaseField = async (
 		valueRelevanceHours,
 		sensitivityClassification,
 	} = targetBaseField;
-	const copiedBaseField = await createOrUpdateBaseField(db, null, {
+	const { item: copiedBaseField } = await createOrUpdateBaseField(db, null, {
 		category,
 		dataType,
 		shortCode,

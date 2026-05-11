@@ -157,12 +157,15 @@ const putChangemakerFiscalSponsor = async (
 		);
 	}
 
-	const updatedChangemaker = await createOrUpdateFiscalSponsorship(db, req, {
-		fiscalSponseeChangemakerId: changemakerId,
-		fiscalSponsorChangemakerId,
-	});
+	const { item: updatedChangemaker, wasInserted } =
+		await createOrUpdateFiscalSponsorship(db, req, {
+			fiscalSponseeChangemakerId: changemakerId,
+			fiscalSponsorChangemakerId,
+		});
 	res
-		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.status(
+			wasInserted ? HTTP_STATUS.SUCCESSFUL.CREATED : HTTP_STATUS.SUCCESSFUL.OK,
+		)
 		.contentType('application/json')
 		.send(updatedChangemaker);
 };

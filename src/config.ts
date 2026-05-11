@@ -15,11 +15,12 @@ let defaultS3Bucket: S3Bucket | null = null;
 export const loadConfig = async (): Promise<void> => {
 	const db = getDatabase();
 	systemUser = await loadSystemUser(db, null);
-	defaultS3Bucket = await loadOrCreateS3Bucket(db, null, {
+	const { item: s3Bucket } = await loadOrCreateS3Bucket(db, null, {
 		name: S3_BUCKET,
 		region: S3_REGION,
 		endpoint: S3_ENDPOINT,
 	});
+	defaultS3Bucket = s3Bucket;
 };
 
 export const getSystemUser = (): User => {

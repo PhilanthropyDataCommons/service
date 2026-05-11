@@ -102,12 +102,15 @@ const postFunderCollaborativeMember = async (
 		);
 	}
 
-	const funder = await createOrUpdateFunderCollaborativeMember(db, req, {
-		funderCollaborativeShortCode: funderShortCode,
-		memberFunderShortCode,
-	});
+	const { item: funder, wasInserted } =
+		await createOrUpdateFunderCollaborativeMember(db, req, {
+			funderCollaborativeShortCode: funderShortCode,
+			memberFunderShortCode,
+		});
 	res
-		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.status(
+			wasInserted ? HTTP_STATUS.SUCCESSFUL.CREATED : HTTP_STATUS.SUCCESSFUL.OK,
+		)
 		.contentType('application/json')
 		.send(funder);
 };

@@ -17,10 +17,11 @@ const createTestDataProvider = async (
 		name: 'Test Data Provider',
 		keycloakOrganizationId: null,
 	};
-	return await createOrUpdateDataProvider(db, authContext, {
+	const { item } = await createOrUpdateDataProvider(db, authContext, {
 		...defaultValues,
 		...overrideValues,
 	});
+	return item;
 };
 
 export { createTestDataProvider };

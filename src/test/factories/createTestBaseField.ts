@@ -27,10 +27,11 @@ const createTestBaseField = async (
 		sensitivityClassification: BaseFieldSensitivityClassification.RESTRICTED,
 		valueRelevanceHours: null,
 	};
-	return await createOrUpdateBaseField(db, authContext, {
+	const { item } = await createOrUpdateBaseField(db, authContext, {
 		...defaultValues,
 		...overrideValues,
 	});
+	return item;
 };
 
 export { createTestBaseField };

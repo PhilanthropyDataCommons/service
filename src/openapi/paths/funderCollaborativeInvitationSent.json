@@ -39,8 +39,18 @@
 			}
 		},
 		"responses": {
+			"200": {
+				"description": "The existing funder collaborative invitation that was updated.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/FunderCollaborativeInvitation.json"
+						}
+					}
+				}
+			},
 			"201": {
-				"description": "The funder collaborative invitation.",
+				"description": "The new funder collaborative invitation that was created.",
 				"content": {
 					"application/json": {
 						"schema": {

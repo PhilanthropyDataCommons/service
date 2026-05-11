@@ -1,7 +1,7 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpsertItemOperation } from '../generators';
 import type { BaseField, InternallyWritableBaseField } from '../../../types';
 
-const createOrUpdateBaseField = generateCreateOrUpdateItemOperation<
+const createOrUpdateBaseField = generateUpsertItemOperation<
 	BaseField,
 	InternallyWritableBaseField,
 	[]

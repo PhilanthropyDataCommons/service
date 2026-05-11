@@ -1,11 +1,11 @@
-import { generateCreateOrUpdateItemOperation } from '../generators';
+import { generateUpdateItemOperation } from '../generators';
 import type {
 	BaseFieldsCopyTask,
 	Id,
 	InternallyWritableBaseFieldsCopyTask,
 } from '../../../types';
 
-const updateBaseFieldsCopyTask = generateCreateOrUpdateItemOperation<
+const updateBaseFieldsCopyTask = generateUpdateItemOperation<
 	BaseFieldsCopyTask,
 	Partial<InternallyWritableBaseFieldsCopyTask>,
 	[baseFieldsCopyTaskId: Id]

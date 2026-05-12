@@ -34,13 +34,14 @@ const postChangemaker = async (req: Request, res: Response): Promise<void> => {
 	if (!isAuthContext(req)) {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
-	if (!isWritableChangemaker(req.body)) {
+	const body = req.body as unknown;
+	if (!isWritableChangemaker(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableChangemaker.errors ?? [],
 		);
 	}
-	const changemaker = await createChangemaker(db, req, req.body);
+	const changemaker = await createChangemaker(db, req, body);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')

@@ -31,16 +31,17 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 		throw new FailedMiddlewareError('Unexpected lack of auth context.');
 	}
 	const db = getDatabase();
-	if (!isWritableSource(req.body)) {
+	const body = req.body as unknown;
+	if (!isWritableSource(body)) {
 		throw new InputValidationError(
 			'Invalid request body.',
 			isWritableSource.errors ?? [],
 		);
 	}
 	if (
-		'funderShortCode' in req.body &&
+		'funderShortCode' in body &&
 		!(await hasFunderPermission(db, req, {
-			funderShortCode: req.body.funderShortCode,
+			funderShortCode: body.funderShortCode,
 			permission: PermissionGrantVerb.CREATE,
 			scope: PermissionGrantEntityType.SOURCE,
 		}))
@@ -50,9 +51,9 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 	if (
-		'dataProviderShortCode' in req.body &&
+		'dataProviderShortCode' in body &&
 		!(await hasDataProviderPermission(db, req, {
-			dataProviderShortCode: req.body.dataProviderShortCode,
+			dataProviderShortCode: body.dataProviderShortCode,
 			permission: PermissionGrantVerb.CREATE,
 			scope: PermissionGrantEntityType.SOURCE,
 		}))
@@ -62,9 +63,9 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 	if (
-		'changemakerId' in req.body &&
+		'changemakerId' in body &&
 		!(await hasChangemakerPermission(db, req, {
-			changemakerId: req.body.changemakerId,
+			changemakerId: body.changemakerId,
 			permission: PermissionGrantVerb.CREATE,
 			scope: PermissionGrantEntityType.SOURCE,
 		}))
@@ -77,7 +78,7 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 	// Normally we try to avoid passing the body directly vs extracting the values and passing them.
 	// Because because writableSource is a union type it is hard to extract the values directly without
 	// losing type context that the union provided.
-	const source = await createSource(db, req, req.body);
+	const source = await createSource(db, req, body);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')

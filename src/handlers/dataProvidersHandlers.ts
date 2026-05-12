@@ -3,10 +3,16 @@ import {
 	getDatabase,
 	getLimitValues,
 	createOrUpdateDataProvider,
+	createPermissionGrant,
 	loadDataProviderBundle,
 	loadDataProvider,
 } from '../database';
-import { isAuthContext, isWritableDataProvider } from '../types';
+import {
+	getSelfManageGrantFragment,
+	isAuthContext,
+	isWritableDataProvider,
+	PermissionGrantEntityType,
+} from '../types';
 import { FailedMiddlewareError, InputValidationError } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
@@ -69,21 +75,37 @@ const putDataProvider = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 	const { name, keycloakOrganizationId } = body;
-	const { item: dataProvider, wasInserted } = await createOrUpdateDataProvider(
-		db,
-		req,
-		{
-			shortCode,
-			name,
-			keycloakOrganizationId,
-		},
-	);
+	const { committedDataProvider, committedDataProviderWasInserted } =
+		await db.transaction(async (txDb) => {
+			const { item, wasInserted } = await createOrUpdateDataProvider(
+				txDb,
+				req,
+				{
+					shortCode,
+					name,
+					keycloakOrganizationId,
+				},
+			);
+			if (wasInserted) {
+				await createPermissionGrant(txDb, req, {
+					...getSelfManageGrantFragment(req),
+					contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
+					dataProviderShortCode: item.shortCode,
+				});
+			}
+			return {
+				committedDataProvider: item,
+				committedDataProviderWasInserted: wasInserted,
+			};
+		});
 	res
 		.status(
-			wasInserted ? HTTP_STATUS.SUCCESSFUL.CREATED : HTTP_STATUS.SUCCESSFUL.OK,
+			committedDataProviderWasInserted
+				? HTTP_STATUS.SUCCESSFUL.CREATED
+				: HTTP_STATUS.SUCCESSFUL.OK,
 		)
 		.contentType('application/json')
-		.send(dataProvider);
+		.send(committedDataProvider);
 };
 
 export const dataProviderHandlers = {

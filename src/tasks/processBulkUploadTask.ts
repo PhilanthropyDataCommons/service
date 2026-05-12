@@ -16,6 +16,7 @@ import { getDefaultS3Bucket } from '../config';
 import {
 	createBulkUploadLog,
 	createChangemakerProposal,
+	createPermissionGrant,
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
@@ -28,8 +29,10 @@ import {
 } from '../database/operations';
 import {
 	TaskStatus,
+	getSelfManageGrantFragment,
 	isProcessBulkUploadJobPayload,
 	BaseFieldDataType,
+	PermissionGrantEntityType,
 } from '../types';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
@@ -568,6 +571,11 @@ export const processBulkUploadTask = async (
 					opportunityId,
 					externalId: `${recordNumber}`,
 				});
+				await createPermissionGrant(transactionDb, taskAuthContext, {
+					...getSelfManageGrantFragment(taskAuthContext),
+					contextEntityType: PermissionGrantEntityType.PROPOSAL,
+					proposalId: proposal.id,
+				});
 				const proposalVersion = await createProposalVersion(
 					transactionDb,
 					taskAuthContext,
@@ -577,21 +585,30 @@ export const processBulkUploadTask = async (
 						sourceId: bulkUploadTask.sourceId,
 					},
 				);
+				await createPermissionGrant(transactionDb, taskAuthContext, {
+					...getSelfManageGrantFragment(taskAuthContext),
+					contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION,
+					proposalVersionId: proposalVersion.id,
+				});
 
 				const {
 					[changemakerNameIndex]: changemakerName,
 					[changemakerTaxIdIndex]: changemakerTaxId,
 				} = record;
 				if (changemakerTaxId !== undefined) {
-					const { item: changemaker } = await loadOrCreateChangemaker(
-						transactionDb,
-						taskAuthContext,
-						{
+					const { item: changemaker, wasInserted } =
+						await loadOrCreateChangemaker(transactionDb, taskAuthContext, {
 							name: changemakerName ?? 'Unnamed Organization',
 							taxId: changemakerTaxId,
 							keycloakOrganizationId: null,
-						},
-					);
+						});
+					if (wasInserted) {
+						await createPermissionGrant(transactionDb, taskAuthContext, {
+							...getSelfManageGrantFragment(taskAuthContext),
+							contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+							changemakerId: changemaker.id,
+						});
+					}
 					await createChangemakerProposal(transactionDb, taskAuthContext, {
 						changemakerId: changemaker.id,
 						proposalId: proposal.id,
@@ -625,7 +642,7 @@ export const processBulkUploadTask = async (
 							isValid = true;
 						}
 
-						return await createProposalFieldValue(
+						const proposalFieldValue = await createProposalFieldValue(
 							transactionDb,
 							taskAuthContext,
 							{
@@ -637,6 +654,12 @@ export const processBulkUploadTask = async (
 								goodAsOf: null,
 							},
 						);
+						await createPermissionGrant(transactionDb, taskAuthContext, {
+							...getSelfManageGrantFragment(taskAuthContext),
+							contextEntityType: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+							proposalFieldValueId: proposalFieldValue.id,
+						});
+						return proposalFieldValue;
 					}),
 				);
 			});

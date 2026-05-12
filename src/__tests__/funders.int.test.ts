@@ -3,6 +3,7 @@ import { app } from '../app';
 import {
 	getDatabase,
 	loadFunder,
+	loadPermissionGrantBundle,
 	loadTableMetrics,
 	loadSystemFunder,
 	createOrUpdateFunderCollaborativeMember,
@@ -15,6 +16,8 @@ import {
 	getAuthContext,
 	loadTestUser,
 	getTestUserKeycloakUserId,
+	NO_LIMIT,
+	NO_OFFSET,
 } from '../test/utils';
 import {
 	expectArray,
@@ -475,6 +478,66 @@ describe('/funders', () => {
 				shortCode: 'repeatable',
 				name: 'second',
 			});
+		});
+
+		it('grants the creator a manage permission on the new funder', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			await agent
+				.put('/funders/self_grant_funder')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ name: 'Self-grant Funder', isCollaborative: false })
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+						contextEntityType: 'funder',
+						funderShortCode: 'self_grant_funder',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
+		});
+
+		it('does not grant a permission when the PUT updates an existing funder', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await createTestFunder(db, testUserAuthContext, {
+				shortCode: 'existing_funder',
+			});
+			const before = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			await agent
+				.put('/funders/existing_funder')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ name: 'Renamed', isCollaborative: false })
+				.expect(200);
+			const after = await loadPermissionGrantBundle(
+				db,
+				systemUserAuthContext,
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(after.total).toEqual(before.total);
 		});
 
 		it('returns 400 bad request when no name is sent', async () => {

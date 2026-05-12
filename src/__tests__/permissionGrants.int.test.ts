@@ -72,6 +72,7 @@ describe('/permissionGrants', () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
 			const permissionGrant = await createTestPermissionGrant(db, authContext);
+			const expectedCreatedByUser = await loadTestUser(db);
 
 			const response = await agent
 				.get('/permissionGrants')
@@ -90,6 +91,7 @@ describe('/permissionGrants', () => {
 						scope: ['changemaker'],
 						verbs: ['view'],
 						createdBy: testUserKeycloakUserId,
+						createdByUser: expectedCreatedByUser,
 						createdAt: expectTimestamp(),
 					},
 				],
@@ -141,6 +143,7 @@ describe('/permissionGrants', () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
 			const permissionGrant = await createTestPermissionGrant(db, authContext);
+			const expectedCreatedByUser = await loadTestUser(db);
 
 			const response = await agent
 				.get(`/permissionGrants/${permissionGrant.id}`)
@@ -157,6 +160,7 @@ describe('/permissionGrants', () => {
 				scope: ['changemaker'],
 				verbs: ['view'],
 				createdBy: testUserKeycloakUserId,
+				createdByUser: expectedCreatedByUser,
 				createdAt: expectTimestamp(),
 			});
 		});
@@ -235,6 +239,7 @@ describe('/permissionGrants', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics(db, 'permission_grants');
+			const expectedCreatedByUser = await loadTestUser(db);
 
 			expect(result.body).toMatchObject({
 				id: expectNumber(),
@@ -245,6 +250,7 @@ describe('/permissionGrants', () => {
 				scope: ['changemaker'],
 				verbs: ['view', 'edit'],
 				createdBy: testUserKeycloakUserId,
+				createdByUser: expectedCreatedByUser,
 				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
@@ -270,6 +276,7 @@ describe('/permissionGrants', () => {
 				})
 				.expect(201);
 			const after = await loadTableMetrics(db, 'permission_grants');
+			const expectedCreatedByUser = await loadTestUser(db);
 
 			expect(result.body).toMatchObject({
 				id: expectNumber(),
@@ -280,6 +287,7 @@ describe('/permissionGrants', () => {
 				scope: ['funder'],
 				verbs: ['view', 'create'],
 				createdBy: testUserKeycloakUserId,
+				createdByUser: expectedCreatedByUser,
 				createdAt: expectTimestamp(),
 			});
 			expect(after.count).toEqual(before.count + 1);
@@ -304,6 +312,7 @@ describe('/permissionGrants', () => {
 					verbs: ['view'],
 				})
 				.expect(201);
+			const expectedCreatedByUser = await loadTestUser(db);
 
 			expect(result.body).toMatchObject({
 				id: expectNumber(),
@@ -314,6 +323,7 @@ describe('/permissionGrants', () => {
 				scope: ['changemaker'],
 				verbs: ['view'],
 				createdBy: testUserKeycloakUserId,
+				createdByUser: expectedCreatedByUser,
 				createdAt: expectTimestamp(),
 			});
 		});
@@ -690,6 +700,7 @@ describe('/permissionGrants', () => {
 					},
 				})
 				.expect(201);
+			const expectedCreatedByUser = await loadTestUser(db);
 
 			expect(result.body).toMatchObject({
 				id: expectNumber(),
@@ -707,6 +718,7 @@ describe('/permissionGrants', () => {
 					},
 				},
 				createdBy: testUserKeycloakUserId,
+				createdByUser: expectedCreatedByUser,
 				createdAt: expectTimestamp(),
 			});
 		});
@@ -894,6 +906,7 @@ describe('/permissionGrants', () => {
 				scope: [PermissionGrantEntityType.CHANGEMAKER],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
+			const expectedCreatedByUser = await loadTestUser(db);
 
 			const response = await agent
 				.put(`/permissionGrants/${permissionGrant.id}`)
@@ -918,6 +931,7 @@ describe('/permissionGrants', () => {
 				scope: ['changemaker'],
 				verbs: ['view', 'edit'],
 				createdBy: testUserKeycloakUserId,
+				createdByUser: expectedCreatedByUser,
 				createdAt: expectTimestamp(),
 			});
 		});

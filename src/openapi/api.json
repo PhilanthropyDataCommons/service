@@ -392,5 +392,10 @@
 		"/users": {
 			"$ref": "./paths/users.json"
 		}
-	}
+	},
+	"servers": [
+		{
+			"url": "."
+		}
+	]
 }

@@ -1,5 +1,7 @@
 # Keycloak dev/CI realm
 
+This directory is intended to support the Keycloak development/CI container in `compose-ci.yml` in the repository root.
+
 A pre-configured `realm.json` is imported on first boot of `pdc-auth` (via `--import-realm`). It defines a Keycloak realm for dev/ci: a `pdc-admin` group/role, two users (`dev@pdc.local`, `user@pdc.local`), the `pdc-openapi-docs` public client, and the `pdc-dev-ingest` confidential client and its service-account user.
 
 > [!WARNING]

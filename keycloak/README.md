@@ -26,3 +26,7 @@ Edit the live realm and re-export:
    - Strip `createdTimestamp` fields so Keycloak regenerates them on import. Leave `id` fields in place so diffs stay stable across re-exports.
 
 4. Verify by tearing down volumes and booting fresh: login should work for affected users, and `pdc-dev-ingest` should still issue tokens with `client_secret=<password>`.
+
+## Keycloak version alignment
+
+Keycloak exports a specific version in the realm file. When bumping the image tag beyond minor versions, regenerate `realm.json` against the new version (see above) so the two stay aligned.

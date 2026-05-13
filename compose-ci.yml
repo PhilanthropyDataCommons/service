@@ -138,86 +138,19 @@ services:
     ports:
       - '127.0.0.1:8780:8780'
       - '127.0.0.1:9790:9790'
-    command: ['start-dev']
+    volumes:
+      - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
+    # keycloak/realm.json creates dev Keycloak realm; skipped if already created
+    command: ['start-dev', '--import-realm']
     healthcheck:
       test: |
         /bin/sh
         -ec
         /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
         /opt/keycloak/bin/kcadm.sh get http://localhost:9790/health
-      interval: 15s
+      interval: 5s
+      start_period: 90s
     user: ${UID:-1000}:${GID:-${UID:-1000}}
-    post_start:
-      - command:
-          - /bin/bash
-          - -ecx
-          - |
-            # Sleep to give the server a chance to start then add a Realm.
-            # Thanks to https://stackoverflow.com/a/19866239 for tcp approach.
-            while ! timeout 1 bash -c 'cat < /dev/null > /dev/tcp/localhost/8780'; do sleep 10; done
-            # Avoid 'Failed to get lock on /opt/keycloak/.keycloak/kcadm.config'
-            sleep 10
-            cd /opt/keycloak/bin
-            ./kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
-            # If we already have a plain user (which is next-to-last step), then
-            # this script likely ran already due to volume persistence, so exit.
-            ./kcadm.sh get-roles -r pdc --uusername 'user@pdc.local' && exit 0
-            ./kcadm.sh create realms -s realm=pdc -s enabled=true \
-            -s loginWithEmailAllowed=true -s registrationEmailAsUsername=true \
-            -s organizationsEnabled=true
-            ./kcadm.sh create users -r pdc -s username='dev@pdc.local' \
-            -s email='dev@pdc.local' -s emailVerified='true' \
-            -s enabled='true' -s firstName='developer' \
-            -s lastName='admin' -i > admin_user_id
-            ./kcadm.sh set-password -r pdc \
-            --username 'dev@pdc.local' --new-password 'password'
-            ./kcadm.sh create roles -r pdc \
-            -s name='pdc-admin' \
-            -s description='PDC Users with application-level Administrative privileges.' \
-            -i > admin_role_id
-            ./kcadm.sh create groups -r pdc \
-            -s name='pdc-admin' -i > admin_group_id
-            ./kcadm.sh add-roles -r pdc --gname pdc-admin --rolename pdc-admin
-            ./kcadm.sh add-roles -r pdc --gname pdc-admin \
-            --cclientid realm-management --rolename manage-users
-            ./kcadm.sh add-roles -r pdc --gname pdc-admin \
-            --cclientid realm-management --rolename query-users
-            ./kcadm.sh add-roles -r pdc --gname pdc-admin \
-            --cclientid realm-management --rolename view-users
-            ./kcadm.sh update -r pdc \
-            users/$(cat admin_user_id)/groups/$(cat admin_group_id) \
-            -s realm=pdc -s userId=$(cat admin_user_id) \
-            -s groupId=$(cat admin_group_id) -n
-            ./kcadm.sh create clients -r pdc \
-            -s clientId='pdc-openapi-docs' \
-            -s name='PDC OpenAPI Documentation' \
-            -s rootUrl='http://pdc-api:3030' \
-            -s redirectUris='["http://pdc-api:3030/*"]' \
-            -s publicClient='true' -s standardFlowEnabled='true'
-            ./kcadm.sh create clients -r pdc \
-            -s clientId='pdc-dev-ingest' \
-            -s name='Developer Ingest Client with Service Account' \
-            -s publicClient='false' -s standardFlowEnabled='false' \
-            -s implicitFlowEnabled='false' \
-            -s directAccessGrantsEnabled='false' \
-            -s serviceAccountsEnabled='true' \
-            -s secret='password' -i > dev_client_id
-            ./kcadm.sh get \
-            realms/pdc/clients/$(cat dev_client_id)/service-account-user \
-            --fields id --format csv --noquotes > dev_service_account_id
-            ./kcadm.sh update -r pdc users/$(cat dev_service_account_id) \
-            -s attributes='{"firstName": "Development Admin", "lastName": "Service Account"}'
-            ./kcadm.sh update -r pdc \
-            users/$(cat dev_service_account_id)/groups/$(cat admin_group_id) \
-            -s realm=pdc -s userId=$(cat dev_service_account_id) \
-            -s groupId=$(cat admin_group_id) -n
-            ./kcadm.sh create users -r pdc \
-            -s username='user@pdc.local' -s email='user@pdc.local' \
-            -s emailVerified='true' -s enabled='true' \
-            -s firstName='unprivileged' -s lastName='user' -i > plain_user_id
-            ./kcadm.sh set-password -r pdc \
-            --username 'user@pdc.local' --new-password 'password'
-        user: ${UID:-1000}
   pdc-databases:
     image: docker.io/postgres:18
     depends_on:

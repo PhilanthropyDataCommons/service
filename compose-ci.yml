@@ -148,7 +148,7 @@ services:
         -ec
         /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8780/ --realm master --user admin --password admin
         /opt/keycloak/bin/kcadm.sh get http://localhost:9790/health
-      interval: 5s
+      interval: 15s
       start_period: 90s
     user: ${UID:-1000}:${GID:-${UID:-1000}}
   pdc-databases:

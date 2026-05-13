@@ -23,6 +23,6 @@ Edit the live realm and re-export:
    Merge them into one file, then:
    - For each regular user, add `credentials` (type `password`, set a plaintext password value, set `temporary: false`), `groups` (paths from `GET /users/{id}/groups`), and `realmRoles: [default-roles-pdc]`.
    - Replace the masked `pdc-dev-ingest` `secret` with a plaintext value (the export masks confidential-client secrets)
-   - Strip `id` and `createdTimestamp` fields so Keycloak regenerates them on import.
+   - Strip `createdTimestamp` fields so Keycloak regenerates them on import. Leave `id` fields in place so diffs stay stable across re-exports.
 
 4. Verify by tearing down volumes and booting fresh: login should work for affected users, and `pdc-dev-ingest` should still issue tokens with `client_secret=<password>`.

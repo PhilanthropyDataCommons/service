@@ -135,6 +135,7 @@ const contextEntityTypeNativeScopes = {
 	[PermissionGrantEntityType.FUNDER]: [
 		PermissionGrantEntityType.FUNDER,
 		PermissionGrantEntityType.OPPORTUNITY,
+		PermissionGrantEntityType.APPLICATION_FORM,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 	],
@@ -143,6 +144,7 @@ const contextEntityTypeNativeScopes = {
 	],
 	[PermissionGrantEntityType.OPPORTUNITY]: [
 		PermissionGrantEntityType.OPPORTUNITY,
+		PermissionGrantEntityType.APPLICATION_FORM,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 	],

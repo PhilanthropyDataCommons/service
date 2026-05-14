@@ -376,6 +376,7 @@ describe('/proposalVersions', () => {
 				scope: [
 					PermissionGrantEntityType.FUNDER,
 					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
 					PermissionGrantEntityType.PROPOSAL,
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
@@ -489,6 +490,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				scope: [
 					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
 					PermissionGrantEntityType.PROPOSAL,
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
@@ -544,6 +546,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				scope: [
 					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
 					PermissionGrantEntityType.PROPOSAL,
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
@@ -593,6 +596,7 @@ describe('/proposalVersions', () => {
 				opportunityId: opportunity.id,
 				scope: [
 					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
 					PermissionGrantEntityType.PROPOSAL,
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],

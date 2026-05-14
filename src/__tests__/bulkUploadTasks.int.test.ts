@@ -80,7 +80,10 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const firstProposalsDataFile = await createTestFile(
@@ -421,7 +424,10 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -508,7 +514,10 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -586,7 +595,10 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -676,7 +688,10 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -750,7 +765,10 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -815,7 +833,10 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -983,7 +1004,10 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -1064,7 +1088,10 @@ describe('/tasks/bulkUploads', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {

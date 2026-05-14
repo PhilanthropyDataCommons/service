@@ -3,12 +3,12 @@ WITH
 		SELECT application_forms.*
 		FROM application_forms
 		WHERE
-			has_opportunity_permission(
+			has_application_form_permission(
 				:authContextKeycloakUserId,
 				:authContextIsAdministrator,
-				application_forms.opportunity_id,
+				application_forms.id,
 				'view',
-				'opportunity'
+				'applicationForm'
 			)
 	),
 

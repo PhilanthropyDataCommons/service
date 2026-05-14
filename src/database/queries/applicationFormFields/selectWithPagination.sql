@@ -2,8 +2,6 @@ WITH
 	candidate_entries AS NOT MATERIALIZED (
 		SELECT application_form_fields.*
 		FROM application_form_fields
-			INNER JOIN application_forms
-				ON application_form_fields.application_form_id = application_forms.id
 		WHERE
 			CASE
 				WHEN :applicationFormId::integer IS NULL THEN
@@ -11,12 +9,12 @@ WITH
 				ELSE
 					application_form_fields.application_form_id = :applicationFormId
 			END
-			AND has_opportunity_permission(
+			AND has_application_form_permission(
 				:authContextKeycloakUserId,
 				:authContextIsAdministrator,
-				application_forms.opportunity_id,
+				application_form_fields.application_form_id,
 				'view',
-				'opportunity'
+				'applicationForm'
 			)
 	),
 

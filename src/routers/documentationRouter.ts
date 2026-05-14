@@ -21,16 +21,13 @@ const options: SwaggerUiOptions = {
 			usePkceWithAuthorizationCodeGrant: true,
 		},
 	},
-	swaggerUrl: 'openapi/api.json',
+	swaggerUrl: 'api.json',
 };
 
 const documentationRouter = express.Router();
 documentationRouter.use('/', swaggerUi.serve);
 documentationRouter.get('/', swaggerUi.setup(null, options));
-documentationRouter.get(
-	'/openapi/api.json',
-	documentationHandlers.getRootApiSpec,
-);
+documentationRouter.get('/api.json', documentationHandlers.getRootApiSpec);
 documentationRouter.get(
 	'/openapi/components/securitySchemes/auth.json',
 	documentationHandlers.getAuthApiSpec,

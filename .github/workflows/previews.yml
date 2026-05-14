@@ -362,8 +362,11 @@ jobs:
             --url "${URL}/v2/apps/${app_id}" |
             jq -r -c '.app.live_url')
           if [ "${live_url}" != "" ] && [ "${live_url}" != "null" ]; then
-            # Save live_url for the next step.
+            # Save live_url and subdomain for the next step.
             echo "live_url=${live_url}" >> "${GITHUB_OUTPUT}"
+            subdomain=$(echo "${live_url}" |
+              sed 's/^https:\/\/\([0-9a-z-]\+\)\.ondigitalocean.app/\1/')
+            echo "subdomain=${subdomain}" >> "${GITHUB_OUTPUT}"
           else
             echo "The deployment of a deploy preview succeeded but couldn't find the URL."
             exit 155
@@ -372,7 +375,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
-            🔎 A preview deployment of this pull request is available at ${{ steps.create-app-get-url.outputs.live_url }} assuming this PR is still open. 🔍
+            🔎 A preview deployment of this pull request is available at https://utilities.philanthropydatacommons.org/${{ steps.create-app-get-url.outputs.subdomain }}/ (and upstream ${{ steps.create-app-get-url.outputs.live_url }}) assuming this PR is still open. 🔍
           comment-tag: deploy-preview-url
 
   find-s3-objects-in-db:

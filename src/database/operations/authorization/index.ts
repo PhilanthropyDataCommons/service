@@ -1,3 +1,4 @@
+export { hasApplicationFormPermission } from './hasApplicationFormPermission';
 export { hasChangemakerFieldValuePermission } from './hasChangemakerFieldValuePermission';
 export { hasChangemakerPermission } from './hasChangemakerPermission';
 export { hasDataProviderPermission } from './hasDataProviderPermission';

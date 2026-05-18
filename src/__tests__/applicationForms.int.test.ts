@@ -129,7 +129,10 @@ describe('/applicationForms', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const otherFunder = await createTestFunder(db, testUserAuthContext);
@@ -286,7 +289,10 @@ describe('/applicationForms', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
@@ -362,7 +368,10 @@ describe('/applicationForms', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
@@ -521,7 +530,10 @@ describe('/applicationForms', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
@@ -578,7 +590,10 @@ describe('/applicationForms', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
@@ -632,7 +647,10 @@ describe('/applicationForms', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: visibleFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
@@ -704,7 +722,10 @@ describe('/applicationForms', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -712,7 +733,10 @@ describe('/applicationForms', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
@@ -894,7 +918,10 @@ describe('/applicationForms', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: testFunder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [
+					PermissionGrantEntityType.OPPORTUNITY,
+					PermissionGrantEntityType.APPLICATION_FORM,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {

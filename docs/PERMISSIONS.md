@@ -245,25 +245,25 @@ combinations, only those listed below affect access control.
 Permissions granted against a funder (using the funder's `shortCode` as the
 context key).
 
-| Verb   | Scope              | What It Enables                                                   |
-| ------ | ------------------ | ----------------------------------------------------------------- |
-| view   | opportunity        | View the funder's opportunities                                   |
-|        |                    | View application forms and fields for the funder's opportunities  |
-|        |                    | View bulk upload tasks associated with the funder's opportunities |
-| view   | proposal           | View proposals associated with the funder's opportunities         |
-|        |                    | View proposal versions associated with the funder's opportunities |
-|        |                    | View changemaker-proposal associations for the funder's proposals |
-| view   | proposalFieldValue | View proposal field values for the funder's proposals             |
-| create | opportunity        | Create opportunities for the funder                               |
-| create | proposal           | Create proposals for the funder's opportunities                   |
-|        |                    | Create bulk upload tasks for the funder's opportunities           |
-| edit   | opportunity        | Create or update application forms and fields for the funder      |
-| edit   | funder             | Create or update changemaker-proposal associations                |
-| edit   | proposal           | Create or update proposal versions for the funder's proposals     |
-| view   | source             | View the funder's sources                                         |
-| create | source             | Create sources associated with the funder                         |
-| manage | funder             | View, send, and respond to funder collaborative invitations       |
-|        |                    | View collaborative members for the funder                         |
+| Verb   | Scope              | What It Enables                                                                      |
+| ------ | ------------------ | ------------------------------------------------------------------------------------ |
+| view   | opportunity        | View the funder's opportunities                                                      |
+|        |                    | View bulk upload tasks associated with the funder's opportunities                    |
+| view   | applicationForm    | View application forms (and their fields) for the funder's opportunities             |
+| view   | proposal           | View proposals associated with the funder's opportunities                            |
+|        |                    | View proposal versions associated with the funder's opportunities                    |
+|        |                    | View changemaker-proposal associations for the funder's proposals                    |
+| view   | proposalFieldValue | View proposal field values for the funder's proposals                                |
+| create | opportunity        | Create opportunities for the funder                                                  |
+| create | proposal           | Create proposals for the funder's opportunities                                      |
+|        |                    | Create bulk upload tasks for the funder's opportunities                              |
+| edit   | applicationForm    | Create or update application forms (and their fields) for the funder's opportunities |
+| edit   | funder             | Create or update changemaker-proposal associations                                   |
+| edit   | proposal           | Create or update proposal versions for the funder's proposals                        |
+| view   | source             | View the funder's sources                                                            |
+| create | source             | Create sources associated with the funder                                            |
+| manage | funder             | View, send, and respond to funder collaborative invitations                          |
+|        |                    | View collaborative members for the funder                                            |
 
 ### Changemaker Permissions
 
@@ -290,16 +290,34 @@ context key). Opportunity permissions inherit from the parent funder, so a
 funder's opportunities. Opportunity-level grants provide more granular control
 for specific opportunities.
 
-| Verb   | Scope              | What It Enables                                                        |
-| ------ | ------------------ | ---------------------------------------------------------------------- |
-| view   | opportunity        | View the specific opportunity                                          |
-| view   | proposal           | View proposals associated with the opportunity                         |
-|        |                    | View proposal versions for the opportunity's proposals                 |
-|        |                    | View changemaker-proposal associations for the opportunity's proposals |
-| view   | proposalFieldValue | View proposal field values for the opportunity's proposals             |
-| create | proposal           | Create proposals for the specific opportunity                          |
-|        |                    | Create bulk upload tasks for the specific opportunity                  |
-| edit   | proposal           | Create or update proposal versions for the opportunity's proposals     |
+| Verb   | Scope              | What It Enables                                                           |
+| ------ | ------------------ | ------------------------------------------------------------------------- |
+| view   | opportunity        | View the specific opportunity                                             |
+| view   | applicationForm    | View application forms (and their fields) for the opportunity             |
+| view   | proposal           | View proposals associated with the opportunity                            |
+|        |                    | View proposal versions for the opportunity's proposals                    |
+|        |                    | View changemaker-proposal associations for the opportunity's proposals    |
+| view   | proposalFieldValue | View proposal field values for the opportunity's proposals                |
+| create | proposal           | Create proposals for the specific opportunity                             |
+|        |                    | Create bulk upload tasks for the specific opportunity                     |
+| edit   | applicationForm    | Create or update application forms (and their fields) for the opportunity |
+| edit   | proposal           | Create or update proposal versions for the opportunity's proposals        |
+
+### Application Form Permissions
+
+Permissions granted against an application form (using the application form's
+`id` as the context key). Application form permissions inherit from the parent
+opportunity (and from the opportunity's funder), so an `edit | applicationForm`
+grant on an opportunity automatically applies to all of that opportunity's
+application forms. Application-form-level grants provide more granular control
+for specific forms. Application form fields share the permission of their
+parent form — viewing or editing a field is gated by the form's permission,
+not by a separate field-level permission.
+
+| Verb | Scope           | What It Enables                                                                                                                  |
+| ---- | --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| view | applicationForm | View the specific application form and its fields                                                                                |
+| edit | applicationForm | Update the application form (including its fields' labels, instructions, and input types via `PATCH /applicationFormFields/:id`) |
 
 ### Proposal Permissions
 
@@ -414,8 +432,9 @@ included in the scope.
 ### Other Contexts
 
 The permission system data model includes additional contexts (`proposalVersion`,
-`applicationForm`, `applicationFormField`, `proposalFieldValue`, `bulkUpload`,
+`applicationFormField`, `proposalFieldValue`, `bulkUpload`,
 `changemakerFieldValue`) that can have permission grants created. However,
 these contexts do not currently have permission checks enforced in the
 codebase. Access to these entities is controlled through the parent entity
-permissions described above (funder, changemaker, opportunity, or proposal).
+permissions described above (funder, changemaker, opportunity, proposal, or
+application form).

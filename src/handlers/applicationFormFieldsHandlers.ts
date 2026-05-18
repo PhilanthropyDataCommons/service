@@ -1,10 +1,8 @@
 import { HTTP_STATUS } from '../constants';
 import {
 	getDatabase,
-	hasOpportunityPermission,
-	loadApplicationForm,
+	hasApplicationFormPermission,
 	loadApplicationFormField,
-	loadOpportunity,
 	updateApplicationFormField,
 } from '../database';
 import {
@@ -21,43 +19,6 @@ import {
 } from '../errors';
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
-import type { AuthContext, Id } from '../types';
-import type { TinyPg } from 'tinypg';
-
-const checkApplicationFormFieldPermission = async (
-	db: Pick<TinyPg, 'sql'>,
-	authContext: AuthContext,
-	applicationFormFieldId: Id,
-	permission: PermissionGrantVerb,
-): Promise<void> => {
-	const applicationFormField = await loadApplicationFormField(
-		db,
-		authContext,
-		applicationFormFieldId,
-	);
-
-	const applicationForm = await loadApplicationForm(
-		db,
-		authContext,
-		applicationFormField.applicationFormId,
-	);
-
-	const opportunity = await loadOpportunity(
-		db,
-		authContext,
-		applicationForm.opportunityId,
-	);
-
-	if (
-		!(await hasOpportunityPermission(db, authContext, {
-			opportunityId: opportunity.id,
-			permission,
-			scope: PermissionGrantEntityType.OPPORTUNITY,
-		}))
-	) {
-		throw new UnauthorizedError();
-	}
-};
 
 const patchApplicationFormField = async (
 	req: Request,
@@ -82,12 +43,21 @@ const patchApplicationFormField = async (
 		);
 	}
 
-	await checkApplicationFormFieldPermission(
+	const applicationFormField = await loadApplicationFormField(
 		db,
 		req,
 		applicationFormFieldId,
-		PermissionGrantVerb.EDIT,
 	);
+
+	if (
+		!(await hasApplicationFormPermission(db, req, {
+			applicationFormId: applicationFormField.applicationFormId,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.APPLICATION_FORM,
+		}))
+	) {
+		throw new UnauthorizedError();
+	}
 
 	const updatedField = await updateApplicationFormField(
 		db,

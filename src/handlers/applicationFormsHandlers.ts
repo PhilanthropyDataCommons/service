@@ -96,7 +96,7 @@ const postApplicationForms = async (
 			!(await hasOpportunityPermission(db, req, {
 				opportunityId: opportunity.id,
 				permission: PermissionGrantVerb.EDIT,
-				scope: PermissionGrantEntityType.OPPORTUNITY,
+				scope: PermissionGrantEntityType.APPLICATION_FORM,
 			}))
 		) {
 			throw new UnauthorizedError();

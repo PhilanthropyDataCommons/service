@@ -52,7 +52,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -60,7 +60,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -109,7 +109,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -117,7 +117,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -166,7 +166,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -174,7 +174,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -225,7 +225,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -233,7 +233,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -282,7 +282,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -290,7 +290,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -339,7 +339,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -347,7 +347,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -396,7 +396,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -404,7 +404,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -446,7 +446,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -454,7 +454,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 
@@ -510,7 +510,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: funder.shortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 
@@ -522,6 +522,99 @@ describe('/applicationFormFields', () => {
 					label: 'New Label',
 				})
 				.expect(401);
+		});
+
+		it('successfully updates a field when granted edit at the application form level', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+
+			const baseField = await createTestBaseField(db, null);
+
+			const applicationFormField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: baseField.shortCode,
+				position: 1,
+				label: 'AF Grant Label',
+				instructions: 'AF grant instructions',
+				inputType: null,
+			});
+
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.APPLICATION_FORM,
+				applicationFormId: applicationForm.id,
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+			});
+
+			const response = await request(app)
+				.patch(`/applicationFormFields/${applicationFormField.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Updated via application form grant',
+				})
+				.expect(200);
+
+			expect(response.body).toEqual({
+				...applicationFormField,
+				label: 'Updated via application form grant',
+			});
+		});
+
+		it('returns 404 when the user only has opportunity scope without applicationForm scope', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+
+			const applicationForm = await createApplicationForm(db, null, {
+				opportunityId: opportunity.id,
+				name: null,
+			});
+
+			const baseField = await createTestBaseField(db, null);
+
+			const applicationFormField = await createApplicationFormField(db, null, {
+				applicationFormId: applicationForm.id,
+				baseFieldShortCode: baseField.shortCode,
+				position: 1,
+				label: 'Inheritance Label',
+				instructions: null,
+				inputType: null,
+			});
+
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: opportunity.funderShortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+			});
+
+			await request(app)
+				.patch(`/applicationFormFields/${applicationFormField.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Should not be allowed',
+				})
+				.expect(404);
 		});
 
 		it('returns 404 for non-existent applicationFormFieldId', async () => {
@@ -538,7 +631,7 @@ describe('/applicationFormFields', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.FUNDER,
 				funderShortCode: opportunity.funderShortCode,
-				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				scope: [PermissionGrantEntityType.APPLICATION_FORM],
 				verbs: [PermissionGrantVerb.EDIT],
 			});
 

@@ -4,6 +4,7 @@ import type { JSONSchemaType } from 'ajv';
 enum PermissionGrantGranteeType {
 	USER = 'user',
 	USER_GROUP = 'userGroup',
+	AUTHENTICATED_USERS = 'authenticatedUsers',
 }
 
 const permissionGrantGranteeTypeSchema: JSONSchemaType<PermissionGrantGranteeType> =

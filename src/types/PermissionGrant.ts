@@ -29,15 +29,19 @@ import type { User } from './User';
 import type { Writable } from './Writable';
 import type { ValidateFunction } from 'ajv';
 
-// The key name for each grantee type
+// The key name for each grantee type that carries an identifier. Grantee
+// types without an identifier (e.g. `authenticatedUsers`) are omitted.
 const granteeKeyProperties = {
-	[PermissionGrantGranteeType.USER]: {
-		keyName: 'granteeUserKeycloakUserId',
-	},
+	[PermissionGrantGranteeType.USER]: { keyName: 'granteeUserKeycloakUserId' },
 	[PermissionGrantGranteeType.USER_GROUP]: {
 		keyName: 'granteeKeycloakOrganizationId',
 	},
-} as const satisfies Record<PermissionGrantGranteeType, { keyName: string }>;
+} as const satisfies Omit<
+	Record<PermissionGrantGranteeType, { keyName: string }>,
+	PermissionGrantGranteeType.AUTHENTICATED_USERS
+>;
+
+type PermissionGrantKeyedGranteeType = keyof typeof granteeKeyProperties;
 
 interface UnkeyedPermissionGrant {
 	readonly id: Id;
@@ -54,7 +58,7 @@ interface UnkeyedPermissionGrant {
 }
 
 type GranteeKeysByGranteeType = {
-	[G in PermissionGrantGranteeType]: Record<
+	[G in PermissionGrantKeyedGranteeType]: Record<
 		(typeof granteeKeyProperties)[G]['keyName'],
 		KeycloakId
 	>;
@@ -68,9 +72,9 @@ type ContextEntityKeysByContextEntityType = {
 };
 
 type PermissionGrantGranteeKeyVariant<G extends PermissionGrantGranteeType> =
-	GranteeKeysByGranteeType[G] & {
-		granteeType: G;
-	};
+	G extends PermissionGrantKeyedGranteeType
+		? GranteeKeysByGranteeType[G] & { granteeType: G }
+		: { granteeType: G };
 
 type PermissionGrantContextEntityKeyVariant<
 	C extends PermissionGrantEntityType,
@@ -160,12 +164,12 @@ const getContextKeyValidator = (
 };
 
 const granteeKeyValidatorCache = new Map<
-	PermissionGrantGranteeType,
+	PermissionGrantKeyedGranteeType,
 	ValidateFunction
 >();
 
 const getGranteeKeyValidator = (
-	granteeType: PermissionGrantGranteeType,
+	granteeType: PermissionGrantKeyedGranteeType,
 ): ValidateFunction => {
 	const existing = granteeKeyValidatorCache.get(granteeType);
 	if (existing !== undefined) {
@@ -193,6 +197,11 @@ const coreWritableKeys = new Set([
 	'conditions',
 ]);
 
+const isPermissionGrantKeyedGranteeType = (
+	granteeType: PermissionGrantGranteeType,
+): granteeType is PermissionGrantKeyedGranteeType =>
+	granteeType in granteeKeyProperties;
+
 const getAllowedKeys = (
 	contextEntityType: PermissionGrantEntityType,
 	granteeType: PermissionGrantGranteeType,
@@ -201,7 +210,9 @@ const getAllowedKeys = (
 	if (isPermissionGrantKeyedContextEntityType(contextEntityType)) {
 		allowed.add(contextEntityKeyProperties[contextEntityType].keyName);
 	}
-	allowed.add(granteeKeyProperties[granteeType].keyName);
+	if (isPermissionGrantKeyedGranteeType(granteeType)) {
+		allowed.add(granteeKeyProperties[granteeType].keyName);
+	}
 	return allowed;
 };
 
@@ -224,10 +235,12 @@ const isWritablePermissionGrant: TypeGuardWithAjvErrors<
 		}
 	}
 
-	const validateGranteeKey = getGranteeKeyValidator(granteeType);
-	if (!validateGranteeKey(data)) {
-		isWritablePermissionGrant.errors = validateGranteeKey.errors ?? null;
-		return false;
+	if (isPermissionGrantKeyedGranteeType(granteeType)) {
+		const validateGranteeKey = getGranteeKeyValidator(granteeType);
+		if (!validateGranteeKey(data)) {
+			isWritablePermissionGrant.errors = validateGranteeKey.errors ?? null;
+			return false;
+		}
 	}
 
 	const allowedKeys = getAllowedKeys(contextEntityType, granteeType);
@@ -271,9 +284,11 @@ const getSelfManageGrantFragment = (
 
 export {
 	getSelfManageGrantFragment,
+	isPermissionGrantKeyedGranteeType,
 	isWritablePermissionGrant,
 	type PermissionGrant,
 	type PermissionGrantContextEntity,
+	type PermissionGrantKeyedGranteeType,
 	type WritablePermissionGrant,
 	type WritableUnkeyedPermissionGrant,
 };

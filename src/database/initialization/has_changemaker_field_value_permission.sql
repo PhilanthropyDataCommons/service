@@ -58,7 +58,8 @@ BEGIN
 				pg.verbs, has_changemaker_field_value_permission.verb
 			)
 			AND (
-				(
+				pg.grantee_type = 'authenticatedUsers'
+				OR (
 					pg.grantee_type = 'user'
 					AND pg.grantee_user_keycloak_user_id
 						= has_changemaker_field_value_permission.user_keycloak_user_id

@@ -82,6 +82,15 @@
 				}
 			},
 			"required": ["granteeType", "granteeKeycloakOrganizationId"]
+		},
+		{
+			"properties": {
+				"granteeType": {
+					"type": "string",
+					"const": "authenticatedUsers"
+				}
+			},
+			"required": ["granteeType"]
 		}
 	]
 }

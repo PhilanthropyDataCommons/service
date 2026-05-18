@@ -32,8 +32,8 @@ import {
 	type WritableUnkeyedPermissionGrant,
 } from '../types';
 import { coerceParams } from '../coercion';
-import type { Request, Response } from 'express';
 import type { TinyPg } from 'tinypg';
+import type { Request, Response } from 'express';
 
 const assertPermissionGrantContextEntityTypeIsSupported = (
 	permissionGrant: WritableUnkeyedPermissionGrant,

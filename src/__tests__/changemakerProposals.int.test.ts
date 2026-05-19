@@ -10,7 +10,6 @@ import {
 	createProposalFieldValue,
 	createApplicationForm,
 	createApplicationFormField,
-	createSource,
 	loadTableMetrics,
 	loadSystemUser,
 	createPermissionGrant,
@@ -21,6 +20,7 @@ import {
 	createTestFile,
 	createTestFunder,
 	createTestOpportunity,
+	createTestSource,
 } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -386,9 +386,8 @@ describe('/changemakerProposals', () => {
 			});
 
 			// Create funder source
-			const funderSource = await createSource(db, testUserAuthContext, {
+			const funderSource = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
-				label: 'Proposal Version File Funder Source',
 			});
 
 			// Create opportunity and proposal
@@ -495,10 +494,13 @@ describe('/changemakerProposals', () => {
 			});
 
 			// Create changemaker-sourced source and batch for changemaker field values
-			const changemakerSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: `${changemaker.name} source`,
-			});
+			const changemakerSource = await createTestSource(
+				db,
+				testUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+				},
+			);
 			const batch = await createChangemakerFieldValueBatch(
 				db,
 				systemUserAuthContext,

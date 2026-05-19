@@ -8,7 +8,6 @@ import {
 	createOrUpdateBaseField,
 	createProposal,
 	createProposalVersion,
-	createSource,
 	loadPermissionGrantBundle,
 	loadSystemFunder,
 	loadSystemSource,
@@ -24,6 +23,7 @@ import {
 	createTestChangemaker,
 	createTestFunder,
 	createTestOpportunity,
+	createTestSource,
 } from '../test/factories';
 import {
 	BaseFieldCategory,
@@ -583,8 +583,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const sourceFunder = await createTestFunder(db, systemUserAuthContext);
-			const funderSource = await createSource(db, systemUserAuthContext, {
-				label: 'Funder-owned Source',
+			const funderSource = await createTestSource(db, systemUserAuthContext, {
 				funderShortCode: sourceFunder.shortCode,
 			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);

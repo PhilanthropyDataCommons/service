@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	getDatabase,
-	createSource,
 	createChangemakerFieldValueBatch,
 	createChangemakerFieldValue,
 	createEphemeralUserGroupAssociation,
@@ -16,7 +15,11 @@ import {
 	expectObjectContaining,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
-import { createTestBaseField, createTestChangemaker } from '../test/factories';
+import {
+	createTestBaseField,
+	createTestChangemaker,
+	createTestSource,
+} from '../test/factories';
 import {
 	getAuthContext,
 	loadTestUser,
@@ -46,8 +49,7 @@ describe('POST /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -92,8 +94,7 @@ describe('POST /changemakerFieldValues', () => {
 		const testUserAuthContext = getAuthContext(testUser, true);
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 		const baseField = await createTestBaseField(db, null);
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Self-grant Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 		const batch = await createChangemakerFieldValueBatch(
@@ -144,8 +145,7 @@ describe('POST /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -236,8 +236,7 @@ describe('POST /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -298,8 +297,7 @@ describe('POST /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -355,8 +353,7 @@ describe('POST /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -399,8 +396,7 @@ describe('POST /changemakerFieldValues', () => {
 
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -444,8 +440,7 @@ describe('POST /changemakerFieldValues', () => {
 			sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
 		});
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -487,8 +482,7 @@ describe('POST /changemakerFieldValues', () => {
 			sensitivityClassification: BaseFieldSensitivityClassification.FORBIDDEN,
 		});
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -556,8 +550,7 @@ describe('POST /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -600,8 +593,7 @@ describe('GET /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -688,13 +680,11 @@ describe('GET /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const visibleSource = await createSource(db, testUserAuthContext, {
-			label: 'Visible Source',
+		const visibleSource = await createTestSource(db, testUserAuthContext, {
 			changemakerId: visibleChangemaker.id,
 		});
 
-		const hiddenSource = await createSource(db, testUserAuthContext, {
-			label: 'Hidden Source',
+		const hiddenSource = await createTestSource(db, testUserAuthContext, {
 			changemakerId: hiddenChangemaker.id,
 		});
 
@@ -760,8 +750,7 @@ describe('GET /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -820,8 +809,7 @@ describe('GET /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -891,13 +879,11 @@ describe('GET /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source1 = await createSource(db, testUserAuthContext, {
-			label: 'Source 1',
+		const source1 = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker1.id,
 		});
 
-		const source2 = await createSource(db, testUserAuthContext, {
-			label: 'Source 2',
+		const source2 = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker2.id,
 		});
 
@@ -961,8 +947,7 @@ describe('GET /changemakerFieldValues', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -1045,8 +1030,7 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -1103,8 +1087,7 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 
@@ -1149,8 +1132,7 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 
 		const baseField = await createTestBaseField(db, null);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 

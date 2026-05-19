@@ -565,7 +565,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect(201);
 			const grants = await loadPermissionGrantBundle(
 				db,
-				systemUserAuthContext,
+				getAuthContext(systemUser, true),
 				NO_LIMIT,
 				NO_OFFSET,
 			);

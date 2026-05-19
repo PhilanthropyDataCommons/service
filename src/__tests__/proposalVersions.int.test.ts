@@ -293,7 +293,6 @@ describe('/proposalVersions', () => {
 		it('grants the creator a manage permission on the new proposal version and field values', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
-			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
@@ -336,7 +335,7 @@ describe('/proposalVersions', () => {
 				.expect(201);
 			const grants = await loadPermissionGrantBundle(
 				db,
-				systemUserAuthContext,
+				getAuthContext(systemUser, true),
 				NO_LIMIT,
 				NO_OFFSET,
 			);

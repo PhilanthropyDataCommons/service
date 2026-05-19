@@ -243,10 +243,12 @@ type PermissionGrantContextEntityKeyVariant<
 		}
 	: { contextEntityType: C };
 
+type PermissionGrantContextEntity = {
+	[C in PermissionGrantEntityType]: PermissionGrantContextEntityKeyVariant<C>;
+}[PermissionGrantEntityType];
+
 type PermissionGrant = UnkeyedPermissionGrant &
-	{
-		[C in PermissionGrantEntityType]: PermissionGrantContextEntityKeyVariant<C>;
-	}[PermissionGrantEntityType] &
+	PermissionGrantContextEntity &
 	{
 		[G in PermissionGrantGranteeType]: PermissionGrantGranteeKeyVariant<G>;
 	}[PermissionGrantGranteeType];
@@ -481,6 +483,7 @@ export {
 	PermissionGrantGranteeType,
 	type PermissionGrant,
 	type PermissionGrantCondition,
+	type PermissionGrantContextEntity,
 	type PermissionGrantEntityKeyValueType,
 	type PermissionGrantKeyedContextEntityType,
 	type WritablePermissionGrant,

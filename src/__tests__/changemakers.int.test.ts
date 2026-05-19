@@ -10,7 +10,6 @@ import {
 	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
 	createPermissionGrant,
-	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
 	loadPermissionGrantBundle,
@@ -25,6 +24,7 @@ import {
 	createTestFile,
 	createTestFunder,
 	createTestOpportunity,
+	createTestProposal,
 	createTestSource,
 } from '../test/factories';
 import {
@@ -315,7 +315,7 @@ describe('/changemakers', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			await createTestProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
 			});
@@ -359,11 +359,11 @@ describe('/changemakers', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			await createTestProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
 			});
-			await createProposal(db, testUserAuthContext, {
+			await createTestProposal(db, testUserAuthContext, {
 				externalId: 'proposal-2',
 				opportunityId: opportunity.id,
 			});
@@ -456,7 +456,7 @@ describe('/changemakers', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			await createTestProposal(db, testUserAuthContext, {
 				externalId: 'proposal-1',
 				opportunityId: opportunity.id,
 			});
@@ -572,7 +572,7 @@ describe('/changemakers', () => {
 				const { shortCode: baseFieldShortCode } = baseFieldEmail;
 				const { id: changemakerId } = firstChangemaker;
 				const { id: opportunityId } = firstFunderOpportunity;
-				const { id: proposalId } = await createProposal(
+				const { id: proposalId } = await createTestProposal(
 					db,
 					systemUserAuthContext,
 					{
@@ -710,7 +710,7 @@ describe('/changemakers', () => {
 				} = await setupTestContext(db);
 
 				const { shortCode: baseFieldShortCode } = baseFieldPhone;
-				const { id: proposalId } = await createProposal(
+				const { id: proposalId } = await createTestProposal(
 					db,
 					systemUserAuthContext,
 					{
@@ -812,7 +812,7 @@ describe('/changemakers', () => {
 				} = await setupTestContext(db);
 
 				const { shortCode: baseFieldShortCode } = baseFieldPhone;
-				const { id: proposalId } = await createProposal(
+				const { id: proposalId } = await createTestProposal(
 					db,
 					systemUserAuthContext,
 					{
@@ -911,7 +911,7 @@ describe('/changemakers', () => {
 
 				// Set up data platform provider sources.
 				// Associate one opportunity, one changemaker, and two responses with a base field.
-				const { id: proposalId } = await createProposal(
+				const { id: proposalId } = await createTestProposal(
 					db,
 					systemUserAuthContext,
 					{
@@ -1013,7 +1013,7 @@ describe('/changemakers', () => {
 						BaseFieldSensitivityClassification.RESTRICTED,
 				});
 				const opportunity = firstFunderOpportunity;
-				const proposal = await createProposal(db, systemUserAuthContext, {
+				const proposal = await createTestProposal(db, systemUserAuthContext, {
 					opportunityId: opportunity.id,
 					externalId: `Another proposal to ${opportunity.title}`,
 				});
@@ -1831,7 +1831,7 @@ describe('/changemakers', () => {
 			});
 
 			// Create ProposalFieldValue from funder source (should be lower priority)
-			const proposal = await createProposal(db, systemUserAuthContext, {
+			const proposal = await createTestProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: 'priority-test-proposal',
 			});
@@ -2124,7 +2124,7 @@ describe('/changemakers', () => {
 			const funderSource = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: funder.shortCode,
 			});
-			const proposal = await createProposal(db, systemUserAuthContext, {
+			const proposal = await createTestProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: 'multi-test-proposal',
 			});
@@ -2259,7 +2259,7 @@ describe('/changemakers', () => {
 			const source1 = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: funderWithFieldValueScope.shortCode,
 			});
-			const proposal1 = await createProposal(db, systemUserAuthContext, {
+			const proposal1 = await createTestProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity1.id,
 				externalId: 'proposal-with-fv-scope',
 			});
@@ -2308,7 +2308,7 @@ describe('/changemakers', () => {
 			const source2 = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: funderWithoutFieldValueScope.shortCode,
 			});
-			const proposal2 = await createProposal(db, systemUserAuthContext, {
+			const proposal2 = await createTestProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity2.id,
 				externalId: 'proposal-without-fv-scope',
 			});
@@ -2595,7 +2595,7 @@ describe('/changemakers', () => {
 				funderShortCode: funder.shortCode,
 			});
 
-			const proposal = await createProposal(db, systemUserAuthContext, {
+			const proposal = await createTestProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity.id,
 				externalId: 'proposal-file-test',
 			});

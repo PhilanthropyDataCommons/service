@@ -3,7 +3,6 @@ import {
 	createApplicationFormField,
 	createFile,
 	createOrUpdateBaseField,
-	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
 	getDatabase,
@@ -12,6 +11,7 @@ import {
 import {
 	createTestBaseField,
 	createTestOpportunity,
+	createTestProposal,
 	createTestUser,
 } from '../../../test/factories';
 import { getAuthContext, loadTestUser } from '../../../test/utils';
@@ -29,8 +29,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, testUserAuthContext);
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'proposal-1',
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			opportunityId: opportunity.id,
 		});
 		const applicationForm = await createApplicationForm(db, null, {
@@ -86,8 +85,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, testUserAuthContext);
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'proposal-with-file',
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			opportunityId: opportunity.id,
 		});
 		const applicationForm = await createApplicationForm(db, null, {
@@ -166,8 +164,7 @@ describe('/proposal_field_value_to_json', () => {
 		const otherUserAuthContext = getAuthContext(otherUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, testUserAuthContext);
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'proposal-with-other-file',
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			opportunityId: opportunity.id,
 		});
 		const applicationForm = await createApplicationForm(db, null, {
@@ -244,8 +241,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, testUserAuthContext);
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'proposal-with-missing-file',
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			opportunityId: opportunity.id,
 		});
 		const applicationForm = await createApplicationForm(db, null, {
@@ -314,8 +310,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, testUserAuthContext);
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'proposal-with-invalid-file-id',
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			opportunityId: opportunity.id,
 		});
 		const applicationForm = await createApplicationForm(db, null, {
@@ -384,8 +379,7 @@ describe('/proposal_field_value_to_json', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const systemSource = await loadSystemSource(db, null);
 		const opportunity = await createTestOpportunity(db, testUserAuthContext);
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'proposal-with-string',
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			opportunityId: opportunity.id,
 		});
 		const applicationForm = await createApplicationForm(db, null, {

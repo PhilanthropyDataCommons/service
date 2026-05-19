@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
-	createProposal,
 	getDatabase,
 	hasChangemakerPermission,
 	hasDataProviderPermission,
@@ -23,6 +22,7 @@ import {
 	createTestFunder,
 	createTestOpportunity,
 	createTestPermissionGrant,
+	createTestProposal,
 	createTestSource,
 } from '../test/factories';
 import {
@@ -1867,7 +1867,7 @@ describe('`any` scope semantics', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const opportunity = await createTestOpportunity(db, testUserAuthContext);
-		const proposal = await createProposal(db, testUserAuthContext, {
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			externalId: 'any-scope-inherited-proposal',
 			opportunityId: opportunity.id,
 		});

@@ -5,7 +5,6 @@ import {
 	createChangemakerFieldValue,
 	createChangemakerFieldValueBatch,
 	createChangemakerProposal,
-	createProposal,
 	createProposalVersion,
 	createProposalFieldValue,
 	createApplicationForm,
@@ -20,6 +19,7 @@ import {
 	createTestFile,
 	createTestFunder,
 	createTestOpportunity,
+	createTestProposal,
 	createTestSource,
 } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
@@ -125,26 +125,27 @@ describe('/changemakerProposals', () => {
 					funderShortCode: anotherFunder.shortCode,
 				},
 			);
-			const funderVisibleProposal = await createProposal(
+			const funderVisibleProposal = await createTestProposal(
 				db,
 				testUserAuthContext,
 				{
 					opportunityId: visibleOpportunity.id,
-					externalId: 'visibleThroughFunder',
 				},
 			);
-			const changemakerVisibleProposal = await createProposal(
+			const changemakerVisibleProposal = await createTestProposal(
 				db,
 				testUserAuthContext,
 				{
 					opportunityId: anotherOpportunity.id,
-					externalId: 'visibleThroughChangemaker',
 				},
 			);
-			const anotherProposal = await createProposal(db, testUserAuthContext, {
-				opportunityId: anotherOpportunity.id,
-				externalId: 'notVisible',
-			});
+			const anotherProposal = await createTestProposal(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: anotherOpportunity.id,
+				},
+			);
 			const changemakerVisibleChangemakerProposal =
 				await createChangemakerProposal(db, null, {
 					changemakerId: visibleChangemaker.id,
@@ -183,21 +184,19 @@ describe('/changemakerProposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await insertTestChangemakers(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			const firstProposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '1',
 			});
-			await createProposal(db, testUserAuthContext, {
+			const secondProposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '2',
 			});
 			await createChangemakerProposal(db, null, {
 				changemakerId: 1,
-				proposalId: 1,
+				proposalId: firstProposal.id,
 			});
 			await createChangemakerProposal(db, null, {
 				changemakerId: 1,
-				proposalId: 2,
+				proposalId: secondProposal.id,
 			});
 			const result = await request(app)
 				.get(`/changemakerProposals?changemaker=1`)
@@ -218,12 +217,10 @@ describe('/changemakerProposals', () => {
 							fiscalSponsors: [],
 							fields: [],
 						},
-						proposalId: 2,
+						proposalId: secondProposal.id,
 						proposal: {
-							id: 2,
-							opportunityId: opportunity.id,
+							...secondProposal,
 							opportunity,
-							externalId: '2',
 							versions: [],
 							changemakers: [
 								{
@@ -235,8 +232,6 @@ describe('/changemakerProposals', () => {
 									createdBy: testUser.keycloakUserId,
 								},
 							],
-							createdAt: expectTimestamp(),
-							createdBy: testUser.keycloakUserId,
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -253,12 +248,10 @@ describe('/changemakerProposals', () => {
 							fiscalSponsors: [],
 							fields: [],
 						},
-						proposalId: 1,
+						proposalId: firstProposal.id,
 						proposal: {
-							id: 1,
-							opportunityId: opportunity.id,
+							...firstProposal,
 							opportunity,
-							externalId: '1',
 							versions: [],
 							changemakers: [
 								{
@@ -270,8 +263,6 @@ describe('/changemakerProposals', () => {
 									createdBy: testUser.keycloakUserId,
 								},
 							],
-							createdAt: expectTimestamp(),
-							createdBy: testUser.keycloakUserId,
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -286,24 +277,22 @@ describe('/changemakerProposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await insertTestChangemakers(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			const targetProposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '1',
 			});
-			await createProposal(db, testUserAuthContext, {
+			const otherProposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '2',
 			});
 			await createChangemakerProposal(db, null, {
 				changemakerId: 1,
-				proposalId: 1,
+				proposalId: targetProposal.id,
 			});
 			await createChangemakerProposal(db, null, {
 				changemakerId: 2,
-				proposalId: 2,
+				proposalId: otherProposal.id,
 			});
 			const result = await request(app)
-				.get(`/changemakerProposals?proposal=1`)
+				.get(`/changemakerProposals?proposal=${targetProposal.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(result.body).toEqual({
@@ -321,12 +310,10 @@ describe('/changemakerProposals', () => {
 							fiscalSponsors: [],
 							fields: [],
 						},
-						proposalId: 1,
+						proposalId: targetProposal.id,
 						proposal: {
-							id: 1,
-							opportunityId: opportunity.id,
+							...targetProposal,
 							opportunity,
-							externalId: '1',
 							versions: [],
 							changemakers: [
 								{
@@ -338,8 +325,6 @@ describe('/changemakerProposals', () => {
 									createdBy: testUser.keycloakUserId,
 								},
 							],
-							createdAt: expectTimestamp(),
-							createdBy: testUser.keycloakUserId,
 						},
 						createdAt: expectTimestamp(),
 					},
@@ -394,9 +379,8 @@ describe('/changemakerProposals', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
-			const proposal = await createProposal(db, systemUserAuthContext, {
+			const proposal = await createTestProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: 'proposal-version-file-test',
 			});
 			await createChangemakerProposal(db, null, {
 				changemakerId: changemaker.id,
@@ -522,9 +506,8 @@ describe('/changemakerProposals', () => {
 
 			// Create a proposal to link to the changemaker
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, systemUserAuthContext, {
+			const proposal = await createTestProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: 'cmp-changemaker-field-test',
 			});
 			await createChangemakerProposal(db, null, {
 				changemakerId: changemaker.id,
@@ -573,9 +556,8 @@ describe('/changemakerProposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await insertTestChangemakers(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '1',
 			});
 			const before = await loadTableMetrics(db, 'changemakers_proposals');
 			const result = await request(app)
@@ -584,7 +566,7 @@ describe('/changemakerProposals', () => {
 				.set(authHeaderWithAdminRole)
 				.send({
 					changemakerId: 1,
-					proposalId: 1,
+					proposalId: proposal.id,
 				})
 				.expect(201);
 			const after = await loadTableMetrics(db, 'changemakers_proposals');
@@ -602,12 +584,10 @@ describe('/changemakerProposals', () => {
 					fiscalSponsors: [],
 					fields: [],
 				},
-				proposalId: 1,
+				proposalId: proposal.id,
 				proposal: {
-					id: 1,
-					opportunityId: opportunity.id,
+					...proposal,
 					opportunity,
-					externalId: '1',
 					versions: [],
 					changemakers: [
 						{
@@ -619,8 +599,6 @@ describe('/changemakerProposals', () => {
 							createdBy: testUser.keycloakUserId,
 						},
 					],
-					createdAt: expectTimestamp(),
-					createdBy: testUser.keycloakUserId,
 				},
 				createdAt: expectTimestamp(),
 			});
@@ -650,9 +628,8 @@ describe('/changemakerProposals', () => {
 				funderShortCode: testFunder.shortCode,
 			});
 			await insertTestChangemakers(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '1',
 			});
 			const before = await loadTableMetrics(db, 'changemakers_proposals');
 			const result = await request(app)
@@ -661,7 +638,7 @@ describe('/changemakerProposals', () => {
 				.set(authHeader)
 				.send({
 					changemakerId: 1,
-					proposalId: 1,
+					proposalId: proposal.id,
 				})
 				.expect(201);
 			const after = await loadTableMetrics(db, 'changemakers_proposals');
@@ -678,12 +655,10 @@ describe('/changemakerProposals', () => {
 					fiscalSponsors: [],
 					fields: [],
 				},
-				proposalId: 1,
+				proposalId: proposal.id,
 				proposal: {
-					id: 1,
-					opportunityId: opportunity.id,
+					...proposal,
 					opportunity,
-					externalId: '1',
 					versions: [],
 					changemakers: [
 						{
@@ -695,8 +670,6 @@ describe('/changemakerProposals', () => {
 							createdBy: testUser.keycloakUserId,
 						},
 					],
-					createdAt: expectTimestamp(),
-					createdBy: testUser.keycloakUserId,
 				},
 				createdAt: expectTimestamp(),
 			});
@@ -726,9 +699,8 @@ describe('/changemakerProposals', () => {
 				funderShortCode: testFunder.shortCode,
 			});
 			await insertTestChangemakers(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '1',
 			});
 			const before = await loadTableMetrics(db, 'changemakers_proposals');
 			const result = await request(app)
@@ -760,9 +732,8 @@ describe('/changemakerProposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await insertTestChangemakers(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '1',
 			});
 			const result = await request(app)
 				.post('/changemakerProposals')
@@ -784,9 +755,8 @@ describe('/changemakerProposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			await insertTestChangemakers(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '1',
 			});
 			const result = await request(app)
 				.post('/changemakerProposals')
@@ -846,9 +816,8 @@ describe('/changemakerProposals', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
-			await createProposal(db, testUserAuthContext, {
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '1',
 			});
 			const result = await request(app)
 				.post('/changemakerProposals')
@@ -883,9 +852,8 @@ describe('/changemakerProposals', () => {
 				funderShortCode: testFunder.shortCode,
 			});
 			await insertTestChangemakers(db, testUserAuthContext);
-			await createProposal(db, testUserAuthContext, {
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
-				externalId: '1',
 			});
 			await createChangemakerProposal(db, null, {
 				changemakerId: 1,

@@ -6,7 +6,6 @@ import {
 	createApplicationFormField,
 	createOpportunity,
 	createOrUpdateBaseField,
-	createProposal,
 	createProposalVersion,
 	loadPermissionGrantBundle,
 	loadSystemFunder,
@@ -23,6 +22,7 @@ import {
 	createTestChangemaker,
 	createTestFunder,
 	createTestOpportunity,
+	createTestProposal,
 	createTestSource,
 } from '../test/factories';
 import {
@@ -63,8 +63,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -110,8 +109,7 @@ describe('/proposalVersions', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: visibleFunder.shortCode,
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -161,8 +159,7 @@ describe('/proposalVersions', () => {
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -224,8 +221,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -259,8 +255,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -297,8 +292,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'self-grant-proposal',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -391,8 +385,7 @@ describe('/proposalVersions', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -453,8 +446,7 @@ describe('/proposalVersions', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: testFunder.shortCode,
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -502,8 +494,7 @@ describe('/proposalVersions', () => {
 				scope: [PermissionGrantEntityType.SOURCE],
 				verbs: [PermissionGrantVerb.REFERENCE],
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -550,8 +541,7 @@ describe('/proposalVersions', () => {
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -607,8 +597,7 @@ describe('/proposalVersions', () => {
 				scope: [PermissionGrantEntityType.SOURCE],
 				verbs: [PermissionGrantVerb.REFERENCE],
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -634,8 +623,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -722,8 +710,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -846,8 +833,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -883,8 +869,7 @@ describe('/proposalVersions', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -910,8 +895,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			await createApplicationForm(db, null, {
@@ -953,8 +937,7 @@ describe('/proposalVersions', () => {
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity1 = await createTestOpportunity(db, testUserAuthContext);
 			const opportunity2 = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity1.id,
 			});
 			await createApplicationForm(db, null, {
@@ -1001,8 +984,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -1052,8 +1034,7 @@ describe('/proposalVersions', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm1 = await createApplicationForm(db, null, {
@@ -1144,8 +1125,7 @@ describe('/proposalVersions', () => {
 				title: 'Conditional Test Opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'cond-proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -1258,8 +1238,7 @@ describe('/proposalVersions', () => {
 				title: 'No Conditions Test Opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'nocond-proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -1356,8 +1335,7 @@ describe('/proposalVersions', () => {
 				title: 'Exclusion Test Opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'excl-proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -1447,8 +1425,7 @@ describe('/proposalVersions', () => {
 				title: 'Equals Test Opportunity',
 				funderShortCode: systemFunder.shortCode,
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'eq-proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -1563,8 +1540,7 @@ describe('/proposalVersions', () => {
 					funderShortCode: otherFunder.shortCode,
 				},
 			);
-			const otherProposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'other-funder-proposal-1',
+			const otherProposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: otherOpportunity.id,
 			});
 			const otherApplicationForm = await createApplicationForm(db, null, {
@@ -1652,10 +1628,13 @@ describe('/proposalVersions', () => {
 					funderShortCode: grantedFunder.shortCode,
 				},
 			);
-			const grantedProposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'granted-funder-proposal-1',
-				opportunityId: grantedOpportunity.id,
-			});
+			const grantedProposal = await createTestProposal(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: grantedOpportunity.id,
+				},
+			);
 			const grantedApplicationForm = await createApplicationForm(db, null, {
 				opportunityId: grantedOpportunity.id,
 				name: null,
@@ -1711,8 +1690,7 @@ describe('/proposalVersions', () => {
 					funderShortCode: otherFunder.shortCode,
 				},
 			);
-			const otherProposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'other-funder-proposal-1',
+			const otherProposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: otherOpportunity.id,
 			});
 			const otherApplicationForm = await createApplicationForm(db, null, {

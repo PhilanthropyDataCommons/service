@@ -1,5 +1,5 @@
 {
 	"type": "string",
-	"enum": ["user", "userGroup"],
+	"enum": ["user", "userGroup", "authenticatedUsers"],
 	"description": "The type of grantee for a permission grant."
 }

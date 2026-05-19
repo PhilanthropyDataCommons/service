@@ -1,9 +1,12 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	createApplicationForm,
+	createPermissionGrant,
 	createProposal,
 	createSource,
 	getDatabase,
+	hasApplicationFormPermission,
 	hasChangemakerPermission,
 	hasDataProviderPermission,
 	hasFunderPermission,
@@ -1051,6 +1054,139 @@ describe('/permissionGrants', () => {
 				.expect(400);
 			expect(result.body).toMatchObject({
 				name: 'InputValidationError',
+			});
+		});
+
+		describe('authenticatedUsers grantee type', () => {
+			it('creates and returns a grant with both grantee key fields null', async () => {
+				const db = getDatabase();
+				const authContext = await getTestAuthContext(db);
+				const changemaker = await createTestChangemaker(db, authContext);
+				const before = await loadTableMetrics(db, 'permission_grants');
+				const result = await agent
+					.post('/permissionGrants')
+					.type('application/json')
+					.set(adminUserAuthHeader)
+					.send({
+						granteeType: 'authenticatedUsers',
+						contextEntityType: 'changemaker',
+						changemakerId: changemaker.id,
+						scope: ['changemaker'],
+						verbs: ['view'],
+					})
+					.expect(201);
+				const after = await loadTableMetrics(db, 'permission_grants');
+
+				expect(result.body).toMatchObject({
+					id: expectNumber(),
+					granteeType: 'authenticatedUsers',
+					granteeUserKeycloakUserId: null,
+					granteeKeycloakOrganizationId: null,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				});
+				expect(after.count).toEqual(before.count + 1);
+			});
+
+			it('returns 400 when grantee key field is included', async () => {
+				const db = getDatabase();
+				const authContext = await getTestAuthContext(db);
+				const changemaker = await createTestChangemaker(db, authContext);
+				await agent
+					.post('/permissionGrants')
+					.type('application/json')
+					.set(adminUserAuthHeader)
+					.send({
+						granteeType: 'authenticatedUsers',
+						granteeUserKeycloakUserId: testUserKeycloakUserId,
+						contextEntityType: 'changemaker',
+						changemakerId: changemaker.id,
+						scope: ['changemaker'],
+						verbs: ['view'],
+					})
+					.expect(400);
+			});
+
+			it('grants permission to an arbitrary authenticated user', async () => {
+				const db = getDatabase();
+				const adminAuthContext = await getTestAuthContext(db, true);
+				const funder = await createTestFunder(db, adminAuthContext);
+				await createPermissionGrant(db, adminAuthContext, {
+					granteeType: PermissionGrantGranteeType.AUTHENTICATED_USERS,
+					contextEntityType: PermissionGrantEntityType.FUNDER,
+					funderShortCode: funder.shortCode,
+					scope: [PermissionGrantEntityType.FUNDER],
+					verbs: [PermissionGrantVerb.VIEW],
+				});
+
+				const arbitraryUser = await loadTestUser(db);
+				const arbitraryUserAuthContext = getAuthContext(arbitraryUser);
+
+				const allowed = await hasFunderPermission(
+					db,
+					arbitraryUserAuthContext,
+					{
+						funderShortCode: funder.shortCode,
+						permission: PermissionGrantVerb.VIEW,
+						scope: PermissionGrantEntityType.FUNDER,
+					},
+				);
+				expect(allowed).toBe(true);
+			});
+
+			it('propagates through context inheritance (funder grant covers application form)', async () => {
+				const db = getDatabase();
+				const adminAuthContext = await getTestAuthContext(db, true);
+				const funder = await createTestFunder(db, adminAuthContext);
+				const opportunity = await createTestOpportunity(db, adminAuthContext, {
+					funderShortCode: funder.shortCode,
+				});
+				const applicationForm = await createApplicationForm(
+					db,
+					adminAuthContext,
+					{
+						opportunityId: opportunity.id,
+						name: 'test form',
+					},
+				);
+				await createPermissionGrant(db, adminAuthContext, {
+					granteeType: PermissionGrantGranteeType.AUTHENTICATED_USERS,
+					contextEntityType: PermissionGrantEntityType.FUNDER,
+					funderShortCode: funder.shortCode,
+					scope: [PermissionGrantEntityType.APPLICATION_FORM],
+					verbs: [PermissionGrantVerb.VIEW],
+				});
+
+				const arbitraryUser = await loadTestUser(db);
+				const arbitraryUserAuthContext = getAuthContext(arbitraryUser);
+
+				const allowed = await hasApplicationFormPermission(
+					db,
+					arbitraryUserAuthContext,
+					{
+						applicationFormId: applicationForm.id,
+						permission: PermissionGrantVerb.VIEW,
+						scope: PermissionGrantEntityType.APPLICATION_FORM,
+					},
+				);
+				expect(allowed).toBe(true);
+			});
+
+			it('does not enable permission for unauthenticated requests', async () => {
+				const db = getDatabase();
+				const adminAuthContext = await getTestAuthContext(db, true);
+				const funder = await createTestFunder(db, adminAuthContext);
+				await createPermissionGrant(db, adminAuthContext, {
+					granteeType: PermissionGrantGranteeType.AUTHENTICATED_USERS,
+					contextEntityType: PermissionGrantEntityType.FUNDER,
+					funderShortCode: funder.shortCode,
+					scope: [PermissionGrantEntityType.FUNDER],
+					verbs: [PermissionGrantVerb.VIEW],
+				});
+
+				await agent.get('/permissionGrants').expect(401);
 			});
 		});
 	});

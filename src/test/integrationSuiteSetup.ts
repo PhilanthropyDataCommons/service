@@ -6,6 +6,7 @@ import nock from 'nock';
 import { loadConfig } from '../config';
 import {
 	resetTestPermissionGrantFactory,
+	resetTestProposalFactory,
 	resetTestSourceFactory,
 } from './factories';
 import {
@@ -29,6 +30,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
 	resetTestPermissionGrantFactory();
+	resetTestProposalFactory();
 	resetTestSourceFactory();
 	mockJwks.start();
 	await createWorkerDatabase();

@@ -6,7 +6,6 @@ import {
 	createOrUpdateBaseField,
 	createChangemakerProposal,
 	createEphemeralUserGroupAssociation,
-	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
 	getDatabase,
@@ -22,6 +21,7 @@ import {
 	createTestChangemaker,
 	createTestFunder,
 	createTestOpportunity,
+	createTestProposal,
 	createTestUser,
 } from '../test/factories';
 import {
@@ -50,6 +50,7 @@ import {
 	PermissionGrantVerb,
 	stringToKeycloakId,
 } from '../types';
+import type { Proposal } from '../types';
 
 describe('/proposals', () => {
 	describe('GET /', () => {
@@ -122,19 +123,17 @@ describe('/proposals', () => {
 					funderShortCode: anotherFunder.shortCode,
 				},
 			);
-			const funderVisibleProposal = await createProposal(
+			const funderVisibleProposal = await createTestProposal(
 				db,
 				testUserAuthContext,
 				{
-					externalId: 'proposal-1',
 					opportunityId: visibleOpportunity.id,
 				},
 			);
-			const changemakerVisibleProposal = await createProposal(
+			const changemakerVisibleProposal = await createTestProposal(
 				db,
 				testUserAuthContext,
 				{
-					externalId: 'proposal-2',
 					opportunityId: anotherOpportunity.id,
 				},
 			);
@@ -142,8 +141,7 @@ describe('/proposals', () => {
 				changemakerId: visibleChangemaker.id,
 				proposalId: changemakerVisibleProposal.id,
 			});
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-3',
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: anotherOpportunity.id,
 			});
 			const response = await request(app)
@@ -173,12 +171,10 @@ describe('/proposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-2',
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const changemaker = await createTestChangemaker(db, testUserAuthContext, {
@@ -196,12 +192,8 @@ describe('/proposals', () => {
 				total: 1,
 				entries: [
 					{
-						id: 1,
-						externalId: 'proposal-1',
-						opportunityId: opportunity.id,
+						...proposal,
 						opportunity,
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 						versions: [],
 						changemakers: [
 							{
@@ -236,14 +228,16 @@ describe('/proposals', () => {
 				},
 			);
 
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: systemOpportunity.id,
 			});
-			const testFunderProposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-2',
-				opportunityId: testFunderOpportunity.id,
-			});
+			const testFunderProposal = await createTestProposal(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: testFunderOpportunity.id,
+				},
+			);
 			const response = await request(app)
 				.get(`/proposals?funder=${testFunder.shortCode}`)
 				.set(authHeaderWithAdminRole)
@@ -253,12 +247,8 @@ describe('/proposals', () => {
 				total: 1,
 				entries: [
 					{
-						id: testFunderProposal.id,
-						externalId: 'proposal-2',
-						opportunityId: testFunderOpportunity.id,
+						...testFunderProposal,
 						opportunity: testFunderOpportunity,
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 						versions: [],
 						changemakers: [],
 					},
@@ -307,12 +297,14 @@ describe('/proposals', () => {
 
 			const systemSource = await loadSystemSource(db, null);
 			const summaryField = await createTestBaseField(db, null);
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
-				opportunityId: opportunity.id,
-			});
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-2',
+			const matchingProposal = await createTestProposal(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			await createApplicationForm(db, null, {
@@ -361,12 +353,8 @@ describe('/proposals', () => {
 				total: 1,
 				entries: [
 					{
-						id: 1,
-						externalId: 'proposal-1',
-						opportunityId: opportunity.id,
+						...matchingProposal,
 						opportunity,
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 						versions: [
 							{
 								id: 1,
@@ -420,8 +408,7 @@ describe('/proposals', () => {
 				sensitivityClassification:
 					BaseFieldSensitivityClassification.RESTRICTED,
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(db, null, {
@@ -477,14 +464,20 @@ describe('/proposals', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
-				opportunityId: opportunity.id,
-			});
-			await createProposal(db, anotherUserAuthContext, {
-				externalId: 'proposal-2',
-				opportunityId: opportunity.id,
-			});
+			const testUserProposal = await createTestProposal(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+			const anotherUserProposal = await createTestProposal(
+				db,
+				anotherUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
 			const response = await request(app)
 				.get('/proposals')
 				.set(authHeaderWithAdminRole)
@@ -493,22 +486,14 @@ describe('/proposals', () => {
 				total: 2,
 				entries: [
 					{
-						id: 2,
-						externalId: 'proposal-2',
-						opportunityId: opportunity.id,
+						...anotherUserProposal,
 						opportunity,
-						createdAt: expectTimestamp(),
-						createdBy: anotherUser.keycloakUserId,
 						versions: [],
 						changemakers: [],
 					},
 					{
-						id: 1,
-						externalId: 'proposal-1',
-						opportunityId: opportunity.id,
+						...testUserProposal,
 						opportunity,
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 						versions: [],
 						changemakers: [],
 					},
@@ -524,12 +509,14 @@ describe('/proposals', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
-				opportunityId: opportunity.id,
-			});
-			await createProposal(db, anotherUserAuthContext, {
-				externalId: 'proposal-2',
+			const testUserProposal = await createTestProposal(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+			await createTestProposal(db, anotherUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const response = await request(app)
@@ -542,12 +529,8 @@ describe('/proposals', () => {
 				total: 1,
 				entries: [
 					{
-						id: 1,
-						externalId: 'proposal-1',
-						opportunityId: opportunity.id,
+						...testUserProposal,
 						opportunity,
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 						versions: [],
 						changemakers: [],
 					},
@@ -563,12 +546,14 @@ describe('/proposals', () => {
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
-				opportunityId: opportunity.id,
-			});
-			await createProposal(db, anotherUserAuthContext, {
-				externalId: 'proposal-2',
+			const testUserProposal = await createTestProposal(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+			await createTestProposal(db, anotherUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const response = await request(app)
@@ -579,12 +564,8 @@ describe('/proposals', () => {
 				total: 1,
 				entries: [
 					{
-						id: 1,
-						externalId: 'proposal-1',
-						opportunityId: opportunity.id,
+						...testUserProposal,
 						opportunity,
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 						versions: [],
 						changemakers: [],
 					},
@@ -602,12 +583,14 @@ describe('/proposals', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const systemSource = await loadSystemSource(db, null);
 			const summaryField = await createTestBaseField(db, null);
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-4999',
-				opportunityId: opportunity.id,
-			});
-			await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-5003',
+			const matchingProposal = await createTestProposal(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			await createApplicationForm(db, null, {
@@ -656,12 +639,8 @@ describe('/proposals', () => {
 				total: 1,
 				entries: [
 					{
-						id: 1,
-						externalId: 'proposal-4999',
-						opportunityId: opportunity.id,
+						...matchingProposal,
 						opportunity,
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 						versions: [
 							{
 								id: 1,
@@ -711,13 +690,18 @@ describe('/proposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			await Array.from(Array(20)).reduce(async (p, _, i) => {
-				await p;
-				await createProposal(db, testUserAuthContext, {
-					externalId: `proposal-${i + 1}`,
-					opportunityId: opportunity.id,
-				});
-			}, Promise.resolve());
+			const proposals = await Array.from(Array(20)).reduce<Promise<Proposal[]>>(
+				async (acc) => {
+					const list = await acc;
+					list.push(
+						await createTestProposal(db, testUserAuthContext, {
+							opportunityId: opportunity.id,
+						}),
+					);
+					return list;
+				},
+				Promise.resolve([]),
+			);
 			const response = await request(app)
 				.get('/proposals')
 				.query({
@@ -730,54 +714,34 @@ describe('/proposals', () => {
 				total: 20,
 				entries: [
 					{
-						id: 15,
-						externalId: 'proposal-15',
-						opportunityId: opportunity.id,
+						...proposals[14],
 						opportunity,
 						versions: [],
 						changemakers: [],
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 					},
 					{
-						id: 14,
-						externalId: 'proposal-14',
-						opportunityId: opportunity.id,
+						...proposals[13],
 						opportunity,
 						versions: [],
 						changemakers: [],
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 					},
 					{
-						id: 13,
-						externalId: 'proposal-13',
-						opportunityId: opportunity.id,
+						...proposals[12],
 						opportunity,
 						versions: [],
 						changemakers: [],
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 					},
 					{
-						id: 12,
-						externalId: 'proposal-12',
-						opportunityId: opportunity.id,
+						...proposals[11],
 						opportunity,
 						versions: [],
 						changemakers: [],
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 					},
 					{
-						id: 11,
-						externalId: 'proposal-11',
-						opportunityId: opportunity.id,
+						...proposals[10],
 						opportunity,
 						versions: [],
 						changemakers: [],
-						createdAt: expectTimestamp(),
-						createdBy: testUser.keycloakUserId,
 					},
 				],
 			});
@@ -824,8 +788,7 @@ describe('/proposals', () => {
 			const anotherUser = await createTestUser(db, null);
 			const anotherUserAuthContext = getAuthContext(anotherUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, anotherUserAuthContext, {
-				externalId: `proposal-1`,
+			const proposal = await createTestProposal(db, anotherUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 
@@ -847,7 +810,7 @@ describe('/proposals', () => {
 			});
 
 			const response = await request(app)
-				.get('/proposals/1')
+				.get(`/proposals/${proposal.id}`)
 				.set(authHeader)
 				.expect(404);
 			expect(response.body).toEqual({
@@ -861,7 +824,7 @@ describe('/proposals', () => {
 							lookupValues: {
 								authContextIsAdministrator: false,
 								authContextKeycloakUserId: testUser.keycloakUserId,
-								proposalId: 1,
+								proposalId: proposal.id,
 							},
 						},
 					},
@@ -887,28 +850,26 @@ describe('/proposals', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 
-			await createProposal(db, testUserAuthContext, {
-				externalId: `proposal-1`,
+			await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
-			await createProposal(db, testUserAuthContext, {
-				externalId: `proposal-2`,
-				opportunityId: opportunity.id,
-			});
+			const requestedProposal = await createTestProposal(
+				db,
+				testUserAuthContext,
+				{
+					opportunityId: opportunity.id,
+				},
+			);
 
 			const response = await request(app)
-				.get('/proposals/2')
+				.get(`/proposals/${requestedProposal.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				id: 2,
-				externalId: 'proposal-2',
+				...requestedProposal,
+				opportunity,
 				versions: [],
 				changemakers: [],
-				opportunityId: opportunity.id,
-				opportunity,
-				createdAt: expectTimestamp(),
-				createdBy: testUser.keycloakUserId,
 			});
 		});
 
@@ -941,17 +902,16 @@ describe('/proposals', () => {
 				inputType: null,
 			});
 			const systemSource = await loadSystemSource(db, null);
-			await createProposal(db, testUserAuthContext, {
-				externalId: `proposal-2525-01-04T00Z`,
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
-				proposalId: 1,
+				proposalId: proposal.id,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
-				proposalId: 1,
+				proposalId: proposal.id,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 			});
@@ -988,20 +948,16 @@ describe('/proposals', () => {
 				goodAsOf: null,
 			});
 			const response = await request(app)
-				.get('/proposals/1')
+				.get(`/proposals/${proposal.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				id: 1,
-				opportunityId: opportunity.id,
+				...proposal,
 				opportunity,
-				externalId: 'proposal-2525-01-04T00Z',
-				createdAt: expectTimestamp(),
-				createdBy: testUser.keycloakUserId,
 				versions: [
 					{
 						id: 2,
-						proposalId: 1,
+						proposalId: proposal.id,
 						sourceId: systemSource.id,
 						source: systemSource,
 						applicationFormId: 1,
@@ -1059,7 +1015,7 @@ describe('/proposals', () => {
 					},
 					{
 						id: 1,
-						proposalId: 1,
+						proposalId: proposal.id,
 						sourceId: systemSource.id,
 						source: systemSource,
 						applicationFormId: 1,
@@ -1149,17 +1105,16 @@ describe('/proposals', () => {
 					'Please enter a full summary or abstract of the proposal.',
 				inputType: null,
 			});
-			await createProposal(db, testUserAuthContext, {
-				externalId: `proposal-2525-01-04T00Z`,
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
-				proposalId: 1,
+				proposalId: proposal.id,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
-				proposalId: 1,
+				proposalId: proposal.id,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 			});
@@ -1196,20 +1151,16 @@ describe('/proposals', () => {
 				goodAsOf: null,
 			});
 			const response = await request(app)
-				.get('/proposals/1')
+				.get(`/proposals/${proposal.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				id: 1,
-				opportunityId: opportunity.id,
+				...proposal,
 				opportunity,
-				externalId: 'proposal-2525-01-04T00Z',
-				createdAt: expectTimestamp(),
-				createdBy: testUser.keycloakUserId,
 				versions: [
 					{
 						id: 2,
-						proposalId: 1,
+						proposalId: proposal.id,
 						sourceId: systemSource.id,
 						source: systemSource,
 						applicationFormId: 1,
@@ -1267,7 +1218,7 @@ describe('/proposals', () => {
 					},
 					{
 						id: 1,
-						proposalId: 1,
+						proposalId: proposal.id,
 						sourceId: systemSource.id,
 						source: systemSource,
 						applicationFormId: 1,
@@ -1366,8 +1317,7 @@ describe('/proposals', () => {
 				instructions: 'Enter a summary',
 				inputType: null,
 			});
-			const proposal = await createProposal(db, testUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const proposalVersion = await createProposalVersion(
@@ -1435,12 +1385,11 @@ describe('/proposals', () => {
 				instructions: 'This field should not be used in proposal versions',
 				inputType: null,
 			});
-			await createProposal(db, testUserAuthContext, {
-				externalId: `proposal-2525-01-04T00Z`,
+			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			await createProposalVersion(db, testUserAuthContext, {
-				proposalId: 1,
+				proposalId: proposal.id,
 				applicationFormId: 1,
 				sourceId: systemSource.id,
 			});
@@ -1466,20 +1415,16 @@ describe('/proposals', () => {
 			});
 
 			const response = await request(app)
-				.get('/proposals/1')
+				.get(`/proposals/${proposal.id}`)
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual({
-				id: 1,
-				opportunityId: opportunity.id,
+				...proposal,
 				opportunity,
-				externalId: 'proposal-2525-01-04T00Z',
-				createdAt: expectTimestamp(),
-				createdBy: testUser.keycloakUserId,
 				versions: [
 					{
 						id: 1,
-						proposalId: 1,
+						proposalId: proposal.id,
 						sourceId: systemSource.id,
 						source: systemSource,
 						applicationFormId: 1,

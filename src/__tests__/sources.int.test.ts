@@ -3,7 +3,6 @@ import { app } from '../app';
 import {
 	getDatabase,
 	createEphemeralUserGroupAssociation,
-	createSource,
 	loadPermissionGrantBundle,
 	loadSystemSource,
 	loadTableMetrics,
@@ -24,6 +23,7 @@ import {
 	createTestDataProvider,
 	createTestFunder,
 	createTestOpportunity,
+	createTestSource,
 } from '../test/factories';
 import {
 	getAuthContext,
@@ -55,11 +55,7 @@ describe('/sources', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			const source = await createSource(db, testUserAuthContext, {
-				label: 'Example Inc.',
-				changemakerId: changemaker.id,
-			});
+			const source = await createTestSource(db, testUserAuthContext);
 			const response = await agent
 				.get('/sources')
 				.set(adminUserAuthHeader)
@@ -74,11 +70,7 @@ describe('/sources', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			await createSource(db, testUserAuthContext, {
-				label: 'Example Inc.',
-				changemakerId: changemaker.id,
-			});
+			await createTestSource(db, testUserAuthContext);
 			await agent.get('/sources').set(authHeader).expect(200, {
 				entries: [],
 				total: 0,
@@ -91,15 +83,8 @@ describe('/sources', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			const visibleSource = await createSource(db, testUserAuthContext, {
-				label: 'Visible Inc.',
-				changemakerId: changemaker.id,
-			});
-			await createSource(db, testUserAuthContext, {
-				label: 'Hidden Inc.',
-				changemakerId: changemaker.id,
-			});
+			const visibleSource = await createTestSource(db, testUserAuthContext);
+			await createTestSource(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -130,12 +115,10 @@ describe('/sources', () => {
 				db,
 				testUserAuthContext,
 			);
-			const visibleSource = await createSource(db, testUserAuthContext, {
-				label: 'Visible Inc.',
+			const visibleSource = await createTestSource(db, testUserAuthContext, {
 				changemakerId: visibleChangemaker.id,
 			});
-			await createSource(db, testUserAuthContext, {
-				label: 'Hidden Inc.',
+			await createTestSource(db, testUserAuthContext, {
 				changemakerId: hiddenChangemaker.id,
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -162,12 +145,10 @@ describe('/sources', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const visibleFunder = await createTestFunder(db, testUserAuthContext);
 			const hiddenFunder = await createTestFunder(db, testUserAuthContext);
-			const visibleSource = await createSource(db, testUserAuthContext, {
-				label: 'Visible Inc.',
+			const visibleSource = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: visibleFunder.shortCode,
 			});
-			await createSource(db, testUserAuthContext, {
-				label: 'Hidden Inc.',
+			await createTestSource(db, testUserAuthContext, {
 				funderShortCode: hiddenFunder.shortCode,
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -200,12 +181,10 @@ describe('/sources', () => {
 				db,
 				testUserAuthContext,
 			);
-			const visibleSource = await createSource(db, testUserAuthContext, {
-				label: 'Visible Inc.',
+			const visibleSource = await createTestSource(db, testUserAuthContext, {
 				dataProviderShortCode: visibleDataProvider.shortCode,
 			});
-			await createSource(db, testUserAuthContext, {
-				label: 'Hidden Inc.',
+			await createTestSource(db, testUserAuthContext, {
 				dataProviderShortCode: hiddenDataProvider.shortCode,
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -234,11 +213,7 @@ describe('/sources', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			const source = await createSource(db, testUserAuthContext, {
-				label: 'Example Inc.',
-				changemakerId: changemaker.id,
-			});
+			const source = await createTestSource(db, testUserAuthContext);
 
 			const response = await agent
 				.get(`/sources/${source.id}`)
@@ -253,11 +228,7 @@ describe('/sources', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			const source = await createSource(db, testUserAuthContext, {
-				label: 'Example Inc.',
-				changemakerId: changemaker.id,
-			});
+			const source = await createTestSource(db, testUserAuthContext);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -281,8 +252,7 @@ describe('/sources', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			const source = await createSource(db, testUserAuthContext, {
-				label: 'Example Inc.',
+			const source = await createTestSource(db, testUserAuthContext, {
 				changemakerId: changemaker.id,
 			});
 			await createPermissionGrant(db, systemUserAuthContext, {
@@ -328,11 +298,7 @@ describe('/sources', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			const source = await createSource(db, testUserAuthContext, {
-				label: 'Example Inc.',
-				changemakerId: changemaker.id,
-			});
+			const source = await createTestSource(db, testUserAuthContext);
 			await agent.get(`/sources/${source.id}`).set(authHeader).expect(404);
 		});
 	});
@@ -416,7 +382,7 @@ describe('/sources', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			await createSource(db, testUserAuthContext, {
+			await createTestSource(db, testUserAuthContext, {
 				label: 'Example Corp',
 				changemakerId: changemaker.id,
 			});
@@ -447,7 +413,7 @@ describe('/sources', () => {
 				db,
 				testUserAuthContext,
 			);
-			await createSource(db, testUserAuthContext, {
+			await createTestSource(db, testUserAuthContext, {
 				label: 'Example Corp',
 				dataProviderShortCode: dataProvider.shortCode,
 			});
@@ -475,7 +441,7 @@ describe('/sources', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const funder = await createTestFunder(db, testUserAuthContext);
-			await createSource(db, testUserAuthContext, {
+			await createTestSource(db, testUserAuthContext, {
 				label: 'Example Corp',
 				funderShortCode: funder.shortCode,
 			});
@@ -903,11 +869,7 @@ describe('/sources', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			const localSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: 'Example Inc.',
-			});
+			const localSource = await createTestSource(db, testUserAuthContext);
 			const before = await loadTableMetrics(db, 'sources');
 
 			await agent
@@ -928,11 +890,7 @@ describe('/sources', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
-			const changemaker = await createTestChangemaker(db, testUserAuthContext);
-			const localSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: 'Example Inc.',
-			});
+			const localSource = await createTestSource(db, testUserAuthContext);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
 			const proposal = await createProposal(db, systemUserAuthContext, {
 				externalId: 'proposal-1',

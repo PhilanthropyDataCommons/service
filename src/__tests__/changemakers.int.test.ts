@@ -13,7 +13,6 @@ import {
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
-	createSource,
 	loadPermissionGrantBundle,
 	loadSystemSource,
 	loadSystemUser,
@@ -26,6 +25,7 @@ import {
 	createTestFile,
 	createTestFunder,
 	createTestOpportunity,
+	createTestSource,
 } from '../test/factories';
 import {
 	getAuthContext,
@@ -98,12 +98,11 @@ const setupTestContext = async (db: TinyPg) => {
 		name: 'Changemaker 5387',
 		keycloakOrganizationId: '8b15d276-be48-11ef-a061-5b4a50e82d50',
 	});
-	const { id: secondChangemakerSourceId } = await createSource(
+	const { id: secondChangemakerSourceId } = await createTestSource(
 		db,
 		testUserAuthContext,
 		{
 			changemakerId: secondChangemaker.id,
-			label: `${secondChangemaker.name} source`,
 		},
 	);
 	const firstFunder = await createTestFunder(db, testUserAuthContext, {
@@ -131,12 +130,11 @@ const setupTestContext = async (db: TinyPg) => {
 			funderShortCode: firstFunder.shortCode,
 		},
 	);
-	const { id: firstFunderSourceId } = await createSource(
+	const { id: firstFunderSourceId } = await createTestSource(
 		db,
 		testUserAuthContext,
 		{
 			funderShortCode: firstFunder.shortCode,
-			label: `${firstFunder.name} source`,
 		},
 	);
 	const firstDataProvider = await createTestDataProvider(
@@ -147,20 +145,18 @@ const setupTestContext = async (db: TinyPg) => {
 		db,
 		testUserAuthContext,
 	);
-	const { id: firstDataProviderSourceId } = await createSource(
+	const { id: firstDataProviderSourceId } = await createTestSource(
 		db,
 		testUserAuthContext,
 		{
 			dataProviderShortCode: firstDataProvider.shortCode,
-			label: `${firstDataProvider.name} source`,
 		},
 	);
-	const { id: secondDataProviderSourceId } = await createSource(
+	const { id: secondDataProviderSourceId } = await createTestSource(
 		db,
 		testUserAuthContext,
 		{
 			dataProviderShortCode: secondDataProvider.shortCode,
-			label: `${secondDataProvider.name} source`,
 		},
 	);
 
@@ -1764,10 +1760,13 @@ describe('/changemakers', () => {
 			const baseField = await createTestBaseField(db, null);
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 			// Create a changemaker-sourced source
-			const changemakerSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: `${changemaker.name} source`,
-			});
+			const changemakerSource = await createTestSource(
+				db,
+				testUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+				},
+			);
 			// Create a batch linked to the source
 			const batch = await createChangemakerFieldValueBatch(
 				db,
@@ -1827,9 +1826,8 @@ describe('/changemakers', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: funder.shortCode,
 			});
-			const funderSource = await createSource(db, testUserAuthContext, {
+			const funderSource = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: funder.shortCode,
-				label: 'Funder Priority Source',
 			});
 
 			// Create ProposalFieldValue from funder source (should be lower priority)
@@ -1872,10 +1870,13 @@ describe('/changemakers', () => {
 			});
 
 			// Create changemaker-sourced ChangemakerFieldValue (should win)
-			const changemakerSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: `${changemaker.name} source`,
-			});
+			const changemakerSource = await createTestSource(
+				db,
+				testUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+				},
+			);
 			const batch = await createChangemakerFieldValueBatch(
 				db,
 				systemUserAuthContext,
@@ -1932,10 +1933,13 @@ describe('/changemakers', () => {
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 			// Create changemaker-sourced source
-			const changemakerSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: `${changemaker.name} source`,
-			});
+			const changemakerSource = await createTestSource(
+				db,
+				testUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+				},
+			);
 
 			// Create older ChangemakerFieldValue
 			const olderBatch = await createChangemakerFieldValueBatch(
@@ -2011,10 +2015,13 @@ describe('/changemakers', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-			const changemakerSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: `${changemaker.name} source`,
-			});
+			const changemakerSource = await createTestSource(
+				db,
+				testUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+				},
+			);
 			const batch = await createChangemakerFieldValueBatch(
 				db,
 				systemUserAuthContext,
@@ -2061,10 +2068,13 @@ describe('/changemakers', () => {
 			const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
 			// Create ChangemakerFieldValue for email
-			const changemakerSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: `${changemaker.name} source`,
-			});
+			const changemakerSource = await createTestSource(
+				db,
+				testUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+				},
+			);
 			const batch = await createChangemakerFieldValueBatch(
 				db,
 				systemUserAuthContext,
@@ -2111,9 +2121,8 @@ describe('/changemakers', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: funder.shortCode,
 			});
-			const funderSource = await createSource(db, testUserAuthContext, {
+			const funderSource = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: funder.shortCode,
-				label: 'Funder Multi Source',
 			});
 			const proposal = await createProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity.id,
@@ -2247,9 +2256,8 @@ describe('/changemakers', () => {
 					funderShortCode: funderWithFieldValueScope.shortCode,
 				},
 			);
-			const source1 = await createSource(db, testUserAuthContext, {
+			const source1 = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: funderWithFieldValueScope.shortCode,
-				label: 'Source With FV Scope',
 			});
 			const proposal1 = await createProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity1.id,
@@ -2297,9 +2305,8 @@ describe('/changemakers', () => {
 					funderShortCode: funderWithoutFieldValueScope.shortCode,
 				},
 			);
-			const source2 = await createSource(db, testUserAuthContext, {
+			const source2 = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: funderWithoutFieldValueScope.shortCode,
-				label: 'Source Without FV Scope',
 			});
 			const proposal2 = await createProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity2.id,
@@ -2378,10 +2385,13 @@ describe('/changemakers', () => {
 			});
 
 			// Create changemaker-sourced source and batch
-			const changemakerSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: `${changemaker.name} source`,
-			});
+			const changemakerSource = await createTestSource(
+				db,
+				testUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+				},
+			);
 			const batch = await createChangemakerFieldValueBatch(
 				db,
 				systemUserAuthContext,
@@ -2490,10 +2500,13 @@ describe('/changemakers', () => {
 			});
 
 			// Create changemaker-sourced source and batch
-			const changemakerSource = await createSource(db, testUserAuthContext, {
-				changemakerId: changemaker.id,
-				label: `${changemaker.name} source`,
-			});
+			const changemakerSource = await createTestSource(
+				db,
+				testUserAuthContext,
+				{
+					changemakerId: changemaker.id,
+				},
+			);
 			const batch = await createChangemakerFieldValueBatch(
 				db,
 				systemUserAuthContext,
@@ -2578,9 +2591,8 @@ describe('/changemakers', () => {
 			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: funder.shortCode,
 			});
-			const funderSource = await createSource(db, testUserAuthContext, {
+			const funderSource = await createTestSource(db, testUserAuthContext, {
 				funderShortCode: funder.shortCode,
-				label: 'Funder Proposal File Source',
 			});
 
 			const proposal = await createProposal(db, systemUserAuthContext, {

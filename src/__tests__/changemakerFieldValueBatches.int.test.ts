@@ -4,11 +4,14 @@ import {
 	getDatabase,
 	createChangemakerFieldValueBatch,
 	createPermissionGrant,
-	createSource,
 	loadSystemUser,
 } from '../database';
 import { expectNumber, expectTimestamp } from '../test/asymettricMatchers';
-import { createTestChangemaker, createTestUser } from '../test/factories';
+import {
+	createTestChangemaker,
+	createTestSource,
+	createTestUser,
+} from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
@@ -27,12 +30,7 @@ describe('POST /changemakerFieldValueBatches', () => {
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
-		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
-			changemakerId: changemaker.id,
-		});
+		const source = await createTestSource(db, testUserAuthContext);
 		await createPermissionGrant(db, systemUserAuthContext, {
 			granteeType: PermissionGrantGranteeType.USER,
 			granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -57,10 +55,7 @@ describe('POST /changemakerFieldValueBatches', () => {
 			sourceId: source.id,
 			notes: 'Routine annual import',
 			createdAt: expectTimestamp(),
-			source: {
-				id: source.id,
-				label: 'Test Source',
-			},
+			source,
 		});
 	});
 
@@ -70,12 +65,7 @@ describe('POST /changemakerFieldValueBatches', () => {
 		const systemUserAuthContext = getAuthContext(systemUser);
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
-		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
-			changemakerId: changemaker.id,
-		});
+		const source = await createTestSource(db, testUserAuthContext);
 		await createPermissionGrant(db, systemUserAuthContext, {
 			granteeType: PermissionGrantGranteeType.USER,
 			granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -150,12 +140,7 @@ describe('POST /changemakerFieldValueBatches', () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
-		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
-			changemakerId: changemaker.id,
-		});
+		const source = await createTestSource(db, testUserAuthContext);
 
 		const result = await request(app)
 			.post('/changemakerFieldValueBatches')
@@ -180,8 +165,7 @@ describe('POST /changemakerFieldValueBatches', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
 
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 		await createPermissionGrant(db, systemUserAuthContext, {
@@ -231,12 +215,7 @@ describe('GET /changemakerFieldValueBatches', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 
-		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
-			changemakerId: changemaker.id,
-		});
+		const source = await createTestSource(db, testUserAuthContext);
 
 		const firstBatch = await createChangemakerFieldValueBatch(
 			db,
@@ -274,12 +253,7 @@ describe('GET /changemakerFieldValueBatches', () => {
 		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
-			changemakerId: changemaker.id,
-		});
+		const source = await createTestSource(db, testUserAuthContext);
 
 		const testUserBatch = await createChangemakerFieldValueBatch(
 			db,
@@ -313,12 +287,7 @@ describe('GET /changemakerFieldValueBatches', () => {
 		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
-			changemakerId: changemaker.id,
-		});
+		const source = await createTestSource(db, testUserAuthContext);
 
 		const testUserBatch = await createChangemakerFieldValueBatch(
 			db,
@@ -360,12 +329,7 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 
-		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
-			changemakerId: changemaker.id,
-		});
+		const source = await createTestSource(db, testUserAuthContext);
 
 		const batch = await createChangemakerFieldValueBatch(
 			db,
@@ -391,12 +355,7 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
-			changemakerId: changemaker.id,
-		});
+		const source = await createTestSource(db, testUserAuthContext);
 
 		const batch = await createChangemakerFieldValueBatch(
 			db,
@@ -424,12 +383,7 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Test Source',
-			changemakerId: changemaker.id,
-		});
+		const source = await createTestSource(db, testUserAuthContext);
 
 		const batch = await createChangemakerFieldValueBatch(
 			db,

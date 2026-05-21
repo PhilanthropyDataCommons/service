@@ -19,6 +19,7 @@ const createTestOpportunity = async (
 	const defaultValues: WritableOpportunity = {
 		title: `Test Opportunity ${uuidv4()}`,
 		funderShortCode,
+		terminologySetId: null,
 	};
 	return await createOpportunity(db, authContext, {
 		...defaultValues,

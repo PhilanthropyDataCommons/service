@@ -1,0 +1,61 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"allOf": [{ "$ref": "./id.json" }],
+			"readOnly": true,
+			"example": 17
+		},
+		"funderShortCode": {
+			"type": "string",
+			"example": "pdc"
+		},
+		"name": {
+			"type": "string",
+			"minLength": 1,
+			"example": "RFP Vocabulary"
+		},
+		"opportunityLabel": {
+			"type": ["string", "null"],
+			"description": "Singular display label for the canonical concept `opportunity`. Null means use the PDC default.",
+			"example": "Request for Proposal"
+		},
+		"opportunitiesLabel": {
+			"type": ["string", "null"],
+			"description": "Plural display label for the canonical concept `opportunity`.",
+			"example": "Requests for Proposal"
+		},
+		"applicationFormLabel": {
+			"type": ["string", "null"],
+			"description": "Singular display label for the canonical concept `applicationForm`.",
+			"example": "Intake Form"
+		},
+		"applicationFormsLabel": {
+			"type": ["string", "null"],
+			"description": "Plural display label for the canonical concept `applicationForm`.",
+			"example": "Intake Forms"
+		},
+		"proposalLabel": {
+			"type": ["string", "null"],
+			"description": "Singular display label for the canonical concept `proposal`.",
+			"example": "Funding Request"
+		},
+		"proposalsLabel": {
+			"type": ["string", "null"],
+			"description": "Plural display label for the canonical concept `proposal`.",
+			"example": "Funding Requests"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that created this terminology set",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		}
+	},
+	"required": ["id", "funderShortCode", "name", "createdAt", "createdBy"]
+}

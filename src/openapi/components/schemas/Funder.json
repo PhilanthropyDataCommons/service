@@ -26,6 +26,11 @@
 		"isCollaborative": {
 			"type": "boolean",
 			"default": false
+		},
+		"defaultTerminologySetId": {
+			"oneOf": [{ "$ref": "./id.json" }, { "type": "null" }],
+			"description": "The terminology set that newly-created opportunities under this funder inherit by default. Null means new opportunities fall back to PDC default labels.",
+			"example": 17
 		}
 	},
 	"required": ["shortCode", "name", "createdAt", "createdBy", "isCollaborative"]

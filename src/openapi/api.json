@@ -233,6 +233,18 @@
 			"SourcePermissionGrant": {
 				"$ref": "./components/schemas/SourcePermissionGrant.json"
 			},
+			"TerminologySet": {
+				"$ref": "./components/schemas/TerminologySet.json"
+			},
+			"TerminologySetBundle": {
+				"$ref": "./components/schemas/TerminologySetBundle.json"
+			},
+			"TerminologySetPatch": {
+				"$ref": "./components/schemas/TerminologySetPatch.json"
+			},
+			"TerminologySetPermissionGrant": {
+				"$ref": "./components/schemas/TerminologySetPermissionGrant.json"
+			},
 			"Permission": {
 				"$ref": "./components/schemas/Permission.json"
 			},
@@ -388,6 +400,12 @@
 		},
 		"/sources/{sourceId}": {
 			"$ref": "./paths/source.json"
+		},
+		"/terminologySets": {
+			"$ref": "./paths/terminologySets.json"
+		},
+		"/terminologySets/{terminologySetId}": {
+			"$ref": "./paths/terminologySet.json"
 		},
 		"/users": {
 			"$ref": "./paths/users.json"

@@ -20,8 +20,10 @@
 						"enum": [
 							"funder",
 							"opportunity",
+							"applicationForm",
 							"proposal",
 							"proposalFieldValue",
+							"terminologySet",
 							"any"
 						]
 					},

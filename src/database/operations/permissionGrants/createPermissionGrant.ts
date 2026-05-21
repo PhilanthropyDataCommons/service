@@ -24,6 +24,7 @@ const createPermissionGrant = generateCreateItemOperation<
 		'sourceId',
 		'bulkUploadTaskId',
 		'changemakerFieldValueId',
+		'terminologySetId',
 		'scope',
 		'verbs',
 		'conditions',

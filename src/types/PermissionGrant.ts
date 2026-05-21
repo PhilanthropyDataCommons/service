@@ -1,3 +1,10 @@
+/* eslint-disable max-lines --
+ * This module is the single source of truth for permission grant context
+ * entities, scope inheritance, and validation. Each new entity type adds a
+ * handful of lines across enum, key map, native scopes, and conditions.
+ * Splitting these apart would obscure the invariant relationship between
+ * them. We accept the slightly larger file in exchange for centralization.
+ */
 import { ajv } from '../ajv';
 import { isEmpty } from '../arrays';
 import { BaseFieldCategory } from './BaseField';
@@ -31,6 +38,7 @@ enum PermissionGrantEntityType {
 	SOURCE = 'source',
 	BULK_UPLOAD = 'bulkUpload',
 	CHANGEMAKER_FIELD_VALUE = 'changemakerFieldValue',
+	TERMINOLOGY_SET = 'terminologySet',
 	ANY = 'any',
 }
 
@@ -50,7 +58,6 @@ interface PermissionGrantCondition {
 	value: string[];
 }
 
-// The key name for each grantee type
 const granteeKeyProperties = {
 	[PermissionGrantGranteeType.USER]: {
 		keyName: 'granteeUserKeycloakUserId',
@@ -60,7 +67,6 @@ const granteeKeyProperties = {
 	},
 } as const satisfies Record<PermissionGrantGranteeType, { keyName: string }>;
 
-// The primary key name + data type for each context entity
 const contextEntityKeyProperties = {
 	[PermissionGrantEntityType.CHANGEMAKER]: {
 		keyName: 'changemakerId',
@@ -110,6 +116,10 @@ const contextEntityKeyProperties = {
 		keyName: 'changemakerFieldValueId',
 		keyType: PermissionGrantEntityKeyType.ID,
 	},
+	[PermissionGrantEntityType.TERMINOLOGY_SET]: {
+		keyName: 'terminologySetId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
 } as const satisfies Omit<
 	Record<
 		PermissionGrantEntityType,
@@ -138,6 +148,7 @@ const contextEntityTypeNativeScopes = {
 		PermissionGrantEntityType.APPLICATION_FORM,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+		PermissionGrantEntityType.TERMINOLOGY_SET,
 	],
 	[PermissionGrantEntityType.DATA_PROVIDER]: [
 		PermissionGrantEntityType.DATA_PROVIDER,
@@ -171,6 +182,9 @@ const contextEntityTypeNativeScopes = {
 	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: [
 		PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
 	],
+	[PermissionGrantEntityType.TERMINOLOGY_SET]: [
+		PermissionGrantEntityType.TERMINOLOGY_SET,
+	],
 	[PermissionGrantEntityType.ANY]: [],
 } as const satisfies Record<
 	PermissionGrantEntityType,
@@ -196,6 +210,7 @@ const scopeConditions = {
 	[PermissionGrantEntityType.SOURCE]: [],
 	[PermissionGrantEntityType.BULK_UPLOAD]: [],
 	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: [],
+	[PermissionGrantEntityType.TERMINOLOGY_SET]: [],
 	[PermissionGrantEntityType.ANY]: [],
 } as const satisfies Record<
 	PermissionGrantEntityType,
@@ -451,11 +466,8 @@ const getConditionsForScope = (
 	scopeKey: PermissionGrantEntityType,
 ): readonly PermissionGrantCondition[] => scopeConditions[scopeKey];
 
-/**
- * Returns the grantee + scope + verbs portion of a permission grant that
- * gives the auth user `manage` against `any` scope. Spread into a grant
- * alongside `contextEntityType` and the entity-specific key field.
- */
+// Spread into a grant alongside `contextEntityType` and the entity-specific
+// key field to give the auth user `manage` against `any` scope.
 const getSelfManageGrantFragment = (
 	authContext: AuthContext,
 ): Pick<

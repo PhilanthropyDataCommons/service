@@ -9,7 +9,8 @@ BEGIN
     'keycloakOrganizationId', funder.keycloak_organization_id,
     'createdAt', funder.created_at,
 		'createdBy', funder.created_by,
-    'isCollaborative', funder.is_collaborative
+    'isCollaborative', funder.is_collaborative,
+    'defaultTerminologySetId', funder.default_terminology_set_id
   );
 END;
 $$ LANGUAGE plpgsql;

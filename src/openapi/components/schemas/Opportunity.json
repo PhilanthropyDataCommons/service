@@ -18,6 +18,14 @@
 			"$ref": "./Funder.json",
 			"readOnly": true
 		},
+		"terminologySetId": {
+			"oneOf": [{ "$ref": "./id.json" }, { "type": "null" }],
+			"description": "The terminology set whose label overrides apply to this opportunity. Null means use the PDC default labels. Must reference a terminology set owned by the same funder."
+		},
+		"terminologySet": {
+			"oneOf": [{ "$ref": "./TerminologySet.json" }, { "type": "null" }],
+			"readOnly": true
+		},
 		"createdAt": {
 			"type": "string",
 			"format": "date-time",

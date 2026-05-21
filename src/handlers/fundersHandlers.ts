@@ -83,7 +83,12 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 
-	const { name, keycloakOrganizationId, isCollaborative } = body;
+	const {
+		name,
+		keycloakOrganizationId,
+		isCollaborative,
+		defaultTerminologySetId,
+	} = body;
 	const { committedFunder, committedFunderWasInserted } = await db.transaction(
 		async (txDb) => {
 			const { item, wasInserted } = await createOrUpdateFunder(txDb, req, {
@@ -91,6 +96,7 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 				name,
 				keycloakOrganizationId,
 				isCollaborative,
+				defaultTerminologySetId,
 			});
 			if (wasInserted) {
 				await createPermissionGrant(txDb, req, {

@@ -6,12 +6,18 @@ import type { Writable } from './Writable';
 import type { ShortCode } from './ShortCode';
 import type { Funder } from './Funder';
 import type { KeycloakId } from './KeycloakId';
+import type { TerminologySet } from './TerminologySet';
 
 interface Opportunity {
 	readonly id: Id;
 	title: string;
 	funderShortCode: ShortCode;
 	readonly funder: Funder;
+	// We do not really want "undefined" here, only null. See
+	// https://github.com/ajv-validator/ajv/issues/2283 and/or
+	// https://github.com/ajv-validator/ajv/issues/2163.
+	terminologySetId: Id | null | undefined;
+	readonly terminologySet: TerminologySet | null | undefined;
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
 }
@@ -26,6 +32,10 @@ const writableOpportunitySchema: JSONSchemaType<WritableOpportunity> = {
 		},
 		funderShortCode: {
 			...shortCodeSchema,
+		},
+		terminologySetId: {
+			type: 'integer',
+			nullable: true,
 		},
 	},
 	required: ['title', 'funderShortCode'],

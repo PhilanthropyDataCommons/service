@@ -1,0 +1,70 @@
+{
+	"get": {
+		"operationId": "getTerminologySets",
+		"summary": "Gets a list of terminology sets.",
+		"tags": ["Terminology Sets"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{ "$ref": "../components/parameters/pageParam.json" },
+			{ "$ref": "../components/parameters/countParam.json" },
+			{ "$ref": "../components/parameters/funderParam.json" }
+		],
+		"responses": {
+			"200": {
+				"description": "A list of terminology sets the caller has permission to view.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/TerminologySetBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			}
+		}
+	},
+	"post": {
+		"operationId": "addTerminologySet",
+		"summary": "Adds a new terminology set under a funder.",
+		"tags": ["Terminology Sets"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/TerminologySet.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new terminology set that was created.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/TerminologySet.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			}
+		}
+	}
+}

@@ -83,6 +83,14 @@ BEGIN
 				'manage',
 				'changemakerFieldValue'
 			);
+		WHEN 'terminologySet' THEN
+			RETURN has_terminology_set_permission(
+				user_keycloak_user_id,
+				user_is_admin,
+				permission_grant.terminology_set_id,
+				'manage',
+				'terminologySet'
+			);
 		WHEN 'applicationFormField', 'proposalVersion', 'bulkUpload' THEN
 			-- Permission checks are not enforced for these context entity types;
 			-- only administrators may manage such grants.

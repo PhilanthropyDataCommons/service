@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Added `terminology_sets`: per-funder display-label overrides for `opportunity`, `applicationForm`, and `proposal` (singular/plural; null means PDC default). Exposed via `GET`/`POST`/`PATCH /terminologySets[/:id]`. A new `terminologySet` context and scope are inherited from the owning funder.
+- Added `funders.defaultTerminologySetId`: a funder's chosen default for newly-created opportunities. Existing opportunities are not re-bound when the default changes.
+- Added `opportunities.terminologySetId`: opportunities may reference a terminology set owned by the same funder. When omitted on `POST /opportunities`, the funder's default is pinned at insert time; setting it explicitly requires `reference | terminologySet`.
+- `opportunity` responses now include `terminologySetId` and an inlined `terminologySet` (or `null`); `funder` responses now include `defaultTerminologySetId`.
+
 ### Changed
 
 - Creating an entity now automatically grants the creator a `manage` permission with `any` scope on the new entity. This applies to opportunities, changemakers, proposals, sources, bulk upload tasks, application forms (and their fields), proposal versions (and their field values), and changemaker field values created via the HTTP API, as well as proposals, proposal versions, proposal field values, and newly inserted changemakers created during bulk upload processing.

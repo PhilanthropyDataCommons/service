@@ -1,5 +1,6 @@
 import { ajv } from '../ajv';
 import { keycloakIdSchema } from './KeycloakId';
+import type { Id } from './Id';
 import type { KeycloakId } from './KeycloakId';
 import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
@@ -13,6 +14,7 @@ interface Funder {
 	// https://github.com/ajv-validator/ajv/issues/2163.
 	keycloakOrganizationId: KeycloakId | null | undefined;
 	isCollaborative: boolean;
+	defaultTerminologySetId: Id | null | undefined;
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
 }
@@ -33,6 +35,10 @@ const writableFunderSchema: JSONSchemaType<WritableFunder> = {
 		},
 		isCollaborative: {
 			type: 'boolean',
+		},
+		defaultTerminologySetId: {
+			type: 'integer',
+			nullable: true,
 		},
 	},
 	required: ['name', 'isCollaborative'],

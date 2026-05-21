@@ -8,6 +8,7 @@ import {
 	resetTestPermissionGrantFactory,
 	resetTestProposalFactory,
 	resetTestSourceFactory,
+	resetTestTerminologySetFactory,
 } from './factories';
 import {
 	closeAdminClient,
@@ -32,6 +33,7 @@ beforeEach(async () => {
 	resetTestPermissionGrantFactory();
 	resetTestProposalFactory();
 	resetTestSourceFactory();
+	resetTestTerminologySetFactory();
 	mockJwks.start();
 	await createWorkerDatabase();
 	await loadConfig();

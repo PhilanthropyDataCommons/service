@@ -5,6 +5,7 @@ import {
 	createOpportunity,
 	getLimitValues,
 	hasFunderPermission,
+	hasTerminologySetPermission,
 	loadOpportunity,
 	loadOpportunityBundle,
 } from '../database';
@@ -72,6 +73,17 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 			funderShortCode: body.funderShortCode,
 			permission: PermissionGrantVerb.CREATE,
 			scope: PermissionGrantEntityType.OPPORTUNITY,
+		}))
+	) {
+		throw new UnauthorizedError();
+	}
+	if (
+		body.terminologySetId !== undefined &&
+		body.terminologySetId !== null &&
+		!(await hasTerminologySetPermission(db, req, {
+			terminologySetId: body.terminologySetId,
+			permission: PermissionGrantVerb.REFERENCE,
+			scope: PermissionGrantEntityType.TERMINOLOGY_SET,
 		}))
 	) {
 		throw new UnauthorizedError();

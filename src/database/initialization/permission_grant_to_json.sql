@@ -65,6 +65,10 @@ BEGIN
 				'changemakerFieldValueId',
 				permission_grant.changemaker_field_value_id
 			)
+		WHEN 'terminologySet'
+			THEN jsonb_build_object(
+				'terminologySetId', permission_grant.terminology_set_id
+			)
 	END;
 END;
 $$ LANGUAGE plpgsql;

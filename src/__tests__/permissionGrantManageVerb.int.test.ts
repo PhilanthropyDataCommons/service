@@ -4,7 +4,6 @@ import {
 	createChangemakerFieldValue,
 	createChangemakerFieldValueBatch,
 	createPermissionGrant,
-	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
 	getDatabase,
@@ -24,6 +23,7 @@ import {
 	createTestDataProvider,
 	createTestFunder,
 	createTestOpportunity,
+	createTestProposal,
 	createTestSource,
 } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
@@ -154,8 +154,7 @@ describe('`manage` verb semantics', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const adminAuthContext = getAuthContext(testUser, true);
 		const opportunity = await createTestOpportunity(db, testUserAuthContext);
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'opp-manage-proposal',
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			opportunityId: opportunity.id,
 		});
 
@@ -192,11 +191,7 @@ describe('`manage` verb semantics', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const adminAuthContext = getAuthContext(testUser, true);
-		const opportunity = await createTestOpportunity(db, testUserAuthContext);
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'proposal-manage-proposal',
-			opportunityId: opportunity.id,
-		});
+		const proposal = await createTestProposal(db, testUserAuthContext);
 
 		await createPermissionGrant(db, adminAuthContext, {
 			granteeType: PermissionGrantGranteeType.USER,
@@ -364,8 +359,7 @@ describe('`manage` verb semantics', () => {
 		const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 			funderShortCode: funder.shortCode,
 		});
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'conditional-manage-proposal',
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			opportunityId: opportunity.id,
 		});
 		const applicationForm = await createApplicationForm(db, null, {
@@ -502,8 +496,7 @@ describe('`manage` verb semantics', () => {
 		const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 			funderShortCode: funder.shortCode,
 		});
-		const proposal = await createProposal(db, testUserAuthContext, {
-			externalId: 'pfv-inherited-proposal',
+		const proposal = await createTestProposal(db, testUserAuthContext, {
 			opportunityId: opportunity.id,
 		});
 		const applicationForm = await createApplicationForm(db, null, {

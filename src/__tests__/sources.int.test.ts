@@ -7,7 +7,6 @@ import {
 	loadSystemSource,
 	loadTableMetrics,
 	loadSystemUser,
-	createProposal,
 	createProposalVersion,
 	createApplicationForm,
 	createPermissionGrant,
@@ -23,6 +22,7 @@ import {
 	createTestDataProvider,
 	createTestFunder,
 	createTestOpportunity,
+	createTestProposal,
 	createTestSource,
 } from '../test/factories';
 import {
@@ -892,8 +892,7 @@ describe('/sources', () => {
 			const systemUserAuthContext = getAuthContext(systemUser);
 			const localSource = await createTestSource(db, testUserAuthContext);
 			const opportunity = await createTestOpportunity(db, testUserAuthContext);
-			const proposal = await createProposal(db, systemUserAuthContext, {
-				externalId: 'proposal-1',
+			const proposal = await createTestProposal(db, systemUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
 			const applicationForm = await createApplicationForm(

@@ -4,7 +4,6 @@ import {
 	getDatabase,
 	createApplicationForm,
 	createApplicationFormField,
-	createOpportunity,
 	createOrUpdateBaseField,
 	createProposalVersion,
 	loadPermissionGrantBundle,
@@ -1121,8 +1120,7 @@ describe('/proposalVersions', () => {
 				shortCode: 'orgName',
 			});
 
-			const opportunity = await createOpportunity(db, testUserAuthContext, {
-				title: 'Conditional Test Opportunity',
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: systemFunder.shortCode,
 			});
 			const proposal = await createTestProposal(db, testUserAuthContext, {
@@ -1234,8 +1232,7 @@ describe('/proposalVersions', () => {
 				shortCode: 'orgName',
 			});
 
-			const opportunity = await createOpportunity(db, testUserAuthContext, {
-				title: 'No Conditions Test Opportunity',
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: systemFunder.shortCode,
 			});
 			const proposal = await createTestProposal(db, testUserAuthContext, {
@@ -1331,8 +1328,7 @@ describe('/proposalVersions', () => {
 				shortCode: 'orgName',
 			});
 
-			const opportunity = await createOpportunity(db, testUserAuthContext, {
-				title: 'Exclusion Test Opportunity',
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: systemFunder.shortCode,
 			});
 			const proposal = await createTestProposal(db, testUserAuthContext, {
@@ -1421,8 +1417,7 @@ describe('/proposalVersions', () => {
 				shortCode: 'orgName',
 			});
 
-			const opportunity = await createOpportunity(db, testUserAuthContext, {
-				title: 'Equals Test Opportunity',
+			const opportunity = await createTestOpportunity(db, testUserAuthContext, {
 				funderShortCode: systemFunder.shortCode,
 			});
 			const proposal = await createTestProposal(db, testUserAuthContext, {
@@ -1532,11 +1527,10 @@ describe('/proposalVersions', () => {
 			});
 
 			// Set up opportunity + proposal + field values for the OTHER funder
-			const otherOpportunity = await createOpportunity(
+			const otherOpportunity = await createTestOpportunity(
 				db,
 				testUserAuthContext,
 				{
-					title: 'Other Funder Opportunity',
 					funderShortCode: otherFunder.shortCode,
 				},
 			);
@@ -1620,11 +1614,10 @@ describe('/proposalVersions', () => {
 			});
 
 			// Set up data for the GRANTED funder
-			const grantedOpportunity = await createOpportunity(
+			const grantedOpportunity = await createTestOpportunity(
 				db,
 				testUserAuthContext,
 				{
-					title: 'Granted Funder Opportunity',
 					funderShortCode: grantedFunder.shortCode,
 				},
 			);
@@ -1682,11 +1675,10 @@ describe('/proposalVersions', () => {
 			});
 
 			// Set up data for the OTHER funder
-			const otherOpportunity = await createOpportunity(
+			const otherOpportunity = await createTestOpportunity(
 				db,
 				testUserAuthContext,
 				{
-					title: 'Other Funder Opportunity',
 					funderShortCode: otherFunder.shortCode,
 				},
 			);

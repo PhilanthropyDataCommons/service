@@ -4,7 +4,6 @@ import {
 	getDatabase,
 	createApplicationForm,
 	createBulkUploadTask,
-	createSource,
 	loadPermissionGrantBundle,
 	loadSystemSource,
 	loadSystemUser,
@@ -16,6 +15,7 @@ import {
 	createTestFile,
 	createTestFunder,
 	createTestOpportunity,
+	createTestSource,
 	createTestUser,
 } from '../test/factories';
 import {
@@ -756,10 +756,13 @@ describe('/tasks/bulkUploads', () => {
 				db,
 				systemUserAuthContext,
 			);
-			const dataProviderSource = await createSource(db, systemUserAuthContext, {
-				label: 'Provider-owned Source',
-				dataProviderShortCode: dataProvider.shortCode,
-			});
+			const dataProviderSource = await createTestSource(
+				db,
+				systemUserAuthContext,
+				{
+					dataProviderShortCode: dataProvider.shortCode,
+				},
+			);
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,

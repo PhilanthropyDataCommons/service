@@ -7,7 +7,6 @@ import {
 	createProposal,
 	createProposalFieldValue,
 	createProposalVersion,
-	createSource,
 	getDatabase,
 	hasChangemakerFieldValuePermission,
 	hasChangemakerPermission,
@@ -25,6 +24,7 @@ import {
 	createTestDataProvider,
 	createTestFunder,
 	createTestOpportunity,
+	createTestSource,
 } from '../test/factories';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -102,8 +102,7 @@ describe('`manage` verb semantics', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const adminAuthContext = getAuthContext(testUser, true);
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Source under changemaker',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 		const baseField = await createTestBaseField(db, null);
@@ -226,8 +225,7 @@ describe('`manage` verb semantics', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const adminAuthContext = getAuthContext(testUser, true);
 		const dataProvider = await createTestDataProvider(db, testUserAuthContext);
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'DP-owned Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			dataProviderShortCode: dataProvider.shortCode,
 		});
 
@@ -265,8 +263,7 @@ describe('`manage` verb semantics', () => {
 		const testUserAuthContext = getAuthContext(testUser);
 		const adminAuthContext = getAuthContext(testUser, true);
 		const changemaker = await createTestChangemaker(db, testUserAuthContext);
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'Directly granted source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			changemakerId: changemaker.id,
 		});
 

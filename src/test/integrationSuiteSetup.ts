@@ -4,7 +4,10 @@ import nock from 'nock';
  * via `setupFilesAfterEnv`.
  */
 import { loadConfig } from '../config';
-import { resetTestPermissionGrantFactory } from './factories';
+import {
+	resetTestPermissionGrantFactory,
+	resetTestSourceFactory,
+} from './factories';
 import {
 	closeAdminClient,
 	createWorkerDatabase,
@@ -26,6 +29,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
 	resetTestPermissionGrantFactory();
+	resetTestSourceFactory();
 	mockJwks.start();
 	await createWorkerDatabase();
 	await loadConfig();

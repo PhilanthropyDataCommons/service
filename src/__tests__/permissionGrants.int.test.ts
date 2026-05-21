@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	createProposal,
-	createSource,
 	getDatabase,
 	hasChangemakerPermission,
 	hasDataProviderPermission,
@@ -24,6 +23,7 @@ import {
 	createTestFunder,
 	createTestOpportunity,
 	createTestPermissionGrant,
+	createTestSource,
 } from '../test/factories';
 import {
 	mockJwt as authHeader,
@@ -1544,8 +1544,7 @@ describe('/permissionGrants', () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
 			const changemaker = await createTestChangemaker(db, authContext);
-			const source = await createSource(db, authContext, {
-				label: 'Cascade Test Source',
+			const source = await createTestSource(db, authContext, {
 				changemakerId: changemaker.id,
 			});
 			await createTestPermissionGrant(db, authContext, {
@@ -1831,8 +1830,7 @@ describe('`any` scope semantics', () => {
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const dataProvider = await createTestDataProvider(db, testUserAuthContext);
-		const source = await createSource(db, testUserAuthContext, {
-			label: 'DP-owned Source',
+		const source = await createTestSource(db, testUserAuthContext, {
 			dataProviderShortCode: dataProvider.shortCode,
 		});
 

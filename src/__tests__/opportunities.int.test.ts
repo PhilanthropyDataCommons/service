@@ -57,20 +57,8 @@ describe('/opportunities', () => {
 			const testUserAuthContext = getAuthContext(testUser);
 
 			const systemOpportunity = await loadSystemOpportunity(db, null);
-			const opportunity1 = await createTestOpportunity(
-				db,
-				testUserAuthContext,
-				{
-					title: 'Tremendous opportunity 👌',
-				},
-			);
-			const opportunity2 = await createTestOpportunity(
-				db,
-				testUserAuthContext,
-				{
-					title: 'Terrific opportunity 👐',
-				},
-			);
+			const opportunity1 = await createTestOpportunity(db, testUserAuthContext);
+			const opportunity2 = await createTestOpportunity(db, testUserAuthContext);
 			const response = await request(app)
 				.get('/opportunities')
 				.set(authHeaderWithAdminRole)
@@ -102,7 +90,6 @@ describe('/opportunities', () => {
 				db,
 				testUserAuthContext,
 				{
-					title: 'Tremendous opportunity 👌',
 					funderShortCode: visibleFunder.shortCode,
 				},
 			);

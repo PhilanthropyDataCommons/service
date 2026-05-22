@@ -29,25 +29,11 @@ BEGIN
 			AND scope_set_permits_scope(
 				pg.scope, has_data_provider_permission.scope
 			)
-			AND (
-				pg.grantee_type = 'authenticatedUsers'
-				OR (
-					pg.grantee_type = 'user'
-					AND pg.grantee_user_keycloak_user_id
-						= has_data_provider_permission.user_keycloak_user_id
-				)
-				OR (
-					pg.grantee_type = 'userGroup'
-					AND EXISTS (
-						SELECT 1
-						FROM ephemeral_user_group_associations euga
-						WHERE euga.user_keycloak_user_id
-							= has_data_provider_permission.user_keycloak_user_id
-							AND euga.user_group_keycloak_organization_id
-								= pg.grantee_keycloak_organization_id
-							AND NOT is_expired(euga.not_after)
-					)
-				)
+			AND grantee_permits_user(
+				pg.grantee_type,
+				pg.grantee_user_keycloak_user_id,
+				pg.grantee_keycloak_organization_id,
+				has_data_provider_permission.user_keycloak_user_id
 			)
 	) INTO has_permission;
 

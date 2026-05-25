@@ -21,7 +21,10 @@ import {
 	InputValidationError,
 	UnauthorizedError,
 } from '../errors';
-import { extractPaginationParameters } from '../queryParameters';
+import {
+	extractFunderParameters,
+	extractPaginationParameters,
+} from '../queryParameters';
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
 
@@ -32,7 +35,14 @@ const getOpportunities = async (req: Request, res: Response): Promise<void> => {
 	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
-	const opportunityBundle = await loadOpportunityBundle(db, req, limit, offset);
+	const { funderShortCode } = extractFunderParameters(req);
+	const opportunityBundle = await loadOpportunityBundle(
+		db,
+		req,
+		funderShortCode,
+		limit,
+		offset,
+	);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')

@@ -1,9 +1,9 @@
 import { generateLoadBundleOperation } from '../generators';
-import type { Opportunity } from '../../../types';
+import type { Opportunity, ShortCode } from '../../../types';
 
-const loadOpportunityBundle = generateLoadBundleOperation<Opportunity, []>(
-	'opportunities.selectWithPagination',
-	[],
-);
+const loadOpportunityBundle = generateLoadBundleOperation<
+	Opportunity,
+	[funderShortCode: ShortCode | undefined]
+>('opportunities.selectWithPagination', ['funderShortCode']);
 
 export { loadOpportunityBundle };

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.37.0 2026-05-25
+
 ### Fixed
 
 - Bulk upload processing no longer fails when a row leaves a file-typed field blank. The empty cell is stored as a non-file value (`value: ""`, `isValid: false`) and no attachment lookup is attempted for that field.

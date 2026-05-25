@@ -632,14 +632,17 @@ export const processBulkUploadTask = async (
 
 						// File attachments are the one unique case where we need to convert the bulk upload value
 						// into a PDC File ID.  The value in the CSV is the relative path of the file within the
-						// attachments archive.
+						// attachments archive.  A blank or whitespace-only cell means no attachment for that row.
 						if (
 							applicationFormField.baseField.dataType === BaseFieldDataType.FILE
 						) {
-							const attachmentFile =
-								await attachmentsManager.getAttachmentFile(fieldValue);
-							processedFieldValue = attachmentFile.id.toString();
-							isValid = true;
+							const trimmedPath = fieldValue.trim();
+							if (trimmedPath !== '') {
+								const attachmentFile =
+									await attachmentsManager.getAttachmentFile(trimmedPath);
+								processedFieldValue = attachmentFile.id.toString();
+								isValid = true;
+							}
 						}
 
 						const proposalFieldValue = await createProposalFieldValue(

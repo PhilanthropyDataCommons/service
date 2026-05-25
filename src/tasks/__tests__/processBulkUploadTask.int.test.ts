@@ -748,6 +748,117 @@ describe('processBulkUploadTask', () => {
 		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
 	});
 
+	it('should process rows with blank or whitespace-only file attachment cells without failing the bulk upload', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const attachmentsArchiveFile = await createTestFile(
+			db,
+			systemUserAuthContext,
+		);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'favorite_file'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+				overrideValues: {
+					attachmentsArchiveFileId: attachmentsArchiveFile.id,
+				},
+			},
+		);
+
+		s3Mock
+			.on(GetObjectCommand, { Key: proposalsDataFile.storageKey })
+			.resolves({
+				Body: sdkStreamMixin(
+					fs.createReadStream(
+						path.join(
+							__dirname,
+							'fixtures',
+							'processBulkUploadTask',
+							'validCsvTemplateWithBlankFile.csv',
+						),
+					),
+				),
+			});
+
+		s3Mock
+			.on(GetObjectCommand, { Key: attachmentsArchiveFile.storageKey })
+			.resolves({
+				Body: sdkStreamMixin(
+					fs.createReadStream(
+						path.join(
+							__dirname,
+							'fixtures',
+							'processBulkUploadTask',
+							'attachments.zip',
+						),
+					),
+				),
+			});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
+
+		const proposalBundle = await loadProposalBundle(
+			db,
+			testAuthContext,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		const favoriteFileValues = proposalBundle.entries
+			.flatMap((proposal) => proposal.versions)
+			.flatMap((version) => version.fieldValues)
+			.filter(
+				(fv) => fv.applicationFormField.baseFieldShortCode === 'favorite_file',
+			)
+			.sort((a, b) => a.proposalVersionId - b.proposalVersionId);
+		expect(favoriteFileValues).toEqual([
+			expectObjectContaining({
+				value: expectString(),
+				isValid: true,
+				file: expectObjectContaining({ name: 'one.txt' }),
+			}),
+			expectObjectContaining({
+				value: '',
+				isValid: false,
+				file: null,
+			}),
+			expectObjectContaining({
+				value: '   ',
+				isValid: false,
+				file: null,
+			}),
+			expectObjectContaining({
+				value: expectString(),
+				isValid: true,
+				file: expectObjectContaining({ name: 'one.txt' }),
+			}),
+		]);
+	});
+
 	it('should create changemakers and changemaker-proposal relationships', async () => {
 		const db = getDatabase();
 		await createTestBaseFields(db);

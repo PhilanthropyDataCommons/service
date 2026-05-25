@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Bulk upload processing no longer fails when a row leaves a file-typed field blank. The empty cell is stored as a non-file value (`value: ""`, `isValid: false`) and no attachment lookup is attempted for that field.
+
 ### Changed
 
 - Creating an entity now automatically grants the creator a `manage` permission with `any` scope on the new entity. This applies to opportunities, changemakers, proposals, sources, bulk upload tasks, application forms (and their fields), proposal versions (and their field values), and changemaker field values created via the HTTP API, as well as proposals, proposal versions, proposal field values, and newly inserted changemakers created during bulk upload processing.

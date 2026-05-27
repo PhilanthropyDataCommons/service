@@ -31,7 +31,7 @@ For notes on how to set up a production instance, see the [hosting documentation
 
 ## Development
 
-In order to run this software you need to set up a [Postgres 17](https://www.postgresql.org/) (or newer) database. You will also need a working copy of `python3`
+In order to run this software you need to set up a [Postgres 17](https://www.postgresql.org/) (or newer) database. You will also need a working copy of `python3`.
 
 ### Setup
 

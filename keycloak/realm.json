@@ -555,13 +555,13 @@
 				"profile",
 				"roles",
 				"basic",
-				"email"
+				"email",
+				"organizations"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"organization",
 				"microprofile-jwt"
 			]
 		},
@@ -610,13 +610,13 @@
 				"profile",
 				"roles",
 				"basic",
-				"email"
+				"email",
+				"organizations"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"organization",
 				"microprofile-jwt"
 			]
 		},
@@ -652,13 +652,13 @@
 				"profile",
 				"roles",
 				"basic",
-				"email"
+				"email",
+				"organizations"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"organization",
 				"microprofile-jwt"
 			]
 		},
@@ -693,13 +693,13 @@
 				"profile",
 				"roles",
 				"basic",
-				"email"
+				"email",
+				"organizations"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"organization",
 				"microprofile-jwt"
 			]
 		},
@@ -711,12 +711,12 @@
 			"alwaysDisplayInConsole": false,
 			"clientAuthenticatorType": "client-secret",
 			"secret": "password",
-			"redirectUris": [],
+			"redirectUris": ["http://127.0.0.1:8000/*"],
 			"webOrigins": [],
 			"notBefore": 0,
 			"bearerOnly": false,
 			"consentRequired": false,
-			"standardFlowEnabled": false,
+			"standardFlowEnabled": true,
 			"implicitFlowEnabled": false,
 			"directAccessGrantsEnabled": false,
 			"serviceAccountsEnabled": true,
@@ -736,13 +736,13 @@
 				"profile",
 				"roles",
 				"basic",
-				"email"
+				"email",
+				"organizations"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"organization",
 				"microprofile-jwt"
 			]
 		},
@@ -778,13 +778,13 @@
 				"profile",
 				"roles",
 				"basic",
-				"email"
+				"email",
+				"organizations"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"organization",
 				"microprofile-jwt"
 			]
 		},
@@ -819,13 +819,13 @@
 				"profile",
 				"roles",
 				"basic",
-				"email"
+				"email",
+				"organizations"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"organization",
 				"microprofile-jwt"
 			]
 		},
@@ -883,13 +883,13 @@
 				"profile",
 				"roles",
 				"basic",
-				"email"
+				"email",
+				"organizations"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"organization",
 				"microprofile-jwt"
 			]
 		}
@@ -1478,7 +1478,7 @@
 		},
 		{
 			"id": "7e62d182-0a15-406c-907e-cb24563de53b",
-			"name": "organization",
+			"name": "organizations",
 			"description": "Additional claims about the organization a subject belongs to",
 			"protocol": "openid-connect",
 			"attributes": {
@@ -1489,7 +1489,7 @@
 			"protocolMappers": [
 				{
 					"id": "2a05994d-c774-4125-8e73-63fb7394b24a",
-					"name": "organization",
+					"name": "organizations",
 					"protocol": "openid-connect",
 					"protocolMapper": "oidc-organization-membership-mapper",
 					"consentRequired": false,
@@ -1497,9 +1497,13 @@
 						"id.token.claim": "true",
 						"introspection.token.claim": "true",
 						"access.token.claim": "true",
-						"claim.name": "organization",
-						"jsonType.label": "String",
-						"multivalued": "true"
+						"userinfo.token.claim": "true",
+						"lightweight.claim": "false",
+						"claim.name": "organizations",
+						"jsonType.label": "JSON",
+						"multivalued": "true",
+						"addOrganizationId": "true",
+						"addOrganizationAttributes": "true"
 					}
 				}
 			]
@@ -1582,14 +1586,14 @@
 		"roles",
 		"web-origins",
 		"acr",
-		"basic"
+		"basic",
+		"organizations"
 	],
 	"defaultOptionalClientScopes": [
 		"offline_access",
 		"address",
 		"phone",
-		"microprofile-jwt",
-		"organization"
+		"microprofile-jwt"
 	],
 	"browserSecurityHeaders": {
 		"contentSecurityPolicyReportOnly": "",

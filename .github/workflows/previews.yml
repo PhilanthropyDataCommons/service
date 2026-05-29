@@ -314,7 +314,7 @@ jobs:
             if [ "${phase}" == "ACTIVE" ]; then
               # You might expect to get the live URL from response, no.
               break
-            elif [ "${phase}" == "FAILED" ]; then
+            elif [ "${phase}" == "FAILED" ] || [ "${phase}" == "ERROR" ]; then
               exit 153
             fi
           done

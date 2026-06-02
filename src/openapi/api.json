@@ -260,6 +260,9 @@
 			"TerminologySetPatch": {
 				"$ref": "./components/schemas/TerminologySetPatch.json"
 			},
+			"TerminologySetPermissionGrant": {
+				"$ref": "./components/schemas/TerminologySetPermissionGrant.json"
+			},
 			"Permission": {
 				"$ref": "./components/schemas/Permission.json"
 			},

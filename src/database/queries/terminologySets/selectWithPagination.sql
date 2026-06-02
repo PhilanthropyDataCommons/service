@@ -1,7 +1,15 @@
 WITH
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT terminology_sets.*
 		FROM terminology_sets
+			INNER JOIN
+				permitted_terminology_set_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'terminologySet'
+				) AS permitted_terminology_sets
+				ON terminology_sets.id = permitted_terminology_sets.id
 		WHERE CASE
 			WHEN :funderShortCode::short_code_t IS NULL THEN TRUE
 			ELSE terminology_sets.funder_short_code = :funderShortCode

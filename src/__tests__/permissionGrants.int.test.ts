@@ -380,6 +380,7 @@ describe('/permissionGrants', () => {
 				'changemakerFieldValueId',
 				9001,
 			],
+			[PermissionGrantEntityType.TERMINOLOGY_SET, 'terminologySetId', 9001],
 		] as Array<[PermissionGrantEntityType, string, number | string]>)(
 			'returns 404 to a non-admin when the %s context entity does not exist',
 			async (contextEntityType, keyName, keyValue) => {

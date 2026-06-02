@@ -268,6 +268,8 @@ context key).
 | edit   | proposal           | Create or update proposal versions for the funder's proposals                        |
 | view   | source             | View the funder's sources                                                            |
 | create | source             | Create sources associated with the funder                                            |
+| view   | terminologySet     | View the funder's terminology sets                                                   |
+| edit   | terminologySet     | Create or update terminology sets owned by the funder                                |
 | manage | funder             | View, send, and respond to funder collaborative invitations                          |
 |        |                    | View collaborative members for the funder                                            |
 
@@ -324,6 +326,21 @@ not by a separate field-level permission.
 | ---- | --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | view | applicationForm | View the specific application form and its fields                                                                                |
 | edit | applicationForm | Update the application form (including its fields' labels, instructions, and input types via `PATCH /applicationFormFields/:id`) |
+
+### TerminologySet Permissions
+
+Permissions granted against a terminology set (using the terminology set's `id`
+as the context key). Terminology sets are funder-scoped: an `edit |
+terminologySet` grant on a funder automatically applies to all of that funder's
+terminology sets. Opportunity-level grants do **not** confer access to
+terminology sets — terminology sets inherit only from the parent funder.
+
+| Verb      | Scope          | What It Enables                                                                              |
+| --------- | -------------- | -------------------------------------------------------------------------------------------- |
+| view      | terminologySet | View the specific terminology set                                                            |
+| edit      | terminologySet | Update the terminology set's name and label fields                                           |
+| reference | terminologySet | Bind the terminology set to an opportunity (via `terminologySetId` on `POST /opportunities`) |
+| manage    | terminologySet | Full permissions including managing permission grants on the terminology set                 |
 
 ### Proposal Permissions
 

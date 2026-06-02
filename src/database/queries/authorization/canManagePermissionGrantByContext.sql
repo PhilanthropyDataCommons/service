@@ -82,4 +82,15 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	WHERE
 		:contextEntityType::text = 'proposalFieldValue'
 		AND pfv.id = :proposalFieldValueId::integer
+	UNION ALL
+	SELECT 1 FROM
+		permitted_terminology_set_ids(
+			:authContextKeycloakUserId,
+			:authContextIsAdministrator,
+			'manage',
+			'terminologySet'
+		) AS ts
+	WHERE
+		:contextEntityType::text = 'terminologySet'
+		AND ts.id = :terminologySetId::integer
 ) AS result;

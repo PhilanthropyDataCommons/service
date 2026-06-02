@@ -1,22 +1,40 @@
 import request from 'supertest';
 import { app } from '../app';
-import { getDatabase, loadTableMetrics } from '../database';
+import {
+	createPermissionGrant,
+	getDatabase,
+	loadPermissionGrantBundle,
+	loadSystemFunder,
+	loadSystemUser,
+	loadTableMetrics,
+} from '../database';
 import { createTestFunder, createTestTerminologySet } from '../test/factories';
-import { getAuthContext, loadTestUser } from '../test/utils';
-import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
+import {
+	getAuthContext,
+	loadTestUser,
+	NO_LIMIT,
+	NO_OFFSET,
+} from '../test/utils';
+import {
+	expectArray,
+	expectArrayContaining,
+	expectObjectContaining,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 } from '../test/mockJwt';
+import {
+	PermissionGrantEntityType,
+	PermissionGrantGranteeType,
+	PermissionGrantVerb,
+} from '../types';
 
 describe('/terminologySets', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
 			await request(app).get('/terminologySets').expect(401);
-		});
-
-		it('requires administrator role', async () => {
-			await request(app).get('/terminologySets').set(authHeader).expect(401);
 		});
 
 		it('returns all terminology sets for an administrator', async () => {
@@ -41,6 +59,44 @@ describe('/terminologySets', () => {
 			expect(response.body).toEqual({
 				entries: [setA, setB],
 				total: 2,
+			});
+		});
+
+		it('returns only the terminology sets a non-admin caller can view', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const visibleFunder = await createTestFunder(db, testUserAuthContext);
+			const hiddenFunder = await createTestFunder(db, testUserAuthContext);
+
+			const visibleSet = await createTestTerminologySet(
+				db,
+				testUserAuthContext,
+				{ funderShortCode: visibleFunder.shortCode, name: 'Visible' },
+			);
+			await createTestTerminologySet(db, testUserAuthContext, {
+				funderShortCode: hiddenFunder.shortCode,
+				name: 'Hidden',
+			});
+
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: visibleFunder.shortCode,
+				scope: [PermissionGrantEntityType.TERMINOLOGY_SET],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await request(app)
+				.get('/terminologySets')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual({
+				entries: [visibleSet],
+				total: 1,
 			});
 		});
 
@@ -90,10 +146,6 @@ describe('/terminologySets', () => {
 			await request(app).get('/terminologySets/1').expect(401);
 		});
 
-		it('requires administrator role', async () => {
-			await request(app).get('/terminologySets/1').set(authHeader).expect(401);
-		});
-
 		it('returns 400 when id is not numeric', async () => {
 			const result = await request(app)
 				.get('/terminologySets/abc')
@@ -127,27 +179,52 @@ describe('/terminologySets', () => {
 				.expect(200);
 			expect(response.body).toEqual(terminologySet);
 		});
+
+		it('returns 404 when a non-admin caller has no view permission', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const terminologySet = await createTestTerminologySet(
+				db,
+				testUserAuthContext,
+			);
+			await request(app)
+				.get(`/terminologySets/${terminologySet.id}`)
+				.set(authHeader)
+				.expect(404);
+		});
+
+		it('returns the set when a non-admin caller has funder permission', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.TERMINOLOGY_SET],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const terminologySet = await createTestTerminologySet(
+				db,
+				testUserAuthContext,
+				{ funderShortCode: funder.shortCode },
+			);
+			const response = await request(app)
+				.get(`/terminologySets/${terminologySet.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(terminologySet);
+		});
 	});
 
 	describe('POST /', () => {
 		it('requires authentication', async () => {
 			await request(app).post('/terminologySets').expect(401);
-		});
-
-		it('requires administrator role', async () => {
-			const db = getDatabase();
-			const testUser = await loadTestUser(db);
-			const testUserAuthContext = getAuthContext(testUser);
-			const funder = await createTestFunder(db, testUserAuthContext);
-			const before = await loadTableMetrics(db, 'terminology_sets');
-			await request(app)
-				.post('/terminologySets')
-				.type('application/json')
-				.set(authHeader)
-				.send({ funderShortCode: funder.shortCode, name: 'Nope' })
-				.expect(401);
-			const after = await loadTableMetrics(db, 'terminology_sets');
-			expect(after.count).toEqual(before.count);
 		});
 
 		it('returns 400 when funderShortCode is missing', async () => {
@@ -189,27 +266,107 @@ describe('/terminologySets', () => {
 				createdAt: expectTimestamp(),
 			});
 		});
+
+		it('returns 401 when the user lacks edit | terminologySet on the funder', async () => {
+			const db = getDatabase();
+			const systemFunder = await loadSystemFunder(db, null);
+			const before = await loadTableMetrics(db, 'terminology_sets');
+			await request(app)
+				.post('/terminologySets')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					funderShortCode: systemFunder.shortCode,
+					name: 'Unauthorized vocab',
+				})
+				.expect(401);
+			const after = await loadTableMetrics(db, 'terminology_sets');
+			expect(after.count).toEqual(before.count);
+		});
+
+		it('creates a terminology set when the user has edit | terminologySet on the funder', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const systemFunder = await loadSystemFunder(db, null);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [PermissionGrantEntityType.TERMINOLOGY_SET],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+			const before = await loadTableMetrics(db, 'terminology_sets');
+			const response = await request(app)
+				.post('/terminologySets')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					funderShortCode: systemFunder.shortCode,
+					name: 'RFP Vocabulary',
+					proposalLabel: 'Funding Request',
+				})
+				.expect(201);
+			const after = await loadTableMetrics(db, 'terminology_sets');
+			expect(after.count).toEqual(before.count + 1);
+			expect(response.body).toMatchObject({
+				funderShortCode: systemFunder.shortCode,
+				name: 'RFP Vocabulary',
+				proposalLabel: 'Funding Request',
+				opportunityLabel: null,
+				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
+			});
+		});
+
+		it('grants the creator a manage permission on the new terminology set', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const systemFunder = await loadSystemFunder(db, null);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: systemFunder.shortCode,
+				scope: [PermissionGrantEntityType.TERMINOLOGY_SET],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+			await request(app)
+				.post('/terminologySets')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					funderShortCode: systemFunder.shortCode,
+					name: 'Self-grant test',
+				})
+				.expect(201);
+			const grants = await loadPermissionGrantBundle(
+				db,
+				getAuthContext(systemUser, true),
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(grants.entries).toEqual(
+				expectArrayContaining([
+					expectObjectContaining({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUser.keycloakUserId,
+						contextEntityType: 'terminologySet',
+						scope: ['any'],
+						verbs: ['manage'],
+					}),
+				]),
+			);
+		});
 	});
 
 	describe('PATCH /:terminologySetId', () => {
 		it('requires authentication', async () => {
 			await request(app).patch('/terminologySets/1').expect(401);
-		});
-
-		it('requires administrator role', async () => {
-			const db = getDatabase();
-			const testUser = await loadTestUser(db);
-			const testUserAuthContext = getAuthContext(testUser);
-			const terminologySet = await createTestTerminologySet(
-				db,
-				testUserAuthContext,
-			);
-			await request(app)
-				.patch(`/terminologySets/${terminologySet.id}`)
-				.type('application/json')
-				.set(authHeader)
-				.send({ proposalLabel: 'Submission' })
-				.expect(401);
 		});
 
 		it('returns 400 when id is not numeric', async () => {
@@ -269,6 +426,34 @@ describe('/terminologySets', () => {
 				name: 'InputValidationError',
 				details: expectArray(),
 			});
+		});
+
+		it('returns 401 when a non-admin caller lacks edit permission', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
+			const terminologySet = await createTestTerminologySet(
+				db,
+				testUserAuthContext,
+				{ funderShortCode: funder.shortCode },
+			);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.TERMINOLOGY_SET],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await request(app)
+				.patch(`/terminologySets/${terminologySet.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({ proposalLabel: 'Submission' })
+				.expect(401);
 		});
 	});
 });

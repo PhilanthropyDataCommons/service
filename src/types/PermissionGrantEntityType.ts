@@ -13,6 +13,7 @@ enum PermissionGrantEntityType {
 	SOURCE = 'source',
 	BULK_UPLOAD = 'bulkUpload',
 	CHANGEMAKER_FIELD_VALUE = 'changemakerFieldValue',
+	TERMINOLOGY_SET = 'terminologySet',
 	ANY = 'any',
 }
 
@@ -85,6 +86,10 @@ const contextEntityKeyProperties = {
 		keyName: 'changemakerFieldValueId',
 		keyType: PermissionGrantEntityKeyType.ID,
 	},
+	[PermissionGrantEntityType.TERMINOLOGY_SET]: {
+		keyName: 'terminologySetId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
 } as const satisfies Omit<
 	Record<
 		PermissionGrantEntityType,
@@ -118,6 +123,7 @@ const contextEntityTypeNativeScopes = {
 		PermissionGrantEntityType.APPLICATION_FORM,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+		PermissionGrantEntityType.TERMINOLOGY_SET,
 	],
 	[PermissionGrantEntityType.DATA_PROVIDER]: [
 		PermissionGrantEntityType.DATA_PROVIDER,
@@ -150,6 +156,9 @@ const contextEntityTypeNativeScopes = {
 	],
 	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: [
 		PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+	],
+	[PermissionGrantEntityType.TERMINOLOGY_SET]: [
+		PermissionGrantEntityType.TERMINOLOGY_SET,
 	],
 	[PermissionGrantEntityType.ANY]: [],
 } as const satisfies Record<

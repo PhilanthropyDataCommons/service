@@ -1,19 +1,29 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	createPermissionGrant,
 	createTerminologySet,
 	getDatabase,
 	getLimitValues,
+	hasFunderPermission,
+	hasTerminologySetPermission,
 	loadTerminologySet,
 	loadTerminologySetBundle,
 	updateTerminologySet,
 } from '../database';
 import {
+	getSelfManageGrantFragment,
 	isAuthContext,
 	isId,
 	isTerminologySetPatch,
 	isWritableTerminologySet,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 } from '../types';
-import { FailedMiddlewareError, InputValidationError } from '../errors';
+import {
+	FailedMiddlewareError,
+	InputValidationError,
+	UnauthorizedError,
+} from '../errors';
 import {
 	extractFunderParameters,
 	extractPaginationParameters,
@@ -79,11 +89,28 @@ const postTerminologySet = async (
 			isWritableTerminologySet.errors ?? [],
 		);
 	}
-	const terminologySet = await createTerminologySet(db, req, body);
+	if (
+		!(await hasFunderPermission(db, req, {
+			funderShortCode: body.funderShortCode,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.TERMINOLOGY_SET,
+		}))
+	) {
+		throw new UnauthorizedError();
+	}
+	const committedTerminologySet = await db.transaction(async (txDb) => {
+		const terminologySet = await createTerminologySet(txDb, req, body);
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.TERMINOLOGY_SET,
+			terminologySetId: terminologySet.id,
+		});
+		return terminologySet;
+	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(terminologySet);
+		.send(committedTerminologySet);
 };
 
 const patchTerminologySet = async (
@@ -106,6 +133,16 @@ const patchTerminologySet = async (
 	}
 
 	await loadTerminologySet(db, req, terminologySetId);
+
+	if (
+		!(await hasTerminologySetPermission(db, req, {
+			terminologySetId,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.TERMINOLOGY_SET,
+		}))
+	) {
+		throw new UnauthorizedError();
+	}
 
 	const updatedTerminologySet = await updateTerminologySet(
 		db,

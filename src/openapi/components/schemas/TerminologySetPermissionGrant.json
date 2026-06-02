@@ -1,0 +1,27 @@
+{
+	"allOf": [
+		{ "$ref": "./PermissionGrantBase.json" },
+		{
+			"type": "object",
+			"properties": {
+				"contextEntityType": {
+					"type": "string",
+					"const": "terminologySet"
+				},
+				"terminologySetId": {
+					"$ref": "./id.json",
+					"example": 17
+				},
+				"scope": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"enum": ["terminologySet", "any"]
+					},
+					"minItems": 1
+				}
+			},
+			"required": ["contextEntityType", "terminologySetId"]
+		}
+	]
+}

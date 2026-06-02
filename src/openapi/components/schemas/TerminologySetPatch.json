@@ -1,0 +1,37 @@
+{
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string",
+			"minLength": 1,
+			"example": "LOI Vocabulary"
+		},
+		"opportunityLabel": {
+			"type": ["string", "null"],
+			"example": "Call for Letters of Inquiry"
+		},
+		"opportunitiesLabel": {
+			"type": ["string", "null"],
+			"example": "Calls for Letters of Inquiry"
+		},
+		"applicationFormLabel": {
+			"type": ["string", "null"],
+			"example": "LOI Form"
+		},
+		"applicationFormsLabel": {
+			"type": ["string", "null"],
+			"example": "LOI Forms"
+		},
+		"proposalLabel": {
+			"type": ["string", "null"],
+			"example": "Letter of Inquiry"
+		},
+		"proposalsLabel": {
+			"type": ["string", "null"],
+			"example": "Letters of Inquiry"
+		}
+	},
+	"additionalProperties": false,
+	"minProperties": 1,
+	"required": []
+}

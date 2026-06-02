@@ -1,0 +1,93 @@
+{
+	"get": {
+		"operationId": "getTerminologySetById",
+		"summary": "Gets a specific terminology set.",
+		"tags": ["Terminology Sets"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "terminologySetId",
+				"description": "The PDC-generated ID of a terminology set.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The requested terminology set.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/TerminologySet.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	},
+	"patch": {
+		"operationId": "updateTerminologySetById",
+		"summary": "Updates the name and/or label fields of a specific terminology set.",
+		"tags": ["Terminology Sets"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "terminologySetId",
+				"description": "The PDC-generated ID of a terminology set.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/TerminologySetPatch.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"200": {
+				"description": "The updated terminology set.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/TerminologySet.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			}
+		}
+	}
+}

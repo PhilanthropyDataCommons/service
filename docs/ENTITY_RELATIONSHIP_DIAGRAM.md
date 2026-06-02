@@ -122,6 +122,19 @@ erDiagram
     datetime createdAt
     uuid createdBy FK
   }
+  TerminologySet {
+    int id PK
+    string funderShortCode FK
+    string name
+    string opportunityLabel
+    string opportunitiesLabel
+    string applicationFormLabel
+    string applicationFormsLabel
+    string proposalLabel
+    string proposalsLabel
+    datetime createdAt
+    uuid createdBy FK
+  }
   Source {
     int id PK
     string label
@@ -190,6 +203,7 @@ erDiagram
   Opportunity ||--|{ ApplicationForm : establishes
   Funder ||--|{ Opportunity : has
   Funder ||--|{ BulkUploadTask : has
+  Funder ||--o{ TerminologySet : "authors"
   ApplicationForm ||--|{ ApplicationFormField : has
   ApplicationFormField }o--|| BaseField : represents
   BaseField ||--o{ BaseFieldLocalization : "has localizations"

@@ -8,4 +8,5 @@ export * from './createTestPermissionGrant';
 export * from './createTestProposal';
 export * from './createTestS3Bucket';
 export * from './createTestSource';
+export * from './createTestTerminologySet';
 export * from './createTestUser';

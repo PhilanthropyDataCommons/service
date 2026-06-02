@@ -33,6 +33,9 @@
 					}
 				}
 			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
 			}
@@ -69,24 +72,11 @@
 				}
 			},
 			"400": {
-				"description": "Required fields were not provided or were incorrectly formatted.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/InputValidation.json",
+				"description": "Required fields were not provided or were incorrectly formatted."
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
 			}
 		}
 	}

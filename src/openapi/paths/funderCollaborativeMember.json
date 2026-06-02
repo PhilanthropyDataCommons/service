@@ -39,6 +39,9 @@
 					}
 				}
 			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
 			}
@@ -105,7 +108,7 @@
 				}
 			},
 			"400": {
-				"$ref": "../components/responses/DatabaseError.json"
+				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
@@ -154,6 +157,9 @@
 						}
 					}
 				}
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json"

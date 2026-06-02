@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PATCH /applicationFormFields/:applicationFormFieldId` now requires `edit | applicationForm` scope on the parent application form instead of `edit | opportunity`.
 - Existing permission grants with `opportunity` scope on funder or opportunity contexts have been migrated to also include `applicationForm` scope. This preserves prior access for grantees who relied on `opportunity`-scoped grants for application form access.
 - `/permissionGrants` endpoints (list, read, create, update, delete) no longer require administrator role. Non-admin users holding the `manage` verb on a grant's context entity may now list, read, create, update, and delete those grants. `GET /permissionGrants` filters results for non-admins to grants whose context entity they can manage. Updating a grant requires manage on both the existing and proposed context entity.
+- Standardized OpenAPI error responses onto shared, reusable `components/responses` referenced via `$ref` (with per-endpoint `description` overrides) instead of inline duplicates. Error responses now consistently document a `PdcError` body, and every authenticated endpoint documents a `401`. Documentation-only; no behavior change.
 
 ## 0.36.0 2026-05-12
 

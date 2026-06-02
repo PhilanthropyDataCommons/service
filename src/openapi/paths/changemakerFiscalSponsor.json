@@ -50,34 +50,15 @@
 				}
 			},
 			"400": {
-				"description": "The same ID was passed for sponsor and sponsee or the IDs were out of range.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/InputValidation.json",
+				"description": "The same ID was passed for sponsor and sponsee or the IDs were out of range."
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"422": {
-				"description": "The call passed one or more changemakerIds that do not exist in the database.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/UnprocessableEntity.json",
+				"description": "The call passed one or more changemakerIds that do not exist in the database."
 			}
 		}
 	},
@@ -93,6 +74,9 @@
 		"responses": {
 			"204": {
 				"description": "Confirmation of successful deletion of the fiscal sponsorship."
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"

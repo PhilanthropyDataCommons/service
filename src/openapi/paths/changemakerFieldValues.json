@@ -29,14 +29,7 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
 			}
 		}
 	},
@@ -72,34 +65,15 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"409": {
-				"description": "The changemaker, base field, or batch does not exist.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Conflict.json",
+				"description": "The changemaker, base field, or batch does not exist."
 			},
 			"422": {
-				"description": "The request body was invalid or the base field is not an organization-category field.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/UnprocessableEntity.json",
+				"description": "The request body was invalid or the base field is not an organization-category field."
 			}
 		}
 	}

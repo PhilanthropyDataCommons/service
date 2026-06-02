@@ -31,6 +31,9 @@
 					}
 				}
 			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
 			}

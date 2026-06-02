@@ -30,6 +30,9 @@
 					}
 				}
 			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
 			}
@@ -66,15 +69,11 @@
 					}
 				}
 			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
 			"422": {
-				"description": "The referenced entity does not exist in the database.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/UnprocessableEntity.json"
 			}
 		}
 	}

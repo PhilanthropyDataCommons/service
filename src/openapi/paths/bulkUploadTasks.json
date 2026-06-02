@@ -9,9 +9,15 @@
 			}
 		],
 		"parameters": [
-			{ "$ref": "../components/parameters/pageParam.json" },
-			{ "$ref": "../components/parameters/countParam.json" },
-			{ "$ref": "../components/parameters/createdByParam.json" }
+			{
+				"$ref": "../components/parameters/pageParam.json"
+			},
+			{
+				"$ref": "../components/parameters/countParam.json"
+			},
+			{
+				"$ref": "../components/parameters/createdByParam.json"
+			}
 		],
 		"responses": {
 			"200": {
@@ -25,14 +31,7 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
@@ -70,14 +69,7 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
 			}
 		}
 	}

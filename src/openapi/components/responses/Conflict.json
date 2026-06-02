@@ -1,5 +1,5 @@
 {
-	"description": "The specified resource was not found.",
+	"description": "The request conflicts with the current state of the resource.",
 	"content": {
 		"application/json": {
 			"schema": {

@@ -60,27 +60,19 @@
 				}
 			},
 			"400": {
-				"description": "Required fields were not provided or were incorrectly formatted.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/InputValidation.json",
+				"description": "Required fields were not provided or were incorrectly formatted."
 			},
-			"409": {
-				"description": "There was a unique key conflict.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"404": {
+				"$ref": "../components/responses/NotFound.json",
 				"description": "The base field could not be found."
+			},
+			"409": {
+				"$ref": "../components/responses/Conflict.json",
+				"description": "There was a unique key conflict."
 			}
 		}
 	}

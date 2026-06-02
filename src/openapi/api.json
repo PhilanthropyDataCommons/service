@@ -11,8 +11,20 @@
 	},
 	"components": {
 		"responses": {
+			"Conflict": {
+				"$ref": "./components/responses/Conflict.json"
+			},
+			"InputValidation": {
+				"$ref": "./components/responses/InputValidation.json"
+			},
 			"NotFound": {
 				"$ref": "./components/responses/NotFound.json"
+			},
+			"Unauthorized": {
+				"$ref": "./components/responses/Unauthorized.json"
+			},
+			"UnprocessableEntity": {
+				"$ref": "./components/responses/UnprocessableEntity.json"
 			}
 		},
 		"parameters": {

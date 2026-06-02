@@ -30,7 +30,11 @@
 					}
 				}
 			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
 			"404": {
+				"$ref": "../components/responses/NotFound.json",
 				"description": "The base field could not be found."
 			}
 		}

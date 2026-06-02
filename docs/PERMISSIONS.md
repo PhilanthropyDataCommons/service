@@ -335,6 +335,13 @@ terminologySet` grant on a funder automatically applies to all of that funder's
 terminology sets. Opportunity-level grants do **not** confer access to
 terminology sets — terminology sets inherit only from the parent funder.
 
+Because opportunity responses embed the bound terminology set, the inlined
+`terminologySet` is only populated when the caller has `view | terminologySet`
+(directly or via the funder cascade). Callers without that permission still see
+the opportunity's `terminologySetId`, but the inlined `terminologySet` is
+`null`. This keeps the embed consistent with the rule above: viewing an
+opportunity does not, by itself, grant access to its terminology set's details.
+
 | Verb      | Scope          | What It Enables                                                                              |
 | --------- | -------------- | -------------------------------------------------------------------------------------------- |
 | view      | terminologySet | View the specific terminology set                                                            |

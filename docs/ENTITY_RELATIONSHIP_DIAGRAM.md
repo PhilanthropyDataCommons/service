@@ -70,6 +70,7 @@ erDiagram
     int id PK
     string title
     string funderShortCode FK
+    int terminologySetId FK
     datetime createdAt
     uuid createdBy FK
   }
@@ -205,6 +206,7 @@ erDiagram
   Funder ||--|{ Opportunity : has
   Funder ||--|{ BulkUploadTask : has
   Funder ||--o{ TerminologySet : "authors"
+  Opportunity }o--o| TerminologySet : "uses"
   ApplicationForm ||--|{ ApplicationFormField : has
   ApplicationFormField }o--|| BaseField : represents
   BaseField ||--o{ BaseFieldLocalization : "has localizations"

@@ -1,12 +1,14 @@
 import request from 'supertest';
 import { app } from '../app';
 import {
+	createOpportunity,
 	createPermissionGrant,
 	getDatabase,
 	loadPermissionGrantBundle,
 	loadSystemFunder,
 	loadSystemUser,
 	loadTableMetrics,
+	loadTerminologySet,
 } from '../database';
 import { createTestFunder, createTestTerminologySet } from '../test/factories';
 import {
@@ -454,6 +456,180 @@ describe('/terminologySets', () => {
 				.set(authHeader)
 				.send({ proposalLabel: 'Submission' })
 				.expect(401);
+		});
+	});
+
+	describe('funder-scoped composite FK', () => {
+		it('rejects an opportunity that references a terminology set owned by a different funder', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funderA = await createTestFunder(db, testUserAuthContext);
+			const funderB = await createTestFunder(db, testUserAuthContext);
+			const setA = await createTestTerminologySet(db, testUserAuthContext, {
+				funderShortCode: funderA.shortCode,
+				name: "A's vocab",
+			});
+
+			await expect(
+				createOpportunity(db, testUserAuthContext, {
+					title: 'Cross-funder opportunity',
+					funderShortCode: funderB.shortCode,
+					terminologySetId: setA.id,
+				}),
+			).rejects.toThrow();
+		});
+	});
+
+	describe('reference verb check on opportunity creation', () => {
+		it('rejects POST /opportunities with terminologySetId when caller lacks reference | terminologySet', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
+			const terminologySet = await createTestTerminologySet(
+				db,
+				testUserAuthContext,
+				{
+					funderShortCode: funder.shortCode,
+					name: 'Reference-protected vocab',
+				},
+			);
+
+			// Caller can CREATE opportunities on funder, but has no reference
+			// permission on the terminology set.
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.CREATE],
+			});
+
+			await request(app)
+				.post('/opportunities')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					title: 'Should be rejected',
+					funderShortCode: funder.shortCode,
+					terminologySetId: terminologySet.id,
+				})
+				.expect(401);
+		});
+
+		it('allows POST /opportunities with terminologySetId when caller has reference permission via funder cascade', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
+			const terminologySet = await createTestTerminologySet(
+				db,
+				testUserAuthContext,
+				{
+					funderShortCode: funder.shortCode,
+					name: 'Reference-allowed vocab',
+				},
+			);
+
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.CREATE],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.TERMINOLOGY_SET],
+				verbs: [PermissionGrantVerb.REFERENCE],
+			});
+
+			const response = await request(app)
+				.post('/opportunities')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					title: 'Reference-allowed opportunity',
+					funderShortCode: funder.shortCode,
+					terminologySetId: terminologySet.id,
+				})
+				.expect(201);
+			// The caller can bind (reference) the set but lacks
+			// `view | terminologySet`, so the inlined details are withheld even
+			// though the terminologySetId is returned.
+			expect(response.body).toMatchObject({
+				terminologySetId: terminologySet.id,
+				terminologySet: null,
+			});
+			// Sanity: backing record reflects the same id
+			const loaded = await loadTerminologySet(
+				db,
+				getAuthContext(testUser, true),
+				terminologySet.id,
+			);
+			expect(loaded.id).toEqual(terminologySet.id);
+		});
+
+		it('inlines the terminologySet on the opportunity when the caller has view permission via funder cascade', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
+			const terminologySet = await createTestTerminologySet(
+				db,
+				testUserAuthContext,
+				{
+					funderShortCode: funder.shortCode,
+					name: 'Viewable vocab',
+				},
+			);
+
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.CREATE],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.TERMINOLOGY_SET],
+				verbs: [PermissionGrantVerb.REFERENCE, PermissionGrantVerb.VIEW],
+			});
+
+			const response = await request(app)
+				.post('/opportunities')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					title: 'Viewable-vocab opportunity',
+					funderShortCode: funder.shortCode,
+					terminologySetId: terminologySet.id,
+				})
+				.expect(201);
+			expect(response.body).toMatchObject({
+				terminologySetId: terminologySet.id,
+				terminologySet: expectObjectContaining({
+					id: terminologySet.id,
+					name: 'Viewable vocab',
+				}),
+			});
 		});
 	});
 });

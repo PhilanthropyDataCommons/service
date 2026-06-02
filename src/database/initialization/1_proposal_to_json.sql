@@ -23,7 +23,11 @@ BEGIN
   FROM proposal_versions
   WHERE proposal_versions.proposal_id = proposal.id;
 
-  SELECT opportunity_to_json(opportunities.*)
+  SELECT opportunity_to_json(
+    opportunities.*,
+    auth_context_keycloak_user_id,
+    auth_context_is_administrator
+  )
   INTO opportunity_json
   FROM opportunities
   WHERE opportunities.id = proposal.opportunity_id;

@@ -22,6 +22,9 @@
 			},
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	},
@@ -62,6 +65,9 @@
 			"409": {
 				"$ref": "../components/responses/Conflict.json",
 				"description": "The source does not exist."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

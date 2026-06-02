@@ -32,6 +32,9 @@
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	},
@@ -78,6 +81,9 @@
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json",
 				"description": "The application references entities that do not exist in the database."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

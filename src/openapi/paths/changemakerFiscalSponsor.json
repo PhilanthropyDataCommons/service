@@ -59,6 +59,9 @@
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json",
 				"description": "The call passed one or more changemakerIds that do not exist in the database."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	},
@@ -80,6 +83,9 @@
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

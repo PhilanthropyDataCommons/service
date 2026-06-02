@@ -32,6 +32,9 @@
 			},
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	},
@@ -86,6 +89,9 @@
 			"404": {
 				"$ref": "../components/responses/NotFound.json",
 				"description": "The given changemaker ID was not found."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

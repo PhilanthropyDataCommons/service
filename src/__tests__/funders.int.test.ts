@@ -122,6 +122,7 @@ describe('/funders', () => {
 						name: 'The Foundation Foundation',
 						keycloakOrganizationId: null,
 						isCollaborative: false,
+						defaultTerminologySetId: null,
 					},
 					{
 						shortCode: 'theFundFund',
@@ -130,6 +131,7 @@ describe('/funders', () => {
 						name: 'The Fund Fund',
 						keycloakOrganizationId: null,
 						isCollaborative: false,
+						defaultTerminologySetId: null,
 					},
 					systemFunder,
 				],
@@ -164,6 +166,7 @@ describe('/funders', () => {
 						name: 'Green Environment Fund',
 						keycloakOrganizationId: null,
 						isCollaborative: false,
+						defaultTerminologySetId: null,
 					},
 				],
 			});
@@ -371,6 +374,7 @@ describe('/funders', () => {
 				name: 'The Foundation Foundation',
 				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
 				isCollaborative: false,
+				defaultTerminologySetId: null,
 			});
 		});
 
@@ -456,6 +460,7 @@ describe('/funders', () => {
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				isCollaborative: false,
+				defaultTerminologySetId: null,
 			});
 			expect(after.count).toEqual(before.count);
 			expect(anotherFunderAfter).toEqual(anotherFunderBefore);

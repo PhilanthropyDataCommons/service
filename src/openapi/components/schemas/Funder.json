@@ -26,6 +26,11 @@
 		"isCollaborative": {
 			"type": "boolean",
 			"default": false
+		},
+		"defaultTerminologySetId": {
+			"oneOf": [{ "$ref": "./id.json" }, { "type": "null" }],
+			"description": "The funder's chosen default terminology set, exposed as a stored preference for clients to apply (for example, to pre-fill the terminology set when creating an opportunity). It is not applied automatically; an opportunity uses a terminology set only when one is explicitly set on it. Null means the funder has no chosen default.",
+			"example": 17
 		}
 	},
 	"required": ["shortCode", "name", "createdAt", "createdBy", "isCollaborative"]

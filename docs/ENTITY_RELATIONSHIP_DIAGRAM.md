@@ -120,6 +120,7 @@ erDiagram
     string name
     uuid keycloakOrganizationId
     boolean isCollaborative
+    int defaultTerminologySetId FK
     datetime createdAt
     uuid createdBy FK
   }
@@ -206,6 +207,7 @@ erDiagram
   Funder ||--|{ Opportunity : has
   Funder ||--|{ BulkUploadTask : has
   Funder ||--o{ TerminologySet : "authors"
+  Funder }o--o| TerminologySet : "defaults to"
   Opportunity }o--o| TerminologySet : "uses"
   ApplicationForm ||--|{ ApplicationFormField : has
   ApplicationFormField }o--|| BaseField : represents

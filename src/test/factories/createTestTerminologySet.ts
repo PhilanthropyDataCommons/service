@@ -19,6 +19,7 @@ const getOrCreateDefaultFunder = async (
 		name: 'Default Test Terminology Set Funder',
 		keycloakOrganizationId: null,
 		isCollaborative: false,
+		defaultTerminologySetId: null,
 	}).then(({ item }) => item);
 	return await defaultFunderPromise;
 };

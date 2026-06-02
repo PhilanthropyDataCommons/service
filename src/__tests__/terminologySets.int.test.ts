@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	createOpportunity,
+	createOrUpdateFunder,
 	createPermissionGrant,
 	getDatabase,
 	loadPermissionGrantBundle,
@@ -630,6 +631,42 @@ describe('/terminologySets', () => {
 					name: 'Viewable vocab',
 				}),
 			});
+		});
+	});
+
+	describe('funder default', () => {
+		it('does not bind an opportunity to the funder default when no terminology set is specified', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
+			const defaultSet = await createTestTerminologySet(
+				db,
+				testUserAuthContext,
+				{
+					funderShortCode: funder.shortCode,
+					name: 'Funder default',
+				},
+			);
+			await createOrUpdateFunder(db, testUserAuthContext, {
+				shortCode: funder.shortCode,
+				name: funder.name,
+				keycloakOrganizationId: null,
+				isCollaborative: funder.isCollaborative,
+				defaultTerminologySetId: defaultSet.id,
+			});
+
+			const opportunity = await createOpportunity(
+				db,
+				getAuthContext(testUser, true),
+				{
+					title: 'Opportunity without an explicit terminology set',
+					funderShortCode: funder.shortCode,
+					terminologySetId: null,
+				},
+			);
+			expect(opportunity.terminologySetId).toBeNull();
+			expect(opportunity.terminologySet).toBeNull();
 		});
 	});
 });

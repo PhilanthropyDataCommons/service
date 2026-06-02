@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a `terminologySet` entity that lets funders define custom display labels for opportunities, proposals, and application forms, managed via the `/terminologySets` endpoints.
 - Added a `terminologySet` permission scope, inherited from the owning funder, that governs who can view and edit terminology sets.
 - Opportunities can now reference a terminology set owned by the same funder.
-- Added `funders.defaultTerminologySetId`: a funder's chosen default terminology set. When `terminologySetId` is omitted on `POST /opportunities`, the funder's default is pinned at insert time; existing opportunities are not re-bound when the default later changes. Funder responses now include `defaultTerminologySetId`.
+- Funders can now designate a default terminology set.
 
 ## 0.39.0 2026-06-24
 

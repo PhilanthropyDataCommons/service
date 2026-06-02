@@ -17,6 +17,7 @@ const createTestFunder = async (
 		name: 'Test Funder',
 		keycloakOrganizationId: null,
 		isCollaborative: false,
+		defaultTerminologySetId: null,
 	};
 	const { item } = await createOrUpdateFunder(db, authContext, {
 		...defaultValues,

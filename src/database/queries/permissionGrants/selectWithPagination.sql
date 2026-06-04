@@ -1,5 +1,5 @@
 WITH
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT permission_grants.*
 		FROM permission_grants
 		WHERE can_manage_permission_grant(

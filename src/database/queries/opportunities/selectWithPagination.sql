@@ -3,7 +3,13 @@ WITH
 		SELECT opportunities.*
 		FROM opportunities
 		WHERE
-			has_opportunity_permission(
+			CASE
+				WHEN :funderShortCode::short_code_t IS NULL THEN
+					TRUE
+				ELSE
+					opportunities.funder_short_code = :funderShortCode
+			END
+			AND has_opportunity_permission(
 				:authContextKeycloakUserId,
 				:authContextIsAdministrator,
 				opportunities.id,

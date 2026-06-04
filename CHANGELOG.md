@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.37.0 2026-05-25
+
 ### Fixed
 
 - Bulk upload processing no longer fails when a row leaves a file-typed field blank. The empty cell is stored as a non-file value (`value: ""`, `isValid: false`) and no attachment lookup is attempted for that field.
 
 ### Changed
 
+- `GET /opportunities` now accepts an optional `funder` query parameter to filter opportunities by funder shortCode.
 - Creating an entity now automatically grants the creator a `manage` permission with `any` scope on the new entity. This applies to opportunities, changemakers, proposals, sources, bulk upload tasks, application forms (and their fields), proposal versions (and their field values), and changemaker field values created via the HTTP API, as well as proposals, proposal versions, proposal field values, and newly inserted changemakers created during bulk upload processing.
 - Viewing application forms now requires explicit `view | applicationForm` scope, checked via a new `has_application_form_permission` function. The scope can be granted at the applicationForm, opportunity, or funder context level and is inherited appropriately. Previously this was implicitly granted by any `view | opportunity` grant.
 - Viewing application form fields now requires explicit `view | applicationForm` scope on the parent application form, checked via `has_application_form_permission`. Previously this was implicitly granted by any `view | opportunity` grant. Application form fields do not have their own independent permission scope; access to a field is determined entirely by access to its parent form.

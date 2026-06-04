@@ -9,9 +9,15 @@
 			}
 		],
 		"parameters": [
-			{ "$ref": "../components/parameters/pageParam.json" },
-			{ "$ref": "../components/parameters/countParam.json" },
-			{ "$ref": "../components/parameters/keycloakUserIdParam.json" }
+			{
+				"$ref": "../components/parameters/pageParam.json"
+			},
+			{
+				"$ref": "../components/parameters/countParam.json"
+			},
+			{
+				"$ref": "../components/parameters/keycloakUserIdParam.json"
+			}
 		],
 		"responses": {
 			"200": {
@@ -24,8 +30,14 @@
 					}
 				}
 			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

@@ -9,12 +9,24 @@
 			}
 		],
 		"parameters": [
-			{ "$ref": "../components/parameters/pageParam.json" },
-			{ "$ref": "../components/parameters/countParam.json" },
-			{ "$ref": "../components/parameters/searchParam.json" },
-			{ "$ref": "../components/parameters/changemakerParam.json" },
-			{ "$ref": "../components/parameters/funderParam.json" },
-			{ "$ref": "../components/parameters/createdByParam.json" }
+			{
+				"$ref": "../components/parameters/pageParam.json"
+			},
+			{
+				"$ref": "../components/parameters/countParam.json"
+			},
+			{
+				"$ref": "../components/parameters/searchParam.json"
+			},
+			{
+				"$ref": "../components/parameters/changemakerParam.json"
+			},
+			{
+				"$ref": "../components/parameters/funderParam.json"
+			},
+			{
+				"$ref": "../components/parameters/createdByParam.json"
+			}
 		],
 		"responses": {
 			"200": {
@@ -28,14 +40,10 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	},
@@ -70,34 +78,18 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"409": {
-				"description": "There was a unique key conflict.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Conflict.json",
+				"description": "There was a unique key conflict."
 			},
 			"422": {
-				"description": "The proposal references entities that do not exist in the database.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/UnprocessableEntity.json",
+				"description": "The proposal references entities that do not exist in the database."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

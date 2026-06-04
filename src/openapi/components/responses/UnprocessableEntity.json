@@ -1,3 +1,10 @@
 {
-	"description": "The referenced entity does not exist in the database."
+	"description": "The referenced entity does not exist in the database.",
+	"content": {
+		"application/json": {
+			"schema": {
+				"$ref": "../schemas/PdcError.json"
+			}
+		}
+	}
 }

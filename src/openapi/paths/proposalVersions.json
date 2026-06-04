@@ -30,24 +30,14 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"422": {
-				"description": "The proposal version references entities that do not exist in the database.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/UnprocessableEntity.json",
+				"description": "The proposal version references entities that do not exist in the database."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

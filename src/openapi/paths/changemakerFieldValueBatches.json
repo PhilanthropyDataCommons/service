@@ -21,14 +21,10 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	},
@@ -64,24 +60,14 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"409": {
-				"description": "The source does not exist.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Conflict.json",
+				"description": "The source does not exist."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

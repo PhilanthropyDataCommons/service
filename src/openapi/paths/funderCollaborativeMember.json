@@ -39,8 +39,14 @@
 					}
 				}
 			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	},
@@ -105,13 +111,16 @@
 				}
 			},
 			"400": {
-				"$ref": "../components/responses/DatabaseError.json"
+				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	},
@@ -155,8 +164,14 @@
 					}
 				}
 			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

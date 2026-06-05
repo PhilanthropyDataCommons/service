@@ -9,10 +9,18 @@
 			}
 		],
 		"parameters": [
-			{ "$ref": "../components/parameters/pageParam.json" },
-			{ "$ref": "../components/parameters/countParam.json" },
-			{ "$ref": "../components/parameters/searchParam.json" },
-			{ "$ref": "../components/parameters/proposalParam.json" }
+			{
+				"$ref": "../components/parameters/pageParam.json"
+			},
+			{
+				"$ref": "../components/parameters/countParam.json"
+			},
+			{
+				"$ref": "../components/parameters/searchParam.json"
+			},
+			{
+				"$ref": "../components/parameters/proposalParam.json"
+			}
 		],
 		"responses": {
 			"200": {
@@ -26,14 +34,10 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	},
@@ -68,14 +72,10 @@
 				}
 			},
 			"401": {
-				"description": "Authentication was not provided or was invalid.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"$ref": "../components/schemas/PdcError.json"
-						}
-					}
-				}
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
 			}
 		}
 	}

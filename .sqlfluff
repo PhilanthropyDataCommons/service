@@ -6,6 +6,11 @@ exclude_rules =
   references.keywords,
   # TinyPg :paramName syntax conflicts with column qualification rules
   references.consistent,
+  # TinyPg :param.attr nested-attribute syntax (e.g. :sensitivityFilter.list)
+  # is parsed by sqlfluff as a table-qualified column reference. As of sqlfluff
+  # 4.2.0 the placeholder templater no longer suppresses lint violations that
+  # overlap a placeholder, so these params now trip references.from.
+  references.from,
   # paginated_entries.*::table_type cast not recognized as a table reference
   structure.unused_join,
 
@@ -47,3 +52,5 @@ status = 'pending'
 memberFunderShortCode = 'placeholder'
 baseFieldShortCode = 'placeholder'
 userKeycloakUserId = '00000000-0000-0000-0000-000000000000'
+bulkUploadTaskId = 1
+isCollaborative = false

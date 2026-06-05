@@ -21,6 +21,7 @@ import {
 	expectArray,
 	expectArrayContaining,
 	expectObjectContaining,
+	expectString,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
 import {
@@ -66,6 +67,82 @@ describe('/opportunities', () => {
 			expect(response.body).toEqual({
 				entries: [systemOpportunity, opportunity1, opportunity2],
 				total: 3,
+			});
+		});
+
+		it('returns a subset of opportunities present in the database when a funder filter is provided', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const testFunder = await createTestFunder(db, testUserAuthContext);
+
+			await createTestOpportunity(db, testUserAuthContext);
+			const testFunderOpportunity = await createTestOpportunity(
+				db,
+				testUserAuthContext,
+				{
+					funderShortCode: testFunder.shortCode,
+				},
+			);
+
+			const response = await request(app)
+				.get(`/opportunities?funder=${testFunder.shortCode}`)
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+
+			expect(response.body).toEqual({
+				total: 1,
+				entries: [testFunderOpportunity],
+			});
+		});
+
+		it('filters opportunities when the funder shortCode is numeric', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const numericShortCodeFunder = await createTestFunder(
+				db,
+				testUserAuthContext,
+				{ shortCode: '12345' },
+			);
+
+			await createTestOpportunity(db, testUserAuthContext);
+			const numericFunderOpportunity = await createTestOpportunity(
+				db,
+				testUserAuthContext,
+				{ funderShortCode: numericShortCodeFunder.shortCode },
+			);
+
+			const response = await request(app)
+				.get(`/opportunities?funder=${numericShortCodeFunder.shortCode}`)
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+
+			expect(response.body).toEqual({
+				total: 1,
+				entries: [numericFunderOpportunity],
+			});
+		});
+
+		it('returns a 400 error if an invalid funder filter is provided', async () => {
+			const response = await request(app)
+				.get(`/opportunities?funder=\u{1F600}`)
+				.set(authHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({
+				name: 'InputValidationError',
+				message: expectString(),
+			});
+		});
+
+		it('returns a 400 error if the funder filter is repeated', async () => {
+			const response = await request(app)
+				.get('/opportunities?funder=foo&funder=bar')
+				.set(authHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({
+				name: 'InputValidationError',
+				message: expectString(),
 			});
 		});
 

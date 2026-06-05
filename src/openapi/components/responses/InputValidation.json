@@ -1,3 +1,10 @@
 {
-	"description": "The request body is invalid."
+	"description": "The request body is invalid.",
+	"content": {
+		"application/json": {
+			"schema": {
+				"$ref": "../schemas/PdcError.json"
+			}
+		}
+	}
 }

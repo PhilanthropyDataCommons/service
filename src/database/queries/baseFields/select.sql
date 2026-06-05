@@ -4,15 +4,12 @@ WHERE
 	CASE
 		WHEN :sensitivityFilter.list::sensitivity_classification [] IS NULL
 		THEN TRUE
+		WHEN :sensitivityFilter.negated THEN
+			NOT (base_fields.sensitivity_classification = any(
+				:sensitivityFilter.list::sensitivity_classification []
+			))
 		ELSE
-			CASE
-				WHEN :sensitivityFilter.negated THEN
-					NOT (base_fields.sensitivity_classification = any(
-						:sensitivityFilter.list::sensitivity_classification []
-					))
-				ELSE
-					base_fields.sensitivity_classification = any(
-						:sensitivityFilter.list::sensitivity_classification []
-					)
-			END
+			base_fields.sensitivity_classification = any(
+				:sensitivityFilter.list::sensitivity_classification []
+			)
 	END;

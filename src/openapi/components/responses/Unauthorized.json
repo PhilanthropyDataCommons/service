@@ -1,3 +1,10 @@
 {
-	"description": "Authentication was not provided or was invalid."
+	"description": "Authentication was not provided or was invalid.",
+	"content": {
+		"application/json": {
+			"schema": {
+				"$ref": "../schemas/PdcError.json"
+			}
+		}
+	}
 }

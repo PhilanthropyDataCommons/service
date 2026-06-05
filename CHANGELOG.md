@@ -7,8 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.37.0 2026-05-25
+
+### Fixed
+
+- Bulk upload processing no longer fails when a row leaves a file-typed field blank. The empty cell is stored as a non-file value (`value: ""`, `isValid: false`) and no attachment lookup is attempted for that field.
+
 ### Changed
 
+- `GET /opportunities` now accepts an optional `funder` query parameter to filter opportunities by funder shortCode.
 - Creating an entity now automatically grants the creator a `manage` permission with `any` scope on the new entity. This applies to opportunities, changemakers, proposals, sources, bulk upload tasks, application forms (and their fields), proposal versions (and their field values), and changemaker field values created via the HTTP API, as well as proposals, proposal versions, proposal field values, and newly inserted changemakers created during bulk upload processing.
 - Viewing application forms now requires explicit `view | applicationForm` scope, checked via a new `has_application_form_permission` function. The scope can be granted at the applicationForm, opportunity, or funder context level and is inherited appropriately. Previously this was implicitly granted by any `view | opportunity` grant.
 - Viewing application form fields now requires explicit `view | applicationForm` scope on the parent application form, checked via `has_application_form_permission`. Previously this was implicitly granted by any `view | opportunity` grant. Application form fields do not have their own independent permission scope; access to a field is determined entirely by access to its parent form.
@@ -16,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PATCH /applicationFormFields/:applicationFormFieldId` now requires `edit | applicationForm` scope on the parent application form instead of `edit | opportunity`.
 - Existing permission grants with `opportunity` scope on funder or opportunity contexts have been migrated to also include `applicationForm` scope. This preserves prior access for grantees who relied on `opportunity`-scoped grants for application form access.
 - `/permissionGrants` endpoints (list, read, create, update, delete) no longer require administrator role. Non-admin users holding the `manage` verb on a grant's context entity may now list, read, create, update, and delete those grants. `GET /permissionGrants` filters results for non-admins to grants whose context entity they can manage. Updating a grant requires manage on both the existing and proposed context entity.
+- Standardized OpenAPI error responses onto shared, reusable `components/responses` referenced via `$ref` (with per-endpoint `description` overrides) instead of inline duplicates. Error responses now consistently document a `PdcError` body, and every authenticated endpoint documents a `401`. Documentation-only; no behavior change.
+- Every endpoint now documents a `500` response via a shared, reusable `InternalServerError` component. Documentation-only; no behavior change.
 
 ## 0.36.0 2026-05-12
 

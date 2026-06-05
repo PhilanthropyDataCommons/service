@@ -1,6 +1,6 @@
 {
 	"schema": {
-		"type": "string"
+		"$ref": "../schemas/shortCode.json"
 	},
 	"in": "query",
 	"name": "funder",

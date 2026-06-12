@@ -6,13 +6,17 @@
 		},
 		"fields": {
 			"type": "object",
+			"description": "The form fields that must be submitted alongside the file in the S3 POST. Always includes `key`, plus dynamic S3 policy fields (e.g. `policy`, `x-amz-signature`, `x-amz-credential`, `x-amz-algorithm`, `x-amz-date`).",
 			"properties": {
 				"key": {
 					"type": "string",
 					"example": "96ddab90-1931-478d-8c02-a1dc80ae01e5"
 				}
 			},
-			"required": ["key"]
+			"required": ["key"],
+			"additionalProperties": {
+				"type": "string"
+			}
 		}
 	},
 	"required": ["url", "fields"]

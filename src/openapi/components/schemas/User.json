@@ -7,7 +7,7 @@
 			"format": "uuid"
 		},
 		"keycloakUserName": {
-			"type": "string",
+			"type": ["string", "null"],
 			"description": "The full name of the user (described in OIDC 1.0 'name' standard claim) as of most recent logged-in service activity.",
 			"example": "John Doe"
 		},

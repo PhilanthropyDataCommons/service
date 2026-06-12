@@ -71,10 +71,8 @@
 		},
 		"logs": {
 			"type": "array",
-			"properties": {
-				"entries": {
-					"$ref": "./BulkUploadLog.json"
-				}
+			"items": {
+				"$ref": "./BulkUploadLog.json"
 			},
 			"readOnly": true
 		}

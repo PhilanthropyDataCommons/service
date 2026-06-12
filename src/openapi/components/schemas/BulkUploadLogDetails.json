@@ -14,7 +14,7 @@
 		},
 		"cause": {
 			"description": "A cause when available, another one of these objects.",
-			"type": "object",
+			"allOf": [{ "$ref": "./BulkUploadLogDetails.json" }],
 			"readOnly": true
 		}
 	},

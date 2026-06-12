@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.38.0 2026-06-12
+
+### Fixed
+
+- Corrected the OpenAPI `Organization.funder` schema to reference the `Funder` schema instead of `DataProvider`. Documentation-only; no behavior change.
+- Corrected the OpenAPI `Source` schema to no longer list the non-existent `relatedEntityId` as a required property. Documentation-only; no behavior change.
+- Corrected the OpenAPI `PresignedPost.fields` schema to allow the dynamic S3 POST form fields (e.g. `policy`, `x-amz-*`) via `additionalProperties`. Documentation-only; no behavior change.
+- Corrected the OpenAPI `BaseField` schema to mark `shortCode` as `readOnly` (it used the misspelled, ignored `read-only` keyword). Documentation-only; no behavior change.
+- Corrected the OpenAPI `BaseFieldLocalization` schema: `description` and `createdAt` are no longer nullable, `createdAt` is now `readOnly` and required, and `baseFieldShortCode` is now `readOnly`, matching the actual payload. Documentation-only; no behavior change.
+- Corrected the OpenAPI `BulkUploadTask.logs` schema to describe an array of `BulkUploadLog` items (it previously used an invalid bundle-style `properties.entries` shape). Documentation-only; no behavior change.
+- Corrected the OpenAPI `BulkUploadLog.details` schema to reference `BulkUploadLogDetails` directly (it previously wrapped the reference in a spurious `entries` property). Documentation-only; no behavior change.
+- Corrected the OpenAPI `BulkUploadLogDetails.cause` schema to reference `BulkUploadLogDetails` recursively, matching the real nested-cause payload. Documentation-only; no behavior change.
+- Corrected the OpenAPI `Opportunity` schema to require `funderShortCode` and `funder`, which are always present in responses. Documentation-only; no behavior change.
+- Corrected the OpenAPI `ProposalVersion` schema to require `source` and `createdBy`, which are always present in responses. Documentation-only; no behavior change.
+- Corrected the OpenAPI `FunderCollaborativeInvitation` schema to require `invitationStatus`, which is always present in responses. Documentation-only; no behavior change.
+- Corrected the OpenAPI `User.keycloakUserName` schema to be nullable, matching the actual payload. Documentation-only; no behavior change.
+
 ## 0.37.0 2026-05-25
 
 ### Fixed

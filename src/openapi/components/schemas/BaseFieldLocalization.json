@@ -3,7 +3,8 @@
 	"properties": {
 		"baseFieldShortCode": {
 			"type": "string",
-			"example": "first_name"
+			"example": "first_name",
+			"readOnly": true
 		},
 		"language": {
 			"type": "string",
@@ -15,13 +16,20 @@
 			"example": "Applicant Name"
 		},
 		"description": {
-			"type": ["string", "null"],
+			"type": "string",
 			"example": "The Name of the Applicant"
 		},
 		"createdAt": {
-			"type": ["string", "null"],
-			"format": "date-time"
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
 		}
 	},
-	"required": ["baseFieldShortCode", "language", "label", "description"]
+	"required": [
+		"baseFieldShortCode",
+		"language",
+		"label",
+		"description",
+		"createdAt"
+	]
 }

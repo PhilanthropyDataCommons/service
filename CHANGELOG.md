@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Funder collaborative endpoints now return `403` (or `404`) instead of `401` when an authenticated user lacks permission.
 - `POST /opportunities` now returns `403` (or `404`) instead of `401` when an authenticated user lacks permission on the associated funder.
+- `POST /proposals` now returns `403` (or `404`) instead of `422` when an authenticated user lacks permission on (or cannot view) the associated opportunity.
 
 ## 0.38.0 2026-06-12
 

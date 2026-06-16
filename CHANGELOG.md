@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Funder collaborative endpoints now return `403` (or `404`) instead of `401` when an authenticated user lacks permission.
+
 ## 0.38.0 2026-06-12
 
 ### Fixed

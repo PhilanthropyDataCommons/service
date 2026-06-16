@@ -1,0 +1,10 @@
+{
+	"description": "The specified resource exists and is viewable, but the authenticated user does not have permission to perform this action.",
+	"content": {
+		"application/json": {
+			"schema": {
+				"$ref": "../schemas/PdcError.json"
+			}
+		}
+	}
+}

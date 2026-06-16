@@ -5,6 +5,7 @@ import {
 	createOpportunity,
 	getLimitValues,
 	hasFunderPermission,
+	loadFunder,
 	loadOpportunity,
 	loadOpportunityBundle,
 } from '../database';
@@ -18,8 +19,8 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	UnauthorizedError,
 } from '../errors';
 import {
 	extractFunderParameters,
@@ -84,7 +85,10 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 			scope: PermissionGrantEntityType.OPPORTUNITY,
 		}))
 	) {
-		throw new UnauthorizedError();
+		await loadFunder(db, req, body.funderShortCode);
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create an opportunity for the specified funder.',
+		);
 	}
 	const committedOpportunity = await db.transaction(async (txDb) => {
 		const opportunity = await createOpportunity(txDb, req, body);

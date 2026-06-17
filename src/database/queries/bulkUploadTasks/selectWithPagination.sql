@@ -1,5 +1,5 @@
 WITH
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT bulk_upload_tasks.*
 		FROM bulk_upload_tasks
 			INNER JOIN application_forms

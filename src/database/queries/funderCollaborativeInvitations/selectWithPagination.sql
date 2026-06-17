@@ -1,5 +1,5 @@
 WITH
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT funder_collaborative_invitations.*
 		FROM funder_collaborative_invitations
 		WHERE

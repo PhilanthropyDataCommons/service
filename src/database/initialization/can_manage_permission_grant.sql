@@ -93,4 +93,4 @@ BEGIN
 				permission_grant.context_entity_type;
 	END CASE;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql STABLE;

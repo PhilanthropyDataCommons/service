@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /changemakerFieldValueBatches` now returns `403` (or `404`) instead of `422` when an authenticated user lacks permission to reference (or cannot view) the specified source.
 - `POST /changemakerFieldValues` now returns `403` when an authenticated user lacks permission to create field values for the specified changemaker, and `404` (instead of `409`) when the changemaker, base field, or batch does not exist.
 - `POST /changemakerProposals` now returns `403` (instead of `422`) when an authenticated user lacks permission on the funder associated with the proposal, and `404` (instead of `422`) when the associated proposal cannot be viewed or does not exist.
+- `POST /sources` now returns `403` (instead of `422`) when an authenticated user lacks permission to create a source for the specified funder, data provider, or changemaker, and `404` when that organization does not exist.
 
 ## 0.38.0 2026-06-12
 

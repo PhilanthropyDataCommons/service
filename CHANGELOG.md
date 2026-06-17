@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /changemakerProposals` now returns `403` (instead of `422`) when an authenticated user lacks permission on the funder associated with the proposal, and `404` (instead of `422`) when the associated proposal cannot be viewed or does not exist.
 - `POST /sources` now returns `403` (instead of `422`) when an authenticated user lacks permission to create a source for the specified funder, data provider, or changemaker, and `404` when that organization does not exist.
 - `POST /proposalVersions` now returns `403` (instead of `422`) when an authenticated user lacks permission to edit the proposal or reference the source, and `404` (instead of `409`) when the proposal, source, application form, or application form field cannot be viewed or does not exist. A `409` is now returned only when the application form or field is not associated with the proposal.
+- `POST /tasks/bulkUploads` now returns `403` (instead of `422`) when an authenticated user lacks permission to create proposals for the application form's opportunity or to reference the source, and `404` (instead of `422`) when the application form, opportunity, or source cannot be viewed or does not exist.
 
 ## 0.38.0 2026-06-12
 

@@ -47,6 +47,7 @@ createdBy = '00000000-0000-0000-0000-000000000000'
 keycloakUserId = '00000000-0000-0000-0000-000000000000'
 applicationFormId = 1
 applicationFormFieldId = 1
+fieldValueId = 1
 batchId = 1
 changemakerId = 1
 funderShortCode = 'placeholder'

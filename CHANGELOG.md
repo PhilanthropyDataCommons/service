@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Listing application forms and application form fields no longer slows down as the number of permission grants grows.
 - Listing sources no longer slows down as the number of permission grants grows.
 - Listing proposals and changemaker-proposal relationships no longer slows down as the number of permission grants grows.
+- Listing changemaker field values no longer slows down as the number of permission grants grows.
 
 ### Fixed
 

@@ -101,12 +101,17 @@ BEGIN
 				WHERE permitted_sources.id = permission_grant.source_id
 			);
 		WHEN 'changemakerFieldValue' THEN
-			RETURN has_changemaker_field_value_permission(
-				user_keycloak_user_id,
-				user_is_admin,
-				permission_grant.changemaker_field_value_id,
-				'manage',
-				'changemakerFieldValue'
+			RETURN EXISTS (
+				SELECT 1
+				FROM permitted_changemaker_field_value_ids(
+					user_keycloak_user_id,
+					user_is_admin,
+					'manage',
+					'changemakerFieldValue'
+				) AS permitted_field_values
+				WHERE
+					permitted_field_values.id
+					= permission_grant.changemaker_field_value_id
 			);
 		WHEN 'applicationFormField', 'proposalVersion', 'bulkUpload' THEN
 			-- Permission checks are not enforced for these context entity types;

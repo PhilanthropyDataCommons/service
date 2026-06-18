@@ -82,12 +82,17 @@ BEGIN
 					= permission_grant.application_form_id
 			);
 		WHEN 'proposalFieldValue' THEN
-			RETURN has_proposal_field_value_permission(
-				user_keycloak_user_id,
-				user_is_admin,
-				permission_grant.proposal_field_value_id,
-				'manage',
-				'proposalFieldValue'
+			RETURN EXISTS (
+				SELECT 1
+				FROM permitted_proposal_field_value_ids(
+					user_keycloak_user_id,
+					user_is_admin,
+					'manage',
+					'proposalFieldValue'
+				) AS permitted_field_values
+				WHERE
+					permitted_field_values.id
+					= permission_grant.proposal_field_value_id
 			);
 		WHEN 'source' THEN
 			RETURN EXISTS (

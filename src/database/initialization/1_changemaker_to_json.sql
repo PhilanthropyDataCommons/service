@@ -61,6 +61,14 @@ BEGIN
 				ON pv.proposal_id = op.proposal_id
 			INNER JOIN sources s
 				ON pv.source_id = s.id
+			-- Restrict to field values the user may view.
+			INNER JOIN permitted_proposal_field_value_ids(
+				auth_context_keycloak_user_id,
+				auth_context_is_administrator,
+				'view',
+				'proposalFieldValue'
+			) AS permitted_field_values
+				ON permitted_field_values.id = pfv.id
 			WHERE op.changemaker_id = changemaker.id
 				AND bf.category = 'organization'
 				AND pfv.is_valid
@@ -68,14 +76,6 @@ BEGIN
 				AND u.keycloak_user_id IS NOT NULL
 				-- Guard against the valid-but-not-really-valid-here system user:
 				AND u.keycloak_user_id != system_keycloak_user_id()
-				-- Check permission to view this proposal field value:
-				AND has_proposal_field_value_permission(
-					auth_context_keycloak_user_id,
-					auth_context_is_administrator,
-					pfv.id,
-					'view',
-					'proposalFieldValue'
-				)
 
 			UNION ALL
 

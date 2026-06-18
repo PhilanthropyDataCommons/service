@@ -1,11 +1,9 @@
 SELECT exists(
 	SELECT 1
-	FROM permission_grants
-	WHERE
-		id = :permissionGrantId
-		AND can_manage_permission_grant(
+	FROM
+		permitted_permission_grant_ids(
 			:authContextKeycloakUserId,
-			:authContextIsAdministrator,
-			permission_grants.*::permission_grants
-		)
+			:authContextIsAdministrator
+		) AS permitted_grants
+	WHERE permitted_grants.id = :permissionGrantId
 ) AS result;

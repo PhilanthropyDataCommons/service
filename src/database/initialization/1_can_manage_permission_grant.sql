@@ -66,12 +66,17 @@ BEGIN
 				'proposal'
 			);
 		WHEN 'applicationForm' THEN
-			RETURN has_application_form_permission(
-				user_keycloak_user_id,
-				user_is_admin,
-				permission_grant.application_form_id,
-				'manage',
-				'applicationForm'
+			RETURN EXISTS (
+				SELECT 1
+				FROM permitted_application_form_ids(
+					user_keycloak_user_id,
+					user_is_admin,
+					'manage',
+					'applicationForm'
+				) AS permitted_application_forms
+				WHERE
+					permitted_application_forms.id
+					= permission_grant.application_form_id
 			);
 		WHEN 'proposalFieldValue' THEN
 			RETURN has_proposal_field_value_permission(

@@ -2,6 +2,16 @@ WITH
 	candidate_entries AS MATERIALIZED (
 		SELECT application_form_fields.*
 		FROM application_form_fields
+			INNER JOIN
+				permitted_application_form_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'applicationForm'
+				) AS permitted_application_forms
+				ON
+					application_form_fields.application_form_id
+					= permitted_application_forms.id
 		WHERE
 			CASE
 				WHEN :applicationFormId::integer IS NULL THEN
@@ -9,13 +19,6 @@ WITH
 				ELSE
 					application_form_fields.application_form_id = :applicationFormId
 			END
-			AND has_application_form_permission(
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator,
-				application_form_fields.application_form_id,
-				'view',
-				'applicationForm'
-			)
 	),
 
 	entry_count AS (

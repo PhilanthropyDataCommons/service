@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Listing opportunities and bulk upload tasks no longer slows down as the number of permission grants grows.
 - Listing application forms and application form fields no longer slows down as the number of permission grants grows.
+- Listing sources no longer slows down as the number of permission grants grows.
 
 ### Fixed
 

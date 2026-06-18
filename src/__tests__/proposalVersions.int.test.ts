@@ -867,7 +867,7 @@ describe('/proposalVersions', () => {
 			});
 		});
 
-		it('returns 422 Unprocessable Entity when the provided source does not exist', async () => {
+		it('returns 404 Not Found when the provided source does not exist', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -889,7 +889,7 @@ describe('/proposalVersions', () => {
 					sourceId: 9001,
 					fieldValues: [],
 				})
-				.expect(422);
+				.expect(404);
 		});
 
 		it('Returns 404 Not Found if the provided application form does not exist', async () => {

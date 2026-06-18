@@ -87,12 +87,15 @@ BEGIN
 				'proposalFieldValue'
 			);
 		WHEN 'source' THEN
-			RETURN has_source_permission(
-				user_keycloak_user_id,
-				user_is_admin,
-				permission_grant.source_id,
-				'manage',
-				'source'
+			RETURN EXISTS (
+				SELECT 1
+				FROM permitted_source_ids(
+					user_keycloak_user_id,
+					user_is_admin,
+					'manage',
+					'source'
+				) AS permitted_sources
+				WHERE permitted_sources.id = permission_grant.source_id
 			);
 		WHEN 'changemakerFieldValue' THEN
 			RETURN has_changemaker_field_value_permission(

@@ -39,6 +39,7 @@ offset = 0
 authContextKeycloakUserId = '00000000-0000-0000-0000-000000000000'
 authContextIsAdministrator = false
 proposalId = 1
+opportunityId = 1
 search = ''
 createdBy = '00000000-0000-0000-0000-000000000000'
 keycloakUserId = '00000000-0000-0000-0000-000000000000'

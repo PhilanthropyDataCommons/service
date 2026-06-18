@@ -47,12 +47,15 @@ BEGIN
 					= permission_grant.data_provider_short_code
 			);
 		WHEN 'opportunity' THEN
-			RETURN has_opportunity_permission(
-				user_keycloak_user_id,
-				user_is_admin,
-				permission_grant.opportunity_id,
-				'manage',
-				'opportunity'
+			RETURN EXISTS (
+				SELECT 1
+				FROM permitted_opportunity_ids(
+					user_keycloak_user_id,
+					user_is_admin,
+					'manage',
+					'opportunity'
+				) AS permitted_opportunities
+				WHERE permitted_opportunities.id = permission_grant.opportunity_id
 			);
 		WHEN 'proposal' THEN
 			RETURN has_proposal_permission(

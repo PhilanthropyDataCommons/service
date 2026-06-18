@@ -16,14 +16,13 @@ BEGIN
   SELECT changemaker_to_json(changemakers.*, NULL, FALSE, TRUE)
   INTO changemaker_json
   FROM changemakers
-  WHERE changemakers.keycloak_organization_id = keycloak_id
-  AND has_changemaker_permission(
+  INNER JOIN permitted_changemaker_ids(
     auth_context_keycloak_user_id,
     auth_context_is_administrator,
-    changemakers.id,
     'view',
     'changemaker'
-  );
+  ) AS permitted_changemakers ON changemakers.id = permitted_changemakers.id
+  WHERE changemakers.keycloak_organization_id = keycloak_id;
 
   SELECT data_provider_to_json(data_providers.*)
   INTO data_provider_json

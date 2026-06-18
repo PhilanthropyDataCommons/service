@@ -20,12 +20,15 @@ BEGIN
 				'funder'
 			);
 		WHEN 'changemaker' THEN
-			RETURN has_changemaker_permission(
-				user_keycloak_user_id,
-				user_is_admin,
-				permission_grant.changemaker_id,
-				'manage',
-				'changemaker'
+			RETURN EXISTS (
+				SELECT 1
+				FROM permitted_changemaker_ids(
+					user_keycloak_user_id,
+					user_is_admin,
+					'manage',
+					'changemaker'
+				) AS permitted_changemakers
+				WHERE permitted_changemakers.id = permission_grant.changemaker_id
 			);
 		WHEN 'dataProvider' THEN
 			RETURN has_data_provider_permission(

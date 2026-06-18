@@ -34,12 +34,17 @@ BEGIN
 				WHERE permitted_changemakers.id = permission_grant.changemaker_id
 			);
 		WHEN 'dataProvider' THEN
-			RETURN has_data_provider_permission(
-				user_keycloak_user_id,
-				user_is_admin,
-				permission_grant.data_provider_short_code,
-				'manage',
-				'dataProvider'
+			RETURN EXISTS (
+				SELECT 1
+				FROM permitted_data_provider_short_codes(
+					user_keycloak_user_id,
+					user_is_admin,
+					'manage',
+					'dataProvider'
+				) AS permitted_data_providers
+				WHERE
+					permitted_data_providers.short_code
+					= permission_grant.data_provider_short_code
 			);
 		WHEN 'opportunity' THEN
 			RETURN has_opportunity_permission(

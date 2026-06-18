@@ -27,14 +27,14 @@ BEGIN
   SELECT data_provider_to_json(data_providers.*)
   INTO data_provider_json
   FROM data_providers
-  WHERE data_providers.keycloak_organization_id = keycloak_id
-  AND has_data_provider_permission(
+  INNER JOIN permitted_data_provider_short_codes(
     auth_context_keycloak_user_id,
     auth_context_is_administrator,
-    data_providers.short_code,
     'view',
     'dataProvider'
-  );
+  ) AS permitted_data_providers
+    ON data_providers.short_code = permitted_data_providers.short_code
+  WHERE data_providers.keycloak_organization_id = keycloak_id;
 
   SELECT funder_to_json(funders.*)
   INTO funder_json

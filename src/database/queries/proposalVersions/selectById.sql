@@ -5,12 +5,12 @@ SELECT
 		:authContextIsAdministrator
 	) AS object
 FROM proposal_versions
-WHERE
-	id = :proposalVersionId
-	AND has_proposal_permission(
-		:authContextKeycloakUserId,
-		:authContextIsAdministrator,
-		proposal_id,
-		'view',
-		'proposal'
-	);
+	INNER JOIN
+		permitted_proposal_ids(
+			:authContextKeycloakUserId,
+			:authContextIsAdministrator,
+			'view',
+			'proposal'
+		) AS permitted_proposals
+		ON proposal_versions.proposal_id = permitted_proposals.id
+WHERE proposal_versions.id = :proposalVersionId;

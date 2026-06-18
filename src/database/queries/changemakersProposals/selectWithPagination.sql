@@ -2,6 +2,14 @@ WITH
 	candidate_entries AS MATERIALIZED (
 		SELECT changemakers_proposals.*
 		FROM changemakers_proposals
+			INNER JOIN
+				permitted_proposal_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'proposal'
+				) AS permitted_proposals
+				ON changemakers_proposals.proposal_id = permitted_proposals.id
 		WHERE
 			CASE
 				WHEN :changemakerId::integer IS NULL THEN
@@ -15,13 +23,6 @@ WITH
 				ELSE
 					changemakers_proposals.proposal_id = :proposalId
 			END
-			AND has_proposal_permission(
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator,
-				changemakers_proposals.proposal_id,
-				'view',
-				'proposal'
-			)
 	),
 
 	entry_count AS (

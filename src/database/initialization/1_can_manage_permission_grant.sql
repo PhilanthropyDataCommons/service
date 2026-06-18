@@ -58,12 +58,15 @@ BEGIN
 				WHERE permitted_opportunities.id = permission_grant.opportunity_id
 			);
 		WHEN 'proposal' THEN
-			RETURN has_proposal_permission(
-				user_keycloak_user_id,
-				user_is_admin,
-				permission_grant.proposal_id,
-				'manage',
-				'proposal'
+			RETURN EXISTS (
+				SELECT 1
+				FROM permitted_proposal_ids(
+					user_keycloak_user_id,
+					user_is_admin,
+					'manage',
+					'proposal'
+				) AS permitted_proposals
+				WHERE permitted_proposals.id = permission_grant.proposal_id
 			);
 		WHEN 'applicationForm' THEN
 			RETURN EXISTS (

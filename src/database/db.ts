@@ -57,17 +57,21 @@ const getDatabaseName = async (db: TinyPg): Promise<string> => {
 };
 
 const initializeDatabase = async (db: TinyPg): Promise<TinyPg> => {
-	const initializationFiles = (
-		await fs.readdir(initializationDirectory)
-	).filter((file) => file.endsWith('.sql'));
+	const initializationFiles = (await fs.readdir(initializationDirectory))
+		.filter((file) => file.endsWith('.sql'))
+		// Numeric-aware so a leading prefix compares as a number (2_ before 10_),
+		// not lexically.
+		.sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
 
-	await Promise.all(
-		initializationFiles.map(async (file) => {
-			const filePath = path.join(initializationDirectory, file);
-			const sql = (await fs.readFile(filePath)).toString();
-			await db.query(sql);
-		}),
-	);
+	// Files are created one at a time in this order, so a lower numeric prefix
+	// controls load order: a function written in LANGUAGE sql can reference a
+	// function an earlier file creates. Body validation stays on, so a bad
+	// reference fails loudly at startup.
+	await initializationFiles.reduce(async (previous, file) => {
+		await previous;
+		const filePath = path.join(initializationDirectory, file);
+		await db.query((await fs.readFile(filePath)).toString());
+	}, Promise.resolve());
 
 	return db;
 };

@@ -39,14 +39,13 @@ BEGIN
   SELECT funder_to_json(funders.*)
   INTO funder_json
   FROM funders
-  WHERE funders.keycloak_organization_id = keycloak_id
-  AND has_funder_permission(
+  INNER JOIN permitted_funder_short_codes(
     auth_context_keycloak_user_id,
     auth_context_is_administrator,
-    funders.short_code,
     'view',
     'funder'
-  );
+  ) AS permitted_funders ON funders.short_code = permitted_funders.short_code
+  WHERE funders.keycloak_organization_id = keycloak_id;
 
   RETURN
     CASE WHEN changemaker_json IS NOT NULL

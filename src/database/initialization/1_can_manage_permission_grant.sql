@@ -12,12 +12,15 @@ BEGIN
 
 	CASE permission_grant.context_entity_type
 		WHEN 'funder' THEN
-			RETURN has_funder_permission(
-				user_keycloak_user_id,
-				user_is_admin,
-				permission_grant.funder_short_code,
-				'manage',
-				'funder'
+			RETURN EXISTS (
+				SELECT 1
+				FROM permitted_funder_short_codes(
+					user_keycloak_user_id,
+					user_is_admin,
+					'manage',
+					'funder'
+				) AS permitted_funders
+				WHERE permitted_funders.short_code = permission_grant.funder_short_code
 			);
 		WHEN 'changemaker' THEN
 			RETURN EXISTS (

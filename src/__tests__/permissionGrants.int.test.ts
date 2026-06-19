@@ -309,7 +309,7 @@ describe('/permissionGrants', () => {
 			await agent.post('/permissionGrants').expect(401);
 		});
 
-		it('returns 401 to a non-admin who has no permission on the context entity', async () => {
+		it('returns 403 to a non-admin who has no permission on the context entity', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
 			const changemaker = await createTestChangemaker(db, authContext);
@@ -325,10 +325,10 @@ describe('/permissionGrants', () => {
 					scope: ['changemaker'],
 					verbs: ['view'],
 				})
-				.expect(401);
+				.expect(403);
 		});
 
-		it('returns 401 to a non-admin with view but not manage permission on the context entity', async () => {
+		it('returns 403 to a non-admin with view but not manage permission on the context entity', async () => {
 			const db = getDatabase();
 			const authContext = await getTestAuthContext(db);
 			const changemaker = await createTestChangemaker(db, authContext);
@@ -352,10 +352,97 @@ describe('/permissionGrants', () => {
 					scope: ['changemaker'],
 					verbs: ['view'],
 				})
-				.expect(401);
+				.expect(403);
 		});
 
-		it('returns 401 to a non-admin when the context entity does not exist', async () => {
+		it.each([
+			[PermissionGrantEntityType.CHANGEMAKER, 'changemakerId', 9001],
+			[PermissionGrantEntityType.FUNDER, 'funderShortCode', 'foo'],
+			[PermissionGrantEntityType.DATA_PROVIDER, 'dataProviderShortCode', 'foo'],
+			[PermissionGrantEntityType.OPPORTUNITY, 'opportunityId', 9001],
+			[PermissionGrantEntityType.PROPOSAL, 'proposalId', 9001],
+			[PermissionGrantEntityType.PROPOSAL_VERSION, 'proposalVersionId', 9001],
+			[PermissionGrantEntityType.APPLICATION_FORM, 'applicationFormId', 9001],
+			[
+				PermissionGrantEntityType.APPLICATION_FORM_FIELD,
+				'applicationFormFieldId',
+				9001,
+			],
+			[
+				PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+				'proposalFieldValueId',
+				9001,
+			],
+			[PermissionGrantEntityType.SOURCE, 'sourceId', 9001],
+			[PermissionGrantEntityType.BULK_UPLOAD, 'bulkUploadTaskId', 9001],
+			[
+				PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+				'changemakerFieldValueId',
+				9001,
+			],
+		] as Array<[PermissionGrantEntityType, string, number | string]>)(
+			'returns 404 to a non-admin when the %s context entity does not exist',
+			async (contextEntityType, keyName, keyValue) => {
+				const result = await agent
+					.post('/permissionGrants')
+					.type('application/json')
+					.set(authHeader)
+					.send({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUserKeycloakUserId,
+						contextEntityType,
+						[keyName]: keyValue,
+						scope: [contextEntityType],
+						verbs: ['view'],
+					})
+					.expect(404);
+				expect(result.body).toMatchObject({
+					name: 'NotFoundError',
+				});
+			},
+		);
+
+		it.each([
+			[PermissionGrantEntityType.FUNDER, 'funderShortCode', createTestFunder],
+			[
+				PermissionGrantEntityType.DATA_PROVIDER,
+				'dataProviderShortCode',
+				createTestDataProvider,
+			],
+		] as const)(
+			'returns 403 to a non-admin who can view but not manage an existing %s context entity',
+			async (contextEntityType, keyName, createTestEntity) => {
+				const db = getDatabase();
+				const authContext = await getTestAuthContext(db);
+				const entity = await createTestEntity(db, authContext);
+				await agent
+					.post('/permissionGrants')
+					.type('application/json')
+					.set(authHeader)
+					.send({
+						granteeType: 'user',
+						granteeUserKeycloakUserId: testUserKeycloakUserId,
+						contextEntityType,
+						[keyName]: entity.shortCode,
+						scope: [contextEntityType],
+						verbs: ['view'],
+					})
+					.expect(403);
+			},
+		);
+
+		it('returns 403 to a non-admin who can view but not manage an existing opportunity context entity', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const opportunity = await createTestOpportunity(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+				opportunityId: opportunity.id,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
 			await agent
 				.post('/permissionGrants')
 				.type('application/json')
@@ -363,12 +450,66 @@ describe('/permissionGrants', () => {
 				.send({
 					granteeType: 'user',
 					granteeUserKeycloakUserId: testUserKeycloakUserId,
-					contextEntityType: 'changemaker',
-					changemakerId: 9001,
-					scope: ['changemaker'],
+					contextEntityType: 'opportunity',
+					opportunityId: opportunity.id,
+					scope: ['opportunity'],
 					verbs: ['view'],
 				})
-				.expect(401);
+				.expect(403);
+		});
+
+		it('returns 403 to a non-admin who can view but not manage an existing proposal context entity', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const proposal = await createTestProposal(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.PROPOSAL,
+				proposalId: proposal.id,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'proposal',
+					proposalId: proposal.id,
+					scope: ['proposal'],
+					verbs: ['view'],
+				})
+				.expect(403);
+		});
+
+		it('returns 403 to a non-admin who can view but not manage an existing source context entity', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const source = await createTestSource(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: source.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'source',
+					sourceId: source.id,
+					scope: ['source'],
+					verbs: ['view'],
+				})
+				.expect(403);
 		});
 
 		it('allows non-admin with manage permission to create a grant', async () => {
@@ -1263,7 +1404,46 @@ describe('/permissionGrants', () => {
 					scope: ['changemaker'],
 					verbs: ['view'],
 				})
-				.expect(401);
+				.expect(403);
+		});
+
+		it('returns 404 to a non-admin when the proposed context entity does not exist', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+			const permissionGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const result = await agent
+				.put(`/permissionGrants/${permissionGrant.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: 9001,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(404);
+			expect(result.body).toMatchObject({
+				name: 'NotFoundError',
+			});
 		});
 
 		it('allows non-admin with manage permission to update a grant', async () => {

@@ -10,6 +10,7 @@ import {
 	loadApplicationFormField,
 	loadProposal,
 	loadProposalVersion,
+	loadSource,
 } from '../database';
 import {
 	getSelfManageGrantFragment,
@@ -22,9 +23,8 @@ import {
 import {
 	InputValidationError,
 	InputConflictError,
-	NotFoundError,
 	FailedMiddlewareError,
-	UnprocessableEntityError,
+	ForbiddenError,
 } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
@@ -47,29 +47,9 @@ const assertApplicationFormExistsForProposal = async (
 		db,
 		authContext,
 		applicationFormId,
-	).catch(() => {
-		throw new InputConflictError('The Application Form does not exist.', {
-			entityType: 'ApplicationForm',
-			entityId: applicationFormId,
-		});
-	});
-
-	const proposal = await loadProposal(db, authContext, proposalId).catch(
-		(err: unknown) => {
-			if (err instanceof NotFoundError) {
-				throw new InputConflictError(
-					`The specified Proposal does not exist (${proposalId}).`,
-					{
-						entityType: 'Proposal',
-						entityId: proposalId,
-						contextEntityType: 'ApplicationForm',
-						contextEntityId: applicationFormId,
-					},
-				);
-			}
-			throw err;
-		},
 	);
+
+	const proposal = await loadProposal(db, authContext, proposalId);
 
 	if (proposal.opportunityId !== applicationForm.opportunityId) {
 		throw new InputConflictError(
@@ -93,34 +73,21 @@ const assertProposalFieldValuesMapToApplicationForm = async (
 	const applicationFormFieldQueries = proposalFieldValues.map(
 		async (proposalFieldValue) => {
 			const { applicationFormFieldId } = proposalFieldValue;
-			try {
-				const applicationFormField = await loadApplicationFormField(
-					db,
-					authContext,
-					proposalFieldValue.applicationFormFieldId,
+			const applicationFormField = await loadApplicationFormField(
+				db,
+				authContext,
+				applicationFormFieldId,
+			);
+			if (applicationFormField.applicationFormId !== applicationFormId) {
+				throw new InputConflictError(
+					`Application Form Field (${applicationFormFieldId}) does not exist in Application Form (${applicationFormId}).`,
+					{
+						entityType: 'ApplicationForm',
+						entityId: applicationFormId,
+						contextEntityType: 'ApplicationFormField',
+						contextEntityId: applicationFormFieldId,
+					},
 				);
-				if (applicationFormField.applicationFormId !== applicationFormId) {
-					throw new InputConflictError(
-						`Application Form Field (${applicationFormFieldId}) does not exist in Application Form (${applicationFormId}).`,
-						{
-							entityType: 'ApplicationForm',
-							entityId: applicationFormId,
-							contextEntityType: 'ApplicationFormField',
-							contextEntityId: applicationFormFieldId,
-						},
-					);
-				}
-			} catch (error) {
-				if (error instanceof NotFoundError) {
-					throw new InputConflictError(
-						'The Application Form Field does not exist.',
-						{
-							entityType: 'ApplicationFormField',
-							entityId: applicationFormFieldId,
-						},
-					);
-				}
-				throw error;
 			}
 		},
 	);
@@ -145,108 +112,93 @@ const postProposalVersion = async (
 	}
 
 	const { sourceId, fieldValues, proposalId, applicationFormId } = body;
-	try {
-		const proposal = await loadProposal(db, req, proposalId);
-		if (
-			!(await hasProposalPermission(db, req, {
-				proposalId: proposal.id,
-				permission: PermissionGrantVerb.EDIT,
-				scope: PermissionGrantEntityType.PROPOSAL,
-			}))
-		) {
-			throw new UnprocessableEntityError(
-				'You do not have write permissions on this proposal.',
-			);
-		}
-		if (
-			!(await hasSourcePermission(db, req, {
-				sourceId,
-				permission: PermissionGrantVerb.REFERENCE,
-				scope: PermissionGrantEntityType.SOURCE,
-			}))
-		) {
-			throw new UnprocessableEntityError(
-				'You do not have permission to reference the specified source.',
-			);
-		}
-		await assertApplicationFormExistsForProposal(
-			db,
-			req,
-			applicationFormId,
-			proposalId,
+	const proposal = await loadProposal(db, req, proposalId);
+	if (
+		!(await hasProposalPermission(db, req, {
+			proposalId: proposal.id,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.PROPOSAL,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create a proposal version for the specified proposal.',
 		);
-		await assertProposalFieldValuesMapToApplicationForm(
-			db,
-			req,
-			applicationFormId,
-			fieldValues,
-		);
-		const committedProposalVersion = await db.transaction(
-			async (transactionDb) => {
-				const proposalVersion = await createProposalVersion(
-					transactionDb,
-					req,
-					{
-						proposalId,
-						applicationFormId,
-						sourceId,
-					},
-				);
-				await createPermissionGrant(transactionDb, req, {
-					...getSelfManageGrantFragment(req),
-					contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION,
-					proposalVersionId: proposalVersion.id,
-				});
-				const proposalFieldValues = await allNoLeaks(
-					fieldValues.map(async (fieldValue) => {
-						const { value, applicationFormFieldId } = fieldValue;
-						const applicationFormField = await loadApplicationFormField(
-							transactionDb,
-							req,
-							applicationFormFieldId,
-						);
-						const isValid = fieldValueIsValid(
-							value,
-							applicationFormField.baseField.dataType,
-						);
-						const proposalFieldValue = await createProposalFieldValue(
-							transactionDb,
-							req,
-							{
-								...fieldValue,
-								proposalVersionId: proposalVersion.id,
-								isValid,
-							},
-						);
-						await createPermissionGrant(transactionDb, req, {
-							...getSelfManageGrantFragment(req),
-							contextEntityType: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
-							proposalFieldValueId: proposalFieldValue.id,
-						});
-						return proposalFieldValue;
-					}),
-				);
-				return {
-					...proposalVersion,
-					fieldValues: proposalFieldValues,
-				};
-			},
-		);
-		res
-			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
-			.contentType('application/json')
-			.send(committedProposalVersion);
-	} catch (error: unknown) {
-		if (error instanceof NotFoundError) {
-			if (error.details.entityType === 'Proposal') {
-				throw new InputConflictError(`The related entity does not exist`, {
-					entityType: 'Proposal',
-					entityId: proposalId,
-				});
-			}
-		}
-		throw error;
 	}
+	if (
+		!(await hasSourcePermission(db, req, {
+			sourceId,
+			permission: PermissionGrantVerb.REFERENCE,
+			scope: PermissionGrantEntityType.SOURCE,
+		}))
+	) {
+		await loadSource(db, req, sourceId);
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to reference the specified source.',
+		);
+	}
+	await assertApplicationFormExistsForProposal(
+		db,
+		req,
+		applicationFormId,
+		proposalId,
+	);
+	await assertProposalFieldValuesMapToApplicationForm(
+		db,
+		req,
+		applicationFormId,
+		fieldValues,
+	);
+	const committedProposalVersion = await db.transaction(
+		async (transactionDb) => {
+			const proposalVersion = await createProposalVersion(transactionDb, req, {
+				proposalId,
+				applicationFormId,
+				sourceId,
+			});
+			await createPermissionGrant(transactionDb, req, {
+				...getSelfManageGrantFragment(req),
+				contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION,
+				proposalVersionId: proposalVersion.id,
+			});
+			const proposalFieldValues = await allNoLeaks(
+				fieldValues.map(async (fieldValue) => {
+					const { value, applicationFormFieldId } = fieldValue;
+					const applicationFormField = await loadApplicationFormField(
+						transactionDb,
+						req,
+						applicationFormFieldId,
+					);
+					const isValid = fieldValueIsValid(
+						value,
+						applicationFormField.baseField.dataType,
+					);
+					const proposalFieldValue = await createProposalFieldValue(
+						transactionDb,
+						req,
+						{
+							...fieldValue,
+							proposalVersionId: proposalVersion.id,
+							isValid,
+						},
+					);
+					await createPermissionGrant(transactionDb, req, {
+						...getSelfManageGrantFragment(req),
+						contextEntityType: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+						proposalFieldValueId: proposalFieldValue.id,
+					});
+					return proposalFieldValue;
+				}),
+			);
+			return {
+				...proposalVersion,
+				fieldValues: proposalFieldValues,
+			};
+		},
+	);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.contentType('application/json')
+		.send(committedProposalVersion);
 };
 
 const getProposalVersion = async (

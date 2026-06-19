@@ -33,9 +33,6 @@
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
 			},
-			"404": {
-				"$ref": "../components/responses/NotFound.json"
-			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"
 			}
@@ -73,6 +70,16 @@
 			},
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"422": {
+				"$ref": "../components/responses/UnprocessableEntity.json",
+				"description": "A referenced file does not exist or is not owned by the authenticated user."
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"

@@ -1,5 +1,10 @@
 import { requireFunderPermission } from '../requireFunderPermission';
-import { InputValidationError, UnauthorizedError } from '../../errors';
+import {
+	ForbiddenError,
+	InputValidationError,
+	NotFoundError,
+	UnauthorizedError,
+} from '../../errors';
 import {
 	getDatabase,
 	createPermissionGrant,
@@ -61,7 +66,7 @@ describe('requireFunderPermission', () => {
 		void requireFunderPermission(PermissionGrantVerb.VIEW)(req, res, nextMock);
 	});
 
-	it('calls next with an UnauthorizedError when user lacks permission', (done) => {
+	it('calls next with a ForbiddenError when user lacks permission but can view the funder', (done) => {
 		void (async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
@@ -74,11 +79,34 @@ describe('requireFunderPermission', () => {
 			req.role = { isAdministrator: false };
 			req.params = { funderShortCode: unpermittedFunder.shortCode };
 			const nextMock = jest.fn((error: unknown) => {
-				expect(error).toBeInstanceOf(UnauthorizedError);
+				expect(error).toBeInstanceOf(ForbiddenError);
 				expect(error).toMatchObject({
 					message:
 						'Authenticated user does not have permission to perform this action.',
 				});
+				done();
+			});
+
+			void requireFunderPermission(PermissionGrantVerb.EDIT)(
+				req,
+				res,
+				nextMock,
+			);
+		})();
+	});
+
+	it('calls next with a NotFoundError when the funder does not exist', (done) => {
+		void (async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+
+			const req = getMockRequest() as AuthenticatedRequest;
+			const res = getMockResponse();
+			req.user = testUser;
+			req.role = { isAdministrator: false };
+			req.params = { funderShortCode: 'nonexistentfunder' };
+			const nextMock = jest.fn((error: unknown) => {
+				expect(error).toBeInstanceOf(NotFoundError);
 				done();
 			});
 
@@ -126,7 +154,7 @@ describe('requireFunderPermission', () => {
 		})();
 	});
 
-	it('calls next with an UnauthorizedError when user has a different permission than required', (done) => {
+	it('calls next with a ForbiddenError when user has a different permission than required', (done) => {
 		void (async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
@@ -150,7 +178,7 @@ describe('requireFunderPermission', () => {
 			req.role = { isAdministrator: false };
 			req.params = { funderShortCode: viewOnlyFunder.shortCode };
 			const nextMock = jest.fn((error: unknown) => {
-				expect(error).toBeInstanceOf(UnauthorizedError);
+				expect(error).toBeInstanceOf(ForbiddenError);
 				expect(error).toMatchObject({
 					message:
 						'Authenticated user does not have permission to perform this action.',

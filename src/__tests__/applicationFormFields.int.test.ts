@@ -478,7 +478,7 @@ describe('/applicationFormFields', () => {
 				.expect(401);
 		});
 
-		it('returns 401 for user without funder EDIT permission', async () => {
+		it('returns 403 for a user who can view the field but lacks funder EDIT permission', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -521,7 +521,7 @@ describe('/applicationFormFields', () => {
 				.send({
 					label: 'New Label',
 				})
-				.expect(401);
+				.expect(403);
 		});
 
 		it('successfully updates a field when granted edit at the application form level', async () => {

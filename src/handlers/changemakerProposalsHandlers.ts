@@ -16,9 +16,8 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	NotFoundError,
-	UnprocessableEntityError,
 } from '../errors';
 import {
 	extractChangemakerParameters,
@@ -72,36 +71,27 @@ const postChangemakerProposal = async (
 	}
 
 	const { proposalId, changemakerId } = body;
-	try {
-		const proposal = await loadProposal(db, req, proposalId);
-		const opportunity = await loadOpportunity(db, req, proposal.opportunityId);
-		if (
-			!(await hasFunderPermission(db, req, {
-				funderShortCode: opportunity.funderShortCode,
-				permission: PermissionGrantVerb.EDIT,
-				scope: PermissionGrantEntityType.FUNDER,
-			}))
-		) {
-			throw new UnprocessableEntityError(
-				'You do not have write permissions on the funder associated with this proposal.',
-			);
-		}
-		const changemakerProposal = await createChangemakerProposal(db, null, {
-			changemakerId,
-			proposalId,
-		});
-		res
-			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
-			.contentType('application/json')
-			.send(changemakerProposal);
-	} catch (error: unknown) {
-		if (error instanceof NotFoundError) {
-			throw new UnprocessableEntityError(
-				`related ${error.details.entityType} not found.`,
-			);
-		}
-		throw error;
+	const proposal = await loadProposal(db, req, proposalId);
+	const opportunity = await loadOpportunity(db, req, proposal.opportunityId);
+	if (
+		!(await hasFunderPermission(db, req, {
+			funderShortCode: opportunity.funderShortCode,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.FUNDER,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to edit the funder associated with the specified proposal.',
+		);
 	}
+	const changemakerProposal = await createChangemakerProposal(db, null, {
+		changemakerId,
+		proposalId,
+	});
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.contentType('application/json')
+		.send(changemakerProposal);
 };
 
 export const changemakerProposalsHandlers = {

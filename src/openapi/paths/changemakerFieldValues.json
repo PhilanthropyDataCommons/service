@@ -70,13 +70,15 @@
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
 			},
-			"409": {
-				"$ref": "../components/responses/Conflict.json",
-				"description": "The changemaker, base field, or batch does not exist."
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
 			},
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json",
-				"description": "The request body was invalid or the base field is not an organization-category field."
+				"description": "The base field is not an organization-category field, or the base field is forbidden."
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"

@@ -7,6 +7,9 @@ import {
 	hasChangemakerPermission,
 	hasDataProviderPermission,
 	hasFunderPermission,
+	loadChangemaker,
+	loadDataProvider,
+	loadFunder,
 	loadSource,
 	loadSourceBundle,
 	removeSource,
@@ -21,8 +24,8 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	UnprocessableEntityError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
@@ -48,8 +51,9 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 			scope: PermissionGrantEntityType.SOURCE,
 		}))
 	) {
-		throw new UnprocessableEntityError(
-			'You do not have permission to create a source for the specified funder.',
+		await loadFunder(db, req, body.funderShortCode);
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create a source for the specified funder.',
 		);
 	}
 	if (
@@ -60,8 +64,9 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 			scope: PermissionGrantEntityType.SOURCE,
 		}))
 	) {
-		throw new UnprocessableEntityError(
-			'You do not have permission to create a source for the specified data provider.',
+		await loadDataProvider(db, req, body.dataProviderShortCode);
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create a source for the specified data provider.',
 		);
 	}
 	if (
@@ -72,8 +77,9 @@ const postSource = async (req: Request, res: Response): Promise<void> => {
 			scope: PermissionGrantEntityType.SOURCE,
 		}))
 	) {
-		throw new UnprocessableEntityError(
-			'You do not have permission to create a source for the specified changemaker.',
+		await loadChangemaker(db, req, body.changemakerId);
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create a source for the specified changemaker.',
 		);
 	}
 

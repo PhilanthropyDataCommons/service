@@ -1,5 +1,6 @@
 export * from './DatabaseError';
 export * from './FailedMiddlewareError';
+export * from './ForbiddenError';
 export * from './InputConflictError';
 export * from './InputValidationError';
 export * from './InternalValidationError';

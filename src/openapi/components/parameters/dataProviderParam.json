@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"$ref": "../schemas/shortCode.json"
+	},
+	"in": "query",
+	"name": "dataProvider",
+	"required": false,
+	"description": "A reference (shortCode) to an existing data provider entity."
+}

@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"$ref": "../schemas/PermissionGrantGranteeType.json"
+	},
+	"in": "query",
+	"name": "granteeType",
+	"required": false,
+	"description": "Filters permission grants by grantee type."
+}

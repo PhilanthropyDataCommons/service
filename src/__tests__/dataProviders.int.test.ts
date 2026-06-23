@@ -203,6 +203,12 @@ describe('/dataProviders', () => {
 			const grants = await loadPermissionGrantBundle(
 				db,
 				getAuthContext(systemUser, true),
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);
@@ -230,6 +236,12 @@ describe('/dataProviders', () => {
 			const before = await loadPermissionGrantBundle(
 				db,
 				systemUserAuthContext,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);
@@ -242,6 +254,12 @@ describe('/dataProviders', () => {
 			const after = await loadPermissionGrantBundle(
 				db,
 				systemUserAuthContext,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);

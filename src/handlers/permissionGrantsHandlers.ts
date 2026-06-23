@@ -31,7 +31,15 @@ import {
 	NoDataReturnedError,
 	NotFoundError,
 } from '../errors';
-import { extractPaginationParameters } from '../queryParameters';
+import {
+	extractChangemakerParameters,
+	extractDataProviderParameters,
+	extractFunderParameters,
+	extractGranteeTypeParameters,
+	extractPaginationParameters,
+	extractProposalParameters,
+	extractVerbParameters,
+} from '../queryParameters';
 import {
 	getConditionsForScope,
 	getScopesForContextEntityType,
@@ -48,6 +56,8 @@ import {
 import { coerceParams } from '../coercion';
 import type { TinyPg } from 'tinypg';
 import type { Request, Response } from 'express';
+
+const MAXIMUM_CONTEXT_ENTITY_FILTERS = 1;
 
 const assertPermissionGrantContextEntityTypeIsSupported = (
 	permissionGrant: WritableUnkeyedPermissionGrant,
@@ -207,10 +217,35 @@ const getPermissionGrants = async (
 	const db = getDatabase();
 	const paginationParameters = extractPaginationParameters(req);
 	const { limit, offset } = getLimitValues(paginationParameters);
+	const { changemakerId } = extractChangemakerParameters(req);
+	const { funderShortCode } = extractFunderParameters(req);
+	const { dataProviderShortCode } = extractDataProviderParameters(req);
+	const { proposalId } = extractProposalParameters(req);
+	const { granteeType } = extractGranteeTypeParameters(req);
+	const { verb } = extractVerbParameters(req);
+
+	const contextEntityFilters = [
+		changemakerId,
+		funderShortCode,
+		dataProviderShortCode,
+		proposalId,
+	].filter((filterValue) => filterValue !== undefined);
+	if (contextEntityFilters.length > MAXIMUM_CONTEXT_ENTITY_FILTERS) {
+		throw new InputValidationError(
+			'Only one of changemaker, funder, dataProvider, or proposal may be provided.',
+			[],
+		);
+	}
 
 	const permissionGrantBundle = await loadPermissionGrantBundle(
 		db,
 		req,
+		changemakerId,
+		funderShortCode,
+		dataProviderShortCode,
+		proposalId,
+		granteeType,
+		verb,
 		limit,
 		offset,
 	);

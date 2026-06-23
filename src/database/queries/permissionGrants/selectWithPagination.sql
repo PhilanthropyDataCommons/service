@@ -8,6 +8,31 @@ WITH
 					:authContextIsAdministrator
 				) AS permitted_grants
 				ON permission_grants.id = permitted_grants.id
+		WHERE
+			CASE
+				WHEN :changemakerId::integer IS NULL THEN TRUE
+				ELSE permission_grants.changemaker_id = :changemakerId
+			END
+			AND CASE
+				WHEN :funderShortCode::short_code_t IS NULL THEN TRUE
+				ELSE permission_grants.funder_short_code = :funderShortCode
+			END
+			AND CASE
+				WHEN :dataProviderShortCode::short_code_t IS NULL THEN TRUE
+				ELSE permission_grants.data_provider_short_code = :dataProviderShortCode
+			END
+			AND CASE
+				WHEN :proposalId::integer IS NULL THEN TRUE
+				ELSE permission_grants.proposal_id = :proposalId
+			END
+			AND CASE
+				WHEN :granteeType::permission_grant_grantee_type_t IS NULL THEN TRUE
+				ELSE permission_grants.grantee_type = :granteeType
+			END
+			AND CASE
+				WHEN :verb::permission_grant_verb_t IS NULL THEN TRUE
+				ELSE :verb::permission_grant_verb_t = any(permission_grants.verbs)
+			END
 	),
 
 	entry_count AS (

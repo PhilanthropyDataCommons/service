@@ -497,6 +497,12 @@ describe('/funders', () => {
 			const grants = await loadPermissionGrantBundle(
 				db,
 				getAuthContext(systemUser, true),
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);
@@ -526,6 +532,12 @@ describe('/funders', () => {
 			const before = await loadPermissionGrantBundle(
 				db,
 				systemUserAuthContext,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);
@@ -538,6 +550,12 @@ describe('/funders', () => {
 			const after = await loadPermissionGrantBundle(
 				db,
 				systemUserAuthContext,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);

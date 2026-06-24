@@ -260,6 +260,8 @@ PDC would then:
 
 It would use the ProposalFieldValue set as the primary source, and the ChangemakerFieldValue set as a secondary source.
 
+See also the [PDC Glossary](GLOSSARY.md) for more information about some of the terms used above.
+
 ## Examples
 
 ### Registering an Application Form

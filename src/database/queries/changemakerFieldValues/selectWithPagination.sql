@@ -2,6 +2,14 @@ WITH
 	candidate_entries AS MATERIALIZED (
 		SELECT changemaker_field_values.*
 		FROM changemaker_field_values
+			INNER JOIN
+				permitted_changemaker_field_value_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'changemakerFieldValue'
+				) AS permitted_field_values
+				ON changemaker_field_values.id = permitted_field_values.id
 		WHERE
 			CASE
 				WHEN :batchId::integer IS NULL THEN
@@ -15,13 +23,6 @@ WITH
 				ELSE
 					changemaker_field_values.changemaker_id = :changemakerId
 			END
-			AND has_changemaker_field_value_permission(
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator,
-				changemaker_field_values.id,
-				'view',
-				'changemakerFieldValue'
-			)
 	),
 
 	entry_count AS (

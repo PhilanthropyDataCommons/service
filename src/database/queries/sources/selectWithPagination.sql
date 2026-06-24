@@ -2,13 +2,14 @@ WITH
 	candidate_entries AS MATERIALIZED (
 		SELECT sources.*
 		FROM sources
-		WHERE has_source_permission(
-			:authContextKeycloakUserId,
-			:authContextIsAdministrator,
-			sources.id,
-			'view',
-			'source'
-		)
+			INNER JOIN
+				permitted_source_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'source'
+				) AS permitted_sources
+				ON sources.id = permitted_sources.id
 	),
 
 	entry_count AS (

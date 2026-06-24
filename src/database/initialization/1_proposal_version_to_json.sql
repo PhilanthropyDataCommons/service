@@ -16,14 +16,14 @@ BEGIN
 	)
 	INTO proposal_field_values_json
 	FROM proposal_field_values
-	WHERE proposal_field_values.proposal_version_id = proposal_version.id
-		AND has_proposal_field_value_permission(
-			auth_context_keycloak_user_id,
-			auth_context_is_administrator,
-			proposal_field_values.id,
-			'view',
-			'proposalFieldValue'
-		);
+	INNER JOIN permitted_proposal_field_value_ids(
+		auth_context_keycloak_user_id,
+		auth_context_is_administrator,
+		'view',
+		'proposalFieldValue'
+	) AS permitted_field_values
+		ON permitted_field_values.id = proposal_field_values.id
+	WHERE proposal_field_values.proposal_version_id = proposal_version.id;
 
 	SELECT source_to_json(
 		sources.*,

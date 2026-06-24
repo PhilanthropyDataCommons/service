@@ -1,11 +1,11 @@
 SELECT changemaker_field_value_to_json(changemaker_field_values.*) AS object
 FROM changemaker_field_values
-WHERE
-	id = :fieldValueId
-	AND has_changemaker_field_value_permission(
-		:authContextKeycloakUserId,
-		:authContextIsAdministrator,
-		id,
-		'view',
-		'changemakerFieldValue'
-	);
+	INNER JOIN
+		permitted_changemaker_field_value_ids(
+			:authContextKeycloakUserId,
+			:authContextIsAdministrator,
+			'view',
+			'changemakerFieldValue'
+		) AS permitted_field_values
+		ON changemaker_field_values.id = permitted_field_values.id
+WHERE changemaker_field_values.id = :fieldValueId;

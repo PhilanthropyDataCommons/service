@@ -2,6 +2,14 @@ WITH
 	candidate_entries AS MATERIALIZED (
 		SELECT opportunities.*
 		FROM opportunities
+			INNER JOIN
+				permitted_opportunity_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'opportunity'
+				) AS permitted_opportunities
+				ON opportunities.id = permitted_opportunities.id
 		WHERE
 			CASE
 				WHEN :funderShortCode::short_code_t IS NULL THEN
@@ -9,13 +17,6 @@ WITH
 				ELSE
 					opportunities.funder_short_code = :funderShortCode
 			END
-			AND has_opportunity_permission(
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator,
-				opportunities.id,
-				'view',
-				'opportunity'
-			)
 	),
 
 	entry_count AS (

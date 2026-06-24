@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.39.0 2026-06-24
+
+### Changed
+
+- Listing opportunities and bulk upload tasks no longer slows down as the number of permission grants grows.
+- Listing application forms and application form fields no longer slows down as the number of permission grants grows.
+- Listing sources no longer slows down as the number of permission grants grows.
+- Listing proposals and changemaker-proposal relationships no longer slows down as the number of permission grants grows.
+- Listing changemaker field values no longer slows down as the number of permission grants grows.
+- Listing permission grants no longer slows down as the number of permission grants grows.
+
 ### Fixed
 
 - Funder collaborative endpoints now return `403` (or `404`) instead of `401` when an authenticated user lacks permission.

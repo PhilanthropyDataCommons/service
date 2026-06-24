@@ -2,6 +2,14 @@ WITH
 	candidate_entries AS MATERIALIZED (
 		SELECT proposals.*
 		FROM proposals
+			INNER JOIN
+				permitted_proposal_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'proposal'
+				) AS permitted_proposals
+				ON proposals.id = permitted_proposals.id
 			INNER JOIN opportunities
 				ON proposals.opportunity_id = opportunities.id
 			LEFT JOIN proposal_versions ON proposals.id = proposal_versions.proposal_id
@@ -52,13 +60,6 @@ WITH
 				ELSE
 					opportunities.funder_short_code = :funderShortCode
 			END
-			AND has_proposal_permission(
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator,
-				proposals.id,
-				'view',
-				'proposal'
-			)
 		GROUP BY proposals.id
 	),
 

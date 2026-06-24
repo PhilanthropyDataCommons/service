@@ -2,14 +2,14 @@ WITH
 	candidate_entries AS MATERIALIZED (
 		SELECT application_forms.*
 		FROM application_forms
-		WHERE
-			has_application_form_permission(
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator,
-				application_forms.id,
-				'view',
-				'applicationForm'
-			)
+			INNER JOIN
+				permitted_application_form_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'applicationForm'
+				) AS permitted_application_forms
+				ON application_forms.id = permitted_application_forms.id
 	),
 
 	entry_count AS (

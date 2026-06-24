@@ -61,6 +61,14 @@ BEGIN
 				ON pv.proposal_id = op.proposal_id
 			INNER JOIN sources s
 				ON pv.source_id = s.id
+			-- Restrict to field values the user may view.
+			INNER JOIN permitted_proposal_field_value_ids(
+				auth_context_keycloak_user_id,
+				auth_context_is_administrator,
+				'view',
+				'proposalFieldValue'
+			) AS permitted_field_values
+				ON permitted_field_values.id = pfv.id
 			WHERE op.changemaker_id = changemaker.id
 				AND bf.category = 'organization'
 				AND pfv.is_valid
@@ -68,14 +76,6 @@ BEGIN
 				AND u.keycloak_user_id IS NOT NULL
 				-- Guard against the valid-but-not-really-valid-here system user:
 				AND u.keycloak_user_id != system_keycloak_user_id()
-				-- Check permission to view this proposal field value:
-				AND has_proposal_field_value_permission(
-					auth_context_keycloak_user_id,
-					auth_context_is_administrator,
-					pfv.id,
-					'view',
-					'proposalFieldValue'
-				)
 
 			UNION ALL
 
@@ -102,6 +102,14 @@ BEGIN
 				ON cfv.batch_id = cfvb.id
 			INNER JOIN sources s
 				ON cfvb.source_id = s.id
+			-- Restrict to field values the user may view.
+			INNER JOIN permitted_changemaker_field_value_ids(
+				auth_context_keycloak_user_id,
+				auth_context_is_administrator,
+				'view',
+				'changemakerFieldValue'
+			) AS permitted_field_values
+				ON permitted_field_values.id = cfv.id
 			WHERE cfv.changemaker_id = changemaker.id
 				AND bf.category = 'organization'
 				AND cfv.is_valid
@@ -109,14 +117,6 @@ BEGIN
 				AND u.keycloak_user_id IS NOT NULL
 				-- Guard against the valid-but-not-really-valid-here system user:
 				AND u.keycloak_user_id != system_keycloak_user_id()
-				-- Check permission to view this changemaker field value:
-				AND has_changemaker_field_value_permission(
-					auth_context_keycloak_user_id,
-					auth_context_is_administrator,
-					cfv.id,
-					'view',
-					'changemakerFieldValue'
-				)
 		) AS combined_field_values
 		ORDER BY
 			base_field_short_code,

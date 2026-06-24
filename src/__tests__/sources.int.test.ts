@@ -15,6 +15,7 @@ import {
 	expectArray,
 	expectArrayContaining,
 	expectObjectContaining,
+	expectString,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
 import {
@@ -508,7 +509,7 @@ describe('/sources', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 if the user does not have create source permission on the changemaker', async () => {
+		it('returns 403 if the user does not have create source permission on the changemaker', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -558,13 +559,13 @@ describe('/sources', () => {
 					label: 'Example Corp',
 					changemakerId: changemaker.id,
 				})
-				.expect(422);
+				.expect(403);
 			const after = await loadTableMetrics(db, 'sources');
 			expect(result.body).toEqual({
-				details: [{ name: 'UnprocessableEntityError' }],
+				details: [{ name: 'ForbiddenError' }],
 				message:
-					'You do not have permission to create a source for the specified changemaker.',
-				name: 'UnprocessableEntityError',
+					'Authenticated user does not have permission to create a source for the specified changemaker.',
+				name: 'ForbiddenError',
 			});
 			expect(after.count).toEqual(before.count);
 		});
@@ -634,7 +635,7 @@ describe('/sources', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 if the user does not have create source permission on the funder', async () => {
+		it('returns 403 if the user does not have create source permission on the funder', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -684,13 +685,13 @@ describe('/sources', () => {
 					label: 'Example Corp',
 					funderShortCode: funder.shortCode,
 				})
-				.expect(422);
+				.expect(403);
 			const after = await loadTableMetrics(db, 'sources');
 			expect(result.body).toEqual({
-				details: [{ name: 'UnprocessableEntityError' }],
+				details: [{ name: 'ForbiddenError' }],
 				message:
-					'You do not have permission to create a source for the specified funder.',
-				name: 'UnprocessableEntityError',
+					'Authenticated user does not have permission to create a source for the specified funder.',
+				name: 'ForbiddenError',
 			});
 			expect(after.count).toEqual(before.count);
 		});
@@ -766,7 +767,7 @@ describe('/sources', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 if the user does not have create source permission on the data provider', async () => {
+		it('returns 403 if the user does not have create source permission on the data provider', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -811,15 +812,63 @@ describe('/sources', () => {
 					label: 'Example Corp',
 					dataProviderShortCode: dataProvider.shortCode,
 				})
-				.expect(422);
+				.expect(403);
 			const after = await loadTableMetrics(db, 'sources');
 			expect(result.body).toEqual({
-				details: [{ name: 'UnprocessableEntityError' }],
+				details: [{ name: 'ForbiddenError' }],
 				message:
-					'You do not have permission to create a source for the specified data provider.',
-				name: 'UnprocessableEntityError',
+					'Authenticated user does not have permission to create a source for the specified data provider.',
+				name: 'ForbiddenError',
 			});
 			expect(after.count).toEqual(before.count);
+		});
+
+		it('returns 404 when the specified funder does not exist', async () => {
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Example Corp',
+					funderShortCode: 'doesnotexist',
+				})
+				.expect(404);
+			expect(result.body).toMatchObject({
+				name: 'NotFoundError',
+				message: expectString(),
+			});
+		});
+
+		it('returns 404 when the specified data provider does not exist', async () => {
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Example Corp',
+					dataProviderShortCode: 'doesnotexist',
+				})
+				.expect(404);
+			expect(result.body).toMatchObject({
+				name: 'NotFoundError',
+				message: expectString(),
+			});
+		});
+
+		it('returns 404 when the specified changemaker does not exist', async () => {
+			const result = await agent
+				.post('/sources')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					label: 'Example Corp',
+					changemakerId: 999999,
+				})
+				.expect(404);
+			expect(result.body).toMatchObject({
+				name: 'NotFoundError',
+				message: expectString(),
+			});
 		});
 
 		it('returns 400 bad request when no label sent', async () => {

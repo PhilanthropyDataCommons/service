@@ -16,12 +16,7 @@
 			"readOnly": true
 		},
 		"details": {
-			"type": "object",
-			"properties": {
-				"entries": {
-					"$ref": "./BulkUploadLogDetails.json"
-				}
-			},
+			"allOf": [{ "$ref": "./BulkUploadLogDetails.json" }],
 			"readOnly": true
 		}
 	},

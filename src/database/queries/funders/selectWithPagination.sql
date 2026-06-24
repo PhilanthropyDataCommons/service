@@ -12,7 +12,7 @@ WITH
 			END AS tsquery
 	),
 
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT funders.*
 		FROM funders
 			CROSS JOIN search_query

@@ -42,6 +42,7 @@ import {
 	expectArrayContaining,
 	expectNumber,
 	expectObjectContaining,
+	expectString,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
 import {
@@ -411,7 +412,7 @@ describe('/proposalVersions', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 when user has edit|funder but not edit|proposal scope', async () => {
+		it('returns 403 when user has edit|funder but not edit|proposal scope', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -462,7 +463,7 @@ describe('/proposalVersions', () => {
 					sourceId: systemSource.id,
 					fieldValues: [],
 				})
-				.expect(422);
+				.expect(403);
 		});
 
 		it('creates a proposal version for a user with edit|proposal on the opportunity', async () => {
@@ -520,7 +521,7 @@ describe('/proposalVersions', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 when the user lacks reference permission on the source', async () => {
+		it('returns 403 when the user can view the source but lacks reference permission', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -540,6 +541,14 @@ describe('/proposalVersions', () => {
 				],
 				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
 			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: systemSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
 			const proposal = await createTestProposal(db, testUserAuthContext, {
 				opportunityId: opportunity.id,
 			});
@@ -557,11 +566,11 @@ describe('/proposalVersions', () => {
 					sourceId: systemSource.id,
 					fieldValues: [],
 				})
-				.expect(422);
+				.expect(403);
 			expect(result.body).toMatchObject({
-				name: 'UnprocessableEntityError',
+				name: 'ForbiddenError',
 				message:
-					'You do not have permission to reference the specified source.',
+					'Authenticated user does not have permission to reference the specified source.',
 			});
 		});
 
@@ -826,7 +835,7 @@ describe('/proposalVersions', () => {
 				.expect(400);
 		});
 
-		it('returns 409 Conflict when the provided proposal does not exist', async () => {
+		it('returns 404 Not Found when the provided proposal does not exist', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -850,16 +859,11 @@ describe('/proposalVersions', () => {
 					sourceId: systemSource.id,
 					fieldValues: [],
 				})
-				.expect(409);
+				.expect(404);
 
 			expect(result.body).toMatchObject({
-				name: 'InputConflictError',
-				details: [
-					{
-						entityType: 'Proposal',
-						entityId: nonExistentProposalId,
-					},
-				],
+				name: 'NotFoundError',
+				message: expectString(),
 			});
 		});
 
@@ -888,7 +892,7 @@ describe('/proposalVersions', () => {
 				.expect(422);
 		});
 
-		it('Returns 409 Conflict if the provided application form does not exist', async () => {
+		it('Returns 404 Not Found if the provided application form does not exist', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -913,18 +917,13 @@ describe('/proposalVersions', () => {
 					sourceId: systemSource.id,
 					fieldValues: [],
 				})
-				.expect(409);
+				.expect(404);
 			const after = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
-				name: 'InputConflictError',
-				details: [
-					{
-						entityType: 'ApplicationForm',
-						entityId: 9999,
-					},
-				],
+				name: 'NotFoundError',
+				message: expectString(),
 			});
 			expect(after.count).toEqual(0);
 		});
@@ -977,7 +976,7 @@ describe('/proposalVersions', () => {
 			expect(after.count).toEqual(0);
 		});
 
-		it('Returns 409 Conflict if a provided application form field ID does not exist', async () => {
+		it('Returns 404 Not Found if a provided application form field ID does not exist', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -1011,18 +1010,13 @@ describe('/proposalVersions', () => {
 						},
 					],
 				})
-				.expect(409);
+				.expect(404);
 			const after = await loadTableMetrics(db, 'proposal_field_values');
 			logger.debug('after: %o', after);
 			expect(before.count).toEqual(0);
 			expect(result.body).toMatchObject({
-				name: 'InputConflictError',
-				details: [
-					{
-						entityType: 'ApplicationFormField',
-						entityId: nonExistentFieldId,
-					},
-				],
+				name: 'NotFoundError',
+				message: expectString(),
 			});
 			expect(after.count).toEqual(0);
 		});

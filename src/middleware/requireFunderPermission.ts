@@ -13,8 +13,12 @@
  * If any of the checks fail, the middleware will pass an appropriate error to the next middleware.
  */
 import { getDatabase } from '../database';
-import { hasFunderPermission } from '../database/operations';
-import { InputValidationError, UnauthorizedError } from '../errors';
+import { hasFunderPermission, loadFunder } from '../database/operations';
+import {
+	ForbiddenError,
+	InputValidationError,
+	UnauthorizedError,
+} from '../errors';
 import {
 	isAuthContext,
 	isShortCode,
@@ -54,8 +58,9 @@ const requireFunderPermission =
 				scope: PermissionGrantEntityType.FUNDER,
 			});
 			if (!hasPermission) {
+				await loadFunder(db, req, funderShortCode);
 				next(
-					new UnauthorizedError(
+					new ForbiddenError(
 						'Authenticated user does not have permission to perform this action.',
 					),
 				);

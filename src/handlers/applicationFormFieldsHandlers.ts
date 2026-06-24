@@ -14,8 +14,8 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	UnauthorizedError,
 } from '../errors';
 import { coerceParams } from '../coercion';
 import type { Request, Response } from 'express';
@@ -56,7 +56,9 @@ const patchApplicationFormField = async (
 			scope: PermissionGrantEntityType.APPLICATION_FORM,
 		}))
 	) {
-		throw new UnauthorizedError();
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to edit the specified application form field.',
+		);
 	}
 
 	const updatedField = await updateApplicationFormField(

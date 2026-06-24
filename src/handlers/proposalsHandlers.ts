@@ -19,9 +19,8 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	NotFoundError,
-	UnprocessableEntityError,
 } from '../errors';
 import {
 	extractCreatedByParameters,
@@ -94,43 +93,34 @@ const postProposal = async (req: Request, res: Response): Promise<void> => {
 	}
 
 	const { externalId, opportunityId } = body;
-	try {
-		const opportunity = await loadOpportunity(db, req, opportunityId);
-		if (
-			!(await hasOpportunityPermission(db, req, {
-				opportunityId: opportunity.id,
-				permission: PermissionGrantVerb.CREATE,
-				scope: PermissionGrantEntityType.PROPOSAL,
-			}))
-		) {
-			throw new UnprocessableEntityError(
-				'You do not have permission to create a proposal for this opportunity.',
-			);
-		}
-		const committedProposal = await db.transaction(async (txDb) => {
-			const proposal = await createProposal(txDb, req, {
-				opportunityId,
-				externalId,
-			});
-			await createPermissionGrant(txDb, req, {
-				...getSelfManageGrantFragment(req),
-				contextEntityType: PermissionGrantEntityType.PROPOSAL,
-				proposalId: proposal.id,
-			});
-			return proposal;
-		});
-		res
-			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
-			.contentType('application/json')
-			.send(committedProposal);
-	} catch (error: unknown) {
-		if (error instanceof NotFoundError) {
-			throw new UnprocessableEntityError(
-				`The associated ${error.details.entityType} was not found.`,
-			);
-		}
-		throw error;
+	const opportunity = await loadOpportunity(db, req, opportunityId);
+	if (
+		!(await hasOpportunityPermission(db, req, {
+			opportunityId: opportunity.id,
+			permission: PermissionGrantVerb.CREATE,
+			scope: PermissionGrantEntityType.PROPOSAL,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create a proposal for the specified opportunity.',
+		);
 	}
+	const committedProposal = await db.transaction(async (txDb) => {
+		const proposal = await createProposal(txDb, req, {
+			opportunityId,
+			externalId,
+		});
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.PROPOSAL,
+			proposalId: proposal.id,
+		});
+		return proposal;
+	});
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.contentType('application/json')
+		.send(committedProposal);
 };
 
 export const proposalsHandlers = {

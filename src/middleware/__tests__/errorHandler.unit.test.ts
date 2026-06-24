@@ -1,7 +1,7 @@
 import { TinyPgError } from 'tinypg';
 import { UnauthorizedError } from 'express-jwt';
 import { errorHandler } from '../errorHandler';
-import { DatabaseError } from '../../errors';
+import { DatabaseError, ForbiddenError } from '../../errors';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import { getMockNextFunction } from '../../test/utils';
 
@@ -45,6 +45,30 @@ describe('errorHandler', () => {
 			expect.objectContaining({
 				name: 'UnauthorizedError',
 				message: '',
+				details: [err],
+			}),
+		);
+	});
+
+	it('should send 403 for a ForbiddenError', () => {
+		const err = new ForbiddenError(
+			'Authenticated user does not have permission to perform this action.',
+		);
+		const req = getMockRequest();
+		const res = getMockResponse();
+		const statusMock = jest.fn().mockReturnValue(res);
+		const contentTypeMock = jest.fn().mockReturnValue(res);
+		const sendMock = jest.fn().mockReturnValue(res);
+		res.status = statusMock;
+		res.contentType = contentTypeMock;
+		res.send = sendMock;
+		const next = getMockNextFunction();
+		errorHandler(err, req, res, next);
+		expect(statusMock).toHaveBeenCalledWith(403);
+		expect(sendMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message:
+					'Authenticated user does not have permission to perform this action.',
 				details: [err],
 			}),
 		);

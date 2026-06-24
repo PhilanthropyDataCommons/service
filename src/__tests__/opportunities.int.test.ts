@@ -380,7 +380,7 @@ describe('/opportunities', () => {
 			);
 		});
 
-		it('returns 401 unauthorized if the user does not have create opportunity permission on the associated funder', async () => {
+		it('returns 403 forbidden if the user does not have create opportunity permission on the associated funder', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -411,10 +411,22 @@ describe('/opportunities', () => {
 					title: '🎆',
 					funderShortCode: systemFunder.shortCode,
 				})
-				.expect(401);
+				.expect(403);
 			const after = await loadTableMetrics(db, 'opportunities');
 			expect(before.count).toEqual(1);
 			expect(after.count).toEqual(1);
+		});
+
+		it('returns 404 not found when the associated funder does not exist', async () => {
+			await request(app)
+				.post('/opportunities')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					title: '🎆',
+					funderShortCode: 'thisFunderDoesNotExist',
+				})
+				.expect(404);
 		});
 
 		it('returns 400 bad request when no title sent', async () => {

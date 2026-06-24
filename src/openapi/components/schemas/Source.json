@@ -25,7 +25,7 @@
 					"readOnly": true
 				}
 			},
-			"required": ["id", "label", "relatedEntityId", "createdAt", "createdBy"]
+			"required": ["id", "label", "createdAt", "createdBy"]
 		},
 		{
 			"oneOf": [

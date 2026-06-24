@@ -2,6 +2,7 @@ import { UnauthorizedError as JwtUnauthorizedError } from 'express-jwt';
 import { HTTP_STATUS } from '../constants';
 import {
 	DatabaseError,
+	ForbiddenError,
 	InternalValidationError,
 	InputValidationError,
 	InputConflictError,
@@ -91,6 +92,8 @@ const getHttpStatusCodeForError = (error: unknown): number => {
 			case UnauthorizedError:
 			case JwtUnauthorizedError:
 				return HTTP_STATUS.CLIENT_ERROR.UNAUTHORIZED;
+			case ForbiddenError:
+				return HTTP_STATUS.CLIENT_ERROR.FORBIDDEN;
 			case NotFoundError:
 				return HTTP_STATUS.CLIENT_ERROR.NOT_FOUND;
 			case UnprocessableEntityError:

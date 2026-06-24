@@ -30,6 +30,7 @@ import {
 	expectNumber,
 	expectObject,
 	expectObjectContaining,
+	expectString,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
 import {
@@ -675,7 +676,7 @@ describe('/tasks/bulkUploads', () => {
 			expect(after.count).toEqual(1);
 		});
 
-		it('returns 422 unprocessable entity when the user lacks reference permission on the source', async () => {
+		it('returns 403 forbidden when the user can view the source but lacks reference permission', async () => {
 			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
 			const systemUser = await loadSystemUser(db, null);
@@ -701,6 +702,14 @@ describe('/tasks/bulkUploads', () => {
 				funderShortCode: testFunder.shortCode,
 				scope: [PermissionGrantEntityType.PROPOSAL],
 				verbs: [PermissionGrantVerb.CREATE],
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: systemSource.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
 			});
 			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
 
@@ -732,15 +741,15 @@ describe('/tasks/bulkUploads', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send(testData)
-				.expect(422);
+				.expect(403);
 			const after = await loadTableMetrics(db, 'bulk_upload_tasks');
 
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({
-				details: [{ name: 'UnprocessableEntityError' }],
+				details: [{ name: 'ForbiddenError' }],
 				message:
-					'You do not have permission to reference the specified source.',
-				name: 'UnprocessableEntityError',
+					'Authenticated user does not have permission to reference the specified source.',
+				name: 'ForbiddenError',
 			});
 			expect(after.count).toEqual(0);
 		});
@@ -822,7 +831,7 @@ describe('/tasks/bulkUploads', () => {
 				.expect(201);
 		});
 
-		it('returns 422 unprocessable entity when the user does not have create proposal permission for the associated opportunity', async () => {
+		it('returns 403 forbidden when the user can view the application form but does not have create proposal permission for the associated opportunity', async () => {
 			const db = getDatabase();
 			const systemSource = await loadSystemSource(db, null);
 			const systemUser = await loadSystemUser(db, null);
@@ -879,17 +888,46 @@ describe('/tasks/bulkUploads', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send(testData)
-				.expect(422);
+				.expect(403);
 			const after = await loadTableMetrics(db, 'bulk_upload_tasks');
 
 			expect(before.count).toEqual(0);
 			expect(result.body).toEqual({
-				details: [{ name: 'UnprocessableEntityError' }],
+				details: [{ name: 'ForbiddenError' }],
 				message:
-					'You do not have permission to create proposals for this opportunity.',
-				name: 'UnprocessableEntityError',
+					'Authenticated user does not have permission to create proposals for the specified opportunity.',
+				name: 'ForbiddenError',
 			});
 			expect(after.count).toEqual(0);
+		});
+
+		it('returns 404 not found when the application form cannot be viewed or does not exist', async () => {
+			const db = getDatabase();
+			const systemSource = await loadSystemSource(db, null);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const proposalsDataFile = await createTestFile(db, testUserAuthContext);
+
+			const testData: WritableBulkUploadTask = {
+				sourceId: systemSource.id,
+				applicationFormId: 999999,
+				proposalsDataFileId: proposalsDataFile.id,
+				attachmentsArchiveFileId: null,
+			};
+			const before = await loadTableMetrics(db, 'bulk_upload_tasks');
+			const result = await request(app)
+				.post('/tasks/bulkUploads/')
+				.type('application/json')
+				.set(authHeader)
+				.send(testData)
+				.expect(404);
+			const after = await loadTableMetrics(db, 'bulk_upload_tasks');
+
+			expect(result.body).toMatchObject({
+				name: 'NotFoundError',
+				message: expectString(),
+			});
+			expect(after.count).toEqual(before.count);
 		});
 
 		it('returns 400 bad request when no proposalDataFileId is provided', async () => {

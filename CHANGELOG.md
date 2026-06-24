@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Funder collaborative endpoints now return `403` (or `404`) instead of `401` when an authenticated user lacks permission.
+- `POST /opportunities` now returns `403` (or `404`) instead of `401` when an authenticated user lacks permission on the associated funder.
+- `POST /proposals` now returns `403` (or `404`) instead of `422` when an authenticated user lacks permission on (or cannot view) the associated opportunity.
+- `POST /changemakerFieldValueBatches` now returns `403` (or `404`) instead of `422` when an authenticated user lacks permission to reference (or cannot view) the specified source.
+- `POST /changemakerFieldValues` now returns `403` when an authenticated user lacks permission to create field values for the specified changemaker, and `404` (instead of `409`) when the changemaker, base field, or batch does not exist.
+- `POST /changemakerProposals` now returns `403` (instead of `422`) when an authenticated user lacks permission on the funder associated with the proposal, and `404` (instead of `422`) when the associated proposal cannot be viewed or does not exist.
+- `POST /sources` now returns `403` (instead of `422`) when an authenticated user lacks permission to create a source for the specified funder, data provider, or changemaker, and `404` when that organization does not exist.
+- `POST /proposalVersions` now returns `403` (instead of `422`) when an authenticated user lacks permission to edit the proposal or reference the source, and `404` (instead of `409`) when the proposal, source, application form, or application form field cannot be viewed or does not exist. A `409` is now returned only when the application form or field is not associated with the proposal.
+- `POST /tasks/bulkUploads` now returns `403` (instead of `422`) when an authenticated user lacks permission to create proposals for the application form's opportunity or to reference the source, and `404` (instead of `422`) when the application form, opportunity, or source cannot be viewed or does not exist.
+- `POST /permissionGrants` now returns `403` (instead of `401`) when an authenticated user lacks permission to manage permission grants on the specified context entity, and `404` when that context entity cannot be viewed or does not exist.
+- `PUT /permissionGrants/:permissionGrantId` now returns `403` (instead of `401`) when an authenticated user lacks permission to manage permission grants on the specified context entity, and `404` when that context entity cannot be viewed or does not exist.
+- `POST /applicationForms` now returns `403` (instead of `401`) when an authenticated user lacks permission on the associated opportunity, and `404` (instead of `422`) when that opportunity cannot be viewed or does not exist.
+- `PATCH /applicationFormFields/:applicationFormFieldId` now returns `403` (instead of `401`) when an authenticated user lacks edit permission on the field's application form.
+
+## 0.38.0 2026-06-12
+
+### Fixed
+
+- Corrected the OpenAPI `Organization.funder` schema to reference the `Funder` schema instead of `DataProvider`. Documentation-only; no behavior change.
+- Corrected the OpenAPI `Source` schema to no longer list the non-existent `relatedEntityId` as a required property. Documentation-only; no behavior change.
+- Corrected the OpenAPI `PresignedPost.fields` schema to allow the dynamic S3 POST form fields (e.g. `policy`, `x-amz-*`) via `additionalProperties`. Documentation-only; no behavior change.
+- Corrected the OpenAPI `BaseField` schema to mark `shortCode` as `readOnly` (it used the misspelled, ignored `read-only` keyword). Documentation-only; no behavior change.
+- Corrected the OpenAPI `BaseFieldLocalization` schema: `description` and `createdAt` are no longer nullable, `createdAt` is now `readOnly` and required, and `baseFieldShortCode` is now `readOnly`, matching the actual payload. Documentation-only; no behavior change.
+- Corrected the OpenAPI `BulkUploadTask.logs` schema to describe an array of `BulkUploadLog` items (it previously used an invalid bundle-style `properties.entries` shape). Documentation-only; no behavior change.
+- Corrected the OpenAPI `BulkUploadLog.details` schema to reference `BulkUploadLogDetails` directly (it previously wrapped the reference in a spurious `entries` property). Documentation-only; no behavior change.
+- Corrected the OpenAPI `BulkUploadLogDetails.cause` schema to reference `BulkUploadLogDetails` recursively, matching the real nested-cause payload. Documentation-only; no behavior change.
+- Corrected the OpenAPI `Opportunity` schema to require `funderShortCode` and `funder`, which are always present in responses. Documentation-only; no behavior change.
+- Corrected the OpenAPI `ProposalVersion` schema to require `source` and `createdBy`, which are always present in responses. Documentation-only; no behavior change.
+- Corrected the OpenAPI `FunderCollaborativeInvitation` schema to require `invitationStatus`, which is always present in responses. Documentation-only; no behavior change.
+- Corrected the OpenAPI `User.keycloakUserName` schema to be nullable, matching the actual payload. Documentation-only; no behavior change.
+
 ## 0.37.0 2026-05-25
 
 ### Fixed

@@ -3,7 +3,7 @@
 	"properties": {
 		"shortCode": {
 			"$ref": "./shortCode.json",
-			"read-only": true
+			"readOnly": true
 		},
 		"label": {
 			"type": "string",

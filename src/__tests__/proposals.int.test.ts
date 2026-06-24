@@ -1573,7 +1573,7 @@ describe('/proposals', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 if the user does not have permission', async () => {
+		it('returns 404 not found when the user cannot view the associated opportunity', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -1587,7 +1587,36 @@ describe('/proposals', () => {
 					externalId: 'proposal123',
 					opportunityId: opportunity.id,
 				})
-				.expect(422);
+				.expect(404);
+			const after = await loadTableMetrics(db, 'proposals');
+			expect(after.count).toEqual(before.count);
+		});
+
+		it('returns 403 forbidden when the user can view the associated opportunity but lacks create permission', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const opportunity = await createTestOpportunity(db, testUserAuthContext);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+				opportunityId: opportunity.id,
+				scope: [PermissionGrantEntityType.OPPORTUNITY],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const before = await loadTableMetrics(db, 'proposals');
+			await request(app)
+				.post('/proposals')
+				.type('application/json')
+				.set(authHeader)
+				.send({
+					externalId: 'proposal123',
+					opportunityId: opportunity.id,
+				})
+				.expect(403);
 			const after = await loadTableMetrics(db, 'proposals');
 			expect(after.count).toEqual(before.count);
 		});
@@ -1668,7 +1697,9 @@ describe('/proposals', () => {
 			});
 		});
 
-		it('returns 422 conflict when a non-existent opportunity id is provided', async () => {
+		it('returns 404 not found when a non-existent opportunity id is provided', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
 			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
@@ -1677,15 +1708,23 @@ describe('/proposals', () => {
 					externalId: 'proposal123',
 					opportunityId: 1,
 				})
-				.expect(422);
+				.expect(404);
 			expect(result.body).toEqual({
+				name: 'NotFoundError',
+				message: expectString(),
 				details: [
 					{
-						name: 'UnprocessableEntityError',
+						name: 'NotFoundError',
+						details: {
+							entityType: 'Opportunity',
+							lookupValues: {
+								authContextIsAdministrator: false,
+								authContextKeycloakUserId: testUser.keycloakUserId,
+								opportunityId: 1,
+							},
+						},
 					},
 				],
-				message: 'The associated Opportunity was not found.',
-				name: 'UnprocessableEntityError',
 			});
 		});
 	});

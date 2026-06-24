@@ -1,5 +1,5 @@
 WITH
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT changemakers_proposals.*
 		FROM changemakers_proposals
 		WHERE

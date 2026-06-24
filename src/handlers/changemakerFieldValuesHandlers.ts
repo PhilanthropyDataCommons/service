@@ -23,9 +23,8 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	InputConflictError,
-	NotFoundError,
 	UnprocessableEntityError,
 } from '../errors';
 import {
@@ -56,16 +55,7 @@ const postChangemakerFieldValue = async (
 
 	const { changemakerId, baseFieldShortCode, batchId, value, goodAsOf } = body;
 
-	// Verify changemaker exists
-	await loadChangemaker(db, req, changemakerId).catch((error: unknown) => {
-		if (error instanceof NotFoundError) {
-			throw new InputConflictError('The changemaker does not exist.', {
-				entityType: 'Changemaker',
-				entityId: changemakerId,
-			});
-		}
-		throw error;
-	});
+	await loadChangemaker(db, req, changemakerId);
 
 	if (
 		!(await hasChangemakerPermission(db, req, {
@@ -74,23 +64,13 @@ const postChangemakerFieldValue = async (
 			scope: PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
 		}))
 	) {
-		throw new UnprocessableEntityError(
-			'You do not have permission to create field values for this changemaker.',
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create field values for the specified changemaker.',
 		);
 	}
 
 	// Verify base field exists and validate its properties
-	const baseField = await loadBaseField(db, req, baseFieldShortCode).catch(
-		(error: unknown) => {
-			if (error instanceof NotFoundError) {
-				throw new InputConflictError('The base field does not exist.', {
-					entityType: 'BaseField',
-					entityShortCode: baseFieldShortCode,
-				});
-			}
-			throw error;
-		},
-	);
+	const baseField = await loadBaseField(db, req, baseFieldShortCode);
 
 	// Verify base field is organization category
 	if (baseField.category !== BaseFieldCategory.ORGANIZATION) {
@@ -109,18 +89,7 @@ const postChangemakerFieldValue = async (
 		);
 	}
 
-	// Verify batch exists
-	await loadChangemakerFieldValueBatch(db, req, batchId).catch(
-		(error: unknown) => {
-			if (error instanceof NotFoundError) {
-				throw new InputConflictError('The batch does not exist.', {
-					entityType: 'ChangemakerFieldValueBatch',
-					entityId: batchId,
-				});
-			}
-			throw error;
-		},
-	);
+	await loadChangemakerFieldValueBatch(db, req, batchId);
 
 	const isValid = fieldValueIsValid(value, baseField.dataType);
 

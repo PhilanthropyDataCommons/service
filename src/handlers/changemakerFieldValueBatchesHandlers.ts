@@ -6,6 +6,7 @@ import {
 	hasSourcePermission,
 	loadChangemakerFieldValueBatch,
 	loadChangemakerFieldValueBatchBundle,
+	loadSource,
 } from '../database';
 import {
 	isAuthContext,
@@ -16,8 +17,8 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	UnprocessableEntityError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
@@ -49,8 +50,9 @@ const postChangemakerFieldValueBatch = async (
 			scope: PermissionGrantEntityType.SOURCE,
 		}))
 	) {
-		throw new UnprocessableEntityError(
-			'You do not have permission to reference the specified source.',
+		await loadSource(db, req, sourceId);
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to reference the specified source.',
 		);
 	}
 

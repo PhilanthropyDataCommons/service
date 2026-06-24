@@ -905,7 +905,7 @@ describe('/applicationForms', () => {
 				.expect(400);
 		});
 
-		it(`returns 401 unauthorized if the user does not have edit permission on the associated opportunity's funder`, async () => {
+		it(`returns 403 forbidden if the user can view the opportunity but does not have edit permission on the associated opportunity's funder`, async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -936,7 +936,7 @@ describe('/applicationForms', () => {
 					name: null,
 					fields: [],
 				})
-				.expect(401);
+				.expect(403);
 			const after = await loadTableMetrics(db, 'application_forms');
 			expect(before.count).toEqual(1);
 			expect(after.count).toEqual(1);
@@ -1094,7 +1094,7 @@ describe('/applicationForms', () => {
 			});
 		});
 
-		it('returns 422 conflict when a non-existent opportunity id is provided', async () => {
+		it('returns 404 not found when a non-existent opportunity id is provided', async () => {
 			const result = await request(app)
 				.post('/applicationForms')
 				.type('application/json')
@@ -1104,9 +1104,9 @@ describe('/applicationForms', () => {
 					name: null,
 					fields: [],
 				})
-				.expect(422);
+				.expect(404);
 			expect(result.body).toMatchObject({
-				name: 'UnprocessableEntityError',
+				name: 'NotFoundError',
 				details: expectArray(),
 			});
 		});

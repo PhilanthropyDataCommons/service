@@ -39,6 +39,9 @@
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
 			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"
 			},

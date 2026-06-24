@@ -1,5 +1,5 @@
 WITH
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT proposals.*
 		FROM proposals
 			INNER JOIN opportunities

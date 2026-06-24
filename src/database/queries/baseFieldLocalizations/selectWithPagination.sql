@@ -1,5 +1,5 @@
 WITH
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT base_field_localizations.*
 		FROM base_field_localizations
 		WHERE

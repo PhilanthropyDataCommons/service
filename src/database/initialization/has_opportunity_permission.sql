@@ -49,4 +49,4 @@ BEGIN
 
 	RETURN has_permission;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql STABLE;

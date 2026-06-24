@@ -30,5 +30,12 @@
 			"readOnly": true
 		}
 	},
-	"required": ["id", "title", "createdAt", "createdBy"]
+	"required": [
+		"id",
+		"title",
+		"funderShortCode",
+		"funder",
+		"createdAt",
+		"createdBy"
+	]
 }

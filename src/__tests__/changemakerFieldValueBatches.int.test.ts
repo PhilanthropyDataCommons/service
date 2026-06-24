@@ -136,11 +136,21 @@ describe('POST /changemakerFieldValueBatches', () => {
 			.expect(401);
 	});
 
-	it('Returns 422 when the user lacks reference permission on the source', async () => {
+	it('Returns 403 when the user can view the source but lacks reference permission', async () => {
 		const db = getDatabase();
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
 		const source = await createTestSource(db, testUserAuthContext);
+		await createPermissionGrant(db, systemUserAuthContext, {
+			granteeType: PermissionGrantGranteeType.USER,
+			granteeUserKeycloakUserId: testUser.keycloakUserId,
+			contextEntityType: PermissionGrantEntityType.SOURCE,
+			sourceId: source.id,
+			scope: [PermissionGrantEntityType.SOURCE],
+			verbs: [PermissionGrantVerb.VIEW],
+		});
 
 		const result = await request(app)
 			.post('/changemakerFieldValueBatches')
@@ -150,10 +160,10 @@ describe('POST /changemakerFieldValueBatches', () => {
 				sourceId: source.id,
 				notes: 'Test notes',
 			})
-			.expect(422);
+			.expect(403);
 
 		expect(result.body).toMatchObject({
-			name: 'UnprocessableEntityError',
+			name: 'ForbiddenError',
 		});
 	});
 
@@ -192,7 +202,7 @@ describe('POST /changemakerFieldValueBatches', () => {
 		});
 	});
 
-	it('Returns 422 when source does not exist', async () => {
+	it('Returns 404 when source does not exist', async () => {
 		const result = await request(app)
 			.post('/changemakerFieldValueBatches')
 			.type('application/json')
@@ -201,10 +211,10 @@ describe('POST /changemakerFieldValueBatches', () => {
 				sourceId: 999999,
 				notes: 'Test notes',
 			})
-			.expect(422);
+			.expect(404);
 
 		expect(result.body).toMatchObject({
-			name: 'UnprocessableEntityError',
+			name: 'NotFoundError',
 		});
 	});
 });

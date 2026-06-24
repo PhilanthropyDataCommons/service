@@ -28,6 +28,7 @@
 	"required": [
 		"funderCollaborativeShortCode",
 		"invitedFunderShortCode",
+		"invitationStatus",
 		"createdAt",
 		"createdBy"
 	]

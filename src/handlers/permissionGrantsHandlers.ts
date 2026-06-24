@@ -6,17 +6,29 @@ import {
 	createPermissionGrant,
 	getDatabase,
 	getLimitValues,
+	loadApplicationForm,
+	loadApplicationFormField,
+	loadBulkUploadTask,
+	loadChangemaker,
+	loadChangemakerFieldValue,
+	loadDataProvider,
+	loadFunder,
+	loadOpportunity,
 	loadPermissionGrant,
 	loadPermissionGrantBundle,
+	loadProposal,
+	loadProposalFieldValue,
+	loadProposalVersion,
+	loadSource,
 	removePermissionGrant,
 	updatePermissionGrant,
 } from '../database';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
 	NoDataReturnedError,
 	NotFoundError,
-	UnauthorizedError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import {
@@ -29,6 +41,7 @@ import {
 	type AuthIdentityAndRole,
 	type Id,
 	type PermissionGrantCondition,
+	type WritablePermissionGrant,
 	type WritableUnkeyedPermissionGrant,
 } from '../types';
 import { coerceParams } from '../coercion';
@@ -119,6 +132,67 @@ const assertPermissionGrantHasValidConditions = (
 	}
 };
 
+/**
+ * Loads the grant's context entity so a missing or unviewable entity surfaces
+ * as a `NotFoundError` (404). Callers use this to distinguish "the context
+ * entity does not exist" from "the entity exists but the user cannot manage its
+ * grants" (403).
+ */
+const assertPermissionGrantContextEntityExists = async (
+	db: Pick<TinyPg, 'sql'>,
+	authContext: AuthIdentityAndRole,
+	body: WritablePermissionGrant,
+): Promise<void> => {
+	switch (body.contextEntityType) {
+		case PermissionGrantEntityType.FUNDER:
+			await loadFunder(db, authContext, body.funderShortCode);
+			break;
+		case PermissionGrantEntityType.CHANGEMAKER:
+			await loadChangemaker(db, authContext, body.changemakerId);
+			break;
+		case PermissionGrantEntityType.DATA_PROVIDER:
+			await loadDataProvider(db, authContext, body.dataProviderShortCode);
+			break;
+		case PermissionGrantEntityType.OPPORTUNITY:
+			await loadOpportunity(db, authContext, body.opportunityId);
+			break;
+		case PermissionGrantEntityType.PROPOSAL:
+			await loadProposal(db, authContext, body.proposalId);
+			break;
+		case PermissionGrantEntityType.PROPOSAL_VERSION:
+			await loadProposalVersion(db, authContext, body.proposalVersionId);
+			break;
+		case PermissionGrantEntityType.APPLICATION_FORM:
+			await loadApplicationForm(db, authContext, body.applicationFormId);
+			break;
+		case PermissionGrantEntityType.APPLICATION_FORM_FIELD:
+			await loadApplicationFormField(
+				db,
+				authContext,
+				body.applicationFormFieldId,
+			);
+			break;
+		case PermissionGrantEntityType.PROPOSAL_FIELD_VALUE:
+			await loadProposalFieldValue(db, authContext, body.proposalFieldValueId);
+			break;
+		case PermissionGrantEntityType.SOURCE:
+			await loadSource(db, authContext, body.sourceId);
+			break;
+		case PermissionGrantEntityType.BULK_UPLOAD:
+			await loadBulkUploadTask(db, authContext, body.bulkUploadTaskId);
+			break;
+		case PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE:
+			await loadChangemakerFieldValue(
+				db,
+				authContext,
+				body.changemakerFieldValueId,
+			);
+			break;
+		case PermissionGrantEntityType.ANY:
+			break;
+	}
+};
+
 const getPermissionGrants = async (
 	req: Request,
 	res: Response,
@@ -165,7 +239,8 @@ const postPermissionGrant = async (
 	assertPermissionGrantHasValidConditions(body);
 
 	if (!(await canManagePermissionGrantByContext(db, req, body))) {
-		throw new UnauthorizedError(
+		await assertPermissionGrantContextEntityExists(db, req, body);
+		throw new ForbiddenError(
 			'Authenticated user does not have permission to manage permission grants on the specified context entity.',
 		);
 	}
@@ -254,7 +329,8 @@ const putPermissionGrant = async (
 	assertPermissionGrantHasValidConditions(body);
 
 	if (!(await canManagePermissionGrantByContext(db, req, body))) {
-		throw new UnauthorizedError(
+		await assertPermissionGrantContextEntityExists(db, req, body);
+		throw new ForbiddenError(
 			'Authenticated user does not have permission to manage permission grants on the specified context entity.',
 		);
 	}

@@ -74,6 +74,16 @@
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
 			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"409": {
+				"$ref": "../components/responses/Conflict.json",
+				"description": "There was a unique key conflict."
+			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"
 			}

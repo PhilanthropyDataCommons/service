@@ -669,12 +669,19 @@ describe('/funders', () => {
 				const result = await agent
 					.get('/funders/theFundFund/members/theFoundationFoundation')
 					.set(authHeader)
-					.expect(401);
+					.expect(403);
 				expect(result.body).toMatchObject({
 					message:
 						'Authenticated user does not have permission to perform this action.',
 					details: expectArray(),
 				});
+			});
+
+			it('returns 404 when the funder does not exist', async () => {
+				await agent
+					.get('/funders/theFundFund/members/theFoundationFoundation')
+					.set(authHeader)
+					.expect(404);
 			});
 
 			it('returns exactly one funder collaborative member selected by short code', async () => {
@@ -978,7 +985,7 @@ describe('/funders', () => {
 				.type('application/json')
 				.send({})
 				.set(authHeader)
-				.expect(401);
+				.expect(403);
 
 			expect(result.body).toMatchObject({
 				message:
@@ -1125,7 +1132,7 @@ describe('/funders', () => {
 				.get('/funders/theFundFund/invitations/sent')
 				.type('application/json')
 				.set(authHeader)
-				.expect(401);
+				.expect(403);
 
 			expect(result.body).toMatchObject({
 				message:
@@ -1226,7 +1233,7 @@ describe('/funders', () => {
 				.get('/funders/theFundFund/invitations/received')
 				.type('application/json')
 				.set(authHeader)
-				.expect(401);
+				.expect(403);
 
 			expect(result.body).toMatchObject({
 				message:
@@ -1344,7 +1351,7 @@ describe('/funders', () => {
 				.patch('/funders/theFundFund/invitations/received/bar')
 				.type('application/json')
 				.set(authHeader)
-				.expect(401);
+				.expect(403);
 		});
 
 		it('successfully updates the invitation status to accepted, and creates a funder collaborative member', async () => {

@@ -1,5 +1,5 @@
 {
-	"description": "The specified resource was not found.",
+	"description": "The specified resource does not exist, or the authenticated user does not have permission to view it.",
 	"content": {
 		"application/json": {
 			"schema": {

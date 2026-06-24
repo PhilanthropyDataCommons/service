@@ -676,7 +676,7 @@ describe('/changemakerProposals', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
-		it('returns 422 Unprocessable Content if the user does not have edit permission on the funder associated with the proposal opportunity', async () => {
+		it('returns 403 Forbidden if the user can view the proposal but does not have edit permission on the funder associated with the proposal opportunity', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -711,17 +711,17 @@ describe('/changemakerProposals', () => {
 					changemakerId: 1,
 					proposalId: 1,
 				})
-				.expect(422);
+				.expect(403);
 			const after = await loadTableMetrics(db, 'changemakers_proposals');
 			expect(result.body).toEqual({
 				details: [
 					{
-						name: 'UnprocessableEntityError',
+						name: 'ForbiddenError',
 					},
 				],
 				message:
-					'You do not have write permissions on the funder associated with this proposal.',
-				name: 'UnprocessableEntityError',
+					'Authenticated user does not have permission to edit the funder associated with the specified proposal.',
+				name: 'ForbiddenError',
 			});
 			expect(after.count).toEqual(before.count);
 		});
@@ -772,7 +772,7 @@ describe('/changemakerProposals', () => {
 			});
 		});
 
-		it('returns 422 Unprocessable Content when a non-existent proposal is sent', async () => {
+		it('returns 404 Not Found when a non-existent proposal is sent', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
@@ -786,15 +786,10 @@ describe('/changemakerProposals', () => {
 					changemakerId: 1,
 					proposalId: 42,
 				})
-				.expect(422);
-			expect(result.body).toEqual({
-				details: [
-					{
-						name: 'UnprocessableEntityError',
-					},
-				],
-				message: 'related Proposal not found.',
-				name: 'UnprocessableEntityError',
+				.expect(404);
+			expect(result.body).toMatchObject({
+				name: 'NotFoundError',
+				message: expectString(),
 			});
 		});
 

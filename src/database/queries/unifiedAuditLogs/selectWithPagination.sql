@@ -1,5 +1,5 @@
 WITH
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT unified_audit_logs.*
 		FROM unified_audit_logs
 	),

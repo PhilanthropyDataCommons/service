@@ -1,5 +1,5 @@
 WITH
-	candidate_entries AS NOT MATERIALIZED (
+	candidate_entries AS MATERIALIZED (
 		SELECT changemaker_field_values.*
 		FROM changemaker_field_values
 		WHERE

@@ -10,6 +10,7 @@ import {
 	loadBulkUploadTaskBundle,
 	loadFileIfCreatedBy,
 	loadOpportunity,
+	loadSource,
 } from '../database';
 import {
 	getSelfManageGrantFragment,
@@ -21,6 +22,7 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
 	NotFoundError,
 	UnprocessableEntityError,
@@ -39,35 +41,26 @@ const validateApplicationFormCreatePermission = async (
 	authContext: AuthContext,
 	applicationFormId: Id,
 ): Promise<void> => {
-	try {
-		const applicationForm = await loadApplicationForm(
-			db,
-			authContext,
-			applicationFormId,
+	const applicationForm = await loadApplicationForm(
+		db,
+		authContext,
+		applicationFormId,
+	);
+	const opportunity = await loadOpportunity(
+		db,
+		authContext,
+		applicationForm.opportunityId,
+	);
+	if (
+		!(await hasOpportunityPermission(db, authContext, {
+			opportunityId: opportunity.id,
+			permission: PermissionGrantVerb.CREATE,
+			scope: PermissionGrantEntityType.PROPOSAL,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create proposals for the specified opportunity.',
 		);
-		const opportunity = await loadOpportunity(
-			db,
-			authContext,
-			applicationForm.opportunityId,
-		);
-		if (
-			!(await hasOpportunityPermission(db, authContext, {
-				opportunityId: opportunity.id,
-				permission: PermissionGrantVerb.CREATE,
-				scope: PermissionGrantEntityType.PROPOSAL,
-			}))
-		) {
-			throw new UnprocessableEntityError(
-				'You do not have permission to create proposals for this opportunity.',
-			);
-		}
-	} catch (err: unknown) {
-		if (err instanceof NotFoundError) {
-			throw new UnprocessableEntityError(
-				'You do not have permission to create proposals for this opportunity.',
-			);
-		}
-		throw err;
 	}
 };
 
@@ -125,8 +118,9 @@ const postBulkUploadTask = async (
 			scope: PermissionGrantEntityType.SOURCE,
 		}))
 	) {
-		throw new UnprocessableEntityError(
-			'You do not have permission to reference the specified source.',
+		await loadSource(db, req, sourceId);
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to reference the specified source.',
 		);
 	}
 

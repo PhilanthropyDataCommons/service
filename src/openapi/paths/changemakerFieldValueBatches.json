@@ -62,9 +62,11 @@
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
 			},
-			"409": {
-				"$ref": "../components/responses/Conflict.json",
-				"description": "The source does not exist."
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"

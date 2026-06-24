@@ -13,6 +13,7 @@ import {
 	expectArrayContaining,
 	expectNumber,
 	expectObjectContaining,
+	expectString,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
 import {
@@ -288,7 +289,7 @@ describe('POST /changemakerFieldValues', () => {
 			.expect(401);
 	});
 
-	it('Returns 422 when user does not have create permission on changemakerFieldValue', async () => {
+	it('Returns 403 when user can view the changemaker but lacks create permission on changemakerFieldValue', async () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
@@ -323,12 +324,12 @@ describe('POST /changemakerFieldValues', () => {
 				value: 'Test value',
 				goodAsOf: '2024-01-01T00:00:00Z',
 			})
-			.expect(422);
+			.expect(403);
 
 		expect(result.body).toMatchObject({
-			name: 'UnprocessableEntityError',
+			name: 'ForbiddenError',
 			message:
-				'You do not have permission to create field values for this changemaker.',
+				'Authenticated user does not have permission to create field values for the specified changemaker.',
 		});
 	});
 
@@ -389,7 +390,7 @@ describe('POST /changemakerFieldValues', () => {
 		});
 	});
 
-	it('Returns 409 when base field does not exist', async () => {
+	it('Returns 404 when base field does not exist', async () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
@@ -420,11 +421,11 @@ describe('POST /changemakerFieldValues', () => {
 				value: 'Test value',
 				goodAsOf: '2024-01-01T00:00:00Z',
 			})
-			.expect(409);
+			.expect(404);
 
 		expect(result.body).toMatchObject({
-			name: 'InputConflictError',
-			message: 'The base field does not exist.',
+			name: 'NotFoundError',
+			message: expectString(),
 		});
 	});
 
@@ -513,7 +514,7 @@ describe('POST /changemakerFieldValues', () => {
 		});
 	});
 
-	it('Returns 409 when batch does not exist', async () => {
+	it('Returns 404 when batch does not exist', async () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
@@ -533,15 +534,15 @@ describe('POST /changemakerFieldValues', () => {
 				value: 'Test value',
 				goodAsOf: '2024-01-01T00:00:00Z',
 			})
-			.expect(409);
+			.expect(404);
 
 		expect(result.body).toMatchObject({
-			name: 'InputConflictError',
-			message: 'The batch does not exist.',
+			name: 'NotFoundError',
+			message: expectString(),
 		});
 	});
 
-	it('Returns 409 when changemaker does not exist', async () => {
+	it('Returns 404 when changemaker does not exist', async () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser, true);
@@ -574,11 +575,11 @@ describe('POST /changemakerFieldValues', () => {
 				value: 'Test value',
 				goodAsOf: '2024-01-01T00:00:00Z',
 			})
-			.expect(409);
+			.expect(404);
 
 		expect(result.body).toMatchObject({
-			name: 'InputConflictError',
-			message: 'The changemaker does not exist.',
+			name: 'NotFoundError',
+			message: expectString(),
 		});
 	});
 });

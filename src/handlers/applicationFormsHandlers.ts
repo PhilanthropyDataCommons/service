@@ -20,10 +20,8 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	NotFoundError,
-	UnauthorizedError,
-	UnprocessableEntityError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
@@ -90,67 +88,57 @@ const postApplicationForms = async (
 	}
 
 	const { fields, opportunityId, name } = body;
-	try {
-		const opportunity = await loadOpportunity(db, req, opportunityId);
-		if (
-			!(await hasOpportunityPermission(db, req, {
-				opportunityId: opportunity.id,
-				permission: PermissionGrantVerb.EDIT,
-				scope: PermissionGrantEntityType.APPLICATION_FORM,
-			}))
-		) {
-			throw new UnauthorizedError();
-		}
-		const committedApplicationForm = await db.transaction(
-			async (transactionDb) => {
-				const applicationForm = await createApplicationForm(
-					transactionDb,
-					null,
-					{
-						opportunityId,
-						name,
-					},
-				);
-				await createPermissionGrant(transactionDb, req, {
-					...getSelfManageGrantFragment(req),
-					contextEntityType: PermissionGrantEntityType.APPLICATION_FORM,
-					applicationFormId: applicationForm.id,
-				});
-				const applicationFormFields = await Promise.all(
-					fields.map(async (field) => {
-						const applicationFormField = await createApplicationFormField(
-							transactionDb,
-							null,
-							{
-								...field,
-								applicationFormId: applicationForm.id,
-							},
-						);
-						await createPermissionGrant(transactionDb, req, {
-							...getSelfManageGrantFragment(req),
-							contextEntityType:
-								PermissionGrantEntityType.APPLICATION_FORM_FIELD,
-							applicationFormFieldId: applicationFormField.id,
-						});
-						return applicationFormField;
-					}),
-				);
-				return {
-					...applicationForm,
-					fields: applicationFormFields,
-				};
-			},
+	const opportunity = await loadOpportunity(db, req, opportunityId);
+	if (
+		!(await hasOpportunityPermission(db, req, {
+			opportunityId: opportunity.id,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.APPLICATION_FORM,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create an application form for the specified opportunity.',
 		);
-		res
-			.status(HTTP_STATUS.SUCCESSFUL.CREATED)
-			.contentType('application/json')
-			.send(committedApplicationForm);
-	} catch (error: unknown) {
-		if (error instanceof NotFoundError) {
-			throw new UnprocessableEntityError('A related entity was not found');
-		}
-		throw error;
 	}
+	const committedApplicationForm = await db.transaction(
+		async (transactionDb) => {
+			const applicationForm = await createApplicationForm(transactionDb, null, {
+				opportunityId,
+				name,
+			});
+			await createPermissionGrant(transactionDb, req, {
+				...getSelfManageGrantFragment(req),
+				contextEntityType: PermissionGrantEntityType.APPLICATION_FORM,
+				applicationFormId: applicationForm.id,
+			});
+			const applicationFormFields = await Promise.all(
+				fields.map(async (field) => {
+					const applicationFormField = await createApplicationFormField(
+						transactionDb,
+						null,
+						{
+							...field,
+							applicationFormId: applicationForm.id,
+						},
+					);
+					await createPermissionGrant(transactionDb, req, {
+						...getSelfManageGrantFragment(req),
+						contextEntityType: PermissionGrantEntityType.APPLICATION_FORM_FIELD,
+						applicationFormFieldId: applicationFormField.id,
+					});
+					return applicationFormField;
+				}),
+			);
+			return {
+				...applicationForm,
+				fields: applicationFormFields,
+			};
+		},
+	);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
+		.contentType('application/json')
+		.send(committedApplicationForm);
 };
 
 const getApplicationFormProposalDataCsv = async (

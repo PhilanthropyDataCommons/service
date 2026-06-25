@@ -21,6 +21,7 @@ import {
 	createProposalFieldValue,
 	createProposalVersion,
 	loadBulkUploadTask,
+	loadChangemaker,
 	loadOrCreateChangemaker,
 	updateBulkUploadTask,
 	loadSystemUser,
@@ -30,10 +31,12 @@ import {
 import {
 	TaskStatus,
 	getSelfManageGrantFragment,
+	isId,
 	isProcessBulkUploadJobPayload,
 	BaseFieldDataType,
 	PermissionGrantEntityType,
 } from '../types';
+import { InputValidationError } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
 import { SINGLE_STEP } from '../constants';
@@ -52,6 +55,7 @@ import type {
 
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
 const CHANGEMAKER_NAME_SHORT_CODE = 'organization_name';
+const CHANGEMAKER_PDC_ID_SHORT_CODE = 'pdc_changemaker_id';
 const SINGLE_ENTRY = 1;
 
 const downloadFileDataToTemporaryStorage = async (
@@ -149,6 +153,11 @@ const getChangemakerTaxIdIndex = (fields: ApplicationFormField[]): number =>
 const getChangemakerNameIndex = (fields: ApplicationFormField[]): number =>
 	fields.findIndex(
 		(field) => field.baseFieldShortCode === CHANGEMAKER_NAME_SHORT_CODE,
+	);
+
+const getChangemakerPdcIdIndex = (fields: ApplicationFormField[]): number =>
+	fields.findIndex(
+		(field) => field.baseFieldShortCode === CHANGEMAKER_PDC_ID_SHORT_CODE,
 	);
 
 // THIS FUNCTION IS A MONKEY PATCH
@@ -545,6 +554,9 @@ export const processBulkUploadTask = async (
 		const changemakerTaxIdIndex = getChangemakerTaxIdIndex(
 			applicationFormFields,
 		);
+		const changemakerPdcIdIndex = getChangemakerPdcIdIndex(
+			applicationFormFields,
+		);
 
 		await db.transaction(async (transactionDb) => {
 			const attachmentsManager = new AttachmentsManager(
@@ -594,8 +606,28 @@ export const processBulkUploadTask = async (
 				const {
 					[changemakerNameIndex]: changemakerName,
 					[changemakerTaxIdIndex]: changemakerTaxId,
+					[changemakerPdcIdIndex]: changemakerPdcIdValue,
 				} = record;
-				if (changemakerTaxId !== undefined) {
+				const changemakerPdcId = changemakerPdcIdValue?.trim();
+				if (changemakerPdcId !== undefined && changemakerPdcId !== '') {
+					const changemakerId = Number(changemakerPdcId);
+					if (!isId(changemakerId)) {
+						throw new InputValidationError(
+							`Row ${recordNumber}: invalid ${CHANGEMAKER_PDC_ID_SHORT_CODE} ` +
+								`value "${changemakerPdcIdValue}"; expected an existing changemaker id.`,
+							isId.errors ?? [],
+						);
+					}
+					const changemaker = await loadChangemaker(
+						transactionDb,
+						taskAuthContext,
+						changemakerId,
+					);
+					await createChangemakerProposal(transactionDb, taskAuthContext, {
+						changemakerId: changemaker.id,
+						proposalId: proposal.id,
+					});
+				} else if (changemakerTaxId !== undefined) {
 					const { item: changemaker, wasInserted } =
 						await loadOrCreateChangemaker(transactionDb, taskAuthContext, {
 							name: changemakerName ?? 'Unnamed Organization',

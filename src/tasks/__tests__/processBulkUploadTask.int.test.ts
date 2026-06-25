@@ -41,6 +41,7 @@ import {
 } from '../../test/asymettricMatchers';
 import {
 	createTestBaseField,
+	createTestChangemaker,
 	createTestFile,
 	createTestOpportunity,
 } from '../../test/factories';
@@ -127,6 +128,12 @@ const createTestBaseFields = async (db: TinyPg): Promise<void> => {
 		description: 'Just a file we want to attach.',
 		shortCode: 'favorite_file',
 		dataType: BaseFieldDataType.FILE,
+	});
+	await createTestBaseField(db, null, {
+		label: 'PDC Changemaker ID',
+		description:
+			'The PDC id of an existing changemaker to attach this proposal to.',
+		shortCode: 'pdc_changemaker_id',
 	});
 };
 
@@ -954,6 +961,253 @@ describe('processBulkUploadTask', () => {
 			],
 			total: 2,
 		});
+	});
+
+	it('attaches a proposal to an existing changemaker given by pdc_changemaker_id, creating no duplicate', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const existingChangemaker = await createTestChangemaker(
+			db,
+			systemUserAuthContext,
+			{ name: 'Original Changemaker Name', taxId: '11-1111111' },
+		);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'pdc_changemaker_id'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{ proposalsDataFileId: proposalsDataFile.id, applicationFormId },
+		);
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'validCsvTemplateWithChangemakerId.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const changemakerBundle = await loadChangemakerBundle(
+			db,
+			null,
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		// No new changemaker is created and the existing name is left untouched,
+		// even though the uploaded row carried a different organization_name.
+		expect(changemakerBundle.total).toBe(1);
+		expect(changemakerBundle.entries).toEqual([
+			expectObjectContaining({
+				id: existingChangemaker.id,
+				name: 'Original Changemaker Name',
+			}),
+		]);
+
+		const changemakerProposalBundle = await loadChangemakerProposalBundle(
+			db,
+			testAuthContext,
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		expect(changemakerProposalBundle.total).toBe(1);
+		expect(changemakerProposalBundle.entries).toEqual([
+			expectObjectContaining({ changemakerId: existingChangemaker.id }),
+		]);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
+	});
+
+	it('prefers pdc_changemaker_id over organization_tax_id when both are present', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const existingChangemaker = await createTestChangemaker(
+			db,
+			systemUserAuthContext,
+			{ name: 'Original Changemaker Name', taxId: '11-1111111' },
+		);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			[
+				'proposal_submitter_email',
+				'organization_name',
+				'organization_tax_id',
+				'pdc_changemaker_id',
+			],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{ proposalsDataFileId: proposalsDataFile.id, applicationFormId },
+		);
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'csvTemplateWithChangemakerIdAndTaxId.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const changemakerBundle = await loadChangemakerBundle(
+			db,
+			null,
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		// The tax id matched nothing, but no new changemaker is created because the
+		// explicit pdc_changemaker_id takes precedence.
+		expect(changemakerBundle.total).toBe(1);
+		expect(changemakerBundle.entries).toEqual([
+			expectObjectContaining({ id: existingChangemaker.id }),
+		]);
+
+		const changemakerProposalBundle = await loadChangemakerProposalBundle(
+			db,
+			testAuthContext,
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		expect(changemakerProposalBundle.entries).toEqual([
+			expectObjectContaining({ changemakerId: existingChangemaker.id }),
+		]);
+	});
+
+	it('fails the task when pdc_changemaker_id is not a valid id', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'pdc_changemaker_id'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{ proposalsDataFileId: proposalsDataFile.id, applicationFormId },
+		);
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'csvTemplateWithInvalidChangemakerId.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.FAILED);
+		expect(updatedBulkUploadTask.logs).toEqual(
+			expectArrayContaining([
+				expectObjectContaining({
+					isError: true,
+					details: expectObjectContaining({ name: 'InputValidationError' }),
+				}),
+			]),
+		);
+	});
+
+	it('fails the task when pdc_changemaker_id refers to a changemaker that does not exist', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'pdc_changemaker_id'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{ proposalsDataFileId: proposalsDataFile.id, applicationFormId },
+		);
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'csvTemplateWithNonexistentChangemakerId.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.FAILED);
+		expect(updatedBulkUploadTask.logs.length).toBeGreaterThan(0);
 	});
 
 	it('should grant the upload-initiating user manage permissions on every entity it creates', async () => {

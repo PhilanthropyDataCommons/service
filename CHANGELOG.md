@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Bulk uploads accept an optional `pdc_changemaker_id` column. When a row supplies a value in that column, the proposal is attached to that exact existing changemaker instead of matching/creating one by `organization_tax_id` + `organization_name`. An invalid or unknown id fails the task with a logged error.
+
 ## 0.39.0 2026-06-24
 
 ### Changed

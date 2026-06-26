@@ -104,6 +104,14 @@ describe('canManagePermissionGrantByContext', () => {
 			expectedKey: { changemakerFieldValueId: 13 },
 		},
 		{
+			label: 'terminologySet',
+			grant: {
+				contextEntityType: PermissionGrantEntityType.TERMINOLOGY_SET,
+				terminologySetId: 31,
+			},
+			expectedKey: { terminologySetId: 31 },
+		},
+		{
 			label: 'applicationFormField',
 			grant: {
 				contextEntityType: PermissionGrantEntityType.APPLICATION_FORM_FIELD,
@@ -142,6 +150,7 @@ describe('canManagePermissionGrantByContext', () => {
 		sourceId: undefined,
 		bulkUploadTaskId: undefined,
 		changemakerFieldValueId: undefined,
+		terminologySetId: undefined,
 	};
 
 	it.each(cases)(

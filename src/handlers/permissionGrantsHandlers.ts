@@ -20,6 +20,7 @@ import {
 	loadProposalFieldValue,
 	loadProposalVersion,
 	loadSource,
+	loadTerminologySet,
 	removePermissionGrant,
 	updatePermissionGrant,
 } from '../database';
@@ -177,6 +178,9 @@ const assertPermissionGrantContextEntityExists = async (
 			break;
 		case PermissionGrantEntityType.SOURCE:
 			await loadSource(db, authContext, body.sourceId);
+			break;
+		case PermissionGrantEntityType.TERMINOLOGY_SET:
+			await loadTerminologySet(db, authContext, body.terminologySetId);
 			break;
 		case PermissionGrantEntityType.BULK_UPLOAD:
 			await loadBulkUploadTask(db, authContext, body.bulkUploadTaskId);

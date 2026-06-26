@@ -5,6 +5,7 @@ import {
 	createOpportunity,
 	getLimitValues,
 	hasFunderPermission,
+	hasTerminologySetPermission,
 	loadFunder,
 	loadOpportunity,
 	loadOpportunityBundle,
@@ -21,6 +22,7 @@ import {
 	FailedMiddlewareError,
 	ForbiddenError,
 	InputValidationError,
+	UnauthorizedError,
 } from '../errors';
 import {
 	extractFunderParameters,
@@ -89,6 +91,17 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 		throw new ForbiddenError(
 			'Authenticated user does not have permission to create an opportunity for the specified funder.',
 		);
+	}
+	if (
+		body.terminologySetId !== undefined &&
+		body.terminologySetId !== null &&
+		!(await hasTerminologySetPermission(db, req, {
+			terminologySetId: body.terminologySetId,
+			permission: PermissionGrantVerb.REFERENCE,
+			scope: PermissionGrantEntityType.TERMINOLOGY_SET,
+		}))
+	) {
+		throw new UnauthorizedError();
 	}
 	const committedOpportunity = await db.transaction(async (txDb) => {
 		const opportunity = await createOpportunity(txDb, req, body);

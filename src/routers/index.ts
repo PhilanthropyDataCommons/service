@@ -17,6 +17,7 @@ import { proposalsRouter } from './proposalsRouter';
 import { proposalVersionsRouter } from './proposalVersionsRouter';
 import { sourcesRouter } from './sourcesRouter';
 import { tasksRouter } from './tasksRouter';
+import { terminologySetsRouter } from './terminologySetsRouter';
 import { usersRouter } from './usersRouter';
 import { documentationRouter } from './documentationRouter';
 import { userGroupsRouter } from './userGroupsRouter';
@@ -45,6 +46,7 @@ rootRouter.use('/platformProviderResponses', platformProviderResponsesRouter);
 rootRouter.use('/proposals', proposalsRouter);
 rootRouter.use('/proposalVersions', proposalVersionsRouter);
 rootRouter.use('/sources', sourcesRouter);
+rootRouter.use('/terminologySets', terminologySetsRouter);
 rootRouter.use('/users', usersRouter);
 rootRouter.use('/', documentationRouter);
 

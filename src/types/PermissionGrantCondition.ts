@@ -26,6 +26,7 @@ const scopeConditions = {
 	[PermissionGrantEntityType.SOURCE]: [],
 	[PermissionGrantEntityType.BULK_UPLOAD]: [],
 	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: [],
+	[PermissionGrantEntityType.TERMINOLOGY_SET]: [],
 	[PermissionGrantEntityType.ANY]: [],
 } as const satisfies Record<
 	PermissionGrantEntityType,

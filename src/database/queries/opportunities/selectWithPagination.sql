@@ -24,7 +24,12 @@ WITH
 	),
 
 	paginated_entries AS (
-		SELECT opportunity_to_json(candidate_entries.*::opportunities) AS object
+		SELECT
+			opportunity_to_json(
+				candidate_entries.*::opportunities,
+				:authContextKeycloakUserId,
+				:authContextIsAdministrator
+			) AS object
 		FROM candidate_entries
 		ORDER BY id
 		LIMIT :limit OFFSET :offset

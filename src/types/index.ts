@@ -50,6 +50,7 @@ export * from './ShortCode';
 export * from './Source';
 export * from './TableMetrics';
 export * from './TaskStatus';
+export * from './TerminologySet';
 export * from './TinyPgErrorWithQueryContext';
 export * from './UnifiedAuditLog';
 export * from './UpsertResult';

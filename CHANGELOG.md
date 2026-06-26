@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.40.0 2026-06-26
+
 ### Added
 
 - Bulk uploads accept an optional `pdc_changemaker_id` column. When a row supplies a value in that column, the proposal is attached to that exact existing changemaker instead of matching/creating one by `organization_tax_id` + `organization_name`. An invalid or unknown id fails the task with a logged error.
+- Added a `terminologySet` entity that lets funders define custom display labels for opportunities, proposals, and application forms, managed via the `/terminologySets` endpoints.
+- Added a `terminologySet` permission scope, inherited from the owning funder, that governs who can view and edit terminology sets.
+- Opportunities can now reference a terminology set owned by the same funder.
+- Funders can now designate a default terminology set.
 
 ## 0.39.0 2026-06-24
 

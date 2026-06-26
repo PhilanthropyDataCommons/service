@@ -70,6 +70,7 @@ erDiagram
     int id PK
     string title
     string funderShortCode FK
+    int terminologySetId FK
     datetime createdAt
     uuid createdBy FK
   }
@@ -119,6 +120,20 @@ erDiagram
     string name
     uuid keycloakOrganizationId
     boolean isCollaborative
+    int defaultTerminologySetId FK
+    datetime createdAt
+    uuid createdBy FK
+  }
+  TerminologySet {
+    int id PK
+    string funderShortCode FK
+    string name
+    string opportunityLabel
+    string opportunitiesLabel
+    string applicationFormLabel
+    string applicationFormsLabel
+    string proposalLabel
+    string proposalsLabel
     datetime createdAt
     uuid createdBy FK
   }
@@ -179,6 +194,7 @@ erDiagram
     int sourceId FK
     int bulkUploadTaskId FK
     int changemakerFieldValueId FK
+    int terminologySetId FK
     string[] scope
     string[] verbs
     jsonb conditions
@@ -190,6 +206,9 @@ erDiagram
   Opportunity ||--|{ ApplicationForm : establishes
   Funder ||--|{ Opportunity : has
   Funder ||--|{ BulkUploadTask : has
+  Funder ||--o{ TerminologySet : "authors"
+  Funder }o--o| TerminologySet : "defaults to"
+  Opportunity }o--o| TerminologySet : "uses"
   ApplicationForm ||--|{ ApplicationFormField : has
   ApplicationFormField }o--|| BaseField : represents
   BaseField ||--o{ BaseFieldLocalization : "has localizations"
@@ -226,6 +245,7 @@ erDiagram
   PermissionGrant }o--o| Source : "references"
   PermissionGrant }o--o| BulkUploadTask : "references"
   PermissionGrant }o--o| ChangemakerFieldValue : "references"
+  PermissionGrant }o--o| TerminologySet : "references"
   PermissionGrant }o--|| User : "is created by"
   Changemaker ||--o{ FiscalSponsorship : "sponsors"
   Changemaker ||--o{ FiscalSponsorship : "is sponsored by"

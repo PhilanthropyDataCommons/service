@@ -121,5 +121,18 @@ CREATE FUNCTION permitted_permission_grant_ids(
 		'proposalFieldValue'
 	) AS permitted_field_values
 		ON permitted_field_values.id = pg.proposal_field_value_id
-	WHERE pg.context_entity_type = 'proposalFieldValue';
+	WHERE pg.context_entity_type = 'proposalFieldValue'
+
+	UNION
+
+	SELECT pg.id
+	FROM permission_grants pg
+	INNER JOIN permitted_terminology_set_ids(
+		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.user_is_admin,
+		'manage',
+		'terminologySet'
+	) AS permitted_terminology_sets
+		ON permitted_terminology_sets.id = pg.terminology_set_id
+	WHERE pg.context_entity_type = 'terminologySet';
 $$ LANGUAGE sql STABLE;

@@ -9,3 +9,4 @@ export { hasOpportunityPermission } from './hasOpportunityPermission';
 export { hasProposalFieldValuePermission } from './hasProposalFieldValuePermission';
 export { hasProposalPermission } from './hasProposalPermission';
 export { hasSourcePermission } from './hasSourcePermission';
+export { hasTerminologySetPermission } from './hasTerminologySetPermission';

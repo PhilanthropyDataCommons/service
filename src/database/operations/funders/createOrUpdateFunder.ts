@@ -7,7 +7,13 @@ const createOrUpdateFunder = generateUpsertItemOperation<
 	[]
 >(
 	'funders.insertOrUpdateOne',
-	['shortCode', 'name', 'keycloakOrganizationId', 'isCollaborative'],
+	[
+		'shortCode',
+		'name',
+		'keycloakOrganizationId',
+		'isCollaborative',
+		'defaultTerminologySetId',
+	],
 	[],
 );
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- Added database indexes so permission checks and proposal listing no longer rely on sequential scans that slow down as data grows.
+
 ## 0.40.0 2026-06-26
 
 ### Added

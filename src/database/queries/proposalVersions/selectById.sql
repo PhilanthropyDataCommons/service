@@ -1,16 +1,18 @@
 SELECT
-	proposal_version_to_json(
-		proposal_versions.*,
+	build_proposal_version_result(
+		proposal_versions,
 		:authContextKeycloakUserId,
 		:authContextIsAdministrator
 	) AS object
 FROM proposal_versions
-	INNER JOIN
-		permitted_proposal_ids(
+WHERE
+	proposal_versions.id = :proposalVersionId
+	AND proposal_versions.proposal_id IN (
+		SELECT permitted_proposals.id
+		FROM permitted_proposal_ids(
 			:authContextKeycloakUserId,
 			:authContextIsAdministrator,
 			'view',
 			'proposal'
 		) AS permitted_proposals
-		ON proposal_versions.proposal_id = permitted_proposals.id
-WHERE proposal_versions.id = :proposalVersionId;
+	);

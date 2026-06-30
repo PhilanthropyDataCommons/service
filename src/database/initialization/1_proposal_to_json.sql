@@ -12,7 +12,7 @@ DECLARE
   changemakers_json JSONB;
 BEGIN
   SELECT jsonb_agg(
-    proposal_version_to_json(
+    build_proposal_version_result(
       proposal_versions.*,
       auth_context_keycloak_user_id,
       auth_context_is_administrator

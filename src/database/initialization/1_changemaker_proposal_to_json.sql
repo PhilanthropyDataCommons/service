@@ -10,14 +10,17 @@ DECLARE
   proposal_json JSONB;
   changemaker_json JSONB;
 BEGIN
-  SELECT proposal_to_json(
-    proposals.*,
+  SELECT serialized_proposal.object
+  INTO proposal_json
+  FROM build_proposals_results(
+    ARRAY(
+      SELECT proposals
+      FROM proposals
+      WHERE proposals.id = changemaker_proposal.proposal_id
+    ),
     auth_context_keycloak_user_id,
     auth_context_is_administrator
-  )
-  INTO proposal_json
-  FROM proposals
-  WHERE proposals.id = changemaker_proposal.proposal_id;
+  ) AS serialized_proposal;
 
   SELECT changemaker_to_json(
     changemakers.*,

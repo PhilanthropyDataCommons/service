@@ -18,7 +18,7 @@ INSERT INTO proposal_versions (
 		1
 	)
 )
-RETURNING proposal_version_to_json(
+RETURNING build_proposal_version_result(
 	proposal_versions,
 	:authContextKeycloakUserId,
 	:authContextIsAdministrator

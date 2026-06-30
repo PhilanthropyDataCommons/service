@@ -67,16 +67,30 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			proposal_to_json(
-				candidate_entries.*::proposals,
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator
-			) AS object
+	page AS (
+		SELECT candidate_entries.id
 		FROM candidate_entries
-		ORDER BY id DESC
+		ORDER BY candidate_entries.id DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	page_proposals AS (
+		SELECT proposals AS proposal
+		FROM proposals
+		WHERE proposals.id IN (SELECT page.id FROM page)
+	),
+
+	paginated_entries AS (
+		SELECT serialized_proposal.object
+		FROM page
+			INNER JOIN
+				build_proposals_results(
+					array(SELECT page_proposals.proposal FROM page_proposals),
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator
+				) AS serialized_proposal
+				ON page.id = serialized_proposal.id
+		ORDER BY page.id DESC
 	)
 
 SELECT

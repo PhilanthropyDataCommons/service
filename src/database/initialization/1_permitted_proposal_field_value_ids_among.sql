@@ -6,10 +6,10 @@ SELECT drop_function('permitted_proposal_field_value_ids_among');
 -- the field value or inherited from its proposal, opportunity, funder, or
 -- changemaker, subject to the grant's base field category `conditions`.
 --
--- The inheritance is expanded here rather than reusing permitted_proposal_ids
--- because the per-field-value category conditions cannot be expressed at the
--- proposal level. Taking the ids as a parameter keeps the work proportional to
--- the candidates instead of every field value the user can see.
+-- Bounding to `filter_ids` keeps the work proportional to the candidates rather
+-- than every field value the user can see. Administrators skip the
+-- grant-inheritance branch entirely: they already have every non-forbidden
+-- field, so that branch can only return a subset of what they already get.
 CREATE FUNCTION permitted_proposal_field_value_ids_among(
 	user_keycloak_user_id uuid,
 	user_is_admin boolean,
@@ -19,28 +19,24 @@ CREATE FUNCTION permitted_proposal_field_value_ids_among(
 ) RETURNS TABLE (id int) AS $$
 	-- Public fields are viewable by any authenticated user.
 	SELECT pfv.id
-	FROM unnest(
-		permitted_proposal_field_value_ids_among.filter_ids
-	) AS candidate (id)
-	INNER JOIN proposal_field_values pfv ON pfv.id = candidate.id
+	FROM proposal_field_values pfv
 	INNER JOIN application_form_fields aff
 		ON pfv.application_form_field_id = aff.id
 	INNER JOIN base_fields bf ON aff.base_field_short_code = bf.short_code
-	WHERE bf.sensitivity_classification = 'public'
+	WHERE pfv.id = ANY(permitted_proposal_field_value_ids_among.filter_ids)
+		AND bf.sensitivity_classification = 'public'
 		AND permitted_proposal_field_value_ids_among.verb = 'view'
 
 	UNION
 
 	-- Administrators have all permissions, except on forbidden fields.
 	SELECT pfv.id
-	FROM unnest(
-		permitted_proposal_field_value_ids_among.filter_ids
-	) AS candidate (id)
-	INNER JOIN proposal_field_values pfv ON pfv.id = candidate.id
+	FROM proposal_field_values pfv
 	INNER JOIN application_form_fields aff
 		ON pfv.application_form_field_id = aff.id
 	INNER JOIN base_fields bf ON aff.base_field_short_code = bf.short_code
-	WHERE bf.sensitivity_classification <> 'forbidden'
+	WHERE pfv.id = ANY(permitted_proposal_field_value_ids_among.filter_ids)
+		AND bf.sensitivity_classification <> 'forbidden'
 		AND permitted_proposal_field_value_ids_among.user_is_admin
 
 	UNION
@@ -48,10 +44,7 @@ CREATE FUNCTION permitted_proposal_field_value_ids_among(
 	-- Granted on the field value or inherited from its proposal, opportunity,
 	-- funder, or changemaker -- subject to the grant's base field conditions.
 	SELECT pfv.id
-	FROM unnest(
-		permitted_proposal_field_value_ids_among.filter_ids
-	) AS candidate (id)
-	INNER JOIN proposal_field_values pfv ON pfv.id = candidate.id
+	FROM proposal_field_values pfv
 	INNER JOIN application_form_fields aff
 		ON pfv.application_form_field_id = aff.id
 	INNER JOIN base_fields bf ON aff.base_field_short_code = bf.short_code
@@ -82,7 +75,9 @@ CREATE FUNCTION permitted_proposal_field_value_ids_among(
 				AND pg.changemaker_id = cp.changemaker_id
 			)
 		)
-	WHERE bf.sensitivity_classification <> 'forbidden'
+	WHERE pfv.id = ANY(permitted_proposal_field_value_ids_among.filter_ids)
+		AND NOT permitted_proposal_field_value_ids_among.user_is_admin
+		AND bf.sensitivity_classification <> 'forbidden'
 		AND verb_set_permits_verb(
 			pg.verbs, permitted_proposal_field_value_ids_among.verb
 		)

@@ -55,8 +55,29 @@ import type {
 
 const CHANGEMAKER_TAX_ID_SHORT_CODE = 'organization_tax_id';
 const CHANGEMAKER_NAME_SHORT_CODE = 'organization_name';
-const CHANGEMAKER_PDC_ID_SHORT_CODE = 'pdc_changemaker_id';
 const SINGLE_ENTRY = 1;
+
+const CONTROL_COLUMN_PREFIX = 'control:';
+const CONTROL_KEY_PDC_CHANGEMAKER_ID = 'pdc_changemaker_id';
+
+const RECOGNIZED_CONTROL_KEYS: ReadonlySet<string> = new Set([
+	CONTROL_KEY_PDC_CHANGEMAKER_ID,
+]);
+
+export interface DataColumn {
+	csvIndex: number;
+	label: string;
+}
+
+export interface ControlColumn {
+	csvIndex: number;
+	key: string;
+}
+
+export interface ClassifiedColumns {
+	dataColumns: DataColumn[];
+	controlColumns: ControlColumn[];
+}
 
 const downloadFileDataToTemporaryStorage = async (
 	file: File,
@@ -122,43 +143,93 @@ const loadHeaderRowFromCsv = async (csvPath: string): Promise<string[]> => {
 	return headers;
 };
 
-const assertCsvMatchesApplicationForm = async (
-	csvPath: string,
-	applicationForm: ApplicationForm,
-): Promise<void> => {
-	const csvLabels = await loadHeaderRowFromCsv(csvPath);
-	const expectedLabels = applicationForm.fields.map((field) => field.label);
+export const classifyHeaderRow = (headerRow: string[]): ClassifiedColumns => {
+	const dataColumns: DataColumn[] = [];
+	const controlColumns: ControlColumn[] = [];
+	headerRow.forEach((label, csvIndex) => {
+		if (label.startsWith(CONTROL_COLUMN_PREFIX)) {
+			const key = label.slice(CONTROL_COLUMN_PREFIX.length).trim();
+			controlColumns.push({ csvIndex, key });
+		} else {
+			dataColumns.push({ csvIndex, label });
+		}
+	});
+	return { dataColumns, controlColumns };
+};
 
-	if (csvLabels.length !== expectedLabels.length) {
-		throw new Error(
-			`CSV has ${csvLabels.length} columns but the application form has ${expectedLabels.length} fields.`,
-		);
-	}
-
-	csvLabels.forEach((label, index) => {
-		const { [index]: expectedLabel } = expectedLabels;
-		if (label !== expectedLabel) {
+export const assertControlColumnsAreValid = (
+	classifiedColumns: ClassifiedColumns,
+): void => {
+	const seenKeys = new Set<string>();
+	classifiedColumns.controlColumns.forEach(({ key }) => {
+		if (!RECOGNIZED_CONTROL_KEYS.has(key)) {
 			throw new Error(
-				`CSV column ${index} has label "${label}" but the application form expects "${expectedLabel}" at that position.`,
+				`CSV control column "${CONTROL_COLUMN_PREFIX}${key}" uses an unknown control key "${key}". ` +
+					`Recognized control keys: ${[...RECOGNIZED_CONTROL_KEYS].join(', ')}.`,
 			);
 		}
+		if (seenKeys.has(key)) {
+			throw new Error(
+				`CSV has more than one "${CONTROL_COLUMN_PREFIX}${key}" control column.`,
+			);
+		}
+		seenKeys.add(key);
 	});
 };
 
-const getChangemakerTaxIdIndex = (fields: ApplicationFormField[]): number =>
-	fields.findIndex(
-		(field) => field.baseFieldShortCode === CHANGEMAKER_TAX_ID_SHORT_CODE,
-	);
+export const extractControlValues = (
+	record: string[],
+	controlColumns: ControlColumn[],
+): Map<string, string> => {
+	const controlValues = new Map<string, string>();
+	controlColumns.forEach(({ csvIndex, key }) => {
+		const value = record[csvIndex]?.trim() ?? '';
+		if (value !== '') {
+			controlValues.set(key, value);
+		}
+	});
+	return controlValues;
+};
 
-const getChangemakerNameIndex = (fields: ApplicationFormField[]): number =>
-	fields.findIndex(
-		(field) => field.baseFieldShortCode === CHANGEMAKER_NAME_SHORT_CODE,
-	);
+const assertCsvMatchesApplicationForm = async (
+	csvPath: string,
+	applicationForm: ApplicationForm,
+): Promise<ClassifiedColumns> => {
+	const headerRow = await loadHeaderRowFromCsv(csvPath);
+	const classifiedColumns = classifyHeaderRow(headerRow);
+	assertControlColumnsAreValid(classifiedColumns);
 
-const getChangemakerPdcIdIndex = (fields: ApplicationFormField[]): number =>
-	fields.findIndex(
-		(field) => field.baseFieldShortCode === CHANGEMAKER_PDC_ID_SHORT_CODE,
+	const { dataColumns } = classifiedColumns;
+	const expectedLabels = applicationForm.fields.map((field) => field.label);
+
+	if (dataColumns.length !== expectedLabels.length) {
+		throw new Error(
+			`CSV has ${dataColumns.length} data columns but the application form has ${expectedLabels.length} fields.`,
+		);
+	}
+
+	dataColumns.forEach(({ label, csvIndex }, index) => {
+		const { [index]: expectedLabel } = expectedLabels;
+		if (label !== expectedLabel) {
+			throw new Error(
+				`CSV column ${csvIndex} has label "${label}" but the application form expects "${expectedLabel}" at position ${index}.`,
+			);
+		}
+	});
+
+	return classifiedColumns;
+};
+
+const getDataColumnCsvIndexForShortCode = (
+	dataColumns: DataColumn[],
+	applicationFormFields: ApplicationFormField[],
+	shortCode: string,
+): number | undefined => {
+	const fieldIndex = applicationFormFields.findIndex(
+		(field) => field.baseFieldShortCode === shortCode,
 	);
+	return dataColumns[fieldIndex]?.csvIndex;
+};
 
 // THIS FUNCTION IS A MONKEY PATCH
 // Really we should be passing the jwt of the calling user so that an auth context can be re-generated
@@ -545,17 +616,21 @@ export const processBulkUploadTask = async (
 		const { applicationForm } = bulkUploadTask;
 		const { fields: applicationFormFields } = applicationForm;
 
-		await assertCsvMatchesApplicationForm(
-			temporaryProposalsDataFile.path,
-			applicationForm,
-		);
+		const { dataColumns, controlColumns } =
+			await assertCsvMatchesApplicationForm(
+				temporaryProposalsDataFile.path,
+				applicationForm,
+			);
 
-		const changemakerNameIndex = getChangemakerNameIndex(applicationFormFields);
-		const changemakerTaxIdIndex = getChangemakerTaxIdIndex(
+		const changemakerNameCsvIndex = getDataColumnCsvIndexForShortCode(
+			dataColumns,
 			applicationFormFields,
+			CHANGEMAKER_NAME_SHORT_CODE,
 		);
-		const changemakerPdcIdIndex = getChangemakerPdcIdIndex(
+		const changemakerTaxIdCsvIndex = getDataColumnCsvIndexForShortCode(
+			dataColumns,
 			applicationFormFields,
+			CHANGEMAKER_TAX_ID_SHORT_CODE,
 		);
 
 		await db.transaction(async (transactionDb) => {
@@ -603,18 +678,24 @@ export const processBulkUploadTask = async (
 					proposalVersionId: proposalVersion.id,
 				});
 
-				const {
-					[changemakerNameIndex]: changemakerName,
-					[changemakerTaxIdIndex]: changemakerTaxId,
-					[changemakerPdcIdIndex]: changemakerPdcIdValue,
-				} = record;
-				const changemakerPdcId = changemakerPdcIdValue?.trim();
-				if (changemakerPdcId !== undefined && changemakerPdcId !== '') {
+				const controlValues = extractControlValues(record, controlColumns);
+				const changemakerPdcId = controlValues.get(
+					CONTROL_KEY_PDC_CHANGEMAKER_ID,
+				);
+				const changemakerName =
+					changemakerNameCsvIndex === undefined
+						? undefined
+						: record[changemakerNameCsvIndex];
+				const changemakerTaxId =
+					changemakerTaxIdCsvIndex === undefined
+						? undefined
+						: record[changemakerTaxIdCsvIndex];
+				if (changemakerPdcId !== undefined) {
 					const changemakerId = Number(changemakerPdcId);
 					if (!isId(changemakerId)) {
 						throw new InputValidationError(
-							`Row ${recordNumber}: invalid ${CHANGEMAKER_PDC_ID_SHORT_CODE} ` +
-								`value "${changemakerPdcIdValue}"; expected an existing changemaker id.`,
+							`Row ${recordNumber}: invalid ${CONTROL_COLUMN_PREFIX}${CONTROL_KEY_PDC_CHANGEMAKER_ID} ` +
+								`value "${changemakerPdcId}"; expected an existing changemaker id.`,
 							isId.errors ?? [],
 						);
 					}
@@ -648,54 +729,60 @@ export const processBulkUploadTask = async (
 				}
 
 				await allNoLeaks(
-					record.map<Promise<ProposalFieldValue>>(async (fieldValue, index) => {
-						const { [index]: applicationFormField } = applicationFormFields;
-						if (applicationFormField === undefined) {
-							throw new Error(
-								'There is no form field associated with this column',
-							);
-						}
-
-						let processedFieldValue = fieldValue;
-						let isValid = fieldValueIsValid(
-							fieldValue,
-							applicationFormField.baseField.dataType,
-						);
-
-						// File attachments are the one unique case where we need to convert the bulk upload value
-						// into a PDC File ID.  The value in the CSV is the relative path of the file within the
-						// attachments archive.  A blank or whitespace-only cell means no attachment for that row.
-						if (
-							applicationFormField.baseField.dataType === BaseFieldDataType.FILE
-						) {
-							const trimmedPath = fieldValue.trim();
-							if (trimmedPath !== '') {
-								const attachmentFile =
-									await attachmentsManager.getAttachmentFile(trimmedPath);
-								processedFieldValue = attachmentFile.id.toString();
-								isValid = true;
+					dataColumns.map<Promise<ProposalFieldValue>>(
+						async ({ csvIndex }, position) => {
+							const { [position]: applicationFormField } =
+								applicationFormFields;
+							if (applicationFormField === undefined) {
+								throw new Error(
+									'There is no form field associated with this column',
+								);
 							}
-						}
 
-						const proposalFieldValue = await createProposalFieldValue(
-							transactionDb,
-							taskAuthContext,
-							{
-								proposalVersionId: proposalVersion.id,
-								applicationFormFieldId: applicationFormField.id,
-								value: processedFieldValue,
-								position: index,
-								isValid,
-								goodAsOf: null,
-							},
-						);
-						await createPermissionGrant(transactionDb, taskAuthContext, {
-							...getSelfManageGrantFragment(taskAuthContext),
-							contextEntityType: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
-							proposalFieldValueId: proposalFieldValue.id,
-						});
-						return proposalFieldValue;
-					}),
+							const fieldValue = record[csvIndex] ?? '';
+							let processedFieldValue = fieldValue;
+							let isValid = fieldValueIsValid(
+								fieldValue,
+								applicationFormField.baseField.dataType,
+							);
+
+							// File attachments are the one unique case where we need to convert the bulk upload value
+							// into a PDC File ID.  The value in the CSV is the relative path of the file within the
+							// attachments archive.  A blank or whitespace-only cell means no attachment for that row.
+							if (
+								applicationFormField.baseField.dataType ===
+								BaseFieldDataType.FILE
+							) {
+								const trimmedPath = fieldValue.trim();
+								if (trimmedPath !== '') {
+									const attachmentFile =
+										await attachmentsManager.getAttachmentFile(trimmedPath);
+									processedFieldValue = attachmentFile.id.toString();
+									isValid = true;
+								}
+							}
+
+							const proposalFieldValue = await createProposalFieldValue(
+								transactionDb,
+								taskAuthContext,
+								{
+									proposalVersionId: proposalVersion.id,
+									applicationFormFieldId: applicationFormField.id,
+									value: processedFieldValue,
+									position,
+									isValid,
+									goodAsOf: null,
+								},
+							);
+							await createPermissionGrant(transactionDb, taskAuthContext, {
+								...getSelfManageGrantFragment(taskAuthContext),
+								contextEntityType:
+									PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+								proposalFieldValueId: proposalFieldValue.id,
+							});
+							return proposalFieldValue;
+						},
+					),
 				);
 			});
 		});

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Bulk upload CSVs may include `control:`-prefixed columns (e.g. `control:pdc_changemaker_id`). Control columns carry meta-information that changes how a row is processed; they are exempt from application-form validation and are not stored as proposal field values. The first such column, `control:pdc_changemaker_id`, attaches a row's proposal to an exact existing changemaker, taking precedence over `organization_tax_id` + `organization_name` matching. Unknown `control:` keys fail the upload.
+
+### Fixed
+
+- The plain `pdc_changemaker_id` bulk upload column described in 0.40.0 never functioned: it was matched against application form base fields (which never include it), and adding it to a CSV failed column-count validation. It is replaced by the `control:pdc_changemaker_id` control column.
+
 ## 0.40.0 2026-06-26
 
 ### Added

@@ -129,12 +129,6 @@ const createTestBaseFields = async (db: TinyPg): Promise<void> => {
 		shortCode: 'favorite_file',
 		dataType: BaseFieldDataType.FILE,
 	});
-	await createTestBaseField(db, null, {
-		label: 'PDC Changemaker ID',
-		description:
-			'The PDC id of an existing changemaker to attach this proposal to.',
-		shortCode: 'pdc_changemaker_id',
-	});
 };
 
 describe('processBulkUploadTask', () => {
@@ -978,7 +972,7 @@ describe('processBulkUploadTask', () => {
 		const { applicationFormId } = await createTestApplicationForm(
 			db,
 			systemUserAuthContext,
-			['proposal_submitter_email', 'organization_name', 'pdc_changemaker_id'],
+			['proposal_submitter_email', 'organization_name'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			db,
@@ -1057,12 +1051,7 @@ describe('processBulkUploadTask', () => {
 		const { applicationFormId } = await createTestApplicationForm(
 			db,
 			systemUserAuthContext,
-			[
-				'proposal_submitter_email',
-				'organization_name',
-				'organization_tax_id',
-				'pdc_changemaker_id',
-			],
+			['proposal_submitter_email', 'organization_name', 'organization_tax_id'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			db,
@@ -1125,7 +1114,7 @@ describe('processBulkUploadTask', () => {
 		const { applicationFormId } = await createTestApplicationForm(
 			db,
 			systemUserAuthContext,
-			['proposal_submitter_email', 'organization_name', 'pdc_changemaker_id'],
+			['proposal_submitter_email', 'organization_name'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			db,
@@ -1176,7 +1165,7 @@ describe('processBulkUploadTask', () => {
 		const { applicationFormId } = await createTestApplicationForm(
 			db,
 			systemUserAuthContext,
-			['proposal_submitter_email', 'organization_name', 'pdc_changemaker_id'],
+			['proposal_submitter_email', 'organization_name'],
 		);
 		const bulkUploadTask = await createTestBulkUploadTask(
 			db,
@@ -1191,6 +1180,240 @@ describe('processBulkUploadTask', () => {
 						'fixtures',
 						'processBulkUploadTask',
 						'csvTemplateWithNonexistentChangemakerId.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.FAILED);
+		expect(updatedBulkUploadTask.logs.length).toBeGreaterThan(0);
+	});
+
+	it('reads data columns by position when a control column is interleaved, without storing the control value', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const existingChangemaker = await createTestChangemaker(
+			db,
+			systemUserAuthContext,
+			{ name: 'Original Changemaker Name', taxId: '11-1111111' },
+		);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{ proposalsDataFileId: proposalsDataFile.id, applicationFormId },
+		);
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'controlColumnAtNonFinalPosition.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
+
+		const proposalBundle = await loadProposalBundle(
+			db,
+			testAuthContext,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		const fieldValues = proposalBundle.entries
+			.flatMap((proposal) => proposal.versions)
+			.flatMap((version) => version.fieldValues)
+			.sort((a, b) => a.position - b.position);
+		expect(fieldValues).toEqual([
+			expectObjectContaining({
+				position: 0,
+				value: 'foo@example.com',
+				applicationFormField: expectObjectContaining({
+					baseFieldShortCode: 'proposal_submitter_email',
+				}),
+			}),
+			expectObjectContaining({
+				position: 1,
+				value: 'A Deliberately Different Name',
+				applicationFormField: expectObjectContaining({
+					baseFieldShortCode: 'organization_name',
+				}),
+			}),
+		]);
+
+		const changemakerProposalBundle = await loadChangemakerProposalBundle(
+			db,
+			testAuthContext,
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		expect(changemakerProposalBundle.entries).toEqual([
+			expectObjectContaining({ changemakerId: existingChangemaker.id }),
+		]);
+	});
+
+	it('falls back to organization_tax_id matching when the control value is blank', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name', 'organization_tax_id'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{ proposalsDataFileId: proposalsDataFile.id, applicationFormId },
+		);
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'controlColumnEmptyValue.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
+
+		const changemakerBundle = await loadChangemakerBundle(
+			db,
+			null,
+			undefined,
+			undefined,
+			NO_LIMIT,
+			NO_OFFSET,
+		);
+		expect(changemakerBundle.entries).toEqual([
+			expectObjectContaining({ taxId: '51-2144346', name: 'Foo LLC.' }),
+		]);
+	});
+
+	it('fails the task when a control column uses an unknown key', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{ proposalsDataFileId: proposalsDataFile.id, applicationFormId },
+		);
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'unknownControlKey.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.FAILED);
+		expect(updatedBulkUploadTask.logs.length).toBeGreaterThan(0);
+	});
+
+	it('fails the task when a control column is duplicated', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{ proposalsDataFileId: proposalsDataFile.id, applicationFormId },
+		);
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'duplicateControlColumn.csv',
 					),
 				),
 			),

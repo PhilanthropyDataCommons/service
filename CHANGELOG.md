@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Paginated list endpoints no longer slow down as you request later pages.
 
+### Added
+
+- Bulk upload CSVs may now include `control:`-prefixed columns (e.g. `control:pdc_changemaker_id`). Control columns carry meta-information that changes how a row is processed; they are exempt from application-form validation and are not stored as base fields.
+
+### Changed
+
+- `pdc_changemaker_id` is now expected as a `control:` column in a bulk-upload, rather than as a base field.
+
 ## 0.40.0 2026-06-26
 
 ### Added

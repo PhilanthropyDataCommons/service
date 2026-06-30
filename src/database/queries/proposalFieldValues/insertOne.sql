@@ -13,4 +13,4 @@ INSERT INTO proposal_field_values (
 	:isValid,
 	:goodAsOf
 )
-RETURNING proposal_field_value_to_json(proposal_field_values) AS object;
+RETURNING build_proposal_field_value_result(proposal_field_values) AS object;

@@ -22,8 +22,8 @@ import {
 } from '../../../types';
 import type { ProposalFieldValue, JsonResultSet } from '../../../types';
 
-describe('/proposal_field_value_to_json', () => {
-	it('returns a db error if attempting to load a forbidden proposal_field_value_to_json', async () => {
+describe('/build_proposal_field_value_result', () => {
+	it('returns a db error if attempting to serialize a forbidden proposal field value', async () => {
 		const db = getDatabase();
 		const testUser = await loadTestUser(db);
 		const testUserAuthContext = getAuthContext(testUser);
@@ -72,10 +72,10 @@ describe('/proposal_field_value_to_json', () => {
 
 		await expect(
 			db.query(
-				'SELECT proposal_field_value_to_json(proposal_field_values.*) FROM proposal_field_values WHERE proposal_field_values.id = 1',
+				'SELECT assert_proposal_field_value_not_forbidden(proposal_field_values.*) FROM proposal_field_values WHERE proposal_field_values.id = 1',
 			),
 		).rejects.toThrow(
-			'Attempt to convert forbidden proposal_field_value to JSON (1)',
+			'Refusing to serialize forbidden proposal_field_value (1)',
 		);
 	});
 
@@ -141,7 +141,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 
 		const result = await db.query<JsonResultSet<ProposalFieldValue>>(
-			`SELECT proposal_field_value_to_json(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
+			`SELECT build_proposal_field_value_result(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
 		);
 
 		const {
@@ -221,7 +221,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 
 		const result = await db.query<JsonResultSet<ProposalFieldValue>>(
-			`SELECT proposal_field_value_to_json(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
+			`SELECT build_proposal_field_value_result(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
 		);
 
 		const {
@@ -290,7 +290,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 
 		const result = await db.query<JsonResultSet<ProposalFieldValue>>(
-			`SELECT proposal_field_value_to_json(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
+			`SELECT build_proposal_field_value_result(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
 		);
 
 		const {
@@ -359,7 +359,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 
 		const result = await db.query<JsonResultSet<ProposalFieldValue>>(
-			`SELECT proposal_field_value_to_json(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
+			`SELECT build_proposal_field_value_result(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
 		);
 
 		const {
@@ -426,7 +426,7 @@ describe('/proposal_field_value_to_json', () => {
 		});
 
 		const result = await db.query<JsonResultSet<ProposalFieldValue>>(
-			`SELECT proposal_field_value_to_json(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
+			`SELECT build_proposal_field_value_result(proposal_field_values.*) as object FROM proposal_field_values WHERE proposal_field_values.id = ${proposalFieldValue.id}`,
 		);
 
 		const {

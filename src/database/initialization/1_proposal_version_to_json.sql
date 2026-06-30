@@ -17,7 +17,7 @@ BEGIN
 	)
 
 	SELECT jsonb_agg(
-		proposal_field_value_to_json(version_field_values.*)
+		build_proposal_field_value_result(version_field_values.*)
 		ORDER BY version_field_values.position, version_field_values.id DESC
 	)
 	INTO proposal_field_values_json

@@ -50,7 +50,7 @@ BEGIN
 		FROM (
 			-- ProposalFieldValues
 			SELECT
-				proposal_field_value_to_json(pfv.*) AS field_value_json,
+				build_proposal_field_value_result(pfv.*) AS field_value_json,
 				bf.short_code AS base_field_short_code,
 				s.changemaker_id AS source_changemaker_id,
 				s.funder_short_code AS source_funder_short_code,

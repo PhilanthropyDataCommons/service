@@ -10,20 +10,26 @@ DECLARE
 	proposal_field_values_json JSONB;
 	source_json JSONB;
 BEGIN
+	WITH version_field_values AS MATERIALIZED (
+		SELECT proposal_field_values.*
+		FROM proposal_field_values
+		WHERE proposal_field_values.proposal_version_id = proposal_version.id
+	)
+
 	SELECT jsonb_agg(
-		proposal_field_value_to_json(proposal_field_values.*)
-		ORDER BY proposal_field_values.position, proposal_field_values.id DESC
+		proposal_field_value_to_json(version_field_values.*)
+		ORDER BY version_field_values.position, version_field_values.id DESC
 	)
 	INTO proposal_field_values_json
-	FROM proposal_field_values
-	INNER JOIN permitted_proposal_field_value_ids(
+	FROM version_field_values
+	INNER JOIN permitted_proposal_field_value_ids_among(
 		auth_context_keycloak_user_id,
 		auth_context_is_administrator,
 		'view',
-		'proposalFieldValue'
+		'proposalFieldValue',
+		ARRAY(SELECT version_field_values.id FROM version_field_values)
 	) AS permitted_field_values
-		ON permitted_field_values.id = proposal_field_values.id
-	WHERE proposal_field_values.proposal_version_id = proposal_version.id;
+		ON permitted_field_values.id = version_field_values.id;
 
 	SELECT source_to_json(
 		sources.*,

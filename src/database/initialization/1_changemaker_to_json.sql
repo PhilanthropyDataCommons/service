@@ -26,6 +26,16 @@ BEGIN
 	WHERE NOT shallow;
 
 	-- Combine ProposalFieldValues and ChangemakerFieldValues, select gold per base field
+	WITH changemaker_proposal_field_value_ids AS (
+		SELECT pfv.id
+		FROM proposal_field_values pfv
+		INNER JOIN proposal_versions pv
+			ON pfv.proposal_version_id = pv.id
+		INNER JOIN changemakers_proposals op
+			ON pv.proposal_id = op.proposal_id
+		WHERE op.changemaker_id = changemaker.id
+	)
+
 	SELECT jsonb_agg(field_value_json)
 	INTO field_values_json
 	FROM (
@@ -61,12 +71,17 @@ BEGIN
 				ON pv.proposal_id = op.proposal_id
 			INNER JOIN sources s
 				ON pv.source_id = s.id
-			-- Restrict to field values the user may view.
-			INNER JOIN permitted_proposal_field_value_ids(
+			-- Restrict to field values the user may view, bounded to this
+			-- changemaker's proposals so permission is computed only for them.
+			INNER JOIN permitted_proposal_field_value_ids_among(
 				auth_context_keycloak_user_id,
 				auth_context_is_administrator,
 				'view',
-				'proposalFieldValue'
+				'proposalFieldValue',
+				ARRAY(
+					SELECT changemaker_proposal_field_value_ids.id
+					FROM changemaker_proposal_field_value_ids
+				)
 			) AS permitted_field_values
 				ON permitted_field_values.id = pfv.id
 			WHERE op.changemaker_id = changemaker.id

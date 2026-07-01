@@ -22,14 +22,17 @@ BEGIN
     auth_context_is_administrator
   ) AS serialized_proposal;
 
-  SELECT changemaker_to_json(
-    changemakers.*,
+  SELECT serialized_changemaker.object
+  INTO changemaker_json
+  FROM build_changemakers_results(
+    ARRAY(
+      SELECT changemakers
+      FROM changemakers
+      WHERE changemakers.id = changemaker_proposal.changemaker_id
+    ),
     auth_context_keycloak_user_id,
     auth_context_is_administrator
-  )
-  INTO changemaker_json
-  FROM changemakers
-  WHERE changemakers.id = changemaker_proposal.changemaker_id;
+  ) AS serialized_changemaker;
 
   RETURN jsonb_build_object(
     'id', changemaker_proposal.id,

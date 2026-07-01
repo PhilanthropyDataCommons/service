@@ -20,14 +20,20 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			terminology_set_to_json(
-				candidate_entries.*::terminology_sets
-			) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY id
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT
+			terminology_set_to_json(
+				page.*::terminology_sets
+			) AS object
+		FROM page
+		ORDER BY id
 	)
 
 SELECT

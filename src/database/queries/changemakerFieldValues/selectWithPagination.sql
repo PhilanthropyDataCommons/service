@@ -29,14 +29,20 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			build_changemaker_field_value_result(
-				candidate_entries.*::changemaker_field_values
-			) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY id DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT
+			build_changemaker_field_value_result(
+				page.*::changemaker_field_values
+			) AS object
+		FROM page
+		ORDER BY id DESC
 	)
 
 SELECT

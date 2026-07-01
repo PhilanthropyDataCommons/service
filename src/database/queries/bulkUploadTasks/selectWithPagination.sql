@@ -25,16 +25,22 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			bulk_upload_task_to_json(
-				candidate_entries.*::bulk_upload_tasks,
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator
-			) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY id DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT
+			bulk_upload_task_to_json(
+				page.*::bulk_upload_tasks,
+				:authContextKeycloakUserId,
+				:authContextIsAdministrator
+			) AS object
+		FROM page
+		ORDER BY id DESC
 	)
 
 SELECT

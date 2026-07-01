@@ -8,11 +8,17 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT data_provider_to_json(candidate_entries.*::data_providers) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY created_at DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT data_provider_to_json(page.*::data_providers) AS object
+		FROM page
+		ORDER BY created_at DESC
 	)
 
 SELECT

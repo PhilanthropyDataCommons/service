@@ -29,16 +29,22 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			changemaker_proposal_to_json(
-				candidate_entries.*::changemakers_proposals,
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator
-			) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY id DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT
+			changemaker_proposal_to_json(
+				page.*::changemakers_proposals,
+				:authContextKeycloakUserId,
+				:authContextIsAdministrator
+			) AS object
+		FROM page
+		ORDER BY id DESC
 	)
 
 SELECT

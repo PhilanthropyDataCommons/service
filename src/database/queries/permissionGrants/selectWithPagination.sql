@@ -14,14 +14,20 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			permission_grant_to_json(
-				candidate_entries.*::permission_grants
-			) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY id DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT
+			permission_grant_to_json(
+				page.*::permission_grants
+			) AS object
+		FROM page
+		ORDER BY id DESC
 	)
 
 SELECT

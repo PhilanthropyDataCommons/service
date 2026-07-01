@@ -37,14 +37,20 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			funder_collaborative_invitation_to_json(
-				candidate_entries.*::funder_collaborative_invitations
-			) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY created_at DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT
+			funder_collaborative_invitation_to_json(
+				page.*::funder_collaborative_invitations
+			) AS object
+		FROM page
+		ORDER BY created_at DESC
 	)
 
 SELECT

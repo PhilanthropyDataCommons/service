@@ -25,14 +25,20 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			base_fields_copy_task_to_json(
-				candidate_entries.*::base_fields_copy_tasks
-			) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY id DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT
+			base_fields_copy_task_to_json(
+				page.*::base_fields_copy_tasks
+			) AS object
+		FROM page
+		ORDER BY id DESC
 	)
 
 SELECT

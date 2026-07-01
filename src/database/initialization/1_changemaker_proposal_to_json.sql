@@ -2,45 +2,15 @@ SELECT drop_function('changemaker_proposal_to_json');
 
 CREATE FUNCTION changemaker_proposal_to_json(
 	changemaker_proposal changemakers_proposals,
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
-	auth_context_is_administrator boolean DEFAULT FALSE
-)
-RETURNS jsonb AS $$
-DECLARE
-  proposal_json JSONB;
-  changemaker_json JSONB;
-BEGIN
-  SELECT serialized_proposal.object
-  INTO proposal_json
-  FROM build_proposals_results(
-    ARRAY(
-      SELECT proposals
-      FROM proposals
-      WHERE proposals.id = changemaker_proposal.proposal_id
-    ),
-    auth_context_keycloak_user_id,
-    auth_context_is_administrator
-  ) AS serialized_proposal;
-
-  SELECT serialized_changemaker.object
-  INTO changemaker_json
-  FROM build_changemakers_results(
-    ARRAY(
-      SELECT changemakers
-      FROM changemakers
-      WHERE changemakers.id = changemaker_proposal.changemaker_id
-    ),
-    auth_context_keycloak_user_id,
-    auth_context_is_administrator
-  ) AS serialized_changemaker;
-
-  RETURN jsonb_build_object(
-    'id', changemaker_proposal.id,
-    'changemakerId', changemaker_proposal.changemaker_id,
-    'changemaker', changemaker_json,
-    'proposalId', changemaker_proposal.proposal_id,
-    'proposal', proposal_json,
-    'createdAt', changemaker_proposal.created_at
-  );
-END;
-$$ LANGUAGE plpgsql;
+	changemaker jsonb,
+	proposal jsonb
+) RETURNS jsonb AS $$
+	SELECT jsonb_build_object(
+		'id', changemaker_proposal.id,
+		'changemakerId', changemaker_proposal.changemaker_id,
+		'changemaker', changemaker,
+		'proposalId', changemaker_proposal.proposal_id,
+		'proposal', proposal,
+		'createdAt', changemaker_proposal.created_at
+	);
+$$ LANGUAGE sql IMMUTABLE;

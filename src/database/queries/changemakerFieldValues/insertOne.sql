@@ -13,4 +13,5 @@ INSERT INTO changemaker_field_values (
 	:isValid,
 	:goodAsOf
 )
-RETURNING changemaker_field_value_to_json(changemaker_field_values) AS object;
+RETURNING
+	build_changemaker_field_value_result(changemaker_field_values) AS object;

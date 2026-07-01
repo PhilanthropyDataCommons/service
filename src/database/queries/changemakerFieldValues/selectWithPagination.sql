@@ -31,7 +31,7 @@ WITH
 
 	paginated_entries AS (
 		SELECT
-			changemaker_field_value_to_json(
+			build_changemaker_field_value_result(
 				candidate_entries.*::changemaker_field_values
 			) AS object
 		FROM candidate_entries

@@ -96,7 +96,7 @@ BEGIN
 
 			-- ChangemakerFieldValues
 			SELECT
-				changemaker_field_value_to_json(
+				build_changemaker_field_value_result(
 					cfv.*,
 					auth_context_keycloak_user_id,
 					auth_context_is_administrator

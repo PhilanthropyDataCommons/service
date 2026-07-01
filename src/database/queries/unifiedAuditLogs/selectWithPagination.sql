@@ -8,14 +8,20 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			unified_audit_log_to_json(
-				candidate_entries.*::unified_audit_logs
-			) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY action_tstamp_stm DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT
+			unified_audit_log_to_json(
+				page.*::unified_audit_logs
+			) AS object
+		FROM page
+		ORDER BY action_tstamp_stm DESC
 	)
 
 SELECT

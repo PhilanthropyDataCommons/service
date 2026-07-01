@@ -15,14 +15,20 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			base_field_localization_to_json(
-				candidate_entries.*::base_field_localizations
-			) AS object
+	page AS (
+		SELECT candidate_entries.*
 		FROM candidate_entries
 		ORDER BY created_at
 		LIMIT :limit OFFSET :offset
+	),
+
+	paginated_entries AS (
+		SELECT
+			base_field_localization_to_json(
+				page.*::base_field_localizations
+			) AS object
+		FROM page
+		ORDER BY created_at
 	)
 
 SELECT

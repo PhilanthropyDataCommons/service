@@ -117,12 +117,18 @@ BEGIN
 				ON cfv.batch_id = cfvb.id
 			INNER JOIN sources s
 				ON cfvb.source_id = s.id
-			-- Restrict to field values the user may view.
-			INNER JOIN permitted_changemaker_field_value_ids(
+			-- Restrict to field values the user may view, bounded to this
+			-- changemaker's field values so permission is computed only for them.
+			INNER JOIN permitted_changemaker_field_value_ids_among(
 				auth_context_keycloak_user_id,
 				auth_context_is_administrator,
 				'view',
-				'changemakerFieldValue'
+				'changemakerFieldValue',
+				ARRAY(
+					SELECT changemaker_field_values.id
+					FROM changemaker_field_values
+					WHERE changemaker_field_values.changemaker_id = changemaker.id
+				)
 			) AS permitted_field_values
 				ON permitted_field_values.id = cfv.id
 			WHERE cfv.changemaker_id = changemaker.id

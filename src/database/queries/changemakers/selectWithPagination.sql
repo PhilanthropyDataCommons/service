@@ -31,16 +31,30 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	paginated_entries AS (
-		SELECT
-			changemaker_to_json(
-				candidate_entries.*::changemakers,
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator
-			) AS object
+	page AS (
+		SELECT candidate_entries.id
 		FROM candidate_entries
-		ORDER BY id DESC
+		ORDER BY candidate_entries.id DESC
 		LIMIT :limit OFFSET :offset
+	),
+
+	page_changemakers AS (
+		SELECT changemakers AS changemaker
+		FROM changemakers
+		WHERE changemakers.id IN (SELECT page.id FROM page)
+	),
+
+	paginated_entries AS (
+		SELECT serialized_changemaker.object
+		FROM page
+			INNER JOIN
+				build_changemakers_results(
+					array(SELECT page_changemakers.changemaker FROM page_changemakers),
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator
+				) AS serialized_changemaker
+				ON page.id = serialized_changemaker.id
+		ORDER BY page.id DESC
 	)
 
 SELECT

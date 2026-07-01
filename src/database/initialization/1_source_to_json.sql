@@ -22,13 +22,9 @@ BEGIN
   FROM funders
   WHERE funders.short_code = source.funder_short_code;
 
-  -- Use shallow=TRUE to prevent infinite recursion (source -> changemaker -> fields -> batch -> source)
-  SELECT changemaker_to_json(
-    changemakers.*,
-    auth_context_keycloak_user_id,
-    auth_context_is_administrator,
-    TRUE
-  )
+  -- Shallow changemaker (no children) to prevent infinite recursion
+  -- (source -> changemaker -> fields -> batch -> source).
+  SELECT changemaker_to_json(changemakers.*, NULL, NULL, TRUE)
   INTO changemaker_json
   FROM changemakers
   WHERE changemakers.id = source.changemaker_id;

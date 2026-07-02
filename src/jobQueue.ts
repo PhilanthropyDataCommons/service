@@ -1,4 +1,4 @@
-import { Logger, quickAddJob, run, runMigrations } from 'graphile-worker';
+import { Logger, addJobAdhoc, run, runMigrations } from 'graphile-worker';
 import { TEN_MINUTES_IN_MS } from './constants/time';
 import { copyBaseFields, processBulkUploadTask } from './tasks';
 import { getLogger } from './logger';
@@ -74,7 +74,7 @@ export const addJob = async (
 	payload: unknown,
 ): Promise<Job> => {
 	const db = getDatabase();
-	return await quickAddJob(
+	return await addJobAdhoc(
 		{
 			logger: jobQueueLogger,
 			pgPool: db.pool,

@@ -30,21 +30,29 @@ WITH
 	),
 
 	page AS (
-		SELECT candidate_entries.*
+		SELECT candidate_entries.id
 		FROM candidate_entries
-		ORDER BY id DESC
+		ORDER BY candidate_entries.id DESC
 		LIMIT :limit OFFSET :offset
 	),
 
+	page_entries AS (
+		SELECT changemakers_proposals AS entry
+		FROM changemakers_proposals
+		WHERE changemakers_proposals.id IN (SELECT page.id FROM page)
+	),
+
 	paginated_entries AS (
-		SELECT
-			changemaker_proposal_to_json(
-				page.*::changemakers_proposals,
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator
-			) AS object
+		SELECT serialized_entry.object
 		FROM page
-		ORDER BY id DESC
+			INNER JOIN
+				build_changemakers_proposals_results(
+					array(SELECT page_entries.entry FROM page_entries),
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator
+				) AS serialized_entry
+				ON page.id = serialized_entry.id
+		ORDER BY page.id DESC
 	)
 
 SELECT

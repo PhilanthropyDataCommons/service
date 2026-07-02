@@ -20,11 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out our code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: 'service'
       - name: Check out sdk generators
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: 'PhilanthropyDataCommons/sdk'
           path: 'sdk'

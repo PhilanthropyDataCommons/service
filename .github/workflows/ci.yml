@@ -156,7 +156,7 @@ jobs:
           S3_PATH_STYLE: false
           S3_REGION: fake-s3-region
       - name: Upload test coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true

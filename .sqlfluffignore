@@ -48,7 +48,17 @@ src/database/migrations/0042-alter-permission-tables-add-not_after.sql
 src/database/migrations/0043-alter-data_providers-add-keycloak_organization_id.sql
 src/database/migrations/0044-alter-funders-add-keycloak_organization_id.sql
 src/database/migrations/0045-alter-changemakers-add-keycloak_organization_id.sql
+src/database/migrations/0055-create-audit-log.sql
 src/database/migrations/0058-create-db-operation-audit-logs.sql
+src/database/migrations/0059-alter-base_fields-use-shortcode-as-primary-key.sql
+src/database/migrations/0074-create-bulk_upload_log.sql
+src/database/migrations/0078-create-changemaker_field_value_batches.sql
+src/database/migrations/0079-create-changemaker_field_values.sql
+src/database/migrations/0080-alter-changemaker_field_value_batches-add-created_by.sql
+src/database/migrations/0083-create-permission_grants.sql
+src/database/migrations/0098-alter-references-to-base_fields-short_code.sql
+src/database/migrations/0099-alter-changemakers-add-name_search.sql
+src/database/migrations/0101-alter-funders-add-name_search.sql
 
 # SQLFluff 4.1.0 does not yet parse MERGE ... RETURNING (PG 17+). Once it does
 # (https://github.com/sqlfluff/sqlfluff/), these can be removed.

@@ -62,7 +62,8 @@ assign users to that group, and then assign the group to the App.
 6. Set the display name to include the full name of the organization, for
    example `My Foundation Microsoft Entra Client`
 7. Set the "Client ID" to the value provided by the Entra admin (a UUID)
-8. Set the "Client Secret" to the value provided by the Entra admin
+8. Set the "Client Secret" to the value provided by the Entra admin\
+   _NOTE: The Secret is not a GUID but instead is a 'passphrase' value_
 9. Set "Prompt" to `login`
 10. Set Tenant ID to the value provided by the Entra admin (a UUID)
 11. Click "Add"
@@ -88,6 +89,14 @@ Link the Organization to the newly created Identity provider:
 7. Keep "Hide on login page" set to `On`
 8. Set "Redirect when email domain matches" to `On`
 9. Click "Save".
+
+Verify the Link to the Organization from the Identity provider:
+
+1. Go into the Organization
+2. Select the "Identity Providers" tab. There should be the entry you just added
+3. On the right side, click the verticle ellipses and select Edit\
+   ![The Menu to click on to Edit the IDP Link](./images/Entra_3.png)
+4. Enable the 'Redirect when email domain matches' option
 
 ## In Microsoft Entra again
 

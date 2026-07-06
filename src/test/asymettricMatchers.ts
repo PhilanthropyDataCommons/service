@@ -22,6 +22,9 @@ const expectObjectContaining = (obj: Record<string, unknown>): unknown =>
 
 const expectString = (): unknown => expect.any(String);
 
+const expectStringContaining = (substring: string): unknown =>
+	expect.stringContaining(substring);
+
 const expectTimestamp = (): unknown =>
 	expect.stringMatching(ISO_TIMESTAMP_PATTERN);
 
@@ -33,5 +36,6 @@ export {
 	expectObject,
 	expectObjectContaining,
 	expectString,
+	expectStringContaining,
 	expectTimestamp,
 };

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a `GET /funders/{memberFunderShortCode}/collaboratives` endpoint that lists funder collaborative memberships for a given member funder.
 - Bulk upload CSVs may now include `control:`-prefixed columns (e.g. `control:pdc_changemaker_id`). Control columns carry meta-information that changes how a row is processed; they are exempt from application-form validation and are not stored as base fields.
 
 ### Changed

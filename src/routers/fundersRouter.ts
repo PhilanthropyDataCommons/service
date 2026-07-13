@@ -49,6 +49,12 @@ fundersRouter.delete(
 	funderCollaborativeMembersHandlers.deleteFunderCollaborativeMember,
 );
 
+fundersRouter.get(
+	'/:funderShortCode/collaboratives',
+	requireFunderPermission(PermissionGrantVerb.MANAGE),
+	funderCollaborativeMembersHandlers.getFunderCollaboratives,
+);
+
 fundersRouter.post(
 	'/:funderShortCode/invitations/sent/:invitedFunderShortCode',
 	requireFunderPermission(PermissionGrantVerb.MANAGE),

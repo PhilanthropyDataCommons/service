@@ -272,6 +272,7 @@ context key).
 | edit   | terminologySet     | Create or update terminology sets owned by the funder                                |
 | manage | funder             | View, send, and respond to funder collaborative invitations                          |
 |        |                    | View collaborative members for the funder                                            |
+|        |                    | View the collaboratives the funder is a member of                                    |
 
 ### Changemaker Permissions
 

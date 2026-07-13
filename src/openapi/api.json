@@ -383,6 +383,9 @@
 		"/funders/{funderCollaborativeShortCode}/members/{memberFunderShortCode}": {
 			"$ref": "./paths/funderCollaborativeMember.json"
 		},
+		"/funders/{memberFunderShortCode}/collaboratives": {
+			"$ref": "./paths/funderCollaboratives.json"
+		},
 		"/funders/{funderCollaborativeShortCode}/invitations/sent": {
 			"$ref": "./paths/funderCollaborativeInvitationsSent.json"
 		},

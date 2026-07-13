@@ -1,0 +1,53 @@
+{
+	"get": {
+		"operationId": "getFunderCollaboratives",
+		"summary": "Gets a list of funder collaborative membership records for the collaboratives that the funder is a member of.",
+		"tags": ["Funder Collaborative Members"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "memberFunderShortCode",
+				"description": "The short code of a member funder.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/shortCode.json"
+				}
+			},
+			{
+				"$ref": "../components/parameters/pageParam.json"
+			},
+			{
+				"$ref": "../components/parameters/countParam.json"
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "A list of funder collaborative memberships for the funder.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/FunderCollaborativeMemberBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

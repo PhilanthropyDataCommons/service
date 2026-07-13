@@ -65,3 +65,5 @@ userKeycloakUserId = '00000000-0000-0000-0000-000000000000'
 bulkUploadTaskId = 1
 terminologySetId = 1
 isCollaborative = false
+granteeType = 'user'
+verb = 'view'

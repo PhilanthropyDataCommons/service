@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"$ref": "../schemas/PermissionGrantVerb.json"
+	},
+	"in": "query",
+	"name": "verb",
+	"required": false,
+	"description": "Filters permission grants to those that include the given verb."
+}

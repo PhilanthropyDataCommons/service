@@ -43,6 +43,7 @@ import {
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
+	stringToKeycloakId,
 } from '../types';
 const agent = request.agent(app);
 
@@ -197,6 +198,322 @@ describe('/permissionGrants', () => {
 						total: 2,
 					});
 				});
+		});
+
+		it('filters by changemaker', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const matchingChangemaker = await createTestChangemaker(db, authContext);
+			const otherChangemaker = await createTestChangemaker(db, authContext);
+			const matchingGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: matchingChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: otherChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get(`/permissionGrants?changemaker=${matchingChangemaker.id}`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [
+					{ id: matchingGrant.id, changemakerId: matchingChangemaker.id },
+				],
+			});
+		});
+
+		it('filters by funder', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const funder = await createTestFunder(db, authContext);
+			const matchingGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createTestPermissionGrant(db, authContext);
+
+			const response = await agent
+				.get(`/permissionGrants?funder=${funder.shortCode}`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [{ id: matchingGrant.id, funderShortCode: funder.shortCode }],
+			});
+		});
+
+		it('filters by data provider', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const dataProvider = await createTestDataProvider(db, authContext);
+			const matchingGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
+				dataProviderShortCode: dataProvider.shortCode,
+				scope: [PermissionGrantEntityType.DATA_PROVIDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createTestPermissionGrant(db, authContext);
+
+			const response = await agent
+				.get(`/permissionGrants?dataProvider=${dataProvider.shortCode}`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [
+					{
+						id: matchingGrant.id,
+						dataProviderShortCode: dataProvider.shortCode,
+					},
+				],
+			});
+		});
+
+		it('filters by proposal', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const proposal = await createTestProposal(db, authContext);
+			const matchingGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.PROPOSAL,
+				proposalId: proposal.id,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createTestPermissionGrant(db, authContext);
+
+			const response = await agent
+				.get(`/permissionGrants?proposal=${proposal.id}`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [{ id: matchingGrant.id, proposalId: proposal.id }],
+			});
+		});
+
+		it('filters by grantee type', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			const userGroupGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: stringToKeycloakId(
+					'47d406ad-5e50-42d4-88f1-f87947a3e314',
+				),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createTestPermissionGrant(db, authContext);
+
+			const response = await agent
+				.get('/permissionGrants?granteeType=userGroup')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [{ id: userGroupGrant.id, granteeType: 'userGroup' }],
+			});
+		});
+
+		it('filters by verb, matching grants that include the verb', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			const multiVerbGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+			});
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+
+			const response = await agent
+				.get('/permissionGrants?verb=edit')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [{ id: multiVerbGrant.id, verbs: ['view', 'edit'] }],
+			});
+		});
+
+		it('applies multiple filters together', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			const otherChangemaker = await createTestChangemaker(db, authContext);
+			const matchingGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			// Same changemaker, different verb: excluded by the verb filter.
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+			// Matching verb, different changemaker: excluded by the changemaker filter.
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: otherChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get(`/permissionGrants?changemaker=${changemaker.id}&verb=view`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [{ id: matchingGrant.id }],
+			});
+		});
+
+		it('returns an empty bundle when a filter matches nothing', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			await createTestPermissionGrant(db, authContext);
+
+			const response = await agent
+				.get('/permissionGrants?verb=delete')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toEqual({ entries: [], total: 0 });
+		});
+
+		it('returns an empty bundle when combined filters match nothing', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get(
+					`/permissionGrants?changemaker=${changemaker.id}&granteeType=userGroup`,
+				)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toEqual({ entries: [], total: 0 });
+		});
+
+		it('composes filters with pagination', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const funder = await createTestFunder(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+			await createTestPermissionGrant(db, authContext);
+
+			const response = await agent
+				.get(`/permissionGrants?funder=${funder.shortCode}&_count=1&_page=1`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 2,
+				entries: [{ id: expectNumber() }],
+			});
+		});
+
+		it('returns 400 if an invalid granteeType filter is provided', async () => {
+			const response = await agent
+				.get('/permissionGrants?granteeType=bogus')
+				.set(adminUserAuthHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({ name: 'InputValidationError' });
+		});
+
+		it('returns 400 if an invalid verb filter is provided', async () => {
+			const response = await agent
+				.get('/permissionGrants?verb=destroy')
+				.set(adminUserAuthHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({ name: 'InputValidationError' });
+		});
+
+		it('returns 400 if a non-numeric changemaker filter is provided', async () => {
+			const response = await agent
+				.get('/permissionGrants?changemaker=foo')
+				.set(adminUserAuthHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({ name: 'InputValidationError' });
+		});
+
+		it('returns 400 if an invalid data provider filter is provided', async () => {
+			const response = await agent
+				.get('/permissionGrants?dataProvider=bad!code')
+				.set(adminUserAuthHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({ name: 'InputValidationError' });
+		});
+
+		it('returns 400 if more than one context entity filter is provided', async () => {
+			const response = await agent
+				.get('/permissionGrants?changemaker=1&funder=someFunder')
+				.set(adminUserAuthHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({ name: 'InputValidationError' });
 		});
 	});
 

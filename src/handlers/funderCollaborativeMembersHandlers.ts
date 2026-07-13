@@ -79,6 +79,38 @@ const getFunderCollaborativeMembers = async (
 		.send(funderBundle);
 };
 
+const getFunderCollaboratives = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
+	const db = getDatabase();
+	const { funderShortCode } = coerceParams(req.params);
+	if (!isShortCode(funderShortCode)) {
+		throw new InputValidationError(
+			'Invalid member funder short code.',
+			isShortCode.errors ?? [],
+		);
+	}
+	const paginationParameters = extractPaginationParameters(req);
+	const { offset, limit } = getLimitValues(paginationParameters);
+	const funderBundle = await loadFunderCollaborativeMemberBundle(
+		db,
+		req,
+		undefined,
+		funderShortCode,
+		limit,
+		offset,
+	);
+
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(funderBundle);
+};
+
 const postFunderCollaborativeMember = async (
 	req: Request,
 	res: Response,
@@ -149,6 +181,7 @@ const deleteFunderCollaborativeMember = async (
 export const funderCollaborativeMembersHandlers = {
 	getFunderCollaborativeMember,
 	getFunderCollaborativeMembers,
+	getFunderCollaboratives,
 	postFunderCollaborativeMember,
 	deleteFunderCollaborativeMember,
 };

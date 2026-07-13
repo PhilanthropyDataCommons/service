@@ -958,6 +958,135 @@ describe('/funders', () => {
 			});
 		});
 	});
+	describe('/funders/:funderShortCode/collaboratives', () => {
+		describe('GET /', () => {
+			it('requires authentication', async () => {
+				await agent.get('/funders/foo/collaboratives').expect(401);
+			});
+
+			it('throws a 400 error if the funder short code is invalid', async () => {
+				await agent
+					.get('/funders/!!!!!!!/collaboratives')
+					.set(adminUserAuthHeader)
+					.expect(400);
+			});
+
+			it('requires MANAGE permission on the funder', async () => {
+				const db = getDatabase();
+				const testUser = await loadTestUser(db);
+				const testUserAuthContext = getAuthContext(testUser);
+				await createTestFunders(db, testUserAuthContext, {
+					theFundFund: true,
+					theFoundationFoundation: false,
+					theFundersWhoFund: false,
+					theFundingFathers: false,
+					theFunnyFunders: false,
+					theFungibleFund: false,
+				});
+				const result = await agent
+					.get('/funders/theFoundationFoundation/collaboratives')
+					.set(authHeader)
+					.expect(403);
+				expect(result.body).toMatchObject({
+					message:
+						'Authenticated user does not have permission to perform this action.',
+					details: expectArray(),
+				});
+			});
+
+			it('returns all collaboratives that a funder is a member of', async () => {
+				const db = getDatabase();
+				const testUser = await loadTestUser(db);
+				const testUserAuthContext = getAuthContext(testUser);
+				await createTestFunders(db, testUserAuthContext, {
+					theFundFund: true,
+					theFoundationFoundation: true,
+					theFundersWhoFund: false,
+					theFundingFathers: false,
+					theFunnyFunders: false,
+					theFungibleFund: false,
+				});
+
+				await createOrUpdateFunderCollaborativeMember(db, testUserAuthContext, {
+					funderCollaborativeShortCode: 'theFundFund',
+					memberFunderShortCode: 'theFundersWhoFund',
+				});
+				await createOrUpdateFunderCollaborativeMember(db, testUserAuthContext, {
+					funderCollaborativeShortCode: 'theFoundationFoundation',
+					memberFunderShortCode: 'theFundersWhoFund',
+				});
+				await createOrUpdateFunderCollaborativeMember(db, testUserAuthContext, {
+					funderCollaborativeShortCode: 'theFundFund',
+					memberFunderShortCode: 'theFundingFathers',
+				});
+				const response = await agent
+					.get('/funders/theFundersWhoFund/collaboratives')
+					.set(adminUserAuthHeader)
+					.expect(200);
+				expect(response.body).toEqual({
+					entries: [
+						{
+							funderCollaborativeShortCode: 'theFoundationFoundation',
+							memberFunderShortCode: 'theFundersWhoFund',
+							createdAt: expectTimestamp(),
+							createdBy: testUser.keycloakUserId,
+						},
+						{
+							funderCollaborativeShortCode: 'theFundFund',
+							memberFunderShortCode: 'theFundersWhoFund',
+							createdAt: expectTimestamp(),
+							createdBy: testUser.keycloakUserId,
+						},
+					],
+					total: 2,
+				});
+			});
+
+			it('returns collaboratives when the user has MANAGE permission on the funder', async () => {
+				const db = getDatabase();
+				const testUser = await loadTestUser(db);
+				const testUserAuthContext = getAuthContext(testUser);
+				const systemUser = await loadSystemUser(db, null);
+				const systemUserAuthContext = getAuthContext(systemUser);
+				await createTestFunders(db, testUserAuthContext, {
+					theFundFund: true,
+					theFoundationFoundation: false,
+					theFundersWhoFund: false,
+					theFundingFathers: false,
+					theFunnyFunders: false,
+					theFungibleFund: false,
+				});
+				await createPermissionGrant(db, systemUserAuthContext, {
+					granteeType: PermissionGrantGranteeType.USER,
+					granteeUserKeycloakUserId: testUser.keycloakUserId,
+					contextEntityType: PermissionGrantEntityType.FUNDER,
+					funderShortCode: 'theFoundationFoundation',
+					scope: [PermissionGrantEntityType.FUNDER],
+					verbs: [PermissionGrantVerb.MANAGE],
+				});
+				await createOrUpdateFunderCollaborativeMember(db, testUserAuthContext, {
+					funderCollaborativeShortCode: 'theFundFund',
+					memberFunderShortCode: 'theFoundationFoundation',
+				});
+
+				const response = await agent
+					.get('/funders/theFoundationFoundation/collaboratives')
+					.set(authHeader)
+					.expect(200);
+				expect(response.body).toEqual({
+					entries: [
+						{
+							funderCollaborativeShortCode: 'theFundFund',
+							memberFunderShortCode: 'theFoundationFoundation',
+							createdAt: expectTimestamp(),
+							createdBy: testUser.keycloakUserId,
+						},
+					],
+					total: 1,
+				});
+			});
+		});
+	});
 	describe('POST /:shortCode/invitations/sent/:invitedFunderShortCode', () => {
 		it('requires authentication', async () => {
 			const db = getDatabase();

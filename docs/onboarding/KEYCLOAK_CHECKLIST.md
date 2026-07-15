@@ -31,6 +31,9 @@ as expected. It is intended to remind, not to detail setup of each item.
   - [ ] `realm-management` `manage-identity-providers`
   - [ ] `realm-management` `view-realm`
   - [ ] `realm-management` `view-events`
+  - [ ] `realm-management` `view-organizations`
+  - [ ] `realm-management` `manage-organizations`
+  - [ ] `realm-management` `query-organizations`
 - [ ] At least one user assigned to `pdc-admin` group
 - [ ] Organizations enabled
 - [ ] Admin Permissions enabled in realm (aka Fine-grained Admin Permissions)
@@ -39,4 +42,8 @@ as expected. It is intended to remind, not to detail setup of each item.
 - [ ] Browser authn flow includes organization elements
 - [ ] Broker first login authn flow includes organization elements
 - [ ] `organizations` Client scope with `organizations` mapper (for JWT)
-- [ ] All custom clients have `organizations` client scope assigned as default
+- [ ] Custom clients have `organizations` client scope assigned as default
+  - [ ] Except Exchange clients, assign as optional until this bug is fixed:
+        https://github.com/keycloak/keycloak/issues/50882
+- [ ] Forgot password link enabled (realm Login)
+- [ ] Reset credentials flow requires existing 2FA entry (does not reset 2FA)

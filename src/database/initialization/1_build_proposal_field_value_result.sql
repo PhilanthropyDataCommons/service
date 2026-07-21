@@ -12,6 +12,7 @@ DECLARE
 	is_file_field BOOLEAN;
 	application_form_field_json JSONB;
 	version_created_by UUID;
+	version_proposal_id INTEGER;
 BEGIN
 	PERFORM assert_proposal_field_value_not_forbidden(proposal_field_value);
 
@@ -25,8 +26,8 @@ BEGIN
 	WHERE application_form_fields.id
 		= proposal_field_value.application_form_field_id;
 
-	SELECT proposal_versions.created_by
-	INTO version_created_by
+	SELECT proposal_versions.created_by, proposal_versions.proposal_id
+	INTO version_created_by, version_proposal_id
 	FROM proposal_versions
 	WHERE proposal_versions.id = proposal_field_value.proposal_version_id;
 
@@ -35,7 +36,8 @@ BEGIN
 		application_form_field_json,
 		proposal_field_value_file_to_json(
 			proposal_field_value, is_file_field, version_created_by
-		)
+		),
+		version_proposal_id
 	);
 END;
 $$ LANGUAGE plpgsql STABLE;

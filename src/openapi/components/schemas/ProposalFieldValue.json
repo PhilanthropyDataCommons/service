@@ -4,6 +4,11 @@
 		{
 			"type": "object",
 			"properties": {
+				"proposalId": {
+					"allOf": [{ "$ref": "./id.json" }],
+					"readOnly": true,
+					"example": 2911
+				},
 				"proposalVersionId": {
 					"allOf": [{ "$ref": "./id.json" }],
 					"readOnly": true,
@@ -23,6 +28,7 @@
 				}
 			},
 			"required": [
+				"proposalId",
 				"proposalVersionId",
 				"applicationFormFieldId",
 				"applicationFormField",

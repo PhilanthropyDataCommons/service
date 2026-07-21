@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.41.0 2026-07-24
+
 ### Fixed
 
 - Paginated list endpoints no longer slow down as you request later pages.
 
 ### Added
 
+- Proposal field value objects now include a `proposalId` attribute, so a value in a changemaker's `fields` (or anywhere else a proposal field value appears) can be traced back to its proposal without an extra call to `GET /proposalVersions/{proposalVersionId}`.
 - Added a `GET /funders/{memberFunderShortCode}/collaboratives` endpoint that lists funder collaborative memberships for a given member funder.
 - Bulk upload CSVs may now include `control:`-prefixed columns (e.g. `control:pdc_changemaker_id`). Control columns carry meta-information that changes how a row is processed; they are exempt from application-form validation and are not stored as base fields.
 

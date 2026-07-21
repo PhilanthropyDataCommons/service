@@ -55,7 +55,7 @@ import {
 	stringToKeycloakId,
 } from '../types';
 import type { TinyPg } from 'tinypg';
-import type { AuthContext } from '../types';
+import type { AuthContext, Id, KeycloakId } from '../types';
 
 const insertTestChangemakers = async (db: TinyPg, authContext: AuthContext) => {
 	await createChangemaker(db, authContext, {
@@ -67,6 +67,23 @@ const insertTestChangemakers = async (db: TinyPg, authContext: AuthContext) => {
 		taxId: '22-2222222',
 		name: 'Another Inc.',
 		keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
+	});
+};
+
+const grantChangemakerView = async (
+	db: TinyPg,
+	changemakerId: Id,
+	granteeUserKeycloakUserId: KeycloakId,
+) => {
+	const systemUser = await loadSystemUser(db, null);
+	const systemUserAuthContext = getAuthContext(systemUser, true);
+	await createPermissionGrant(db, systemUserAuthContext, {
+		granteeType: PermissionGrantGranteeType.USER,
+		granteeUserKeycloakUserId,
+		contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+		changemakerId,
+		scope: [PermissionGrantEntityType.CHANGEMAKER],
+		verbs: [PermissionGrantVerb.VIEW],
 	});
 };
 
@@ -182,8 +199,33 @@ const setupTestContext = async (db: TinyPg) => {
 
 describe('/changemakers', () => {
 	describe('GET /', () => {
-		it('does not require authentication', async () => {
-			await request(app).get('/changemakers').expect(200);
+		it('does not require authentication and returns only public attributes', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await insertTestChangemakers(db, testUserAuthContext);
+			await request(app)
+				.get('/changemakers')
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).toStrictEqual({
+						total: 2,
+						entries: [
+							{
+								id: 2,
+								taxId: '22-2222222',
+								name: 'Another Inc.',
+								fields: [],
+							},
+							{
+								id: 1,
+								taxId: '11-1111111',
+								name: 'Example Inc.',
+								fields: [],
+							},
+						],
+					});
+				});
 		});
 
 		it('returns an empty Bundle when no data is present', async () => {
@@ -193,11 +235,12 @@ describe('/changemakers', () => {
 			});
 		});
 
-		it('returns changemakers present in the database', async () => {
+		it('returns full attributes only for changemakers the user has view permission on', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			await insertTestChangemakers(db, testUserAuthContext);
+			await grantChangemakerView(db, 1, testUser.keycloakUserId);
 			await request(app)
 				.get('/changemakers')
 				.set(authHeader)
@@ -210,10 +253,6 @@ describe('/changemakers', () => {
 								id: 2,
 								taxId: '22-2222222',
 								name: 'Another Inc.',
-								keycloakOrganizationId: '57ceaca8-be48-11ef-8c91-5732d98a77e1',
-								createdAt: expectTimestamp(),
-								createdBy: testUser.keycloakUserId,
-								fiscalSponsors: [],
 								fields: [],
 							},
 							{
@@ -249,7 +288,7 @@ describe('/changemakers', () => {
 					_page: 2,
 					_count: 5,
 				})
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.expect(200)
 				.expect((res) => {
 					expect(res.body).toEqual({
@@ -335,7 +374,7 @@ describe('/changemakers', () => {
 			});
 			const response = await request(app)
 				.get(`/changemakers?proposal=1`)
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 1,
@@ -382,7 +421,7 @@ describe('/changemakers', () => {
 			});
 			const response = await request(app)
 				.get(`/changemakers`)
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 1,
@@ -417,7 +456,7 @@ describe('/changemakers', () => {
 			});
 			const response = await request(app)
 				.get('/changemakers?_content=garden')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 1,
@@ -480,7 +519,7 @@ describe('/changemakers', () => {
 			});
 			const response = await request(app)
 				.get('/changemakers?_content=garden&proposal=1')
-				.set(authHeader)
+				.set(adminUserAuthHeader)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 1,
@@ -512,12 +551,26 @@ describe('/changemakers', () => {
 	});
 
 	describe('GET /:id', () => {
-		it('does not require authentication', async () => {
+		it('does not require authentication and returns only public attributes', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			await insertTestChangemakers(db, testUserAuthContext);
-			await request(app).get('/changemakers/1').expect(200);
+			await request(app)
+				.get('/changemakers/1')
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).toStrictEqual({
+						id: 1,
+						taxId: '11-1111111',
+						name: 'Example Inc.',
+						fields: [],
+					});
+					expect(res.body).not.toHaveProperty('keycloakOrganizationId');
+					expect(res.body).not.toHaveProperty('createdAt');
+					expect(res.body).not.toHaveProperty('createdBy');
+					expect(res.body).not.toHaveProperty('fiscalSponsors');
+				});
 		});
 
 		it('returns 404 when given id is not present', async () => {
@@ -529,6 +582,7 @@ describe('/changemakers', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			await insertTestChangemakers(db, testUserAuthContext);
+			await grantChangemakerView(db, 2, testUser.keycloakUserId);
 			await request(app)
 				.get('/changemakers/2')
 				.set(authHeader)
@@ -680,6 +734,11 @@ describe('/changemakers', () => {
 					isValid: false,
 					goodAsOf: null,
 				});
+				await grantChangemakerView(
+					db,
+					changemakerId,
+					getTestUserKeycloakUserId(),
+				);
 				await request(app)
 					.get(`/changemakers/${changemakerId}`)
 					.set(authHeader)
@@ -786,6 +845,11 @@ describe('/changemakers', () => {
 					isValid: true,
 					goodAsOf: null,
 				});
+				await grantChangemakerView(
+					db,
+					changemaker.id,
+					getTestUserKeycloakUserId(),
+				);
 				await request(app)
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
@@ -793,8 +857,10 @@ describe('/changemakers', () => {
 					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
+							keycloakOrganizationId: '8b15d276-be48-11ef-a061-5b4a50e82d50',
 							createdAt: expectTimestamp(),
 							createdBy: getTestUserKeycloakUserId(),
+							fiscalSponsors: [],
 							fields: [changemakerEarliestValue],
 						});
 					});
@@ -884,6 +950,11 @@ describe('/changemakers', () => {
 					isValid: true,
 					goodAsOf: null,
 				});
+				await grantChangemakerView(
+					db,
+					changemaker.id,
+					getTestUserKeycloakUserId(),
+				);
 				await request(app)
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
@@ -891,8 +962,10 @@ describe('/changemakers', () => {
 					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
+							keycloakOrganizationId: '8b15d276-be48-11ef-a061-5b4a50e82d50',
 							createdAt: expectTimestamp(),
 							createdBy: getTestUserKeycloakUserId(),
+							fiscalSponsors: [],
 							fields: [funderEarliestValue],
 						});
 					});
@@ -985,6 +1058,11 @@ describe('/changemakers', () => {
 						goodAsOf: null,
 					},
 				);
+				await grantChangemakerView(
+					db,
+					changemaker.id,
+					getTestUserKeycloakUserId(),
+				);
 				await request(app)
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
@@ -992,8 +1070,10 @@ describe('/changemakers', () => {
 					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
+							keycloakOrganizationId: '8b15d276-be48-11ef-a061-5b4a50e82d50',
 							createdAt: expectTimestamp(),
 							createdBy: getTestUserKeycloakUserId(),
+							fiscalSponsors: [],
 							fields: [dataProviderNewestValue],
 						});
 					});
@@ -1060,6 +1140,11 @@ describe('/changemakers', () => {
 						BaseFieldSensitivityClassification.FORBIDDEN,
 				});
 
+				await grantChangemakerView(
+					db,
+					changemaker.id,
+					getTestUserKeycloakUserId(),
+				);
 				await request(app)
 					.get(`/changemakers/${changemaker.id}`)
 					.set(authHeader)
@@ -1067,8 +1152,102 @@ describe('/changemakers', () => {
 					.expect((res) => {
 						expect(res.body).toEqual({
 							...changemaker,
+							keycloakOrganizationId: '8b15d276-be48-11ef-a061-5b4a50e82d50',
 							createdAt: expectTimestamp(),
 							createdBy: getTestUserKeycloakUserId(),
+							fiscalSponsors: [],
+							fields: [],
+						});
+					});
+			});
+
+			it('does not return field values when unauthenticated, even when the base field is public', async () => {
+				const db = getDatabase();
+				const {
+					secondChangemaker: changemaker,
+					systemUserAuthContext,
+					firstFunderOpportunity,
+					firstFunderSourceId: funderSourceId,
+				} = await setupTestContext(db);
+
+				const publicBaseField = await createTestBaseField(db, null, {
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
+				});
+				const restrictedBaseField = await createTestBaseField(db, null, {
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.RESTRICTED,
+				});
+				const opportunity = firstFunderOpportunity;
+				const proposal = await createTestProposal(db, systemUserAuthContext, {
+					opportunityId: opportunity.id,
+					externalId: `Another proposal to ${opportunity.title}`,
+				});
+				await createChangemakerProposal(db, null, {
+					changemakerId: changemaker.id,
+					proposalId: proposal.id,
+				});
+				const applicationForm = await createApplicationForm(db, null, {
+					opportunityId: opportunity.id,
+					name: null,
+				});
+				const publicApplicationFormField = await createApplicationFormField(
+					db,
+					null,
+					{
+						label: 'Public',
+						applicationFormId: applicationForm.id,
+						baseFieldShortCode: publicBaseField.shortCode,
+						position: 1,
+						instructions: 'Please enter the public field.',
+						inputType: null,
+					},
+				);
+				const restrictedApplicationFormField = await createApplicationFormField(
+					db,
+					null,
+					{
+						label: 'Restricted',
+						applicationFormId: applicationForm.id,
+						baseFieldShortCode: restrictedBaseField.shortCode,
+						position: 2,
+						instructions: 'Please enter the restricted field.',
+						inputType: null,
+					},
+				);
+				const proposalVersion = await createProposalVersion(
+					db,
+					systemUserAuthContext,
+					{
+						proposalId: proposal.id,
+						applicationFormId: applicationForm.id,
+						sourceId: funderSourceId,
+					},
+				);
+				await createProposalFieldValue(db, null, {
+					proposalVersionId: proposalVersion.id,
+					applicationFormFieldId: publicApplicationFormField.id,
+					position: 1,
+					value: 'public value',
+					isValid: true,
+					goodAsOf: null,
+				});
+				await createProposalFieldValue(db, null, {
+					proposalVersionId: proposalVersion.id,
+					applicationFormFieldId: restrictedApplicationFormField.id,
+					position: 2,
+					value: 'restricted value',
+					isValid: true,
+					goodAsOf: null,
+				});
+
+				await request(app)
+					.get(`/changemakers/${changemaker.id}`)
+					.expect(200)
+					.expect((res) => {
+						expect(res.body).toStrictEqual({
+							id: changemaker.id,
+							taxId: changemaker.taxId,
+							name: changemaker.name,
 							fields: [],
 						});
 					});
@@ -1232,6 +1411,7 @@ describe('/changemakers', () => {
 				keycloakOrganizationId: newOrganizationId,
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
+				fiscalSponsors: [],
 				fields: [],
 			});
 		});
@@ -1256,8 +1436,10 @@ describe('/changemakers', () => {
 			expect(result.body).toStrictEqual({
 				...changemaker,
 				taxId: newTaxId,
+				keycloakOrganizationId: null,
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
+				fiscalSponsors: [],
 				fields: [],
 			});
 		});
@@ -1423,6 +1605,9 @@ describe('/changemakers', () => {
 			expect(result.body).toStrictEqual({
 				...changemaker,
 				keycloakOrganizationId: null,
+				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
+				fiscalSponsors: [],
 			});
 		});
 	});
@@ -1501,6 +1686,7 @@ describe('/changemakers', () => {
 				.expect(200);
 			expect(changemakerResult.body).toStrictEqual({
 				...fiscalSponsee,
+				keycloakOrganizationId: null,
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				fiscalSponsors: [
@@ -1508,16 +1694,16 @@ describe('/changemakers', () => {
 						id: fiscalSponsor.id,
 						taxId: fiscalSponsor.taxId,
 						name: fiscalSponsor.name,
-						keycloakOrganizationId: fiscalSponsor.keycloakOrganizationId,
-						createdAt: fiscalSponsor.createdAt,
+						keycloakOrganizationId: null,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
 					{
 						id: fiscalSponsorTwo.id,
 						taxId: fiscalSponsorTwo.taxId,
 						name: fiscalSponsorTwo.name,
-						keycloakOrganizationId: fiscalSponsorTwo.keycloakOrganizationId,
-						createdAt: fiscalSponsorTwo.createdAt,
+						keycloakOrganizationId: null,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
 				],
@@ -1669,14 +1855,16 @@ describe('/changemakers', () => {
 				.expect(200);
 			expect(changemakerResult.body).toStrictEqual({
 				...fiscalSponsee,
+				keycloakOrganizationId: null,
 				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
 				fiscalSponsors: [
 					{
 						id: fiscalSponsorToKeep.id,
 						taxId: fiscalSponsorToKeep.taxId,
 						name: fiscalSponsorToKeep.name,
-						keycloakOrganizationId: fiscalSponsorToKeep.keycloakOrganizationId,
-						createdAt: fiscalSponsorToKeep.createdAt,
+						keycloakOrganizationId: null,
+						createdAt: expectTimestamp(),
 						createdBy: testUser.keycloakUserId,
 					},
 				],
@@ -1801,7 +1989,10 @@ describe('/changemakers', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
-				scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
+				scope: [
+					PermissionGrantEntityType.CHANGEMAKER,
+					PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 			await request(app)
@@ -1910,7 +2101,10 @@ describe('/changemakers', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
-				scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
+				scope: [
+					PermissionGrantEntityType.CHANGEMAKER,
+					PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 
@@ -1993,7 +2187,10 @@ describe('/changemakers', () => {
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
 				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 				changemakerId: changemaker.id,
-				scope: [PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE],
+				scope: [
+					PermissionGrantEntityType.CHANGEMAKER,
+					PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+				],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
 

@@ -14,5 +14,7 @@ WITH
 
 SELECT serialized_proposal.object
 FROM build_proposals_results(
-	array(SELECT inserted_proposal::proposals FROM inserted_proposal)
+	array(SELECT inserted_proposal::proposals FROM inserted_proposal),
+	:authContextKeycloakUserId,
+	:authContextIsAdministrator
 ) AS serialized_proposal;

@@ -12,7 +12,7 @@ DECLARE
   funder_json JSONB := NULL::JSONB;
 BEGIN
   -- Shallow changemaker (no children) because the purpose is the changemaker ID.
-  SELECT changemaker_to_json(changemakers.*, NULL, NULL, TRUE)
+  SELECT changemaker_to_json(changemakers.*, NULL, NULL, TRUE, TRUE)
   INTO changemaker_json
   FROM changemakers
   INNER JOIN permitted_changemaker_ids(

@@ -7,10 +7,13 @@ import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { ProposalFieldValue } from './ProposalFieldValue';
 
-interface ShallowChangemaker {
+interface PublicChangemaker {
 	readonly id: Id;
 	taxId: string;
 	name: string;
+}
+
+interface ProtectedChangemakerAttributes {
 	// We do not really want "undefined" here, only null. See
 	// https://github.com/ajv-validator/ajv/issues/2283 and/or
 	// https://github.com/ajv-validator/ajv/issues/2163.
@@ -19,10 +22,13 @@ interface ShallowChangemaker {
 	readonly createdBy: KeycloakId;
 }
 
-interface Changemaker extends ShallowChangemaker {
-	readonly fiscalSponsors: ShallowChangemaker[];
+type ShallowChangemaker = PublicChangemaker &
+	Partial<ProtectedChangemakerAttributes>;
+
+type Changemaker = ShallowChangemaker & {
 	readonly fields: Array<ProposalFieldValue | ChangemakerFieldValue>;
-}
+	readonly fiscalSponsors?: ShallowChangemaker[];
+};
 
 type WritableChangemaker = Writable<Changemaker>;
 
@@ -82,6 +88,8 @@ const isPartialWritableChangemaker = ajv.compile(
 export {
 	isWritableChangemaker,
 	type Changemaker,
+	type ProtectedChangemakerAttributes,
+	type PublicChangemaker,
 	type ShallowChangemaker,
 	type WritableChangemaker,
 	writableChangemakerSchema,

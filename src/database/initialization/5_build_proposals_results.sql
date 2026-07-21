@@ -94,15 +94,34 @@ CREATE FUNCTION build_proposals_results(
 		FROM opportunities o
 		WHERE o.id IN (SELECT ip.opportunity_id FROM input_proposals ip)
 	),
+	-- bounded to the changemakers attached to this page's proposals
+	viewable_changemaker_ids AS (
+		SELECT p.id
+		FROM permitted_changemaker_ids_among(
+			build_proposals_results.auth_context_keycloak_user_id,
+			build_proposals_results.auth_context_is_administrator,
+			'view', 'changemaker',
+			ARRAY(
+				SELECT cp.changemaker_id
+				FROM changemakers_proposals cp
+				WHERE cp.proposal_id IN (SELECT ip.id FROM input_proposals ip)
+			)
+		) AS p
+		WHERE build_proposals_results.auth_context_keycloak_user_id IS NOT NULL
+	),
 	changemaker_json AS (
 		SELECT
 			cp.proposal_id,
 			jsonb_agg(
-				changemaker_to_json(c.*, NULL, NULL, TRUE)
+				changemaker_to_json(
+					c.*, NULL, NULL, TRUE,
+					vci.id IS NOT NULL
+				)
 				ORDER BY c.id ASC
 			) AS changemakers
 		FROM changemakers_proposals cp
 		INNER JOIN changemakers c ON c.id = cp.changemaker_id
+		LEFT JOIN viewable_changemaker_ids vci ON vci.id = c.id
 		WHERE cp.proposal_id IN (SELECT ip.id FROM input_proposals ip)
 		GROUP BY cp.proposal_id
 	)

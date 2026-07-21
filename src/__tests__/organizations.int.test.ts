@@ -5,7 +5,7 @@ import {
 	createPermissionGrant,
 	loadSystemUser,
 } from '../database';
-import { expectArray } from '../test/asymettricMatchers';
+import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import {
 	createTestChangemaker,
 	createTestDataProvider,
@@ -90,10 +90,10 @@ describe('/organizations', () => {
 				changemaker: {
 					taxId: expectedChangemaker.taxId,
 					name: expectedChangemaker.name,
-					createdAt: expectedChangemaker.createdAt,
+					createdAt: expectTimestamp(),
 					createdBy: testUser.keycloakUserId,
 					id: expectedChangemaker.id,
-					keycloakOrganizationId: expectedChangemaker.keycloakOrganizationId,
+					keycloakOrganizationId,
 				},
 				data_provider: expectedDataProvider,
 				funder: expectedFunder,

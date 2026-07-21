@@ -56,13 +56,29 @@ describe('/sources', () => {
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			const systemSource = await loadSystemSource(db, null);
-			const source = await createTestSource(db, testUserAuthContext);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const source = await createTestSource(db, testUserAuthContext, {
+				changemakerId: changemaker.id,
+			});
 			const response = await agent
 				.get('/sources')
 				.set(adminUserAuthHeader)
 				.expect(200);
 			expect(response.body).toEqual({
-				entries: [source, systemSource],
+				entries: [
+					{
+						...source,
+						changemaker: {
+							id: changemaker.id,
+							taxId: changemaker.taxId,
+							name: changemaker.name,
+							keycloakOrganizationId: null,
+							createdAt: expectTimestamp(),
+							createdBy: testUser.keycloakUserId,
+						},
+					},
+					systemSource,
+				],
 				total: 2,
 			});
 		});
@@ -214,13 +230,26 @@ describe('/sources', () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
-			const source = await createTestSource(db, testUserAuthContext);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const source = await createTestSource(db, testUserAuthContext, {
+				changemakerId: changemaker.id,
+			});
 
 			const response = await agent
 				.get(`/sources/${source.id}`)
 				.set(adminUserAuthHeader)
 				.expect(200);
-			expect(response.body).toEqual(source);
+			expect(response.body).toEqual({
+				...source,
+				changemaker: {
+					id: changemaker.id,
+					taxId: changemaker.taxId,
+					name: changemaker.name,
+					keycloakOrganizationId: null,
+					createdAt: expectTimestamp(),
+					createdBy: testUser.keycloakUserId,
+				},
+			});
 		});
 
 		it('returns the source to a user with a direct view grant', async () => {
@@ -335,8 +364,8 @@ describe('/sources', () => {
 					id: changemaker.id,
 					taxId: changemaker.taxId,
 					name: changemaker.name,
-					keycloakOrganizationId: changemaker.keycloakOrganizationId,
-					createdAt: changemaker.createdAt,
+					keycloakOrganizationId: null,
+					createdAt: expectTimestamp(),
 				},
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
@@ -506,8 +535,6 @@ describe('/sources', () => {
 					id: changemaker.id,
 					taxId: changemaker.taxId,
 					name: changemaker.name,
-					keycloakOrganizationId: changemaker.keycloakOrganizationId,
-					createdAt: changemaker.createdAt,
 				},
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,

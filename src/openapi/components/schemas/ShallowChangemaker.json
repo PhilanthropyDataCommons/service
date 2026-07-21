@@ -1,35 +1,11 @@
 {
-	"type": "object",
-	"properties": {
-		"id": {
-			"$ref": "./id.json",
-			"readOnly": true,
-			"example": 3407
+	"description": "A changemaker without its children (`fields` and `fiscalSponsors`). Which attributes are present depends on whether the caller holds `view` permission on this particular changemaker.",
+	"allOf": [
+		{
+			"$ref": "./PublicChangemaker.json"
 		},
-		"taxId": {
-			"type": "string",
-			"example": "11-1111111"
-		},
-		"name": {
-			"type": "string",
-			"example": "Example Inc."
-		},
-		"keycloakOrganizationId": {
-			"description": "Optional, set this only when available. One can PATCH it in later if it becomes available.",
-			"$ref": "./keycloakOrganizationId.json",
-			"examples": [null, "9cb0cf25-0387-431a-8dc8-634f7f8768b9"]
-		},
-		"createdAt": {
-			"type": "string",
-			"format": "date-time",
-			"readOnly": true
-		},
-		"createdBy": {
-			"description": "The keycloak user id of the PDC user that created this changemaker",
-			"type": "string",
-			"format": "uuid",
-			"readOnly": true
+		{
+			"$ref": "./ProtectedChangemakerAttributes.json"
 		}
-	},
-	"required": ["id", "taxId", "name", "createdAt", "createdBy"]
+	]
 }

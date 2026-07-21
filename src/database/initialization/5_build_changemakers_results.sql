@@ -17,6 +17,28 @@ CREATE FUNCTION build_changemakers_results(
 	WITH input_changemakers AS (
 		SELECT c.* FROM unnest(build_changemakers_results.changemakers) AS c
 	),
+	-- changemakers that serialize with the full attribute set for this user,
+	-- bounded to this page's changemakers and their fiscal sponsors
+	viewable_changemaker_ids AS (
+		SELECT p.id
+		FROM permitted_changemaker_ids_among(
+			build_changemakers_results.auth_context_keycloak_user_id,
+			build_changemakers_results.auth_context_is_administrator,
+			'view', 'changemaker',
+			ARRAY(
+				SELECT ic.id FROM input_changemakers ic
+				UNION
+				SELECT fs.fiscal_sponsor_changemaker_id
+				FROM fiscal_sponsorships fs
+				WHERE fs.fiscal_sponsee_changemaker_id IN (
+					SELECT ic.id FROM input_changemakers ic
+				)
+					AND NOT is_expired(fs.not_after)
+			)
+		) AS p
+		WHERE build_changemakers_results.auth_context_keycloak_user_id
+			IS NOT NULL
+	),
 	-- viewable field values, bounded to this page's field values
 	permitted_proposal_field_values AS (
 		SELECT p.id
@@ -51,7 +73,10 @@ CREATE FUNCTION build_changemakers_results(
 		SELECT
 			fs.fiscal_sponsee_changemaker_id AS changemaker_id,
 			jsonb_agg(
-				changemaker_to_json(sponsor.*, NULL, NULL, TRUE) ORDER BY sponsor.id
+				changemaker_to_json(
+					sponsor.*, NULL, NULL, TRUE,
+					vci.id IS NOT NULL
+				) ORDER BY sponsor.id
 			) AS fiscal_sponsors
 		FROM fiscal_sponsorships fs
 		INNER JOIN changemakers sponsor
@@ -59,6 +84,7 @@ CREATE FUNCTION build_changemakers_results(
 		INNER JOIN users u
 			ON u.keycloak_user_id
 			= build_changemakers_results.auth_context_keycloak_user_id
+		LEFT JOIN viewable_changemaker_ids vci ON vci.id = sponsor.id
 		WHERE fs.fiscal_sponsee_changemaker_id IN (
 			SELECT ic.id FROM input_changemakers ic
 		)
@@ -177,9 +203,11 @@ CREATE FUNCTION build_changemakers_results(
 	SELECT
 		ic.id,
 		changemaker_to_json(
-			ic.*, fsj.fiscal_sponsors, gfj.fields, FALSE
+			ic.*, fsj.fiscal_sponsors, gfj.fields, FALSE,
+			vci.id IS NOT NULL
 		) AS object
 	FROM input_changemakers ic
 	LEFT JOIN fiscal_sponsor_json fsj ON fsj.changemaker_id = ic.id
-	LEFT JOIN gold_field_json gfj ON gfj.changemaker_id = ic.id;
+	LEFT JOIN gold_field_json gfj ON gfj.changemaker_id = ic.id
+	LEFT JOIN viewable_changemaker_ids vci ON vci.id = ic.id;
 $$ LANGUAGE sql STABLE;

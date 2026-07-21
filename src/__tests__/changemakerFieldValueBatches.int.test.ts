@@ -297,7 +297,10 @@ describe('GET /changemakerFieldValueBatches', () => {
 		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const source = await createTestSource(db, testUserAuthContext);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
+		const source = await createTestSource(db, testUserAuthContext, {
+			changemakerId: changemaker.id,
+		});
 
 		const testUserBatch = await createChangemakerFieldValueBatch(
 			db,
@@ -322,9 +325,23 @@ describe('GET /changemakerFieldValueBatches', () => {
 			.set(authHeaderWithAdminRole)
 			.expect(200);
 
+		const adminVisibleSource = {
+			...source,
+			changemaker: {
+				id: changemaker.id,
+				taxId: changemaker.taxId,
+				name: changemaker.name,
+				keycloakOrganizationId: null,
+				createdAt: expectTimestamp(),
+				createdBy: testUser.keycloakUserId,
+			},
+		};
 		expect(result.body).toStrictEqual({
 			total: 2,
-			entries: [anotherUserBatch, testUserBatch],
+			entries: [
+				{ ...anotherUserBatch, source: adminVisibleSource },
+				{ ...testUserBatch, source: adminVisibleSource },
+			],
 		});
 	});
 
@@ -393,7 +410,10 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 		const anotherUser = await createTestUser(db, null);
 		const anotherUserAuthContext = getAuthContext(anotherUser);
 
-		const source = await createTestSource(db, testUserAuthContext);
+		const changemaker = await createTestChangemaker(db, testUserAuthContext);
+		const source = await createTestSource(db, testUserAuthContext, {
+			changemakerId: changemaker.id,
+		});
 
 		const batch = await createChangemakerFieldValueBatch(
 			db,
@@ -409,7 +429,20 @@ describe('GET /changemakerFieldValueBatches/:batchId', () => {
 			.set(authHeaderWithAdminRole)
 			.expect(200);
 
-		expect(result.body).toStrictEqual(batch);
+		expect(result.body).toStrictEqual({
+			...batch,
+			source: {
+				...source,
+				changemaker: {
+					id: changemaker.id,
+					taxId: changemaker.taxId,
+					name: changemaker.name,
+					keycloakOrganizationId: null,
+					createdAt: expectTimestamp(),
+					createdBy: testUser.keycloakUserId,
+				},
+			},
+		});
 	});
 
 	it('Returns 404 when batch does not exist', async () => {

@@ -1,6 +1,7 @@
 import { createChangemaker, updateChangemaker } from '..';
 import { stringToKeycloakId } from '../../../../types';
 import { getDatabase } from '../../../db';
+import { expectTimestamp } from '../../../../test/asymettricMatchers';
 import { getAuthContext, loadTestUser } from '../../../../test/utils';
 
 describe('updateChangemaker', () => {
@@ -18,13 +19,16 @@ describe('updateChangemaker', () => {
 		);
 		const result = await updateChangemaker(
 			db,
-			null,
+			getAuthContext(testUser, true),
 			{ keycloakOrganizationId: newOrganizationId },
 			changemaker.id,
 		);
 		expect(result).toStrictEqual({
 			...changemaker,
 			keycloakOrganizationId: newOrganizationId,
+			createdAt: expectTimestamp(),
+			createdBy: testUser.keycloakUserId,
+			fiscalSponsors: [],
 		});
 	});
 
@@ -42,13 +46,16 @@ describe('updateChangemaker', () => {
 		);
 		const result = await updateChangemaker(
 			db,
-			null,
+			getAuthContext(testUser, true),
 			{ keycloakOrganizationId: newOrganizationId },
 			changemaker.id,
 		);
 		expect(result).toStrictEqual({
 			...changemaker,
 			keycloakOrganizationId: newOrganizationId,
+			createdAt: expectTimestamp(),
+			createdBy: testUser.keycloakUserId,
+			fiscalSponsors: [],
 		});
 	});
 

@@ -1,4 +1,9 @@
-SELECT build_changemaker_field_value_result(changemaker_field_values) AS object
+SELECT
+	build_changemaker_field_value_result(
+		changemaker_field_values,
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator
+	) AS object
 FROM changemaker_field_values
 WHERE
 	changemaker_field_values.id = :fieldValueId

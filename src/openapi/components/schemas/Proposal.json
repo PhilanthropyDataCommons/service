@@ -27,6 +27,7 @@
 		},
 		"changemakers": {
 			"type": "array",
+			"description": "The changemakers associated with this proposal. Permission is evaluated per changemaker, so entries the caller cannot view carry only the public attributes while the rest carry all of them; a single array can hold both shapes.",
 			"items": {
 				"$ref": "./ShallowChangemaker.json"
 			},

@@ -1,7 +1,7 @@
 import { ajv } from '../ajv';
 import { idSchema } from './Id';
 import type { Funder } from './Funder';
-import type { Changemaker } from './Changemaker';
+import type { ShallowChangemaker } from './Changemaker';
 import type { DataProvider } from './DataProvider';
 import type { Id } from './Id';
 import type { JSONSchemaType } from 'ajv';
@@ -27,7 +27,7 @@ interface FunderSource extends SourceBase {
 
 interface ChangemakerSource extends SourceBase {
 	changemakerId: Id;
-	readonly changemaker: Changemaker;
+	readonly changemaker: ShallowChangemaker;
 }
 
 type Source = DataProviderSource | FunderSource | ChangemakerSource;

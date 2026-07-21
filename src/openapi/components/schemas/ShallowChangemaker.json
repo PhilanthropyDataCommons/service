@@ -15,21 +15,22 @@
 			"example": "Example Inc."
 		},
 		"keycloakOrganizationId": {
-			"description": "Optional, set this only when available. One can PATCH it in later if it becomes available.",
+			"description": "Optional, set this only when available. One can PATCH it in later if it becomes available. Omitted when the request is unauthenticated.",
 			"$ref": "./keycloakOrganizationId.json",
 			"examples": [null, "9cb0cf25-0387-431a-8dc8-634f7f8768b9"]
 		},
 		"createdAt": {
+			"description": "Omitted when the request is unauthenticated.",
 			"type": "string",
 			"format": "date-time",
 			"readOnly": true
 		},
 		"createdBy": {
-			"description": "The keycloak user id of the PDC user that created this changemaker",
+			"description": "The keycloak user id of the PDC user that created this changemaker. Omitted when the request is unauthenticated.",
 			"type": "string",
 			"format": "uuid",
 			"readOnly": true
 		}
 	},
-	"required": ["id", "taxId", "name", "createdAt", "createdBy"]
+	"required": ["id", "taxId", "name"]
 }

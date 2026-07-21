@@ -147,13 +147,13 @@ describe('/changemakerProposals', () => {
 				},
 			);
 			const changemakerVisibleChangemakerProposal =
-				await createChangemakerProposal(db, null, {
+				await createChangemakerProposal(db, testUserAuthContext, {
 					changemakerId: visibleChangemaker.id,
 					proposalId: changemakerVisibleProposal.id,
 				});
 			const funderVisibleChangemakerProposal = await createChangemakerProposal(
 				db,
-				null,
+				testUserAuthContext,
 				{
 					changemakerId: anotherChangemaker.id,
 					proposalId: funderVisibleProposal.id,

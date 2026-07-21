@@ -51,7 +51,11 @@ CREATE FUNCTION build_changemakers_results(
 		SELECT
 			fs.fiscal_sponsee_changemaker_id AS changemaker_id,
 			jsonb_agg(
-				changemaker_to_json(sponsor.*, NULL, NULL, TRUE) ORDER BY sponsor.id
+				changemaker_to_json(
+					sponsor.*, NULL, NULL, TRUE,
+					build_changemakers_results.auth_context_keycloak_user_id,
+					build_changemakers_results.auth_context_is_administrator
+				) ORDER BY sponsor.id
 			) AS fiscal_sponsors
 		FROM fiscal_sponsorships fs
 		INNER JOIN changemakers sponsor
@@ -86,9 +90,6 @@ CREATE FUNCTION build_changemakers_results(
 				1 AS source_kind,
 				pfv.id AS field_value_id
 			FROM proposal_field_values pfv
-			INNER JOIN users u
-				ON u.keycloak_user_id
-				= build_changemakers_results.auth_context_keycloak_user_id
 			INNER JOIN application_form_fields aff
 				ON pfv.application_form_field_id = aff.id
 			INNER JOIN base_fields bf ON aff.base_field_short_code = bf.short_code
@@ -100,8 +101,17 @@ CREATE FUNCTION build_changemakers_results(
 			WHERE op.changemaker_id IN (SELECT ic.id FROM input_changemakers ic)
 				AND bf.category = 'organization'
 				AND pfv.is_valid
-				AND u.keycloak_user_id IS NOT NULL
-				AND u.keycloak_user_id != system_keycloak_user_id()
+				AND (
+					build_changemakers_results.auth_context_keycloak_user_id
+					IS NULL
+					OR EXISTS (
+						SELECT 1
+						FROM users u
+						WHERE u.keycloak_user_id
+							= build_changemakers_results.auth_context_keycloak_user_id
+							AND u.keycloak_user_id != system_keycloak_user_id()
+					)
+				)
 
 			UNION ALL
 
@@ -117,9 +127,6 @@ CREATE FUNCTION build_changemakers_results(
 				2 AS source_kind,
 				cfv.id AS field_value_id
 			FROM changemaker_field_values cfv
-			INNER JOIN users u
-				ON u.keycloak_user_id
-				= build_changemakers_results.auth_context_keycloak_user_id
 			INNER JOIN base_fields bf ON cfv.base_field_short_code = bf.short_code
 			INNER JOIN changemaker_field_value_batches cfvb ON cfv.batch_id = cfvb.id
 			INNER JOIN sources s ON cfvb.source_id = s.id
@@ -128,8 +135,17 @@ CREATE FUNCTION build_changemakers_results(
 			WHERE cfv.changemaker_id IN (SELECT ic.id FROM input_changemakers ic)
 				AND bf.category = 'organization'
 				AND cfv.is_valid
-				AND u.keycloak_user_id IS NOT NULL
-				AND u.keycloak_user_id != system_keycloak_user_id()
+				AND (
+					build_changemakers_results.auth_context_keycloak_user_id
+					IS NULL
+					OR EXISTS (
+						SELECT 1
+						FROM users u
+						WHERE u.keycloak_user_id
+							= build_changemakers_results.auth_context_keycloak_user_id
+							AND u.keycloak_user_id != system_keycloak_user_id()
+					)
+				)
 		) AS combined
 		ORDER BY
 			combined.changemaker_id,
@@ -177,7 +193,9 @@ CREATE FUNCTION build_changemakers_results(
 	SELECT
 		ic.id,
 		changemaker_to_json(
-			ic.*, fsj.fiscal_sponsors, gfj.fields, FALSE
+			ic.*, fsj.fiscal_sponsors, gfj.fields, FALSE,
+			build_changemakers_results.auth_context_keycloak_user_id,
+			build_changemakers_results.auth_context_is_administrator
 		) AS object
 	FROM input_changemakers ic
 	LEFT JOIN fiscal_sponsor_json fsj ON fsj.changemaker_id = ic.id

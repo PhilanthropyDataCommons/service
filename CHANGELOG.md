@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `pdc_changemaker_id` is now expected as a `control:` column in a bulk-upload, rather than as a base field.
 - `GET /permissionGrants` now accepts optional filter query parameters: `changemaker`, `funder`, `dataProvider`, and `proposal` to filter by context entity, and `granteeType` and `verb` to filter by grantee. At most one context entity filter may be provided per request; providing more than one returns a `400`.
+- Unauthenticated requests to `GET /changemakers` and `GET /changemakers/{changemakerId}` now return only `id`, `name`, `taxId`, and `fields`; the `keycloakOrganizationId`, `createdAt`, `createdBy`, and `fiscalSponsors` attributes are omitted. `fields` now contains values of base fields whose sensitivity classification is `public`.
 
 ## 0.40.0 2026-06-26
 

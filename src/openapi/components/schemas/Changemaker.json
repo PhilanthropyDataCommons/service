@@ -8,7 +8,7 @@
 			"properties": {
 				"fiscalSponsors": {
 					"type": "array",
-					"description": "Fiscal sponsors (past and present) of this changemaker. Empty when unauthenticated. The response here will not include values for `fields` nor `fiscalSponsors` to avoid infinite recursion. Use the returned `id` to call $getChangemakerById for those details.",
+					"description": "Fiscal sponsors (past and present) of this changemaker. Omitted when the request is unauthenticated. The response here will not include values for `fields` nor `fiscalSponsors` to avoid infinite recursion. Use the returned `id` to call $getChangemakerById for those details.",
 					"items": {
 						"$ref": "./ShallowChangemaker.json"
 					},
@@ -28,7 +28,7 @@
 				},
 				"fields": {
 					"type": "array",
-					"description": "For each base field, the best available value related to this changemaker. Can contain ProposalFieldValue or ChangemakerFieldValue objects. Empty when unauthenticated or when recursively querying changemakers, for example, within fiscal sponsors.",
+					"description": "For each base field, the best available value related to this changemaker. Can contain ProposalFieldValue or ChangemakerFieldValue objects. When the request is unauthenticated, contains only values of base fields whose sensitivity classification is `public`. Empty when recursively querying changemakers, for example, within fiscal sponsors.",
 					"items": {
 						"oneOf": [
 							{ "$ref": "./ProposalFieldValue.json" },
@@ -38,7 +38,7 @@
 					"readOnly": true
 				}
 			},
-			"required": ["fields", "fiscalSponsors"]
+			"required": ["fields"]
 		}
 	]
 }

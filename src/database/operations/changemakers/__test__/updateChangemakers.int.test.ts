@@ -18,7 +18,7 @@ describe('updateChangemaker', () => {
 		);
 		const result = await updateChangemaker(
 			db,
-			null,
+			testUserAuthContext,
 			{ keycloakOrganizationId: newOrganizationId },
 			changemaker.id,
 		);
@@ -42,7 +42,7 @@ describe('updateChangemaker', () => {
 		);
 		const result = await updateChangemaker(
 			db,
-			null,
+			testUserAuthContext,
 			{ keycloakOrganizationId: newOrganizationId },
 			changemaker.id,
 		);

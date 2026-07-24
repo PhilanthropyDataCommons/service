@@ -729,7 +729,7 @@ describe('processBulkUploadTask', () => {
 
 		const changemakerBundle = await loadChangemakerBundle(
 			db,
-			null,
+			testAuthContext,
 			undefined,
 			undefined,
 			NO_LIMIT,
@@ -910,7 +910,7 @@ describe('processBulkUploadTask', () => {
 
 		const changemakerBundle = await loadChangemakerBundle(
 			db,
-			null,
+			systemUserAuthContext,
 			undefined,
 			undefined,
 			NO_LIMIT,
@@ -1006,7 +1006,7 @@ describe('processBulkUploadTask', () => {
 
 		const changemakerBundle = await loadChangemakerBundle(
 			db,
-			null,
+			systemUserAuthContext,
 			undefined,
 			undefined,
 			NO_LIMIT,
@@ -1102,7 +1102,7 @@ describe('processBulkUploadTask', () => {
 
 		const changemakerBundle = await loadChangemakerBundle(
 			db,
-			null,
+			systemUserAuthContext,
 			undefined,
 			undefined,
 			NO_LIMIT,
@@ -1622,7 +1622,7 @@ describe('processBulkUploadTask', () => {
 
 		const changemakerBundle = await loadChangemakerBundle(
 			db,
-			null,
+			systemUserAuthContext,
 			undefined,
 			undefined,
 			NO_LIMIT,

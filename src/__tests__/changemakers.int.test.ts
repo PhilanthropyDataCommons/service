@@ -182,8 +182,33 @@ const setupTestContext = async (db: TinyPg) => {
 
 describe('/changemakers', () => {
 	describe('GET /', () => {
-		it('does not require authentication', async () => {
-			await request(app).get('/changemakers').expect(200);
+		it('does not require authentication and returns only public attributes', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			await insertTestChangemakers(db, testUserAuthContext);
+			await request(app)
+				.get('/changemakers')
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).toStrictEqual({
+						total: 2,
+						entries: [
+							{
+								id: 2,
+								taxId: '22-2222222',
+								name: 'Another Inc.',
+								fields: [],
+							},
+							{
+								id: 1,
+								taxId: '11-1111111',
+								name: 'Example Inc.',
+								fields: [],
+							},
+						],
+					});
+				});
 		});
 
 		it('returns an empty Bundle when no data is present', async () => {
@@ -512,12 +537,26 @@ describe('/changemakers', () => {
 	});
 
 	describe('GET /:id', () => {
-		it('does not require authentication', async () => {
+		it('does not require authentication and returns only public attributes', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 			const testUserAuthContext = getAuthContext(testUser);
 			await insertTestChangemakers(db, testUserAuthContext);
-			await request(app).get('/changemakers/1').expect(200);
+			await request(app)
+				.get('/changemakers/1')
+				.expect(200)
+				.expect((res) => {
+					expect(res.body).toStrictEqual({
+						id: 1,
+						taxId: '11-1111111',
+						name: 'Example Inc.',
+						fields: [],
+					});
+					expect(res.body).not.toHaveProperty('keycloakOrganizationId');
+					expect(res.body).not.toHaveProperty('createdAt');
+					expect(res.body).not.toHaveProperty('createdBy');
+					expect(res.body).not.toHaveProperty('fiscalSponsors');
+				});
 		});
 
 		it('returns 404 when given id is not present', async () => {
@@ -1070,6 +1109,98 @@ describe('/changemakers', () => {
 							createdAt: expectTimestamp(),
 							createdBy: getTestUserKeycloakUserId(),
 							fields: [],
+						});
+					});
+			});
+
+			it('returns only public field values when unauthenticated', async () => {
+				const db = getDatabase();
+				const {
+					secondChangemaker: changemaker,
+					systemUserAuthContext,
+					firstFunderOpportunity,
+					firstFunderSourceId: funderSourceId,
+				} = await setupTestContext(db);
+
+				const publicBaseField = await createTestBaseField(db, null, {
+					sensitivityClassification: BaseFieldSensitivityClassification.PUBLIC,
+				});
+				const restrictedBaseField = await createTestBaseField(db, null, {
+					sensitivityClassification:
+						BaseFieldSensitivityClassification.RESTRICTED,
+				});
+				const opportunity = firstFunderOpportunity;
+				const proposal = await createTestProposal(db, systemUserAuthContext, {
+					opportunityId: opportunity.id,
+					externalId: `Another proposal to ${opportunity.title}`,
+				});
+				await createChangemakerProposal(db, null, {
+					changemakerId: changemaker.id,
+					proposalId: proposal.id,
+				});
+				const applicationForm = await createApplicationForm(db, null, {
+					opportunityId: opportunity.id,
+					name: null,
+				});
+				const publicApplicationFormField = await createApplicationFormField(
+					db,
+					null,
+					{
+						label: 'Public',
+						applicationFormId: applicationForm.id,
+						baseFieldShortCode: publicBaseField.shortCode,
+						position: 1,
+						instructions: 'Please enter the public field.',
+						inputType: null,
+					},
+				);
+				const restrictedApplicationFormField = await createApplicationFormField(
+					db,
+					null,
+					{
+						label: 'Restricted',
+						applicationFormId: applicationForm.id,
+						baseFieldShortCode: restrictedBaseField.shortCode,
+						position: 2,
+						instructions: 'Please enter the restricted field.',
+						inputType: null,
+					},
+				);
+				const proposalVersion = await createProposalVersion(
+					db,
+					systemUserAuthContext,
+					{
+						proposalId: proposal.id,
+						applicationFormId: applicationForm.id,
+						sourceId: funderSourceId,
+					},
+				);
+				const publicFieldValue = await createProposalFieldValue(db, null, {
+					proposalVersionId: proposalVersion.id,
+					applicationFormFieldId: publicApplicationFormField.id,
+					position: 1,
+					value: 'public value',
+					isValid: true,
+					goodAsOf: null,
+				});
+				await createProposalFieldValue(db, null, {
+					proposalVersionId: proposalVersion.id,
+					applicationFormFieldId: restrictedApplicationFormField.id,
+					position: 2,
+					value: 'restricted value',
+					isValid: true,
+					goodAsOf: null,
+				});
+
+				await request(app)
+					.get(`/changemakers/${changemaker.id}`)
+					.expect(200)
+					.expect((res) => {
+						expect(res.body).toStrictEqual({
+							id: changemaker.id,
+							taxId: changemaker.taxId,
+							name: changemaker.name,
+							fields: [publicFieldValue],
 						});
 					});
 			});

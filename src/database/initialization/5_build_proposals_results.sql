@@ -98,7 +98,11 @@ CREATE FUNCTION build_proposals_results(
 		SELECT
 			cp.proposal_id,
 			jsonb_agg(
-				changemaker_to_json(c.*, NULL, NULL, TRUE)
+				changemaker_to_json(
+					c.*, NULL, NULL, TRUE,
+					build_proposals_results.auth_context_keycloak_user_id,
+					build_proposals_results.auth_context_is_administrator
+				)
 				ORDER BY c.id ASC
 			) AS changemakers
 		FROM changemakers_proposals cp

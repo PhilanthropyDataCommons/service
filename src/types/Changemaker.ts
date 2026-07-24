@@ -14,13 +14,17 @@ interface ShallowChangemaker {
 	// We do not really want "undefined" here, only null. See
 	// https://github.com/ajv-validator/ajv/issues/2283 and/or
 	// https://github.com/ajv-validator/ajv/issues/2163.
+	// Omitted when serialized for an unauthenticated caller.
 	keycloakOrganizationId: KeycloakId | null | undefined;
-	readonly createdAt: string;
-	readonly createdBy: KeycloakId;
+	// Omitted when serialized for an unauthenticated caller.
+	readonly createdAt: string | undefined;
+	// Omitted when serialized for an unauthenticated caller.
+	readonly createdBy: KeycloakId | undefined;
 }
 
 interface Changemaker extends ShallowChangemaker {
-	readonly fiscalSponsors: ShallowChangemaker[];
+	// Omitted when serialized for an unauthenticated caller.
+	readonly fiscalSponsors: ShallowChangemaker[] | undefined;
 	readonly fields: Array<ProposalFieldValue | ChangemakerFieldValue>;
 }
 

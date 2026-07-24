@@ -2182,6 +2182,7 @@ describe('/changemakers', () => {
 								value: 'multi@test.com',
 							}),
 							expectObjectContaining({
+								proposalId: proposal.id,
 								proposalVersionId: proposalVersion.id,
 								value: '+15555559999',
 							}),
@@ -2664,6 +2665,7 @@ describe('/changemakers', () => {
 						id: changemaker.id,
 						fields: [
 							expectObjectContaining({
+								proposalId: proposal.id,
 								proposalVersionId: proposalVersion.id,
 								value: testFile.id.toString(),
 								file: expectObjectContaining({

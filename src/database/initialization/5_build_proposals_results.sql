@@ -49,7 +49,8 @@ CREATE FUNCTION build_proposals_results(
 					affj.object,
 					proposal_field_value_file_to_json(
 						pfv, bf.data_type = 'file', tv.created_by
-					)
+					),
+					tv.proposal_id
 				)
 				ORDER BY pfv.position, pfv.id DESC
 			) AS field_values

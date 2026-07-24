@@ -368,6 +368,7 @@ describe('/proposals', () => {
 								fieldValues: [
 									{
 										id: 1,
+										proposalId: 1,
 										applicationFormFieldId: 1,
 										proposalVersionId: 1,
 										position: 1,
@@ -654,6 +655,7 @@ describe('/proposals', () => {
 								fieldValues: [
 									{
 										id: 1,
+										proposalId: 1,
 										applicationFormFieldId: 1,
 										proposalVersionId: 1,
 										position: 1,
@@ -967,6 +969,7 @@ describe('/proposals', () => {
 						fieldValues: [
 							{
 								id: 3,
+								proposalId: proposal.id,
 								proposalVersionId: 2,
 								applicationFormFieldId: 1,
 								position: 1,
@@ -990,6 +993,7 @@ describe('/proposals', () => {
 							},
 							{
 								id: 4,
+								proposalId: proposal.id,
 								proposalVersionId: 2,
 								applicationFormFieldId: 2,
 								position: 2,
@@ -1025,6 +1029,7 @@ describe('/proposals', () => {
 						fieldValues: [
 							{
 								id: 1,
+								proposalId: proposal.id,
 								proposalVersionId: 1,
 								applicationFormFieldId: 1,
 								position: 1,
@@ -1048,6 +1053,7 @@ describe('/proposals', () => {
 							},
 							{
 								id: 2,
+								proposalId: proposal.id,
 								proposalVersionId: 1,
 								applicationFormFieldId: 2,
 								position: 2,
@@ -1170,6 +1176,7 @@ describe('/proposals', () => {
 						fieldValues: [
 							{
 								id: 3,
+								proposalId: proposal.id,
 								proposalVersionId: 2,
 								applicationFormFieldId: 1,
 								position: 1,
@@ -1193,6 +1200,7 @@ describe('/proposals', () => {
 							},
 							{
 								id: 4,
+								proposalId: proposal.id,
 								proposalVersionId: 2,
 								applicationFormFieldId: 2,
 								position: 2,
@@ -1228,6 +1236,7 @@ describe('/proposals', () => {
 						fieldValues: [
 							{
 								id: 1,
+								proposalId: proposal.id,
 								proposalVersionId: 1,
 								applicationFormFieldId: 1,
 								position: 1,
@@ -1251,6 +1260,7 @@ describe('/proposals', () => {
 							},
 							{
 								id: 2,
+								proposalId: proposal.id,
 								proposalVersionId: 1,
 								applicationFormFieldId: 2,
 								position: 2,
@@ -1434,6 +1444,7 @@ describe('/proposals', () => {
 						fieldValues: [
 							{
 								id: 1,
+								proposalId: proposal.id,
 								proposalVersionId: 1,
 								applicationFormFieldId: 1,
 								position: 1,

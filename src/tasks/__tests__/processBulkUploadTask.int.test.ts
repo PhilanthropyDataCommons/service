@@ -514,6 +514,7 @@ describe('processBulkUploadTask', () => {
 									isValid: true,
 									goodAsOf: null,
 									position: 0,
+									proposalId: 2,
 									proposalVersionId: 2,
 									value: 'foo@example.com',
 									file: null,
@@ -547,6 +548,7 @@ describe('processBulkUploadTask', () => {
 									isValid: true,
 									goodAsOf: null,
 									position: 1,
+									proposalId: 2,
 									proposalVersionId: 2,
 									value: 'Bar Inc.',
 									file: null,
@@ -580,6 +582,7 @@ describe('processBulkUploadTask', () => {
 									isValid: true,
 									goodAsOf: null,
 									position: 2,
+									proposalId: 2,
 									proposalVersionId: 2,
 									value: twoTxtFile.id.toString(),
 									file: { ...twoTxtFile, downloadUrl: expectString() },
@@ -637,6 +640,7 @@ describe('processBulkUploadTask', () => {
 									isValid: true,
 									goodAsOf: null,
 									position: 0,
+									proposalId: 1,
 									proposalVersionId: 1,
 									value: 'foo@example.com',
 									file: null,
@@ -670,6 +674,7 @@ describe('processBulkUploadTask', () => {
 									isValid: true,
 									goodAsOf: null,
 									position: 1,
+									proposalId: 1,
 									proposalVersionId: 1,
 									value: 'Foo LLC.',
 									file: null,
@@ -703,6 +708,7 @@ describe('processBulkUploadTask', () => {
 									isValid: true,
 									goodAsOf: null,
 									position: 2,
+									proposalId: 1,
 									proposalVersionId: 1,
 									value: oneTxtFile.id.toString(),
 									file: { ...oneTxtFile, downloadUrl: expectString() },
@@ -1295,6 +1301,9 @@ describe('processBulkUploadTask', () => {
 			NO_LIMIT,
 			NO_OFFSET,
 		);
+		const uploadedProposal = proposalBundle.entries.find(
+			(proposal) => proposal.externalId === '1',
+		);
 		const fieldValues = proposalBundle.entries
 			.flatMap((proposal) => proposal.versions)
 			.flatMap((version) => version.fieldValues)
@@ -1330,6 +1339,7 @@ describe('processBulkUploadTask', () => {
 				isValid: true,
 				goodAsOf: null,
 				position: 0,
+				proposalId: uploadedProposal?.id,
 				proposalVersionId: expectNumber(),
 				value: 'foo@example.com',
 				file: null,
@@ -1363,6 +1373,7 @@ describe('processBulkUploadTask', () => {
 				isValid: true,
 				goodAsOf: null,
 				position: 1,
+				proposalId: uploadedProposal?.id,
 				proposalVersionId: expectNumber(),
 				value: 'A Deliberately Different Name',
 				file: null,
@@ -1455,6 +1466,12 @@ describe('processBulkUploadTask', () => {
 			NO_OFFSET,
 		);
 		expect(proposalBundle.total).toBe(2);
+		const rowOneProposal = proposalBundle.entries.find(
+			(proposal) => proposal.externalId === '1',
+		);
+		const rowTwoProposal = proposalBundle.entries.find(
+			(proposal) => proposal.externalId === '2',
+		);
 		const fieldValues = proposalBundle.entries
 			.flatMap((proposal) => proposal.versions)
 			.flatMap((version) => version.fieldValues)
@@ -1489,6 +1506,7 @@ describe('processBulkUploadTask', () => {
 				isValid: true,
 				goodAsOf: null,
 				position: 0,
+				proposalId: rowOneProposal?.id,
 				proposalVersionId: expectNumber(),
 				value: 'Alice Org',
 				file: null,
@@ -1522,6 +1540,7 @@ describe('processBulkUploadTask', () => {
 				isValid: true,
 				goodAsOf: null,
 				position: 0,
+				proposalId: rowTwoProposal?.id,
 				proposalVersionId: expectNumber(),
 				value: 'Bob Org',
 				file: null,

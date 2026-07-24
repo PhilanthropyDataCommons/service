@@ -6,6 +6,7 @@ import type { FieldValueBase } from './FieldValueBase';
 import type { Writable } from './Writable';
 
 interface ProposalFieldValue extends FieldValueBase {
+	readonly proposalId: Id;
 	proposalVersionId: Id;
 	applicationFormFieldId: Id;
 	position: number;

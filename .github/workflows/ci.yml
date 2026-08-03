@@ -21,7 +21,7 @@ jobs:
         with:
           node-version-file: .node-version
       - name: Lint GitHub Action workflows
-        uses: raven-actions/actionlint@v2.1.2
+        uses: raven-actions/actionlint@v2.2.0
 
   npm-install:
     runs-on: ubuntu-latest
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
           cache: pip

@@ -13,6 +13,10 @@ exclude_rules =
   references.from,
   # paginated_entries.*::table_type cast not recognized as a table reference
   structure.unused_join,
+  # CREATE INDEX CONCURRENTLY (and friends) cannot run inside a transaction,
+  # and postgres-migrations wraps every migration in one, so this rule can
+  # never be satisfied by a migration.
+  postgres.excessive_locks,
 
 [sqlfluff:indentation]
 indent_unit = tab

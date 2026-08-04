@@ -1,0 +1,32 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"allOf": [{ "$ref": "./id.json" }],
+			"readOnly": true,
+			"example": 42
+		},
+		"changemakerId": {
+			"allOf": [{ "$ref": "./id.json" }],
+			"description": "The changemaker that leads this initiative.",
+			"example": 7
+		},
+		"title": {
+			"type": "string",
+			"minLength": 1,
+			"example": "Clean Water for the Lower Valley"
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that created this initiative",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		}
+	},
+	"required": ["id", "changemakerId", "title", "createdAt", "createdBy"]
+}

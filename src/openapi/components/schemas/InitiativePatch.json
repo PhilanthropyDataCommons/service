@@ -1,0 +1,13 @@
+{
+	"type": "object",
+	"properties": {
+		"title": {
+			"type": "string",
+			"minLength": 1,
+			"example": "Clean Water for the Upper Valley"
+		}
+	},
+	"additionalProperties": false,
+	"minProperties": 1,
+	"required": []
+}

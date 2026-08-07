@@ -13,7 +13,9 @@ import {
 	createPermissionGrant,
 } from '../database';
 import {
+	ALL_VERBS,
 	getAuthContext,
+	getFullPermissionsMap,
 	loadTestUser,
 	getTestUserKeycloakUserId,
 	NO_LIMIT,
@@ -29,6 +31,7 @@ import { createTestFunder } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
+	mockOrgId,
 } from '../test/mockJwt';
 import {
 	FunderCollaborativeInvitationStatus,
@@ -38,6 +41,10 @@ import {
 } from '../types';
 import type { TinyPg } from 'tinypg';
 import type { AuthContext } from '../types';
+
+const FULL_FUNDER_PERMISSIONS = getFullPermissionsMap(
+	PermissionGrantEntityType.FUNDER,
+);
 
 const createTestFunders = async (
 	db: TinyPg,
@@ -123,6 +130,7 @@ describe('/funders', () => {
 						keycloakOrganizationId: null,
 						isCollaborative: false,
 						defaultTerminologySetId: null,
+						permissions: {},
 					},
 					{
 						shortCode: 'theFundFund',
@@ -132,6 +140,7 @@ describe('/funders', () => {
 						keycloakOrganizationId: null,
 						isCollaborative: false,
 						defaultTerminologySetId: null,
+						permissions: {},
 					},
 					systemFunder,
 				],
@@ -167,6 +176,7 @@ describe('/funders', () => {
 						keycloakOrganizationId: null,
 						isCollaborative: false,
 						defaultTerminologySetId: null,
+						permissions: {},
 					},
 				],
 			});
@@ -375,6 +385,7 @@ describe('/funders', () => {
 				keycloakOrganizationId: '0de87edc-be40-11ef-8249-0312f1b87538',
 				isCollaborative: false,
 				defaultTerminologySetId: null,
+				permissions: {},
 			});
 		});
 
@@ -387,6 +398,208 @@ describe('/funders', () => {
 				name: 'The Foundation Foundation',
 			});
 			await agent.get('/funders/foo').set(authHeader).expect(404);
+		});
+
+		it('resolves the permissions of a direct user grant', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser(db);
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get('/funders/theFundFund')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				shortCode: 'theFundFund',
+				permissions: {
+					funder: [PermissionGrantVerb.VIEW],
+				},
+			});
+		});
+
+		it('expands a manage verb to every verb in resolved permissions', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser(db);
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+
+			const response = await agent
+				.get('/funders/theFundFund')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				permissions: {
+					funder: ALL_VERBS,
+				},
+			});
+		});
+
+		it('expands an any scope to every native scope in resolved permissions', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser(db);
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get('/funders/theFundFund')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				permissions: getFullPermissionsMap(PermissionGrantEntityType.FUNDER, [
+					PermissionGrantVerb.VIEW,
+				]),
+			});
+		});
+
+		it('resolves permissions granted via user group membership', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: mockOrgId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+
+			const response = await agent
+				.get('/funders/theFundFund')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				permissions: {
+					funder: [PermissionGrantVerb.EDIT],
+				},
+			});
+		});
+
+		it('resolves permissions granted to all authenticated users', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.AUTHENTICATED_USERS,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get('/funders/theFundFund')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				permissions: {
+					funder: [PermissionGrantVerb.VIEW],
+				},
+			});
+		});
+
+		it('excludes scopes restricted by grant conditions from resolved permissions', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser(db);
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [
+					PermissionGrantEntityType.FUNDER,
+					PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+				],
+				verbs: [PermissionGrantVerb.VIEW],
+				conditions: {
+					[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: {
+						property: 'baseFieldCategory',
+						operator: 'in',
+						value: ['project'],
+					},
+				},
+			});
+
+			const response = await agent
+				.get('/funders/theFundFund')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(
+				expectObjectContaining({
+					permissions: {
+						funder: [PermissionGrantVerb.VIEW],
+					},
+				}),
+			);
+		});
+
+		it('resolves every verb at every native scope for administrators', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+				name: 'The Fund Fund',
+			});
+
+			const response = await agent
+				.get('/funders/theFundFund')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				permissions: FULL_FUNDER_PERMISSIONS,
+			});
 		});
 	});
 
@@ -461,6 +674,7 @@ describe('/funders', () => {
 				createdBy: testUser.keycloakUserId,
 				isCollaborative: false,
 				defaultTerminologySetId: null,
+				permissions: FULL_FUNDER_PERMISSIONS,
 			});
 			expect(after.count).toEqual(before.count);
 			expect(anotherFunderAfter).toEqual(anotherFunderBefore);

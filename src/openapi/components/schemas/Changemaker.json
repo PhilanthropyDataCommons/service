@@ -39,9 +39,12 @@
 						]
 					},
 					"readOnly": true
+				},
+				"permissions": {
+					"$ref": "./PermissionsMap.json"
 				}
 			},
-			"required": ["fields"]
+			"required": ["fields", "permissions"]
 		}
 	]
 }

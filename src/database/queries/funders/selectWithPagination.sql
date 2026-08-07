@@ -48,10 +48,23 @@ WITH
 		LIMIT :limit OFFSET :offset
 	),
 
+	page_funders AS (
+		SELECT funders AS funder
+		FROM funders
+		WHERE funders.short_code IN (SELECT page.short_code FROM page)
+	),
+
 	paginated_entries AS (
-		SELECT funder_to_json(page.*::funders) AS object
+		SELECT serialized_funder.object
 		FROM page
-		ORDER BY created_at DESC
+			INNER JOIN
+				build_funders_results(
+					array(SELECT page_funders.funder FROM page_funders),
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator
+				) AS serialized_funder
+				ON page.short_code = serialized_funder.short_code
+		ORDER BY page.created_at DESC
 	)
 
 SELECT

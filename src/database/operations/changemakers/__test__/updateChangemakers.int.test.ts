@@ -1,8 +1,19 @@
 import { createChangemaker, updateChangemaker } from '..';
-import { stringToKeycloakId } from '../../../../types';
+import {
+	PermissionGrantEntityType,
+	stringToKeycloakId,
+} from '../../../../types';
 import { getDatabase } from '../../../db';
 import { expectTimestamp } from '../../../../test/asymettricMatchers';
-import { getAuthContext, loadTestUser } from '../../../../test/utils';
+import {
+	getAuthContext,
+	getFullPermissionsMap,
+	loadTestUser,
+} from '../../../../test/utils';
+
+const FULL_CHANGEMAKER_PERMISSIONS = getFullPermissionsMap(
+	PermissionGrantEntityType.CHANGEMAKER,
+);
 
 describe('updateChangemaker', () => {
 	it('Successfully sets a keycloakOrganizationId where previously null', async () => {
@@ -29,6 +40,7 @@ describe('updateChangemaker', () => {
 			createdAt: expectTimestamp(),
 			createdBy: testUser.keycloakUserId,
 			fiscalSponsors: [],
+			permissions: FULL_CHANGEMAKER_PERMISSIONS,
 		});
 	});
 
@@ -56,6 +68,7 @@ describe('updateChangemaker', () => {
 			createdAt: expectTimestamp(),
 			createdBy: testUser.keycloakUserId,
 			fiscalSponsors: [],
+			permissions: FULL_CHANGEMAKER_PERMISSIONS,
 		});
 	});
 

@@ -47,6 +47,9 @@ const getFunders = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getFunder = async (req: Request, res: Response): Promise<void> => {
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
 	const db = getDatabase();
 	const { funderShortCode } = coerceParams(req.params);
 	if (!isShortCode(funderShortCode)) {
@@ -55,7 +58,7 @@ const getFunder = async (req: Request, res: Response): Promise<void> => {
 			isShortCode.errors ?? [],
 		);
 	}
-	const funder = await loadFunder(db, null, funderShortCode);
+	const funder = await loadFunder(db, req, funderShortCode);
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.OK)
 		.contentType('application/json')
@@ -104,6 +107,10 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 					contextEntityType: PermissionGrantEntityType.FUNDER,
 					funderShortCode: item.shortCode,
 				});
+				return {
+					committedFunder: await loadFunder(txDb, req, item.shortCode),
+					committedFunderWasInserted: wasInserted,
+				};
 			}
 			return { committedFunder: item, committedFunderWasInserted: wasInserted };
 		},

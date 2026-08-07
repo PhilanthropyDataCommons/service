@@ -241,6 +241,45 @@ consulted, so no `contextEntityType`, verb, or scope is involved.
 | data provider | any authenticated user             | `GET /dataProviders`, `GET /dataProviders/{dataProviderShortCode}` |
 | base field    | everyone, unauthenticated included | `GET /baseFields`                                                  |
 
+### Resolved Permissions on Entity Responses
+
+Changemaker and funder responses include a readonly `permissions` attribute
+describing the authenticated caller's _resolved_ permissions on that entity as
+a map of scope to verbs, for example:
+
+```json
+{
+	"permissions": {
+		"changemaker": ["view", "edit"],
+		"proposal": ["view"]
+	}
+}
+```
+
+Resolution applies the same semantics as enforcement:
+
+- A granted `manage` verb expands to every verb at the granted scopes.
+- A granted `any` scope expands to every native scope of the context type
+  (changemaker: `changemaker`, `changemakerFieldValue`, `initiative`,
+  `initiativeFieldValue`, `proposal`, `proposalFieldValue`, `source`;
+  funder: `funder`, `opportunity`,
+  `applicationForm`, `proposal`, `proposalFieldValue`, `source`,
+  `terminologySet`). The literal `any` scope is never emitted.
+- Grants held via user group membership and grants to all authenticated users
+  are included.
+- Administrators resolve to every verb at every native scope.
+
+Changemakers and funders are permission leaves, so only grants made directly
+on the entity contribute (there is no inheritance from other entities). A
+scope named in a grant's `conditions` is excluded from that grant's
+contribution, since the flat verb map cannot express a conditioned
+permission — the map may understate but never overstates.
+
+The map is empty (`{}`) for anonymous requests and for funders embedded
+within another entity's response (e.g. the `funder` attached to a source or
+opportunity); shallow changemaker embeds (e.g. `fiscalSponsors` entries) omit
+the attribute entirely.
+
 ### Permission Grant Management
 
 CRUD operations on permission grants require either the `pdc-admin` role or the

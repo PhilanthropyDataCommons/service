@@ -4,6 +4,7 @@ CREATE FUNCTION changemaker_to_json(
 	changemaker changemakers,
 	fiscal_sponsors jsonb,
 	fields jsonb,
+	permissions jsonb,
 	shallow boolean DEFAULT FALSE,
 	with_view_permission boolean DEFAULT TRUE
 ) RETURNS jsonb AS $$
@@ -14,7 +15,8 @@ CREATE FUNCTION changemaker_to_json(
 	) || CASE
 		WHEN changemaker_to_json.shallow THEN '{}'::jsonb
 		ELSE jsonb_build_object(
-			'fields', COALESCE(changemaker_to_json.fields, '[]'::jsonb)
+			'fields', COALESCE(changemaker_to_json.fields, '[]'::jsonb),
+			'permissions', COALESCE(changemaker_to_json.permissions, '{}'::jsonb)
 		)
 	END || CASE
 		WHEN NOT changemaker_to_json.with_view_permission THEN '{}'::jsonb

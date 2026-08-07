@@ -3,6 +3,7 @@ import { idSchema } from './Id';
 import { keycloakIdSchema } from './KeycloakId';
 import type { Id } from './Id';
 import type { KeycloakId } from './KeycloakId';
+import type { PermissionsMap } from './PermissionsMap';
 import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { ShortCode } from './ShortCode';
@@ -18,6 +19,7 @@ interface Funder {
 	defaultTerminologySetId: Id | null | undefined;
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
+	readonly permissions: PermissionsMap;
 }
 
 type WritableFunder = Writable<Funder>;

@@ -7,10 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Changemaker and funder responses now include a readonly `permissions` attribute describing the caller's resolved permissions on that entity as a map of scope to verbs (with `manage` verbs, `any` scopes, user group membership, all-authenticated-users grants, and the administrator role already expanded). It is `{}` for anonymous callers and for funders embedded in other entities' responses; shallow changemaker embeds omit it.
+
 ### Changed
 
 - A changemaker now carries the `keycloakOrganizationId`, `createdAt`, and `createdBy` attributes, and its `fiscalSponsors`, only when the requester holds `view` permission on that changemaker. Every other requester, including an unauthenticated one, receives `id`, `name`, and `taxId`, plus `fields` where the endpoint returns it at all. This applies wherever a changemaker appears, not just at `/changemakers`: the changemakers embedded in a proposal, in a source, and in another changemaker's `fiscalSponsors` are narrowed the same way. Permission is evaluated per changemaker, so a single array may hold both shapes.
 - `fields` remains an empty array for unauthenticated requests; it is kept in the response shape to support future visibility of `public` base field values.
+
+### Fixed
+
+- The `changemaker` attached to a changemaker-backed `source` is now documented as a `ShallowChangemaker`. The API has always served a shallow changemaker there, but the schema described a full `Changemaker`, promising `fields` and `fiscalSponsors` attributes that were never present.
 
 ## 0.42.0 2026-08-25
 

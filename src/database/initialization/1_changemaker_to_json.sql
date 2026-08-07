@@ -4,6 +4,7 @@ CREATE FUNCTION changemaker_to_json(
 	changemaker changemakers,
 	fiscal_sponsors jsonb,
 	fields jsonb,
+	permissions jsonb,
 	shallow boolean DEFAULT FALSE
 ) RETURNS jsonb AS $$
 	SELECT jsonb_build_object(
@@ -17,7 +18,8 @@ CREATE FUNCTION changemaker_to_json(
 		WHEN changemaker_to_json.shallow THEN '{}'::jsonb
 		ELSE jsonb_build_object(
 			'fiscalSponsors', COALESCE(changemaker_to_json.fiscal_sponsors, '[]'::jsonb),
-			'fields', COALESCE(changemaker_to_json.fields, '[]'::jsonb)
+			'fields', COALESCE(changemaker_to_json.fields, '[]'::jsonb),
+			'permissions', COALESCE(changemaker_to_json.permissions, '{}'::jsonb)
 		)
 	END;
 $$ LANGUAGE sql IMMUTABLE;

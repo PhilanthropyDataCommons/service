@@ -308,6 +308,9 @@
 			"PermissionGrantVerb": {
 				"$ref": "./components/schemas/PermissionGrantVerb.json"
 			},
+			"PermissionsMap": {
+				"$ref": "./components/schemas/PermissionsMap.json"
+			},
 			"User": {
 				"$ref": "./components/schemas/User.json"
 			},

@@ -36,9 +36,12 @@
 						]
 					},
 					"readOnly": true
+				},
+				"permissions": {
+					"$ref": "./PermissionsMap.json"
 				}
 			},
-			"required": ["fields", "fiscalSponsors"]
+			"required": ["fields", "fiscalSponsors", "permissions"]
 		}
 	]
 }

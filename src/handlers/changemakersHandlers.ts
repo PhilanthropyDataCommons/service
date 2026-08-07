@@ -51,7 +51,7 @@ const postChangemaker = async (req: Request, res: Response): Promise<void> => {
 			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 			changemakerId: changemaker.id,
 		});
-		return changemaker;
+		return await loadChangemaker(txDb, req, changemaker.id);
 	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)

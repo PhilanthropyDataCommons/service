@@ -22,7 +22,11 @@ import {
 	createTestProposal,
 	createTestSource,
 } from '../test/factories';
-import { getAuthContext, loadTestUser } from '../test/utils';
+import {
+	getAuthContext,
+	getFullPermissionsMap,
+	loadTestUser,
+} from '../test/utils';
 import {
 	expectArray,
 	expectObjectContaining,
@@ -42,6 +46,10 @@ import {
 } from '../types';
 import type { AuthContext } from '../types';
 import type { TinyPg } from 'tinypg';
+
+const FULL_CHANGEMAKER_PERMISSIONS = getFullPermissionsMap(
+	PermissionGrantEntityType.CHANGEMAKER,
+);
 
 const insertTestChangemakers = async (
 	db: TinyPg,
@@ -172,7 +180,16 @@ describe('/changemakerProposals', () => {
 			expect(result.body).toEqual({
 				entries: [
 					funderVisibleChangemakerProposal,
-					changemakerVisibleChangemakerProposal,
+					{
+						...changemakerVisibleChangemakerProposal,
+						changemaker: {
+							...changemakerVisibleChangemakerProposal.changemaker,
+							permissions: {
+								changemaker: [PermissionGrantVerb.VIEW],
+								proposal: [PermissionGrantVerb.VIEW],
+							},
+						},
+					},
 				],
 				total: 2,
 			});
@@ -216,6 +233,7 @@ describe('/changemakerProposals', () => {
 							createdBy: testUser.keycloakUserId,
 							fiscalSponsors: [],
 							fields: [],
+							permissions: FULL_CHANGEMAKER_PERMISSIONS,
 						},
 						proposalId: secondProposal.id,
 						proposal: {
@@ -247,6 +265,7 @@ describe('/changemakerProposals', () => {
 							createdBy: testUser.keycloakUserId,
 							fiscalSponsors: [],
 							fields: [],
+							permissions: FULL_CHANGEMAKER_PERMISSIONS,
 						},
 						proposalId: firstProposal.id,
 						proposal: {
@@ -309,6 +328,7 @@ describe('/changemakerProposals', () => {
 							createdBy: testUser.keycloakUserId,
 							fiscalSponsors: [],
 							fields: [],
+							permissions: FULL_CHANGEMAKER_PERMISSIONS,
 						},
 						proposalId: targetProposal.id,
 						proposal: {
@@ -583,6 +603,7 @@ describe('/changemakerProposals', () => {
 					createdBy: testUser.keycloakUserId,
 					fiscalSponsors: [],
 					fields: [],
+					permissions: {},
 				},
 				proposalId: proposal.id,
 				proposal: {
@@ -654,6 +675,7 @@ describe('/changemakerProposals', () => {
 					createdBy: testUser.keycloakUserId,
 					fiscalSponsors: [],
 					fields: [],
+					permissions: {},
 				},
 				proposalId: proposal.id,
 				proposal: {

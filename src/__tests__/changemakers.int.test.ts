@@ -28,7 +28,9 @@ import {
 	createTestSource,
 } from '../test/factories';
 import {
+	ALL_VERBS,
 	getAuthContext,
+	getFullPermissionsMap,
 	getTestUserKeycloakUserId,
 	loadTestUser,
 	NO_LIMIT,
@@ -44,6 +46,7 @@ import {
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
+	mockOrgId,
 } from '../test/mockJwt';
 import {
 	BaseFieldDataType,
@@ -56,6 +59,10 @@ import {
 } from '../types';
 import type { TinyPg } from 'tinypg';
 import type { AuthContext } from '../types';
+
+const FULL_CHANGEMAKER_PERMISSIONS = getFullPermissionsMap(
+	PermissionGrantEntityType.CHANGEMAKER,
+);
 
 const insertTestChangemakers = async (db: TinyPg, authContext: AuthContext) => {
 	await createChangemaker(db, authContext, {
@@ -215,6 +222,7 @@ describe('/changemakers', () => {
 								createdBy: testUser.keycloakUserId,
 								fiscalSponsors: [],
 								fields: [],
+								permissions: {},
 							},
 							{
 								id: 1,
@@ -225,6 +233,7 @@ describe('/changemakers', () => {
 								createdBy: testUser.keycloakUserId,
 								fiscalSponsors: [],
 								fields: [],
+								permissions: {},
 							},
 						],
 					});
@@ -264,6 +273,7 @@ describe('/changemakers', () => {
 								createdBy: testUser.keycloakUserId,
 								fiscalSponsors: [],
 								fields: [],
+								permissions: {},
 							},
 							{
 								id: 14,
@@ -274,6 +284,7 @@ describe('/changemakers', () => {
 								createdBy: testUser.keycloakUserId,
 								fiscalSponsors: [],
 								fields: [],
+								permissions: {},
 							},
 							{
 								id: 13,
@@ -284,6 +295,7 @@ describe('/changemakers', () => {
 								createdBy: testUser.keycloakUserId,
 								fiscalSponsors: [],
 								fields: [],
+								permissions: {},
 							},
 							{
 								id: 12,
@@ -294,6 +306,7 @@ describe('/changemakers', () => {
 								createdBy: testUser.keycloakUserId,
 								fiscalSponsors: [],
 								fields: [],
+								permissions: {},
 							},
 							{
 								id: 11,
@@ -304,6 +317,7 @@ describe('/changemakers', () => {
 								createdBy: testUser.keycloakUserId,
 								fiscalSponsors: [],
 								fields: [],
+								permissions: {},
 							},
 						],
 					});
@@ -349,6 +363,7 @@ describe('/changemakers', () => {
 						createdBy: testUser.keycloakUserId,
 						fiscalSponsors: [],
 						fields: [],
+						permissions: {},
 					},
 				],
 			});
@@ -396,6 +411,7 @@ describe('/changemakers', () => {
 						createdBy: testUser.keycloakUserId,
 						fiscalSponsors: [],
 						fields: [],
+						permissions: {},
 					},
 				],
 			});
@@ -431,6 +447,7 @@ describe('/changemakers', () => {
 						createdBy: testUser.keycloakUserId,
 						fiscalSponsors: [],
 						fields: [],
+						permissions: {},
 					},
 				],
 			});
@@ -494,6 +511,7 @@ describe('/changemakers', () => {
 						createdBy: testUser.keycloakUserId,
 						fiscalSponsors: [],
 						fields: [],
+						permissions: {},
 					},
 				],
 			});
@@ -524,6 +542,222 @@ describe('/changemakers', () => {
 			await request(app).get('/changemakers/9001').set(authHeader).expect(404);
 		});
 
+		it('returns empty permissions for anonymous requests', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createPermissionGrant(db, testUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+
+			const response = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				permissions: {},
+			});
+		});
+
+		it('resolves the permissions of a direct user grant', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createPermissionGrant(db, testUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+			});
+
+			const response = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(
+				expectObjectContaining({
+					permissions: {
+						changemaker: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+					},
+				}),
+			);
+		});
+
+		it('expands a manage verb to every verb in resolved permissions', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createPermissionGrant(db, testUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.PROPOSAL],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+
+			const response = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(
+				expectObjectContaining({
+					permissions: {
+						proposal: ALL_VERBS,
+					},
+				}),
+			);
+		});
+
+		it('expands an any scope to every native scope in resolved permissions', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createPermissionGrant(db, testUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.ANY],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(
+				expectObjectContaining({
+					permissions: getFullPermissionsMap(
+						PermissionGrantEntityType.CHANGEMAKER,
+						[PermissionGrantVerb.VIEW],
+					),
+				}),
+			);
+		});
+
+		it('resolves permissions granted via user group membership', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createPermissionGrant(db, testUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: mockOrgId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+
+			const response = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(
+				expectObjectContaining({
+					permissions: {
+						changemaker: [PermissionGrantVerb.EDIT],
+					},
+				}),
+			);
+		});
+
+		it('resolves permissions granted to all authenticated users', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createPermissionGrant(db, testUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.AUTHENTICATED_USERS,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const authenticatedResponse = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(authenticatedResponse.body).toEqual(
+				expectObjectContaining({
+					permissions: {
+						changemaker: [PermissionGrantVerb.VIEW],
+					},
+				}),
+			);
+
+			const anonymousResponse = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.expect(200);
+			expect(anonymousResponse.body).toEqual(
+				expectObjectContaining({ permissions: {} }),
+			);
+		});
+
+		it('excludes scopes restricted by grant conditions from resolved permissions', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createPermissionGrant(db, testUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [
+					PermissionGrantEntityType.CHANGEMAKER,
+					PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+				],
+				verbs: [PermissionGrantVerb.VIEW],
+				conditions: {
+					[PermissionGrantEntityType.PROPOSAL_FIELD_VALUE]: {
+						property: 'baseFieldCategory',
+						operator: 'in',
+						value: ['project'],
+					},
+				},
+			});
+
+			const response = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toEqual(
+				expectObjectContaining({
+					permissions: {
+						changemaker: [PermissionGrantVerb.VIEW],
+					},
+				}),
+			);
+		});
+
+		it('resolves every verb at every native scope for administrators', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+
+			const response = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toEqual(
+				expectObjectContaining({ permissions: FULL_CHANGEMAKER_PERMISSIONS }),
+			);
+		});
+
 		it('returns the specified changemaker', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
@@ -543,6 +777,7 @@ describe('/changemakers', () => {
 						createdBy: testUser.keycloakUserId,
 						fiscalSponsors: [],
 						fields: [],
+						permissions: {},
 					});
 				});
 		});
@@ -694,6 +929,7 @@ describe('/changemakers', () => {
 							createdBy: getTestUserKeycloakUserId(),
 							fiscalSponsors: [],
 							fields: [latestValidValue],
+							permissions: {},
 						});
 					});
 			});
@@ -1105,6 +1341,7 @@ describe('/changemakers', () => {
 				createdBy: getTestUserKeycloakUserId(),
 				fiscalSponsors: [],
 				fields: [],
+				permissions: FULL_CHANGEMAKER_PERMISSIONS,
 			});
 			expect(after.count).toEqual(1);
 		});
@@ -1233,6 +1470,7 @@ describe('/changemakers', () => {
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				fields: [],
+				permissions: FULL_CHANGEMAKER_PERMISSIONS,
 			});
 		});
 
@@ -1259,6 +1497,7 @@ describe('/changemakers', () => {
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
 				fields: [],
+				permissions: FULL_CHANGEMAKER_PERMISSIONS,
 			});
 		});
 
@@ -1292,6 +1531,7 @@ describe('/changemakers', () => {
 				createdBy: testUser.keycloakUserId,
 				fiscalSponsors: [],
 				fields: [],
+				permissions: FULL_CHANGEMAKER_PERMISSIONS,
 			});
 		});
 
@@ -1423,6 +1663,7 @@ describe('/changemakers', () => {
 			expect(result.body).toStrictEqual({
 				...changemaker,
 				keycloakOrganizationId: null,
+				permissions: FULL_CHANGEMAKER_PERMISSIONS,
 			});
 		});
 	});
@@ -1503,6 +1744,7 @@ describe('/changemakers', () => {
 				...fiscalSponsee,
 				createdAt: expectTimestamp(),
 				createdBy: testUser.keycloakUserId,
+				permissions: FULL_CHANGEMAKER_PERMISSIONS,
 				fiscalSponsors: [
 					{
 						id: fiscalSponsor.id,
@@ -1670,6 +1912,7 @@ describe('/changemakers', () => {
 			expect(changemakerResult.body).toStrictEqual({
 				...fiscalSponsee,
 				createdAt: expectTimestamp(),
+				permissions: FULL_CHANGEMAKER_PERMISSIONS,
 				fiscalSponsors: [
 					{
 						id: fiscalSponsorToKeep.id,

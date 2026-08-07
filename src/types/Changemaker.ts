@@ -3,6 +3,7 @@ import { keycloakIdSchema } from './KeycloakId';
 import type { ChangemakerFieldValue } from './ChangemakerFieldValue';
 import type { Id } from './Id';
 import type { KeycloakId } from './KeycloakId';
+import type { PermissionsMap } from './PermissionsMap';
 import type { Writable } from './Writable';
 import type { JSONSchemaType } from 'ajv';
 import type { ProposalFieldValue } from './ProposalFieldValue';
@@ -28,6 +29,7 @@ type ShallowChangemaker = PublicChangemaker &
 type Changemaker = ShallowChangemaker & {
 	readonly fields: Array<ProposalFieldValue | ChangemakerFieldValue>;
 	readonly fiscalSponsors?: ShallowChangemaker[];
+	readonly permissions: PermissionsMap;
 };
 
 type WritableChangemaker = Writable<Changemaker>;

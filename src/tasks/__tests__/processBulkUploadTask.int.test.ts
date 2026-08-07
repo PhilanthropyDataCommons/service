@@ -22,11 +22,13 @@ import { processBulkUploadTask } from '../processBulkUploadTask';
 import {
 	BaseFieldDataType,
 	BaseFieldCategory,
+	PermissionGrantEntityType,
 	TaskStatus,
 	BaseFieldSensitivityClassification,
 } from '../../types';
 import {
 	getAuthContext,
+	getFullPermissionsMap,
 	getTestAuthContext,
 	NO_LIMIT,
 	NO_OFFSET,
@@ -54,6 +56,10 @@ import type {
 	Opportunity,
 } from '../../types';
 import type { TinyPg } from 'tinypg';
+
+const FULL_CHANGEMAKER_PERMISSIONS = getFullPermissionsMap(
+	PermissionGrantEntityType.CHANGEMAKER,
+);
 
 const s3Mock = mockClient(S3Client);
 
@@ -937,6 +943,7 @@ describe('processBulkUploadTask', () => {
 					keycloakOrganizationId: null,
 					fields: [],
 					fiscalSponsors: [],
+					permissions: FULL_CHANGEMAKER_PERMISSIONS,
 				},
 			],
 			total: 1,
@@ -1025,6 +1032,7 @@ describe('processBulkUploadTask', () => {
 					keycloakOrganizationId: null,
 					fields: [],
 					fiscalSponsors: [],
+					permissions: FULL_CHANGEMAKER_PERMISSIONS,
 				},
 			],
 			total: 1,
@@ -1121,6 +1129,7 @@ describe('processBulkUploadTask', () => {
 					keycloakOrganizationId: null,
 					fields: [],
 					fiscalSponsors: [],
+					permissions: FULL_CHANGEMAKER_PERMISSIONS,
 				},
 			],
 			total: 1,
@@ -1639,6 +1648,7 @@ describe('processBulkUploadTask', () => {
 					keycloakOrganizationId: null,
 					fields: [],
 					fiscalSponsors: [],
+					permissions: FULL_CHANGEMAKER_PERMISSIONS,
 				},
 			],
 			total: 1,

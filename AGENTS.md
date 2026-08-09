@@ -216,9 +216,7 @@ describe('/endpoint', () => {
 				.get('/endpoint')
 				.set(authHeader)
 				.expect(200);
-			expect(response.body).toEqual({
-				/* expected */
-			});
+			expect(response.body).toEqual({/* expected */});
 		});
 	});
 });

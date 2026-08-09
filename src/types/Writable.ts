@@ -42,12 +42,7 @@ type OptionalKeys<T> = {
 type RequiredKeys<T> = Exclude<keyof T, OptionalKeys<T>>;
 
 type WritablePrimitive =
-	| undefined
-	| null
-	| boolean
-	| string
-	| number
-	| Function;
+	undefined | null | boolean | string | number | Function;
 
 type WritableObject<T> = {
 	// Capture required keys

@@ -197,6 +197,15 @@
 			"PdcError": {
 				"$ref": "./components/schemas/PdcError.json"
 			},
+			"Initiative": {
+				"$ref": "./components/schemas/Initiative.json"
+			},
+			"InitiativeBundle": {
+				"$ref": "./components/schemas/InitiativeBundle.json"
+			},
+			"InitiativePatch": {
+				"$ref": "./components/schemas/InitiativePatch.json"
+			},
 			"Opportunity": {
 				"$ref": "./components/schemas/Opportunity.json"
 			},
@@ -403,6 +412,12 @@
 		},
 		"/baseFields/{baseFieldShortCode}/localizations/{language}": {
 			"$ref": "./paths/baseFieldLocalization.json"
+		},
+		"/initiatives": {
+			"$ref": "./paths/initiatives.json"
+		},
+		"/initiatives/{initiativeId}": {
+			"$ref": "./paths/initiative.json"
 		},
 		"/opportunities": {
 			"$ref": "./paths/opportunities.json"

@@ -3,6 +3,7 @@ export * from './createTestChangemaker';
 export * from './createTestDataProvider';
 export * from './createTestFile';
 export * from './createTestFunder';
+export * from './createTestInitiative';
 export * from './createTestOpportunity';
 export * from './createTestPermissionGrant';
 export * from './createTestProposal';

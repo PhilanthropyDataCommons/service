@@ -12,6 +12,11 @@ or may be part of an organization's attributes returned by a data provider.
 A person or group that makes change. For example, a grant applicant, grant
 recipient, non-profit organization, or an individual seeking funds.
 
+## Initiative
+
+A project or program led by a changemaker. For example, a food bank's summer
+meals program. A changemaker may lead many initiatives.
+
 ## Terminology set
 
 A funder-authored bundle of display-label overrides for canonical PDC concepts

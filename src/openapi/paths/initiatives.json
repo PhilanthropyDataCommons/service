@@ -1,0 +1,87 @@
+{
+	"get": {
+		"operationId": "getInitiatives",
+		"summary": "Gets a list of initiatives.",
+		"description": "Returns a paginated list of initiatives. Optionally filter by changemaker. Requires the administrator role.",
+		"tags": ["Initiatives"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{ "$ref": "../components/parameters/pageParam.json" },
+			{ "$ref": "../components/parameters/countParam.json" },
+			{ "$ref": "../components/parameters/changemakerParam.json" }
+		],
+		"responses": {
+			"200": {
+				"description": "All initiatives matching the filter criteria.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/InitiativeBundle.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json",
+				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	},
+	"post": {
+		"operationId": "addInitiative",
+		"summary": "Creates a new initiative for a changemaker.",
+		"description": "Requires the administrator role.",
+		"tags": ["Initiatives"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/Initiative.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The new initiative that was created.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Initiative.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json",
+				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json",
+				"description": "The specified changemaker could not be found."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

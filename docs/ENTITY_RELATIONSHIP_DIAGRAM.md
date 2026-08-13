@@ -46,6 +46,13 @@ erDiagram
     string notes
     datetime createdAt
   }
+  Initiative {
+    int id PK
+    int changemakerId FK
+    string title
+    datetime createdAt
+    uuid createdBy FK
+  }
   ChangemakersProposal {
     int id PK
     int changemakerId FK
@@ -218,6 +225,7 @@ erDiagram
   ProposalFieldValue }o--|| ApplicationFormField : populates
   Changemaker ||--o{ ChangemakersProposal : "is associated with"
   Proposal ||--o{ ChangemakersProposal : "is associated with"
+  Changemaker ||--o{ Initiative : "leads"
   Changemaker ||--o{ ChangemakerFieldValue : "has"
   ChangemakerFieldValue }o--|| BaseField : "is for"
   ChangemakerFieldValue }o--|| ChangemakerFieldValueBatch : "belongs to"
@@ -270,6 +278,7 @@ Additionally...
 9. A `Changemaker` can have `Changemaker Field Values` that store field data directly associated with the changemaker (independent of any proposal).
 10. `Changemaker Field Values` are grouped into `Changemaker Field Value Batches`, each of which comes from a `Source`.
 11. `Changemakers` can have `Fiscal Sponsorship` relationships with other `Changemakers`.
+12. A `Changemaker` can lead many `Initiatives`, each of which represents a project or program that changemaker runs.
 
 The thinking is that when a new proposal is being written, a Grant Management System could ask the PDC "is there any pre-populated data we should use for this changemaker?"
 

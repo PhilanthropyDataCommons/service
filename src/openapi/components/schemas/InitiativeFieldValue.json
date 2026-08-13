@@ -1,0 +1,47 @@
+{
+	"allOf": [
+		{ "$ref": "./FieldValueBase.json" },
+		{
+			"type": "object",
+			"properties": {
+				"initiativeId": {
+					"allOf": [{ "$ref": "./id.json" }],
+					"description": "The initiative this value describes.  It is taken from the request path.",
+					"readOnly": true,
+					"example": 42
+				},
+				"baseFieldShortCode": {
+					"allOf": [{ "$ref": "./shortCode.json" }],
+					"example": "initiative_description"
+				},
+				"baseField": {
+					"$ref": "./BaseField.json",
+					"readOnly": true
+				},
+				"sourceId": {
+					"allOf": [{ "$ref": "./id.json" }],
+					"description": "The source that provided this value.",
+					"example": 7
+				},
+				"source": {
+					"$ref": "./Source.json",
+					"readOnly": true
+				},
+				"createdBy": {
+					"description": "The keycloak user id of the PDC user that created this field value",
+					"type": "string",
+					"format": "uuid",
+					"readOnly": true
+				}
+			},
+			"required": [
+				"initiativeId",
+				"baseFieldShortCode",
+				"baseField",
+				"sourceId",
+				"source",
+				"createdBy"
+			]
+		}
+	]
+}

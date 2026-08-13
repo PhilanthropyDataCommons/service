@@ -53,6 +53,17 @@ erDiagram
     datetime createdAt
     uuid createdBy FK
   }
+  InitiativeFieldValue {
+    int id PK
+    int initiativeId FK
+    string baseFieldShortCode FK
+    int sourceId FK
+    string value
+    boolean isValid
+    datetime goodAsOf
+    datetime createdAt
+    uuid createdBy FK
+  }
   ChangemakersProposal {
     int id PK
     int changemakerId FK
@@ -226,6 +237,9 @@ erDiagram
   Changemaker ||--o{ ChangemakersProposal : "is associated with"
   Proposal ||--o{ ChangemakersProposal : "is associated with"
   Changemaker ||--o{ Initiative : "leads"
+  Initiative ||--o{ InitiativeFieldValue : "has"
+  InitiativeFieldValue }o--|| BaseField : "is for"
+  InitiativeFieldValue }o--|| Source : "comes from"
   Changemaker ||--o{ ChangemakerFieldValue : "has"
   ChangemakerFieldValue }o--|| BaseField : "is for"
   ChangemakerFieldValue }o--|| ChangemakerFieldValueBatch : "belongs to"
@@ -279,6 +293,7 @@ Additionally...
 10. `Changemaker Field Values` are grouped into `Changemaker Field Value Batches`, each of which comes from a `Source`.
 11. `Changemakers` can have `Fiscal Sponsorship` relationships with other `Changemakers`.
 12. A `Changemaker` can lead many `Initiatives`, each of which represents a project or program that changemaker runs.
+13. An `Initiative` can have `Initiative Field Values` that store base field data about that initiative, each of which comes from a `Source`. Any base field category other than `organization` may be used, since organization data belongs to the changemaker rather than to one of its initiatives.
 
 The thinking is that when a new proposal is being written, a Grant Management System could ask the PDC "is there any pre-populated data we should use for this changemaker?"
 

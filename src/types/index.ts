@@ -25,6 +25,7 @@ export * from './FunderCollaborativeInvitation';
 export * from './FunderCollaborativeMember';
 export * from './Id';
 export * from './Initiative';
+export * from './InitiativeFieldValue';
 export * from './JsonObject';
 export * from './JsonResultSet';
 export * from './KeycloakId';

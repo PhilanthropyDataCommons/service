@@ -1,0 +1,126 @@
+{
+	"get": {
+		"operationId": "getInitiativeFieldValueById",
+		"summary": "Gets a specific initiative field value.",
+		"description": "Requires the administrator role.",
+		"tags": ["Initiatives"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "initiativeId",
+				"description": "The PDC-generated ID of an initiative.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			},
+			{
+				"name": "fieldValueId",
+				"description": "The PDC-generated ID of an initiative field value.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The requested initiative field value.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/InitiativeFieldValue.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json",
+				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json",
+				"description": "The initiative field value could not be found."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	},
+	"patch": {
+		"operationId": "updateInitiativeFieldValueById",
+		"summary": "Updates a specific initiative field value.",
+		"description": "Requires the administrator role.",
+		"tags": ["Initiatives"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "initiativeId",
+				"description": "The PDC-generated ID of an initiative.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			},
+			{
+				"name": "fieldValueId",
+				"description": "The PDC-generated ID of an initiative field value.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/InitiativeFieldValuePatch.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"200": {
+				"description": "The updated initiative field value.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/InitiativeFieldValue.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json",
+				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json",
+				"description": "The initiative field value or source could not be found."
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

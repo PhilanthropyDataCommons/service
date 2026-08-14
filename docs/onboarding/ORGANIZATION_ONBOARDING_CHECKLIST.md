@@ -7,7 +7,7 @@ to the PDC. The intended audience is PDC administrators.
 
 These steps require Keycloak PDC realm administrative access.
 
-Use https://auth.philanthropydatacommons.org/admin to do these steps.
+Use https://auth.philanthropydatacommons.org/admin/pdc/console to do these steps.
 
 - [ ] Add the organization to Keycloak organizations
   - [ ] Follow existing naming conventions

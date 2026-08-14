@@ -9,7 +9,6 @@ These steps require Keycloak PDC realm administrative access.
 
 Use https://auth.philanthropydatacommons.org/admin to do these steps.
 
-- [ ] Add a human from the organization to Keycloak users
 - [ ] Add the organization to Keycloak organizations
   - [ ] Follow existing naming conventions
   - [ ] Note/copy the new organization UUID for use below

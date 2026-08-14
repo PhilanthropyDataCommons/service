@@ -1,7 +1,9 @@
 # User Onboarding Checklist
 
 These steps should ensure a good user experience for users that are new to the
-PDC. The intended audience is PDC administrators.
+PDC. The intended audience is PDC administrators. These steps apply to users
+that do not belong to an organization with an authentication system (IdP)
+integrated with the PDC Keycloak.
 
 ## In the PDC Keycloak (PDC Realm)
 

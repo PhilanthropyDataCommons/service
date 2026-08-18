@@ -6,22 +6,22 @@
 			"properties": {
 				"contextEntityType": {
 					"type": "string",
-					"const": "changemaker"
+					"const": "initiative"
 				},
-				"changemakerId": {
+				"initiativeId": {
 					"$ref": "./id.json",
-					"example": 15
+					"example": 21
 				},
 				"scope": {
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["changemaker", "initiative", "any"]
+						"enum": ["initiative", "any"]
 					},
 					"minItems": 1
 				}
 			},
-			"required": ["contextEntityType", "changemakerId"]
+			"required": ["contextEntityType", "initiativeId"]
 		}
 	]
 }

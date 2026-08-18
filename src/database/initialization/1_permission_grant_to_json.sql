@@ -69,6 +69,10 @@ BEGIN
 			THEN jsonb_build_object(
 				'terminologySetId', permission_grant.terminology_set_id
 			)
+		WHEN 'initiative'
+			THEN jsonb_build_object(
+				'initiativeId', permission_grant.initiative_id
+			)
 	END;
 END;
 $$ LANGUAGE plpgsql;

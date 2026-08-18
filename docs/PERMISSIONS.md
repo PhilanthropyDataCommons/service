@@ -290,6 +290,8 @@ context key).
 | edit   | proposal           | Create or update proposal versions for the changemaker's proposals |
 | view   | source             | View the changemaker's sources                                     |
 | create | source             | Create sources associated with the changemaker                     |
+| view   | initiative         | View the changemaker's initiatives                                 |
+| edit   | initiative         | Create or update initiatives owned by the changemaker              |
 
 ### Opportunity Permissions
 
@@ -349,6 +351,29 @@ opportunity does not, by itself, grant access to its terminology set's details.
 | edit      | terminologySet | Update the terminology set's name and label fields                                           |
 | reference | terminologySet | Bind the terminology set to an opportunity (via `terminologySetId` on `POST /opportunities`) |
 | manage    | terminologySet | Full permissions including managing permission grants on the terminology set                 |
+
+### Initiative Permissions
+
+Permissions granted against an initiative (using the initiative's `id` as the
+context key). Initiatives are changemaker-scoped: an `edit | initiative` grant
+on a changemaker automatically applies to all of that changemaker's
+initiatives. Initiative-level grants provide more granular control for specific
+initiatives.
+
+An `edit | initiative` grant is only actionable alongside `view | initiative`
+(or a `manage` grant, which satisfies both). Endpoints that modify an
+initiative resolve the initiative before checking the edit permission, so a
+caller who cannot view an initiative receives a 404 rather than a 403.
+
+Initiative field values are not covered by these permissions. The
+`/initiatives/:initiativeId/fieldValues` endpoints remain restricted to the
+`pdc-admin` role.
+
+| Verb   | Scope      | What It Enables                                                         |
+| ------ | ---------- | ----------------------------------------------------------------------- |
+| view   | initiative | View the specific initiative                                            |
+| edit   | initiative | Update the initiative's title                                           |
+| manage | initiative | Full permissions including managing permission grants on the initiative |
 
 ### Proposal Permissions
 

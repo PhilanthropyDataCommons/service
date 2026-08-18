@@ -14,6 +14,7 @@
 		"bulkUpload",
 		"changemakerFieldValue",
 		"terminologySet",
+		"initiative",
 		"any"
 	]
 }

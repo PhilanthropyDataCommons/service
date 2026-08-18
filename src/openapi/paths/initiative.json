@@ -2,7 +2,7 @@
 	"get": {
 		"operationId": "getInitiativeById",
 		"summary": "Gets a specific initiative.",
-		"description": "Requires the administrator role.",
+		"description": "Requires `view` permission at the `initiative` scope on the initiative or on its changemaker.",
 		"tags": ["Initiatives"],
 		"security": [
 			{
@@ -35,12 +35,11 @@
 				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
-				"$ref": "../components/responses/Unauthorized.json",
-				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json",
-				"description": "The initiative could not be found."
+				"description": "The initiative could not be found, or the caller may not view it."
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"
@@ -50,7 +49,7 @@
 	"patch": {
 		"operationId": "updateInitiativeById",
 		"summary": "Updates the title of a specific initiative.",
-		"description": "Requires the administrator role.",
+		"description": "Requires `edit` permission at the `initiative` scope on the initiative or on its changemaker.",
 		"tags": ["Initiatives"],
 		"security": [
 			{
@@ -93,12 +92,15 @@
 				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
-				"$ref": "../components/responses/Unauthorized.json",
-				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json",
+				"description": "The caller may view the initiative but may not edit it."
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json",
-				"description": "The initiative could not be found."
+				"description": "The initiative could not be found, or the caller may not view it."
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"

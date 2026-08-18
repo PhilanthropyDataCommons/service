@@ -213,6 +213,7 @@ erDiagram
     int bulkUploadTaskId FK
     int changemakerFieldValueId FK
     int terminologySetId FK
+    int initiativeId FK
     string[] scope
     string[] verbs
     jsonb conditions
@@ -268,6 +269,7 @@ erDiagram
   PermissionGrant }o--o| BulkUploadTask : "references"
   PermissionGrant }o--o| ChangemakerFieldValue : "references"
   PermissionGrant }o--o| TerminologySet : "references"
+  PermissionGrant }o--o| Initiative : "references"
   PermissionGrant }o--|| User : "is created by"
   Changemaker ||--o{ FiscalSponsorship : "sponsors"
   Changemaker ||--o{ FiscalSponsorship : "is sponsored by"

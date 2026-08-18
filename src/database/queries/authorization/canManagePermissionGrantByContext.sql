@@ -93,4 +93,15 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	WHERE
 		:contextEntityType::text = 'terminologySet'
 		AND ts.id = :terminologySetId::integer
+	UNION ALL
+	SELECT 1 FROM
+		permitted_initiative_ids(
+			:authContextKeycloakUserId,
+			:authContextIsAdministrator,
+			'manage',
+			'initiative'
+		) AS i
+	WHERE
+		:contextEntityType::text = 'initiative'
+		AND i.id = :initiativeId::integer
 ) AS result;

@@ -134,5 +134,18 @@ CREATE FUNCTION permitted_permission_grant_ids(
 		'terminologySet'
 	) AS permitted_terminology_sets
 		ON permitted_terminology_sets.id = pg.terminology_set_id
-	WHERE pg.context_entity_type = 'terminologySet';
+	WHERE pg.context_entity_type = 'terminologySet'
+
+	UNION
+
+	SELECT pg.id
+	FROM permission_grants pg
+	INNER JOIN permitted_initiative_ids(
+		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.user_is_admin,
+		'manage',
+		'initiative'
+	) AS permitted_initiatives
+		ON permitted_initiatives.id = pg.initiative_id
+	WHERE pg.context_entity_type = 'initiative';
 $$ LANGUAGE sql STABLE;

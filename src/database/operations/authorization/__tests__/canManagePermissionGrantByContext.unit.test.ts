@@ -112,6 +112,14 @@ describe('canManagePermissionGrantByContext', () => {
 			expectedKey: { terminologySetId: 31 },
 		},
 		{
+			label: 'initiative',
+			grant: {
+				contextEntityType: PermissionGrantEntityType.INITIATIVE,
+				initiativeId: 21,
+			},
+			expectedKey: { initiativeId: 21 },
+		},
+		{
 			label: 'applicationFormField',
 			grant: {
 				contextEntityType: PermissionGrantEntityType.APPLICATION_FORM_FIELD,
@@ -151,6 +159,7 @@ describe('canManagePermissionGrantByContext', () => {
 		bulkUploadTaskId: undefined,
 		changemakerFieldValueId: undefined,
 		terminologySetId: undefined,
+		initiativeId: undefined,
 	};
 
 	it.each(cases)(

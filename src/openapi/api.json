@@ -215,6 +215,9 @@
 			"InitiativePatch": {
 				"$ref": "./components/schemas/InitiativePatch.json"
 			},
+			"InitiativePermissionGrant": {
+				"$ref": "./components/schemas/InitiativePermissionGrant.json"
+			},
 			"Opportunity": {
 				"$ref": "./components/schemas/Opportunity.json"
 			},

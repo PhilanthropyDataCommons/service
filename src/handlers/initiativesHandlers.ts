@@ -1,24 +1,29 @@
 import { HTTP_STATUS } from '../constants';
 import {
 	createInitiative,
+	createPermissionGrant,
 	getDatabase,
 	getLimitValues,
+	hasChangemakerPermission,
+	hasInitiativePermission,
 	loadChangemaker,
 	loadInitiative,
 	loadInitiativeBundle,
 	updateInitiative,
 } from '../database';
 import {
+	getSelfManageGrantFragment,
 	isAuthContext,
 	isId,
 	isInitiativePatch,
 	isWritableInitiative,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	NoDataReturnedError,
-	NotFoundError,
 } from '../errors';
 import {
 	extractChangemakerParameters,
@@ -79,11 +84,31 @@ const postInitiative = async (req: Request, res: Response): Promise<void> => {
 
 	await loadChangemaker(db, req, body.changemakerId);
 
-	const initiative = await createInitiative(db, req, body);
+	if (
+		!(await hasChangemakerPermission(db, req, {
+			changemakerId: body.changemakerId,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.INITIATIVE,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create an initiative for the specified changemaker.',
+		);
+	}
+
+	const committedInitiative = await db.transaction(async (txDb) => {
+		const initiative = await createInitiative(txDb, req, body);
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.INITIATIVE,
+			initiativeId: initiative.id,
+		});
+		return initiative;
+	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(initiative);
+		.send(committedInitiative);
 };
 
 const patchInitiative = async (req: Request, res: Response): Promise<void> => {
@@ -102,32 +127,30 @@ const patchInitiative = async (req: Request, res: Response): Promise<void> => {
 		);
 	}
 
-	try {
-		const updatedInitiative = await updateInitiative(
-			db,
-			req,
-			req.body,
+	await loadInitiative(db, req, initiativeId);
+
+	if (
+		!(await hasInitiativePermission(db, req, {
 			initiativeId,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.INITIATIVE,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to edit the specified initiative.',
 		);
-		res
-			.status(HTTP_STATUS.SUCCESSFUL.OK)
-			.contentType('application/json')
-			.send(updatedInitiative);
-	} catch (error: unknown) {
-		if (error instanceof NoDataReturnedError) {
-			throw new NotFoundError(
-				'The given initiative was not found.',
-				{
-					entityType: 'Initiative',
-					entityPrimaryKey: {
-						initiativeId,
-					},
-				},
-				{ cause: error },
-			);
-		}
-		throw error;
 	}
+
+	const updatedInitiative = await updateInitiative(
+		db,
+		req,
+		req.body,
+		initiativeId,
+	);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(updatedInitiative);
 };
 
 const initiativesHandlers = {

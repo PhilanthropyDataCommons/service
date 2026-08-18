@@ -938,6 +938,81 @@ describe('/permissionGrants', () => {
 			expect(after.count).toEqual(before.count + 1);
 		});
 
+		it('creates a grant with source scope on a funder context', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const funder = await createTestFunder(db, authContext);
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'funder',
+					funderShortCode: funder.shortCode,
+					scope: ['source'],
+					verbs: ['create'],
+				})
+				.expect(201);
+			expect(result.body).toMatchObject({
+				contextEntityType: 'funder',
+				funderShortCode: funder.shortCode,
+				scope: ['source'],
+				verbs: ['create'],
+			});
+		});
+
+		it('creates a grant with source scope on a changemaker context', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['source'],
+					verbs: ['view'],
+				})
+				.expect(201);
+			expect(result.body).toMatchObject({
+				contextEntityType: 'changemaker',
+				changemakerId: changemaker.id,
+				scope: ['source'],
+				verbs: ['view'],
+			});
+		});
+
+		it('creates a grant with source scope on a dataProvider context', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const dataProvider = await createTestDataProvider(db, authContext);
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'dataProvider',
+					dataProviderShortCode: dataProvider.shortCode,
+					scope: ['source'],
+					verbs: ['create'],
+				})
+				.expect(201);
+			expect(result.body).toMatchObject({
+				contextEntityType: 'dataProvider',
+				dataProviderShortCode: dataProvider.shortCode,
+				scope: ['source'],
+				verbs: ['create'],
+			});
+		});
+
 		it('creates a permission grant for a user not in the users table', async () => {
 			const db = getDatabase();
 			const arbitraryUserKeycloakUserId =

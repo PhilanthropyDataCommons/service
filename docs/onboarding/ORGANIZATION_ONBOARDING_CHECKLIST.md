@@ -7,13 +7,14 @@ to the PDC. The intended audience is PDC administrators.
 
 These steps require Keycloak PDC realm administrative access.
 
-Use https://auth.philanthropydatacommons.org/admin to do these steps.
+Use https://auth.philanthropydatacommons.org/admin/pdc/console to do these steps.
 
-- [ ] Add a human from the organization to Keycloak users
 - [ ] Add the organization to Keycloak organizations
   - [ ] Follow existing naming conventions
   - [ ] Note/copy the new organization UUID for use below
 - [ ] If the organization has an IdP, [integrate it](./ORGANIZATION_IDP_INTEGRATION.md)
+- [ ] If the organization is a funder that uses Fluxx, [integrate
+      it](./FUNDER_FLUXX_INTEGRATION.md)
 - [ ] If the organization will submit data using software, add a Keycloak client
   - [ ] Follow the `pdc-[org short name]-data-ingest` naming convention
   - [ ] Set "Client authentication" to "On"

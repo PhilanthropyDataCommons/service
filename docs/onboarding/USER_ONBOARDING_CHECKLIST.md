@@ -1,11 +1,11 @@
 # User Onboarding Checklist
 
 These steps should ensure a good user experience for users that are new to the
-PDC. The intended audience is PDC administrators.
+PDC. The intended audience is PDC administrators. These steps apply to users
+that do not belong to an organization with an authentication system (IdP)
+integrated with the PDC Keycloak.
 
-## In the PDC Keycloak (PDC Realm)
-
-These steps require membership in the `pdc-admin` group.
+## Add a user
 
 Visit https://auth.philanthropydatacommons.org/admin/pdc/console/#/pdc/users
 
@@ -31,13 +31,9 @@ Visit https://auth.philanthropydatacommons.org/admin/pdc/console/#/pdc/users
 
 Do [organization onboarding](./ORGANIZATION_ONBOARDING_CHECKLIST.md) as needed.
 
-## In the PDC Keycloak (Keycloak Realm)
-
 Join the newly created user to an organization.
 
-These steps require PDC realm administrative access (from the Keycloak realm).
-
-Use https://auth.philanthropydatacommons.org/admin/master/console/#/pdc/ here.
+Visit https://auth.philanthropydatacommons.org/admin/pdc/console/#/pdc/organizations
 
 - [ ] Click "Organizations"
 - [ ] Click on the new user's organization

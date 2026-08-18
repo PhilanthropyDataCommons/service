@@ -16,7 +16,14 @@
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": ["changemaker", "initiative", "any"]
+						"enum": [
+							"changemaker",
+							"changemakerFieldValue",
+							"initiative",
+							"proposal",
+							"proposalFieldValue",
+							"any"
+						]
 					},
 					"minItems": 1
 				}

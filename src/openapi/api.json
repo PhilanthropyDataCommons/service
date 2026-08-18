@@ -212,6 +212,9 @@
 			"InitiativeFieldValuePatch": {
 				"$ref": "./components/schemas/InitiativeFieldValuePatch.json"
 			},
+			"InitiativeFieldValuePermissionGrant": {
+				"$ref": "./components/schemas/InitiativeFieldValuePermissionGrant.json"
+			},
 			"InitiativePatch": {
 				"$ref": "./components/schemas/InitiativePatch.json"
 			},

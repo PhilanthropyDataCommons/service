@@ -15,6 +15,7 @@
 		"changemakerFieldValue",
 		"terminologySet",
 		"initiative",
+		"initiativeFieldValue",
 		"any"
 	]
 }

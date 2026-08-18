@@ -1,3 +1,4 @@
+export { canCreateInitiativeFieldValue } from './canCreateInitiativeFieldValue';
 export { canManagePermissionGrantByContext } from './canManagePermissionGrantByContext';
 export { canManagePermissionGrantById } from './canManagePermissionGrantById';
 export { hasApplicationFormPermission } from './hasApplicationFormPermission';
@@ -5,6 +6,7 @@ export { hasChangemakerFieldValuePermission } from './hasChangemakerFieldValuePe
 export { hasChangemakerPermission } from './hasChangemakerPermission';
 export { hasDataProviderPermission } from './hasDataProviderPermission';
 export { hasFunderPermission } from './hasFunderPermission';
+export { hasInitiativeFieldValuePermission } from './hasInitiativeFieldValuePermission';
 export { hasInitiativePermission } from './hasInitiativePermission';
 export { hasOpportunityPermission } from './hasOpportunityPermission';
 export { hasProposalFieldValuePermission } from './hasProposalFieldValuePermission';

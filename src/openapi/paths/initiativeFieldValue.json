@@ -2,7 +2,7 @@
 	"get": {
 		"operationId": "getInitiativeFieldValueById",
 		"summary": "Gets a specific initiative field value.",
-		"description": "Requires the administrator role.",
+		"description": "Requires `view` permission at the `initiativeFieldValue` scope on the field value, on its initiative, or on the initiative's changemaker.",
 		"tags": ["Initiatives"],
 		"security": [
 			{
@@ -44,12 +44,11 @@
 				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
-				"$ref": "../components/responses/Unauthorized.json",
-				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json",
-				"description": "The initiative field value could not be found."
+				"description": "The initiative field value could not be found, or the caller may not view it."
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"
@@ -59,7 +58,7 @@
 	"patch": {
 		"operationId": "updateInitiativeFieldValueById",
 		"summary": "Updates a specific initiative field value.",
-		"description": "Requires the administrator role.",
+		"description": "Requires `edit` permission at the `initiativeFieldValue` scope on the field value, on its initiative, or on the initiative's changemaker. Citing a new source additionally requires `reference` permission at the `source` scope on that source.",
 		"tags": ["Initiatives"],
 		"security": [
 			{
@@ -111,12 +110,15 @@
 				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
-				"$ref": "../components/responses/Unauthorized.json",
-				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json",
+				"description": "The caller may view the initiative field value but may not edit it, or may not reference the specified source."
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json",
-				"description": "The initiative field value or source could not be found."
+				"description": "The initiative field value or source could not be found, or the caller may not view it."
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"

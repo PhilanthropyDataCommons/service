@@ -214,6 +214,7 @@ erDiagram
     int changemakerFieldValueId FK
     int terminologySetId FK
     int initiativeId FK
+    int initiativeFieldValueId FK
     string[] scope
     string[] verbs
     jsonb conditions
@@ -270,6 +271,7 @@ erDiagram
   PermissionGrant }o--o| ChangemakerFieldValue : "references"
   PermissionGrant }o--o| TerminologySet : "references"
   PermissionGrant }o--o| Initiative : "references"
+  PermissionGrant }o--o| InitiativeFieldValue : "references"
   PermissionGrant }o--|| User : "is created by"
   Changemaker ||--o{ FiscalSponsorship : "sponsors"
   Changemaker ||--o{ FiscalSponsorship : "is sponsored by"

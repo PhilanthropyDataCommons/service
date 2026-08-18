@@ -28,6 +28,13 @@ const scopeConditions = {
 	[PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE]: [],
 	[PermissionGrantEntityType.TERMINOLOGY_SET]: [],
 	[PermissionGrantEntityType.INITIATIVE]: [],
+	[PermissionGrantEntityType.INITIATIVE_FIELD_VALUE]: [
+		{
+			property: 'baseFieldCategory',
+			operator: 'in',
+			value: Object.values(BaseFieldCategory),
+		},
+	],
 	[PermissionGrantEntityType.ANY]: [],
 } as const satisfies Record<
 	PermissionGrantEntityType,

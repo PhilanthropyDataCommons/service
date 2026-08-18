@@ -73,6 +73,11 @@ BEGIN
 			THEN jsonb_build_object(
 				'initiativeId', permission_grant.initiative_id
 			)
+		WHEN 'initiativeFieldValue'
+			THEN jsonb_build_object(
+				'initiativeFieldValueId',
+				permission_grant.initiative_field_value_id
+			)
 	END;
 END;
 $$ LANGUAGE plpgsql;

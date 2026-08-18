@@ -104,4 +104,16 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	WHERE
 		:contextEntityType::text = 'initiative'
 		AND i.id = :initiativeId::integer
+	UNION ALL
+	SELECT 1 FROM
+		permitted_initiative_field_value_ids_among(
+			:authContextKeycloakUserId,
+			:authContextIsAdministrator,
+			'manage',
+			'initiativeFieldValue',
+			ARRAY[:initiativeFieldValueId::integer]
+		) AS ifv
+	WHERE
+		:contextEntityType::text = 'initiativeFieldValue'
+		AND ifv.id = :initiativeFieldValueId::integer
 ) AS result;

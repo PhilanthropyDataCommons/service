@@ -30,6 +30,7 @@ const updatePermissionGrant = generateUpdateItemOperation<
 		'changemakerFieldValueId',
 		'terminologySetId',
 		'initiativeId',
+		'initiativeFieldValueId',
 		'scope',
 		'verbs',
 		'conditions',

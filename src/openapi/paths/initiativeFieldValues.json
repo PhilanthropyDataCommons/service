@@ -2,7 +2,7 @@
 	"get": {
 		"operationId": "getInitiativeFieldValues",
 		"summary": "Gets the field values of an initiative.",
-		"description": "Returns a paginated list of the field values recorded against an initiative. Requires the administrator role.",
+		"description": "Returns a paginated list of the field values recorded against an initiative that the caller has permission to view. Requires `view` permission at the `initiative` scope on the initiative or on its changemaker, plus `view` permission at the `initiativeFieldValue` scope for each field value returned.",
 		"tags": ["Initiatives"],
 		"security": [
 			{
@@ -24,7 +24,7 @@
 		],
 		"responses": {
 			"200": {
-				"description": "All field values for the initiative.",
+				"description": "All field values for the initiative that the caller has permission to view.",
 				"content": {
 					"application/json": {
 						"schema": {
@@ -37,12 +37,11 @@
 				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
-				"$ref": "../components/responses/Unauthorized.json",
-				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json",
-				"description": "The initiative could not be found."
+				"description": "The initiative could not be found, or the caller may not view it."
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"
@@ -52,7 +51,7 @@
 	"post": {
 		"operationId": "addInitiativeFieldValue",
 		"summary": "Creates a new field value for an initiative.",
-		"description": "Creates a new value for a base field on the given initiative. Any base field category other than `organization` may be used, since organization data belongs to the changemaker rather than to one of its initiatives. Multiple values can exist for the same initiative and field combination. Requires the administrator role.",
+		"description": "Creates a new value for a base field on the given initiative. Any base field category other than `organization` may be used, since organization data belongs to the changemaker rather than to one of its initiatives. Multiple values can exist for the same initiative and field combination. Requires `create` permission at the `initiativeFieldValue` scope on the initiative or on its changemaker, and `reference` permission at the `source` scope on the cited source.",
 		"tags": ["Initiatives"],
 		"security": [
 			{
@@ -95,12 +94,15 @@
 				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
-				"$ref": "../components/responses/Unauthorized.json",
-				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json",
+				"description": "The caller may not create field values for the initiative, or may not reference the specified source."
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json",
-				"description": "The initiative, base field, or source could not be found."
+				"description": "The initiative, base field, or source could not be found, or the caller may not view it."
 			},
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json",

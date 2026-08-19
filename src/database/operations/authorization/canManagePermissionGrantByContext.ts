@@ -19,6 +19,7 @@ const canManagePermissionGrantByContext =
 			'bulkUploadTaskId',
 			'changemakerFieldValueId',
 			'terminologySetId',
+			'initiativeId',
 		],
 	);
 

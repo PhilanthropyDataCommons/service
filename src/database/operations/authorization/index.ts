@@ -5,6 +5,7 @@ export { hasChangemakerFieldValuePermission } from './hasChangemakerFieldValuePe
 export { hasChangemakerPermission } from './hasChangemakerPermission';
 export { hasDataProviderPermission } from './hasDataProviderPermission';
 export { hasFunderPermission } from './hasFunderPermission';
+export { hasInitiativePermission } from './hasInitiativePermission';
 export { hasOpportunityPermission } from './hasOpportunityPermission';
 export { hasProposalFieldValuePermission } from './hasProposalFieldValuePermission';
 export { hasProposalPermission } from './hasProposalPermission';

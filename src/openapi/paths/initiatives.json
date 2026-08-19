@@ -2,7 +2,7 @@
 	"get": {
 		"operationId": "getInitiatives",
 		"summary": "Gets a list of initiatives.",
-		"description": "Returns a paginated list of initiatives. Optionally filter by changemaker. Requires the administrator role.",
+		"description": "Returns a paginated list of initiatives the caller has permission to view. Optionally filter by changemaker.",
 		"tags": ["Initiatives"],
 		"security": [
 			{
@@ -16,7 +16,7 @@
 		],
 		"responses": {
 			"200": {
-				"description": "All initiatives matching the filter criteria.",
+				"description": "All initiatives matching the filter criteria that the caller has permission to view.",
 				"content": {
 					"application/json": {
 						"schema": {
@@ -29,8 +29,7 @@
 				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
-				"$ref": "../components/responses/Unauthorized.json",
-				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+				"$ref": "../components/responses/Unauthorized.json"
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"
@@ -40,7 +39,7 @@
 	"post": {
 		"operationId": "addInitiative",
 		"summary": "Creates a new initiative for a changemaker.",
-		"description": "Requires the administrator role.",
+		"description": "Requires `edit` permission at the `initiative` scope on the changemaker that will own the initiative.",
 		"tags": ["Initiatives"],
 		"security": [
 			{
@@ -72,12 +71,15 @@
 				"$ref": "../components/responses/InputValidation.json"
 			},
 			"401": {
-				"$ref": "../components/responses/Unauthorized.json",
-				"description": "The request is unauthenticated, or the caller does not have the administrator role."
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json",
+				"description": "The caller may not create initiatives for the specified changemaker."
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json",
-				"description": "The specified changemaker could not be found."
+				"description": "The specified changemaker could not be found, or the caller may not view it."
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"

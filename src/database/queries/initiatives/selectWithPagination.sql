@@ -2,6 +2,14 @@ WITH
 	candidate_entries AS MATERIALIZED (
 		SELECT initiatives.*
 		FROM initiatives
+			INNER JOIN
+				permitted_initiative_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'initiative'
+				) AS permitted_initiatives
+				ON initiatives.id = permitted_initiatives.id
 		WHERE CASE
 			WHEN :changemakerId::integer IS NULL THEN TRUE
 			ELSE initiatives.changemaker_id = :changemakerId

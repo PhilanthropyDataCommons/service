@@ -1,28 +1,28 @@
 import express from 'express';
 import { initiativesHandlers } from '../handlers/initiativesHandlers';
 import { initiativeFieldValuesHandlers } from '../handlers/initiativeFieldValuesHandlers';
-import { requireAdministratorRole } from '../middleware';
+import { requireAdministratorRole, requireAuthentication } from '../middleware';
 
 const initiativesRouter = express.Router();
 
 initiativesRouter.post(
 	'/',
-	requireAdministratorRole,
+	requireAuthentication,
 	initiativesHandlers.postInitiative,
 );
 initiativesRouter.get(
 	'/',
-	requireAdministratorRole,
+	requireAuthentication,
 	initiativesHandlers.getInitiatives,
 );
 initiativesRouter.get(
 	'/:initiativeId',
-	requireAdministratorRole,
+	requireAuthentication,
 	initiativesHandlers.getInitiative,
 );
 initiativesRouter.patch(
 	'/:initiativeId',
-	requireAdministratorRole,
+	requireAuthentication,
 	initiativesHandlers.patchInitiative,
 );
 initiativesRouter.post(

@@ -11,7 +11,9 @@
 		{ "$ref": "./ProposalFieldValuePermissionGrant.json" },
 		{ "$ref": "./SourcePermissionGrant.json" },
 		{ "$ref": "./BulkUploadPermissionGrant.json" },
-		{ "$ref": "./ChangemakerFieldValuePermissionGrant.json" }
+		{ "$ref": "./ChangemakerFieldValuePermissionGrant.json" },
+		{ "$ref": "./InitiativePermissionGrant.json" },
+		{ "$ref": "./TerminologySetPermissionGrant.json" }
 	],
 	"discriminator": {
 		"propertyName": "contextEntityType",
@@ -27,7 +29,9 @@
 			"proposalFieldValue": "./ProposalFieldValuePermissionGrant.json",
 			"source": "./SourcePermissionGrant.json",
 			"bulkUpload": "./BulkUploadPermissionGrant.json",
-			"changemakerFieldValue": "./ChangemakerFieldValuePermissionGrant.json"
+			"changemakerFieldValue": "./ChangemakerFieldValuePermissionGrant.json",
+			"initiative": "./InitiativePermissionGrant.json",
+			"terminologySet": "./TerminologySetPermissionGrant.json"
 		}
 	}
 }

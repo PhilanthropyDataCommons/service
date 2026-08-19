@@ -29,6 +29,7 @@ const updatePermissionGrant = generateUpdateItemOperation<
 		'bulkUploadTaskId',
 		'changemakerFieldValueId',
 		'terminologySetId',
+		'initiativeId',
 		'scope',
 		'verbs',
 		'conditions',

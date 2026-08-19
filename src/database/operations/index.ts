@@ -18,6 +18,7 @@ export * from './funderCollaborativeInvitations';
 export * from './funderCollaborativeMembers';
 export * from './funders';
 export * from './generic';
+export * from './initiativeFieldValues';
 export * from './initiatives';
 export * from './opportunities';
 export * from './organizations';

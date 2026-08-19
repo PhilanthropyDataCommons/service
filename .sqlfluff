@@ -71,3 +71,5 @@ terminologySetId = 1
 isCollaborative = false
 granteeType = 'user'
 verb = 'view'
+initiativeId = 1
+initiativeFieldValueId = 1

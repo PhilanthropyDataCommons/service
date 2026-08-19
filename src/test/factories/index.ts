@@ -4,6 +4,7 @@ export * from './createTestDataProvider';
 export * from './createTestFile';
 export * from './createTestFunder';
 export * from './createTestInitiative';
+export * from './createTestInitiativeFieldValue';
 export * from './createTestOpportunity';
 export * from './createTestPermissionGrant';
 export * from './createTestProposal';

@@ -6,12 +6,10 @@ import {
 	getDatabase,
 	getLimitValues,
 	hasInitiativeFieldValuePermission,
-	hasSourcePermission,
 	loadBaseField,
 	loadInitiative,
 	loadInitiativeFieldValue,
 	loadInitiativeFieldValueBundle,
-	loadSource,
 	updateInitiativeFieldValue,
 } from '../database';
 import {
@@ -35,6 +33,7 @@ import {
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
 import { fieldValueIsValid } from '../fieldValidation';
+import { assertSourceIsReferenceable } from './assertions';
 import type { TinyPg } from 'tinypg';
 import type {
 	AuthContext,
@@ -78,25 +77,6 @@ const assertBaseFieldIsUsableByInitiatives = (baseField: BaseField): void => {
 	) {
 		throw new UnprocessableEntityError(
 			`Base field ${baseField.shortCode} is forbidden and cannot be used for initiative field values.`,
-		);
-	}
-};
-
-const assertSourceIsReferenceable = async (
-	db: TinyPg,
-	authContext: AuthContext,
-	sourceId: Id,
-): Promise<void> => {
-	if (
-		!(await hasSourcePermission(db, authContext, {
-			sourceId,
-			permission: PermissionGrantVerb.REFERENCE,
-			scope: PermissionGrantEntityType.SOURCE,
-		}))
-	) {
-		await loadSource(db, authContext, sourceId);
-		throw new ForbiddenError(
-			'Authenticated user does not have permission to reference the specified source.',
 		);
 	}
 };

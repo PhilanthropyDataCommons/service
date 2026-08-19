@@ -5,12 +5,10 @@ import {
 	createProposalVersion,
 	getDatabase,
 	hasProposalPermission,
-	hasSourcePermission,
 	loadApplicationForm,
 	loadApplicationFormField,
 	loadProposal,
 	loadProposalVersion,
-	loadSource,
 } from '../database';
 import {
 	getSelfManageGrantFragment,
@@ -29,6 +27,7 @@ import {
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
 import { coerceParams } from '../coercion';
+import { assertSourceIsReferenceable } from './assertions';
 import type { Request, Response } from 'express';
 import type {
 	WritableProposalFieldValueWithProposalVersionContext,
@@ -124,18 +123,7 @@ const postProposalVersion = async (
 			'Authenticated user does not have permission to create a proposal version for the specified proposal.',
 		);
 	}
-	if (
-		!(await hasSourcePermission(db, req, {
-			sourceId,
-			permission: PermissionGrantVerb.REFERENCE,
-			scope: PermissionGrantEntityType.SOURCE,
-		}))
-	) {
-		await loadSource(db, req, sourceId);
-		throw new ForbiddenError(
-			'Authenticated user does not have permission to reference the specified source.',
-		);
-	}
+	await assertSourceIsReferenceable(db, req, sourceId);
 	await assertApplicationFormExistsForProposal(
 		db,
 		req,

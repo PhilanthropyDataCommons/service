@@ -3,25 +3,18 @@ import {
 	getDatabase,
 	createChangemakerFieldValueBatch,
 	getLimitValues,
-	hasSourcePermission,
 	loadChangemakerFieldValueBatch,
 	loadChangemakerFieldValueBatchBundle,
-	loadSource,
 } from '../database';
 import {
 	isAuthContext,
 	isId,
 	isWritableChangemakerFieldValueBatch,
-	PermissionGrantEntityType,
-	PermissionGrantVerb,
 } from '../types';
-import {
-	FailedMiddlewareError,
-	ForbiddenError,
-	InputValidationError,
-} from '../errors';
+import { FailedMiddlewareError, InputValidationError } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
+import { assertSourceIsReferenceable } from './assertions';
 import type { Request, Response } from 'express';
 
 const postChangemakerFieldValueBatch = async (
@@ -43,18 +36,7 @@ const postChangemakerFieldValueBatch = async (
 
 	const { sourceId, notes } = body;
 
-	if (
-		!(await hasSourcePermission(db, req, {
-			sourceId,
-			permission: PermissionGrantVerb.REFERENCE,
-			scope: PermissionGrantEntityType.SOURCE,
-		}))
-	) {
-		await loadSource(db, req, sourceId);
-		throw new ForbiddenError(
-			'Authenticated user does not have permission to reference the specified source.',
-		);
-	}
+	await assertSourceIsReferenceable(db, req, sourceId);
 
 	const changemakerFieldValueBatch = await createChangemakerFieldValueBatch(
 		db,

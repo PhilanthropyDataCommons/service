@@ -5,12 +5,10 @@ import {
 	createBulkUploadTask,
 	getLimitValues,
 	hasOpportunityPermission,
-	hasSourcePermission,
 	loadApplicationForm,
 	loadBulkUploadTaskBundle,
 	loadFileIfCreatedBy,
 	loadOpportunity,
-	loadSource,
 } from '../database';
 import {
 	getSelfManageGrantFragment,
@@ -32,6 +30,7 @@ import {
 	extractPaginationParameters,
 } from '../queryParameters';
 import { addProcessBulkUploadJob } from '../jobQueue';
+import { assertSourceIsReferenceable } from './assertions';
 import type { Request, Response } from 'express';
 import type { AuthContext, Id } from '../types';
 import type { TinyPg } from 'tinypg';
@@ -111,18 +110,7 @@ const postBulkUploadTask = async (
 
 	await validateApplicationFormCreatePermission(db, req, applicationFormId);
 
-	if (
-		!(await hasSourcePermission(db, req, {
-			sourceId,
-			permission: PermissionGrantVerb.REFERENCE,
-			scope: PermissionGrantEntityType.SOURCE,
-		}))
-	) {
-		await loadSource(db, req, sourceId);
-		throw new ForbiddenError(
-			'Authenticated user does not have permission to reference the specified source.',
-		);
-	}
+	await assertSourceIsReferenceable(db, req, sourceId);
 
 	await validateFileOwnership(
 		db,

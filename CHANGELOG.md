@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an `initiativeFieldValue` entity capturing base field data for an initiative, managed via the administrator-only `/initiatives/{initiativeId}/fieldValues` endpoints.
 - Added an `initiative` permission scope, inherited from the owning changemaker, that governs who can view and edit initiatives.
 
+### Fixed
+
+- `POST /permissionGrants` now accepts `source` as a scope for `funder`, `changemaker`, and `dataProvider` context entity types, matching the documented and database-supported behavior. Previously the handler rejected these grants with `InputValidationError` even though the SQL inheritance already supported `source` grants inherited from a source's funder, changemaker, or data provider.
+
 ## 0.41.0 2026-07-24
 
 ### Fixed

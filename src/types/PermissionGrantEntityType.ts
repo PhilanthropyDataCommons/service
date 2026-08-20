@@ -122,6 +122,7 @@ const contextEntityTypeNativeScopes = {
 		PermissionGrantEntityType.INITIATIVE,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+		PermissionGrantEntityType.SOURCE,
 	],
 	[PermissionGrantEntityType.FUNDER]: [
 		PermissionGrantEntityType.FUNDER,
@@ -130,9 +131,11 @@ const contextEntityTypeNativeScopes = {
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 		PermissionGrantEntityType.TERMINOLOGY_SET,
+		PermissionGrantEntityType.SOURCE,
 	],
 	[PermissionGrantEntityType.DATA_PROVIDER]: [
 		PermissionGrantEntityType.DATA_PROVIDER,
+		PermissionGrantEntityType.SOURCE,
 	],
 	[PermissionGrantEntityType.OPPORTUNITY]: [
 		PermissionGrantEntityType.OPPORTUNITY,

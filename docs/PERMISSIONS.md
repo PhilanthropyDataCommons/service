@@ -228,6 +228,19 @@ scope), though not all combinations are currently enforced.
 Users with the `pdc-admin` role in Keycloak automatically pass all permission
 checks. This role grants full administrative access to the PDC service.
 
+### Base Permissions
+
+Some data is readable without any permission grant. These universal grants are
+enforced by the router and the query layer, before the permission system is
+consulted, so no `contextEntityType`, verb, or scope is involved.
+
+| Entity        | Public attributes readable by      | Endpoints                                                          |
+| ------------- | ---------------------------------- | ------------------------------------------------------------------ |
+| changemaker   | everyone, unauthenticated included | `GET /changemakers`, `GET /changemakers/{changemakerId}`           |
+| funder        | any authenticated user             | `GET /funders`, `GET /funders/{funderShortCode}`                   |
+| data provider | any authenticated user             | `GET /dataProviders`, `GET /dataProviders/{dataProviderShortCode}` |
+| base field    | everyone, unauthenticated included | `GET /baseFields`                                                  |
+
 ### Permission Grant Management
 
 CRUD operations on permission grants require either the `pdc-admin` role or the

@@ -233,9 +233,6 @@
 			"Organization": {
 				"$ref": "./components/schemas/Organization.json"
 			},
-			"PlatformProviderResponse": {
-				"$ref": "./components/schemas/PlatformProviderResponse.json"
-			},
 			"Bundle": {
 				"$ref": "./components/schemas/Bundle.json"
 			},
@@ -448,9 +445,6 @@
 		},
 		"/organizations/{keycloakOrganizationId}": {
 			"$ref": "./paths/organization.json"
-		},
-		"/platformProviderResponses": {
-			"$ref": "./paths/platformProviderResponses.json"
 		},
 		"/sources": {
 			"$ref": "./paths/sources.json"

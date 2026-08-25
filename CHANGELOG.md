@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.42.0 2026-08-25
+
 ### Added
 
 - Added an `initiative` entity representing a project led by a changemaker, managed via the `/initiatives` endpoints.

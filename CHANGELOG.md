@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.42.0 2026-08-25
+
 ### Added
 
 - Added an `initiative` entity representing a project led by a changemaker, managed via the `/initiatives` endpoints.
@@ -14,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an `initiative` permission scope, inherited from the owning changemaker, that governs who can view and edit initiatives.
 - Added an `initiativeFieldValue` permission scope, inherited from the owning initiative and changemaker, that governs who can view, create, and edit initiative field values.
 - Added a `baseFieldCategory` condition for grants scoped to `initiativeFieldValue`.
+
+### Removed
+
+- The `platformProviderResponse` entity no longer exists, along with the `GET /platformProviderResponses` and `POST /platformProviderResponses` endpoints. It predated `changemakerFieldValues` and was unused.
 
 ### Fixed
 

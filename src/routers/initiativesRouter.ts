@@ -1,7 +1,7 @@
 import express from 'express';
 import { initiativesHandlers } from '../handlers/initiativesHandlers';
 import { initiativeFieldValuesHandlers } from '../handlers/initiativeFieldValuesHandlers';
-import { requireAdministratorRole, requireAuthentication } from '../middleware';
+import { requireAuthentication } from '../middleware';
 
 const initiativesRouter = express.Router();
 
@@ -27,22 +27,22 @@ initiativesRouter.patch(
 );
 initiativesRouter.post(
 	'/:initiativeId/fieldValues',
-	requireAdministratorRole,
+	requireAuthentication,
 	initiativeFieldValuesHandlers.postInitiativeFieldValue,
 );
 initiativesRouter.get(
 	'/:initiativeId/fieldValues',
-	requireAdministratorRole,
+	requireAuthentication,
 	initiativeFieldValuesHandlers.getInitiativeFieldValues,
 );
 initiativesRouter.get(
 	'/:initiativeId/fieldValues/:fieldValueId',
-	requireAdministratorRole,
+	requireAuthentication,
 	initiativeFieldValuesHandlers.getInitiativeFieldValue,
 );
 initiativesRouter.patch(
 	'/:initiativeId/fieldValues/:fieldValueId',
-	requireAdministratorRole,
+	requireAuthentication,
 	initiativeFieldValuesHandlers.patchInitiativeFieldValue,
 );
 

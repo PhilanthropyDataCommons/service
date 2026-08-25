@@ -20,6 +20,7 @@ const canManagePermissionGrantByContext =
 			'changemakerFieldValueId',
 			'terminologySetId',
 			'initiativeId',
+			'initiativeFieldValueId',
 		],
 	);
 

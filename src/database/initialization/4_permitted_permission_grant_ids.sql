@@ -147,5 +147,18 @@ CREATE FUNCTION permitted_permission_grant_ids(
 		'initiative'
 	) AS permitted_initiatives
 		ON permitted_initiatives.id = pg.initiative_id
-	WHERE pg.context_entity_type = 'initiative';
+	WHERE pg.context_entity_type = 'initiative'
+
+	UNION
+
+	SELECT pg.id
+	FROM permission_grants pg
+	INNER JOIN permitted_initiative_field_value_ids(
+		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.user_is_admin,
+		'manage',
+		'initiativeFieldValue'
+	) AS permitted_field_values
+		ON permitted_field_values.id = pg.initiative_field_value_id
+	WHERE pg.context_entity_type = 'initiativeFieldValue';
 $$ LANGUAGE sql STABLE;

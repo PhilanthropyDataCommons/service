@@ -699,6 +699,11 @@ describe('/permissionGrants', () => {
 			],
 			[PermissionGrantEntityType.TERMINOLOGY_SET, 'terminologySetId', 9001],
 			[PermissionGrantEntityType.INITIATIVE, 'initiativeId', 9001],
+			[
+				PermissionGrantEntityType.INITIATIVE_FIELD_VALUE,
+				'initiativeFieldValueId',
+				9001,
+			],
 		] as Array<[PermissionGrantEntityType, string, number | string]>)(
 			'returns 404 to a non-admin when the %s context entity does not exist',
 			async (contextEntityType, keyName, keyValue) => {
@@ -1440,6 +1445,47 @@ describe('/permissionGrants', () => {
 				createdBy: testUserKeycloakUserId,
 				createdByUser: expectedCreatedByUser,
 				createdAt: expectTimestamp(),
+			});
+		});
+
+		it('creates and returns a permission grant with initiativeFieldValue conditions', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			const result = await agent
+				.post('/permissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'user',
+					granteeUserKeycloakUserId: testUserKeycloakUserId,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['initiativeFieldValue'],
+					verbs: ['view'],
+					conditions: {
+						initiativeFieldValue: {
+							property: 'baseFieldCategory',
+							operator: 'in',
+							value: ['budget', 'project'],
+						},
+					},
+				})
+				.expect(201);
+
+			expect(result.body).toMatchObject({
+				id: expectNumber(),
+				contextEntityType: 'changemaker',
+				changemakerId: changemaker.id,
+				scope: ['initiativeFieldValue'],
+				verbs: ['view'],
+				conditions: {
+					initiativeFieldValue: {
+						property: 'baseFieldCategory',
+						operator: 'in',
+						value: ['budget', 'project'],
+					},
+				},
 			});
 		});
 

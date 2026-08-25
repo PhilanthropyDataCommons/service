@@ -14,6 +14,7 @@ import {
 	loadDataProvider,
 	loadFunder,
 	loadInitiative,
+	loadInitiativeFieldValue,
 	loadOpportunity,
 	loadPermissionGrant,
 	loadPermissionGrantBundle,
@@ -195,6 +196,13 @@ const assertPermissionGrantContextEntityExists = async (
 			break;
 		case PermissionGrantEntityType.INITIATIVE:
 			await loadInitiative(db, authContext, body.initiativeId);
+			break;
+		case PermissionGrantEntityType.INITIATIVE_FIELD_VALUE:
+			await loadInitiativeFieldValue(
+				db,
+				authContext,
+				body.initiativeFieldValueId,
+			);
 			break;
 		case PermissionGrantEntityType.BULK_UPLOAD:
 			await loadBulkUploadTask(db, authContext, body.bulkUploadTaskId);

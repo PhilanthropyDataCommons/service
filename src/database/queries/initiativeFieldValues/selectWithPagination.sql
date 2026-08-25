@@ -2,13 +2,15 @@ WITH
 	candidate_entries AS MATERIALIZED (
 		SELECT initiative_field_values.*
 		FROM initiative_field_values
-			INNER JOIN base_fields
-				ON
-					initiative_field_values.base_field_short_code
-					= base_fields.short_code
-		WHERE
-			initiative_field_values.initiative_id = :initiativeId
-			AND base_fields.sensitivity_classification <> 'forbidden'
+			INNER JOIN
+				permitted_initiative_field_value_ids(
+					:authContextKeycloakUserId,
+					:authContextIsAdministrator,
+					'view',
+					'initiativeFieldValue'
+				) AS permitted_field_values
+				ON initiative_field_values.id = permitted_field_values.id
+		WHERE initiative_field_values.initiative_id = :initiativeId
 	),
 
 	entry_count AS (

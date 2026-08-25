@@ -18,6 +18,7 @@ SET
 	changemaker_field_value_id = :changemakerFieldValueId::integer,
 	terminology_set_id = :terminologySetId::integer,
 	initiative_id = :initiativeId::integer,
+	initiative_field_value_id = :initiativeFieldValueId::integer,
 	scope = :scope::permission_grant_entity_type_t [],
 	verbs = :verbs::permission_grant_verb_t [],
 	conditions = :conditions::jsonb

@@ -307,6 +307,9 @@ context key).
 | create | source                | Create sources associated with the changemaker                    |
 | view   | initiative            | View the changemaker's initiatives                                |
 | edit   | initiative            | Create or update initiatives owned by the changemaker             |
+| view   | initiativeFieldValue  | View field values of the changemaker's initiatives                |
+| create | initiativeFieldValue  | Create field values for the changemaker's initiatives             |
+| edit   | initiativeFieldValue  | Update field values of the changemaker's initiatives              |
 
 ### Opportunity Permissions
 
@@ -380,15 +383,44 @@ An `edit | initiative` grant is only actionable alongside `view | initiative`
 initiative resolve the initiative before checking the edit permission, so a
 caller who cannot view an initiative receives a 404 rather than a 403.
 
-Initiative field values are not covered by these permissions. The
-`/initiatives/:initiativeId/fieldValues` endpoints remain restricted to the
-`pdc-admin` role.
+| Verb   | Scope                | What It Enables                                                         |
+| ------ | -------------------- | ----------------------------------------------------------------------- |
+| view   | initiative           | View the specific initiative                                            |
+| edit   | initiative           | Update the initiative's title                                           |
+| manage | initiative           | Full permissions including managing permission grants on the initiative |
+| view   | initiativeFieldValue | View the initiative's field values                                      |
+| create | initiativeFieldValue | Create field values for the initiative                                  |
+| edit   | initiativeFieldValue | Update the initiative's field values                                    |
 
-| Verb   | Scope      | What It Enables                                                         |
-| ------ | ---------- | ----------------------------------------------------------------------- |
-| view   | initiative | View the specific initiative                                            |
-| edit   | initiative | Update the initiative's title                                           |
-| manage | initiative | Full permissions including managing permission grants on the initiative |
+### InitiativeFieldValue Permissions
+
+Permissions granted against an initiative field value (using the field value's
+`id` as the context key). Initiative field values inherit from their initiative,
+which in turn inherits from the initiative's changemaker, so a
+`view | initiativeFieldValue` grant on a changemaker applies to the field values
+of every initiative that changemaker leads. Field-value-level grants provide
+more granular control for specific values.
+
+The creator of an initiative field value receives a `manage | any` grant on it.
+
+| Verb   | Scope                | What It Enables                                                          |
+| ------ | -------------------- | ------------------------------------------------------------------------ |
+| view   | initiativeFieldValue | View the specific initiative field value                                 |
+| edit   | initiativeFieldValue | Update the field value's value, source, and `goodAsOf`                   |
+| manage | initiativeFieldValue | Full permissions including managing permission grants on the field value |
+
+Base field sensitivity is applied ahead of these grants: values of `public` base
+fields are visible to any authenticated user, and values of `forbidden` base
+fields are never returned, regardless of grants. Creating an initiative field
+value also requires `reference | source` on the cited source, and so does
+re-pointing an existing value at a new source.
+
+Grants scoped to `initiativeFieldValue` accept a `baseFieldCategory` condition,
+described under [Conditional Permissions](#conditional-permissions). The
+condition narrows the grant wherever it is held, including when it is inherited
+from the initiative or the changemaker. On `create` the condition is matched
+against the category of the base field being written, so a conditioned grant
+cannot be used to create values outside its categories.
 
 ### Proposal Permissions
 
@@ -472,7 +504,9 @@ sources.
 
 The `reference | source` check is applied when a source is provided as an
 attribute of data being created — currently when posting to
-`/proposalVersions`, `/tasks/bulkUploads`, or `/changemakerFieldValueBatches`.
+`/proposalVersions`, `/tasks/bulkUploads`, `/changemakerFieldValueBatches`, or
+`/initiatives/:initiativeId/fieldValues`, and when a `PATCH` moves an initiative
+field value to a different source.
 
 ### Conditional Permissions
 
@@ -482,8 +516,9 @@ it only applies to entities that match the specified criteria. Grants without
 conditions (or with `conditions: null`) apply unconditionally, preserving
 backward compatibility.
 
-Conditions are keyed by scope entity type. Each condition specifies a
-`property`, an `operator`, and a `value`:
+Conditions are keyed by scope entity type, and are currently supported for the
+`proposalFieldValue` and `initiativeFieldValue` scopes. Each condition specifies
+a `property`, an `operator`, and a `value`:
 
 - **property**: The entity data property to evaluate (currently only
   `baseFieldCategory` is supported)
@@ -514,6 +549,10 @@ values:
 This grant allows the user to view proposal field values only for base fields
 categorized as `budget` or `project`. Field values in other categories (e.g.,
 `organization`, `evaluation`) would not be visible through this grant.
+
+The equivalent grant keyed on `initiativeFieldValue` narrows initiative field
+values the same way, and can likewise be held on the field value itself, on its
+initiative, or on the initiative's changemaker.
 
 Condition keys must be present in the grant's `scope` array. For instance, a
 condition keyed on `proposalFieldValue` requires `proposalFieldValue` to be

@@ -6,30 +6,22 @@
 			"properties": {
 				"contextEntityType": {
 					"type": "string",
-					"const": "changemaker"
+					"const": "initiativeFieldValue"
 				},
-				"changemakerId": {
+				"initiativeFieldValueId": {
 					"$ref": "./id.json",
-					"example": 15
+					"example": 34
 				},
 				"scope": {
 					"type": "array",
 					"items": {
 						"type": "string",
-						"enum": [
-							"changemaker",
-							"changemakerFieldValue",
-							"initiative",
-							"initiativeFieldValue",
-							"proposal",
-							"proposalFieldValue",
-							"any"
-						]
+						"enum": ["initiativeFieldValue", "any"]
 					},
 					"minItems": 1
 				}
 			},
-			"required": ["contextEntityType", "changemakerId"]
+			"required": ["contextEntityType", "initiativeFieldValueId"]
 		}
 	]
 }

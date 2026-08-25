@@ -1,32 +1,46 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	canCreateInitiativeFieldValue,
 	createInitiativeFieldValue,
+	createPermissionGrant,
 	getDatabase,
 	getLimitValues,
+	hasInitiativeFieldValuePermission,
 	loadBaseField,
 	loadInitiative,
 	loadInitiativeFieldValue,
 	loadInitiativeFieldValueBundle,
-	loadSource,
 	updateInitiativeFieldValue,
 } from '../database';
 import {
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
+	getSelfManageGrantFragment,
 	isAuthContext,
 	isId,
 	isInitiativeFieldValuePatch,
 	isWritableInitiativeFieldValue,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
+	NotFoundError,
 	UnprocessableEntityError,
 } from '../errors';
 import { extractPaginationParameters } from '../queryParameters';
 import { coerceParams } from '../coercion';
 import { fieldValueIsValid } from '../fieldValidation';
-import type { BaseField, Id } from '../types';
+import { assertSourceIsReferenceable } from './assertions';
+import type { TinyPg } from 'tinypg';
+import type {
+	AuthContext,
+	BaseField,
+	Id,
+	InitiativeFieldValue,
+} from '../types';
 import type { Request, Response } from 'express';
 
 const extractInitiativeId = (req: Request): Id => {
@@ -67,6 +81,29 @@ const assertBaseFieldIsUsableByInitiatives = (baseField: BaseField): void => {
 	}
 };
 
+const loadInitiativeFieldValueOfInitiative = async (
+	db: TinyPg,
+	authContext: AuthContext,
+	initiativeId: Id,
+	fieldValueId: Id,
+): Promise<InitiativeFieldValue> => {
+	const initiativeFieldValue = await loadInitiativeFieldValue(
+		db,
+		authContext,
+		fieldValueId,
+	);
+	if (initiativeFieldValue.initiativeId !== initiativeId) {
+		throw new NotFoundError('The given initiative field value was not found.', {
+			entityType: 'InitiativeFieldValue',
+			entityPrimaryKey: {
+				initiativeId,
+				fieldValueId,
+			},
+		});
+	}
+	return initiativeFieldValue;
+};
+
 const getInitiativeFieldValues = async (
 	req: Request,
 	res: Response,
@@ -105,7 +142,7 @@ const getInitiativeFieldValue = async (
 	const initiativeId = extractInitiativeId(req);
 	const fieldValueId = extractFieldValueId(req);
 
-	const initiativeFieldValue = await loadInitiativeFieldValue(
+	const initiativeFieldValue = await loadInitiativeFieldValueOfInitiative(
 		db,
 		req,
 		initiativeId,
@@ -136,22 +173,42 @@ const postInitiativeFieldValue = async (
 	const { baseFieldShortCode, sourceId, value, goodAsOf } = body;
 
 	await loadInitiative(db, req, initiativeId);
+
 	const baseField = await loadBaseField(db, req, baseFieldShortCode);
 	assertBaseFieldIsUsableByInitiatives(baseField);
-	await loadSource(db, req, sourceId);
 
-	const initiativeFieldValue = await createInitiativeFieldValue(db, req, {
-		initiativeId,
-		baseFieldShortCode,
-		sourceId,
-		value,
-		isValid: fieldValueIsValid(value, baseField.dataType),
-		goodAsOf,
+	if (
+		!(await canCreateInitiativeFieldValue(db, req, {
+			initiativeId,
+			baseFieldCategory: baseField.category,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create field values for the specified initiative.',
+		);
+	}
+	await assertSourceIsReferenceable(db, req, sourceId);
+
+	const committedInitiativeFieldValue = await db.transaction(async (txDb) => {
+		const initiativeFieldValue = await createInitiativeFieldValue(txDb, req, {
+			initiativeId,
+			baseFieldShortCode,
+			sourceId,
+			value,
+			isValid: fieldValueIsValid(value, baseField.dataType),
+			goodAsOf,
+		});
+		await createPermissionGrant(txDb, req, {
+			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.INITIATIVE_FIELD_VALUE,
+			initiativeFieldValueId: initiativeFieldValue.id,
+		});
+		return initiativeFieldValue;
 	});
 	res
 		.status(HTTP_STATUS.SUCCESSFUL.CREATED)
 		.contentType('application/json')
-		.send(initiativeFieldValue);
+		.send(committedInitiativeFieldValue);
 };
 
 const patchInitiativeFieldValue = async (
@@ -172,14 +229,28 @@ const patchInitiativeFieldValue = async (
 		);
 	}
 
-	const existingInitiativeFieldValue = await loadInitiativeFieldValue(
-		db,
-		req,
-		initiativeId,
-		fieldValueId,
-	);
+	const existingInitiativeFieldValue =
+		await loadInitiativeFieldValueOfInitiative(
+			db,
+			req,
+			initiativeId,
+			fieldValueId,
+		);
+
+	if (
+		!(await hasInitiativeFieldValuePermission(db, req, {
+			initiativeFieldValueId: fieldValueId,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.INITIATIVE_FIELD_VALUE,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to edit the specified initiative field value.',
+		);
+	}
+
 	if (body.sourceId !== undefined) {
-		await loadSource(db, req, body.sourceId);
+		await assertSourceIsReferenceable(db, req, body.sourceId);
 	}
 
 	const value = body.value ?? existingInitiativeFieldValue.value;

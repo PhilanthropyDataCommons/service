@@ -15,6 +15,7 @@ enum PermissionGrantEntityType {
 	CHANGEMAKER_FIELD_VALUE = 'changemakerFieldValue',
 	TERMINOLOGY_SET = 'terminologySet',
 	INITIATIVE = 'initiative',
+	INITIATIVE_FIELD_VALUE = 'initiativeFieldValue',
 	ANY = 'any',
 }
 
@@ -95,6 +96,10 @@ const contextEntityKeyProperties = {
 		keyName: 'initiativeId',
 		keyType: PermissionGrantEntityKeyType.ID,
 	},
+	[PermissionGrantEntityType.INITIATIVE_FIELD_VALUE]: {
+		keyName: 'initiativeFieldValueId',
+		keyType: PermissionGrantEntityKeyType.ID,
+	},
 } as const satisfies Omit<
 	Record<
 		PermissionGrantEntityType,
@@ -120,6 +125,7 @@ const contextEntityTypeNativeScopes = {
 		PermissionGrantEntityType.CHANGEMAKER,
 		PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
 		PermissionGrantEntityType.INITIATIVE,
+		PermissionGrantEntityType.INITIATIVE_FIELD_VALUE,
 		PermissionGrantEntityType.PROPOSAL,
 		PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 		PermissionGrantEntityType.SOURCE,
@@ -171,6 +177,10 @@ const contextEntityTypeNativeScopes = {
 	],
 	[PermissionGrantEntityType.INITIATIVE]: [
 		PermissionGrantEntityType.INITIATIVE,
+		PermissionGrantEntityType.INITIATIVE_FIELD_VALUE,
+	],
+	[PermissionGrantEntityType.INITIATIVE_FIELD_VALUE]: [
+		PermissionGrantEntityType.INITIATIVE_FIELD_VALUE,
 	],
 	[PermissionGrantEntityType.ANY]: [],
 } as const satisfies Record<

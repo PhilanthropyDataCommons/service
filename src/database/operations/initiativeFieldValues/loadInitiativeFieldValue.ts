@@ -4,11 +4,11 @@ import type { Id, InitiativeFieldValue } from '../../../types';
 
 const loadInitiativeFieldValue = generateLoadItemOperation<
 	InitiativeFieldValue,
-	[initiativeId: Id, initiativeFieldValueId: Id]
+	[initiativeFieldValueId: Id]
 >(
 	'initiativeFieldValues.selectById',
 	'InitiativeFieldValue',
-	['initiativeId', 'initiativeFieldValueId'],
+	['initiativeFieldValueId'],
 	decorateWithFileDownloadUrl,
 );
 

@@ -120,6 +120,14 @@ describe('canManagePermissionGrantByContext', () => {
 			expectedKey: { initiativeId: 21 },
 		},
 		{
+			label: 'initiativeFieldValue',
+			grant: {
+				contextEntityType: PermissionGrantEntityType.INITIATIVE_FIELD_VALUE,
+				initiativeFieldValueId: 34,
+			},
+			expectedKey: { initiativeFieldValueId: 34 },
+		},
+		{
 			label: 'applicationFormField',
 			grant: {
 				contextEntityType: PermissionGrantEntityType.APPLICATION_FORM_FIELD,
@@ -160,6 +168,7 @@ describe('canManagePermissionGrantByContext', () => {
 		changemakerFieldValueId: undefined,
 		terminologySetId: undefined,
 		initiativeId: undefined,
+		initiativeFieldValueId: undefined,
 	};
 
 	it.each(cases)(

@@ -3,6 +3,7 @@ import { applicationFormsRouter } from './applicationFormsRouter';
 import { applicationFormFieldsRouter } from './applicationFormFieldsRouter';
 import { baseFieldsRouter } from './baseFieldsRouter';
 import { dataProvidersRouter } from './dataProviderRouter';
+import { defaultPermissionGrantsRouter } from './defaultPermissionGrantsRouter';
 import { filesRouter } from './filesRouter';
 import { fundersRouter } from './fundersRouter';
 import { initiativesRouter } from './initiativesRouter';
@@ -36,6 +37,7 @@ rootRouter.use(
 );
 rootRouter.use('/changemakerFieldValues', changemakerFieldValuesRouter);
 rootRouter.use('/dataProviders', dataProvidersRouter);
+rootRouter.use('/defaultPermissionGrants', defaultPermissionGrantsRouter);
 rootRouter.use('/files', filesRouter);
 rootRouter.use('/funders', fundersRouter);
 rootRouter.use('/initiatives', initiativesRouter);

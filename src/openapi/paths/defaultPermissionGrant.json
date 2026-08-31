@@ -1,0 +1,146 @@
+{
+	"get": {
+		"operationId": "getDefaultPermissionGrantById",
+		"summary": "Gets a specific default permission grant.",
+		"description": "Returns a default permission grant by ID. Requires the administrator role.",
+		"tags": ["DefaultPermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "defaultPermissionGrantId",
+				"description": "The PDC-generated ID of a default permission grant.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The default permission grant.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/DefaultPermissionGrant.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json",
+				"description": "The request was invalid."
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	},
+	"put": {
+		"operationId": "updateDefaultPermissionGrantById",
+		"summary": "Updates a specific default permission grant.",
+		"description": "Replaces all mutable fields of a default permission grant by ID. Requires the administrator role. Updating a default permission grant does not affect permission grants it has already produced.",
+		"tags": ["DefaultPermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "defaultPermissionGrantId",
+				"description": "The PDC-generated ID of a default permission grant.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/DefaultPermissionGrant.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"200": {
+				"description": "The updated default permission grant.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/DefaultPermissionGrant.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json",
+				"description": "The request was invalid."
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	},
+	"delete": {
+		"operationId": "deleteDefaultPermissionGrantById",
+		"summary": "Deletes a specific default permission grant.",
+		"description": "Deletes a default permission grant by ID. Requires the administrator role. Deleting a default permission grant does not affect permission grants it has already produced.",
+		"tags": ["DefaultPermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "defaultPermissionGrantId",
+				"description": "The PDC-generated ID of a default permission grant to be deleted.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			}
+		],
+		"responses": {
+			"204": {
+				"description": "The default permission grant was successfully deleted."
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json",
+				"description": "The request was invalid."
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

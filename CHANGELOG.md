@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Added a `defaultPermissionGrant` entity, managed via the `/defaultPermissionGrants` endpoints, that describes a permission grant to make against entities of a given type. It carries everything a `permissionGrant` carries except the key naming a specific context entity. The endpoints require the administrator role, and nothing yet consumes the entity.
+
 ## 0.42.0 2026-08-25
 
 ### Added

@@ -253,6 +253,23 @@ manage. `PUT /permissionGrants/:id` additionally requires `manage` on the
 proposed context entity when the caller re-points a grant at a different
 entity.
 
+### Default Permission Grants
+
+A `defaultPermissionGrant` describes a permission grant to make against
+entities of a given type. It carries everything a permission grant carries
+except the key naming a specific context entity, so a default permission grant
+plus a newly created entity of its `contextEntityType` describes a permission
+grant.
+
+CRUD operations on default permission grants, at `/defaultPermissionGrants`,
+require the `pdc-admin` role. Default permission grants sit outside the
+permission system rather than within it: holding `manage` on an entity does
+not confer any access to them.
+
+Nothing consumes default permission grants yet. Creating one grants nobody
+anything, and it is never applied retroactively to entities that already
+exist.
+
 ## Implemented Permissions
 
 The following sections describe permissions that are actually enforced by the

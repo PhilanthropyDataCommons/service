@@ -194,6 +194,18 @@ erDiagram
     string keycloakUserName
     datetime createdAt
   }
+  DefaultPermissionGrant {
+    int id PK
+    string granteeType
+    uuid granteeUserKeycloakUserId
+    uuid granteeKeycloakOrganizationId
+    string contextEntityType
+    string[] scope
+    string[] verbs
+    jsonb conditions
+    uuid createdBy FK
+    datetime createdAt
+  }
   PermissionGrant {
     int id PK
     string granteeType
@@ -273,6 +285,7 @@ erDiagram
   PermissionGrant }o--o| Initiative : "references"
   PermissionGrant }o--o| InitiativeFieldValue : "references"
   PermissionGrant }o--|| User : "is created by"
+  DefaultPermissionGrant }o--|| User : "is created by"
   Changemaker ||--o{ FiscalSponsorship : "sponsors"
   Changemaker ||--o{ FiscalSponsorship : "is sponsored by"
 ```

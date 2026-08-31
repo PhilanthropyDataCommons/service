@@ -140,6 +140,8 @@ services:
       - '127.0.0.1:9790:9790'
     volumes:
       - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
+      - ./pdc-keycloak-theme-20260826-09d3c2e.jar:/opt/keycloak/providers/pdc-keycloak-theme.jar:ro
+      - ./link-to-welcome-page-20260826-09d3c2e.jar:/opt/keycloak/providers/link-to-welcome-page.jar:ro
     # keycloak/realm.json creates dev Keycloak realm; skipped if already created
     command: ['start-dev', '--import-realm']
     healthcheck:
@@ -228,6 +230,17 @@ services:
             mc alias set pdc http://pdc-s3:9300/ s3key s3secret
             mc mb pdc/service --ignore-existing
         user: ${UID:-1000}
+  pdc-fake-email:
+    image: haravich/fake-smtp-server:20260607
+    depends_on:
+      init-volumes:
+        condition: service_completed_successfully
+    ports:
+      - '127.0.0.1:1025:1025'
+      - '127.0.0.1:1080:1080'
+    restart: always
+    user: ${UID:-1000}:${GID:-${UID:-1000}}
+
 volumes:
   s3:
     external: false

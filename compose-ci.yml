@@ -121,7 +121,7 @@ services:
             -d '{"pdcApiUrl": "'${PDC_SYNC_URL:-https://api.philanthropydatacommons.org}'"}'
         user: '999'
   pdc-auth:
-    image: docker.io/keycloak/keycloak:26.7.2
+    image: docker.io/keycloak/keycloak:26.7.3
     depends_on:
       pdc-databases:
         condition: service_healthy

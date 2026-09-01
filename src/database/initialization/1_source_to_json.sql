@@ -17,14 +17,14 @@ BEGIN
   FROM data_providers
   WHERE data_providers.short_code = source.data_provider_short_code;
 
-  SELECT funder_to_json(funders.*)
+  SELECT funder_to_json(funders.*, NULL)
   INTO funder_json
   FROM funders
   WHERE funders.short_code = source.funder_short_code;
 
   -- Shallow changemaker (no children) to prevent infinite recursion
   -- (source -> changemaker -> fields -> batch -> source).
-  SELECT changemaker_to_json(changemakers.*, NULL, NULL, TRUE)
+  SELECT changemaker_to_json(changemakers.*, NULL, NULL, NULL, TRUE)
   INTO changemaker_json
   FROM changemakers
   WHERE changemakers.id = source.changemaker_id;

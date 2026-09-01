@@ -62,7 +62,7 @@
 							"type": "number"
 						},
 						"changemaker": {
-							"$ref": "./Changemaker.json",
+							"$ref": "./ShallowChangemaker.json",
 							"readOnly": true
 						}
 					},

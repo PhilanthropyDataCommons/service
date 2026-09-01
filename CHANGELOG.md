@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Changemaker and funder responses now include a readonly `permissions` attribute describing the caller's resolved permissions on that entity as a map of scope to verbs (with `manage` verbs, `any` scopes, user group membership, all-authenticated-users grants, and the administrator role already expanded). It is `{}` for anonymous callers and for funders embedded in other entities' responses; shallow changemaker embeds omit it.
+
+### Fixed
+
+- The `changemaker` attached to a changemaker-backed `source` is now documented as a `ShallowChangemaker`. The API has always served a shallow changemaker there, but the schema described a full `Changemaker`, promising `fields` and `fiscalSponsors` attributes that were never present.
+
 ## 0.42.0 2026-08-25
 
 ### Added

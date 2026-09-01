@@ -98,7 +98,7 @@ CREATE FUNCTION build_proposals_results(
 		SELECT
 			cp.proposal_id,
 			jsonb_agg(
-				changemaker_to_json(c.*, NULL, NULL, TRUE)
+				changemaker_to_json(c.*, NULL, NULL, NULL, TRUE)
 				ORDER BY c.id ASC
 			) AS changemakers
 		FROM changemakers_proposals cp

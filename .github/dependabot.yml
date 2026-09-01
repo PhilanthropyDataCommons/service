@@ -19,6 +19,8 @@ updates:
         update-types: ['version-update:semver-major']
       - dependency-name: 'eslint'
         update-types: ['version-update:semver-major']
+      - dependency-name: 'eslint-config-love'
+        update-types: ['version-update:semver-major']
       - dependency-name: '@eslint/*'
         update-types: ['version-update:semver-major']
       - dependency-name: 'typescript'

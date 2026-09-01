@@ -5,7 +5,7 @@ SELECT drop_function('build_changemakers_proposals_results');
 -- changemakers from changemakers_proposals, so the insert path needs a fresh
 -- snapshot to see the row it just inserted.
 CREATE FUNCTION build_changemakers_proposals_results(
-	changemakers_proposals changemakers_proposals [],
+	changemakers_proposals changemakers_proposals[],
 	auth_context_keycloak_user_id uuid DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS TABLE (id int, object jsonb) AS $$

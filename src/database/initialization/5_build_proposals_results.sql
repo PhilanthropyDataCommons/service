@@ -5,7 +5,7 @@ SELECT drop_function('build_proposals_results');
 -- and can serialize a proposal INSERTed earlier in the same statement -- which
 -- a STABLE function's snapshot would not otherwise see -- so callers pass rows.
 CREATE FUNCTION build_proposals_results(
-	proposals proposals [],
+	proposals proposals[],
 	auth_context_keycloak_user_id uuid DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS TABLE (id int, object jsonb) AS $$

@@ -10,7 +10,7 @@ CREATE FUNCTION permitted_changemaker_ids_among(
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t,
-	filter_ids int []
+	filter_ids int[]
 ) RETURNS TABLE (id int) AS $$
 	-- Administrators have all permissions.
 	SELECT changemakers.id

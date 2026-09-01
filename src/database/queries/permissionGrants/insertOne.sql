@@ -43,8 +43,8 @@ VALUES (
 	:terminologySetId::integer,
 	:initiativeId::integer,
 	:initiativeFieldValueId::integer,
-	:scope::permission_grant_entity_type_t [],
-	:verbs::permission_grant_verb_t [],
+	:scope::permission_grant_entity_type_t[],
+	:verbs::permission_grant_verb_t[],
 	:conditions::jsonb,
 	:authContextKeycloakUserId::uuid
 )

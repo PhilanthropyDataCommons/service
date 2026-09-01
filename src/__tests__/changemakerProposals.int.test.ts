@@ -147,13 +147,13 @@ describe('/changemakerProposals', () => {
 				},
 			);
 			const changemakerVisibleChangemakerProposal =
-				await createChangemakerProposal(db, null, {
+				await createChangemakerProposal(db, testUserAuthContext, {
 					changemakerId: visibleChangemaker.id,
 					proposalId: changemakerVisibleProposal.id,
 				});
 			const funderVisibleChangemakerProposal = await createChangemakerProposal(
 				db,
-				null,
+				testUserAuthContext,
 				{
 					changemakerId: anotherChangemaker.id,
 					proposalId: funderVisibleProposal.id,
@@ -649,10 +649,6 @@ describe('/changemakerProposals', () => {
 					id: 1,
 					name: 'Example Inc.',
 					taxId: '11-1111111',
-					keycloakOrganizationId: null,
-					createdAt: expectTimestamp(),
-					createdBy: testUser.keycloakUserId,
-					fiscalSponsors: [],
 					fields: [],
 				},
 				proposalId: proposal.id,
@@ -665,9 +661,6 @@ describe('/changemakerProposals', () => {
 							id: 1,
 							name: 'Example Inc.',
 							taxId: '11-1111111',
-							keycloakOrganizationId: null,
-							createdAt: expectTimestamp(),
-							createdBy: testUser.keycloakUserId,
 						},
 					],
 				},

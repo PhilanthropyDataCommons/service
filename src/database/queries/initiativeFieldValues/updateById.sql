@@ -10,4 +10,8 @@ WHERE
 	id = :initiativeFieldValueId
 	AND initiative_id = :initiativeId
 RETURNING
-	build_initiative_field_value_result(initiative_field_values) AS object;
+	build_initiative_field_value_result(
+		initiative_field_values,
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator
+	) AS object;

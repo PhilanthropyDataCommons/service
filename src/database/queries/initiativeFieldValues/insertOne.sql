@@ -16,4 +16,8 @@ INSERT INTO initiative_field_values (
 	:authContextKeycloakUserId
 )
 RETURNING
-	build_initiative_field_value_result(initiative_field_values) AS object;
+	build_initiative_field_value_result(
+		initiative_field_values,
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator
+	) AS object;

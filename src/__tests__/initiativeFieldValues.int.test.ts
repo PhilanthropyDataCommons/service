@@ -19,6 +19,7 @@ import {
 import {
 	getAuthContext,
 	getTestAuthContext,
+	getTestUserKeycloakUserId,
 	loadTestUser,
 	NO_LIMIT,
 	NO_OFFSET,
@@ -271,7 +272,7 @@ describe('/initiatives/:initiativeId/fieldValues', () => {
 
 		it('returns the field values of the specified initiative', async () => {
 			const db = getDatabase();
-			const testUserAuthContext = getAuthContext(await loadTestUser(db));
+			const testUserAuthContext = getAuthContext(await loadTestUser(db), true);
 			const initiative = await createTestInitiative(db, testUserAuthContext);
 			const otherInitiative = await createTestInitiative(
 				db,
@@ -304,7 +305,7 @@ describe('/initiatives/:initiativeId/fieldValues', () => {
 
 		it('omits field values whose base field has become forbidden', async () => {
 			const db = getDatabase();
-			const testUserAuthContext = getAuthContext(await loadTestUser(db));
+			const testUserAuthContext = getAuthContext(await loadTestUser(db), true);
 			const initiative = await createTestInitiative(db, testUserAuthContext);
 			const visibleBaseField = await createTestBaseField(db, null, {
 				category: BaseFieldCategory.PROJECT,
@@ -532,7 +533,7 @@ describe('/initiatives/:initiativeId/fieldValues', () => {
 
 		it('returns the field value', async () => {
 			const db = getDatabase();
-			const testUserAuthContext = getAuthContext(await loadTestUser(db));
+			const testUserAuthContext = getAuthContext(await loadTestUser(db), true);
 			const initiative = await createTestInitiative(db, testUserAuthContext);
 			const fieldValue = await createTestInitiativeFieldValue(
 				db,
@@ -545,6 +546,38 @@ describe('/initiatives/:initiativeId/fieldValues', () => {
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toEqual(fieldValue);
+		});
+
+		it("returns the source's changemaker with its protected attributes when the caller may view it", async () => {
+			const db = getDatabase();
+			const testUserAuthContext = getAuthContext(await loadTestUser(db), true);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const initiative = await createTestInitiative(db, testUserAuthContext);
+			const source = await createTestSource(db, testUserAuthContext, {
+				changemakerId: changemaker.id,
+			});
+			const fieldValue = await createTestInitiativeFieldValue(
+				db,
+				testUserAuthContext,
+				{ initiativeId: initiative.id, sourceId: source.id },
+			);
+
+			const response = await request(app)
+				.get(`/initiatives/${initiative.id}/fieldValues/${fieldValue.id}`)
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				source: {
+					changemaker: {
+						id: changemaker.id,
+						taxId: changemaker.taxId,
+						name: changemaker.name,
+						keycloakOrganizationId: null,
+						createdAt: expectTimestamp(),
+						createdBy: getTestUserKeycloakUserId(),
+					},
+				},
+			});
 		});
 
 		it('returns 404 when the base field has become forbidden', async () => {
@@ -1348,7 +1381,7 @@ describe('/initiatives/:initiativeId/fieldValues', () => {
 
 		it('updates the value', async () => {
 			const db = getDatabase();
-			const testUserAuthContext = getAuthContext(await loadTestUser(db));
+			const testUserAuthContext = getAuthContext(await loadTestUser(db), true);
 			const initiative = await createTestInitiative(db, testUserAuthContext);
 			const fieldValue = await createTestInitiativeFieldValue(
 				db,

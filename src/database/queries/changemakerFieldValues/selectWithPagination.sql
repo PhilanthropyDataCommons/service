@@ -39,7 +39,9 @@ WITH
 	paginated_entries AS (
 		SELECT
 			build_changemaker_field_value_result(
-				page.*::changemaker_field_values
+				page.*::changemaker_field_values,
+				:authContextKeycloakUserId,
+				:authContextIsAdministrator
 			) AS object
 		FROM page
 		ORDER BY id DESC

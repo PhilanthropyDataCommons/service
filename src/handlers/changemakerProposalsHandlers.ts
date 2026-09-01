@@ -84,7 +84,7 @@ const postChangemakerProposal = async (
 			'Authenticated user does not have permission to edit the funder associated with the specified proposal.',
 		);
 	}
-	const changemakerProposal = await createChangemakerProposal(db, null, {
+	const changemakerProposal = await createChangemakerProposal(db, req, {
 		changemakerId,
 		proposalId,
 	});

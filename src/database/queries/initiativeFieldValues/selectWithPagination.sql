@@ -27,7 +27,9 @@ WITH
 	paginated_entries AS (
 		SELECT
 			build_initiative_field_value_result(
-				page.*::initiative_field_values
+				page.*::initiative_field_values,
+				:authContextKeycloakUserId,
+				:authContextIsAdministrator
 			) AS object
 		FROM page
 		ORDER BY id

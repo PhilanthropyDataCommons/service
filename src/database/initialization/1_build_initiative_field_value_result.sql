@@ -1,7 +1,9 @@
 SELECT drop_function('build_initiative_field_value_result');
 
 CREATE FUNCTION build_initiative_field_value_result(
-	initiative_field_value initiative_field_values
+	initiative_field_value initiative_field_values,
+	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS jsonb AS $$
 DECLARE
 	is_file_field BOOLEAN;
@@ -17,7 +19,11 @@ BEGIN
 	FROM base_fields
 	WHERE base_fields.short_code = initiative_field_value.base_field_short_code;
 
-	SELECT source_to_json(sources.*)
+	SELECT source_to_json(
+		sources.*,
+		auth_context_keycloak_user_id,
+		auth_context_is_administrator
+	)
 	INTO source_json
 	FROM sources
 	WHERE sources.id = initiative_field_value.source_id;

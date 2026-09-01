@@ -14,4 +14,8 @@ INSERT INTO changemaker_field_values (
 	:goodAsOf
 )
 RETURNING
-	build_changemaker_field_value_result(changemaker_field_values) AS object;
+	build_changemaker_field_value_result(
+		changemaker_field_values,
+		:authContextKeycloakUserId,
+		:authContextIsAdministrator
+	) AS object;

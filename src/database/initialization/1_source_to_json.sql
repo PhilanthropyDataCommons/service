@@ -24,7 +24,20 @@ BEGIN
 
   -- Shallow changemaker (no children) to prevent infinite recursion
   -- (source -> changemaker -> fields -> batch -> source).
-  SELECT changemaker_to_json(changemakers.*, NULL, NULL, TRUE)
+  SELECT changemaker_to_json(
+    changemakers.*, NULL, NULL, TRUE,
+    source_to_json.auth_context_keycloak_user_id IS NOT NULL
+    AND EXISTS (
+      SELECT 1
+      FROM permitted_changemaker_ids_among(
+        source_to_json.auth_context_keycloak_user_id,
+        source_to_json.auth_context_is_administrator,
+        'view',
+        'changemaker',
+        ARRAY[changemakers.id]
+      ) AS viewable_changemaker_ids
+    )
+  )
   INTO changemaker_json
   FROM changemakers
   WHERE changemakers.id = source.changemaker_id;

@@ -8,7 +8,7 @@
 			"properties": {
 				"fiscalSponsors": {
 					"type": "array",
-					"description": "Fiscal sponsors (past and present) of this changemaker. Empty when unauthenticated. The response here will not include values for `fields` nor `fiscalSponsors` to avoid infinite recursion. Use the returned `id` to call $getChangemakerById for those details.",
+					"description": "Fiscal sponsors (past and present) of this changemaker. Omitted unless the caller holds `view` permission on this changemaker. Permission is evaluated per sponsor, so entries the caller cannot view carry only the public attributes while the rest carry all of them; a single array can hold both shapes. The entries never include values for `fields` nor `fiscalSponsors` to avoid infinite recursion. Use the returned `id` to call $getChangemakerById for those details.",
 					"items": {
 						"$ref": "./ShallowChangemaker.json"
 					},
@@ -18,11 +18,14 @@
 							"id": 74,
 							"name": "Community Development",
 							"taxId": "US123456789",
-							"fields": [],
 							"createdAt": "2025-02-07T13:16:16.191509-06:00",
 							"createdBy": "adace57c-25c2-40b1-9228-c48939f39f98",
-							"fiscalSponsors": [],
 							"keycloakOrganizationId": "f16a71f8-e67b-43ab-a258-31cd8a99a97a"
+						},
+						{
+							"id": 92,
+							"name": "Renewable Cities Initiative",
+							"taxId": "US987654321"
 						}
 					]
 				},
@@ -38,7 +41,7 @@
 					"readOnly": true
 				}
 			},
-			"required": ["fields", "fiscalSponsors"]
+			"required": ["fields"]
 		}
 	]
 }

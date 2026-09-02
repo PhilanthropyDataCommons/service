@@ -15,7 +15,7 @@ CREATE FUNCTION permitted_initiative_field_value_ids_among(
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t,
-	filter_ids int []
+	filter_ids int[]
 ) RETURNS TABLE (id int) AS $$
 	-- Public fields are viewable by any authenticated user.
 	SELECT ifv.id

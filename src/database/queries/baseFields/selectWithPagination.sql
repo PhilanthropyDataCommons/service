@@ -4,15 +4,15 @@ WITH
 		FROM base_fields
 		WHERE
 			CASE
-				WHEN :sensitivityFilter.list::sensitivity_classification [] IS NULL
+				WHEN :sensitivityFilter.list::sensitivity_classification[] IS NULL
 				THEN TRUE
 				WHEN :sensitivityFilter.negated THEN
 					NOT (base_fields.sensitivity_classification = any(
-						:sensitivityFilter.list::sensitivity_classification []
+						:sensitivityFilter.list::sensitivity_classification[]
 					))
 				ELSE
 					base_fields.sensitivity_classification = any(
-						:sensitivityFilter.list::sensitivity_classification []
+						:sensitivityFilter.list::sensitivity_classification[]
 					)
 			END
 	),

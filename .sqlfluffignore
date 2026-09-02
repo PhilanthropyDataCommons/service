@@ -56,9 +56,15 @@ src/database/migrations/0078-create-changemaker_field_value_batches.sql
 src/database/migrations/0079-create-changemaker_field_values.sql
 src/database/migrations/0080-alter-changemaker_field_value_batches-add-created_by.sql
 src/database/migrations/0083-create-permission_grants.sql
+src/database/migrations/0084-migrate-changemaker-permissions-to-permission-grants.sql
+src/database/migrations/0085-migrate-funder-permissions-to-permission-grants.sql
+src/database/migrations/0086-migrate-data-provider-permissions-to-permission-grants.sql
+src/database/migrations/0088-migrate-opportunity-permissions-to-permission-grants.sql
+src/database/migrations/0092-add-opportunity-scope-to-funder-grants.sql
 src/database/migrations/0098-alter-references-to-base_fields-short_code.sql
 src/database/migrations/0099-alter-changemakers-add-name_search.sql
 src/database/migrations/0101-alter-funders-add-name_search.sql
+src/database/migrations/0108-add-source-scope-to-existing-permissions.sql
 
 # SQLFluff 4.1.0 does not yet parse MERGE ... RETURNING (PG 17+). Once it does
 # (https://github.com/sqlfluff/sqlfluff/), these can be removed.

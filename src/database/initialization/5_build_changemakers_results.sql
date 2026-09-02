@@ -10,7 +10,7 @@ SELECT drop_function('build_changemakers_results');
 -- source-priority ordering. Gathering the whole page at once replaces the
 -- per-changemaker query the row-by-row serializer ran.
 CREATE FUNCTION build_changemakers_results(
-	changemakers changemakers [],
+	changemakers changemakers[],
 	auth_context_keycloak_user_id uuid DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS TABLE (id int, object jsonb) AS $$

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a `PATCH /sources/{sourceId}` endpoint for updating a source's `label`.
 - Added an `edit` permission for the `source` scope.
+- Added a `defaultPermissionGrant` entity, managed via the `/defaultPermissionGrants` endpoints, that describes a permission grant to auto-generate against entities of a given type.
 
 ### Changed
 

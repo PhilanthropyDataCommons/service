@@ -11,6 +11,7 @@ export * from './changemakerFieldValues';
 export * from './changemakerProposals';
 export * from './changemakers';
 export * from './dataProviders';
+export * from './defaultPermissionGrants';
 export * from './ephemeralUserGroupAssociations';
 export * from './files';
 export * from './fiscalSponsorships';

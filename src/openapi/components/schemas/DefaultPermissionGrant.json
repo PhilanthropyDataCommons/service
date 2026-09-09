@@ -1,0 +1,17 @@
+{
+	"allOf": [
+		{ "$ref": "./PermissionGrantBase.json" },
+		{
+			"type": "object",
+			"properties": {
+				"contextEntityType": {
+					"$ref": "./PermissionGrantEntityType.json",
+					"description": "The type of entity a grant made from this default applies to. `any` is not supported.",
+					"example": "changemaker"
+				}
+			},
+			"required": ["contextEntityType"]
+		}
+	],
+	"description": "A permission grant template: everything a `PermissionGrant` carries except the key naming its context entity. A default permission grant combined with a newly created entity of its `contextEntityType` describes a permission grant."
+}

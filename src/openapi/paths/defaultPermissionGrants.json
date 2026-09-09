@@ -1,0 +1,86 @@
+{
+	"get": {
+		"operationId": "getDefaultPermissionGrants",
+		"summary": "Gets a list of default permission grants.",
+		"description": "Returns all default permission grants. Requires the administrator role.",
+		"tags": ["DefaultPermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"$ref": "../components/parameters/pageParam.json"
+			},
+			{
+				"$ref": "../components/parameters/countParam.json"
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "All default permission grants.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/DefaultPermissionGrantBundle.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json",
+				"description": "A filter parameter was invalid."
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	},
+	"post": {
+		"operationId": "createDefaultPermissionGrant",
+		"summary": "Creates a new default permission grant.",
+		"description": "Creates a default permission grant for a user, user group, or all authenticated users. Requires the administrator role. Creating a default permission grant does not affect entities that already exist.",
+		"tags": ["DefaultPermissionGrants"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/DefaultPermissionGrant.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"201": {
+				"description": "The newly created default permission grant.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/DefaultPermissionGrant.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json",
+				"description": "The request body was invalid."
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

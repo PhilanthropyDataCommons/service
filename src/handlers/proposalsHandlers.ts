@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	getDatabase,
 	createProposal,
@@ -112,6 +113,10 @@ const postProposal = async (req: Request, res: Response): Promise<void> => {
 		});
 		await createPermissionGrant(txDb, req, {
 			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.PROPOSAL,
+			proposalId: proposal.id,
+		});
+		await applyDefaultPermissionGrants(txDb, req, {
 			contextEntityType: PermissionGrantEntityType.PROPOSAL,
 			proposalId: proposal.id,
 		});

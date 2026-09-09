@@ -16,6 +16,7 @@ import { getDefaultS3Bucket } from '../config';
 import {
 	createBulkUploadLog,
 	createChangemakerProposal,
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	createProposal,
 	createProposalFieldValue,
@@ -679,6 +680,10 @@ export const processBulkUploadTask = async (
 					contextEntityType: PermissionGrantEntityType.PROPOSAL,
 					proposalId: proposal.id,
 				});
+				await applyDefaultPermissionGrants(transactionDb, taskAuthContext, {
+					contextEntityType: PermissionGrantEntityType.PROPOSAL,
+					proposalId: proposal.id,
+				});
 				const proposalVersion = await createProposalVersion(
 					transactionDb,
 					taskAuthContext,
@@ -690,6 +695,10 @@ export const processBulkUploadTask = async (
 				);
 				await createPermissionGrant(transactionDb, taskAuthContext, {
 					...getSelfManageGrantFragment(taskAuthContext),
+					contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION,
+					proposalVersionId: proposalVersion.id,
+				});
+				await applyDefaultPermissionGrants(transactionDb, taskAuthContext, {
 					contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION,
 					proposalVersionId: proposalVersion.id,
 				});
@@ -738,6 +747,10 @@ export const processBulkUploadTask = async (
 					if (wasInserted) {
 						await createPermissionGrant(transactionDb, taskAuthContext, {
 							...getSelfManageGrantFragment(taskAuthContext),
+							contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+							changemakerId: changemaker.id,
+						});
+						await applyDefaultPermissionGrants(transactionDb, taskAuthContext, {
 							contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 							changemakerId: changemaker.id,
 						});
@@ -800,6 +813,15 @@ export const processBulkUploadTask = async (
 									PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 								proposalFieldValueId: proposalFieldValue.id,
 							});
+							await applyDefaultPermissionGrants(
+								transactionDb,
+								taskAuthContext,
+								{
+									contextEntityType:
+										PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+									proposalFieldValueId: proposalFieldValue.id,
+								},
+							);
 							return proposalFieldValue;
 						},
 					),

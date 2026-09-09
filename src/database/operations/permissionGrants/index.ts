@@ -1,3 +1,4 @@
+export * from './applyDefaultPermissionGrants';
 export * from './createPermissionGrant';
 export * from './loadPermissionGrant';
 export * from './loadPermissionGrantBundle';

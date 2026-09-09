@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	createTerminologySet,
 	getDatabase,
@@ -102,6 +103,10 @@ const postTerminologySet = async (
 		const terminologySet = await createTerminologySet(txDb, req, body);
 		await createPermissionGrant(txDb, req, {
 			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.TERMINOLOGY_SET,
+			terminologySetId: terminologySet.id,
+		});
+		await applyDefaultPermissionGrants(txDb, req, {
 			contextEntityType: PermissionGrantEntityType.TERMINOLOGY_SET,
 			terminologySetId: terminologySet.id,
 		});

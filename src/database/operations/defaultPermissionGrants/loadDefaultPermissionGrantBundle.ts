@@ -1,9 +1,12 @@
 import { generateLoadBundleOperation } from '../generators';
-import type { DefaultPermissionGrant } from '../../../types';
+import type {
+	DefaultPermissionGrant,
+	PermissionGrantEntityType,
+} from '../../../types';
 
 const loadDefaultPermissionGrantBundle = generateLoadBundleOperation<
 	DefaultPermissionGrant,
-	[]
->('defaultPermissionGrants.selectWithPagination', []);
+	[contextEntityType: PermissionGrantEntityType | undefined]
+>('defaultPermissionGrants.selectWithPagination', ['contextEntityType']);
 
 export { loadDefaultPermissionGrantBundle };

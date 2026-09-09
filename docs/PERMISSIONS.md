@@ -261,6 +261,13 @@ except the key naming a specific context entity, so a default permission grant
 plus a newly created entity of its `contextEntityType` describes a permission
 grant.
 
+Whenever an entity is created, every default permission grant registered for
+that entity's type is turned into a permission grant against the new entity,
+alongside the `manage` grant its creator always receives. The grants are made
+in the same transaction as the entity, so an entity either exists with its
+default grants or does not exist at all. Editing or deleting a default
+permission grant leaves the grants it has already produced untouched.
+
 CRUD operations on default permission grants, at `/defaultPermissionGrants`,
 require the `pdc-admin` role. Default permission grants sit outside the
 permission system rather than within it: holding `manage` on an entity does

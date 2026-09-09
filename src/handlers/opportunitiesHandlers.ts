@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	getDatabase,
 	createOpportunity,
@@ -107,6 +108,10 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 		const opportunity = await createOpportunity(txDb, req, body);
 		await createPermissionGrant(txDb, req, {
 			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
+			opportunityId: opportunity.id,
+		});
+		await applyDefaultPermissionGrants(txDb, req, {
 			contextEntityType: PermissionGrantEntityType.OPPORTUNITY,
 			opportunityId: opportunity.id,
 		});

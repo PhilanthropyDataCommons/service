@@ -2,6 +2,7 @@ import { HTTP_STATUS } from '../constants';
 import {
 	getDatabase,
 	createOrUpdateFunder,
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	getLimitValues,
 	loadFunderBundle,
@@ -101,6 +102,10 @@ const putFunder = async (req: Request, res: Response): Promise<void> => {
 			if (wasInserted) {
 				await createPermissionGrant(txDb, req, {
 					...getSelfManageGrantFragment(req),
+					contextEntityType: PermissionGrantEntityType.FUNDER,
+					funderShortCode: item.shortCode,
+				});
+				await applyDefaultPermissionGrants(txDb, req, {
 					contextEntityType: PermissionGrantEntityType.FUNDER,
 					funderShortCode: item.shortCode,
 				});

@@ -2,6 +2,7 @@ import { HTTP_STATUS } from '../constants';
 import {
 	canCreateInitiativeFieldValue,
 	createInitiativeFieldValue,
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	getDatabase,
 	getLimitValues,
@@ -200,6 +201,10 @@ const postInitiativeFieldValue = async (
 		});
 		await createPermissionGrant(txDb, req, {
 			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.INITIATIVE_FIELD_VALUE,
+			initiativeFieldValueId: initiativeFieldValue.id,
+		});
+		await applyDefaultPermissionGrants(txDb, req, {
 			contextEntityType: PermissionGrantEntityType.INITIATIVE_FIELD_VALUE,
 			initiativeFieldValueId: initiativeFieldValue.id,
 		});

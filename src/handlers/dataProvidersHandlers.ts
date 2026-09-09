@@ -3,6 +3,7 @@ import {
 	getDatabase,
 	getLimitValues,
 	createOrUpdateDataProvider,
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	loadDataProviderBundle,
 	loadDataProvider,
@@ -89,6 +90,10 @@ const putDataProvider = async (req: Request, res: Response): Promise<void> => {
 			if (wasInserted) {
 				await createPermissionGrant(txDb, req, {
 					...getSelfManageGrantFragment(req),
+					contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
+					dataProviderShortCode: item.shortCode,
+				});
+				await applyDefaultPermissionGrants(txDb, req, {
 					contextEntityType: PermissionGrantEntityType.DATA_PROVIDER,
 					dataProviderShortCode: item.shortCode,
 				});

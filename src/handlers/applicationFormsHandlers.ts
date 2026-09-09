@@ -1,4 +1,5 @@
 import {
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	getDatabase,
 	createApplicationForm,
@@ -111,6 +112,10 @@ const postApplicationForms = async (
 				contextEntityType: PermissionGrantEntityType.APPLICATION_FORM,
 				applicationFormId: applicationForm.id,
 			});
+			await applyDefaultPermissionGrants(transactionDb, req, {
+				contextEntityType: PermissionGrantEntityType.APPLICATION_FORM,
+				applicationFormId: applicationForm.id,
+			});
 			const applicationFormFields = await Promise.all(
 				fields.map(async (field) => {
 					const applicationFormField = await createApplicationFormField(
@@ -123,6 +128,10 @@ const postApplicationForms = async (
 					);
 					await createPermissionGrant(transactionDb, req, {
 						...getSelfManageGrantFragment(req),
+						contextEntityType: PermissionGrantEntityType.APPLICATION_FORM_FIELD,
+						applicationFormFieldId: applicationFormField.id,
+					});
+					await applyDefaultPermissionGrants(transactionDb, req, {
 						contextEntityType: PermissionGrantEntityType.APPLICATION_FORM_FIELD,
 						applicationFormFieldId: applicationFormField.id,
 					});

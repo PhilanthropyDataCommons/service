@@ -9,12 +9,11 @@ import {
 } from '../database';
 import { loadUnifiedAuditLogBundle } from '../database/operations/unifiedAuditLogs';
 import { createTestChangemaker, createTestInitiative } from '../test/factories';
+import { NO_LIMIT, NO_OFFSET } from '../constants';
 import {
 	getAuthContext,
 	getTestAuthContext,
 	loadTestUser,
-	NO_LIMIT,
-	NO_OFFSET,
 } from '../test/utils';
 import {
 	expectArray,

@@ -26,12 +26,11 @@ import {
 	TaskStatus,
 	BaseFieldSensitivityClassification,
 } from '../../types';
+import { NO_LIMIT, NO_OFFSET } from '../../constants';
 import {
 	getAuthContext,
 	getFullPermissionsMap,
 	getTestAuthContext,
-	NO_LIMIT,
-	NO_OFFSET,
 } from '../../test/utils';
 import {
 	expectArrayContaining,

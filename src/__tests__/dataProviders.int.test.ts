@@ -19,12 +19,11 @@ import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
 } from '../test/mockJwt';
+import { NO_LIMIT, NO_OFFSET } from '../constants';
 import {
 	loadTestUser,
 	getTestUserKeycloakUserId,
 	getAuthContext,
-	NO_LIMIT,
-	NO_OFFSET,
 } from '../test/utils';
 const agent = request.agent(app);
 

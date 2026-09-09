@@ -16,13 +16,12 @@ import {
 	createTestInitiativeFieldValue,
 	createTestSource,
 } from '../test/factories';
+import { NO_LIMIT, NO_OFFSET } from '../constants';
 import {
 	getAuthContext,
 	getTestAuthContext,
 	getTestUserKeycloakUserId,
 	loadTestUser,
-	NO_LIMIT,
-	NO_OFFSET,
 } from '../test/utils';
 import {
 	expectArray,

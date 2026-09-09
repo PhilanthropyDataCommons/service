@@ -114,7 +114,7 @@ CREATE FUNCTION build_proposals_results(
 			cp.proposal_id,
 			jsonb_agg(
 				changemaker_to_json(
-					c.*, NULL, NULL, TRUE,
+					c.*, NULL, NULL, NULL, TRUE,
 					vci.id IS NOT NULL
 				)
 				ORDER BY c.id ASC

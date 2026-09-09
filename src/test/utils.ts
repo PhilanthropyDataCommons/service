@@ -1,6 +1,11 @@
 import { setImmediate } from 'node:timers/promises';
 import { loadUserByKeycloakUserId } from '../database';
-import { stringToKeycloakId } from '../types';
+import {
+	getScopesForContextEntityType,
+	PermissionGrantEntityType,
+	PermissionGrantVerb,
+	stringToKeycloakId,
+} from '../types';
 import type { AuthContext, KeycloakId, User } from '../types';
 import type { TinyPg } from 'tinypg';
 
@@ -75,3 +80,15 @@ export const getMockNextFunction = (): jest.Mock<void, unknown[]> =>
 export const NO_OFFSET = 0;
 
 export const NO_LIMIT = undefined;
+
+export const ALL_VERBS = Object.values(PermissionGrantVerb);
+
+export const getFullPermissionsMap = (
+	contextEntityType: PermissionGrantEntityType,
+	verbs: PermissionGrantVerb[] = ALL_VERBS,
+): Record<string, PermissionGrantVerb[]> =>
+	Object.fromEntries(
+		getScopesForContextEntityType(contextEntityType)
+			.filter((scope) => scope !== PermissionGrantEntityType.ANY)
+			.map((scope) => [scope, verbs]),
+	);

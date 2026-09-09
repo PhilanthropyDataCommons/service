@@ -74,7 +74,7 @@ CREATE FUNCTION build_changemakers_results(
 			fs.fiscal_sponsee_changemaker_id AS changemaker_id,
 			jsonb_agg(
 				changemaker_to_json(
-					sponsor.*, NULL, NULL, TRUE,
+					sponsor.*, NULL, NULL, NULL, TRUE,
 					vci.id IS NOT NULL
 				) ORDER BY sponsor.id
 			) AS fiscal_sponsors
@@ -198,16 +198,32 @@ CREATE FUNCTION build_changemakers_results(
 				AND cfv.id = gold_winner.field_value_id
 		) AS winner
 		GROUP BY winner.changemaker_id
+	),
+
+	permissions_json AS (
+		SELECT
+			p.changemaker_id,
+			p.permissions
+		FROM changemaker_permissions_json_among(
+			build_changemakers_results.auth_context_keycloak_user_id,
+			build_changemakers_results.auth_context_is_administrator,
+			ARRAY(SELECT ic.id FROM input_changemakers ic)
+		) AS p
 	)
 
 	SELECT
 		ic.id,
 		changemaker_to_json(
-			ic.*, fsj.fiscal_sponsors, gfj.fields, FALSE,
+			ic.*,
+			fsj.fiscal_sponsors,
+			gfj.fields,
+			COALESCE(pj.permissions, '{}'::jsonb),
+			FALSE,
 			vci.id IS NOT NULL
 		) AS object
 	FROM input_changemakers ic
 	LEFT JOIN fiscal_sponsor_json fsj ON fsj.changemaker_id = ic.id
 	LEFT JOIN gold_field_json gfj ON gfj.changemaker_id = ic.id
-	LEFT JOIN viewable_changemaker_ids vci ON vci.id = ic.id;
+	LEFT JOIN viewable_changemaker_ids vci ON vci.id = ic.id
+	LEFT JOIN permissions_json pj ON pj.changemaker_id = ic.id;
 $$ LANGUAGE sql STABLE;

@@ -41,6 +41,6 @@ FROM merged_changemaker
 		build_changemakers_results(
 			array(SELECT merged_changemaker.changemaker FROM merged_changemaker),
 			:authContextKeycloakUserId,
-			FALSE
+			:authContextIsAdministrator
 		) AS serialized_changemaker
 		ON serialized_changemaker.id = (merged_changemaker.changemaker).id;

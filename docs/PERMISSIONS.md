@@ -282,6 +282,7 @@ context key).
 | edit   | proposal           | Create proposal versions for the funder's proposals                              |
 | view   | source             | View the funder's sources                                                        |
 | create | source             | Create sources associated with the funder                                        |
+| edit   | source             | Update the funder's sources                                                      |
 | view   | terminologySet     | View the funder's terminology sets                                               |
 | edit   | terminologySet     | Create or update terminology sets owned by the funder                            |
 | manage | funder             | View, send, and respond to funder collaborative invitations                      |
@@ -305,6 +306,7 @@ context key).
 | edit   | proposal              | Create proposal versions for the changemaker's proposals          |
 | view   | source                | View the changemaker's sources                                    |
 | create | source                | Create sources associated with the changemaker                    |
+| edit   | source                | Update the changemaker's sources                                  |
 | view   | initiative            | View the changemaker's initiatives                                |
 | edit   | initiative            | Create or update initiatives owned by the changemaker             |
 | view   | initiativeFieldValue  | View field values of the changemaker's initiatives                |
@@ -487,19 +489,21 @@ Permissions granted against a data provider (using the data provider's
 | view   | dataProvider | View the data provider in full, including its non-public attributes |
 | view   | source       | View the data provider's sources                                    |
 | create | source       | Create sources associated with the data provider                    |
+| edit   | source       | Update the data provider's sources                                  |
 
 ### Source Permissions
 
 Permissions granted directly against a source (using the source's `id` as the
 context key). Source permissions inherit from the source's parent entity, so a
-`view | source` or `reference | source` grant on the source's funder,
-changemaker, or data provider automatically applies to all of that parent's
-sources. Source-level grants provide more granular control for specific
+`view | source`, `edit | source`, or `reference | source` grant on the source's
+funder, changemaker, or data provider automatically applies to all of that
+parent's sources. Source-level grants provide more granular control for specific
 sources.
 
 | Verb      | Scope  | What It Enables                                                                    |
 | --------- | ------ | ---------------------------------------------------------------------------------- |
 | view      | source | View the specific source                                                           |
+| edit      | source | Update the source's label                                                          |
 | reference | source | Cite the source when creating proposal versions, bulk upload tasks, or CFV batches |
 
 The `reference | source` check is applied when a source is provided as an

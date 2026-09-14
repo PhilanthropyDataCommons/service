@@ -7,17 +7,20 @@ import {
 	hasChangemakerPermission,
 	hasDataProviderPermission,
 	hasFunderPermission,
+	hasSourcePermission,
 	loadChangemaker,
 	loadDataProvider,
 	loadFunder,
 	loadSource,
 	loadSourceBundle,
 	removeSource,
+	updateSource,
 } from '../database';
 import {
 	getSelfManageGrantFragment,
 	isAuthContext,
 	isId,
+	isSourcePatch,
 	isWritableSource,
 	PermissionGrantEntityType,
 	PermissionGrantVerb,
@@ -131,6 +134,43 @@ const getSource = async (req: Request, res: Response): Promise<void> => {
 		.send(source);
 };
 
+const patchSource = async (req: Request, res: Response): Promise<void> => {
+	if (!isAuthContext(req)) {
+		throw new FailedMiddlewareError('Unexpected lack of auth context.');
+	}
+	const db = getDatabase();
+	const { sourceId } = coerceParams(req.params);
+	if (!isId(sourceId)) {
+		throw new InputValidationError('Invalid id parameter.', isId.errors ?? []);
+	}
+	if (!isSourcePatch(req.body)) {
+		throw new InputValidationError(
+			'Invalid request body.',
+			isSourcePatch.errors ?? [],
+		);
+	}
+
+	await loadSource(db, req, sourceId);
+
+	if (
+		!(await hasSourcePermission(db, req, {
+			sourceId,
+			permission: PermissionGrantVerb.EDIT,
+			scope: PermissionGrantEntityType.SOURCE,
+		}))
+	) {
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to edit the specified source.',
+		);
+	}
+
+	const updatedSource = await updateSource(db, req, req.body, sourceId);
+	res
+		.status(HTTP_STATUS.SUCCESSFUL.OK)
+		.contentType('application/json')
+		.send(updatedSource);
+};
+
 const deleteSource = async (req: Request, res: Response): Promise<void> => {
 	const db = getDatabase();
 	const { sourceId } = coerceParams(req.params);
@@ -149,5 +189,6 @@ export const sourcesHandlers = {
 	postSource,
 	getSources,
 	getSource,
+	patchSource,
 	deleteSource,
 };

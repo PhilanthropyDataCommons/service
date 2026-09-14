@@ -16,6 +16,12 @@ sourcesRouter.post('/', requireAuthentication, sourcesHandlers.postSource);
 
 sourcesRouter.post('/', requireAdministratorRole, sourcesHandlers.postSource);
 
+sourcesRouter.patch(
+	'/:sourceId',
+	requireAuthentication,
+	sourcesHandlers.patchSource,
+);
+
 sourcesRouter.delete(
 	'/:sourceId',
 	requireAdministratorRole,

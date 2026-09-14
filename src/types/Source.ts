@@ -34,6 +34,10 @@ type Source = DataProviderSource | FunderSource | ChangemakerSource;
 
 type WritableSource = Writable<Source>;
 
+const sourceLabelSchema: JSONSchemaType<WritableSource['label']> = {
+	type: 'string',
+};
+
 const writableSourceSchema: JSONSchemaType<WritableSource> = {
 	type: 'object',
 	required: [],
@@ -41,7 +45,7 @@ const writableSourceSchema: JSONSchemaType<WritableSource> = {
 		{
 			type: 'object',
 			properties: {
-				label: { type: 'string' },
+				label: sourceLabelSchema,
 			},
 			required: ['label'],
 		},
@@ -76,4 +80,30 @@ const writableSourceSchema: JSONSchemaType<WritableSource> = {
 
 const isWritableSource = ajv.compile(writableSourceSchema);
 
-export { type Source, type WritableSource, isWritableSource };
+type SourcePatch = Partial<Pick<WritableSource, 'label'>>;
+
+const sourcePatchSchema: JSONSchemaType<SourcePatch> = {
+	type: 'object',
+	properties: {
+		label: {
+			...sourceLabelSchema,
+			/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
+			 * AJV's JSONSchemaType does not properly support nullable for patches.
+			 * See https://github.com/ajv-validator/ajv/issues/2163
+			 */
+			nullable: false as true,
+		},
+	},
+	additionalProperties: false,
+	minProperties: 1,
+};
+
+const isSourcePatch = ajv.compile(sourcePatchSchema);
+
+export {
+	type Source,
+	type SourcePatch,
+	type WritableSource,
+	isSourcePatch,
+	isWritableSource,
+};

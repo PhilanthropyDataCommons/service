@@ -272,6 +272,9 @@
 			"Source": {
 				"$ref": "./components/schemas/Source.json"
 			},
+			"SourcePatch": {
+				"$ref": "./components/schemas/SourcePatch.json"
+			},
 			"SourcePermissionGrant": {
 				"$ref": "./components/schemas/SourcePermissionGrant.json"
 			},

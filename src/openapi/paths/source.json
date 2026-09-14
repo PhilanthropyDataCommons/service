@@ -41,6 +41,70 @@
 			}
 		}
 	},
+	"patch": {
+		"operationId": "updateSourceById",
+		"summary": "Updates the label of a specific source.",
+		"description": "Requires `edit` permission at the `source` scope on the source or on its funder, changemaker, or data provider.",
+		"tags": ["Sources"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "sourceId",
+				"description": "The PDC-generated ID of a source.",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				}
+			}
+		],
+		"requestBody": {
+			"required": true,
+			"content": {
+				"application/json": {
+					"schema": {
+						"$ref": "../components/schemas/SourcePatch.json"
+					}
+				}
+			}
+		},
+		"responses": {
+			"200": {
+				"description": "The updated source.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/Source.json"
+						}
+					}
+				}
+			},
+			"400": {
+				"$ref": "../components/responses/InputValidation.json"
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json",
+				"description": "The caller may view the source but may not edit it."
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json",
+				"description": "The source could not be found, or the caller may not view it."
+			},
+			"409": {
+				"$ref": "../components/responses/Conflict.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	},
 	"delete": {
 		"operationId": "deleteSourceById",
 		"summary": "Deletes a specific source.",

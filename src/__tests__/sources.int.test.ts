@@ -11,6 +11,7 @@ import {
 	createApplicationForm,
 	createPermissionGrant,
 } from '../database';
+import { loadUnifiedAuditLogBundle } from '../database/operations/unifiedAuditLogs';
 import {
 	expectArray,
 	expectArrayContaining,
@@ -28,6 +29,7 @@ import {
 } from '../test/factories';
 import {
 	getAuthContext,
+	getTestAuthContext,
 	loadTestUser,
 	NO_LIMIT,
 	NO_OFFSET,
@@ -938,6 +940,250 @@ describe('/sources', () => {
 			});
 		});
 	});
+
+	describe('PATCH /:sourceId', () => {
+		it('requires authentication', async () => {
+			await agent.patch('/sources/1').expect(401);
+		});
+
+		it('returns 400 when id is not numeric', async () => {
+			const result = await agent
+				.patch('/sources/not_a_valid_id')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ label: 'Renamed Source' })
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('returns 400 when the body is empty', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const source = await createTestSource(db, testUserAuthContext);
+
+			const result = await agent
+				.patch(`/sources/${source.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({})
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('returns 400 when the body contains an unwritable attribute', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const source = await createTestSource(db, testUserAuthContext);
+			const funder = await createTestFunder(db, testUserAuthContext);
+
+			const result = await agent
+				.patch(`/sources/${source.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ funderShortCode: funder.shortCode })
+				.expect(400);
+			expect(result.body).toMatchObject({
+				name: 'InputValidationError',
+				details: expectArray(),
+			});
+		});
+
+		it('returns 404 when the source does not exist', async () => {
+			await agent
+				.patch('/sources/9001')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ label: 'Renamed Source' })
+				.expect(404);
+		});
+
+		it('updates the label for an administrator', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const adminUserAuthContext = getAuthContext(testUser, true);
+			const source = await createTestSource(db, adminUserAuthContext, {
+				label: 'Original Source',
+			});
+
+			const result = await agent
+				.patch(`/sources/${source.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ label: 'Renamed Source' })
+				.expect(200);
+			expect(result.body).toEqual({
+				...source,
+				label: 'Renamed Source',
+			});
+		});
+
+		it('returns 404 when a non-admin caller cannot view the source', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const source = await createTestSource(db, testUserAuthContext);
+
+			await agent
+				.patch(`/sources/${source.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({ label: 'Renamed Source' })
+				.expect(404);
+		});
+
+		it('returns 403 when a non-admin caller can view but lacks edit permission', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const source = await createTestSource(db, testUserAuthContext);
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: source.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			await agent
+				.patch(`/sources/${source.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({ label: 'Renamed Source' })
+				.expect(403);
+		});
+
+		it('updates the label when a non-admin caller has a direct edit grant', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const source = await createTestSource(db, testUserAuthContext, {
+				label: 'Original Source',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.SOURCE,
+				sourceId: source.id,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+			});
+
+			const result = await agent
+				.patch(`/sources/${source.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({ label: 'Renamed Source' })
+				.expect(200);
+			expect(result.body).toEqual({
+				...source,
+				label: 'Renamed Source',
+			});
+		});
+
+		it('updates the label when a non-admin caller has an inherited funder edit grant', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const funder = await createTestFunder(db, testUserAuthContext);
+			const source = await createTestSource(db, testUserAuthContext, {
+				label: 'Original Source',
+				funderShortCode: funder.shortCode,
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.SOURCE],
+				verbs: [PermissionGrantVerb.VIEW, PermissionGrantVerb.EDIT],
+			});
+
+			const result = await agent
+				.patch(`/sources/${source.id}`)
+				.type('application/json')
+				.set(authHeader)
+				.send({ label: 'Renamed Source' })
+				.expect(200);
+			expect(result.body).toEqual({
+				...source,
+				label: 'Renamed Source',
+			});
+		});
+
+		it('returns 409 conflict when the new label is not unique for the owner', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			await createTestSource(db, testUserAuthContext, {
+				label: 'Existing Source',
+				changemakerId: changemaker.id,
+			});
+			const source = await createTestSource(db, testUserAuthContext, {
+				label: 'Original Source',
+				changemakerId: changemaker.id,
+			});
+
+			const result = await agent
+				.patch(`/sources/${source.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ label: 'Existing Source' })
+				.expect(409);
+			expect(result.body).toMatchObject({
+				name: 'DatabaseError',
+				details: [
+					{
+						code: PostgresErrorCode.UNIQUE_VIOLATION,
+					},
+				],
+			});
+		});
+
+		it('records the acting user in the audit log', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const source = await createTestSource(db, testUserAuthContext);
+
+			await agent
+				.patch(`/sources/${source.id}`)
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({ label: 'Renamed Source' })
+				.expect(200);
+
+			const auditLogs = await loadUnifiedAuditLogBundle(
+				db,
+				await getTestAuthContext(db),
+				NO_LIMIT,
+				NO_OFFSET,
+			);
+			expect(auditLogs.entries).toContainEqual(
+				expectObjectContaining({
+					operation: 'Called query sources.updateById',
+					userKeycloakUserId: testUser.keycloakUserId,
+					userIsAdministrator: true,
+				}),
+			);
+		});
+	});
+
 	describe('DELETE /:sourceId', () => {
 		it('requires authentication', async () => {
 			await agent.delete('/sources/:sourceId').expect(401);

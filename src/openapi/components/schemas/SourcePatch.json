@@ -1,0 +1,13 @@
+{
+	"type": "object",
+	"properties": {
+		"label": {
+			"type": "string",
+			"description": "A description of the dataset from the changemaker, funder, or data provider that adds the data to the PDC.",
+			"example": "The 2025 Survey of Changemakers by the Good Foundation"
+		}
+	},
+	"additionalProperties": false,
+	"minProperties": 1,
+	"required": []
+}

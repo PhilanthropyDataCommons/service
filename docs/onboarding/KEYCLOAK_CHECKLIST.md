@@ -4,16 +4,26 @@ This is intended to be a comprehensive checklist of Keycloak configurations that
 should be present to fully interoperate with the PDC service and external IdPs
 as expected. It is intended to remind, not to detail setup of each item.
 
-- [ ] Required action `.jar` file in `providers` directory (from `auth` project)
-- [ ] SMS 2FA `.jar` file in `providers` directory (from `auth` project)
-- [ ] Theme `.jar` file in `providers` directory (from `auth` project)
+Jar files come from the "auth" project Releases here:
+https://github.com/PhilanthropyDataCommons/auth/releases
+
+- [ ] Required action `.jar` file in `providers` directory
+- [ ] SMS 2FA `.jar` file in `providers` directory
+- [ ] Theme `.jar` file in `providers` directory
+- [ ] Link to Welcome Page `.jar` file in `providers` directory
 - [ ] A realm matching the PDC service env vars (rest is part of this realm)
 - [ ] Authn Required Actions includes "Update mobile number" enabled
+- [ ] Authn Required Actions includes "Link to Welcome Page" enabled (and last)
+- [ ] Client `pdc-link-to-welcome-page` links to a welcome page
+- [ ] Authn "Link to Welcome Page" action uses `pdc-link-to-welcome-page` client
 - [ ] Browser authn flow includes "TOTP or SMS" after passphrase
 - [ ] SMS Authentication step in Browser authn flow has an alias
 - [ ] SMS Authentication step also has SenderId "Philanthropy Data Commons"
-- [ ] Custom Login theme enabled (realm Themes)
-- [ ] Custom Email theme enabled (realm Themes)
+- [ ] Localization Enabled.
+  - [ ] Locales: `English` for both fields.
+  - [ ] Realm overrides: "translation" for `maintenanceNotice` is set
+- [ ] Custom Login theme `pdc-keycloak-theme` enabled (realm Themes)
+- [ ] Custom Email theme `pdc-keycloak-theme` enabled (realm Themes)
 - [ ] Use `pdc-` prefix on custom clients to distinguish from built-in clients
 - [ ] `pdc-openapi-docs` client (service API docs use this)
 - [ ] `pdc-admin` group

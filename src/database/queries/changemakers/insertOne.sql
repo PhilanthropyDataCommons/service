@@ -18,5 +18,5 @@ SELECT serialized_changemaker.object
 FROM build_changemakers_results(
 	array(SELECT inserted_changemaker::changemakers FROM inserted_changemaker),
 	:authContextKeycloakUserId,
-	FALSE
+	:authContextIsAdministrator
 ) AS serialized_changemaker;

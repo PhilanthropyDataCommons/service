@@ -1,0 +1,18 @@
+{
+	"type": "object",
+	"description": "The authenticated caller's resolved permissions on this entity. Each key is a permission scope; each value lists every verb the caller holds at that scope, with `manage` verbs, `any`-scope grants, user group membership, all-authenticated-users grants, and the administrator role already expanded. Scopes restricted by grant conditions are omitted rather than overstated. Empty for anonymous callers and for funders embedded within another entity's response; shallow changemaker embeds omit the attribute, while fully serialized embedded changemakers resolve normally.",
+	"readOnly": true,
+	"propertyNames": {
+		"$ref": "./PermissionGrantEntityType.json"
+	},
+	"additionalProperties": {
+		"type": "array",
+		"items": {
+			"$ref": "./PermissionGrantVerb.json"
+		}
+	},
+	"example": {
+		"changemaker": ["view", "edit"],
+		"proposal": ["view"]
+	}
+}

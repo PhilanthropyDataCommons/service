@@ -10,14 +10,11 @@ DECLARE
   funder_json JSONB;
   terminology_set_json JSONB;
 BEGIN
-  SELECT funder_to_json(funders.*)
+  SELECT funder_to_json(funders.*, NULL)
   INTO funder_json
   FROM funders
   WHERE funders.short_code = opportunity.funder_short_code;
 
-  -- Only embed the terminology set when the caller is permitted to view it.
-  -- The terminologySetId is always returned, but the inlined details are
-  -- gated behind `view | terminologySet`.
   IF opportunity.terminology_set_id IS NOT NULL
     AND EXISTS (
       SELECT 1

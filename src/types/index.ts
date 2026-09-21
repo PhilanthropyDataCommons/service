@@ -42,6 +42,7 @@ export * from './PermissionGrantCondition';
 export * from './PermissionGrantEntityType';
 export * from './PermissionGrantGranteeType';
 export * from './PermissionGrantVerb';
+export * from './PermissionsMap';
 export * from './PostgresErrorCode';
 export * from './ProcessBulkUploadJobPayload';
 export * from './Proposal';

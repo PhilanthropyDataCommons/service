@@ -1,3 +1,13 @@
-SELECT funder_to_json(funders.*) AS object
-FROM funders
-WHERE short_code = :funderShortCode;
+WITH
+	requested_funder AS (
+		SELECT funders AS funder
+		FROM funders
+		WHERE funders.short_code = :funderShortCode
+	)
+
+SELECT serialized_funder.object
+FROM build_funders_results(
+	array(SELECT requested_funder.funder FROM requested_funder),
+	:authContextKeycloakUserId,
+	:authContextIsAdministrator
+) AS serialized_funder;

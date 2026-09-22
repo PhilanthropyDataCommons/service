@@ -42,6 +42,7 @@ const getDefaultPermissionGrants = async (
 	const defaultPermissionGrantBundle = await loadDefaultPermissionGrantBundle(
 		db,
 		req,
+		undefined,
 		limit,
 		offset,
 	);

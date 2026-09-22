@@ -4,7 +4,8 @@ import { expect } from '@jest/globals';
 import { getDatabase } from '../database/db';
 import { createServiceQueryAuditLog } from '../database/operations/serviceQueryAuditLogs';
 import { loadUnifiedAuditLogBundle } from '../database/operations/unifiedAuditLogs';
-import { getTestAuthContext, NO_LIMIT, NO_OFFSET } from '../test/utils';
+import { NO_LIMIT, NO_OFFSET } from '../constants';
+import { getTestAuthContext } from '../test/utils';
 import { expectTimestamp } from '../test/asymettricMatchers';
 
 describe('service query audit logs', () => {

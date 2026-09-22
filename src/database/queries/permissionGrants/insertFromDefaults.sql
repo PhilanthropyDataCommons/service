@@ -1,0 +1,53 @@
+INSERT INTO permission_grants (
+	grantee_type,
+	grantee_user_keycloak_user_id,
+	grantee_keycloak_organization_id,
+	context_entity_type,
+	changemaker_id,
+	funder_short_code,
+	data_provider_short_code,
+	opportunity_id,
+	proposal_id,
+	proposal_version_id,
+	application_form_id,
+	application_form_field_id,
+	proposal_field_value_id,
+	source_id,
+	bulk_upload_task_id,
+	changemaker_field_value_id,
+	terminology_set_id,
+	initiative_id,
+	initiative_field_value_id,
+	scope,
+	verbs,
+	conditions,
+	created_by
+)
+SELECT
+	default_permission_grants.grantee_type,
+	default_permission_grants.grantee_user_keycloak_user_id,
+	default_permission_grants.grantee_keycloak_organization_id,
+	default_permission_grants.context_entity_type,
+	:changemakerId::integer,
+	:funderShortCode::text,
+	:dataProviderShortCode::text,
+	:opportunityId::integer,
+	:proposalId::integer,
+	:proposalVersionId::integer,
+	:applicationFormId::integer,
+	:applicationFormFieldId::integer,
+	:proposalFieldValueId::integer,
+	:sourceId::integer,
+	:bulkUploadTaskId::integer,
+	:changemakerFieldValueId::integer,
+	:terminologySetId::integer,
+	:initiativeId::integer,
+	:initiativeFieldValueId::integer,
+	default_permission_grants.scope,
+	default_permission_grants.verbs,
+	default_permission_grants.conditions,
+	:authContextKeycloakUserId::uuid
+FROM default_permission_grants
+WHERE
+	default_permission_grants.context_entity_type
+	= :contextEntityType::permission_grant_entity_type_t;

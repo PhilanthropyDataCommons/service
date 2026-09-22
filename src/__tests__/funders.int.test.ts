@@ -12,14 +12,13 @@ import {
 	loadFunderCollaborativeMember,
 	createPermissionGrant,
 } from '../database';
+import { NO_LIMIT, NO_OFFSET } from '../constants';
 import {
 	ALL_VERBS,
 	getAuthContext,
 	getFullPermissionsMap,
 	loadTestUser,
 	getTestUserKeycloakUserId,
-	NO_LIMIT,
-	NO_OFFSET,
 } from '../test/utils';
 import {
 	expectArray,

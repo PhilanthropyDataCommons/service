@@ -21,12 +21,8 @@ import {
 	createTestChangemaker,
 	createTestSource,
 } from '../test/factories';
-import {
-	getAuthContext,
-	loadTestUser,
-	NO_LIMIT,
-	NO_OFFSET,
-} from '../test/utils';
+import { NO_LIMIT, NO_OFFSET } from '../constants';
+import { getAuthContext, loadTestUser } from '../test/utils';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,

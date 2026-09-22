@@ -27,14 +27,13 @@ import {
 	createTestProposal,
 	createTestSource,
 } from '../test/factories';
+import { NO_LIMIT, NO_OFFSET } from '../constants';
 import {
 	ALL_VERBS,
 	getAuthContext,
 	getFullPermissionsMap,
 	getTestUserKeycloakUserId,
 	loadTestUser,
-	NO_LIMIT,
-	NO_OFFSET,
 } from '../test/utils';
 import {
 	expectArray,

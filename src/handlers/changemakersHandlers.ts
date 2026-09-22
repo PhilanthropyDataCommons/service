@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	getDatabase,
 	getLimitValues,
@@ -48,6 +49,10 @@ const postChangemaker = async (req: Request, res: Response): Promise<void> => {
 		const changemaker = await createChangemaker(txDb, req, body);
 		await createPermissionGrant(txDb, req, {
 			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+			changemakerId: changemaker.id,
+		});
+		await applyDefaultPermissionGrants(txDb, req, {
 			contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
 			changemakerId: changemaker.id,
 		});

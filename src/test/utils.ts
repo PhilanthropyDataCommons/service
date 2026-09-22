@@ -76,11 +76,6 @@ export const getTestAuthContext = async (
 
 export const getMockNextFunction = (): jest.Mock<void, unknown[]> =>
 	jest.fn((): void => undefined);
-
-export const NO_OFFSET = 0;
-
-export const NO_LIMIT = undefined;
-
 export const ALL_VERBS = Object.values(PermissionGrantVerb);
 
 export const getFullPermissionsMap = (

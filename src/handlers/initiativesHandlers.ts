@@ -1,6 +1,7 @@
 import { HTTP_STATUS } from '../constants';
 import {
 	createInitiative,
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	getDatabase,
 	getLimitValues,
@@ -100,6 +101,10 @@ const postInitiative = async (req: Request, res: Response): Promise<void> => {
 		const initiative = await createInitiative(txDb, req, body);
 		await createPermissionGrant(txDb, req, {
 			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.INITIATIVE,
+			initiativeId: initiative.id,
+		});
+		await applyDefaultPermissionGrants(txDb, req, {
 			contextEntityType: PermissionGrantEntityType.INITIATIVE,
 			initiativeId: initiative.id,
 		});

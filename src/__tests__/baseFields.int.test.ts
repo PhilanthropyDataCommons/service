@@ -12,7 +12,7 @@ import {
 	BaseFieldCategory,
 	BaseFieldSensitivityClassification,
 } from '../types';
-import { NO_LIMIT, NO_OFFSET } from '../test/utils';
+import { NO_LIMIT, NO_OFFSET } from '../constants';
 import { expectArray, expectTimestamp } from '../test/asymettricMatchers';
 import { createTestBaseField } from '../test/factories';
 import {

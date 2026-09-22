@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	getDatabase,
 	createBulkUploadTask,
@@ -138,6 +139,10 @@ const postBulkUploadTask = async (
 		});
 		await createPermissionGrant(txDb, req, {
 			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.BULK_UPLOAD,
+			bulkUploadTaskId: bulkUploadTask.id,
+		});
+		await applyDefaultPermissionGrants(txDb, req, {
 			contextEntityType: PermissionGrantEntityType.BULK_UPLOAD,
 			bulkUploadTaskId: bulkUploadTask.id,
 		});

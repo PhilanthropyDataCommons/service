@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	createProposalFieldValue,
 	createProposalVersion,
@@ -148,6 +149,10 @@ const postProposalVersion = async (
 				contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION,
 				proposalVersionId: proposalVersion.id,
 			});
+			await applyDefaultPermissionGrants(transactionDb, req, {
+				contextEntityType: PermissionGrantEntityType.PROPOSAL_VERSION,
+				proposalVersionId: proposalVersion.id,
+			});
 			const proposalFieldValues = await allNoLeaks(
 				fieldValues.map(async (fieldValue) => {
 					const { value, applicationFormFieldId } = fieldValue;
@@ -171,6 +176,10 @@ const postProposalVersion = async (
 					);
 					await createPermissionGrant(transactionDb, req, {
 						...getSelfManageGrantFragment(req),
+						contextEntityType: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
+						proposalFieldValueId: proposalFieldValue.id,
+					});
+					await applyDefaultPermissionGrants(transactionDb, req, {
 						contextEntityType: PermissionGrantEntityType.PROPOSAL_FIELD_VALUE,
 						proposalFieldValueId: proposalFieldValue.id,
 					});

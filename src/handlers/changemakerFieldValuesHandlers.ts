@@ -1,5 +1,6 @@
 import { HTTP_STATUS } from '../constants';
 import {
+	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	getDatabase,
 	createChangemakerFieldValue,
@@ -104,6 +105,10 @@ const postChangemakerFieldValue = async (
 		});
 		await createPermissionGrant(txDb, req, {
 			...getSelfManageGrantFragment(req),
+			contextEntityType: PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
+			changemakerFieldValueId: changemakerFieldValue.id,
+		});
+		await applyDefaultPermissionGrants(txDb, req, {
 			contextEntityType: PermissionGrantEntityType.CHANGEMAKER_FIELD_VALUE,
 			changemakerFieldValueId: changemakerFieldValue.id,
 		});

@@ -301,6 +301,27 @@ grant carries except the key naming a specific context entity, so a default perm
 grant plus a newly created entity of its `contextEntityType` describes a permission
 grant.
 
+Whenever an entity is created, every default permission grant registered for
+that entity's type generates a new matching permission grant against the new
+entity, alongside the `manage` grant its creator always receives. The grants are made
+in the same transaction as the entity, so an entity either exists with its
+default grants or does not exist at all. Editing or deleting a default
+permission grant leaves the grants it has already produced untouched.
+
+For example, suppose an administrator works through these steps:
+
+1. Funder A is created.
+2. A default permission grant is created giving user X `view | funder` on
+   funders.
+3. Funder B is created. User X now holds a `view | funder` grant on funder B.
+4. The default permission grant is deleted.
+
+Afterward, user X still holds `view | funder` on funder B, because that grant
+was made in step 3 and is independent of the default that produced it. User X
+has no grant on funder A, because funder A existed before the default did.
+Revoking user X's access to funder B means deleting that grant directly, like
+any other permission grant.
+
 CRUD operations on default permission grants, at `/defaultPermissionGrants`,
 require the `pdc-admin` role. Default permission grants sit outside the
 permission system rather than within it: holding `manage` on an entity does

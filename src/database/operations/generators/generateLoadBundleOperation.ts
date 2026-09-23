@@ -1,5 +1,6 @@
 import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import {
+	getCanViewUsersInKeycloakFromAuthContext,
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
@@ -42,6 +43,8 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 					getKeycloakUserIdFromAuthContext(authContext),
 				authContextIsAdministrator:
 					getIsAdministratorFromAuthContext(authContext),
+				authContextCanViewUsersInKeycloak:
+					getCanViewUsersInKeycloakFromAuthContext(authContext),
 			},
 		);
 		const { rows } = await db.sql<PaginatedJsonResultSet<T>>(

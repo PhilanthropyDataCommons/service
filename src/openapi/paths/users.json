@@ -2,6 +2,7 @@
 	"get": {
 		"operationId": "getUsers",
 		"summary": "Gets a list of users.",
+		"description": "Returns the caller's own user record, and additionally every other user when the caller can see users in the system of record (admins).",
 		"tags": ["Users"],
 		"security": [
 			{

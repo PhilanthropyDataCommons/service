@@ -7,6 +7,9 @@ import { expectTimestamp } from '../test/asymettricMatchers';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
+	mockJwtWithRealmManagementManageUsersRole as authHeaderWithManageUsersRole,
+	mockJwtWithRealmManagementQueryUsersRole as authHeaderWithQueryUsersRole,
+	mockJwtWithRealmManagementViewUsersRole as authHeaderWithViewUsersRole,
 } from '../test/mockJwt';
 import { keycloakIdToString } from '../types';
 import type { User } from '../types';
@@ -37,7 +40,27 @@ describe('/users', () => {
 			});
 		});
 
-		it('returns all users when the user is an administrator', async () => {
+		it('returns only the requesting user when the caller carries the pdc-admin realm role but no realm-management user role', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			await createTestUser(db, null);
+
+			const response = await request(app)
+				.get('/users')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: 1,
+				entries: [
+					{
+						...testUser,
+						createdAt: expectTimestamp(),
+					},
+				],
+			});
+		});
+
+		it('returns all users when the caller carries the query-users realm-management role', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const testUser = await loadTestUser(db);
@@ -46,7 +69,41 @@ describe('/users', () => {
 
 			const response = await request(app)
 				.get('/users')
-				.set(authHeaderWithAdminRole)
+				.set(authHeaderWithQueryUsersRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: userCount,
+				entries: [anotherUser, testUser, systemUser],
+			});
+		});
+
+		it('returns all users when the caller carries the view-users realm-management role', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser(db);
+			const anotherUser = await createTestUser(db, null);
+			const { count: userCount } = await loadTableMetrics(db, 'users');
+
+			const response = await request(app)
+				.get('/users')
+				.set(authHeaderWithViewUsersRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				total: userCount,
+				entries: [anotherUser, testUser, systemUser],
+			});
+		});
+
+		it('returns all users when the caller carries the manage-users realm-management role', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const testUser = await loadTestUser(db);
+			const anotherUser = await createTestUser(db, null);
+			const { count: userCount } = await loadTableMetrics(db, 'users');
+
+			const response = await request(app)
+				.get('/users')
+				.set(authHeaderWithManageUsersRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: userCount,
@@ -62,7 +119,7 @@ describe('/users', () => {
 				.get(
 					`/users?keycloakUserId=${keycloakIdToString(anotherUser.keycloakUserId)}`,
 				)
-				.set(authHeaderWithAdminRole)
+				.set(authHeaderWithQueryUsersRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: 1,
@@ -73,7 +130,7 @@ describe('/users', () => {
 		it('returns 400 when an invalid keycloakUserId is provided', async () => {
 			await request(app)
 				.get(`/users?keycloakUserId=thisisnotauuid`)
-				.set(authHeaderWithAdminRole)
+				.set(authHeaderWithQueryUsersRole)
 				.expect(400);
 		});
 
@@ -95,7 +152,7 @@ describe('/users', () => {
 					_page: 2,
 					_count: 5,
 				})
-				.set(authHeaderWithAdminRole)
+				.set(authHeaderWithQueryUsersRole)
 				.expect(200);
 			expect(response.body).toEqual({
 				total: userCount,

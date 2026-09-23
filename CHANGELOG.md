@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A changemaker now carries the `keycloakOrganizationId`, `createdAt`, and `createdBy` attributes, and its `fiscalSponsors`, only when the requester holds `view` permission on that changemaker. Every other requester, including an unauthenticated one, receives `id`, `name`, and `taxId`, plus `fields` where the endpoint returns it at all. This applies wherever a changemaker appears, not just at `/changemakers`: the changemakers embedded in a proposal, in a source, and in another changemaker's `fiscalSponsors` are narrowed the same way. Permission is evaluated per changemaker, so a single array may hold both shapes.
 - `fields` remains an empty array for unauthenticated requests; it is kept in the response shape to support future visibility of `public` base field values.
+- `GET /users` now authorizes the all-users branch against the Keycloak `realm-management` roles `query-users`, `view-users`, or `manage-users` on the caller's JWT (any one), mirroring the disjunction Keycloak itself accepts on the equivalent `GET /admin/realms/{realm}/users` list call, instead of against the PDC-service `pdc-admin` realm role. A token that previously counted as an administrator for this endpoint via `pdc-admin` alone no longer sees every user; such a caller now sees only their own user record (authenticated self-visibility is unchanged).
 
 ### Fixed
 

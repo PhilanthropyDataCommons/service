@@ -39,4 +39,114 @@ describe('addRoleContext', () => {
 		const nextMock = generateNextWithAssertions(runAssertions, done);
 		addRoleContext(req, res, nextMock);
 	});
+
+	it('sets canViewAllUsers false when the JWT carries no resource_access tree', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['pdc-admin'],
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewAllUsers).toBe(false);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewAllUsers false when the JWT carries realm-management roles outside the accepted set', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['pdc-admin'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['view-events'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewAllUsers).toBe(false);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewAllUsers true when the JWT carries query-users', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['query-users'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewAllUsers).toBe(true);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewAllUsers true when the JWT carries view-users', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['view-users'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewAllUsers).toBe(true);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewAllUsers true when the JWT carries manage-users', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['manage-users'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewAllUsers).toBe(true);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
 });

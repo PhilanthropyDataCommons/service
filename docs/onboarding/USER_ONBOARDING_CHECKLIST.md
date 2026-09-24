@@ -21,6 +21,7 @@ Visit https://auth.philanthropydatacommons.org/admin/pdc/console/#/pdc/users
     - [ ] Configure OTP
     - [ ] Update Password
     - [ ] Update mobile number
+    - [ ] Link to Welcome Page
   - [ ] Adjust the Expiration to give the user enough time to login (usually 7-14 days)
         ![The Credential Reset Form](./images/user_onboarding_3.png)
   - [ ] Click "Send Email"

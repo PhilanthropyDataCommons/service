@@ -15,7 +15,7 @@ WITH
 				ELSE
 					(
 						users.keycloak_user_id = :authContextKeycloakUserId
-						OR :authContextIsAdministrator::boolean
+						OR :authContextCanViewAllUsers::boolean
 					)
 			END
 		GROUP BY users.keycloak_user_id
@@ -37,7 +37,7 @@ WITH
 			user_to_json(
 				page.*::users,
 				:authContextKeycloakUserId,
-				:authContextIsAdministrator
+				:authContextCanViewAllUsers
 			) AS object
 		FROM page
 		ORDER BY created_at DESC

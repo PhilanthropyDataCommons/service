@@ -2,6 +2,7 @@
 	"get": {
 		"operationId": "getUsers",
 		"summary": "Gets a list of users.",
+		"description": "Returns the caller's own user record, and additionally every other user when the caller's JWT carries at least one of the Keycloak `realm-management` user-visibility roles (`query-users`, `view-users`, or `manage-users`).",
 		"tags": ["Users"],
 		"security": [
 			{

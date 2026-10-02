@@ -26,8 +26,9 @@ https://github.com/PhilanthropyDataCommons/auth/releases
 - [ ] Custom Email theme `pdc-keycloak-theme` enabled (realm Themes)
 - [ ] Use `pdc-` prefix on custom clients to distinguish from built-in clients
 - [ ] `pdc-openapi-docs` client (service API docs use this)
-- [ ] `pdc-admin` group
-- [ ] `pdc-admin` role assigned to `pdc-admin` group
+- [ ] `pdc-admin` group for human PDC administrators (service and Keycloak)
+- [ ] `pdc-admin` realm role for PDC service administrators
+- [ ] `pdc-admin` realm role assigned to `pdc-admin` group
 - [ ] The following (Client) roles assigned to the `pdc-admin` group:
   - [ ] `realm-management` `manage-users`
   - [ ] `realm-management` `view-users`

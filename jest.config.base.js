@@ -13,6 +13,7 @@ module.exports = {
 	},
 	preset: 'ts-jest',
 	globalSetup: '<rootDir>/src/test/globalSetup.ts',
+	setupFilesAfterEnv: ['<rootDir>/src/test/suiteSetup.ts'],
 	testEnvironment: 'node',
 	testPathIgnorePatterns: ['<rootDir>/dist/'],
 	silent: true,

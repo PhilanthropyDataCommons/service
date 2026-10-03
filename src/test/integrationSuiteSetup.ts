@@ -18,25 +18,6 @@ import {
 } from './harnessFunctions';
 import { mockJwks } from './mockJwt';
 
-// This mock prevents graphile-worker from running background jobs during tests.
-// A factory is used rather than an automock because graphile-worker's entrypoint
-// has a circular import that jest's automocker cannot resolve.
-jest.mock('graphile-worker', () => {
-	class Logger {
-		error = jest.fn();
-		warn = jest.fn();
-		info = jest.fn();
-		debug = jest.fn();
-		scope = jest.fn(() => new Logger());
-	}
-	return {
-		Logger,
-		run: jest.fn(),
-		runMigrations: jest.fn(),
-		addJobAdhoc: jest.fn(),
-	};
-});
-
 beforeAll(async () => {
 	await initializeWorker();
 });

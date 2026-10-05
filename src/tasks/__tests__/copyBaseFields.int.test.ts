@@ -1,4 +1,5 @@
 import nock from 'nock';
+import { MAX_INT32 } from '../../constants';
 import { fetchBaseFieldsFromRemote, copyBaseFields } from '../index';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import {
@@ -121,6 +122,7 @@ describe('fetchBaseFieldsFromRemote', () => {
 	it('should throw an error if the http request to the synchronization url fails', async () => {
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.replyWithError('nobody here but us chickens');
 
 		await expect(
@@ -133,6 +135,7 @@ describe('fetchBaseFieldsFromRemote', () => {
 	it('should throw an error if the http request to the synchronization url succeeds, but the data recieved is not valid json', async () => {
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, 'nobody here but us chickens');
 
 		await expect(
@@ -145,6 +148,7 @@ describe('fetchBaseFieldsFromRemote', () => {
 	it('should throw an error if the http request to the synchronization url succeeds, provides valid json, but the entries are not base fields', async () => {
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, {
 				entries: [
 					{
@@ -167,6 +171,7 @@ describe('fetchBaseFieldsFromRemote', () => {
 	it('should resolve a valid response', async () => {
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, { entries: mockBaseFields, total: mockBaseFields.length });
 
 		await expect(
@@ -195,6 +200,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, { entries: mockBaseFields, total: mockBaseFields.length });
 
 		await copyBaseFields(
@@ -225,6 +231,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(404, 'page not found');
 
 		await copyBaseFields(
@@ -255,6 +262,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, {
 				entries: [
 					{
@@ -297,6 +305,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, { entries: [], total: 0 });
 
 		await copyBaseFields(
@@ -333,6 +342,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, {
 				entries: [
 					{
@@ -420,6 +430,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, { entries: mockBaseFields, total: mockBaseFields.length });
 
 		await copyBaseFields(
@@ -486,6 +497,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, { entries: [mockRemoteBaseField], total: 1 });
 
 		await copyBaseFields(
@@ -564,6 +576,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, {
 				entries: [mockRemoteBaseField, mockFirstNameBaseField],
 				total: 2,
@@ -661,6 +674,7 @@ describe('copyBaseFields', () => {
 
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, {
 				entries: [mockFirstNameBaseFieldWithNoLocalizations],
 				total: 1,
@@ -738,6 +752,7 @@ describe('copyBaseFields', () => {
 
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, { entries: [mockFirstNameBaseField], total: 1 });
 
 		const systemUser = await loadSystemUser(db, null);
@@ -820,6 +835,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, { entries: mockBaseFields, total: mockBaseFields.length });
 
 		await copyBaseFields(
@@ -866,6 +882,7 @@ describe('copyBaseFields', () => {
 		);
 		const request = nock(MOCK_API_URL)
 			.get('/baseFields')
+			.query({ _count: String(MAX_INT32) })
 			.reply(200, { entries: [mockFirstNameBaseField], total: 1 });
 
 		await copyBaseFields(

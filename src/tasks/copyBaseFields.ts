@@ -3,6 +3,7 @@ import {
 	isCopyBaseFieldsJobPayload,
 	TaskStatus,
 } from '../types';
+import { MAX_INT32 } from '../constants';
 import { getDatabase } from '../database/db';
 import {
 	createOrUpdateBaseField,
@@ -20,7 +21,7 @@ export const fetchBaseFieldsFromRemote = async (
 	graphileLogger: GraphileLogger,
 ): Promise<BaseField[]> => {
 	try {
-		const response = await fetch(`${pdcApiUrl}/baseFields`);
+		const response = await fetch(`${pdcApiUrl}/baseFields?_count=${MAX_INT32}`);
 
 		if (!response.ok) {
 			graphileLogger.error(

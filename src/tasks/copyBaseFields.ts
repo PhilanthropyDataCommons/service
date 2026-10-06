@@ -3,6 +3,7 @@ import {
 	isCopyBaseFieldsJobPayload,
 	TaskStatus,
 } from '../types';
+import { MAX_INT32 } from '../constants';
 import { getDatabase } from '../database/db';
 import {
 	createOrUpdateBaseField,
@@ -10,6 +11,7 @@ import {
 	loadBaseFieldsCopyTask,
 	updateBaseFieldsCopyTask,
 } from '../database/operations';
+import { allNoLeaks } from '../promises';
 import type { BaseField } from '../types';
 import type { JobHelpers, Logger as GraphileLogger } from 'graphile-worker';
 import type { TinyPg } from 'tinypg';
@@ -19,7 +21,7 @@ export const fetchBaseFieldsFromRemote = async (
 	graphileLogger: GraphileLogger,
 ): Promise<BaseField[]> => {
 	try {
-		const response = await fetch(`${pdcApiUrl}/baseFields`);
+		const response = await fetch(`${pdcApiUrl}/baseFields?_count=${MAX_INT32}`);
 
 		if (!response.ok) {
 			graphileLogger.error(
@@ -80,7 +82,7 @@ const copyBaseField = async (
 		valueRelevanceHours,
 		sensitivityClassification,
 	});
-	await Promise.all(
+	await allNoLeaks(
 		Object.entries(targetBaseField.localizations).map(
 			async ([language, baseFieldLocalization]) => {
 				await createOrUpdateBaseFieldLocalization(db, null, {
@@ -154,7 +156,7 @@ export const copyBaseFields = async (
 	}
 
 	try {
-		await Promise.all(
+		await allNoLeaks(
 			remoteBaseFields.map<Promise<void>>(async (baseField) => {
 				await copyBaseField(db, baseField);
 			}),

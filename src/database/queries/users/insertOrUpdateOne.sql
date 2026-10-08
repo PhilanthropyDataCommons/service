@@ -17,9 +17,5 @@ WHEN NOT MATCHED THEN INSERT (
 	source.keycloak_user_name
 )
 RETURNING
-	user_to_json(
-		users.*,
-		:authContextKeycloakUserId,
-		:authContextIsAdministrator
-	) AS object,
+	user_to_json(users.*) AS object,
 	merge_action() = 'INSERT' AS "wasInserted";

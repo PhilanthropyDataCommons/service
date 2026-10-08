@@ -16,6 +16,7 @@ WITH
 					(
 						users.keycloak_user_id = :authContextKeycloakUserId
 						OR :authContextIsAdministrator::boolean
+						OR :authContextCanViewUsersInKeycloak::boolean
 					)
 			END
 		GROUP BY users.keycloak_user_id
@@ -33,12 +34,7 @@ WITH
 	),
 
 	paginated_entries AS (
-		SELECT
-			user_to_json(
-				page.*::users,
-				:authContextKeycloakUserId,
-				:authContextIsAdministrator
-			) AS object
+		SELECT user_to_json(page.*::users) AS object
 		FROM page
 		ORDER BY created_at DESC
 	)

@@ -28,6 +28,7 @@ describe('requireAuthentication', () => {
 		req.user = getMockedUser();
 		req.role = {
 			isAdministrator: false,
+			canViewUsersInKeycloak: false,
 		};
 		const nextMock = jest.fn((error) => {
 			expect(error).toBeInstanceOf(UnauthorizedError);
@@ -48,6 +49,7 @@ describe('requireAuthentication', () => {
 		req.user = getMockedUser();
 		req.role = {
 			isAdministrator: true,
+			canViewUsersInKeycloak: false,
 		};
 		const nextMock = jest.fn((error) => {
 			expect(error).toBe(undefined);

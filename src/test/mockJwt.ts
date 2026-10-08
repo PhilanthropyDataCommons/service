@@ -21,6 +21,7 @@ const getMockJwt = (
 	settings: {
 		sub?: string;
 		roles?: string[];
+		realmManagementRoles?: string[];
 		iss?: string;
 		organizations?: Record<string, string>;
 	} = {},
@@ -42,6 +43,14 @@ const getMockJwt = (
 		realm_access: {
 			roles: settings.roles ?? ['default-roles-pdc'],
 		},
+		resource_access:
+			settings.realmManagementRoles === undefined
+				? undefined
+				: {
+						'realm-management': {
+							roles: settings.realmManagementRoles,
+						},
+					},
 		name: getTestUserKeycloakUserName(),
 	});
 	return { Authorization: `Bearer ${token}` };
@@ -58,11 +67,35 @@ const mockJwtWithAdminRole = getMockJwt({
 	roles: ['pdc-admin'],
 });
 
+const mockJwtWithRealmManagementQueryUsersRole = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	realmManagementRoles: ['query-users'],
+});
+
+const mockJwtWithRealmManagementViewUsersRole = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	realmManagementRoles: ['view-users'],
+});
+
+const mockJwtWithRealmManagementManageUsersRole = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	realmManagementRoles: ['manage-users'],
+});
+
+const mockJwtWithUnrelatedRealmManagementRole = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	realmManagementRoles: ['view-events'],
+});
+
 export {
 	mockJwks,
 	mockJwt,
 	mockJwtWithoutSub,
 	mockJwtWithAdminRole,
+	mockJwtWithRealmManagementQueryUsersRole,
+	mockJwtWithRealmManagementViewUsersRole,
+	mockJwtWithRealmManagementManageUsersRole,
+	mockJwtWithUnrelatedRealmManagementRole,
 	mockOrgId,
 	getMockJwt,
 	getMockJwks,

@@ -39,4 +39,132 @@ describe('addRoleContext', () => {
 		const nextMock = generateNextWithAssertions(runAssertions, done);
 		addRoleContext(req, res, nextMock);
 	});
+
+	it('sets canViewUsersInKeycloak false when the JWT carries no resource_access tree and no pdc-admin role', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewUsersInKeycloak).toBe(false);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewUsersInKeycloak false when the JWT carries the pdc-admin realm role but no realm-management role', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['pdc-admin'],
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewUsersInKeycloak).toBe(false);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewUsersInKeycloak false when the JWT carries realm-management roles outside the accepted set and no pdc-admin role', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['view-events'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewUsersInKeycloak).toBe(false);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewUsersInKeycloak true when the JWT carries query-users', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['query-users'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewUsersInKeycloak).toBe(true);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewUsersInKeycloak true when the JWT carries view-users', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['view-users'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewUsersInKeycloak).toBe(true);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewUsersInKeycloak true when the JWT carries manage-users', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['manage-users'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewUsersInKeycloak).toBe(true);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
 });

@@ -52,7 +52,7 @@ export const loadTestUser = async (db: Pick<TinyPg, 'sql'>): Promise<User> => {
 		db,
 		{
 			user: { keycloakUserId: testUserKeycloakUserId },
-			role: { isAdministrator: false },
+			role: { isAdministrator: false, canViewUsersInKeycloak: false },
 		},
 		testUserKeycloakUserId,
 	);
@@ -61,10 +61,12 @@ export const loadTestUser = async (db: Pick<TinyPg, 'sql'>): Promise<User> => {
 export const getAuthContext = (
 	user: User,
 	isAdministrator = false,
+	canViewUsersInKeycloak = false,
 ): AuthContext => ({
 	user,
 	role: {
 		isAdministrator,
+		canViewUsersInKeycloak,
 	},
 });
 

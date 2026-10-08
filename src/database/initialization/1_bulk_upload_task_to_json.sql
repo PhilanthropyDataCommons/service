@@ -46,7 +46,7 @@ BEGIN
   FROM files
   WHERE files.id = bulk_upload_task.attachments_archive_file_id;
 
-  SELECT user_to_json(users.*, auth_context_keycloak_user_id, auth_context_is_administrator)
+  SELECT user_to_json(users.*)
   INTO created_by_user_json
   FROM users
   WHERE users.keycloak_user_id = bulk_upload_task.created_by;

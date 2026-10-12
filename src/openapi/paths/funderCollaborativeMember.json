@@ -119,6 +119,9 @@
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
 			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json"
 			},
@@ -169,6 +172,9 @@
 			},
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
 			},
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json"

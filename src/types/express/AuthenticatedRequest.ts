@@ -34,6 +34,16 @@ interface ObjectWithAuthWithRealmAccessRoles {
 	};
 }
 
+interface ObjectWithAuthWithResourceAccessRealmManagementRoles {
+	auth: {
+		resource_access: {
+			'realm-management': {
+				roles: string[];
+			};
+		};
+	};
+}
+
 interface ObjectWithAuthWithOrganizations {
 	auth: {
 		organizations: Record<string, { id: KeycloakId }>;
@@ -112,6 +122,36 @@ const objectWithAuthWithRealmAccessRolesSchema: JSONSchemaType<ObjectWithAuthWit
 		required: ['auth'],
 	};
 
+const objectWithAuthWithResourceAccessRealmManagementRolesSchema: JSONSchemaType<ObjectWithAuthWithResourceAccessRealmManagementRoles> =
+	{
+		type: 'object',
+		properties: {
+			auth: {
+				type: 'object',
+				properties: {
+					resource_access: {
+						type: 'object',
+						properties: {
+							'realm-management': {
+								type: 'object',
+								properties: {
+									roles: {
+										type: 'array',
+										items: { type: 'string' },
+									},
+								},
+								required: ['roles'],
+							},
+						},
+						required: ['realm-management'],
+					},
+				},
+				required: ['resource_access'],
+			},
+		},
+		required: ['auth'],
+	};
+
 const objectWithAuthWithOrganizationsSchema: JSONSchemaType<ObjectWithAuthWithOrganizations> =
 	{
 		type: 'object',
@@ -147,6 +187,10 @@ const hasAuthWithRealmAccessRoles = ajv.compile(
 	objectWithAuthWithRealmAccessRolesSchema,
 );
 
+const hasAuthWithResourceAccessRealmManagementRoles = ajv.compile(
+	objectWithAuthWithResourceAccessRealmManagementRolesSchema,
+);
+
 const isObjectWithAuthWithOrganizations = ajv.compile(
 	objectWithAuthWithOrganizationsSchema,
 );
@@ -159,6 +203,11 @@ const getAuthNameFromRequest = (req: Request): string | null =>
 
 const getRealmAccessRolesFromRequest = (req: Request): string[] =>
 	hasAuthWithRealmAccessRoles(req) ? req.auth.realm_access.roles : [];
+
+const getRealmManagementRolesFromRequest = (req: Request): string[] =>
+	hasAuthWithResourceAccessRealmManagementRoles(req)
+		? req.auth.resource_access['realm-management'].roles
+		: [];
 
 const getKeycloakOrganizationIdsFromRequest = (req: Request): KeycloakId[] =>
 	isObjectWithAuthWithOrganizations(req)
@@ -180,6 +229,7 @@ export {
 	getAuthNameFromRequest,
 	getAuthSubFromRequest,
 	getRealmAccessRolesFromRequest,
+	getRealmManagementRolesFromRequest,
 	getKeycloakOrganizationIdsFromRequest,
 	getJwtExpFromRequest,
 	hasMeaningfulAuthSub,

@@ -7,7 +7,7 @@ RETURNS jsonb AS $$
 DECLARE
 	created_by_user_json JSONB;
 BEGIN
-	SELECT user_to_json(users.*, NULL::uuid, FALSE)
+	SELECT user_to_json(users.*)
 	INTO created_by_user_json
 	FROM users
 	WHERE users.keycloak_user_id = default_permission_grant.created_by;

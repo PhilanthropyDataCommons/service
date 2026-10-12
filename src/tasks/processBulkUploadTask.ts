@@ -259,6 +259,7 @@ const loadSystemUserAuthContext = async (
 	user: await loadSystemUser(db, null),
 	role: {
 		isAdministrator: true,
+		canViewUsersInKeycloak: false,
 	},
 });
 
@@ -269,6 +270,7 @@ const loadTaskAuthContext = async (
 	user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
 	role: {
 		isAdministrator: false,
+		canViewUsersInKeycloak: false,
 	},
 });
 

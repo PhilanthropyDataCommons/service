@@ -94,6 +94,7 @@ describe('requireAuthentication', () => {
 		};
 		req.role = {
 			isAdministrator: false,
+			canViewUsersInKeycloak: false,
 		};
 		req.user = await loadTestUser(db);
 		const nextMock = getMockNextFunction();

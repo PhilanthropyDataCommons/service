@@ -1,10 +1,6 @@
 SELECT drop_function('user_to_json');
 
-CREATE FUNCTION user_to_json(
-	"user" users,
-	auth_context_keycloak_user_id uuid,
-	auth_context_is_administrator boolean
-)
+CREATE FUNCTION user_to_json("user" users)
 RETURNS jsonb AS $$
 BEGIN
 	RETURN jsonb_build_object(

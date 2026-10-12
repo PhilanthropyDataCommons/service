@@ -608,7 +608,7 @@ describe('/funders', () => {
 		});
 
 		it('requires administrator role', async () => {
-			await agent.put('/funders/foo').set(authHeader).expect(401);
+			await agent.put('/funders/foo').set(authHeader).expect(403);
 		});
 
 		it('creates and returns exactly one funder', async () => {
@@ -1002,7 +1002,7 @@ describe('/funders', () => {
 				await agent
 					.post('/funders/theFundFund/members/theFoundationFoundation')
 					.set(authHeader)
-					.expect(401);
+					.expect(403);
 			});
 
 			it('throws a 400 error if the funder short code is invalid', async () => {
@@ -1100,7 +1100,7 @@ describe('/funders', () => {
 				await agent
 					.delete('/funders/theFundFund/members/theFoundationFoundation')
 					.set(authHeader)
-					.expect(401);
+					.expect(403);
 			});
 
 			it('throws a 400 error if the funder short code is invalid', async () => {

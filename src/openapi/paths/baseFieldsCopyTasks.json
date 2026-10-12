@@ -33,6 +33,9 @@
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
 			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"
 			}
@@ -70,6 +73,9 @@
 			},
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
 			},
 			"500": {
 				"$ref": "../components/responses/InternalServerError.json"

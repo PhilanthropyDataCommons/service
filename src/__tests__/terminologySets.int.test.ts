@@ -266,7 +266,7 @@ describe('/terminologySets', () => {
 			});
 		});
 
-		it('returns 401 when the user lacks edit | terminologySet on the funder', async () => {
+		it('returns 403 when the user lacks edit | terminologySet on the funder', async () => {
 			const db = getDatabase();
 			const systemFunder = await loadSystemFunder(db, null);
 			const before = await loadTableMetrics(db, 'terminology_sets');
@@ -278,7 +278,7 @@ describe('/terminologySets', () => {
 					funderShortCode: systemFunder.shortCode,
 					name: 'Unauthorized vocab',
 				})
-				.expect(401);
+				.expect(403);
 			const after = await loadTableMetrics(db, 'terminology_sets');
 			expect(after.count).toEqual(before.count);
 		});
@@ -433,7 +433,7 @@ describe('/terminologySets', () => {
 			});
 		});
 
-		it('returns 401 when a non-admin caller lacks edit permission', async () => {
+		it('returns 403 when a non-admin caller lacks edit permission', async () => {
 			const db = getDatabase();
 			const systemUser = await loadSystemUser(db, null);
 			const systemUserAuthContext = getAuthContext(systemUser);
@@ -458,7 +458,7 @@ describe('/terminologySets', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({ proposalLabel: 'Submission' })
-				.expect(401);
+				.expect(403);
 		});
 	});
 
@@ -501,8 +501,6 @@ describe('/terminologySets', () => {
 				},
 			);
 
-			// Caller can CREATE opportunities on funder, but has no reference
-			// permission on the terminology set.
 			await createPermissionGrant(db, systemUserAuthContext, {
 				granteeType: PermissionGrantGranteeType.USER,
 				granteeUserKeycloakUserId: testUser.keycloakUserId,
@@ -521,7 +519,7 @@ describe('/terminologySets', () => {
 					funderShortCode: funder.shortCode,
 					terminologySetId: terminologySet.id,
 				})
-				.expect(401);
+				.expect(403);
 		});
 
 		it('allows POST /opportunities with terminologySetId when caller has reference permission via funder cascade', async () => {

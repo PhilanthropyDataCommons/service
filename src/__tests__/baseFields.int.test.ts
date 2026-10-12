@@ -299,7 +299,7 @@ describe('/baseFields', () => {
 		});
 
 		it('requires administrator role', async () => {
-			await request(app).put('/baseFields/summary').set(authHeader).expect(401);
+			await request(app).put('/baseFields/summary').set(authHeader).expect(403);
 		});
 
 		it('creates exactly one base field', async () => {
@@ -865,7 +865,7 @@ describe('/baseFields', () => {
 			await request(app)
 				.put('/baseFields/summary/localizations/fr')
 				.set(authHeader)
-				.expect(401);
+				.expect(403);
 		});
 
 		it('creates the specified base field localization if it does not exist', async () => {

@@ -96,7 +96,7 @@ describe('/dataProviders', () => {
 		});
 
 		it('requires administrator role', async () => {
-			await agent.put('/dataProviders/foo').set(authHeader).expect(401);
+			await agent.put('/dataProviders/foo').set(authHeader).expect(403);
 		});
 
 		it('creates and returns exactly one data provider', async () => {

@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Endpoints restricted to administrators now return `403` (instead of `401`) when an authenticated user lacks the administrator role. A `401` is still returned when the request is not authenticated.
 - The `changemaker` attached to a changemaker-backed `source` is now documented as a `ShallowChangemaker`. The API has always served a shallow changemaker there, but the schema described a full `Changemaker`, promising `fields` and `fiscalSponsors` attributes that were never present.
 
 ## 0.42.0 2026-08-25

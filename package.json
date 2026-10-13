@@ -5,7 +5,7 @@
 	"scripts": {
 		"build": "npm run cleanup && npm run build:node && npm run build:assets && npm run build:openapi",
 		"build:node": "tsc -p tsconfig.json",
-		"build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" \"src/public/**\" dist",
+		"build:assets": "copyfiles -u 1 \"src/**/*.sql\" \"src/**/.keep\" \"src/public/**\" \"src/skills/**\" dist",
 		"build:openapi": "redocly bundle \"src/openapi/api.json\" -o \"dist/openapi/api.json\"",
 		"cleanup": "rimraf dist",
 		"format": "npm run format:eslint && npm run format:prettier && npm run format:sqlfluff",
@@ -87,7 +87,8 @@
 		"ts-jest": "^29.4.13",
 		"ts-node": "^10.9.2",
 		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.70.1"
+		"typescript-eslint": "^8.70.1",
+		"yaml": "^2.9.1"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1139.0",

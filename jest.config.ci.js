@@ -23,7 +23,10 @@ module.exports = {
 			...commonProjectConfig,
 			displayName: 'integration',
 			testMatch: ['**/*.int.test.ts'],
-			setupFilesAfterEnv: ['<rootDir>/src/test/integrationSuiteSetup.ts'],
+			setupFilesAfterEnv: [
+				...config.setupFilesAfterEnv,
+				'<rootDir>/src/test/integrationSuiteSetup.ts',
+			],
 			globalSetup: '<rootDir>/src/test/integrationGlobalSetup.ts',
 			globalTeardown: '<rootDir>/src/test/integrationGlobalTeardown.ts',
 		},
@@ -31,6 +34,7 @@ module.exports = {
 			...commonProjectConfig,
 			displayName: 'unit',
 			testMatch: ['**/*.unit.test.ts'],
+			setupFilesAfterEnv: config.setupFilesAfterEnv,
 		},
 	],
 };

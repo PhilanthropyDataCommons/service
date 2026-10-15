@@ -2,4 +2,4 @@
 set -e
 
 node dist/scripts/migrate.js
-exec node dist/index.js
+exec node --import ./dist/instrument.js dist/index.js

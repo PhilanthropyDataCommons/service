@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import {
 	closeDatabase,
 	createAndSetDatabase,
@@ -53,7 +54,8 @@ const start = async (): Promise<void> => {
 	});
 };
 
-start().catch(() => {
+start().catch((err: unknown) => {
+	Sentry.captureException(err);
 	logger.error(
 		'The PDC service was not started. Please check the logs for more information.',
 	);

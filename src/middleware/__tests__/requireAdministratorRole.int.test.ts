@@ -1,10 +1,10 @@
 import { requireAdministratorRole } from '../requireAdministratorRole';
-import { UnauthorizedError } from '../../errors';
+import { ForbiddenError, UnauthorizedError } from '../../errors';
 import { getMockedUser } from '../../test/utils';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import type { AuthenticatedRequest } from '../../types';
 
-describe('requireAuthentication', () => {
+describe('requireAdministratorRole', () => {
 	it('calls next with an UnauthorizedError when no roles value is provided', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
@@ -15,14 +15,14 @@ describe('requireAuthentication', () => {
 			 * We have validated that error is an UnauthorizedError, but eslint doesn't recognize that fact.
 			 */
 			expect((error as UnauthorizedError).message).toEqual(
-				'Your account must have the administrator role.',
+				'The request lacks an AuthContext.',
 			);
 			done();
 		});
 		requireAdministratorRole(req, res, nextMock);
 	});
 
-	it('calls next with an UnauthorizedError when the user has an administrator role set to false', (done) => {
+	it('calls next with a ForbiddenError when the user has an administrator role set to false', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.user = getMockedUser();
@@ -31,11 +31,11 @@ describe('requireAuthentication', () => {
 			canViewUsersInKeycloak: false,
 		};
 		const nextMock = jest.fn((error) => {
-			expect(error).toBeInstanceOf(UnauthorizedError);
+			expect(error).toBeInstanceOf(ForbiddenError);
 			/* eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion --
-			 * We have validated that error is an UnauthorizedError, but eslint doesn't recognize that fact.
+			 * We have validated that error is a ForbiddenError, but eslint doesn't recognize that fact.
 			 */
-			expect((error as UnauthorizedError).message).toEqual(
+			expect((error as ForbiddenError).message).toEqual(
 				'Your account must have the administrator role.',
 			);
 			done();

@@ -56,6 +56,9 @@
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
 			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
 			"422": {
 				"$ref": "../components/responses/UnprocessableEntity.json",
 				"description": "The call passed one or more changemakerIds that do not exist in the database."
@@ -80,6 +83,9 @@
 			},
 			"401": {
 				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
 			},
 			"404": {
 				"$ref": "../components/responses/NotFound.json"

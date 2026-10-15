@@ -1189,7 +1189,7 @@ describe('/sources', () => {
 		});
 
 		it('requires administrator role', async () => {
-			await agent.delete('/sources/:sourceId').expect(401);
+			await agent.delete('/sources/1').set(authHeader).expect(403);
 		});
 
 		it('deletes exactly one source that has no proposals associated with it', async () => {

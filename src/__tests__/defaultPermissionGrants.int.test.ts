@@ -33,7 +33,7 @@ describe('/defaultPermissionGrants', () => {
 		});
 
 		it('requires administrator role', async () => {
-			await agent.get('/defaultPermissionGrants').set(authHeader).expect(401);
+			await agent.get('/defaultPermissionGrants').set(authHeader).expect(403);
 		});
 
 		it('returns an empty list when no default permission grants exist', async () => {
@@ -115,7 +115,7 @@ describe('/defaultPermissionGrants', () => {
 		});
 
 		it('requires administrator role', async () => {
-			await agent.get('/defaultPermissionGrants/1').set(authHeader).expect(401);
+			await agent.get('/defaultPermissionGrants/1').set(authHeader).expect(403);
 		});
 
 		it('returns 404 when the default permission grant does not exist', async () => {
@@ -162,7 +162,7 @@ describe('/defaultPermissionGrants', () => {
 		});
 
 		it('requires administrator role', async () => {
-			await agent.post('/defaultPermissionGrants').set(authHeader).expect(401);
+			await agent.post('/defaultPermissionGrants').set(authHeader).expect(403);
 		});
 
 		it('creates and returns a default permission grant for a user', async () => {
@@ -429,7 +429,7 @@ describe('/defaultPermissionGrants', () => {
 		});
 
 		it('requires administrator role', async () => {
-			await agent.put('/defaultPermissionGrants/1').set(authHeader).expect(401);
+			await agent.put('/defaultPermissionGrants/1').set(authHeader).expect(403);
 		});
 
 		it('returns 404 when the default permission grant does not exist', async () => {
@@ -512,7 +512,7 @@ describe('/defaultPermissionGrants', () => {
 			await agent
 				.delete('/defaultPermissionGrants/1')
 				.set(authHeader)
-				.expect(401);
+				.expect(403);
 		});
 
 		it('returns 404 when the default permission grant does not exist', async () => {

@@ -28,7 +28,7 @@ describe('/tasks/baseFieldsCopy', () => {
 		});
 
 		it('requires administrator role', async () => {
-			await agent.get('/tasks/baseFieldsCopy').set(authHeader).expect(401);
+			await agent.get('/tasks/baseFieldsCopy').set(authHeader).expect(403);
 		});
 
 		it('returns an empty Bundle when no data is present', async () => {
@@ -166,7 +166,7 @@ describe('/tasks/baseFieldsCopy', () => {
 			await request(app)
 				.post('/tasks/baseFieldsCopy')
 				.set(authHeader)
-				.expect(401);
+				.expect(403);
 		});
 
 		it('throws an error if a synchzronizationUrl is not provided', async () => {

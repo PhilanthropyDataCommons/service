@@ -22,8 +22,8 @@ import {
 } from '../types';
 import {
 	FailedMiddlewareError,
+	ForbiddenError,
 	InputValidationError,
-	UnauthorizedError,
 } from '../errors';
 import {
 	extractFunderParameters,
@@ -97,7 +97,9 @@ const postTerminologySet = async (
 			scope: PermissionGrantEntityType.TERMINOLOGY_SET,
 		}))
 	) {
-		throw new UnauthorizedError();
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to create a terminology set for the specified funder.',
+		);
 	}
 	const committedTerminologySet = await db.transaction(async (txDb) => {
 		const terminologySet = await createTerminologySet(txDb, req, body);
@@ -146,7 +148,9 @@ const patchTerminologySet = async (
 			scope: PermissionGrantEntityType.TERMINOLOGY_SET,
 		}))
 	) {
-		throw new UnauthorizedError();
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to edit this terminology set.',
+		);
 	}
 
 	const updatedTerminologySet = await updateTerminologySet(

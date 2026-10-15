@@ -23,7 +23,6 @@ import {
 	FailedMiddlewareError,
 	ForbiddenError,
 	InputValidationError,
-	UnauthorizedError,
 } from '../errors';
 import {
 	extractFunderParameters,
@@ -102,7 +101,9 @@ const postOpportunity = async (req: Request, res: Response): Promise<void> => {
 			scope: PermissionGrantEntityType.TERMINOLOGY_SET,
 		}))
 	) {
-		throw new UnauthorizedError();
+		throw new ForbiddenError(
+			'Authenticated user does not have permission to reference the specified terminology set.',
+		);
 	}
 	const committedOpportunity = await db.transaction(async (txDb) => {
 		const opportunity = await createOpportunity(txDb, req, body);

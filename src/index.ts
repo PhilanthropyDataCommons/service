@@ -1,10 +1,14 @@
+// Loading this module initializes Sentry. It must stay the first import so
+// that Sentry is set up before the modules it instruments are loaded.
+import './instrument';
+import * as Sentry from '@sentry/node';
 import {
 	closeDatabase,
 	createAndSetDatabase,
 	getDatabaseName,
 	initializeDatabase,
 } from './database';
-import { TEST_DATABASE_PREFIX } from './constants';
+import { TEST_DATABASE_PREFIX, TWO_SECONDS_IN_MS } from './constants';
 import { app } from './app';
 import { startJobQueue } from './jobQueue';
 import { getLogger } from './logger';
@@ -53,8 +57,10 @@ const start = async (): Promise<void> => {
 	});
 };
 
-start().catch(() => {
+start().catch(async (err: unknown) => {
+	Sentry.captureException(err);
 	logger.error(
 		'The PDC service was not started. Please check the logs for more information.',
 	);
+	await Sentry.flush(TWO_SECONDS_IN_MS);
 });

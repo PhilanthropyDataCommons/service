@@ -16,6 +16,7 @@ and should be run as a non-root user.
 
 Add the environment variables in `.env.example`
 however your hosting environment needs.
+To report errors to Sentry, see [SENTRY.md](SENTRY.md).
 
 Be sure to set `NODE_ENV=production`,
 as recommended by the

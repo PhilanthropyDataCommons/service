@@ -1,3 +1,4 @@
+import { captureException } from '@sentry/node';
 import { TinyPgError } from 'tinypg';
 import { UnauthorizedError } from 'express-jwt';
 import { errorHandler } from '../errorHandler';
@@ -5,7 +6,15 @@ import { DatabaseError, ForbiddenError } from '../../errors';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import { getMockNextFunction } from '../../test/utils';
 
+jest.mock('@sentry/node', () => ({ captureException: jest.fn() }));
+
+const mockedCaptureException = jest.mocked(captureException);
+
 describe('errorHandler', () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	it('should process errors that are not Errors', () => {
 		const err = 42;
 		const req = getMockRequest();
@@ -127,5 +136,31 @@ describe('errorHandler', () => {
 				],
 			}),
 		);
+	});
+
+	it('should report server errors to Sentry', () => {
+		const err = new Error('Something unexpected happened');
+		const req = getMockRequest();
+		const res = getMockResponse();
+		res.status = jest.fn().mockReturnValue(res);
+		res.contentType = jest.fn().mockReturnValue(res);
+		res.send = jest.fn().mockReturnValue(res);
+		const next = getMockNextFunction();
+		errorHandler(err, req, res, next);
+		expect(mockedCaptureException).toHaveBeenCalledWith(err);
+	});
+
+	it('should not report client errors to Sentry', () => {
+		const err = new ForbiddenError(
+			'Authenticated user does not have permission to perform this action.',
+		);
+		const req = getMockRequest();
+		const res = getMockResponse();
+		res.status = jest.fn().mockReturnValue(res);
+		res.contentType = jest.fn().mockReturnValue(res);
+		res.send = jest.fn().mockReturnValue(res);
+		const next = getMockNextFunction();
+		errorHandler(err, req, res, next);
+		expect(mockedCaptureException).not.toHaveBeenCalled();
 	});
 });

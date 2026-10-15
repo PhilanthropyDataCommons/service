@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { Logger, addJobAdhoc, run, runMigrations } from 'graphile-worker';
 import { TinyPgError } from 'tinypg';
 import { TEN_MINUTES_IN_MS } from './constants/time';
@@ -84,6 +85,7 @@ export const startJobQueue = async (): Promise<void> => {
 		},
 	});
 	runner.promise.catch((err: unknown) => {
+		Sentry.captureException(err);
 		logger.error(err, 'The queue worker failed.');
 	});
 };

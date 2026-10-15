@@ -1,14 +1,18 @@
+import * as Sentry from '@sentry/node';
+import { initSentry } from './sentry';
 import {
 	closeDatabase,
 	createAndSetDatabase,
 	getDatabaseName,
 	initializeDatabase,
 } from './database';
-import { TEST_DATABASE_PREFIX } from './constants';
+import { TEST_DATABASE_PREFIX, TWO_SECONDS_IN_MS } from './constants';
 import { app } from './app';
 import { startJobQueue } from './jobQueue';
 import { getLogger } from './logger';
 import { loadConfig } from './config';
+
+initSentry();
 
 const logger = getLogger(__filename);
 const DEFAULT_PORT = 3001;
@@ -53,8 +57,10 @@ const start = async (): Promise<void> => {
 	});
 };
 
-start().catch(() => {
+start().catch(async (err: unknown) => {
+	Sentry.captureException(err);
 	logger.error(
 		'The PDC service was not started. Please check the logs for more information.',
 	);
+	await Sentry.flush(TWO_SECONDS_IN_MS);
 });

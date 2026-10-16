@@ -1,4 +1,5 @@
 import express from 'express';
+import { agentSkillsRouter } from './agentSkillsRouter';
 import { applicationFormsRouter } from './applicationFormsRouter';
 import { applicationFormFieldsRouter } from './applicationFormFieldsRouter';
 import { baseFieldsRouter } from './baseFieldsRouter';
@@ -25,6 +26,7 @@ import { userGroupsRouter } from './userGroupsRouter';
 
 const rootRouter = express.Router();
 
+rootRouter.use('/.well-known/agent-skills', agentSkillsRouter);
 rootRouter.use('/applicationForms', applicationFormsRouter);
 rootRouter.use('/applicationFormFields', applicationFormFieldsRouter);
 rootRouter.use('/baseFields', baseFieldsRouter);

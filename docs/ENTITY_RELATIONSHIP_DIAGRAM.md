@@ -193,6 +193,16 @@ erDiagram
     uuid keycloakUserId PK
     string keycloakUserName
     datetime createdAt
+    datetime syncedFromKeycloakAt
+    datetime disabledAt
+  }
+  UserSyncTask {
+    int id PK
+    string status
+    jsonb details
+    datetime statusUpdatedAt
+    uuid createdBy FK
+    datetime createdAt
   }
   DefaultPermissionGrant {
     int id PK
@@ -258,6 +268,7 @@ erDiagram
   ChangemakerFieldValue }o--|| BaseField : "is for"
   ChangemakerFieldValue }o--|| ChangemakerFieldValueBatch : "belongs to"
   ChangemakerFieldValueBatch }o--|| Source : "comes from"
+  User ||--o{ UserSyncTask : "requests"
   Source }|--o| Funder : "represents"
   Source }|--o| Changemaker : "represents"
   Source }|--o| DataProvider : "represents"

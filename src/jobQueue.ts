@@ -1,13 +1,19 @@
 import { Logger, addJobAdhoc, run, runMigrations } from 'graphile-worker';
 import { TEN_MINUTES_IN_MS } from './constants/time';
-import { copyBaseFields, processBulkUploadTask } from './tasks';
+import {
+	copyBaseFields,
+	processBulkUploadTask,
+	syncUsersFromKeycloak,
+} from './tasks';
 import { getLogger } from './logger';
 import { getDatabase } from './database/db';
 import type { TinyPg } from 'tinypg';
 import type { Job } from 'graphile-worker';
 import type {
 	CopyBaseFieldsJobPayload,
+	Id,
 	ProcessBulkUploadJobPayload,
+	SyncUsersFromKeycloakJobPayload,
 } from './types';
 
 const logger = getLogger(__filename);
@@ -17,6 +23,7 @@ const CONCURRENT_JOB_COUNT = 5;
 enum JobType {
 	PROCESS_BULK_UPLOAD = 'processBulkUploadTask',
 	COPY_BASE_FIELDS = 'copyBaseFields',
+	SYNC_USERS_FROM_KEYCLOAK = 'syncUsersFromKeycloak',
 }
 
 export const jobQueueLogger = new Logger((scope) => (level, message, meta) => {
@@ -55,6 +62,7 @@ export const startJobQueue = async (): Promise<void> => {
 		taskList: {
 			processBulkUploadTask,
 			copyBaseFields,
+			syncUsersFromKeycloak,
 		},
 	});
 	runner.promise.catch((err: unknown) => {
@@ -91,3 +99,23 @@ export const addProcessBulkUploadJob = async (
 export const addCopyBaseFieldsJob = async (
 	payload: CopyBaseFieldsJobPayload,
 ): Promise<Job> => await addJob(JobType.COPY_BASE_FIELDS, payload);
+
+// The sync job payload carries the caller's credentials, so the job gets a
+// single attempt and no retries with a stale credential; the task marks the
+// sync task row FAILED itself when the run does not succeed. Enqueuing runs
+// in the same transaction that creates the sync task row, so a task row is
+// never visible without its job.
+export const enqueueSyncUsersFromKeycloakJob = async (
+	transactionDb: Pick<TinyPg, 'sql'>,
+	userSyncTaskId: Id,
+	keycloakAdminAuthorizationHeader: string,
+): Promise<void> => {
+	await transactionDb.sql('userSyncTasks.enqueueJob', {
+		identifier: JobType.SYNC_USERS_FROM_KEYCLOAK,
+		payload: JSON.stringify({
+			userSyncTaskId,
+			keycloakAdminAuthorizationHeader,
+		} satisfies SyncUsersFromKeycloakJobPayload),
+		maxAttempts: 1,
+	});
+};

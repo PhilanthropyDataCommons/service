@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a `POST /users/sync` endpoint that kicks off an asynchronous task replicating all Keycloak users into the PDC `users` cache. The endpoint creates a `userSyncTask` and returns it immediately; the background job walks the whole realm's user list at the Keycloak Admin REST API using the caller's own credentials (passed through as-is), merges each user into the cache with row-level `syncedFromKeycloakAt` tracking, and sets `disabledAt` for users that Keycloak reports as deleted or not enabled instead of deleting them. The sync does not disable users when the walk sees none, and concurrent sync runs are rejected. The task does not retry (single attempt) so a stale credential is not replayed; task rows abandoned by a crashed run are marked failed on the next run.
+- Added a `GET /users/sync/{userSyncTaskId}` endpoint for polling a user sync task; the requester and administrators can read a task, and its `details` carry the run summary (`seen`/`added`/`updated`/`disabled` counts).
+- Added a `userSyncTask` entity, managed via the new `/users/sync` endpoints.
 - Added a `PATCH /sources/{sourceId}` endpoint for updating a source's `label`.
 - Added an `edit` permission for the `source` scope.
 - Added a `defaultPermissionGrant` entity, managed via the `/defaultPermissionGrants` endpoints, that describes a permission grant to auto-generate against entities of a given type.
@@ -20,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A changemaker now carries the `keycloakOrganizationId`, `createdAt`, and `createdBy` attributes, and its `fiscalSponsors`, only when the requester holds `view` permission on that changemaker. Every other requester, including an unauthenticated one, receives `id`, `name`, and `taxId`, plus `fields` where the endpoint returns it at all. This applies wherever a changemaker appears, not just at `/changemakers`: the changemakers embedded in a proposal, in a source, and in another changemaker's `fiscalSponsors` are narrowed the same way. Permission is evaluated per changemaker, so a single array may hold both shapes.
 - `fields` remains an empty array for unauthenticated requests; it is kept in the response shape to support future visibility of `public` base field values.
 - `GET /users` now authorizes the all-users branch when the caller's JWT carries the PDC-service `pdc-admin` realm role OR any one of the Keycloak `realm-management` roles `query-users`, `view-users`, or `manage-users` (the latter mirrors the set Keycloak accepts on the equivalent `GET /admin/realms/{realm}/users` list call). The `pdc-admin` path is retained so administrators can read users to grant permissions and to read `created_by` references that are foreign keys to the users table; a least-privilege caller may instead carry only one of the Keycloak roles, without `pdc-admin`. Authenticated self-visibility is unchanged.
+- `users` responses now include readonly `syncedFromKeycloakAt` and `disabledAt` attributes: when a user was last confirmed against Keycloak by a sync, and when the user was observed as absent from or not enabled in Keycloak by a sync (the row is kept for referential integrity). A user marked disabled becomes live again when a later sync finds the user enabled in Keycloak, or when a valid JWT for the user triggers the existing row-level user upsert.
 
 ### Fixed
 

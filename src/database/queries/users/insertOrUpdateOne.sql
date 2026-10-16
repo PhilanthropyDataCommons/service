@@ -8,7 +8,8 @@ USING (VALUES (
 )
 ON users.keycloak_user_id = source.keycloak_user_id
 WHEN MATCHED THEN UPDATE SET
-	keycloak_user_name = source.keycloak_user_name
+	keycloak_user_name = source.keycloak_user_name,
+	disabled_at = NULL
 WHEN NOT MATCHED THEN INSERT (
 	keycloak_user_id,
 	keycloak_user_name

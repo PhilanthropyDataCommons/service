@@ -1,0 +1,34 @@
+{
+	"post": {
+		"operationId": "syncUsersFromKeycloak",
+		"summary": "Kicks off an asynchronous task that replicates all Keycloak users into the PDC users cache.",
+		"description": "Creates a `userSyncTask` and enqueues a background job that walks the whole realm's user list at the Keycloak Admin REST API using the caller's own credentials, then merges it into the local `users` cache. The sync sets `disabledAt` for users that Keycloak reports as deleted or not enabled rather than deleting them. Poll `GET /users/sync/{userSyncTaskId}` for completion.",
+		"tags": ["Users"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"responses": {
+			"201": {
+				"description": "The created user sync task, initially pending.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/UserSyncTask.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

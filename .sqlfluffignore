@@ -79,3 +79,4 @@ src/database/queries/funderCollaborativeMembers/insertOrUpdateOne.sql
 src/database/queries/funders/insertOrUpdateOne.sql
 src/database/queries/s3Buckets/selectOrCreateOne.sql
 src/database/queries/users/insertOrUpdateOne.sql
+src/database/queries/users/mergeFromSync.sql

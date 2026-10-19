@@ -1771,7 +1771,7 @@ describe('/changemakers', () => {
 				.type('application/json')
 				.set(authHeader)
 				.send({ name: '7404171616851845629932178083729587457161' })
-				.expect(401);
+				.expect(403);
 		});
 
 		it('Requires integer changemaker ID', async () => {

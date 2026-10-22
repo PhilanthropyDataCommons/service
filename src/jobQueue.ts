@@ -1,13 +1,21 @@
 import { Logger, addJobAdhoc, run, runMigrations } from 'graphile-worker';
+import { TinyPgError } from 'tinypg';
 import { TEN_MINUTES_IN_MS } from './constants/time';
-import { copyBaseFields, processBulkUploadTask } from './tasks';
+import {
+	copyBaseFields,
+	processBulkUploadTask,
+	syncUsersFromKeycloak,
+} from './tasks';
 import { getLogger } from './logger';
 import { getDatabase } from './database/db';
+import { isTinyPgErrorWithQueryContext } from './types';
 import type { TinyPg } from 'tinypg';
 import type { Job } from 'graphile-worker';
 import type {
 	CopyBaseFieldsJobPayload,
+	Id,
 	ProcessBulkUploadJobPayload,
+	SyncUsersFromKeycloakJobPayload,
 } from './types';
 
 const logger = getLogger(__filename);
@@ -17,24 +25,39 @@ const CONCURRENT_JOB_COUNT = 5;
 enum JobType {
 	PROCESS_BULK_UPLOAD = 'processBulkUploadTask',
 	COPY_BASE_FIELDS = 'copyBaseFields',
+	SYNC_USERS_FROM_KEYCLOAK = 'syncUsersFromKeycloak',
 }
 
+type LogMeta = Record<string, unknown>;
+
+/**
+ * graphile-worker logs job payloads on failure, and the sync payload
+ * carries credentials.
+ */
+export const redactJobPayloadFromMeta = (meta: LogMeta): LogMeta => {
+	const { job } = meta;
+	return typeof job === 'object' && job !== null
+		? { ...meta, job: { ...job, payload: '[REDACTED]' } }
+		: meta;
+};
+
 export const jobQueueLogger = new Logger((scope) => (level, message, meta) => {
+	const redactedMeta = redactJobPayloadFromMeta(meta);
 	switch (level.valueOf()) {
 		case 'error':
-			logger.error({ ...meta, scope }, message);
+			logger.error({ ...redactedMeta, scope }, message);
 			break;
 		case 'warn':
-			logger.warn({ ...meta, scope }, message);
+			logger.warn({ ...redactedMeta, scope }, message);
 			break;
 		case 'info':
-			logger.info({ ...meta, scope }, message);
+			logger.info({ ...redactedMeta, scope }, message);
 			break;
 		case 'debug':
-			logger.debug({ ...meta, scope }, message);
+			logger.debug({ ...redactedMeta, scope }, message);
 			break;
 		default:
-			logger.info({ ...meta, scope }, message);
+			logger.info({ ...redactedMeta, scope }, message);
 	}
 });
 
@@ -55,6 +78,7 @@ export const startJobQueue = async (): Promise<void> => {
 		taskList: {
 			processBulkUploadTask,
 			copyBaseFields,
+			syncUsersFromKeycloak,
 		},
 	});
 	runner.promise.catch((err: unknown) => {
@@ -91,3 +115,36 @@ export const addProcessBulkUploadJob = async (
 export const addCopyBaseFieldsJob = async (
 	payload: CopyBaseFieldsJobPayload,
 ): Promise<Job> => await addJob(JobType.COPY_BASE_FIELDS, payload);
+
+// Single attempt: a retry would replay a stale credential. Runs in the
+// task row's transaction, so a task row is never visible without its job.
+export const enqueueSyncUsersFromKeycloakJob = async (
+	transactionDb: Pick<TinyPg, 'sql'>,
+	userSyncTaskId: Id,
+	keycloakAdminAuthorizationHeader: string,
+): Promise<void> => {
+	await transactionDb
+		.sql('userSyncTasks.enqueueJob', {
+			identifier: JobType.SYNC_USERS_FROM_KEYCLOAK,
+			payload: JSON.stringify({
+				userSyncTaskId,
+				keycloakAdminAuthorizationHeader,
+			} satisfies SyncUsersFromKeycloakJobPayload),
+			maxAttempts: 1,
+		})
+		.catch((err: unknown) => {
+			if (isTinyPgErrorWithQueryContext(err)) {
+				// The bind parameters carry credentials; throw a redacted copy so the
+				// error handler's logs never receive them.
+				throw new TinyPgError(err.message, undefined, {
+					error: err.queryContext.error,
+					params: {
+						identifier: 'syncUsersFromKeycloak',
+						payload: '[REDACTED: the payload carries the caller credentials]',
+						maxAttempts: 1,
+					},
+				});
+			}
+			throw err;
+		});
+};

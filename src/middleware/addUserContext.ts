@@ -8,6 +8,7 @@ import {
 	getAuthSubFromRequest,
 	getKeycloakOrganizationIdsFromRequest,
 	getJwtExpFromRequest,
+	getJwtIatFromRequest,
 	isKeycloakId,
 	keycloakIdToString,
 	stringToKeycloakId,
@@ -32,6 +33,7 @@ const addUserContext = (
 	const keycloakUserName = getAuthNameFromRequest(req);
 	const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
 	const jwtExpiration = getJwtExpFromRequest(req) ?? JWT_NEVER_EXPIRES;
+	const jwtIssuedAt = getJwtIatFromRequest(req);
 	const systemUser = getSystemUser();
 	if (
 		keycloakUserId === undefined ||
@@ -51,10 +53,17 @@ const addUserContext = (
 		return;
 	}
 
-	createOrUpdateUser(db, null, {
-		keycloakUserId: stringToKeycloakId(keycloakUserId),
-		keycloakUserName,
-	})
+	createOrUpdateUser(
+		db,
+		null,
+		{
+			keycloakUserId: stringToKeycloakId(keycloakUserId),
+			keycloakUserName,
+		},
+		jwtIssuedAt === null
+			? null
+			: new Date(jwtIssuedAt * MS_PER_SECOND).toISOString(),
+	)
 		.then(() => {
 			const createEphemeralUserGroupAssociationPromises =
 				keycloakOrganizationIds.map(

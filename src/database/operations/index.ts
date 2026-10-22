@@ -31,3 +31,4 @@ export * from './s3Buckets';
 export * from './sources';
 export * from './terminologySets';
 export * from './users';
+export * from './userSyncTasks';

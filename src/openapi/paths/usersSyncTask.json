@@ -1,0 +1,45 @@
+{
+	"get": {
+		"operationId": "getUserSyncTask",
+		"summary": "Gets the status of a user sync task.",
+		"description": "Returns the requested user sync task, including its `details` summary once completed. The requester can see their own tasks; administrators can see all tasks.",
+		"tags": ["Users"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "userSyncTaskId",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				},
+				"description": "The ID of the user sync task to retrieve."
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The requested user sync task.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/UserSyncTask.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

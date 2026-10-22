@@ -1,36 +1,45 @@
 import { TinyPgError } from 'tinypg';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
+import {
+	ForbiddenError,
+	InputConflictError,
+	KeycloakAdminApiError,
+	UnauthorizedError,
+} from '../../errors';
 import { stringToKeycloakId, TaskStatus, type UserSyncTask } from '../../types';
 import { syncUsersFromKeycloak } from '../syncUsersFromKeycloak';
-import { loadUserSyncTask, updateUserSyncTask } from '../../database';
+import {
+	loadUserSyncTask,
+	syncUsersFromKeycloak as syncUsersFromKeycloakOperation,
+	updateUserSyncTask,
+} from '../../database';
 
 jest.mock('../../database/db', () => ({
 	getDatabase: jest.fn(() => mockDatabase),
 }));
 jest.mock('../../database', () => ({
 	loadUserSyncTask: jest.fn(),
+	syncUsersFromKeycloak: jest.fn(),
 	updateUserSyncTask: jest.fn(),
 }));
 
 const mockedLoadUserSyncTask = jest.mocked(loadUserSyncTask);
 const mockedUpdateUserSyncTask = jest.mocked(updateUserSyncTask);
+const mockedSyncUsersFromKeycloakOperation = jest.mocked(
+	syncUsersFromKeycloakOperation,
+);
 const mockDatabase = { sql: jest.fn() };
 
 const pendingUserSyncTask: UserSyncTask = {
-	id: 13,
+	id: 7,
 	status: TaskStatus.PENDING,
 	statusUpdatedAt: '2666-06-06T06:06:06.666Z',
 	details: null,
 	createdAt: '2666-06-06T06:06:06.666Z',
-	createdBy: stringToKeycloakId('33333333-4444-4333-8333-333333333333'),
+	createdBy: stringToKeycloakId('77777777-8888-4777-8777-777777777777'),
 };
 
-const validPayload = {
-	userSyncTaskId: 13,
-	keycloakAdminAuthorizationHeader: 'Bearer some.test.jwt',
-};
-
-describe('syncUsersFromKeycloak hello-world task', () => {
+describe('syncUsersFromKeycloak task failure handling', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		mockDatabase.sql.mockResolvedValue({ rows: [] });
@@ -38,49 +47,102 @@ describe('syncUsersFromKeycloak hello-world task', () => {
 		mockedUpdateUserSyncTask.mockResolvedValue(pendingUserSyncTask);
 	});
 
-	it('walks a pending task to completion without contacting Keycloak', async () => {
-		await expect(
-			syncUsersFromKeycloak(validPayload, getMockJobHelpers()),
-		).resolves.toBeUndefined();
+	it.each<[string, Error]>([
+		[
+			'a concurrent sync conflict',
+			new InputConflictError('locked', { entityType: 'UserSyncTask' }),
+		],
+		[
+			'a Keycloak Admin API failure',
+			new KeycloakAdminApiError('request failed'),
+		],
+		['unauthorized credentials', new UnauthorizedError('unauthorized')],
+		['forbidden credentials', new ForbiddenError('forbidden')],
+	])(
+		'marks the task FAILED for %s without throwing',
+		async (_label, operationError) => {
+			mockedSyncUsersFromKeycloakOperation.mockRejectedValue(operationError);
 
-		expect(mockedUpdateUserSyncTask).toHaveBeenCalledTimes(2);
-		expect(mockedUpdateUserSyncTask).toHaveBeenCalledWith(
-			expect.anything(),
-			null,
-			expect.objectContaining({ status: TaskStatus.IN_PROGRESS }),
-			13,
-		);
-		expect(mockedUpdateUserSyncTask).toHaveBeenLastCalledWith(
-			expect.anything(),
-			null,
-			expect.objectContaining({ status: TaskStatus.COMPLETED }),
-			13,
-		);
-	});
+			await expect(
+				syncUsersFromKeycloak(
+					{
+						userSyncTaskId: 7,
+						keycloakAdminAuthorizationHeader: 'Bearer token',
+					},
+					getMockJobHelpers(),
+				),
+			).resolves.toBeUndefined();
 
-	it('ignores a malformed job payload', async () => {
+			expect(mockedUpdateUserSyncTask).toHaveBeenCalledWith(
+				expect.anything(),
+				null,
+				expect.objectContaining({ status: TaskStatus.FAILED }),
+				7,
+			);
+		},
+	);
+
+	it('propagates unexpected database errors instead of proceeding', async () => {
+		mockedSyncUsersFromKeycloakOperation.mockRejectedValue(
+			new TinyPgError('connection lost'),
+		);
+
 		await expect(
 			syncUsersFromKeycloak(
-				{ keycloakAdminAuthorizationHeader: 'Bearer some.test.jwt' },
+				{
+					userSyncTaskId: 7,
+					keycloakAdminAuthorizationHeader: 'Bearer token',
+				},
 				getMockJobHelpers(),
 			),
-		).resolves.toBeUndefined();
+		).rejects.toThrow('connection lost');
 
-		expect(mockedLoadUserSyncTask).not.toHaveBeenCalled();
-		expect(mockedUpdateUserSyncTask).not.toHaveBeenCalled();
+		expect(mockedUpdateUserSyncTask).not.toHaveBeenCalledWith(
+			expect.anything(),
+			null,
+			expect.objectContaining({ status: TaskStatus.FAILED }),
+			7,
+		);
 	});
 
-	it('leaves a task alone when the task is not pending', async () => {
-		mockedLoadUserSyncTask.mockResolvedValue({
-			...pendingUserSyncTask,
-			status: TaskStatus.COMPLETED,
-		});
+	it('propagates a failure to mark the task FAILED rather than proceeding', async () => {
+		mockedSyncUsersFromKeycloakOperation.mockRejectedValue(
+			new KeycloakAdminApiError('request failed'),
+		);
+		mockedUpdateUserSyncTask.mockRejectedValue(
+			new TinyPgError('statement timeout'),
+		);
 
 		await expect(
-			syncUsersFromKeycloak(validPayload, getMockJobHelpers()),
-		).resolves.toBeUndefined();
+			syncUsersFromKeycloak(
+				{
+					userSyncTaskId: 7,
+					keycloakAdminAuthorizationHeader: 'Bearer token',
+				},
+				getMockJobHelpers(),
+			),
+		).rejects.toThrow('statement timeout');
+	});
 
-		expect(mockedUpdateUserSyncTask).not.toHaveBeenCalled();
+	it('propagates unexpected maintenance failures instead of proceeding', async () => {
+		mockDatabase.sql.mockRejectedValueOnce(new Error('disk full'));
+
+		await expect(
+			syncUsersFromKeycloak(
+				{
+					userSyncTaskId: 7,
+					keycloakAdminAuthorizationHeader: 'Bearer token',
+				},
+				getMockJobHelpers(),
+			),
+		).rejects.toThrow('disk full');
+
+		expect(mockedUpdateUserSyncTask).not.toHaveBeenCalledWith(
+			expect.anything(),
+			null,
+			expect.objectContaining({ status: TaskStatus.FAILED }),
+			7,
+		);
 	});
 
 	it('tolerates database failures from the maintenance steps and proceeds', async () => {
@@ -89,26 +151,25 @@ describe('syncUsersFromKeycloak hello-world task', () => {
 				error: { code: '08003' },
 			}),
 		);
+		mockedSyncUsersFromKeycloakOperation.mockResolvedValue({
+			users: { seen: 7, added: 11, updated: 13, disabled: 17 },
+		});
 
 		await expect(
-			syncUsersFromKeycloak(validPayload, getMockJobHelpers()),
+			syncUsersFromKeycloak(
+				{
+					userSyncTaskId: 7,
+					keycloakAdminAuthorizationHeader: 'Bearer token',
+				},
+				getMockJobHelpers(),
+			),
 		).resolves.toBeUndefined();
 
-		expect(mockedUpdateUserSyncTask).toHaveBeenLastCalledWith(
+		expect(mockedUpdateUserSyncTask).toHaveBeenCalledWith(
 			expect.anything(),
 			null,
 			expect.objectContaining({ status: TaskStatus.COMPLETED }),
-			13,
+			7,
 		);
-	});
-
-	it('propagates unexpected maintenance failures instead of proceeding', async () => {
-		mockDatabase.sql.mockRejectedValueOnce(new Error('disk full'));
-
-		await expect(
-			syncUsersFromKeycloak(validPayload, getMockJobHelpers()),
-		).rejects.toThrow('disk full');
-
-		expect(mockedUpdateUserSyncTask).not.toHaveBeenCalled();
 	});
 });

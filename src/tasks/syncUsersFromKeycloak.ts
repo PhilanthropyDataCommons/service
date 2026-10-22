@@ -1,20 +1,36 @@
 import { isNotEmpty } from '../arrays';
 import { getDatabase } from '../database/db';
-import { loadUserSyncTask, updateUserSyncTask } from '../database';
 import {
-	isSyncUsersFromKeycloakJobPayload,
+	loadUserSyncTask,
+	syncUsersFromKeycloak as syncUsersFromKeycloakOperation,
+	updateUserSyncTask,
+} from '../database';
+import {
+	ForbiddenError,
+	InputConflictError,
+	InternalValidationError,
+	KeycloakAdminApiError,
+	UnauthorizedError,
+} from '../errors';
+import {
 	isTinyPgErrorWithQueryContext,
 	TaskStatus,
+	isSyncUsersFromKeycloakJobPayload,
 } from '../types';
 import type { JobHelpers, Logger as GraphileLogger } from 'graphile-worker';
 import type { TinyPg } from 'tinypg';
 
+const isKnownRecoverableSyncError = (err: unknown): boolean =>
+	err instanceof InputConflictError ||
+	err instanceof KeycloakAdminApiError ||
+	err instanceof UnauthorizedError ||
+	err instanceof ForbiddenError ||
+	err instanceof InternalValidationError;
+
 /**
- * Processes a user sync task. This initial implementation is a hello
- * world run: it validates the job payload, performs the task lifecycle
- * maintenance, and walks a pending task through completion without yet
- * contacting the Keycloak Admin REST API. The requester's credentials
- * ride along in the job payload for the sync implementation that follows.
+ * Processes a user sync task: lists the realm's users from the Keycloak
+ * Admin REST API with the credentials captured when the task was requested,
+ * then records the summary on the task row.
  */
 const syncUsersFromKeycloak = async (
 	payload: unknown,
@@ -28,37 +44,65 @@ const syncUsersFromKeycloak = async (
 		});
 		return;
 	}
-	const { userSyncTaskId } = payload;
-	await purgeUnrunnableUserSyncJobs(db, graphileLogger);
-	await failAbandonedUserSyncTasks(db, userSyncTaskId, graphileLogger);
-	const userSyncTask = await loadUserSyncTask(db, null, userSyncTaskId);
-	if (userSyncTask.status !== TaskStatus.PENDING) {
-		graphileLogger.warn(
-			'User sync task cannot be processed because it is not in a PENDING state',
-			{ userSyncTaskId, status: userSyncTask.status },
+	const { userSyncTaskId, keycloakAdminAuthorizationHeader } = payload;
+	try {
+		await purgeUnrunnableUserSyncJobs(db, graphileLogger);
+		await failAbandonedUserSyncTasks(db, userSyncTaskId, graphileLogger);
+		const userSyncTask = await loadUserSyncTask(db, null, userSyncTaskId);
+		if (userSyncTask.status !== TaskStatus.PENDING) {
+			graphileLogger.warn(
+				'User sync task cannot be processed because it is not in a PENDING state',
+				{ userSyncTaskId, status: userSyncTask.status },
+			);
+			return;
+		}
+		await updateUserSyncTask(
+			db,
+			null,
+			{
+				status: TaskStatus.IN_PROGRESS,
+				statusUpdatedAt: new Date().toISOString(),
+			},
+			userSyncTaskId,
 		);
-		return;
+		const summary = await syncUsersFromKeycloakOperation(
+			db,
+			null,
+			keycloakAdminAuthorizationHeader,
+		);
+		await updateUserSyncTask(
+			db,
+			null,
+			{
+				status: TaskStatus.COMPLETED,
+				details: summary,
+				statusUpdatedAt: new Date().toISOString(),
+			},
+			userSyncTaskId,
+		);
+		// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- zero seen users contradicts the requester's valid token.
+		if (summary.users.seen === 0) {
+			graphileLogger.warn(
+				'The Keycloak user listing was empty; users were not disabled this run',
+				{ userSyncTaskId },
+			);
+		}
+	} catch (err) {
+		if (isKnownRecoverableSyncError(err)) {
+			graphileLogger.warn('Syncing users from Keycloak failed', { err });
+			await updateUserSyncTask(
+				db,
+				null,
+				{
+					status: TaskStatus.FAILED,
+					statusUpdatedAt: new Date().toISOString(),
+				},
+				userSyncTaskId,
+			);
+		} else {
+			throw err;
+		}
 	}
-	await updateUserSyncTask(
-		db,
-		null,
-		{
-			status: TaskStatus.IN_PROGRESS,
-			statusUpdatedAt: new Date().toISOString(),
-		},
-		userSyncTaskId,
-	);
-	// The real sync lands in a follow-up commit; completing the task here
-	// proves the enqueue, polling, and lifecycle plumbing end to end.
-	await updateUserSyncTask(
-		db,
-		null,
-		{
-			status: TaskStatus.COMPLETED,
-			statusUpdatedAt: new Date().toISOString(),
-		},
-		userSyncTaskId,
-	);
 };
 
 /**

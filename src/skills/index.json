@@ -1,0 +1,11 @@
+{
+	"$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+	"skills": [
+		{
+			"name": "philanthropy-data-commons",
+			"type": "skill-md",
+			"description": "Hello world placeholder for working with the Philanthropy Data Commons (PDC) API. Use when a task mentions the Philanthropy Data Commons or the PDC service.",
+			"url": "philanthropy-data-commons/SKILL.md"
+		}
+	]
+}

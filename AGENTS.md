@@ -112,6 +112,7 @@ src/
 ├── tasks/          # Background job implementations
 ├── test/           # Test utilities and mocks
 ├── __tests__/      # Integration test files
+├── skills/         # Agent skills served by the API, one directory per skill
 └── openapi/        # OpenAPI specification (api.json)
 ```
 
@@ -349,6 +350,17 @@ All checks must pass before merging PRs.
 3. Run `npm run build:openapi` to bundle
 
 **Important:** See the [OpenAPI conventions](#openapi-conventions) section for rules about schema design.
+
+### Adding or Updating an Agent Skill
+
+Agent skills are static documents that teach an agentic tool how to work with the PDC. They must never be generated from user data.
+
+The service serves `src/skills/` at `/.well-known/agent-skills/`, following the [Agent Skills Discovery RFC](https://github.com/cloudflare/agent-skills-discovery-rfc). It adds each skill's `digest` to the index when responding and validates nothing at runtime; `src/__tests__/agentSkills.int.test.ts` checks that the skills and their index are well formed and agree with each other.
+
+1. Create or edit `src/skills/{skill-name}/SKILL.md`; its frontmatter needs a `name` matching the directory name and a `description`
+2. Add or update that skill's entry in `src/skills/index.json`, leaving out `digest` and keeping the entries sorted by `name`
+
+Each skill is a single `SKILL.md`. Link to material the service already serves (e.g. the OpenAPI specification) rather than adding supporting files, which the index cannot describe.
 
 ### Running Tests with Logging
 

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a `GET /.well-known/agent-skills/index.json` endpoint listing the agent skills the service publishes, and a `GET /.well-known/agent-skills/philanthropy-data-commons/SKILL.md` endpoint serving a placeholder skill.
 - Added a `PATCH /sources/{sourceId}` endpoint for updating a source's `label`.
 - Added an `edit` permission for the `source` scope.
 - Added a `defaultPermissionGrant` entity, managed via the `/defaultPermissionGrants` endpoints, that describes a permission grant to auto-generate against entities of a given type.

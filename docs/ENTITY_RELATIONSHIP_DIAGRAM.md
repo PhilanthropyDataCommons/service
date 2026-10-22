@@ -194,6 +194,14 @@ erDiagram
     string keycloakUserName
     datetime createdAt
   }
+  UserSyncTask {
+    int id PK
+    string status
+    jsonb details
+    datetime statusUpdatedAt
+    uuid createdBy FK
+    datetime createdAt
+  }
   DefaultPermissionGrant {
     int id PK
     string granteeType

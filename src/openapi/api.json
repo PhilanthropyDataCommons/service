@@ -328,6 +328,9 @@
 			},
 			"UserBundle": {
 				"$ref": "./components/schemas/UserBundle.json"
+			},
+			"UserSyncTask": {
+				"$ref": "./components/schemas/UserSyncTask.json"
 			}
 		}
 	},
@@ -481,6 +484,12 @@
 		},
 		"/users": {
 			"$ref": "./paths/users.json"
+		},
+		"/users/sync": {
+			"$ref": "./paths/usersSync.json"
+		},
+		"/users/sync/{userSyncTaskId}": {
+			"$ref": "./paths/usersSyncTask.json"
 		}
 	},
 	"servers": [

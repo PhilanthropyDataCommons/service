@@ -321,6 +321,7 @@ Key environment variables (see `.env.example` for full list):
 | `OPENAPI_DOCS_AUTH_CLIENT_ID`                                      | Keycloak client ID                                                 |
 | `S3_ACCESS_KEY_ID`, `S3_ACCESS_SECRET`, `S3_BUCKET`, `S3_ENDPOINT` | S3 storage                                                         |
 | `LOG_LEVEL`                                                        | Logging verbosity (trace, debug, info, warn, error, fatal, silent) |
+| `SENTRY_DSN`, `SENTRY_ENVIRONMENT`                                 | Sentry error reporting (optional; see `docs/SENTRY.md`)            |
 
 ## CI/CD Workflows
 
@@ -383,6 +384,7 @@ docker build .
 | File                             | Purpose                    |
 | -------------------------------- | -------------------------- |
 | `src/index.ts`                   | Server entry point         |
+| `src/instrument.ts`              | Sentry initialization      |
 | `src/app.ts`                     | Express app configuration  |
 | `src/database/db.ts`             | Database connection pool   |
 | `src/middleware/processJwt.ts`   | JWT authentication         |

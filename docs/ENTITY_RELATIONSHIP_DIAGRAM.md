@@ -193,6 +193,8 @@ erDiagram
     uuid keycloakUserId PK
     string keycloakUserName
     datetime createdAt
+    datetime syncedFromKeycloakAt
+    datetime disabledAt
   }
   UserSyncTask {
     int id PK

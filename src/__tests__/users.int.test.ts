@@ -5,6 +5,7 @@ import {
 	getDatabase,
 	loadSystemUser,
 	loadTableMetrics,
+	loadUserByKeycloakUserId,
 } from '../database';
 import {
 	getMockJwt,
@@ -22,8 +23,13 @@ import {
 	expectString,
 	expectTimestamp,
 } from '../test/asymettricMatchers';
-import { keycloakIdToString, TaskStatus } from '../types';
+import {
+	keycloakIdToString,
+	nonNullKeycloakIdToString,
+	TaskStatus,
+} from '../types';
 import type { User } from '../types';
+
 describe('/users', () => {
 	describe('GET /', () => {
 		it('requires authentication', async () => {
@@ -48,6 +54,50 @@ describe('/users', () => {
 					},
 				],
 			});
+		});
+
+		it('does not clear disabled_at when the request token was issued before the account was disabled', async () => {
+			const db = getDatabase();
+			const testUser = await createTestUser(db, null);
+			await db.query(
+				"UPDATE users SET disabled_at = now() - interval '1 day' WHERE keycloak_user_id = :keycloakUserId",
+				{ keycloakUserId: testUser.keycloakUserId },
+			);
+			const twoDaysAgo = Math.round(new Date().getTime() / 1000) - 172800;
+			const preDisableToken = getMockJwt({
+				sub: nonNullKeycloakIdToString(testUser.keycloakUserId),
+				iat: twoDaysAgo,
+			});
+
+			await request(app).get('/users').set(preDisableToken).expect(200);
+
+			const userAfterRequest = await loadUserByKeycloakUserId(
+				db,
+				null,
+				testUser.keycloakUserId,
+			);
+			expect(userAfterRequest.disabledAt).not.toBeNull();
+		});
+
+		it('clears disabled_at when the request token was issued after the account was disabled', async () => {
+			const db = getDatabase();
+			const testUser = await createTestUser(db, null);
+			await db.query(
+				"UPDATE users SET disabled_at = now() - interval '1 day' WHERE keycloak_user_id = :keycloakUserId",
+				{ keycloakUserId: testUser.keycloakUserId },
+			);
+			const postDisableToken = getMockJwt({
+				sub: nonNullKeycloakIdToString(testUser.keycloakUserId),
+			});
+
+			await request(app).get('/users').set(postDisableToken).expect(200);
+
+			const userAfterRequest = await loadUserByKeycloakUserId(
+				db,
+				null,
+				testUser.keycloakUserId,
+			);
+			expect(userAfterRequest.disabledAt).toBeNull();
 		});
 
 		it('returns all users when the caller carries the pdc-admin realm role but no realm-management user role', async () => {
@@ -173,6 +223,7 @@ describe('/users', () => {
 			});
 		});
 	});
+
 	describe('POST /users/sync', () => {
 		it('requires authentication', async () => {
 			await request(app).post('/users/sync').expect(401);

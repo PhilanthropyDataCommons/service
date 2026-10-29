@@ -4,6 +4,7 @@ export * from './ForbiddenError';
 export * from './InputConflictError';
 export * from './InputValidationError';
 export * from './InternalValidationError';
+export * from './KeycloakAdminApiError';
 export * from './NoDataReturnedError';
 export * from './NotFoundError';
 export * from './UnauthorizedError';

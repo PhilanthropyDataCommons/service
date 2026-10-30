@@ -10,6 +10,7 @@ export interface TinyPgErrorWithQueryContext {
 		error: {
 			code: string;
 		};
+		params?: object;
 	};
 }
 
@@ -34,6 +35,10 @@ export const tinyPgErrorWithQueryContextSchema: JSONSchemaType<TinyPgErrorWithQu
 							},
 						},
 						required: ['code'],
+					},
+					params: {
+						type: 'object',
+						nullable: true,
 					},
 				},
 				required: ['error'],

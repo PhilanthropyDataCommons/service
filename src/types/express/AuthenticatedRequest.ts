@@ -26,6 +26,12 @@ interface ObjectWithAuthWithExp {
 	};
 }
 
+interface ObjectWithAuthWithIat {
+	auth: {
+		iat: number;
+	};
+}
+
 interface ObjectWithAuthWithRealmAccessRoles {
 	auth: {
 		realm_access: {
@@ -93,6 +99,22 @@ const objectWithAuthWithExpSchema: JSONSchemaType<ObjectWithAuthWithExp> = {
 				},
 			},
 			required: ['exp'],
+		},
+	},
+	required: ['auth'],
+};
+
+const objectWithAuthWithIatSchema: JSONSchemaType<ObjectWithAuthWithIat> = {
+	type: 'object',
+	properties: {
+		auth: {
+			type: 'object',
+			properties: {
+				iat: {
+					type: 'number',
+				},
+			},
+			required: ['iat'],
 		},
 	},
 	required: ['auth'],
@@ -183,6 +205,8 @@ const hasAuthWithName = ajv.compile(objectWithAuthWithNameSchema);
 
 const isObjectWithAuthWithExp = ajv.compile(objectWithAuthWithExpSchema);
 
+const hasAuthWithIat = ajv.compile(objectWithAuthWithIatSchema);
+
 const hasAuthWithRealmAccessRoles = ajv.compile(
 	objectWithAuthWithRealmAccessRolesSchema,
 );
@@ -219,6 +243,9 @@ const getKeycloakOrganizationIdsFromRequest = (req: Request): KeycloakId[] =>
 const getJwtExpFromRequest = (req: Request): number | null =>
 	isObjectWithAuthWithExp(req) ? req.auth.exp : null;
 
+const getJwtIatFromRequest = (req: Request): number | null =>
+	hasAuthWithIat(req) ? req.auth.iat : null;
+
 const hasMeaningfulAuthSub = (req: Request): boolean => {
 	const authSub = getAuthSubFromRequest(req);
 	return authSub !== undefined && authSub !== '';
@@ -232,5 +259,6 @@ export {
 	getRealmManagementRolesFromRequest,
 	getKeycloakOrganizationIdsFromRequest,
 	getJwtExpFromRequest,
+	getJwtIatFromRequest,
 	hasMeaningfulAuthSub,
 };

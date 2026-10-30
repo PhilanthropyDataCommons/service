@@ -44,6 +44,8 @@ export const getMockedUser = (): User => ({
 	keycloakUserId: getTestUserKeycloakUserId(),
 	keycloakUserName: getTestUserKeycloakUserName(),
 	createdAt: '',
+	syncedFromKeycloakAt: null,
+	disabledAt: null,
 });
 
 export const loadTestUser = async (db: Pick<TinyPg, 'sql'>): Promise<User> => {

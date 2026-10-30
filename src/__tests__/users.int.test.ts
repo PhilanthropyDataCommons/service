@@ -1,17 +1,33 @@
 import request from 'supertest';
 import { app } from '../app';
-import { getDatabase, loadSystemUser, loadTableMetrics } from '../database';
-import { loadTestUser } from '../test/utils';
-import { createTestUser } from '../test/factories';
-import { expectTimestamp } from '../test/asymettricMatchers';
 import {
+	createUserSyncTask,
+	getDatabase,
+	loadSystemUser,
+	loadTableMetrics,
+	loadUserByKeycloakUserId,
+} from '../database';
+import {
+	getMockJwt,
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as authHeaderWithAdminRole,
 	mockJwtWithRealmManagementManageUsersRole as authHeaderWithManageUsersRole,
 	mockJwtWithRealmManagementQueryUsersRole as authHeaderWithQueryUsersRole,
 	mockJwtWithRealmManagementViewUsersRole as authHeaderWithViewUsersRole,
+	mockJwtWithUnrelatedRealmManagementRole as authHeaderWithUnrelatedRealmManagementRole,
 } from '../test/mockJwt';
-import { keycloakIdToString } from '../types';
+import { getTestAuthContext, loadTestUser } from '../test/utils';
+import { createTestUser } from '../test/factories';
+import {
+	expectNumber,
+	expectString,
+	expectTimestamp,
+} from '../test/asymettricMatchers';
+import {
+	keycloakIdToString,
+	nonNullKeycloakIdToString,
+	TaskStatus,
+} from '../types';
 import type { User } from '../types';
 
 describe('/users', () => {
@@ -38,6 +54,50 @@ describe('/users', () => {
 					},
 				],
 			});
+		});
+
+		it('does not clear disabled_at when the request token was issued before the account was disabled', async () => {
+			const db = getDatabase();
+			const testUser = await createTestUser(db, null);
+			await db.query(
+				"UPDATE users SET disabled_at = now() - interval '1 day' WHERE keycloak_user_id = :keycloakUserId",
+				{ keycloakUserId: testUser.keycloakUserId },
+			);
+			const twoDaysAgo = Math.round(new Date().getTime() / 1000) - 172800;
+			const preDisableToken = getMockJwt({
+				sub: nonNullKeycloakIdToString(testUser.keycloakUserId),
+				iat: twoDaysAgo,
+			});
+
+			await request(app).get('/users').set(preDisableToken).expect(200);
+
+			const userAfterRequest = await loadUserByKeycloakUserId(
+				db,
+				null,
+				testUser.keycloakUserId,
+			);
+			expect(userAfterRequest.disabledAt).not.toBeNull();
+		});
+
+		it('clears disabled_at when the request token was issued after the account was disabled', async () => {
+			const db = getDatabase();
+			const testUser = await createTestUser(db, null);
+			await db.query(
+				"UPDATE users SET disabled_at = now() - interval '1 day' WHERE keycloak_user_id = :keycloakUserId",
+				{ keycloakUserId: testUser.keycloakUserId },
+			);
+			const postDisableToken = getMockJwt({
+				sub: nonNullKeycloakIdToString(testUser.keycloakUserId),
+			});
+
+			await request(app).get('/users').set(postDisableToken).expect(200);
+
+			const userAfterRequest = await loadUserByKeycloakUserId(
+				db,
+				null,
+				testUser.keycloakUserId,
+			);
+			expect(userAfterRequest.disabledAt).toBeNull();
 		});
 
 		it('returns all users when the caller carries the pdc-admin realm role but no realm-management user role', async () => {
@@ -161,6 +221,182 @@ describe('/users', () => {
 					createdUsers[10],
 				],
 			});
+		});
+	});
+
+	describe('POST /users/sync', () => {
+		it('requires authentication', async () => {
+			await request(app).post('/users/sync').expect(401);
+		});
+
+		it('returns 403 when the caller carries no realm-management user roles', async () => {
+			await request(app).post('/users/sync').set(authHeader).expect(403);
+		});
+
+		it('returns 403 when the caller carries only an unrelated realm-management role', async () => {
+			await request(app)
+				.post('/users/sync')
+				.set(authHeaderWithUnrelatedRealmManagementRole)
+				.expect(403);
+		});
+
+		it('returns 403 when the caller carries only the query-users realm-management role', async () => {
+			// query-users alone cannot see the whole realm, so absence is not evidence of deletion.
+			await request(app)
+				.post('/users/sync')
+				.set(authHeaderWithQueryUsersRole)
+				.expect(403);
+		});
+
+		it('creates a pending user sync task when the caller carries the view-users realm-management role', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+
+			const response = await request(app)
+				.post('/users/sync')
+				.set(authHeaderWithViewUsersRole)
+				.expect(201);
+			expect(response.body).toEqual({
+				id: expectNumber(),
+				status: 'pending',
+				statusUpdatedAt: expectTimestamp(),
+				details: null,
+				createdAt: expectTimestamp(),
+				createdBy: keycloakIdToString(testUser.keycloakUserId),
+			} satisfies Record<string, unknown>);
+		});
+
+		it('creates a pending user sync task when the caller carries the view-users realm-management role', async () => {
+			await request(app)
+				.post('/users/sync')
+				.set(authHeaderWithViewUsersRole)
+				.expect(201);
+		});
+
+		it('creates a pending user sync task when the caller carries the manage-users realm-management role', async () => {
+			await request(app)
+				.post('/users/sync')
+				.set(authHeaderWithManageUsersRole)
+				.expect(201);
+		});
+
+		it('enqueues the sync job atomically with the task row', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+
+			await request(app)
+				.post('/users/sync')
+				.set(authHeaderWithViewUsersRole)
+				.expect(201);
+
+			// The task row and its job commit together: the job is visible as
+			// soon as the task is, joined back through the payload.
+			const { rows: jobRows } = await db.query<{
+				attempts: number;
+				maxAttempts: number;
+				createdBy: string;
+				status: string;
+			}>(
+				`SELECT
+					jobs.attempts AS attempts,
+					jobs.max_attempts AS "maxAttempts",
+					queues.queue_name AS "queueName",
+					task.created_by AS "createdBy",
+					task.status AS status
+				FROM graphile_worker._private_jobs AS jobs
+				JOIN graphile_worker._private_job_queues AS queues ON queues.id = jobs.job_queue_id
+				JOIN graphile_worker._private_tasks AS tasks ON tasks.id = jobs.task_id
+				JOIN user_sync_tasks AS task ON task.id::text = jobs.payload ->> 'userSyncTaskId'
+				WHERE tasks.identifier = 'syncUsersFromKeycloak'`,
+			);
+			expect(jobRows).toEqual([
+				{
+					attempts: 0,
+					maxAttempts: 1,
+					queueName: 'sync_users_from_keycloak',
+					createdBy: keycloakIdToString(testUser.keycloakUserId),
+					status: 'pending',
+				},
+			]);
+		});
+	});
+
+	describe('GET /users/sync/:userSyncTaskId', () => {
+		it('requires authentication', async () => {
+			await request(app).get('/users/sync/1').expect(401);
+		});
+
+		it('returns 400 when the userSyncTaskId is not a valid id', async () => {
+			await request(app)
+				.get('/users/sync/notanumber')
+				.set(authHeaderWithQueryUsersRole)
+				.expect(400);
+		});
+
+		it('returns the task for the requester', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const userSyncTask = await createUserSyncTask(
+				db,
+				await getTestAuthContext(db),
+				{ status: TaskStatus.PENDING },
+			);
+
+			const response = await request(app)
+				.get(`/users/sync/${userSyncTask.id}`)
+				.set(authHeaderWithQueryUsersRole)
+				.expect(200);
+			expect(response.body).toEqual({
+				id: userSyncTask.id,
+				status: 'pending',
+				statusUpdatedAt: expectTimestamp(),
+				details: null,
+				createdAt: expectTimestamp(),
+				createdBy: keycloakIdToString(testUser.keycloakUserId),
+			} satisfies Record<string, unknown>);
+		});
+
+		it('returns 404 for a task requested by a different, non-administrator caller', async () => {
+			const db = getDatabase();
+			const userSyncTask = await createUserSyncTask(
+				db,
+				await getTestAuthContext(db),
+				{ status: TaskStatus.PENDING },
+			);
+			const authHeaderForAnotherUser = getMockJwt({
+				sub: '22222222-2222-4222-8222-222222222222',
+			});
+
+			await request(app)
+				.get(`/users/sync/${userSyncTask.id}`)
+				.set(authHeaderForAnotherUser)
+				.expect(404);
+		});
+
+		it('returns the task for an administrator', async () => {
+			const db = getDatabase();
+			const userSyncTask = await createUserSyncTask(
+				db,
+				await getTestAuthContext(db),
+				{ status: TaskStatus.PENDING },
+			);
+			const authHeaderForAnotherAdministrator = getMockJwt({
+				sub: '33333333-3333-4333-8333-333333333333',
+				roles: ['pdc-admin'],
+			});
+
+			const response = await request(app)
+				.get(`/users/sync/${userSyncTask.id}`)
+				.set(authHeaderForAnotherAdministrator)
+				.expect(200);
+			expect(response.body).toEqual({
+				id: userSyncTask.id,
+				status: 'pending',
+				statusUpdatedAt: expectTimestamp(),
+				details: null,
+				createdAt: expectTimestamp(),
+				createdBy: expectString(),
+			} satisfies Record<string, unknown>);
 		});
 	});
 });

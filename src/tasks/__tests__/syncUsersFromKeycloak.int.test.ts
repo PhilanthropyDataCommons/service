@@ -9,7 +9,7 @@ import {
 	updateUserSyncTask,
 } from '../../database';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
-import { KEYCLOAK_USERS_LIST_PAGE_SIZE } from '../../keycloak/constants';
+import { KEYCLOAK_RESOURCE_LIST_PAGE_SIZE } from '../../keycloak/fetchPaginatedKeycloakResource';
 import { createTestUser } from '../../test/factories';
 import { getTestAuthContext } from '../../test/utils';
 import { issuer } from '../../auth/jwtOptions';
@@ -41,7 +41,7 @@ const mockKeycloakUsers = (users: KeycloakUserRepresentation[]) =>
 			briefRepresentation: 'true',
 			exact: 'false',
 			first: '0',
-			max: String(KEYCLOAK_USERS_LIST_PAGE_SIZE),
+			max: String(KEYCLOAK_RESOURCE_LIST_PAGE_SIZE),
 		})
 		.matchHeader('authorization', AUTHORIZATION_HEADER)
 		.reply(200, users);
@@ -446,7 +446,7 @@ describe('syncUsersFromKeycloak', () => {
 				briefRepresentation: 'true',
 				exact: 'false',
 				first: '0',
-				max: String(KEYCLOAK_USERS_LIST_PAGE_SIZE),
+				max: String(KEYCLOAK_RESOURCE_LIST_PAGE_SIZE),
 			})
 			.matchHeader('authorization', AUTHORIZATION_HEADER)
 			.delay(1000)

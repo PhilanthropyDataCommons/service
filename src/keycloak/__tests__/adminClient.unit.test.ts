@@ -4,8 +4,8 @@ import {
 	InternalValidationError,
 	UnauthorizedError,
 } from '../../errors';
-import { KEYCLOAK_ADMIN_PAGE_TIMEOUT_IN_MS } from '../../keycloak/constants';
 import {
+	KEYCLOAK_REQUEST_TIMEOUT,
 	getKeycloakAdminApiBaseUrl,
 	fetchKeycloakResourceAsKeycloakAdmin,
 } from '../adminClient';
@@ -65,7 +65,7 @@ describe('fetchKeycloakResourceAsKeycloakAdmin', () => {
 	});
 
 	it('passes an abort signal to the fetch call', async () => {
-		const signal = AbortSignal.timeout(KEYCLOAK_ADMIN_PAGE_TIMEOUT_IN_MS);
+		const signal = AbortSignal.timeout(KEYCLOAK_REQUEST_TIMEOUT);
 		const fetchSpy = jest
 			.spyOn(globalThis, 'fetch')
 			.mockResolvedValue(new Response('{}', { status: 200 }));

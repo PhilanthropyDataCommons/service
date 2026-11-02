@@ -1,12 +1,11 @@
 import { requireEnv } from 'require-env-variable';
-import { HTTP_STATUS } from '../constants';
+import { HTTP_STATUS, THIRTY_SECONDS_IN_MS } from '../constants';
 import {
 	ForbiddenError,
 	InternalValidationError,
 	KeycloakAdminApiError,
 	UnauthorizedError,
 } from '../errors';
-import { KEYCLOAK_ADMIN_PAGE_TIMEOUT_IN_MS } from './constants';
 
 const { AUTH_SERVER_ISSUER } = requireEnv('AUTH_SERVER_ISSUER');
 
@@ -36,10 +35,12 @@ const KEYCLOAK_UNAUTHORIZED_STATUS: number =
 	HTTP_STATUS.CLIENT_ERROR.UNAUTHORIZED;
 const KEYCLOAK_FORBIDDEN_STATUS: number = HTTP_STATUS.CLIENT_ERROR.FORBIDDEN;
 
+const KEYCLOAK_REQUEST_TIMEOUT = THIRTY_SECONDS_IN_MS;
+
 const fetchKeycloakResourceAsKeycloakAdmin = async (
 	authorizationHeader: string,
 	path: string,
-	signal: AbortSignal = AbortSignal.timeout(KEYCLOAK_ADMIN_PAGE_TIMEOUT_IN_MS),
+	signal: AbortSignal = AbortSignal.timeout(KEYCLOAK_REQUEST_TIMEOUT),
 ): Promise<{ response: Response; receivedAt: Date }> => {
 	const response = await fetch(`${keycloakAdminApiBaseUrl}${path}`, {
 		headers: { authorization: authorizationHeader },
@@ -68,4 +69,8 @@ const fetchKeycloakResourceAsKeycloakAdmin = async (
 	return { response, receivedAt };
 };
 
-export { getKeycloakAdminApiBaseUrl, fetchKeycloakResourceAsKeycloakAdmin };
+export {
+	getKeycloakAdminApiBaseUrl,
+	KEYCLOAK_REQUEST_TIMEOUT,
+	fetchKeycloakResourceAsKeycloakAdmin,
+};

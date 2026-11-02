@@ -1,6 +1,8 @@
 import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import { NotFoundError } from '../../../errors';
 import {
+	getCanViewOrganizationsInKeycloakFromAuthContext,
+	getCanViewUsersInKeycloakFromAuthContext,
 	getIsAdministratorFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
@@ -35,6 +37,10 @@ const generateLoadItemOperation =
 			getKeycloakUserIdFromAuthContext(authContext);
 		const authContextIsAdministrator =
 			getIsAdministratorFromAuthContext(authContext);
+		const authContextCanViewOrganizationsInKeycloak =
+			getCanViewOrganizationsInKeycloakFromAuthContext(authContext);
+		const authContextCanViewUsersInKeycloak =
+			getCanViewUsersInKeycloakFromAuthContext(authContext);
 		const queryParameters = parameterNames.reduce(
 			(acc, parameterName, index) => ({
 				...acc,
@@ -43,6 +49,8 @@ const generateLoadItemOperation =
 			{
 				authContextKeycloakUserId,
 				authContextIsAdministrator,
+				authContextCanViewOrganizationsInKeycloak,
+				authContextCanViewUsersInKeycloak,
 			},
 		);
 

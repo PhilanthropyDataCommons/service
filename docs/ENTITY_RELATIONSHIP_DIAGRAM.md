@@ -204,6 +204,20 @@ erDiagram
     uuid createdBy FK
     datetime createdAt
   }
+  Organization {
+    uuid keycloakOrganizationId PK
+    string keycloakOrganizationName
+    datetime syncedFromKeycloakAt
+    datetime disabledAt
+    datetime createdAt
+  }
+  OrganizationMembership {
+    uuid organizationKeycloakId PK, FK
+    uuid userKeycloakUserId PK, FK
+    datetime syncedFromKeycloakAt
+    datetime disabledAt
+    datetime createdAt
+  }
   DefaultPermissionGrant {
     int id PK
     string granteeType
@@ -296,6 +310,8 @@ erDiagram
   PermissionGrant }o--o| InitiativeFieldValue : "references"
   PermissionGrant }o--|| User : "is created by"
   DefaultPermissionGrant }o--|| User : "is created by"
+  User ||--o{ OrganizationMembership : "belongs to"
+  Organization ||--o{ OrganizationMembership : "has members"
   Changemaker ||--o{ FiscalSponsorship : "sponsors"
   Changemaker ||--o{ FiscalSponsorship : "is sponsored by"
 ```

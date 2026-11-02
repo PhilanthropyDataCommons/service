@@ -236,6 +236,12 @@
 			"Organization": {
 				"$ref": "./components/schemas/Organization.json"
 			},
+			"OrganizationBundle": {
+				"$ref": "./components/schemas/OrganizationBundle.json"
+			},
+			"OrganizationSyncTask": {
+				"$ref": "./components/schemas/OrganizationSyncTask.json"
+			},
 			"Bundle": {
 				"$ref": "./components/schemas/Bundle.json"
 			},
@@ -466,6 +472,15 @@
 		},
 		"/opportunities/{opportunityId}": {
 			"$ref": "./paths/opportunity.json"
+		},
+		"/organizations": {
+			"$ref": "./paths/organizations.json"
+		},
+		"/organizations/sync": {
+			"$ref": "./paths/organizationsSync.json"
+		},
+		"/organizations/sync/{organizationSyncTaskId}": {
+			"$ref": "./paths/organizationsSyncTask.json"
 		},
 		"/organizations/{keycloakOrganizationId}": {
 			"$ref": "./paths/organization.json"

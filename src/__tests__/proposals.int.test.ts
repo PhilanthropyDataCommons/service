@@ -767,6 +767,8 @@ describe('/proposals', () => {
 						details: {
 							entityType: 'Proposal',
 							lookupValues: {
+								authContextCanViewOrganizationsInKeycloak: false,
+								authContextCanViewUsersInKeycloak: false,
 								authContextIsAdministrator: false,
 								authContextKeycloakUserId: testUser.keycloakUserId,
 								proposalId: 9001,
@@ -820,6 +822,8 @@ describe('/proposals', () => {
 						details: {
 							entityType: 'Proposal',
 							lookupValues: {
+								authContextCanViewOrganizationsInKeycloak: false,
+								authContextCanViewUsersInKeycloak: false,
 								authContextIsAdministrator: false,
 								authContextKeycloakUserId: testUser.keycloakUserId,
 								proposalId: proposal.id,
@@ -1731,6 +1735,8 @@ describe('/proposals', () => {
 						details: {
 							entityType: 'Opportunity',
 							lookupValues: {
+								authContextCanViewOrganizationsInKeycloak: false,
+								authContextCanViewUsersInKeycloak: false,
 								authContextIsAdministrator: false,
 								authContextKeycloakUserId: testUser.keycloakUserId,
 								opportunityId: 1,

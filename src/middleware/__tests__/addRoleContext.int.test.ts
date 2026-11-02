@@ -167,4 +167,73 @@ describe('addRoleContext', () => {
 		const nextMock = generateNextWithAssertions(runAssertions, done);
 		addRoleContext(req, res, nextMock);
 	});
+
+	it('sets canViewOrganizationsInKeycloak false when the JWT carries no organization roles', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['view-users'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewOrganizationsInKeycloak).toBe(false);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewOrganizationsInKeycloak true when the JWT carries view-organizations', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['view-organizations'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewOrganizationsInKeycloak).toBe(true);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
+
+	it('sets canViewOrganizationsInKeycloak true when the JWT carries manage-realm', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			realm_access: {
+				roles: ['default-roles-pdc'],
+			},
+			resource_access: {
+				'realm-management': {
+					roles: ['manage-realm'],
+				},
+			},
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBe(undefined);
+			expect(req.role?.canViewOrganizationsInKeycloak).toBe(true);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addRoleContext(req, res, nextMock);
+	});
 });

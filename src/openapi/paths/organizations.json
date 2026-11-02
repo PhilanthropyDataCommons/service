@@ -1,0 +1,42 @@
+{
+	"get": {
+		"operationId": "getOrganizations",
+		"summary": "Gets a list of organizations as cached from Keycloak.",
+		"description": "Returns the cached Keycloak organizations, each including its role bundle (changemaker, data provider, and/or funder) and its current cached members. The caller's JWT must carry the PDC-service `pdc-admin` realm role or at least one of the Keycloak `realm-management` organization-visibility roles (`view-organizations`, `manage-organizations`, or `manage-realm`).",
+		"tags": ["Organizations"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"$ref": "../components/parameters/pageParam.json"
+			},
+			{
+				"$ref": "../components/parameters/countParam.json"
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "A list of organizations.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/OrganizationBundle.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

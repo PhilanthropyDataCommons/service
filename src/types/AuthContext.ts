@@ -9,6 +9,7 @@ interface AuthContext {
 	role: {
 		isAdministrator: boolean;
 		canViewUsersInKeycloak: boolean;
+		canViewOrganizationsInKeycloak: boolean;
 	};
 }
 
@@ -29,8 +30,15 @@ const authContextSchema: JSONSchemaType<AuthContext> = {
 				canViewUsersInKeycloak: {
 					type: 'boolean',
 				},
+				canViewOrganizationsInKeycloak: {
+					type: 'boolean',
+				},
 			},
-			required: ['isAdministrator', 'canViewUsersInKeycloak'],
+			required: [
+				'isAdministrator',
+				'canViewUsersInKeycloak',
+				'canViewOrganizationsInKeycloak',
+			],
 		},
 	},
 	required: ['user', 'role'],
@@ -53,6 +61,10 @@ const getCanViewUsersInKeycloakFromAuthContext = (
 	req: AuthIdentityAndRole | undefined | null,
 ): boolean | undefined => req?.role.canViewUsersInKeycloak;
 
+const getCanViewOrganizationsInKeycloakFromAuthContext = (
+	req: AuthIdentityAndRole | undefined | null,
+): boolean | undefined => req?.role.canViewOrganizationsInKeycloak;
+
 export {
 	type AuthContext,
 	type AuthIdentityAndRole,
@@ -61,4 +73,5 @@ export {
 	getKeycloakUserIdFromAuthContext,
 	getIsAdministratorFromAuthContext,
 	getCanViewUsersInKeycloakFromAuthContext,
+	getCanViewOrganizationsInKeycloakFromAuthContext,
 };

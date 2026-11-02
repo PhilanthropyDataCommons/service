@@ -32,5 +32,6 @@ export * from './s3Buckets';
 export * from './serviceQueryAuditLogs';
 export * from './sources';
 export * from './terminologySets';
+export * from './userOrganizationMemberships';
 export * from './users';
 export * from './userSyncTasks';

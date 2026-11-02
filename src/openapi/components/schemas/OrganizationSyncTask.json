@@ -17,10 +17,14 @@
 			"readOnly": true
 		},
 		"details": {
-			"description": "The summary of the completed sync run; null until the task completes.",
+			"description": "The summary of a completed sync run (counts for organizations and memberships), or an `error` message describing why the run failed; null until the task finishes.",
 			"type": ["object", "null"],
 			"readOnly": true,
 			"properties": {
+				"error": {
+					"type": "string",
+					"description": "The message of the error that caused the sync run to fail; present only when the task status is `failed`."
+				},
 				"organizations": {
 					"type": "object",
 					"properties": {
@@ -65,8 +69,7 @@
 					},
 					"required": ["seen", "added", "updated", "disabled"]
 				}
-			},
-			"required": ["organizations", "memberships"]
+			}
 		},
 		"createdBy": {
 			"description": "The keycloak user id of the PDC user that requested this sync.",

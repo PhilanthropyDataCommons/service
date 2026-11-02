@@ -7,7 +7,7 @@ interface OrganizationSyncTask {
 	readonly id: Id;
 	readonly status: TaskStatus;
 	readonly statusUpdatedAt: string;
-	readonly details: OrganizationSyncSummary | null;
+	readonly details: OrganizationSyncSummary | { error: string } | null;
 	readonly createdAt: string;
 	readonly createdBy: KeycloakId;
 }
@@ -16,7 +16,7 @@ type InternallyWritableOrganizationSyncTask = Pick<
 	OrganizationSyncTask,
 	'status'
 > & {
-	details?: OrganizationSyncSummary | null;
+	details?: OrganizationSyncSummary | { error: string } | null;
 	statusUpdatedAt?: string;
 };
 

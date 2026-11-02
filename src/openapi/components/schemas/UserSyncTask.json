@@ -1,0 +1,69 @@
+{
+	"type": "object",
+	"properties": {
+		"id": {
+			"allOf": [{ "$ref": "./id.json" }],
+			"readOnly": true,
+			"example": 3407
+		},
+		"status": {
+			"type": "string",
+			"readOnly": true,
+			"enum": ["pending", "in_progress", "completed", "failed", "canceled"]
+		},
+		"statusUpdatedAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"details": {
+			"description": "The summary of the completed sync run; null until the task completes.",
+			"type": ["object", "null"],
+			"readOnly": true,
+			"properties": {
+				"users": {
+					"type": "object",
+					"properties": {
+						"seen": {
+							"type": "integer",
+							"description": "The number of users found in Keycloak during the sync run."
+						},
+						"added": {
+							"type": "integer",
+							"description": "The number of users created in the local cache by the sync run."
+						},
+						"updated": {
+							"type": "integer",
+							"description": "The number of existing users confirmed against Keycloak by the sync run."
+						},
+						"disabled": {
+							"type": "integer",
+							"description": "The number of local user rows marked disabled by the sync run because Keycloak reports them as absent or not enabled."
+						}
+					},
+					"required": ["seen", "added", "updated", "disabled"]
+				}
+			},
+			"required": ["users"]
+		},
+		"createdBy": {
+			"description": "The keycloak user id of the PDC user that requested this sync.",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		},
+		"createdAt": {
+			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		}
+	},
+	"required": [
+		"id",
+		"status",
+		"statusUpdatedAt",
+		"details",
+		"createdAt",
+		"createdBy"
+	]
+}

@@ -6,7 +6,9 @@ BEGIN
 	RETURN jsonb_build_object(
 		'keycloakUserId', "user".keycloak_user_id,
 		'keycloakUserName', "user".keycloak_user_name,
-		'createdAt', "user".created_at
+		'createdAt', "user".created_at,
+		'syncedFromKeycloakAt', "user".synced_from_keycloak_at,
+		'disabledAt', "user".disabled_at
 	);
 END;
 $$ LANGUAGE plpgsql;

@@ -10,6 +10,11 @@ interface User {
 	// https://github.com/ajv-validator/ajv/issues/2163.
 	keycloakUserName: string | null | undefined;
 	readonly createdAt: string;
+	// We do not really want "undefined" here, only null. See
+	// https://github.com/ajv-validator/ajv/issues/2283 and/or
+	// https://github.com/ajv-validator/ajv/issues/2163.
+	readonly syncedFromKeycloakAt: string | null | undefined;
+	readonly disabledAt: string | null | undefined;
 }
 
 const userSchema: JSONSchemaType<User> = {
@@ -22,6 +27,14 @@ const userSchema: JSONSchemaType<User> = {
 		},
 		createdAt: {
 			type: 'string',
+		},
+		syncedFromKeycloakAt: {
+			type: 'string',
+			nullable: true,
+		},
+		disabledAt: {
+			type: 'string',
+			nullable: true,
 		},
 	},
 	required: ['keycloakUserId', 'createdAt'],

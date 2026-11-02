@@ -58,6 +58,12 @@ Within the PDC service, we usually refer to this UUID as the [`keycloakUserId`].
 
 [`keycloakUserId`]: https://github.com/PhilanthropyDataCommons/service/blob/main/src/types/User.ts#L7
 
+## User Data Synchronization
+
+The PDC service keeps a cache of user existence and identity in its
+`/users` endpoint. See [User Data Synchronization](./USER_DATA_SYNCHRONIZATION.md)
+for how the cache is synchronized from Keycloak.
+
 ## How to Grant or Revoke PDC Data Permissions to Users
 
 To grant or revoke permissions to users, `PUT` or `DELETE` on URLs starting with

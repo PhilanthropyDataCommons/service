@@ -24,6 +24,7 @@ const getMockJwt = (
 		realmManagementRoles?: string[];
 		iss?: string;
 		organizations?: Record<string, string>;
+		iat?: number;
 	} = {},
 	getToken: (payload: JwtPayload) => string = mockJwks.token,
 ): { Authorization: string } => {
@@ -31,7 +32,7 @@ const getMockJwt = (
 
 	const token = getToken({
 		exp: aMomentAgo + AN_ARBITRARILY_LONG_TIME,
-		iat: aMomentAgo,
+		iat: settings.iat ?? aMomentAgo,
 		iss: settings.iss ?? issuer,
 		sub: settings.sub,
 		aud: 'account',

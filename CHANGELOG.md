@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added a `GET /.well-known/agent-skills/index.json` endpoint listing the agent skills the service publishes, and a `GET /.well-known/agent-skills/philanthropy-data-commons/SKILL.md` endpoint serving a placeholder skill.
+- Added a `POST /users/sync` endpoint that kicks off an asynchronous task replicating all Keycloak users into the PDC `users` cache.
+- Added a `GET /users/sync/{userSyncTaskId}` endpoint for polling a user sync task; the requester and administrators can read a task, and its `details` carry the run summary (`seen`/`added`/`updated`/`disabled` counts).
+- Added a `userSyncTask` entity, managed via the new `/users/sync` endpoints.
 - Added a `PATCH /sources/{sourceId}` endpoint for updating a source's `label`.
 - Added an `edit` permission for the `source` scope.
 - Added a `defaultPermissionGrant` entity, managed via the `/defaultPermissionGrants` endpoints, that describes a permission grant to auto-generate against entities of a given type.
@@ -17,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Creating an entity now also creates the permission grant each default permission grant registered for that entity's type describes.
 
 ### Changed
+
+- `users` responses now include readonly `syncedFromKeycloakAt` and `disabledAt` attributes. `syncedFromKeycloakAt` is when the user was last confirmed to exist in Keycloak. `disabledAt` is when the user was last observed as deleted or disabled in Keycloak, and it clears once a sync or one of the user's own logins shows the account is live again.
 
 - A changemaker now carries the `keycloakOrganizationId`, `createdAt`, and `createdBy` attributes, and its `fiscalSponsors`, only when the requester holds `view` permission on that changemaker. Every other requester, including an unauthenticated one, receives `id`, `name`, and `taxId`, plus `fields` where the endpoint returns it at all. This applies wherever a changemaker appears, not just at `/changemakers`: the changemakers embedded in a proposal, in a source, and in another changemaker's `fiscalSponsors` are narrowed the same way. Permission is evaluated per changemaker, so a single array may hold both shapes.
 - `fields` remains an empty array for unauthenticated requests; it is kept in the response shape to support future visibility of `public` base field values.

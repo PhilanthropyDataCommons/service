@@ -8,11 +8,23 @@
 		},
 		"keycloakUserName": {
 			"type": ["string", "null"],
-			"description": "The full name of the user (described in OIDC 1.0 'name' standard claim) as of most recent logged-in service activity.",
+			"description": "The full name of the user (described in OIDC 1.0 'name' standard claim) as of the most recent logged-in service activity or Keycloak user sync.",
 			"example": "John Doe"
 		},
 		"createdAt": {
 			"type": "string",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"syncedFromKeycloakAt": {
+			"type": ["string", "null"],
+			"description": "The last time this row was confirmed against Keycloak by a sync; null until the first sync.",
+			"format": "date-time",
+			"readOnly": true
+		},
+		"disabledAt": {
+			"type": ["string", "null"],
+			"description": "The time this user was observed as absent from or not enabled in Keycloak by a sync; null if the user is still live in Keycloak. The user row is kept for referential integrity.",
 			"format": "date-time",
 			"readOnly": true
 		}

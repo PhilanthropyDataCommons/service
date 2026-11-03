@@ -11,6 +11,7 @@ const initSentry = (): void => {
 			Sentry.httpIntegration({ sessions: false, breadcrumbs: false }),
 			Sentry.requestDataIntegration(),
 			Sentry.contextLinesIntegration(),
+			Sentry.linkedErrorsIntegration(),
 		],
 		tracePropagationTargets: [],
 		dataCollection: {

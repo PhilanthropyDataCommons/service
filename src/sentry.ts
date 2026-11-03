@@ -12,6 +12,7 @@ const initSentry = (): void => {
 			Sentry.requestDataIntegration(),
 			Sentry.contextLinesIntegration(),
 			Sentry.linkedErrorsIntegration(),
+			Sentry.systemErrorIntegration(),
 		],
 		tracePropagationTargets: [],
 		dataCollection: {

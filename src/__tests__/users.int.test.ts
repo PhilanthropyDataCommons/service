@@ -313,7 +313,7 @@ describe('/users', () => {
 				{
 					attempts: 0,
 					maxAttempts: 1,
-					queueName: 'sync_users_from_keycloak',
+					queueName: 'sync_users_or_orgs_from_keycloak',
 					createdBy: keycloakIdToString(testUser.keycloakUserId),
 					status: 'pending',
 				},

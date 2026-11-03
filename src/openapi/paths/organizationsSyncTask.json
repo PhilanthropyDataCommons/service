@@ -1,0 +1,45 @@
+{
+	"get": {
+		"operationId": "getOrganizationSyncTask",
+		"summary": "Gets the status of an organization sync task.",
+		"description": "Returns the requested organization sync task, including its `details` summary once completed. The requester can see their own tasks; administrators can see all tasks.",
+		"tags": ["Organizations"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"parameters": [
+			{
+				"name": "organizationSyncTaskId",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"$ref": "../components/schemas/id.json"
+				},
+				"description": "The ID of the organization sync task to retrieve."
+			}
+		],
+		"responses": {
+			"200": {
+				"description": "The requested organization sync task.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/OrganizationSyncTask.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"404": {
+				"$ref": "../components/responses/NotFound.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

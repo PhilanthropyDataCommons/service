@@ -23,6 +23,7 @@ export * from './initiativeFieldValues';
 export * from './initiatives';
 export * from './opportunities';
 export * from './organizations';
+export * from './organizationSyncTasks';
 export * from './permissionGrants';
 export * from './proposalFieldValues';
 export * from './proposals';

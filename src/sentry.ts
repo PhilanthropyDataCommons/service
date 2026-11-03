@@ -10,6 +10,7 @@ const initSentry = (): void => {
 			Sentry.onUnhandledRejectionIntegration(),
 			Sentry.httpIntegration({ sessions: false, breadcrumbs: false }),
 			Sentry.requestDataIntegration(),
+			Sentry.contextLinesIntegration(),
 		],
 		tracePropagationTargets: [],
 		dataCollection: {

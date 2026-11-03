@@ -83,6 +83,16 @@ const mockJwtWithRealmManagementManageUsersRole = getMockJwt({
 	realmManagementRoles: ['manage-users'],
 });
 
+const mockJwtWithRealmManagementViewOrganizationsRole = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	realmManagementRoles: ['view-organizations'],
+});
+
+const mockJwtWithRealmManagementSyncOrganizationsRoles = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	realmManagementRoles: ['view-organizations', 'view-users'],
+});
+
 const mockJwtWithUnrelatedRealmManagementRole = getMockJwt({
 	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
 	realmManagementRoles: ['view-events'],
@@ -96,6 +106,8 @@ export {
 	mockJwtWithRealmManagementQueryUsersRole,
 	mockJwtWithRealmManagementViewUsersRole,
 	mockJwtWithRealmManagementManageUsersRole,
+	mockJwtWithRealmManagementSyncOrganizationsRoles,
+	mockJwtWithRealmManagementViewOrganizationsRole,
 	mockJwtWithUnrelatedRealmManagementRole,
 	mockOrgId,
 	getMockJwt,

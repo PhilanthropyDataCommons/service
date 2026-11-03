@@ -4,6 +4,7 @@ import { TEN_MINUTES_IN_MS } from './constants/time';
 import {
 	copyBaseFields,
 	processBulkUploadTask,
+	syncOrganizationsFromKeycloak,
 	syncUsersFromKeycloak,
 } from './tasks';
 import { getLogger } from './logger';
@@ -15,6 +16,7 @@ import type {
 	CopyBaseFieldsJobPayload,
 	Id,
 	ProcessBulkUploadJobPayload,
+	SyncOrganizationsFromKeycloakJobPayload,
 	SyncUsersFromKeycloakJobPayload,
 } from './types';
 
@@ -22,12 +24,14 @@ const logger = getLogger(__filename);
 
 const CONCURRENT_JOB_COUNT = 5;
 
-const SYNC_USERS_FROM_KEYCLOAK_QUEUE_NAME = 'sync_users_from_keycloak';
+const SYNC_USERS_OR_ORGS_FROM_KEYCLOAK_QUEUE_NAME =
+	'sync_users_or_orgs_from_keycloak';
 
 enum JobType {
 	PROCESS_BULK_UPLOAD = 'processBulkUploadTask',
 	COPY_BASE_FIELDS = 'copyBaseFields',
 	SYNC_USERS_FROM_KEYCLOAK = 'syncUsersFromKeycloak',
+	SYNC_ORGANIZATIONS_FROM_KEYCLOAK = 'syncOrganizationsFromKeycloak',
 }
 
 type LogMeta = Record<string, unknown>;
@@ -81,6 +85,7 @@ export const startJobQueue = async (): Promise<void> => {
 			processBulkUploadTask,
 			copyBaseFields,
 			syncUsersFromKeycloak,
+			syncOrganizationsFromKeycloak,
 		},
 	});
 	runner.promise.catch((err: unknown) => {
@@ -132,7 +137,7 @@ export const enqueueSyncUsersFromKeycloakJob = async (
 				userSyncTaskId,
 				keycloakAdminAuthorizationHeader,
 			} satisfies SyncUsersFromKeycloakJobPayload),
-			queueName: SYNC_USERS_FROM_KEYCLOAK_QUEUE_NAME,
+			queueName: SYNC_USERS_OR_ORGS_FROM_KEYCLOAK_QUEUE_NAME,
 			maxAttempts: 1,
 		})
 		.catch((err: unknown) => {
@@ -144,7 +149,37 @@ export const enqueueSyncUsersFromKeycloakJob = async (
 					params: {
 						identifier: 'syncUsersFromKeycloak',
 						payload: '[REDACTED: the payload carries the caller credentials]',
-						queueName: SYNC_USERS_FROM_KEYCLOAK_QUEUE_NAME,
+						queueName: SYNC_USERS_OR_ORGS_FROM_KEYCLOAK_QUEUE_NAME,
+						maxAttempts: 1,
+					},
+				});
+			}
+			throw err;
+		});
+};
+export const enqueueSyncOrganizationsFromKeycloakJob = async (
+	transactionDb: Pick<TinyPg, 'sql'>,
+	organizationSyncTaskId: Id,
+	keycloakAdminAuthorizationHeader: string,
+): Promise<void> => {
+	await transactionDb
+		.sql('organizationSyncTasks.enqueueJob', {
+			identifier: JobType.SYNC_ORGANIZATIONS_FROM_KEYCLOAK,
+			payload: JSON.stringify({
+				organizationSyncTaskId,
+				keycloakAdminAuthorizationHeader,
+			} satisfies SyncOrganizationsFromKeycloakJobPayload),
+			queueName: SYNC_USERS_OR_ORGS_FROM_KEYCLOAK_QUEUE_NAME,
+			maxAttempts: 1,
+		})
+		.catch((err: unknown) => {
+			if (isTinyPgErrorWithQueryContext(err)) {
+				throw new TinyPgError(err.message, undefined, {
+					error: err.queryContext.error,
+					params: {
+						identifier: 'syncOrganizationsFromKeycloak',
+						payload: '[REDACTED: the payload carries the caller credentials]',
+						queueName: SYNC_USERS_OR_ORGS_FROM_KEYCLOAK_QUEUE_NAME,
 						maxAttempts: 1,
 					},
 				});

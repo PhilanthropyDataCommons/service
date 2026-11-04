@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { UnauthorizedError as JwtUnauthorizedError } from 'express-jwt';
 import { HTTP_STATUS } from '../constants';
 import {
@@ -157,6 +158,7 @@ export const errorHandler = (
 	const statusCode = getHttpStatusCodeForError(wrappedError);
 	if (Object.values(HTTP_STATUS.SERVER_ERROR).includes(statusCode)) {
 		logger.error({ wrappedError, statusCode });
+		Sentry.captureException(wrappedError);
 	} else {
 		logger.debug({ wrappedError, statusCode });
 	}

@@ -6,3 +6,4 @@ export const TEN_MINUTES_IN_MS = 600_000;
 export const THIRTY_SECONDS_IN_MS = 30_000;
 export const ISO_TIMESTAMP_PATTERN =
 	/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|(?:\+|-)\d{2}:\d{2})$/v;
+export const TWO_SECONDS_IN_MS = 2_000;

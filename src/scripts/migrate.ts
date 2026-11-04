@@ -1,6 +1,10 @@
+import * as Sentry from '@sentry/node';
+import { initSentry } from '../sentry';
 import { getLogger } from '../logger';
 import { createDatabase, migrate } from '../database';
-import { EXIT_CODE_FAILURE } from '../constants';
+import { EXIT_CODE_FAILURE, TWO_SECONDS_IN_MS } from '../constants';
+
+initSentry();
 
 const logger = getLogger(__filename);
 
@@ -17,6 +21,8 @@ migrate(db)
 		if (reason instanceof Error) {
 			logger.error(reason.message);
 		}
+		Sentry.captureException(reason);
 		await db.close();
-		process.exit(EXIT_CODE_FAILURE);
+		await Sentry.close(TWO_SECONDS_IN_MS);
+		process.exitCode = EXIT_CODE_FAILURE;
 	});

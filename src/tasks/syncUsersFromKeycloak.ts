@@ -165,4 +165,4 @@ const syncUsersFromKeycloak = async (
 	}
 };
 
-export { syncUsersFromKeycloak };
+export { syncUsersFromKeycloak, toFullName };

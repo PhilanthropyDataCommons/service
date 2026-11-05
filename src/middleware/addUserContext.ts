@@ -85,7 +85,11 @@ const addUserContext = (
 						db,
 						{
 							user: { keycloakUserId: stringToKeycloakId(keycloakUserId) },
-							role: { isAdministrator: false, canViewUsersInKeycloak: false },
+							role: {
+								isAdministrator: false,
+								canViewUsersInKeycloak: false,
+								canViewOrganizationsInKeycloak: false,
+							},
 						},
 						keycloakUserId,
 					)

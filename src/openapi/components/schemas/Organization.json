@@ -1,7 +1,24 @@
 {
 	"type": "object",
-	"description": "Up to three entities related to roles played by an organization, as registered in the PDC: a changemaker role, a data provider role, and/or a funder role.",
+	"description": "Up to three entities related to roles played by an organization, as registered in the PDC: a changemaker role, a data provider role, and/or a funder role, alongside the organization's cached Keycloak identity.",
 	"properties": {
+		"keycloakOrganizationId": {
+			"description": "The Keycloak-assigned UUID of the organization.",
+			"type": "string",
+			"format": "uuid",
+			"readOnly": true
+		},
+		"keycloakOrganizationName": {
+			"description": "The organization name as reported by Keycloak; null until the first successful organization sync.",
+			"type": ["string", "null"],
+			"readOnly": true
+		},
+		"disabledAt": {
+			"description": "The time this organization was observed as absent from or not enabled in Keycloak by a sync; null if the organization is still live in Keycloak.",
+			"type": ["string", "null"],
+			"format": "date-time",
+			"readOnly": true
+		},
 		"changemaker": {
 			"$ref": "./ShallowChangemaker.json",
 			"readOnly": true,
@@ -16,7 +33,28 @@
 			"$ref": "./Funder.json",
 			"readOnly": true,
 			"nullable": true
+		},
+		"members": {
+			"description": "The organization's current cached members as cached users; null when the caller may not see membership data.",
+			"type": ["array", "null"],
+			"items": {
+				"$ref": "./User.json"
+			},
+			"readOnly": true
+		},
+		"formerMembers": {
+			"description": "The organization's former members, the cached users whose cached membership Keycloak no longer reports; null when the caller may not see membership data.",
+			"type": ["array", "null"],
+			"items": {
+				"$ref": "./User.json"
+			},
+			"readOnly": true
 		}
 	},
-	"required": ["changemaker", "dataProvider", "funder"]
+	"required": [
+		"keycloakOrganizationId",
+		"changemaker",
+		"dataProvider",
+		"funder"
+	]
 }

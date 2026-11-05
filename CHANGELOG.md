@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a `POST /organizations/sync` endpoint that kicks off an asynchronous task replicating all Keycloak organizations and their memberships into the PDC `organizations` cache.
+- Added a `GET /organizations/sync/{organizationSyncTaskId}` endpoint for polling an organization sync task; the requester and administrators can read a task, and its `details` carry the run summary (`seen`/`added`/`updated`/`disabled` counts for both organizations and memberships).
+- Added a `GET /organizations` endpoint listing the cached Keycloak organizations with their role bundles, Keycloak names, and current cached members; callers need the PDC-service `pdc-admin` realm role or a Keycloak `realm-management` organization-visibility role (`view-organizations`, `manage-organizations`, or `manage-realm`).
 - Added a `GET /.well-known/agent-skills/index.json` endpoint listing the agent skills the service publishes, and a `GET /.well-known/agent-skills/philanthropy-data-commons/SKILL.md` endpoint serving a placeholder skill.
 - Added a `POST /users/sync` endpoint that kicks off an asynchronous task replicating all Keycloak users into the PDC `users` cache.
 - Added a `GET /users/sync/{userSyncTaskId}` endpoint for polling a user sync task; the requester and administrators can read a task, and its `details` carry the run summary (`seen`/`added`/`updated`/`disabled` counts).
@@ -20,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Creating an entity now also creates the permission grant each default permission grant registered for that entity's type describes.
 
 ### Changed
+
+- `GET /organizations/{keycloakOrganizationId}` responses now also include the organization's cached Keycloak identity (`keycloakOrganizationId`, `keycloakOrganizationName`) and its current cached `members`; `members` is `null` when the caller may not see membership data. The data provider role object is now keyed `dataProvider` (previously `data_provider`), matching the documented schema.
 
 - `users` responses now include readonly `syncedFromKeycloakAt` and `disabledAt` attributes. `syncedFromKeycloakAt` is when the user was last confirmed to exist in Keycloak. `disabledAt` is when the user was last observed as deleted or disabled in Keycloak, and it clears once a sync or one of the user's own logins shows the account is live again.
 

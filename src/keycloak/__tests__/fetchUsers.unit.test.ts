@@ -6,7 +6,7 @@ import {
 	UnauthorizedError,
 } from '../../errors';
 import { fetchKeycloakUsers } from '../fetchUsers';
-import { KEYCLOAK_USERS_LIST_PAGE_SIZE } from '../constants';
+import { KEYCLOAK_RESOURCE_LIST_PAGE_SIZE } from '../fetchPaginatedKeycloakResource';
 import type { KeycloakUserRepresentation } from '../fetchUsers';
 
 jest.mock('require-env-variable', () => ({
@@ -55,7 +55,7 @@ describe('fetchKeycloakUsers', () => {
 				briefRepresentation: 'true',
 				exact: 'false',
 				first: '0',
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.reply(200, '<html>not json</html>');
 
@@ -71,7 +71,7 @@ describe('fetchKeycloakUsers', () => {
 				briefRepresentation: 'true',
 				exact: 'false',
 				first: '0',
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.reply(200, () => {
 				const body = new PassThrough();
@@ -95,7 +95,7 @@ describe('fetchKeycloakUsers', () => {
 				briefRepresentation: 'true',
 				exact: 'false',
 				first: '0',
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.delay(2000)
 			.reply(200, createUserPage(0, 3));
@@ -115,7 +115,7 @@ describe('fetchKeycloakUsers', () => {
 				briefRepresentation: 'true',
 				exact: 'false',
 				first: '0',
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.reply(200, createUserPage(0, 3));
 
@@ -133,7 +133,7 @@ describe('fetchKeycloakUsers', () => {
 				briefRepresentation: 'true',
 				exact: 'false',
 				first: '0',
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.reply(200, []);
 
@@ -151,22 +151,22 @@ describe('fetchKeycloakUsers', () => {
 				briefRepresentation: 'true',
 				exact: 'false',
 				first: '0',
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
-			.reply(200, createUserPage(0, KEYCLOAK_USERS_LIST_PAGE_SIZE));
+			.reply(200, createUserPage(0, KEYCLOAK_RESOURCE_LIST_PAGE_SIZE));
 		nock('https://keycloak.example.com')
 			.get(USERS_PATH)
 			.query({
 				briefRepresentation: 'true',
 				exact: 'false',
-				first: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				first: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.reply(
 				200,
 				createUserPage(
-					KEYCLOAK_USERS_LIST_PAGE_SIZE,
-					KEYCLOAK_USERS_LIST_PAGE_SIZE,
+					KEYCLOAK_RESOURCE_LIST_PAGE_SIZE,
+					KEYCLOAK_RESOURCE_LIST_PAGE_SIZE,
 				),
 			);
 		nock('https://keycloak.example.com')
@@ -174,26 +174,26 @@ describe('fetchKeycloakUsers', () => {
 			.query({
 				briefRepresentation: 'true',
 				exact: 'false',
-				first: `${KEYCLOAK_USERS_LIST_PAGE_SIZE * 2}`,
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				first: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE * 2}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
-			.reply(200, createUserPage(KEYCLOAK_USERS_LIST_PAGE_SIZE * 2, 17));
+			.reply(200, createUserPage(KEYCLOAK_RESOURCE_LIST_PAGE_SIZE * 2, 17));
 
 		const users = await collectListedUsers(
 			fetchKeycloakUsers(AUTHORIZATION_HEADER),
 		);
 
 		expect(users).toEqual(
-			createUserPage(0, KEYCLOAK_USERS_LIST_PAGE_SIZE * 2 + 17),
+			createUserPage(0, KEYCLOAK_RESOURCE_LIST_PAGE_SIZE * 2 + 17),
 		);
 	});
 
 	it('deduplicates a user that repeats within and across pages', async () => {
 		const repeatedUser = createKeycloakUserRepresentation(
-			KEYCLOAK_USERS_LIST_PAGE_SIZE - 1,
+			KEYCLOAK_RESOURCE_LIST_PAGE_SIZE - 1,
 		);
 		const freshUser = createKeycloakUserRepresentation(
-			KEYCLOAK_USERS_LIST_PAGE_SIZE,
+			KEYCLOAK_RESOURCE_LIST_PAGE_SIZE,
 		);
 		nock('https://keycloak.example.com')
 			.get(USERS_PATH)
@@ -201,11 +201,11 @@ describe('fetchKeycloakUsers', () => {
 				briefRepresentation: 'true',
 				exact: 'false',
 				first: '0',
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.reply(200, [
 				repeatedUser,
-				...createUserPage(0, KEYCLOAK_USERS_LIST_PAGE_SIZE - 2),
+				...createUserPage(0, KEYCLOAK_RESOURCE_LIST_PAGE_SIZE - 2),
 				repeatedUser,
 			]);
 		nock('https://keycloak.example.com')
@@ -213,8 +213,8 @@ describe('fetchKeycloakUsers', () => {
 			.query({
 				briefRepresentation: 'true',
 				exact: 'false',
-				first: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				first: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.reply(200, [repeatedUser, freshUser]);
 
@@ -224,7 +224,7 @@ describe('fetchKeycloakUsers', () => {
 
 		expect(users).toEqual([
 			repeatedUser,
-			...createUserPage(0, KEYCLOAK_USERS_LIST_PAGE_SIZE - 2),
+			...createUserPage(0, KEYCLOAK_RESOURCE_LIST_PAGE_SIZE - 2),
 			freshUser,
 		]);
 	});
@@ -252,14 +252,14 @@ describe('fetchKeycloakUsers', () => {
 	});
 
 	it('aborts when consecutive pages make no progress', async () => {
-		const page = createUserPage(0, KEYCLOAK_USERS_LIST_PAGE_SIZE);
+		const page = createUserPage(0, KEYCLOAK_RESOURCE_LIST_PAGE_SIZE);
 		nock('https://keycloak.example.com')
 			.get(USERS_PATH)
 			.query({
 				briefRepresentation: 'true',
 				exact: 'false',
 				first: '0',
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.reply(200, page);
 		nock('https://keycloak.example.com')
@@ -267,8 +267,8 @@ describe('fetchKeycloakUsers', () => {
 			.query({
 				briefRepresentation: 'true',
 				exact: 'false',
-				first: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
-				max: `${KEYCLOAK_USERS_LIST_PAGE_SIZE}`,
+				first: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
+				max: `${KEYCLOAK_RESOURCE_LIST_PAGE_SIZE}`,
 			})
 			.reply(200, page);
 

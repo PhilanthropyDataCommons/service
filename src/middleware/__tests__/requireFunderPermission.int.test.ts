@@ -39,7 +39,11 @@ describe('requireFunderPermission', () => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.user = getMockedUser();
-		req.role = { isAdministrator: true, canViewUsersInKeycloak: false };
+		req.role = {
+			isAdministrator: true,
+			canViewUsersInKeycloak: false,
+			canViewOrganizationsInKeycloak: false,
+		};
 		req.params = { funderShortCode: 'test_funder' };
 		const nextMock = jest.fn((error: unknown) => {
 			expect(error).toBe(undefined);
@@ -53,7 +57,11 @@ describe('requireFunderPermission', () => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.user = getMockedUser();
-		req.role = { isAdministrator: false, canViewUsersInKeycloak: false };
+		req.role = {
+			isAdministrator: false,
+			canViewUsersInKeycloak: false,
+			canViewOrganizationsInKeycloak: false,
+		};
 		req.params = { funderShortCode: 'invalid short code with spaces' };
 		const nextMock = jest.fn((error: unknown) => {
 			expect(error).toBeInstanceOf(InputValidationError);
@@ -76,7 +84,11 @@ describe('requireFunderPermission', () => {
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
 			req.user = testUser;
-			req.role = { isAdministrator: false, canViewUsersInKeycloak: false };
+			req.role = {
+				isAdministrator: false,
+				canViewUsersInKeycloak: false,
+				canViewOrganizationsInKeycloak: false,
+			};
 			req.params = { funderShortCode: unpermittedFunder.shortCode };
 			const nextMock = jest.fn((error: unknown) => {
 				expect(error).toBeInstanceOf(ForbiddenError);
@@ -103,7 +115,11 @@ describe('requireFunderPermission', () => {
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
 			req.user = testUser;
-			req.role = { isAdministrator: false, canViewUsersInKeycloak: false };
+			req.role = {
+				isAdministrator: false,
+				canViewUsersInKeycloak: false,
+				canViewOrganizationsInKeycloak: false,
+			};
 			req.params = { funderShortCode: 'nonexistentfunder' };
 			const nextMock = jest.fn((error: unknown) => {
 				expect(error).toBeInstanceOf(NotFoundError);
@@ -139,7 +155,11 @@ describe('requireFunderPermission', () => {
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
 			req.user = testUser;
-			req.role = { isAdministrator: false, canViewUsersInKeycloak: false };
+			req.role = {
+				isAdministrator: false,
+				canViewUsersInKeycloak: false,
+				canViewOrganizationsInKeycloak: false,
+			};
 			req.params = { funderShortCode: permittedFunder.shortCode };
 			const nextMock = jest.fn((error: unknown) => {
 				expect(error).toBe(undefined);
@@ -175,7 +195,11 @@ describe('requireFunderPermission', () => {
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
 			req.user = testUser;
-			req.role = { isAdministrator: false, canViewUsersInKeycloak: false };
+			req.role = {
+				isAdministrator: false,
+				canViewUsersInKeycloak: false,
+				canViewOrganizationsInKeycloak: false,
+			};
 			req.params = { funderShortCode: viewOnlyFunder.shortCode };
 			const nextMock = jest.fn((error: unknown) => {
 				expect(error).toBeInstanceOf(ForbiddenError);

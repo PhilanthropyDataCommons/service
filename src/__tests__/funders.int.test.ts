@@ -814,6 +814,13 @@ describe('/funders', () => {
 					.expect(400);
 			});
 
+			it('returns 404 when the funder does not exist', async () => {
+				await agent
+					.get('/funders/theFundFund/members')
+					.set(authHeader)
+					.expect(404);
+			});
+
 			it('returns all members of a collaborative funder', async () => {
 				const db = getDatabase();
 				const testUser = await loadTestUser(db);
@@ -841,7 +848,7 @@ describe('/funders', () => {
 				});
 				const response = await agent
 					.get('/funders/theFundFund/members')
-					.set(adminUserAuthHeader)
+					.set(authHeader)
 					.expect(200);
 				expect(response.body).toEqual({
 					entries: [
@@ -890,29 +897,6 @@ describe('/funders', () => {
 					.expect(400);
 			});
 
-			it('requires MANAGE permission on the funder', async () => {
-				const db = getDatabase();
-				const testUser = await loadTestUser(db);
-				const testUserAuthContext = getAuthContext(testUser);
-				await createTestFunders(db, testUserAuthContext, {
-					theFundFund: true,
-					theFoundationFoundation: false,
-					theFundersWhoFund: false,
-					theFundingFathers: false,
-					theFunnyFunders: false,
-					theFungibleFund: false,
-				});
-				const result = await agent
-					.get('/funders/theFundFund/members/theFoundationFoundation')
-					.set(authHeader)
-					.expect(403);
-				expect(result.body).toMatchObject({
-					message:
-						'Authenticated user does not have permission to perform this action.',
-					details: expectArray(),
-				});
-			});
-
 			it('returns 404 when the funder does not exist', async () => {
 				await agent
 					.get('/funders/theFundFund/members/theFoundationFoundation')
@@ -924,8 +908,6 @@ describe('/funders', () => {
 				const db = getDatabase();
 				const testUser = await loadTestUser(db);
 				const testUserAuthContext = getAuthContext(testUser);
-				const systemUser = await loadSystemUser(db, null);
-				const systemUserAuthContext = getAuthContext(systemUser);
 				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: true,
 					theFoundationFoundation: false,
@@ -933,14 +915,6 @@ describe('/funders', () => {
 					theFundingFathers: false,
 					theFunnyFunders: false,
 					theFungibleFund: false,
-				});
-				await createPermissionGrant(db, systemUserAuthContext, {
-					granteeType: PermissionGrantGranteeType.USER,
-					granteeUserKeycloakUserId: testUser.keycloakUserId,
-					contextEntityType: PermissionGrantEntityType.FUNDER,
-					funderShortCode: 'theFundFund',
-					scope: [PermissionGrantEntityType.FUNDER],
-					verbs: [PermissionGrantVerb.MANAGE],
 				});
 				await createOrUpdateFunderCollaborativeMember(db, testUserAuthContext, {
 					funderCollaborativeShortCode: 'theFundFund',
@@ -963,8 +937,6 @@ describe('/funders', () => {
 				const db = getDatabase();
 				const testUser = await loadTestUser(db);
 				const testUserAuthContext = getAuthContext(testUser);
-				const systemUser = await loadSystemUser(db, null);
-				const systemUserAuthContext = getAuthContext(systemUser);
 				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: true,
 					theFoundationFoundation: false,
@@ -972,14 +944,6 @@ describe('/funders', () => {
 					theFundingFathers: false,
 					theFunnyFunders: false,
 					theFungibleFund: false,
-				});
-				await createPermissionGrant(db, systemUserAuthContext, {
-					granteeType: PermissionGrantGranteeType.USER,
-					granteeUserKeycloakUserId: testUser.keycloakUserId,
-					contextEntityType: PermissionGrantEntityType.FUNDER,
-					funderShortCode: 'theFundFund',
-					scope: [PermissionGrantEntityType.FUNDER],
-					verbs: [PermissionGrantVerb.MANAGE],
 				});
 				const response = await agent
 					.get('/funders/theFundFund/members/theFoundationFoundation')
@@ -1184,27 +1148,11 @@ describe('/funders', () => {
 					.expect(400);
 			});
 
-			it('requires MANAGE permission on the funder', async () => {
-				const db = getDatabase();
-				const testUser = await loadTestUser(db);
-				const testUserAuthContext = getAuthContext(testUser);
-				await createTestFunders(db, testUserAuthContext, {
-					theFundFund: true,
-					theFoundationFoundation: false,
-					theFundersWhoFund: false,
-					theFundingFathers: false,
-					theFunnyFunders: false,
-					theFungibleFund: false,
-				});
-				const result = await agent
+			it('returns 404 when the funder does not exist', async () => {
+				await agent
 					.get('/funders/theFoundationFoundation/collaboratives')
 					.set(authHeader)
-					.expect(403);
-				expect(result.body).toMatchObject({
-					message:
-						'Authenticated user does not have permission to perform this action.',
-					details: expectArray(),
-				});
+					.expect(404);
 			});
 
 			it('returns all collaboratives that a funder is a member of', async () => {
@@ -1255,12 +1203,10 @@ describe('/funders', () => {
 				});
 			});
 
-			it('returns collaboratives when the user has MANAGE permission on the funder', async () => {
+			it('returns collaboratives to an authenticated user without any permission on the funder', async () => {
 				const db = getDatabase();
 				const testUser = await loadTestUser(db);
 				const testUserAuthContext = getAuthContext(testUser);
-				const systemUser = await loadSystemUser(db, null);
-				const systemUserAuthContext = getAuthContext(systemUser);
 				await createTestFunders(db, testUserAuthContext, {
 					theFundFund: true,
 					theFoundationFoundation: false,
@@ -1268,14 +1214,6 @@ describe('/funders', () => {
 					theFundingFathers: false,
 					theFunnyFunders: false,
 					theFungibleFund: false,
-				});
-				await createPermissionGrant(db, systemUserAuthContext, {
-					granteeType: PermissionGrantGranteeType.USER,
-					granteeUserKeycloakUserId: testUser.keycloakUserId,
-					contextEntityType: PermissionGrantEntityType.FUNDER,
-					funderShortCode: 'theFoundationFoundation',
-					scope: [PermissionGrantEntityType.FUNDER],
-					verbs: [PermissionGrantVerb.MANAGE],
 				});
 				await createOrUpdateFunderCollaborativeMember(db, testUserAuthContext, {
 					funderCollaborativeShortCode: 'theFundFund',

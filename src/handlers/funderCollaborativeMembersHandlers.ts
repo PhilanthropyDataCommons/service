@@ -2,6 +2,7 @@ import { HTTP_STATUS } from '../constants';
 import {
 	getDatabase,
 	getLimitValues,
+	loadFunder,
 	loadFunderCollaborativeMember,
 	loadFunderCollaborativeMemberBundle,
 	createOrUpdateFunderCollaborativeMember,
@@ -62,6 +63,7 @@ const getFunderCollaborativeMembers = async (
 			isShortCode.errors ?? [],
 		);
 	}
+	await loadFunder(db, req, funderShortCode);
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const funderBundle = await loadFunderCollaborativeMemberBundle(
@@ -94,6 +96,7 @@ const getFunderCollaboratives = async (
 			isShortCode.errors ?? [],
 		);
 	}
+	await loadFunder(db, req, funderShortCode);
 	const paginationParameters = extractPaginationParameters(req);
 	const { offset, limit } = getLimitValues(paginationParameters);
 	const funderBundle = await loadFunderCollaborativeMemberBundle(

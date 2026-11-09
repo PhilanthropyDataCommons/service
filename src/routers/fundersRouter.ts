@@ -27,13 +27,13 @@ fundersRouter.put(
 
 fundersRouter.get(
 	'/:funderShortCode/members',
-	requireFunderPermission(PermissionGrantVerb.MANAGE),
+	requireAuthentication,
 	funderCollaborativeMembersHandlers.getFunderCollaborativeMembers,
 );
 
 fundersRouter.get(
 	'/:funderShortCode/members/:memberFunderShortCode',
-	requireFunderPermission(PermissionGrantVerb.MANAGE),
+	requireAuthentication,
 	funderCollaborativeMembersHandlers.getFunderCollaborativeMember,
 );
 
@@ -51,7 +51,7 @@ fundersRouter.delete(
 
 fundersRouter.get(
 	'/:funderShortCode/collaboratives',
-	requireFunderPermission(PermissionGrantVerb.MANAGE),
+	requireAuthentication,
 	funderCollaborativeMembersHandlers.getFunderCollaboratives,
 );
 

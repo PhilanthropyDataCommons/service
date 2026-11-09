@@ -240,12 +240,13 @@ Some data is readable without any permission grant. These universal grants are
 enforced by the router and the query layer, before the permission system is
 consulted, so no `contextEntityType`, verb, or scope is involved.
 
-| Entity        | Public attributes readable by      | Endpoints                                                          |
-| ------------- | ---------------------------------- | ------------------------------------------------------------------ |
-| changemaker   | everyone, unauthenticated included | `GET /changemakers`, `GET /changemakers/{changemakerId}`           |
-| funder        | any authenticated user             | `GET /funders`, `GET /funders/{funderShortCode}`                   |
-| data provider | any authenticated user             | `GET /dataProviders`, `GET /dataProviders/{dataProviderShortCode}` |
-| base field    | everyone, unauthenticated included | `GET /baseFields`                                                  |
+| Entity                      | Public attributes readable by      | Endpoints                                                                                                                                                   |
+| --------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| changemaker                 | everyone, unauthenticated included | `GET /changemakers`, `GET /changemakers/{changemakerId}`                                                                                                    |
+| funder                      | any authenticated user             | `GET /funders`, `GET /funders/{funderShortCode}`                                                                                                            |
+| funder collaborative member | any authenticated user             | `GET /funders/{funderShortCode}/members`, `GET /funders/{funderShortCode}/members/{memberFunderShortCode}`, `GET /funders/{funderShortCode}/collaboratives` |
+| data provider               | any authenticated user             | `GET /dataProviders`, `GET /dataProviders/{dataProviderShortCode}`                                                                                          |
+| base field                  | everyone, unauthenticated included | `GET /baseFields`                                                                                                                                           |
 
 ### Resolved Permissions on Entity Responses
 
@@ -366,8 +367,6 @@ context key).
 | view   | terminologySet     | View the funder's terminology sets                                               |
 | edit   | terminologySet     | Create or update terminology sets owned by the funder                            |
 | manage | funder             | View, send, and respond to funder collaborative invitations                      |
-|        |                    | View collaborative members for the funder                                        |
-|        |                    | View the collaboratives the funder is a member of                                |
 
 ### Changemaker Permissions
 

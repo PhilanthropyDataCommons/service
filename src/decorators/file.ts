@@ -5,6 +5,7 @@ const decorateWithDownloadUrl = async (file: File): Promise<File> => {
 	try {
 		const downloadUrl = await generatePresignedDownloadUrl(
 			file.storageKey,
+			file.name,
 			file.s3BucketName,
 		);
 		return {

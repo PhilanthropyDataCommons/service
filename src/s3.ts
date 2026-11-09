@@ -1,6 +1,7 @@
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { S3, type S3ClientConfig, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { create } from 'content-disposition';
 import { requireEnv } from 'require-env-variable';
 import { ONE_DAY_IN_SECONDS } from './constants';
 import type { PresignedPost } from '@aws-sdk/s3-presigned-post';
@@ -62,11 +63,13 @@ export const generatePresignedPost = async (
 
 export const generatePresignedDownloadUrl = async (
 	storageKey: string,
+	fileName: string,
 	bucketName?: string,
 ): Promise<string> => {
 	const command = new GetObjectCommand({
 		Bucket: bucketName ?? S3_BUCKET,
 		Key: storageKey,
+		ResponseContentDisposition: create(fileName),
 	});
 
 	const url = await getSignedUrl(getS3Client(), command, {

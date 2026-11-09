@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- File `downloadUrl` values now make browsers download the file, using its `name`, instead of displaying it.
+
 ## 0.43.0 2026-11-19
 
 ### Added

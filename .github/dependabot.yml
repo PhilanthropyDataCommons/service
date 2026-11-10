@@ -11,6 +11,8 @@ updates:
     ignore:
       - dependency-name: 'mock-jwks'
         update-types: ['version-update:semver-major']
+      - dependency-name: 'nock'
+        update-types: ['version-update:semver-major']
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
       - dependency-name: 'uuid'

@@ -233,6 +233,33 @@ const getRealmManagementRolesFromRequest = (req: Request): string[] =>
 		? req.auth.resource_access['realm-management'].roles
 		: [];
 
+interface ObjectWithAuthWithScope {
+	auth: {
+		scope: string;
+	};
+}
+
+const objectWithAuthWithScopeSchema: JSONSchemaType<ObjectWithAuthWithScope> = {
+	type: 'object',
+	properties: {
+		auth: {
+			type: 'object',
+			properties: {
+				scope: {
+					type: 'string',
+				},
+			},
+			required: ['scope'],
+		},
+	},
+	required: ['auth'],
+};
+
+const hasAuthWithScope = ajv.compile(objectWithAuthWithScopeSchema);
+
+const getScopeFromRequest = (req: Request): string | null =>
+	hasAuthWithScope(req) ? req.auth.scope : null;
+
 const getKeycloakOrganizationIdsFromRequest = (req: Request): KeycloakId[] =>
 	isObjectWithAuthWithOrganizations(req)
 		? Object.values(req.auth.organizations).map(
@@ -257,6 +284,7 @@ export {
 	getAuthSubFromRequest,
 	getRealmAccessRolesFromRequest,
 	getRealmManagementRolesFromRequest,
+	getScopeFromRequest,
 	getKeycloakOrganizationIdsFromRequest,
 	getJwtExpFromRequest,
 	getJwtIatFromRequest,

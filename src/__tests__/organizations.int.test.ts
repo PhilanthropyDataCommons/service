@@ -31,6 +31,7 @@ import {
 } from '../test/mockJwt';
 import {
 	keycloakIdToString,
+	nonNullKeycloakIdToString,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
@@ -40,9 +41,18 @@ import {
 import {
 	getAuthContext,
 	getTestAuthContext,
+	getTestUserKeycloakUserId,
 	loadTestUser,
 } from '../test/utils';
 const agent = request.agent(app);
+
+const SYNC_JWT_SCOPE = 'openid kc-admin-api';
+
+const syncOrganizationsAuthHeader = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	scope: SYNC_JWT_SCOPE,
+	realmManagementRoles: ['view-organizations', 'view-users'],
+});
 
 describe('/organizations', () => {
 	describe('GET /:keycloakOrganizationId', () => {
@@ -528,13 +538,31 @@ describe('/organizations', () => {
 				.expect(403);
 		});
 
+		it('returns 403 when the token lacks the kc-admin-api scope even with sufficient roles', async () => {
+			const response = await agent
+				.post('/organizations/sync')
+				.set(
+					getMockJwt({
+						sub: '77777777-7777-4777-8777-777777777777',
+						scope: 'openid',
+						realmManagementRoles: ['view-organizations', 'view-users'],
+					}),
+				)
+				.expect(403);
+			expect(response.body).toMatchObject({
+				name: 'ForbiddenError',
+				message:
+					'Your token must carry the kc-admin-api scope for the Keycloak Admin REST API to accept it.',
+			});
+		});
+
 		it('creates a pending organization sync task when the caller carries sufficient roles', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 
 			const response = await agent
 				.post('/organizations/sync')
-				.set(authHeaderWithSyncOrganizationsRoles)
+				.set(syncOrganizationsAuthHeader)
 				.expect(201);
 			expect(response.body).toEqual({
 				id: expectNumber(),
@@ -552,7 +580,7 @@ describe('/organizations', () => {
 
 			await agent
 				.post('/organizations/sync')
-				.set(authHeaderWithSyncOrganizationsRoles)
+				.set(syncOrganizationsAuthHeader)
 				.expect(201);
 
 			const { rows: jobRows } = await db.query<{

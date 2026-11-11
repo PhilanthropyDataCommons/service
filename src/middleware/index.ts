@@ -5,4 +5,5 @@ export * from './processJwt';
 export * from './requireAdministratorRole';
 export * from './requireAuthentication';
 export * from './requireFunderPermission';
+export * from './requireKeycloakAdminApiScope';
 export * from './requireKeycloakRealmManagementRoles';

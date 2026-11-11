@@ -56,5 +56,9 @@ https://github.com/PhilanthropyDataCommons/auth/releases
 - [ ] Custom clients have `organizations` client scope assigned as default
   - [ ] Except Exchange clients, assign as optional until this bug is fixed:
         https://github.com/keycloak/keycloak/issues/50882
+- [ ] `kc-admin-api` built-in client scope assigned as optional to the
+      clients that need Admin REST API access (the OpenAPI docs client,
+      the admin front-end app if used, and the service account client
+      used by the PDC syncs).
 - [ ] Forgot password link enabled (realm Login)
 - [ ] Reset credentials flow requires existing 2FA entry (does not reset 2FA)

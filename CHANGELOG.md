@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `GET /funders/{funderShortCode}/members`, `GET /funders/{funderShortCode}/members/{memberFunderShortCode}`, and `GET /funders/{funderShortCode}/collaboratives` now require only authentication, matching `GET /funders/{funderShortCode}`, rather than `manage` permission on the funder. They still return 404 when the funder does not exist.
+- `POST /organizations/sync` and `POST /users/sync` now also require the caller's token to carry the `kc-admin-api` scope, which the Keycloak Admin REST API requires of tokens used against it; requests without it are rejected with `403` before a sync task is created. Assign the built-in `kc-admin-api` client scope to the PDC client in each realm.
 - `GET /organizations/{keycloakOrganizationId}` responses now also include the organization's cached Keycloak identity (`keycloakOrganizationId`, `keycloakOrganizationName`) and its current cached `members`; `members` is `null` when the caller may not see membership data. The data provider role object is now keyed `dataProvider` (previously `data_provider`), matching the documented schema.
 - `users` responses now include readonly `syncedFromKeycloakAt` and `disabledAt` attributes. `syncedFromKeycloakAt` is when the user was last confirmed to exist in Keycloak. `disabledAt` is when the user was last observed as deleted or disabled in Keycloak, and it clears once a sync or one of the user's own logins shows the account is live again.
 

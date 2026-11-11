@@ -25,6 +25,7 @@ const getMockJwt = (
 		iss?: string;
 		organizations?: Record<string, string>;
 		iat?: number;
+		scope?: string;
 	} = {},
 	getToken: (payload: JwtPayload) => string = mockJwks.token,
 ): { Authorization: string } => {
@@ -38,6 +39,7 @@ const getMockJwt = (
 		aud: 'account',
 		typ: 'Bearer',
 		azp: 'pdc-service',
+		scope: settings.scope ?? 'openid',
 		organizations: settings.organizations ?? {
 			fooOrganization: { id: mockOrgId },
 		},

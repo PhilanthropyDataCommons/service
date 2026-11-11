@@ -2,6 +2,7 @@ import express from 'express';
 import { organizationsHandlers } from '../handlers/organizationsHandlers';
 import {
 	requireAuthentication,
+	requireKeycloakAdminApiScope,
 	requireKeycloakRealmManagementRoles,
 } from '../middleware';
 
@@ -21,6 +22,7 @@ organizationsRouter.get(
 organizationsRouter.post(
 	'/sync',
 	requireAuthentication,
+	requireKeycloakAdminApiScope(),
 	requireKeycloakRealmManagementRoles(
 		...ORGANIZATIONS_SYNC_SUFFICIENT_REALM_MANAGEMENT_ROLE_SETS,
 	),

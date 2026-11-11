@@ -10,8 +10,10 @@ to them, without calling Keycloak. A sync refreshes that cache:
    Keycloak requires on the equivalent listings: `view-users` or
    `manage-users` for the user sync; `view-organizations`,
    `manage-organizations`, or `manage-realm`, plus `view-users` or
-   `manage-users`, for the organization sync. The response is a sync
-   task with status `pending`.
+   `manage-users`, for the organization sync. The Admin REST API
+   additionally requires tokens issued for a client holding the built-in
+   `kc-admin-api` client scope. The response is a sync task with status
+   `pending`.
 2. Poll `GET /users/sync/{userSyncTaskId}` or
    `GET /organizations/sync/{organizationSyncTaskId}` until the status
    is `completed` or `failed`.

@@ -1,5 +1,9 @@
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
-import { generatePresignedPost, getS3Client } from '../s3';
+import {
+	generatePresignedDownloadUrl,
+	generatePresignedPost,
+	getS3Client,
+} from '../s3';
 
 jest.mock('@aws-sdk/s3-presigned-post');
 
@@ -95,5 +99,17 @@ describe('generatePresignedPost', () => {
 		await expect(
 			generatePresignedPost('test-key', 'application/pdf', 1024),
 		).rejects.toThrow('S3 API error');
+	});
+});
+
+describe('generatePresignedDownloadUrl', () => {
+	it('asks S3 to serve the file as an attachment', async () => {
+		const url = new URL(
+			await generatePresignedDownloadUrl('test-key', 'chart.png'),
+		);
+
+		expect(url.searchParams.get('response-content-disposition')).toBe(
+			'attachment; filename=chart.png',
+		);
 	});
 });

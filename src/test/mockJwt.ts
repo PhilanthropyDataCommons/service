@@ -25,6 +25,7 @@ const getMockJwt = (
 		iss?: string;
 		organizations?: Record<string, string>;
 		iat?: number;
+		scope?: string;
 	} = {},
 	getToken: (payload: JwtPayload) => string = mockJwks.token,
 ): { Authorization: string } => {
@@ -38,6 +39,7 @@ const getMockJwt = (
 		aud: 'account',
 		typ: 'Bearer',
 		azp: 'pdc-service',
+		scope: settings.scope ?? 'openid',
 		organizations: settings.organizations ?? {
 			fooOrganization: { id: mockOrgId },
 		},
@@ -83,6 +85,16 @@ const mockJwtWithRealmManagementManageUsersRole = getMockJwt({
 	realmManagementRoles: ['manage-users'],
 });
 
+const mockJwtWithRealmManagementViewOrganizationsRole = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	realmManagementRoles: ['view-organizations'],
+});
+
+const mockJwtWithRealmManagementSyncOrganizationsRoles = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	realmManagementRoles: ['view-organizations', 'view-users'],
+});
+
 const mockJwtWithUnrelatedRealmManagementRole = getMockJwt({
 	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
 	realmManagementRoles: ['view-events'],
@@ -96,6 +108,8 @@ export {
 	mockJwtWithRealmManagementQueryUsersRole,
 	mockJwtWithRealmManagementViewUsersRole,
 	mockJwtWithRealmManagementManageUsersRole,
+	mockJwtWithRealmManagementSyncOrganizationsRoles,
+	mockJwtWithRealmManagementViewOrganizationsRole,
 	mockJwtWithUnrelatedRealmManagementRole,
 	mockOrgId,
 	getMockJwt,

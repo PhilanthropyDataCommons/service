@@ -7,6 +7,7 @@ export * from './createTestFunder';
 export * from './createTestInitiative';
 export * from './createTestInitiativeFieldValue';
 export * from './createTestOpportunity';
+export * from './createTestOrganization';
 export * from './createTestPermissionGrant';
 export * from './createTestProposal';
 export * from './createTestS3Bucket';

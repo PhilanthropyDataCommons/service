@@ -9,14 +9,22 @@ const authContext: AuthIdentityAndRole = {
 	user: {
 		keycloakUserId: stringToKeycloakId('11111111-1111-1111-1111-111111111111'),
 	},
-	role: { isAdministrator: false, canViewUsersInKeycloak: false },
+	role: {
+		isAdministrator: false,
+		canViewUsersInKeycloak: false,
+		canViewOrganizationsInKeycloak: false,
+	},
 };
 
 const adminAuthContext: AuthIdentityAndRole = {
 	user: {
 		keycloakUserId: stringToKeycloakId('22222222-2222-2222-2222-222222222222'),
 	},
-	role: { isAdministrator: true, canViewUsersInKeycloak: false },
+	role: {
+		isAdministrator: true,
+		canViewUsersInKeycloak: false,
+		canViewOrganizationsInKeycloak: false,
+	},
 };
 
 const mockDbReturning = (result: boolean): { sql: jest.Mock } => ({

@@ -16,7 +16,11 @@ import {
 	mockJwtWithRealmManagementViewUsersRole as authHeaderWithViewUsersRole,
 	mockJwtWithUnrelatedRealmManagementRole as authHeaderWithUnrelatedRealmManagementRole,
 } from '../test/mockJwt';
-import { getTestAuthContext, loadTestUser } from '../test/utils';
+import {
+	getTestAuthContext,
+	getTestUserKeycloakUserId,
+	loadTestUser,
+} from '../test/utils';
 import { createTestUser } from '../test/factories';
 import {
 	expectNumber,
@@ -29,6 +33,20 @@ import {
 	TaskStatus,
 } from '../types';
 import type { User } from '../types';
+
+const SYNC_JWT_SCOPE = 'openid kc-admin-api';
+
+const viewUsersSyncAuthHeader = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	scope: SYNC_JWT_SCOPE,
+	realmManagementRoles: ['view-users'],
+});
+
+const manageUsersSyncAuthHeader = getMockJwt({
+	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+	scope: SYNC_JWT_SCOPE,
+	realmManagementRoles: ['manage-users'],
+});
 
 describe('/users', () => {
 	describe('GET /', () => {
@@ -248,13 +266,31 @@ describe('/users', () => {
 				.expect(403);
 		});
 
+		it('returns 403 when the token lacks the kc-admin-api scope even with sufficient roles', async () => {
+			const response = await request(app)
+				.post('/users/sync')
+				.set(
+					getMockJwt({
+						sub: '77777777-7777-4777-8777-777777777777',
+						scope: 'openid',
+						realmManagementRoles: ['view-users'],
+					}),
+				)
+				.expect(403);
+			expect(response.body).toMatchObject({
+				name: 'ForbiddenError',
+				message:
+					'Your token must carry the kc-admin-api scope for the Keycloak Admin REST API to accept it.',
+			});
+		});
+
 		it('creates a pending user sync task when the caller carries the view-users realm-management role', async () => {
 			const db = getDatabase();
 			const testUser = await loadTestUser(db);
 
 			const response = await request(app)
 				.post('/users/sync')
-				.set(authHeaderWithViewUsersRole)
+				.set(viewUsersSyncAuthHeader)
 				.expect(201);
 			expect(response.body).toEqual({
 				id: expectNumber(),
@@ -269,14 +305,14 @@ describe('/users', () => {
 		it('creates a pending user sync task when the caller carries the view-users realm-management role', async () => {
 			await request(app)
 				.post('/users/sync')
-				.set(authHeaderWithViewUsersRole)
+				.set(viewUsersSyncAuthHeader)
 				.expect(201);
 		});
 
 		it('creates a pending user sync task when the caller carries the manage-users realm-management role', async () => {
 			await request(app)
 				.post('/users/sync')
-				.set(authHeaderWithManageUsersRole)
+				.set(manageUsersSyncAuthHeader)
 				.expect(201);
 		});
 
@@ -286,7 +322,7 @@ describe('/users', () => {
 
 			await request(app)
 				.post('/users/sync')
-				.set(authHeaderWithViewUsersRole)
+				.set(viewUsersSyncAuthHeader)
 				.expect(201);
 
 			// The task row and its job commit together: the job is visible as
@@ -313,7 +349,7 @@ describe('/users', () => {
 				{
 					attempts: 0,
 					maxAttempts: 1,
-					queueName: 'sync_users_from_keycloak',
+					queueName: 'sync_users_or_orgs_from_keycloak',
 					createdBy: keycloakIdToString(testUser.keycloakUserId),
 					status: 'pending',
 				},

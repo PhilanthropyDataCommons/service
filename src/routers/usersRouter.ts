@@ -2,6 +2,7 @@ import express from 'express';
 import { usersHandlers } from '../handlers/usersHandlers';
 import {
 	requireAuthentication,
+	requireKeycloakAdminApiScope,
 	requireKeycloakRealmManagementRoles,
 } from '../middleware';
 
@@ -19,6 +20,7 @@ usersRouter.get('/', requireAuthentication, usersHandlers.getUsers);
 usersRouter.post(
 	'/sync',
 	requireAuthentication,
+	requireKeycloakAdminApiScope(),
 	requireKeycloakRealmManagementRoles(
 		USERS_SYNC_SUFFICIENT_REALM_MANAGEMENT_ROLES,
 	),

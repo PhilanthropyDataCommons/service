@@ -1,0 +1,34 @@
+{
+	"post": {
+		"operationId": "syncOrganizationsFromKeycloak",
+		"summary": "Kicks off an asynchronous task that replicates all Keycloak organizations and their memberships into the PDC organizations cache.",
+		"description": "Creates an `organizationSyncTask` and enqueues a background job that lists the realm's organizations and their members at the Keycloak Admin REST API using the caller's own credentials, then merges them into the local `organizations` and `user_organization_memberships` cache. The caller's JWT must carry at least one of the `view-organizations`, `manage-organizations`, or `manage-realm` realm-management roles, and at least one of the `view-users` or `manage-users` realm-management roles, mirroring the sets Keycloak accepts on the equivalent organizations and members listing calls. The sync sets `disabledAt` for organizations that Keycloak reports as deleted or not enabled and for memberships Keycloak no longer reports, rather than deleting rows. Poll `GET /organizations/sync/{organizationSyncTaskId}` for completion.",
+		"tags": ["Organizations"],
+		"security": [
+			{
+				"auth": []
+			}
+		],
+		"responses": {
+			"201": {
+				"description": "The created organization sync task, initially pending.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "../components/schemas/OrganizationSyncTask.json"
+						}
+					}
+				}
+			},
+			"401": {
+				"$ref": "../components/responses/Unauthorized.json"
+			},
+			"403": {
+				"$ref": "../components/responses/Forbidden.json"
+			},
+			"500": {
+				"$ref": "../components/responses/InternalServerError.json"
+			}
+		}
+	}
+}

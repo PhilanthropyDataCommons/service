@@ -1,5 +1,6 @@
 import { TinyPgError } from 'tinypg';
 import {
+	enqueueSyncOrganizationsFromKeycloakJob,
 	enqueueSyncUsersFromKeycloakJob,
 	redactJobPayloadFromMeta,
 } from '../jobQueue';
@@ -16,6 +17,7 @@ jest.mock('../database/db', () => ({ getDatabase: jest.fn() }));
 jest.mock('../tasks', () => ({
 	copyBaseFields: jest.fn(),
 	processBulkUploadTask: jest.fn(),
+	syncOrganizationsFromKeycloak: jest.fn(),
 	syncUsersFromKeycloak: jest.fn(),
 }));
 
@@ -67,5 +69,33 @@ describe('enqueueSyncUsersFromKeycloakJob', () => {
 		// error must not contain them.
 		expect(JSON.stringify(caught)).not.toContain('Bearer secret-token');
 		expect(JSON.stringify(caught)).toContain('syncUsersFromKeycloak');
+	});
+});
+
+describe('enqueueSyncOrganizationsFromKeycloakJob', () => {
+	it('scrubs the caller credentials from the enqueue failure', async () => {
+		const transactionDb = {
+			sql: jest.fn().mockRejectedValue(
+				new TinyPgError('connection lost', undefined, {
+					error: { code: '08003' },
+					params: {
+						identifier: 'syncOrganizationsFromKeycloak',
+						payload: JSON.stringify({
+							organizationSyncTaskId: 1,
+							keycloakAdminAuthorizationHeader: 'Bearer secret-token',
+						}),
+						maxAttempts: 1,
+					},
+				}),
+			),
+		};
+		const caught = await enqueueSyncOrganizationsFromKeycloakJob(
+			transactionDb,
+			1,
+			'Bearer secret-token',
+		).catch((caughtError: unknown) => caughtError);
+
+		expect(JSON.stringify(caught)).not.toContain('Bearer secret-token');
+		expect(JSON.stringify(caught)).toContain('syncOrganizationsFromKeycloak');
 	});
 });

@@ -1,8 +1,39 @@
 import express from 'express';
 import { organizationsHandlers } from '../handlers/organizationsHandlers';
-import { requireAuthentication } from '../middleware';
+import {
+	requireAuthentication,
+	requireKeycloakAdminApiScope,
+	requireKeycloakRealmManagementRoles,
+} from '../middleware';
+
+const ORGANIZATIONS_SYNC_SUFFICIENT_REALM_MANAGEMENT_ROLE_SETS = [
+	['view-organizations', 'manage-organizations', 'manage-realm'],
+	['view-users', 'manage-users'],
+];
 
 const organizationsRouter = express.Router();
+
+organizationsRouter.get(
+	'/',
+	requireAuthentication,
+	organizationsHandlers.getOrganizations,
+);
+
+organizationsRouter.post(
+	'/sync',
+	requireAuthentication,
+	requireKeycloakAdminApiScope(),
+	requireKeycloakRealmManagementRoles(
+		...ORGANIZATIONS_SYNC_SUFFICIENT_REALM_MANAGEMENT_ROLE_SETS,
+	),
+	organizationsHandlers.syncOrganizationsFromKeycloak,
+);
+
+organizationsRouter.get(
+	'/sync/:organizationSyncTaskId',
+	requireAuthentication,
+	organizationsHandlers.getOrganizationSyncTask,
+);
 
 organizationsRouter.get(
 	'/:keycloakOrganizationId',

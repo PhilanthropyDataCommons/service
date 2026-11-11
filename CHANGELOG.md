@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `GET /funders/{funderShortCode}/members`, `GET /funders/{funderShortCode}/members/{memberFunderShortCode}`, and `GET /funders/{funderShortCode}/collaboratives` now require only authentication, matching `GET /funders/{funderShortCode}`, rather than `manage` permission on the funder. They still return 404 when the funder does not exist.
 - `users` responses now include readonly `syncedFromKeycloakAt` and `disabledAt` attributes. `syncedFromKeycloakAt` is when the user was last confirmed to exist in Keycloak. `disabledAt` is when the user was last observed as deleted or disabled in Keycloak, and it clears once a sync or one of the user's own logins shows the account is live again.
 
 - A changemaker now carries the `keycloakOrganizationId`, `createdAt`, and `createdBy` attributes, and its `fiscalSponsors`, only when the requester holds `view` permission on that changemaker. Every other requester, including an unauthenticated one, receives `id`, `name`, and `taxId`, plus `fields` where the endpoint returns it at all. This applies wherever a changemaker appears, not just at `/changemakers`: the changemakers embedded in a proposal, in a source, and in another changemaker's `fiscalSponsors` are narrowed the same way. Permission is evaluated per changemaker, so a single array may hold both shapes.

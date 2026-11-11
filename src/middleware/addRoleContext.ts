@@ -11,6 +11,11 @@ const REALM_MANAGEMENT_ROLES_THAT_GRANT_VIEWING_USERS_IN_KEYCLOAK = [
 	'view-users',
 	'manage-users',
 ];
+const REALM_MANAGEMENT_ROLES_THAT_GRANT_VIEWING_ORGANIZATIONS_IN_KEYCLOAK = [
+	'view-organizations',
+	'manage-organizations',
+	'manage-realm',
+];
 
 const addRoleContext = (
 	req: Request,
@@ -24,9 +29,14 @@ const addRoleContext = (
 		REALM_MANAGEMENT_ROLES_THAT_GRANT_VIEWING_USERS_IN_KEYCLOAK.some((role) =>
 			realmManagementRoles.includes(role),
 		);
+	const canViewOrganizationsInKeycloak =
+		REALM_MANAGEMENT_ROLES_THAT_GRANT_VIEWING_ORGANIZATIONS_IN_KEYCLOAK.some(
+			(role) => realmManagementRoles.includes(role),
+		);
 	(req as AuthenticatedRequest).role = {
 		isAdministrator,
 		canViewUsersInKeycloak,
+		canViewOrganizationsInKeycloak,
 	};
 	next();
 };

@@ -260,6 +260,7 @@ const loadSystemUserAuthContext = async (
 	role: {
 		isAdministrator: true,
 		canViewUsersInKeycloak: false,
+		canViewOrganizationsInKeycloak: false,
 	},
 });
 
@@ -271,6 +272,7 @@ const loadTaskAuthContext = async (
 	role: {
 		isAdministrator: false,
 		canViewUsersInKeycloak: false,
+		canViewOrganizationsInKeycloak: false,
 	},
 });
 

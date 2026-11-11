@@ -29,6 +29,7 @@ describe('requireAdministratorRole', () => {
 		req.role = {
 			isAdministrator: false,
 			canViewUsersInKeycloak: false,
+			canViewOrganizationsInKeycloak: false,
 		};
 		const nextMock = jest.fn((error) => {
 			expect(error).toBeInstanceOf(ForbiddenError);
@@ -50,6 +51,7 @@ describe('requireAdministratorRole', () => {
 		req.role = {
 			isAdministrator: true,
 			canViewUsersInKeycloak: false,
+			canViewOrganizationsInKeycloak: false,
 		};
 		const nextMock = jest.fn((error) => {
 			expect(error).toBe(undefined);

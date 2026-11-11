@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a `GET /organizations` endpoint listing the cached Keycloak organizations with their role bundles, Keycloak names, and current cached members; callers need the PDC-service `pdc-admin` realm role or a Keycloak `realm-management` organization-visibility role (`view-organizations`, `manage-organizations`, or `manage-realm`).
 - Added a `GET /.well-known/agent-skills/index.json` endpoint listing the agent skills the service publishes, and a `GET /.well-known/agent-skills/philanthropy-data-commons/SKILL.md` endpoint serving a placeholder skill.
 - Added a `POST /users/sync` endpoint that kicks off an asynchronous task replicating all Keycloak users into the PDC `users` cache.
 - Added a `GET /users/sync/{userSyncTaskId}` endpoint for polling a user sync task; the requester and administrators can read a task, and its `details` carry the run summary (`seen`/`added`/`updated`/`disabled` counts).
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `GET /funders/{funderShortCode}/members`, `GET /funders/{funderShortCode}/members/{memberFunderShortCode}`, and `GET /funders/{funderShortCode}/collaboratives` now require only authentication, matching `GET /funders/{funderShortCode}`, rather than `manage` permission on the funder. They still return 404 when the funder does not exist.
+- `GET /organizations/{keycloakOrganizationId}` responses now also include the organization's cached Keycloak identity (`keycloakOrganizationId`, `keycloakOrganizationName`) and its current cached `members`; `members` is `null` when the caller may not see membership data. The data provider role object is now keyed `dataProvider` (previously `data_provider`), matching the documented schema.
 - `users` responses now include readonly `syncedFromKeycloakAt` and `disabledAt` attributes. `syncedFromKeycloakAt` is when the user was last confirmed to exist in Keycloak. `disabledAt` is when the user was last observed as deleted or disabled in Keycloak, and it clears once a sync or one of the user's own logins shows the account is live again.
 
 - A changemaker now carries the `keycloakOrganizationId`, `createdAt`, and `createdBy` attributes, and its `fiscalSponsors`, only when the requester holds `view` permission on that changemaker. Every other requester, including an unauthenticated one, receives `id`, `name`, and `taxId`, plus `fields` where the endpoint returns it at all. This applies wherever a changemaker appears, not just at `/changemakers`: the changemakers embedded in a proposal, in a source, and in another changemaker's `fiscalSponsors` are narrowed the same way. Permission is evaluated per changemaker, so a single array may hold both shapes.

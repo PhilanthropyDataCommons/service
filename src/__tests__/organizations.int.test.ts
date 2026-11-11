@@ -10,6 +10,8 @@ import {
 	createTestChangemaker,
 	createTestDataProvider,
 	createTestFunder,
+	createTestOrganization,
+	createTestUser,
 } from '../test/factories';
 import {
 	mockJwt as authHeader,
@@ -86,7 +88,6 @@ describe('/organizations', () => {
 				.set(authHeaderWithAdminRole)
 				.expect(200);
 			expect(response.body).toStrictEqual({
-				// A shallow changemaker is expected, not a deep one.
 				changemaker: {
 					taxId: expectedChangemaker.taxId,
 					name: expectedChangemaker.name,
@@ -95,8 +96,13 @@ describe('/organizations', () => {
 					id: expectedChangemaker.id,
 					keycloakOrganizationId,
 				},
-				data_provider: expectedDataProvider,
+				dataProvider: expectedDataProvider,
 				funder: expectedFunder,
+				keycloakOrganizationId,
+				keycloakOrganizationName: null,
+				disabledAt: null,
+				members: null,
+				formerMembers: null,
 			});
 		});
 
@@ -140,10 +146,14 @@ describe('/organizations', () => {
 				.expect(200);
 			expect(response.body).toStrictEqual({
 				changemaker: null,
-				data_provider: null,
+				dataProvider: null,
 				funder: expectedFunder,
+				keycloakOrganizationId,
+				keycloakOrganizationName: null,
+				disabledAt: null,
+				members: null,
+				formerMembers: null,
 			});
-			// But I lack view access to this org
 			await agent
 				.get(`/organizations/${keycloakOrganizationIdLackingPerm}`)
 				.set(authHeader)
@@ -193,8 +203,13 @@ describe('/organizations', () => {
 				.expect(200);
 			expect(response.body).toStrictEqual({
 				changemaker: null,
-				data_provider: expectedDataProvider,
+				dataProvider: expectedDataProvider,
 				funder: null,
+				keycloakOrganizationId,
+				keycloakOrganizationName: null,
+				disabledAt: null,
+				members: null,
+				formerMembers: null,
 			});
 			// But I lack view access to this org
 			await agent
@@ -219,6 +234,255 @@ describe('/organizations', () => {
 				.get('/organizations/34643bb4-8a4e-46f3-be1a-b679876a506a')
 				.set(authHeader)
 				.expect(404);
+		});
+
+		it('returns members and former members as users for administrators', async () => {
+			const db = getDatabase();
+			const expectedOrganization = await createTestOrganization(db, {
+				keycloakOrganizationId: 'b1c0ffee-0000-4000-8000-000000000001',
+				keycloakOrganizationName: 'Memberdome',
+			});
+			const member = await createTestUser(db, null, {
+				keycloakUserName: 'Moe Member',
+			});
+			const formerMember = await createTestUser(db, null, {
+				keycloakUserName: 'Nora Former',
+			});
+			await db.query(
+				'INSERT INTO user_organization_memberships (user_keycloak_user_id, organization_keycloak_id, synced_from_keycloak_at) VALUES (:userKeycloakUserId, :organizationKeycloakId, :syncedFromKeycloakAt);',
+				{
+					userKeycloakUserId: member.keycloakUserId,
+					organizationKeycloakId: expectedOrganization.keycloakOrganizationId,
+					syncedFromKeycloakAt: '2000-01-01T00:00:00Z',
+				},
+			);
+			await db.query(
+				'INSERT INTO user_organization_memberships (user_keycloak_user_id, organization_keycloak_id, synced_from_keycloak_at, disabled_at) VALUES (:userKeycloakUserId, :organizationKeycloakId, :syncedFromKeycloakAt, :disabledAt);',
+				{
+					userKeycloakUserId: formerMember.keycloakUserId,
+					organizationKeycloakId: expectedOrganization.keycloakOrganizationId,
+					syncedFromKeycloakAt: '2000-01-01T00:00:00Z',
+					disabledAt: '2001-01-01T00:00:00Z',
+				},
+			);
+
+			const response = await agent
+				.get(`/organizations/${expectedOrganization.keycloakOrganizationId}`)
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toStrictEqual({
+				changemaker: null,
+				dataProvider: null,
+				funder: null,
+				keycloakOrganizationId: expectedOrganization.keycloakOrganizationId,
+				keycloakOrganizationName: 'Memberdome',
+				disabledAt: null,
+				members: [
+					{
+						keycloakUserId: member.keycloakUserId,
+						keycloakUserName: 'Moe Member',
+						createdAt: expectTimestamp(),
+						syncedFromKeycloakAt: null,
+						disabledAt: null,
+					},
+				],
+				formerMembers: [
+					{
+						keycloakUserId: formerMember.keycloakUserId,
+						keycloakUserName: 'Nora Former',
+						createdAt: expectTimestamp(),
+						syncedFromKeycloakAt: null,
+						disabledAt: null,
+					},
+				],
+			});
+		});
+
+		it('hides cached members from callers holding only view-organizations and shows them when the caller also holds view-users', async () => {
+			const db = getDatabase();
+			const expectedOrganization = await createTestOrganization(db, {
+				keycloakOrganizationId: 'b1c0ffee-0000-4000-8000-000000000002',
+				keycloakOrganizationName: 'Visibilitydome',
+			});
+			const member = await createTestUser(db, null, {
+				keycloakUserName: 'Ollie Viewer',
+			});
+			await db.query(
+				'INSERT INTO user_organization_memberships (user_keycloak_user_id, organization_keycloak_id, synced_from_keycloak_at) VALUES (:userKeycloakUserId, :organizationKeycloakId, :syncedFromKeycloakAt);',
+				{
+					userKeycloakUserId: member.keycloakUserId,
+					organizationKeycloakId: expectedOrganization.keycloakOrganizationId,
+					syncedFromKeycloakAt: '2000-01-01T00:00:00Z',
+				},
+			);
+
+			const byIdResponse = await agent
+				.get(`/organizations/${expectedOrganization.keycloakOrganizationId}`)
+				.set(authHeaderWithViewOrganizationsRole)
+				.expect(200);
+			expect(byIdResponse.body).toStrictEqual({
+				changemaker: null,
+				dataProvider: null,
+				funder: null,
+				keycloakOrganizationId: expectedOrganization.keycloakOrganizationId,
+				keycloakOrganizationName: 'Visibilitydome',
+				disabledAt: null,
+				members: null,
+				formerMembers: null,
+			});
+
+			const listResponse = await agent
+				.get('/organizations')
+				.set(authHeaderWithViewOrganizationsRole)
+				.expect(200);
+			expect(listResponse.body).toStrictEqual({
+				entries: [
+					{
+						changemaker: null,
+						dataProvider: null,
+						funder: null,
+						keycloakOrganizationId: expectedOrganization.keycloakOrganizationId,
+						keycloakOrganizationName: 'Visibilitydome',
+						disabledAt: null,
+						members: null,
+						formerMembers: null,
+					},
+				],
+				total: 1,
+			});
+
+			const expectedMember = {
+				keycloakUserId: member.keycloakUserId,
+				keycloakUserName: 'Ollie Viewer',
+				createdAt: expectTimestamp(),
+				syncedFromKeycloakAt: null,
+				disabledAt: null,
+			};
+
+			const shownByIdResponse = await agent
+				.get(`/organizations/${expectedOrganization.keycloakOrganizationId}`)
+				.set(authHeaderWithSyncOrganizationsRoles)
+				.expect(200);
+			expect(shownByIdResponse.body).toStrictEqual({
+				changemaker: null,
+				dataProvider: null,
+				funder: null,
+				keycloakOrganizationId: expectedOrganization.keycloakOrganizationId,
+				keycloakOrganizationName: 'Visibilitydome',
+				disabledAt: null,
+				members: [expectedMember],
+				formerMembers: [],
+			});
+
+			const shownListResponse = await agent
+				.get('/organizations')
+				.set(authHeaderWithSyncOrganizationsRoles)
+				.expect(200);
+			expect(shownListResponse.body).toStrictEqual({
+				entries: [
+					{
+						changemaker: null,
+						dataProvider: null,
+						funder: null,
+						keycloakOrganizationId: expectedOrganization.keycloakOrganizationId,
+						keycloakOrganizationName: 'Visibilitydome',
+						disabledAt: null,
+						members: [expectedMember],
+						formerMembers: [],
+					},
+				],
+				total: 1,
+			});
+		});
+	});
+
+	describe('GET /', () => {
+		it('requires authentication', async () => {
+			await agent.get('/organizations').expect(401);
+		});
+
+		it('returns an empty bundle for callers without organization visibility', async () => {
+			const db = getDatabase();
+			await createTestOrganization(db);
+			const response = await agent
+				.get('/organizations')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toStrictEqual({ entries: [], total: 0 });
+		});
+
+		it('returns organizations for administrators', async () => {
+			const db = getDatabase();
+			const expectedOrganization = await createTestOrganization(db, {
+				keycloakOrganizationId: 'a829eda6-3e09-4f79-a47a-379f3d1c0011',
+				keycloakOrganizationName: 'Funderdome',
+				createdAt: '2024-01-01T00:00:00Z',
+			});
+			const otherOrganization = await createTestOrganization(db, {
+				createdAt: '4024-01-01T00:00:00Z',
+			});
+			const response = await agent
+				.get('/organizations')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toStrictEqual({
+				entries: [
+					{
+						changemaker: null,
+						dataProvider: null,
+						funder: null,
+						keycloakOrganizationId: otherOrganization.keycloakOrganizationId,
+						keycloakOrganizationName:
+							otherOrganization.keycloakOrganizationName,
+						disabledAt: null,
+						members: [],
+						formerMembers: [],
+					},
+					{
+						changemaker: null,
+						dataProvider: null,
+						funder: null,
+						keycloakOrganizationId: expectedOrganization.keycloakOrganizationId,
+						keycloakOrganizationName: 'Funderdome',
+						disabledAt: null,
+						members: [],
+						formerMembers: [],
+					},
+				],
+				total: 2,
+			});
+		});
+
+		it('paginates organizations', async () => {
+			const db = getDatabase();
+			await createTestOrganization(db, {
+				keycloakOrganizationId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+				createdAt: '4024-01-01T00:00:00Z',
+			});
+			const secondOrganization = await createTestOrganization(db, {
+				keycloakOrganizationId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+				createdAt: '4024-01-01T00:00:00Z',
+			});
+			const response = await agent
+				.get('/organizations?_page=1&_count=1')
+				.set(authHeaderWithAdminRole)
+				.expect(200);
+			expect(response.body).toStrictEqual({
+				entries: [
+					{
+						changemaker: null,
+						dataProvider: null,
+						funder: null,
+						keycloakOrganizationId: secondOrganization.keycloakOrganizationId,
+						keycloakOrganizationName:
+							secondOrganization.keycloakOrganizationName,
+						disabledAt: null,
+						members: [],
+						formerMembers: [],
+					},
+				],
+				total: 2,
+			});
 		});
 	});
 });

@@ -5,6 +5,12 @@ import { requireAuthentication } from '../middleware';
 const organizationsRouter = express.Router();
 
 organizationsRouter.get(
+	'/',
+	requireAuthentication,
+	organizationsHandlers.getOrganizations,
+);
+
+organizationsRouter.get(
 	'/:keycloakOrganizationId',
 	requireAuthentication,
 	organizationsHandlers.getOrganization,

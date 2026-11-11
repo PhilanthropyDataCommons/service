@@ -63,20 +63,50 @@ WITH
 		SELECT count(*) AS total FROM candidate_entries
 	),
 
-	page AS (
-		SELECT candidate_entries.*
+	keyed_entries AS (
+		SELECT
+			candidate_entries.id,
+			CASE :sortField
+				WHEN 'granteeType' THEN candidate_entries.grantee_type::text
+				WHEN 'contextEntityType' THEN candidate_entries.context_entity_type::text
+				WHEN 'createdByUserName' THEN created_by_user.keycloak_user_name
+			END AS sort_text,
+			CASE WHEN :sortField = 'createdAt' THEN candidate_entries.created_at END
+				AS sort_timestamp,
+			CASE WHEN :sortField = 'id' THEN candidate_entries.id END AS sort_id
 		FROM candidate_entries
-		ORDER BY id DESC
+			LEFT JOIN users AS created_by_user
+				ON candidate_entries.created_by = created_by_user.keycloak_user_id
+	),
+
+	page AS (
+		SELECT keyed_entries.*
+		FROM keyed_entries
+		ORDER BY
+			CASE
+				WHEN :sortDirection = 'asc' THEN keyed_entries.sort_text
+			END ASC NULLS LAST,
+			CASE
+				WHEN :sortDirection = 'desc' THEN keyed_entries.sort_text
+			END DESC NULLS LAST,
+			CASE WHEN :sortDirection = 'asc' THEN keyed_entries.sort_timestamp END ASC,
+			CASE WHEN :sortDirection = 'desc' THEN keyed_entries.sort_timestamp END DESC,
+			CASE WHEN :sortDirection = 'asc' THEN keyed_entries.sort_id END ASC,
+			keyed_entries.id DESC
 		LIMIT :limit OFFSET :offset
 	),
 
 	paginated_entries AS (
-		SELECT
-			permission_grant_to_json(
-				page.*::permission_grants
-			) AS object
+		SELECT permission_grant_to_json(permission_grants) AS object
 		FROM page
-		ORDER BY id DESC
+			INNER JOIN permission_grants ON page.id = permission_grants.id
+		ORDER BY
+			CASE WHEN :sortDirection = 'asc' THEN page.sort_text END ASC NULLS LAST,
+			CASE WHEN :sortDirection = 'desc' THEN page.sort_text END DESC NULLS LAST,
+			CASE WHEN :sortDirection = 'asc' THEN page.sort_timestamp END ASC,
+			CASE WHEN :sortDirection = 'desc' THEN page.sort_timestamp END DESC,
+			CASE WHEN :sortDirection = 'asc' THEN page.sort_id END ASC,
+			page.id DESC
 	)
 
 SELECT

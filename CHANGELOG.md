@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changemaker and funder responses now include a readonly `permissions` attribute describing the caller's resolved permissions on that entity as a map of scope to verbs (with `manage` verbs, `any` scopes, user group membership, all-authenticated-users grants, and the administrator role already expanded). It is `{}` for anonymous callers and for funders embedded in other entities' responses; shallow changemaker embeds omit it.
 - Creating an entity now also creates the permission grant each default permission grant registered for that entity's type describes.
 - `GET /permissionGrants` now accepts `contextEntityType`, `scope`, `createdBy`, `granteeUser`, and `granteeOrganization` filters.
+- `GET /permissionGrants` now accepts a `_sort` parameter (prefix with `-` for descending) for sorting by `id`, `createdAt`, `granteeType`, `contextEntityType`, or `createdByUserName`.
 
 ### Changed
 

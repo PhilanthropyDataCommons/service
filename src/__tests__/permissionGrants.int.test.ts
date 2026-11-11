@@ -635,6 +635,244 @@ describe('/permissionGrants', () => {
 			});
 		});
 
+		it('orders by id descending when no sort is provided', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const olderGrant = await createTestPermissionGrant(db, authContext);
+			const newerGrant = await createTestPermissionGrant(db, authContext);
+
+			const response = await agent
+				.get('/permissionGrants')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				entries: [{ id: newerGrant.id }, { id: olderGrant.id }],
+			});
+		});
+
+		it('sorts by id and by creation time in either direction', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const olderGrant = await createTestPermissionGrant(db, authContext);
+			const newerGrant = await createTestPermissionGrant(db, authContext);
+
+			const ascendingIdResponse = await agent
+				.get('/permissionGrants?_sort=id')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(ascendingIdResponse.body).toMatchObject({
+				entries: [{ id: olderGrant.id }, { id: newerGrant.id }],
+			});
+
+			const descendingIdResponse = await agent
+				.get('/permissionGrants?_sort=-id')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(descendingIdResponse.body).toMatchObject({
+				entries: [{ id: newerGrant.id }, { id: olderGrant.id }],
+			});
+
+			const ascendingCreatedAtResponse = await agent
+				.get('/permissionGrants?_sort=createdAt')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(ascendingCreatedAtResponse.body).toMatchObject({
+				entries: [{ id: olderGrant.id }, { id: newerGrant.id }],
+			});
+
+			const descendingCreatedAtResponse = await agent
+				.get('/permissionGrants?_sort=-createdAt')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(descendingCreatedAtResponse.body).toMatchObject({
+				entries: [{ id: newerGrant.id }, { id: olderGrant.id }],
+			});
+		});
+
+		it('sorts by context entity type alphabetically in either direction', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const funder = await createTestFunder(db, authContext);
+			const funderGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const changemakerGrant = await createTestPermissionGrant(db, authContext);
+
+			const ascendingResponse = await agent
+				.get('/permissionGrants?_sort=contextEntityType')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(ascendingResponse.body).toMatchObject({
+				entries: [{ id: changemakerGrant.id }, { id: funderGrant.id }],
+			});
+
+			const descendingResponse = await agent
+				.get('/permissionGrants?_sort=-contextEntityType')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(descendingResponse.body).toMatchObject({
+				entries: [{ id: funderGrant.id }, { id: changemakerGrant.id }],
+			});
+		});
+
+		it('sorts by grantee type alphabetically in either direction', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			const userGroupGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: stringToKeycloakId(
+					'0d9f7d93-2b7e-4f63-9c2a-4b5c7a1e8f10',
+				),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const userGrant = await createTestPermissionGrant(db, authContext);
+
+			const ascendingResponse = await agent
+				.get('/permissionGrants?_sort=granteeType')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(ascendingResponse.body).toMatchObject({
+				entries: [{ id: userGrant.id }, { id: userGroupGrant.id }],
+			});
+
+			const descendingResponse = await agent
+				.get('/permissionGrants?_sort=-granteeType')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(descendingResponse.body).toMatchObject({
+				entries: [{ id: userGroupGrant.id }, { id: userGrant.id }],
+			});
+		});
+
+		it('sorts by creator name in either direction with unnamed creators last', async () => {
+			const db = getDatabase();
+			const alphaUser = await createTestUser(db, null, {
+				keycloakUserName: 'alpha',
+			});
+			const bravoUser = await createTestUser(db, null, {
+				keycloakUserName: 'bravo',
+			});
+			const unnamedUser = await createTestUser(db, null, {
+				keycloakUserName: null,
+			});
+			const bravoGrant = await createTestPermissionGrant(
+				db,
+				getAuthContext(bravoUser),
+			);
+			const unnamedGrant = await createTestPermissionGrant(
+				db,
+				getAuthContext(unnamedUser),
+			);
+			const alphaGrant = await createTestPermissionGrant(
+				db,
+				getAuthContext(alphaUser),
+			);
+
+			const ascendingResponse = await agent
+				.get('/permissionGrants?_sort=createdByUserName')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(ascendingResponse.body).toMatchObject({
+				entries: [
+					{ id: alphaGrant.id },
+					{ id: bravoGrant.id },
+					{ id: unnamedGrant.id },
+				],
+			});
+
+			const descendingResponse = await agent
+				.get('/permissionGrants?_sort=-createdByUserName')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(descendingResponse.body).toMatchObject({
+				entries: [
+					{ id: bravoGrant.id },
+					{ id: alphaGrant.id },
+					{ id: unnamedGrant.id },
+				],
+			});
+		});
+
+		it('breaks sort ties by id descending so pages are stable', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const olderGrant = await createTestPermissionGrant(db, authContext);
+			const newerGrant = await createTestPermissionGrant(db, authContext);
+
+			const firstPageResponse = await agent
+				.get('/permissionGrants?_sort=contextEntityType&_page=1&_count=1')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(firstPageResponse.body).toMatchObject({
+				total: 2,
+				entries: [{ id: newerGrant.id }],
+			});
+
+			const secondPageResponse = await agent
+				.get('/permissionGrants?_sort=contextEntityType&_page=2&_count=1')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(secondPageResponse.body).toMatchObject({
+				total: 2,
+				entries: [{ id: olderGrant.id }],
+			});
+		});
+
+		it('only filters and sorts grants whose context entity the non-admin can manage', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const manageableChangemaker = await createTestChangemaker(
+				db,
+				authContext,
+			);
+			const unmanageableChangemaker = await createTestChangemaker(
+				db,
+				authContext,
+			);
+			const manageGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: manageableChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: unmanageableChangemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get('/permissionGrants?contextEntityType=changemaker&_sort=id')
+				.set(authHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [{ id: manageGrant.id }],
+			});
+		});
+
+		it('returns 400 if an invalid sort is provided', async () => {
+			const response = await agent
+				.get('/permissionGrants?_sort=--id')
+				.set(adminUserAuthHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({ name: 'InputValidationError' });
+		});
+
 		it('returns 400 if an invalid contextEntityType filter is provided', async () => {
 			const response = await agent
 				.get('/permissionGrants?contextEntityType=bogus')

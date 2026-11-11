@@ -48,6 +48,9 @@
 			},
 			{
 				"$ref": "../components/parameters/granteeOrganizationParam.json"
+			},
+			{
+				"$ref": "../components/parameters/permissionGrantSortParam.json"
 			}
 		],
 		"responses": {

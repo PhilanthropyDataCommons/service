@@ -33,6 +33,21 @@
 			},
 			{
 				"$ref": "../components/parameters/verbParam.json"
+			},
+			{
+				"$ref": "../components/parameters/contextEntityTypeParam.json"
+			},
+			{
+				"$ref": "../components/parameters/scopeParam.json"
+			},
+			{
+				"$ref": "../components/parameters/createdByParam.json"
+			},
+			{
+				"$ref": "../components/parameters/granteeUserParam.json"
+			},
+			{
+				"$ref": "../components/parameters/granteeOrganizationParam.json"
 			}
 		],
 		"responses": {

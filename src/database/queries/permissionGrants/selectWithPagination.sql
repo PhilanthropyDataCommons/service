@@ -33,6 +33,30 @@ WITH
 				WHEN :verb::permission_grant_verb_t IS NULL THEN TRUE
 				ELSE :verb::permission_grant_verb_t = any(permission_grants.verbs)
 			END
+			AND CASE
+				WHEN :contextEntityType::permission_grant_entity_type_t IS NULL THEN TRUE
+				ELSE permission_grants.context_entity_type = :contextEntityType
+			END
+			AND CASE
+				WHEN :scope::permission_grant_entity_type_t IS NULL THEN TRUE
+				ELSE :scope::permission_grant_entity_type_t = any(permission_grants.scope)
+			END
+			AND CASE
+				WHEN :createdBy::uuid IS NULL THEN TRUE
+				ELSE permission_grants.created_by = :createdBy
+			END
+			AND CASE
+				WHEN :granteeUserKeycloakUserId::uuid IS NULL THEN TRUE
+				ELSE
+					permission_grants.grantee_user_keycloak_user_id
+					= :granteeUserKeycloakUserId
+			END
+			AND CASE
+				WHEN :granteeKeycloakOrganizationId::uuid IS NULL THEN TRUE
+				ELSE
+					permission_grants.grantee_keycloak_organization_id
+					= :granteeKeycloakOrganizationId
+			END
 	),
 
 	entry_count AS (

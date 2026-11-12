@@ -34,11 +34,16 @@ import {
 } from '../errors';
 import {
 	extractChangemakerParameters,
+	extractContextEntityTypeParameters,
+	extractCreatedByParameters,
 	extractDataProviderParameters,
 	extractFunderParameters,
+	extractGranteeParameters,
 	extractGranteeTypeParameters,
 	extractPaginationParameters,
+	extractPermissionGrantSortParameters,
 	extractProposalParameters,
+	extractScopeParameters,
 	extractVerbParameters,
 } from '../queryParameters';
 import {
@@ -151,6 +156,13 @@ const getPermissionGrants = async (
 	const { proposalId } = extractProposalParameters(req);
 	const { granteeType } = extractGranteeTypeParameters(req);
 	const { verb } = extractVerbParameters(req);
+	const { contextEntityType } = extractContextEntityTypeParameters(req);
+	const { scope } = extractScopeParameters(req);
+	const { createdBy } = extractCreatedByParameters(req);
+	const { granteeUserKeycloakUserId, granteeKeycloakOrganizationId } =
+		extractGranteeParameters(req);
+	const { sortField, sortDirection } =
+		extractPermissionGrantSortParameters(req);
 
 	const contextEntityFilters = [
 		changemakerId,
@@ -174,6 +186,13 @@ const getPermissionGrants = async (
 		proposalId,
 		granteeType,
 		verb,
+		contextEntityType,
+		scope,
+		createdBy,
+		granteeUserKeycloakUserId,
+		granteeKeycloakOrganizationId,
+		sortField,
+		sortDirection,
 		limit,
 		offset,
 	);

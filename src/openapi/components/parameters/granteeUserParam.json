@@ -1,0 +1,10 @@
+{
+	"schema": {
+		"type": "string",
+		"format": "uuid"
+	},
+	"in": "query",
+	"name": "granteeUser",
+	"required": false,
+	"description": "Filters permission grants to those granted to the user with the given Keycloak user id."
+}

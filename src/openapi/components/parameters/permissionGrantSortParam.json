@@ -1,0 +1,21 @@
+{
+	"schema": {
+		"type": "string",
+		"enum": [
+			"id",
+			"-id",
+			"createdAt",
+			"-createdAt",
+			"granteeType",
+			"-granteeType",
+			"contextEntityType",
+			"-contextEntityType",
+			"createdByUserName",
+			"-createdByUserName"
+		]
+	},
+	"in": "query",
+	"name": "_sort",
+	"required": false,
+	"description": "The field to sort permission grants by. Prefix the field with `-` to sort in descending order. `granteeType` and `contextEntityType` sort alphabetically, and `createdByUserName` sorts by the creator's `keycloakUserName`, with grants whose creator has no name last. Ties, and requests without `_sort`, are ordered by `id` descending."
+}

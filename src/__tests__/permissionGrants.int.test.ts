@@ -1770,6 +1770,59 @@ describe('/permissionGrants', () => {
 				await agent.get('/permissionGrants').expect(401);
 			});
 		});
+
+		describe('allFunders grantee type', () => {
+			it('creates and returns a grant with both grantee key fields null', async () => {
+				const db = getDatabase();
+				const authContext = await getTestAuthContext(db);
+				const changemaker = await createTestChangemaker(db, authContext);
+				const before = await loadTableMetrics(db, 'permission_grants');
+				const result = await agent
+					.post('/permissionGrants')
+					.type('application/json')
+					.set(adminUserAuthHeader)
+					.send({
+						granteeType: 'allFunders',
+						contextEntityType: 'changemaker',
+						changemakerId: changemaker.id,
+						scope: ['changemaker'],
+						verbs: ['view'],
+					})
+					.expect(201);
+				const after = await loadTableMetrics(db, 'permission_grants');
+
+				expect(result.body).toMatchObject({
+					id: expectNumber(),
+					granteeType: 'allFunders',
+					granteeUserKeycloakUserId: null,
+					granteeKeycloakOrganizationId: null,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				});
+				expect(after.count).toEqual(before.count + 1);
+			});
+
+			it('returns 400 when grantee key field is included', async () => {
+				const db = getDatabase();
+				const authContext = await getTestAuthContext(db);
+				const changemaker = await createTestChangemaker(db, authContext);
+				await agent
+					.post('/permissionGrants')
+					.type('application/json')
+					.set(adminUserAuthHeader)
+					.send({
+						granteeType: 'allFunders',
+						granteeKeycloakOrganizationId: testUserKeycloakUserId,
+						contextEntityType: 'changemaker',
+						changemakerId: changemaker.id,
+						scope: ['changemaker'],
+						verbs: ['view'],
+					})
+					.expect(400);
+			});
+		});
 	});
 
 	describe('PUT /:permissionGrantId', () => {

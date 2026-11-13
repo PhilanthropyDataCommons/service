@@ -91,6 +91,15 @@
 				}
 			},
 			"required": ["granteeType"]
+		},
+		{
+			"properties": {
+				"granteeType": {
+					"type": "string",
+					"const": "allFunders"
+				}
+			},
+			"required": ["granteeType"]
 		}
 	]
 }

@@ -275,6 +275,26 @@ describe('/defaultPermissionGrants', () => {
 			});
 		});
 
+		it('creates and returns a default permission grant for all funders', async () => {
+			const result = await agent
+				.post('/defaultPermissionGrants')
+				.type('application/json')
+				.set(adminUserAuthHeader)
+				.send({
+					granteeType: 'allFunders',
+					contextEntityType: 'changemaker',
+					scope: ['changemaker'],
+					verbs: ['view'],
+				})
+				.expect(201);
+
+			expect(result.body).toMatchObject({
+				granteeType: 'allFunders',
+				granteeUserKeycloakUserId: null,
+				granteeKeycloakOrganizationId: null,
+			});
+		});
+
 		it('creates and returns a default permission grant with conditions', async () => {
 			const result = await agent
 				.post('/defaultPermissionGrants')

@@ -5,6 +5,7 @@ enum PermissionGrantGranteeType {
 	USER = 'user',
 	USER_GROUP = 'userGroup',
 	AUTHENTICATED_USERS = 'authenticatedUsers',
+	ALL_FUNDERS = 'allFunders',
 }
 
 const permissionGrantGranteeTypeSchema: JSONSchemaType<PermissionGrantGranteeType> =

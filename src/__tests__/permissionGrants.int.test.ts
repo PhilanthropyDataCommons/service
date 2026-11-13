@@ -1,7 +1,9 @@
 import request from 'supertest';
 import { app } from '../app';
+import { MS_PER_SECOND, SECONDS_PER_HOUR } from '../constants';
 import {
 	createApplicationForm,
+	createEphemeralUserGroupAssociation,
 	createPermissionGrant,
 	getDatabase,
 	hasApplicationFormPermission,
@@ -1768,6 +1770,130 @@ describe('/permissionGrants', () => {
 				});
 
 				await agent.get('/permissionGrants').expect(401);
+			});
+		});
+
+		describe('allFunders grantee type', () => {
+			it('creates and returns a grant with both grantee key fields null', async () => {
+				const db = getDatabase();
+				const authContext = await getTestAuthContext(db);
+				const changemaker = await createTestChangemaker(db, authContext);
+				const before = await loadTableMetrics(db, 'permission_grants');
+				const result = await agent
+					.post('/permissionGrants')
+					.type('application/json')
+					.set(adminUserAuthHeader)
+					.send({
+						granteeType: 'allFunders',
+						contextEntityType: 'changemaker',
+						changemakerId: changemaker.id,
+						scope: ['changemaker'],
+						verbs: ['view'],
+					})
+					.expect(201);
+				const after = await loadTableMetrics(db, 'permission_grants');
+
+				expect(result.body).toMatchObject({
+					id: expectNumber(),
+					granteeType: 'allFunders',
+					granteeUserKeycloakUserId: null,
+					granteeKeycloakOrganizationId: null,
+					contextEntityType: 'changemaker',
+					changemakerId: changemaker.id,
+					scope: ['changemaker'],
+					verbs: ['view'],
+				});
+				expect(after.count).toEqual(before.count + 1);
+			});
+
+			it('returns 400 when grantee key field is included', async () => {
+				const db = getDatabase();
+				const authContext = await getTestAuthContext(db);
+				const changemaker = await createTestChangemaker(db, authContext);
+				await agent
+					.post('/permissionGrants')
+					.type('application/json')
+					.set(adminUserAuthHeader)
+					.send({
+						granteeType: 'allFunders',
+						granteeKeycloakOrganizationId: testUserKeycloakUserId,
+						contextEntityType: 'changemaker',
+						changemakerId: changemaker.id,
+						scope: ['changemaker'],
+						verbs: ['view'],
+					})
+					.expect(400);
+			});
+
+			const anHourFromNow = (): string =>
+				new Date(Date.now() + SECONDS_PER_HOUR * MS_PER_SECOND).toISOString();
+
+			const anHourAgo = (): string =>
+				new Date(Date.now() - SECONDS_PER_HOUR * MS_PER_SECOND).toISOString();
+
+			const canViewChangemakerViaAllFundersGrant = async (
+				userGroupKeycloakOrganizationId: string,
+				notAfter: string,
+				funderKeycloakOrganizationId: string | null,
+			): Promise<boolean> => {
+				const db = getDatabase();
+				const adminAuthContext = await getTestAuthContext(db, true);
+				const changemaker = await createTestChangemaker(db, adminAuthContext);
+				await createTestFunder(db, adminAuthContext, {
+					keycloakOrganizationId:
+						funderKeycloakOrganizationId === null
+							? null
+							: stringToKeycloakId(funderKeycloakOrganizationId),
+				});
+				await createPermissionGrant(db, adminAuthContext, {
+					granteeType: PermissionGrantGranteeType.ALL_FUNDERS,
+					contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+					changemakerId: changemaker.id,
+					scope: [PermissionGrantEntityType.CHANGEMAKER],
+					verbs: [PermissionGrantVerb.VIEW],
+				});
+				const testUser = await loadTestUser(db);
+				await createEphemeralUserGroupAssociation(db, null, {
+					userKeycloakUserId: testUser.keycloakUserId,
+					userGroupKeycloakOrganizationId: stringToKeycloakId(
+						userGroupKeycloakOrganizationId,
+					),
+					notAfter,
+				});
+				return await hasChangemakerPermission(db, getAuthContext(testUser), {
+					changemakerId: changemaker.id,
+					permission: PermissionGrantVerb.VIEW,
+					scope: PermissionGrantEntityType.CHANGEMAKER,
+				});
+			};
+
+			it('grants permission to a member of a funder user group', async () => {
+				const funderOrgId = '4a7b0c1e-8f3d-4e2a-9b6c-1d2e3f4a5b6c';
+				const allowed = await canViewChangemakerViaAllFundersGrant(
+					funderOrgId,
+					anHourFromNow(),
+					funderOrgId,
+				);
+				expect(allowed).toBe(true);
+			});
+
+			it('does not grant permission to a member of a non-funder user group', async () => {
+				const allowed = await canViewChangemakerViaAllFundersGrant(
+					'5b8c1d2f-9a4e-4f3b-8c7d-2e3f4a5b6c7d',
+					anHourFromNow(),
+					null,
+				);
+				expect(allowed).toBe(false);
+			});
+
+			it('does not grant permission when the funder user group association has expired', async () => {
+				const funderOrgId = '6c9d2e3a-0b5f-4a4c-9d8e-3f4a5b6c7d8e';
+				const allowed = await canViewChangemakerViaAllFundersGrant(
+					funderOrgId,
+					anHourAgo(),
+					funderOrgId,
+				);
+				expect(allowed).toBe(false);
 			});
 		});
 	});

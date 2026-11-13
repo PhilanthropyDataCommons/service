@@ -38,7 +38,8 @@ const granteeKeyProperties = {
 	},
 } as const satisfies Omit<
 	Record<PermissionGrantGranteeType, { keyName: string }>,
-	PermissionGrantGranteeType.AUTHENTICATED_USERS
+	| PermissionGrantGranteeType.AUTHENTICATED_USERS
+	| PermissionGrantGranteeType.ALL_FUNDERS
 >;
 
 type PermissionGrantKeyedGranteeType = keyof typeof granteeKeyProperties;

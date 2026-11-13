@@ -173,13 +173,23 @@ funder, data provider, or other changemaker entirely.
 
 The PDC permission system uses four concepts:
 
-- **Grantee**: The user or group receiving the permission (identified by
-  Keycloak UUID)
+- **Grantee**: Who receives the permission (see Grantee Types below)
 - **Context**: The entity the permission is granted against (e.g., "changemaker
   foo" or "funder bar")
 - **Verb**: The action being permitted (see Available Verbs below)
 - **Scope**: The type of data the permission enables access to (e.g.,
   `proposal`, `changemaker`)
+
+### Grantee Types
+
+A grant's `granteeType` says who receives the permission:
+
+| Grantee type       | Who receives the permission                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------------------------------- |
+| user               | The user identified by `granteeUserKeycloakUserId`                                                              |
+| userGroup          | Members of the user group identified by `granteeKeycloakOrganizationId`                                         |
+| allFunders         | Members of any user group associated with a funder (a funder whose `keycloakOrganizationId` is that user group) |
+| authenticatedUsers | Every authenticated user                                                                                        |
 
 ### Available Verbs
 
@@ -275,8 +285,8 @@ Resolution applies the same semantics as enforcement:
   funder: `funder`, `opportunity`,
   `applicationForm`, `proposal`, `proposalFieldValue`, `source`,
   `terminologySet`). The literal `any` scope is never emitted.
-- Grants held via user group membership and grants to all authenticated users
-  are included.
+- Grants held via user group membership, grants to all funders, and grants to
+  all authenticated users are included.
 - Administrators resolve to every verb at every native scope.
 
 Changemakers and funders are permission leaves, so only grants made directly

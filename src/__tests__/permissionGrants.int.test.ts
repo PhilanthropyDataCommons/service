@@ -633,6 +633,40 @@ describe('/permissionGrants', () => {
 			});
 		});
 
+		it('filters by grantee organization', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const changemaker = await createTestChangemaker(db, authContext);
+			const organizationId = '0d9f7d93-2b7e-4f63-9c2a-4b5c7a1e8f10';
+			await createTestPermissionGrant(db, authContext);
+			const organizationGrant = await createTestPermissionGrant(
+				db,
+				authContext,
+				{
+					granteeType: PermissionGrantGranteeType.USER_GROUP,
+					granteeKeycloakOrganizationId: stringToKeycloakId(organizationId),
+					contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+					changemakerId: changemaker.id,
+					scope: [PermissionGrantEntityType.CHANGEMAKER],
+					verbs: [PermissionGrantVerb.VIEW],
+				},
+			);
+
+			const response = await agent
+				.get(`/permissionGrants?granteeOrganization=${organizationId}`)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [
+					{
+						id: organizationGrant.id,
+						granteeKeycloakOrganizationId: organizationId,
+					},
+				],
+			});
+		});
+
 		it('returns 400 if an invalid contextEntityType filter is provided', async () => {
 			const response = await agent
 				.get('/permissionGrants?contextEntityType=bogus')

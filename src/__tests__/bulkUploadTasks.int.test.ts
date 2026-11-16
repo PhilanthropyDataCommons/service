@@ -573,6 +573,7 @@ describe('/tasks/bulkUploads', () => {
 				undefined,
 				undefined,
 				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);

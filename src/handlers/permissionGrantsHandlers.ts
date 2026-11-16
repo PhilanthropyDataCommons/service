@@ -38,6 +38,7 @@ import {
 	extractCreatedByParameters,
 	extractDataProviderParameters,
 	extractFunderParameters,
+	extractGranteeOrganizationParameters,
 	extractGranteeTypeParameters,
 	extractGranteeUserParameters,
 	extractPaginationParameters,
@@ -159,6 +160,8 @@ const getPermissionGrants = async (
 	const { scope } = extractScopeParameters(req);
 	const { createdBy } = extractCreatedByParameters(req);
 	const { granteeUserKeycloakUserId } = extractGranteeUserParameters(req);
+	const { granteeKeycloakOrganizationId } =
+		extractGranteeOrganizationParameters(req);
 
 	const contextEntityFilters = [
 		changemakerId,
@@ -186,6 +189,7 @@ const getPermissionGrants = async (
 		scope,
 		createdBy,
 		granteeUserKeycloakUserId,
+		granteeKeycloakOrganizationId,
 		limit,
 		offset,
 	);

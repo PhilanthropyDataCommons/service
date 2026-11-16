@@ -212,6 +212,7 @@ describe('/dataProviders', () => {
 				undefined,
 				undefined,
 				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);
@@ -249,6 +250,7 @@ describe('/dataProviders', () => {
 				undefined,
 				undefined,
 				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);
@@ -261,6 +263,7 @@ describe('/dataProviders', () => {
 			const after = await loadPermissionGrantBundle(
 				db,
 				systemUserAuthContext,
+				undefined,
 				undefined,
 				undefined,
 				undefined,

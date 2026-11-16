@@ -51,6 +51,12 @@ WITH
 					permission_grants.grantee_user_keycloak_user_id
 					= :granteeUserKeycloakUserId
 			END
+			AND CASE
+				WHEN :granteeKeycloakOrganizationId::uuid IS NULL THEN TRUE
+				ELSE
+					permission_grants.grantee_keycloak_organization_id
+					= :granteeKeycloakOrganizationId
+			END
 	),
 
 	entry_count AS (

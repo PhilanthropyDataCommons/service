@@ -5,6 +5,7 @@ export * from './extractContextEntityTypeParameters';
 export * from './extractCreatedByParameters';
 export * from './extractDataProviderParameters';
 export * from './extractFunderParameters';
+export * from './extractGranteeOrganizationParameters';
 export * from './extractGranteeTypeParameters';
 export * from './extractGranteeUserParameters';
 export * from './extractIsCollaborativeParameters';

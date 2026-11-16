@@ -45,6 +45,12 @@ WITH
 				WHEN :createdBy::uuid IS NULL THEN TRUE
 				ELSE permission_grants.created_by = :createdBy
 			END
+			AND CASE
+				WHEN :granteeUserKeycloakUserId::uuid IS NULL THEN TRUE
+				ELSE
+					permission_grants.grantee_user_keycloak_user_id
+					= :granteeUserKeycloakUserId
+			END
 	),
 
 	entry_count AS (

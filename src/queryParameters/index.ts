@@ -6,6 +6,7 @@ export * from './extractCreatedByParameters';
 export * from './extractDataProviderParameters';
 export * from './extractFunderParameters';
 export * from './extractGranteeTypeParameters';
+export * from './extractGranteeUserParameters';
 export * from './extractIsCollaborativeParameters';
 export * from './extractKeycloakUserIdParameters';
 export * from './extractPaginationParameters';

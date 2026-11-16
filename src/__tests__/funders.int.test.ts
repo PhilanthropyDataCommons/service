@@ -719,6 +719,7 @@ describe('/funders', () => {
 				undefined,
 				undefined,
 				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);
@@ -757,6 +758,7 @@ describe('/funders', () => {
 				undefined,
 				undefined,
 				undefined,
+				undefined,
 				NO_LIMIT,
 				NO_OFFSET,
 			);
@@ -769,6 +771,7 @@ describe('/funders', () => {
 			const after = await loadPermissionGrantBundle(
 				db,
 				systemUserAuthContext,
+				undefined,
 				undefined,
 				undefined,
 				undefined,

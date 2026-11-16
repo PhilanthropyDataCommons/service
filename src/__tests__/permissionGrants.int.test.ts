@@ -572,6 +572,67 @@ describe('/permissionGrants', () => {
 			});
 		});
 
+		it('filters by grantee user', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const granteeUser = await createTestUser(db, null);
+			const changemaker = await createTestChangemaker(db, authContext);
+			await createTestPermissionGrant(db, authContext);
+			const granteeUserGrant = await createTestPermissionGrant(
+				db,
+				authContext,
+				{
+					granteeType: PermissionGrantGranteeType.USER,
+					granteeUserKeycloakUserId: granteeUser.keycloakUserId,
+					contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+					changemakerId: changemaker.id,
+					scope: [PermissionGrantEntityType.CHANGEMAKER],
+					verbs: [PermissionGrantVerb.VIEW],
+				},
+			);
+
+			const response = await agent
+				.get(
+					`/permissionGrants?granteeUser=${nonNullKeycloakIdToString(granteeUser.keycloakUserId)}`,
+				)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [{ id: granteeUserGrant.id }],
+			});
+		});
+
+		it('filters by grantee user when given me', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const otherUser = await createTestUser(db, null);
+			const changemaker = await createTestChangemaker(db, authContext);
+			const testUserGrant = await createTestPermissionGrant(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: otherUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get('/permissionGrants?granteeUser=me')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [
+					{
+						id: testUserGrant.id,
+						granteeUserKeycloakUserId: testUserKeycloakUserId,
+					},
+				],
+			});
+		});
+
 		it('returns 400 if an invalid contextEntityType filter is provided', async () => {
 			const response = await agent
 				.get('/permissionGrants?contextEntityType=bogus')
@@ -583,6 +644,14 @@ describe('/permissionGrants', () => {
 		it('returns 400 if an invalid scope filter is provided', async () => {
 			const response = await agent
 				.get('/permissionGrants?scope=bogus')
+				.set(adminUserAuthHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({ name: 'InputValidationError' });
+		});
+
+		it('returns 400 if an invalid grantee user filter is provided', async () => {
+			const response = await agent
+				.get('/permissionGrants?granteeUser=not-a-uuid')
 				.set(adminUserAuthHeader)
 				.expect(400);
 			expect(response.body).toMatchObject({ name: 'InputValidationError' });

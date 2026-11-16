@@ -21,6 +21,7 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 		contextEntityType: PermissionGrantEntityType | undefined,
 		scope: PermissionGrantEntityType | undefined,
 		createdBy: KeycloakId | undefined,
+		granteeUserKeycloakUserId: KeycloakId | undefined,
 	]
 >('permissionGrants.selectWithPagination', [
 	'changemakerId',
@@ -32,6 +33,7 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 	'contextEntityType',
 	'scope',
 	'createdBy',
+	'granteeUserKeycloakUserId',
 ]);
 
 export { loadPermissionGrantBundle };

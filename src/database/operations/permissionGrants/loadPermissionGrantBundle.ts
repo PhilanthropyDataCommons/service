@@ -5,8 +5,10 @@ import type {
 	PermissionGrant,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
+	PermissionGrantSortField,
 	PermissionGrantVerb,
 	ShortCode,
+	SortDirection,
 } from '../../../types';
 
 const loadPermissionGrantBundle = generateLoadBundleOperation<
@@ -23,6 +25,8 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 		createdBy: KeycloakId | undefined,
 		granteeUserKeycloakUserId: KeycloakId | undefined,
 		granteeKeycloakOrganizationId: KeycloakId | undefined,
+		sortField: PermissionGrantSortField | undefined,
+		sortDirection: SortDirection | undefined,
 	]
 >('permissionGrants.selectWithPagination', [
 	'changemakerId',
@@ -36,6 +40,8 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 	'createdBy',
 	'granteeUserKeycloakUserId',
 	'granteeKeycloakOrganizationId',
+	'sortField',
+	'sortDirection',
 ]);
 
 export { loadPermissionGrantBundle };

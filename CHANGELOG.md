@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added filtering (`contextEntityType`, `scope`, `createdBy`, `granteeUser`, `granteeOrganization`) to `GET /permissionGrants`.
+- Added filtering (`contextEntityType`, `scope`, `createdBy`, `granteeUser`, `granteeOrganization`) and sorting (`_sort`) to `GET /permissionGrants`.
 
 ### Changed
 

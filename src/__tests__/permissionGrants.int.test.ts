@@ -478,6 +478,38 @@ describe('/permissionGrants', () => {
 			});
 		});
 
+		it('filters by context entity type', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const funder = await createTestFunder(db, authContext);
+			await createTestPermissionGrant(db, authContext);
+			const funderGrant = await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const response = await agent
+				.get('/permissionGrants?contextEntityType=funder')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [{ id: funderGrant.id, contextEntityType: 'funder' }],
+			});
+		});
+
+		it('returns 400 if an invalid contextEntityType filter is provided', async () => {
+			const response = await agent
+				.get('/permissionGrants?contextEntityType=bogus')
+				.set(adminUserAuthHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({ name: 'InputValidationError' });
+		});
+
 		it('returns 400 if an invalid granteeType filter is provided', async () => {
 			const response = await agent
 				.get('/permissionGrants?granteeType=bogus')

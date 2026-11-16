@@ -33,6 +33,10 @@ WITH
 				WHEN :verb::permission_grant_verb_t IS NULL THEN TRUE
 				ELSE :verb::permission_grant_verb_t = any(permission_grants.verbs)
 			END
+			AND CASE
+				WHEN :contextEntityType::permission_grant_entity_type_t IS NULL THEN TRUE
+				ELSE permission_grants.context_entity_type = :contextEntityType
+			END
 	),
 
 	entry_count AS (

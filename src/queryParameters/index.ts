@@ -1,6 +1,7 @@
 export * from './extractBaseFieldSensitivityClassificationsParameter';
 export * from './extractChangemakerFieldValueBatchParameters';
 export * from './extractChangemakerParameters';
+export * from './extractContextEntityTypeParameters';
 export * from './extractCreatedByParameters';
 export * from './extractDataProviderParameters';
 export * from './extractFunderParameters';

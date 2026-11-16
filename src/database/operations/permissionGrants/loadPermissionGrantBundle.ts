@@ -2,6 +2,7 @@ import { generateLoadBundleOperation } from '../generators';
 import type {
 	Id,
 	PermissionGrant,
+	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
 	PermissionGrantVerb,
 	ShortCode,
@@ -16,6 +17,7 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 		proposalId: Id | undefined,
 		granteeType: PermissionGrantGranteeType | undefined,
 		verb: PermissionGrantVerb | undefined,
+		contextEntityType: PermissionGrantEntityType | undefined,
 	]
 >('permissionGrants.selectWithPagination', [
 	'changemakerId',
@@ -24,6 +26,7 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 	'proposalId',
 	'granteeType',
 	'verb',
+	'contextEntityType',
 ]);
 
 export { loadPermissionGrantBundle };

@@ -34,6 +34,7 @@ import {
 } from '../errors';
 import {
 	extractChangemakerParameters,
+	extractContextEntityTypeParameters,
 	extractDataProviderParameters,
 	extractFunderParameters,
 	extractGranteeTypeParameters,
@@ -151,6 +152,7 @@ const getPermissionGrants = async (
 	const { proposalId } = extractProposalParameters(req);
 	const { granteeType } = extractGranteeTypeParameters(req);
 	const { verb } = extractVerbParameters(req);
+	const { contextEntityType } = extractContextEntityTypeParameters(req);
 
 	const contextEntityFilters = [
 		changemakerId,
@@ -174,6 +176,7 @@ const getPermissionGrants = async (
 		proposalId,
 		granteeType,
 		verb,
+		contextEntityType,
 		limit,
 		offset,
 	);

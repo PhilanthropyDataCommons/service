@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `GET /permissionGrants` now accepts `contextEntityType`, `scope`, `createdBy`, `granteeUser`, and `granteeOrganization` filters. `createdBy` and `granteeUser` also accept `me` for the authenticated user.
+- `GET /permissionGrants` now accepts a `_sort` parameter (prefix with `-` for descending) for sorting by `id`, `createdAt`, `granteeType`, `contextEntityType`, or `createdByUserName`.
 
 ## 0.43.0 2026-11-19
 

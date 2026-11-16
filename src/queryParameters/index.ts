@@ -11,6 +11,7 @@ export * from './extractGranteeUserParameters';
 export * from './extractIsCollaborativeParameters';
 export * from './extractKeycloakUserIdParameters';
 export * from './extractPaginationParameters';
+export * from './extractPermissionGrantSortParameters';
 export * from './extractProposalParameters';
 export * from './extractScopeParameters';
 export * from './extractSearchParameters';

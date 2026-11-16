@@ -42,6 +42,9 @@
 			},
 			{
 				"$ref": "../components/parameters/createdByParam.json"
+			},
+			{
+				"$ref": "../components/parameters/granteeUserParam.json"
 			}
 		],
 		"responses": {

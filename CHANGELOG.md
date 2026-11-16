@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `GET /permissionGrants` now accepts `contextEntityType`, `scope`, and `createdBy` filters. `createdBy` also accepts `me` for the authenticated user.
+- `GET /permissionGrants` now accepts `contextEntityType`, `scope`, `createdBy`, and `granteeUser` filters. `createdBy` and `granteeUser` also accept `me` for the authenticated user.
 
 ## 0.43.0 2026-11-19
 

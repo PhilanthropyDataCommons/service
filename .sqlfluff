@@ -77,3 +77,4 @@ initiativeId = 1
 initiativeFieldValueId = 1
 scope = 'funder'
 granteeUserKeycloakUserId = '00000000-0000-0000-0000-000000000000'
+granteeKeycloakOrganizationId = '00000000-0000-0000-0000-000000000000'

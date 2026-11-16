@@ -54,6 +54,7 @@ const loadAllPermissionGrants = async (): Promise<Bundle<PermissionGrant>> => {
 		undefined,
 		undefined,
 		undefined,
+		undefined,
 		NO_LIMIT,
 		NO_OFFSET,
 	);

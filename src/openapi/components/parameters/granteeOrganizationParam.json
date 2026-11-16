@@ -1,0 +1,10 @@
+{
+	"schema": {
+		"type": "string",
+		"format": "uuid"
+	},
+	"in": "query",
+	"name": "granteeOrganization",
+	"required": false,
+	"description": "Applies a filter based on permission grant grantee organization."
+}

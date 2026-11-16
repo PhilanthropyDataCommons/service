@@ -37,6 +37,10 @@ WITH
 				WHEN :contextEntityType::permission_grant_entity_type_t IS NULL THEN TRUE
 				ELSE permission_grants.context_entity_type = :contextEntityType
 			END
+			AND CASE
+				WHEN :scope::permission_grant_entity_type_t IS NULL THEN TRUE
+				ELSE :scope::permission_grant_entity_type_t = any(permission_grants.scope)
+			END
 	),
 
 	entry_count AS (

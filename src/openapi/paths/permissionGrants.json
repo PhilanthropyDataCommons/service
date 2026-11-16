@@ -36,6 +36,9 @@
 			},
 			{
 				"$ref": "../components/parameters/contextEntityTypeParam.json"
+			},
+			{
+				"$ref": "../components/parameters/scopeParam.json"
 			}
 		],
 		"responses": {

@@ -10,5 +10,6 @@ export * from './extractIsCollaborativeParameters';
 export * from './extractKeycloakUserIdParameters';
 export * from './extractPaginationParameters';
 export * from './extractProposalParameters';
+export * from './extractScopeParameters';
 export * from './extractSearchParameters';
 export * from './extractVerbParameters';

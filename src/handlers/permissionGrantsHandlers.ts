@@ -40,6 +40,7 @@ import {
 	extractGranteeTypeParameters,
 	extractPaginationParameters,
 	extractProposalParameters,
+	extractScopeParameters,
 	extractVerbParameters,
 } from '../queryParameters';
 import {
@@ -153,6 +154,7 @@ const getPermissionGrants = async (
 	const { granteeType } = extractGranteeTypeParameters(req);
 	const { verb } = extractVerbParameters(req);
 	const { contextEntityType } = extractContextEntityTypeParameters(req);
+	const { scope } = extractScopeParameters(req);
 
 	const contextEntityFilters = [
 		changemakerId,
@@ -177,6 +179,7 @@ const getPermissionGrants = async (
 		granteeType,
 		verb,
 		contextEntityType,
+		scope,
 		limit,
 		offset,
 	);

@@ -75,3 +75,4 @@ granteeType = 'user'
 verb = 'view'
 initiativeId = 1
 initiativeFieldValueId = 1
+scope = 'funder'

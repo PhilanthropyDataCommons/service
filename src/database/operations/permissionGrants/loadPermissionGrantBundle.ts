@@ -18,6 +18,7 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 		granteeType: PermissionGrantGranteeType | undefined,
 		verb: PermissionGrantVerb | undefined,
 		contextEntityType: PermissionGrantEntityType | undefined,
+		scope: PermissionGrantEntityType | undefined,
 	]
 >('permissionGrants.selectWithPagination', [
 	'changemakerId',
@@ -27,6 +28,7 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 	'granteeType',
 	'verb',
 	'contextEntityType',
+	'scope',
 ]);
 
 export { loadPermissionGrantBundle };

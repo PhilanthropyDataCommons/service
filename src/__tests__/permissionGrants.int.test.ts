@@ -502,9 +502,55 @@ describe('/permissionGrants', () => {
 			});
 		});
 
+		it('filters by scope, matching grants whose scope includes the entity type', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const funder = await createTestFunder(db, authContext);
+			await createTestPermissionGrant(db, authContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: funder.shortCode,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const sourceScopedGrant = await createTestPermissionGrant(
+				db,
+				authContext,
+				{
+					granteeType: PermissionGrantGranteeType.USER,
+					granteeUserKeycloakUserId: getTestUserKeycloakUserId(),
+					contextEntityType: PermissionGrantEntityType.FUNDER,
+					funderShortCode: funder.shortCode,
+					scope: [
+						PermissionGrantEntityType.FUNDER,
+						PermissionGrantEntityType.SOURCE,
+					],
+					verbs: [PermissionGrantVerb.VIEW],
+				},
+			);
+
+			const response = await agent
+				.get('/permissionGrants?scope=source')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(response.body).toMatchObject({
+				total: 1,
+				entries: [{ id: sourceScopedGrant.id, scope: ['funder', 'source'] }],
+			});
+		});
+
 		it('returns 400 if an invalid contextEntityType filter is provided', async () => {
 			const response = await agent
 				.get('/permissionGrants?contextEntityType=bogus')
+				.set(adminUserAuthHeader)
+				.expect(400);
+			expect(response.body).toMatchObject({ name: 'InputValidationError' });
+		});
+
+		it('returns 400 if an invalid scope filter is provided', async () => {
+			const response = await agent
+				.get('/permissionGrants?scope=bogus')
 				.set(adminUserAuthHeader)
 				.expect(400);
 			expect(response.body).toMatchObject({ name: 'InputValidationError' });

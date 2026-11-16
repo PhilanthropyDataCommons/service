@@ -1,6 +1,7 @@
 import { generateLoadBundleOperation } from '../generators';
 import type {
 	Id,
+	KeycloakId,
 	PermissionGrant,
 	PermissionGrantEntityType,
 	PermissionGrantGranteeType,
@@ -19,6 +20,7 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 		verb: PermissionGrantVerb | undefined,
 		contextEntityType: PermissionGrantEntityType | undefined,
 		scope: PermissionGrantEntityType | undefined,
+		createdBy: KeycloakId | undefined,
 	]
 >('permissionGrants.selectWithPagination', [
 	'changemakerId',
@@ -29,6 +31,7 @@ const loadPermissionGrantBundle = generateLoadBundleOperation<
 	'verb',
 	'contextEntityType',
 	'scope',
+	'createdBy',
 ]);
 
 export { loadPermissionGrantBundle };

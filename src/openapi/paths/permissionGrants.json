@@ -39,6 +39,9 @@
 			},
 			{
 				"$ref": "../components/parameters/scopeParam.json"
+			},
+			{
+				"$ref": "../components/parameters/createdByParam.json"
 			}
 		],
 		"responses": {

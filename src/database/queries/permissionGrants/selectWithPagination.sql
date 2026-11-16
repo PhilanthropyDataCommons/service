@@ -41,6 +41,10 @@ WITH
 				WHEN :scope::permission_grant_entity_type_t IS NULL THEN TRUE
 				ELSE :scope::permission_grant_entity_type_t = any(permission_grants.scope)
 			END
+			AND CASE
+				WHEN :createdBy::uuid IS NULL THEN TRUE
+				ELSE permission_grants.created_by = :createdBy
+			END
 	),
 
 	entry_count AS (

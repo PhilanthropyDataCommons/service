@@ -29,6 +29,7 @@ import {
 	createTestPermissionGrant,
 	createTestProposal,
 	createTestSource,
+	createTestUser,
 } from '../test/factories';
 import {
 	mockJwt as authHeader,
@@ -537,6 +538,37 @@ describe('/permissionGrants', () => {
 			expect(response.body).toMatchObject({
 				total: 1,
 				entries: [{ id: sourceScopedGrant.id, scope: ['funder', 'source'] }],
+			});
+		});
+
+		it('filters by creator', async () => {
+			const db = getDatabase();
+			const authContext = await getTestAuthContext(db);
+			const otherUser = await createTestUser(db, null);
+			const testUserGrant = await createTestPermissionGrant(db, authContext);
+			const otherUserGrant = await createTestPermissionGrant(
+				db,
+				getAuthContext(otherUser),
+			);
+
+			const otherUserResponse = await agent
+				.get(
+					`/permissionGrants?createdBy=${nonNullKeycloakIdToString(otherUser.keycloakUserId)}`,
+				)
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(otherUserResponse.body).toMatchObject({
+				total: 1,
+				entries: [{ id: otherUserGrant.id }],
+			});
+
+			const meResponse = await agent
+				.get('/permissionGrants?createdBy=me')
+				.set(adminUserAuthHeader)
+				.expect(200);
+			expect(meResponse.body).toMatchObject({
+				total: 1,
+				entries: [{ id: testUserGrant.id }],
 			});
 		});
 

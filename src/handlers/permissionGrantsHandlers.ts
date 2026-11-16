@@ -35,6 +35,7 @@ import {
 import {
 	extractChangemakerParameters,
 	extractContextEntityTypeParameters,
+	extractCreatedByParameters,
 	extractDataProviderParameters,
 	extractFunderParameters,
 	extractGranteeTypeParameters,
@@ -155,6 +156,7 @@ const getPermissionGrants = async (
 	const { verb } = extractVerbParameters(req);
 	const { contextEntityType } = extractContextEntityTypeParameters(req);
 	const { scope } = extractScopeParameters(req);
+	const { createdBy } = extractCreatedByParameters(req);
 
 	const contextEntityFilters = [
 		changemakerId,
@@ -180,6 +182,7 @@ const getPermissionGrants = async (
 		verb,
 		contextEntityType,
 		scope,
+		createdBy,
 		limit,
 		offset,
 	);

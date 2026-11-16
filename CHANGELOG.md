@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `GET /permissionGrants` now accepts a `contextEntityType` filter.
+- `GET /permissionGrants` now accepts `contextEntityType` and `scope` filters.
 
 ## 0.43.0 2026-11-19
 

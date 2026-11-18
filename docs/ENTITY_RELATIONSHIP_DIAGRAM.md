@@ -218,6 +218,12 @@ erDiagram
     datetime disabledAt
     datetime createdAt
   }
+  EphemeralAuthContext {
+    string tokenId PK
+    uuid userKeycloakUserId FK
+    datetime notAfter
+    datetime createdAt
+  }
   DefaultPermissionGrant {
     int id PK
     string granteeType
@@ -312,6 +318,7 @@ erDiagram
   DefaultPermissionGrant }o--|| User : "is created by"
   User ||--o{ OrganizationMembership : "is a member of"
   Organization ||--o{ OrganizationMembership : "has users"
+  User ||--o{ EphemeralAuthContext : "acts through"
   Changemaker ||--o{ FiscalSponsorship : "sponsors"
   Changemaker ||--o{ FiscalSponsorship : "is sponsored by"
 ```

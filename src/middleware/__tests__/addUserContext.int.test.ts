@@ -1,6 +1,7 @@
 import { addUserContext } from '../addUserContext';
 import {
 	getDatabase,
+	loadEphemeralAuthContextByTokenId,
 	loadUserByKeycloakUserId,
 	loadTableMetrics,
 	loadEphemeralUserGroupAssociationsByUserKeycloakUserId,
@@ -11,7 +12,12 @@ import {
 	expectTimestamp,
 } from '../../test/asymettricMatchers';
 import { stringToKeycloakId } from '../../types';
-import { InputValidationError, UnauthorizedError } from '../../errors';
+import {
+	InputValidationError,
+	NoDataReturnedError,
+	NotFoundError,
+	UnauthorizedError,
+} from '../../errors';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import type { AuthenticatedRequest } from '../../types';
 
@@ -46,6 +52,7 @@ describe('addUserContext', () => {
 			sub: '123e4567-e89b-12d3-a456-426614174000',
 			name: 'Olivia',
 			exp: Math.round(new Date().getTime() / 1000) + 3600,
+			jti: 'oliviaToken',
 		};
 
 		loadTableMetrics(db, 'users')
@@ -97,6 +104,7 @@ describe('addUserContext', () => {
 			sub: mockSub,
 			name: 'Sabine',
 			exp: mockAuthExp,
+			jti: 'sabineToken',
 			organizations: {
 				myOrganization: { id: '47d406ad-5e50-42d4-88f1-f87947a3e314' },
 			},
@@ -138,6 +146,7 @@ describe('addUserContext', () => {
 			sub: mockSub,
 			name: mockName,
 			exp: mockAuthExp,
+			jti: 'provoloneToken',
 			organizations: {
 				myOrganization: { id: myOrganizationId },
 				myOtherOrganization: { id: myOtherOrganizationId },
@@ -198,6 +207,157 @@ describe('addUserContext', () => {
 			.catch((e: unknown) => {
 				done(e);
 			});
+	});
+
+	it('records an ephemeral auth context that lasts 180 seconds from the request', (done) => {
+		const db = getDatabase();
+		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
+		const lifetimeMs = 180 * 1000;
+		const requestedAt = new Date().getTime();
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			sub: mockSub,
+			name: 'Provolone',
+			exp: Math.round(requestedAt / 1000) + 3600,
+			jti: 'provoloneToken',
+		};
+
+		const runAssertions = async (err: unknown) => {
+			expect(err).toBe(undefined);
+			const authContext = await loadEphemeralAuthContextByTokenId(
+				db,
+				null,
+				stringToKeycloakId(mockSub),
+				'provoloneToken',
+			);
+			expect(authContext).toEqual({
+				tokenId: 'provoloneToken',
+				userKeycloakUserId: mockSub,
+				notAfter: expectTimestamp(),
+				createdAt: expectTimestamp(),
+			});
+			const notAfter = new Date(authContext.notAfter).getTime();
+			expect(notAfter).toBeGreaterThanOrEqual(requestedAt + lifetimeMs);
+			expect(notAfter).toBeLessThanOrEqual(new Date().getTime() + lifetimeMs);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addUserContext(req, res, nextMock);
+	});
+
+	it('extends the ephemeral auth context on each request with the same token', (done) => {
+		const db = getDatabase();
+		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
+		const auth = {
+			sub: mockSub,
+			name: 'Quentin',
+			exp: Math.round(new Date().getTime() / 1000) + 3600,
+			jti: 'quentinToken',
+		};
+		const firstReq = getMockRequest() as AuthenticatedRequest;
+		const secondReq = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		firstReq.auth = auth;
+		secondReq.auth = auth;
+		const lapsedNotAfter = '2000-01-01T00:00:00.000Z';
+
+		const runAssertions = async (err: unknown) => {
+			expect(err).toBe(undefined);
+			const authContext = await loadEphemeralAuthContextByTokenId(
+				db,
+				null,
+				stringToKeycloakId(mockSub),
+				'quentinToken',
+			);
+			expect(new Date(authContext.notAfter).getTime()).toBeGreaterThan(
+				new Date().getTime(),
+			);
+		};
+
+		const firstNext = (firstErr?: unknown): void => {
+			if (firstErr !== undefined) {
+				done(firstErr);
+				return;
+			}
+			db.query(
+				'UPDATE ephemeral_auth_contexts SET not_after = :notAfter WHERE token_id = :tokenId;',
+				{ notAfter: lapsedNotAfter, tokenId: 'quentinToken' },
+			)
+				.then(() => {
+					addUserContext(
+						secondReq,
+						res,
+						generateNextWithAssertions(runAssertions, done),
+					);
+				})
+				.catch((e: unknown) => {
+					done(e);
+				});
+		};
+		addUserContext(firstReq, res, firstNext);
+	});
+
+	it('passes an error when the token has no jti', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			sub: '123e4567-e89b-12d3-a456-426614174000',
+			name: 'Rhoda',
+			exp: Math.round(new Date().getTime() / 1000) + 3600,
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBeInstanceOf(UnauthorizedError);
+			expect(req.user).toBe(undefined);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addUserContext(req, res, nextMock);
+	});
+
+	it('passes an error and records nothing when a different user presents a jti that was already recorded', (done) => {
+		const db = getDatabase();
+		const firstReq = getMockRequest() as AuthenticatedRequest;
+		const secondReq = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		firstReq.auth = {
+			sub: '123e4567-e89b-12d3-a456-426614174000',
+			name: 'Sven',
+			exp: Math.round(new Date().getTime() / 1000) + 3600,
+			jti: 'sharedToken',
+		};
+		secondReq.auth = {
+			sub: '223e4567-e89b-12d3-a456-426614174000',
+			name: 'Tove',
+			exp: Math.round(new Date().getTime() / 1000) + 3600,
+			jti: 'sharedToken',
+		};
+
+		const runAssertions = async (err: unknown) => {
+			expect(err).toBeInstanceOf(NoDataReturnedError);
+			expect(secondReq.user).toBe(undefined);
+			await expect(
+				loadUserByKeycloakUserId(
+					db,
+					null,
+					stringToKeycloakId('223e4567-e89b-12d3-a456-426614174000'),
+				),
+			).rejects.toBeInstanceOf(NotFoundError);
+		};
+
+		const firstNext = (firstErr?: unknown): void => {
+			if (firstErr !== undefined) {
+				done(firstErr);
+				return;
+			}
+			addUserContext(
+				secondReq,
+				res,
+				generateNextWithAssertions(runAssertions, done),
+			);
+		};
+		addUserContext(firstReq, res, firstNext);
 	});
 
 	it('passes an error and does not creates or assign a user when an invalid keycloakUserId is provided', (done) => {

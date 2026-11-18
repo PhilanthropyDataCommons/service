@@ -140,6 +140,44 @@ describe('addUserContext', () => {
 			});
 	});
 
+	it('creates ephemeral user group associations that never expire when the token has no expiration', (done) => {
+		const db = getDatabase();
+		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
+		const myOrganizationId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			sub: mockSub,
+			name: 'Ursula',
+			organizations: {
+				myOrganization: { id: myOrganizationId },
+			},
+		};
+
+		const runAssertions = async (err: unknown) => {
+			expect(err).toBe(undefined);
+			const ephemeralUserGroupAssociations =
+				await loadEphemeralUserGroupAssociationsByUserKeycloakUserId(
+					db,
+					null,
+					stringToKeycloakId(mockSub),
+					undefined,
+					undefined,
+				);
+			expect(ephemeralUserGroupAssociations.entries).toEqual([
+				{
+					createdAt: expectTimestamp(),
+					userGroupKeycloakOrganizationId: myOrganizationId,
+					userKeycloakUserId: mockSub,
+					notAfter: 'infinity',
+				},
+			]);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addUserContext(req, res, nextMock);
+	});
+
 	it('passes an error and does not creates or assign a user when an invalid keycloakUserId is provided', (done) => {
 		const db = getDatabase();
 		const req = getMockRequest() as AuthenticatedRequest;

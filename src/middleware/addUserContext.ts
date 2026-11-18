@@ -20,9 +20,6 @@ import { MS_PER_SECOND } from '../constants';
 import type { Request, NextFunction, Response } from 'express';
 import type { AuthenticatedRequest } from '../types';
 
-const MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS = 180;
-const JWT_NEVER_EXPIRES = 0;
-
 const addUserContext = (
 	req: Request,
 	res: Response,
@@ -32,7 +29,7 @@ const addUserContext = (
 	const keycloakUserId = getAuthSubFromRequest(req);
 	const keycloakUserName = getAuthNameFromRequest(req);
 	const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
-	const jwtExpiration = getJwtExpFromRequest(req) ?? JWT_NEVER_EXPIRES;
+	const jwtExpiration = getJwtExpFromRequest(req);
 	const jwtIssuedAt = getJwtIatFromRequest(req);
 	const systemUser = getSystemUser();
 	if (
@@ -71,12 +68,10 @@ const addUserContext = (
 						await createEphemeralUserGroupAssociation(db, null, {
 							userKeycloakUserId: keycloakUserId,
 							userGroupKeycloakOrganizationId: keycloakOrganizationId,
-							notAfter: new Date(
-								Math.max(
-									jwtExpiration,
-									MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS,
-								) * MS_PER_SECOND,
-							).toISOString(),
+							notAfter:
+								jwtExpiration === null
+									? 'infinity'
+									: new Date(jwtExpiration * MS_PER_SECOND).toISOString(),
 						}),
 				);
 			Promise.all(createEphemeralUserGroupAssociationPromises)

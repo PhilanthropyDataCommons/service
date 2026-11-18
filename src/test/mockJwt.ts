@@ -1,4 +1,5 @@
 import createJWKSMock from 'mock-jwks';
+import { v4 as uuidv4 } from 'uuid';
 import { issuer } from '../auth/jwtOptions';
 import { nonNullKeycloakIdToString } from '../types';
 import { MS_PER_SECOND } from '../constants';
@@ -25,6 +26,7 @@ const getMockJwt = (
 		iss?: string;
 		organizations?: Record<string, string>;
 		iat?: number;
+		jti?: string;
 		scope?: string;
 	} = {},
 	getToken: (payload: JwtPayload) => string = mockJwks.token,
@@ -35,6 +37,7 @@ const getMockJwt = (
 		exp: aMomentAgo + AN_ARBITRARILY_LONG_TIME,
 		iat: settings.iat ?? aMomentAgo,
 		iss: settings.iss ?? issuer,
+		jti: settings.jti ?? uuidv4(),
 		sub: settings.sub,
 		aud: 'account',
 		typ: 'Bearer',

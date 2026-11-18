@@ -1,8 +1,9 @@
 import {
 	getDatabase,
+	createEphemeralUserGroupAssociation,
+	createOrUpdateEphemeralAuthContext,
 	createOrUpdateUser,
 	loadUserByKeycloakUserId,
-	createEphemeralUserGroupAssociation,
 } from '../database';
 import {
 	EMPTY_AUTH_CONTEXT_ROLES,
@@ -10,6 +11,7 @@ import {
 	getKeycloakOrganizationIdsFromRequest,
 	getJwtExpFromRequest,
 	getJwtIatFromRequest,
+	getJwtJtiFromRequest,
 	isKeycloakId,
 	keycloakIdToString,
 	stringToKeycloakId,
@@ -23,48 +25,55 @@ import { epochSecondsToIsoString } from '../time';
 import type { Request, NextFunction, Response } from 'express';
 import type { AuthenticatedRequest, KeycloakId } from '../types';
 
-const EPHEMERAL_USER_GROUP_ASSOCIATION_LIFETIME_SECONDS = 180;
+const EPHEMERAL_RECORD_LIFETIME_SECONDS = 180;
 
-const getEphemeralUserGroupAssociationExpiration = (): string =>
+const getEphemeralRecordExpiration = (): string =>
 	new Date(
-		Date.now() +
-			EPHEMERAL_USER_GROUP_ASSOCIATION_LIFETIME_SECONDS * MS_PER_SECOND,
+		Date.now() + EPHEMERAL_RECORD_LIFETIME_SECONDS * MS_PER_SECOND,
 	).toISOString();
 
 const recordAuthenticatedUser = async (
 	req: Request,
 	keycloakUserId: KeycloakId,
+	tokenId: string,
 ): Promise<void> => {
-	const db = getDatabase();
 	const jwtIssuedAt = getJwtIatFromRequest(req);
-	await createOrUpdateUser(
-		db,
-		null,
-		{
+	const notAfter = getEphemeralRecordExpiration();
+	const user = await getDatabase().transaction(async (transactionDb) => {
+		await createOrUpdateUser(
+			transactionDb,
+			null,
+			{
+				keycloakUserId,
+				keycloakUserName: getAuthNameFromRequest(req),
+			},
+			jwtIssuedAt === null ? null : epochSecondsToIsoString(jwtIssuedAt),
+		);
+		await createOrUpdateEphemeralAuthContext(transactionDb, null, {
+			tokenId,
+			userKeycloakUserId: keycloakUserId,
+			notAfter,
+		});
+		const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
+		await allNoLeaks(
+			keycloakOrganizationIds.map(
+				async (keycloakOrganizationId) =>
+					await createEphemeralUserGroupAssociation(transactionDb, null, {
+						userKeycloakUserId: keycloakUserId,
+						userGroupKeycloakOrganizationId: keycloakOrganizationId,
+						notAfter,
+					}),
+			),
+		);
+		return await loadUserByKeycloakUserId(
+			transactionDb,
+			{
+				user: { keycloakUserId },
+				role: EMPTY_AUTH_CONTEXT_ROLES,
+			},
 			keycloakUserId,
-			keycloakUserName: getAuthNameFromRequest(req),
-		},
-		jwtIssuedAt === null ? null : epochSecondsToIsoString(jwtIssuedAt),
-	);
-	const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
-	await allNoLeaks(
-		keycloakOrganizationIds.map(
-			async (keycloakOrganizationId) =>
-				await createEphemeralUserGroupAssociation(db, null, {
-					userKeycloakUserId: keycloakUserId,
-					userGroupKeycloakOrganizationId: keycloakOrganizationId,
-					notAfter: getEphemeralUserGroupAssociationExpiration(),
-				}),
-		),
-	);
-	const user = await loadUserByKeycloakUserId(
-		db,
-		{
-			user: { keycloakUserId },
-			role: EMPTY_AUTH_CONTEXT_ROLES,
-		},
-		keycloakUserId,
-	);
+		);
+	});
 	(req as AuthenticatedRequest).user = user;
 };
 
@@ -98,7 +107,13 @@ const addUserContext = (
 		return;
 	}
 
-	recordAuthenticatedUser(req, stringToKeycloakId(keycloakUserId))
+	const tokenId = getJwtJtiFromRequest(req);
+	if (tokenId === null) {
+		next(new UnauthorizedError('auth token must include a jti claim'));
+		return;
+	}
+
+	recordAuthenticatedUser(req, stringToKeycloakId(keycloakUserId), tokenId)
 		.then(() => {
 			next();
 		})
@@ -107,4 +122,4 @@ const addUserContext = (
 		});
 };
 
-export { addUserContext, EPHEMERAL_USER_GROUP_ASSOCIATION_LIFETIME_SECONDS };
+export { addUserContext, EPHEMERAL_RECORD_LIFETIME_SECONDS };

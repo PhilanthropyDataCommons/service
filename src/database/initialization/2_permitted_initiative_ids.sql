@@ -2,7 +2,7 @@ SELECT drop_function('permitted_initiative_ids');
 
 -- Returns the ids of initiatives on which the user holds `verb` at `scope`.
 CREATE FUNCTION permitted_initiative_ids(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t
@@ -20,11 +20,11 @@ CREATE FUNCTION permitted_initiative_ids(
 	WHERE pg.context_entity_type = 'initiative'
 		AND verb_set_permits_verb(pg.verbs, permitted_initiative_ids.verb)
 		AND scope_set_permits_scope(pg.scope, permitted_initiative_ids.scope)
-		AND grantee_permits_user(
+		AND grantee_permits_auth_context(
 			pg.grantee_type,
 			pg.grantee_user_keycloak_user_id,
 			pg.grantee_keycloak_organization_id,
-			permitted_initiative_ids.user_keycloak_user_id
+			permitted_initiative_ids.auth_context_id
 		)
 
 	UNION
@@ -33,7 +33,7 @@ CREATE FUNCTION permitted_initiative_ids(
 	SELECT initiatives.id
 	FROM initiatives
 	INNER JOIN permitted_changemaker_ids(
-		permitted_initiative_ids.user_keycloak_user_id,
+		permitted_initiative_ids.auth_context_id,
 		permitted_initiative_ids.user_is_admin,
 		permitted_initiative_ids.verb,
 		permitted_initiative_ids.scope

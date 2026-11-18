@@ -5,6 +5,7 @@ import type { User } from './User';
 import type { KeycloakId } from './KeycloakId';
 
 interface AuthContext {
+	authContextId: string;
 	user: User;
 	role: {
 		isAdministrator: boolean;
@@ -13,7 +14,7 @@ interface AuthContext {
 	};
 }
 
-type AuthIdentityAndRole = Pick<AuthContext, 'role'> & {
+type AuthIdentityAndRole = Pick<AuthContext, 'authContextId' | 'role'> & {
 	user: Pick<AuthContext['user'], 'keycloakUserId'>;
 };
 
@@ -26,6 +27,9 @@ const EMPTY_AUTH_CONTEXT_ROLES: AuthContext['role'] = {
 const authContextSchema: JSONSchemaType<AuthContext> = {
 	type: 'object',
 	properties: {
+		authContextId: {
+			type: 'string',
+		},
 		user: userSchema,
 		role: {
 			type: 'object',
@@ -47,10 +51,14 @@ const authContextSchema: JSONSchemaType<AuthContext> = {
 			],
 		},
 	},
-	required: ['user', 'role'],
+	required: ['authContextId', 'user', 'role'],
 };
 
 const isAuthContext = ajv.compile(authContextSchema);
+
+const getAuthContextIdFromAuthContext = (
+	req: AuthIdentityAndRole | undefined | null,
+): string | undefined => req?.authContextId;
 
 const getKeycloakUserIdFromAuthContext = (
 	req: AuthIdentityAndRole | undefined | null,
@@ -77,6 +85,7 @@ export {
 	EMPTY_AUTH_CONTEXT_ROLES,
 	authContextSchema,
 	isAuthContext,
+	getAuthContextIdFromAuthContext,
 	getKeycloakUserIdFromAuthContext,
 	getIsAdministratorFromAuthContext,
 	getCanViewUsersInKeycloakFromAuthContext,

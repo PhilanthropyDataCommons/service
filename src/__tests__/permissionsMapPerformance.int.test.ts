@@ -49,7 +49,7 @@ const seedGrantsOutsidePage = async (
 
 const measurePageBuffers = async (
 	db: TinyPg,
-	keycloakUserId: KeycloakId,
+	authContextId: string,
 ): Promise<number> => {
 	const { rows } = await db.query<ExplainRow>(
 		`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
@@ -60,10 +60,10 @@ const measurePageBuffers = async (
 				ORDER BY changemakers.id DESC
 				LIMIT ${String(PAGE_SIZE)}
 			),
-			:keycloakUserId::uuid,
+			:authContextId::text,
 			FALSE
 		)`,
-		{ keycloakUserId },
+		{ authContextId },
 	);
 	const plan = rows[0]?.['QUERY PLAN'][0]?.Plan;
 	return (
@@ -92,7 +92,10 @@ describe('resolved permissions performance', () => {
 			changemakerOutsidePage.id,
 			SMALL_GRANT_COUNT,
 		);
-		const smallTableBuffers = await measurePageBuffers(db, keycloakUserId);
+		const smallTableBuffers = await measurePageBuffers(
+			db,
+			authContext.authContextId,
+		);
 
 		await seedGrantsOutsidePage(
 			db,
@@ -100,7 +103,10 @@ describe('resolved permissions performance', () => {
 			changemakerOutsidePage.id,
 			LARGE_GRANT_COUNT - SMALL_GRANT_COUNT,
 		);
-		const largeTableBuffers = await measurePageBuffers(db, keycloakUserId);
+		const largeTableBuffers = await measurePageBuffers(
+			db,
+			authContext.authContextId,
+		);
 
 		expect(largeTableBuffers).toBeLessThan(
 			smallTableBuffers * MAX_BUFFER_GROWTH_RATIO,

@@ -7,6 +7,7 @@ import {
 	createOrUpdateUser,
 	initializeDatabase,
 	loadOrCreateS3Bucket,
+	loadSystemUser,
 	migrate,
 } from '../database';
 import {
@@ -16,6 +17,7 @@ import {
 } from './testDatabase';
 import { buildConnectionString } from './harnessFunctions';
 import {
+	createTestUserAuthContext,
 	getTestUserKeycloakUserId,
 	getTestUserKeycloakUserName,
 } from './utils';
@@ -47,10 +49,12 @@ export default async (
 		await migrate(goldDb);
 		await initializeDatabase(goldDb);
 
-		await createOrUpdateUser(goldDb, null, {
+		const { item: testUser } = await createOrUpdateUser(goldDb, null, {
 			keycloakUserId: getTestUserKeycloakUserId(),
 			keycloakUserName: getTestUserKeycloakUserName(),
 		});
+		await createTestUserAuthContext(goldDb, testUser);
+		await createTestUserAuthContext(goldDb, await loadSystemUser(goldDb, null));
 
 		await loadOrCreateS3Bucket(goldDb, null, {
 			name: S3_BUCKET,

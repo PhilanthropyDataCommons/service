@@ -4,7 +4,7 @@ INSERT INTO service_query_audit_logs (
 	query_name,
 	query_parameters
 ) VALUES (
-	:authContextKeycloakUserId,
+	auth_context_user_keycloak_user_id(:authContextId),
 	:authContextIsAdministrator,
 	:queryName,
 	:queryParameters

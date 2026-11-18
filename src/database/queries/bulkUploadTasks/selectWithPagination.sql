@@ -6,7 +6,7 @@ WITH
 				ON bulk_upload_tasks.application_form_id = application_forms.id
 			INNER JOIN
 				permitted_opportunity_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'opportunity'
@@ -36,7 +36,7 @@ WITH
 		SELECT
 			bulk_upload_task_to_json(
 				page.*::bulk_upload_tasks,
-				:authContextKeycloakUserId,
+				:authContextId,
 				:authContextIsAdministrator
 			) AS object
 		FROM page

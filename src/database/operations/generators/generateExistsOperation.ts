@@ -1,6 +1,6 @@
 import {
+	getAuthContextIdFromAuthContext,
 	getIsAdministratorFromAuthContext,
-	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type { AuthIdentityAndRole } from '../../../types';
 import type { TinyPg } from 'tinypg';
@@ -19,7 +19,7 @@ type KeysOfUnion<T> = T extends T ? keyof T : never;
  * no row was returned).
  *
  * The auth context is supplied to the query automatically as
- * `authContextKeycloakUserId` and `authContextIsAdministrator`. Each name in
+ * `authContextId` and `authContextIsAdministrator`. Each name in
  * `inputAttributes` becomes a named query parameter; the corresponding value
  * is read from the caller-supplied `input` object, and any attribute the
  * input does not provide is bound as NULL.
@@ -53,7 +53,7 @@ const generateExistsOperation =
 		const {
 			rows: [row],
 		} = await db.sql<ExistsResult>(queryName, {
-			authContextKeycloakUserId: getKeycloakUserIdFromAuthContext(authContext),
+			authContextId: getAuthContextIdFromAuthContext(authContext),
 			authContextIsAdministrator:
 				getIsAdministratorFromAuthContext(authContext),
 			...inputAttributeQueryParameters,

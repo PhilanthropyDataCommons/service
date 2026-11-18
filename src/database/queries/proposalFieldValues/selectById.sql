@@ -5,7 +5,7 @@ WHERE
 	AND proposal_field_values.id IN (
 		SELECT permitted_field_values.id
 		FROM permitted_proposal_field_value_ids_among(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'view',
 			'proposalFieldValue',

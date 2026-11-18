@@ -3,7 +3,7 @@ USING (VALUES (
 	:shortCode::short_code_t,
 	:name::varchar,
 	:keycloakOrganizationId::uuid,
-	:authContextKeycloakUserId::uuid
+	auth_context_user_keycloak_user_id(:authContextId::text)
 )) AS source (
 	short_code,
 	name,

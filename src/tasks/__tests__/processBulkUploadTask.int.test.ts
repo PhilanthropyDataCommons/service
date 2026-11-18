@@ -16,6 +16,7 @@ import {
 	loadChangemakerProposalBundle,
 	loadSystemSource,
 	loadFileBundle,
+	loadEphemeralAuthContextByTokenId,
 } from '../../database';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUploadTask } from '../processBulkUploadTask';
@@ -26,11 +27,17 @@ import {
 	TaskStatus,
 	BaseFieldSensitivityClassification,
 } from '../../types';
-import { NO_LIMIT, NO_OFFSET } from '../../constants';
+import {
+	MS_PER_SECOND,
+	NO_LIMIT,
+	NO_OFFSET,
+	ONE_DAY_IN_SECONDS,
+} from '../../constants';
 import {
 	getAuthContext,
 	getFullPermissionsMap,
 	getTestAuthContext,
+	getTestAuthContextId,
 } from '../../test/utils';
 import {
 	expectArrayContaining,
@@ -1947,6 +1954,96 @@ describe('processBulkUploadTask', () => {
 				}),
 			]),
 		);
+	});
+
+	it('should run under a day-long auth context keyed to the task', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
+		);
+		const lifetimeMs = ONE_DAY_IN_SECONDS * MS_PER_SECOND;
+		const startedAt = new Date().getTime();
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const taskAuthContext = await loadEphemeralAuthContextByTokenId(
+			db,
+			null,
+			systemUser.keycloakUserId,
+			`bulkUploadTask:${bulkUploadTask.id}`,
+		);
+		const notAfter = new Date(taskAuthContext.notAfter).getTime();
+		expect(notAfter).toBeGreaterThanOrEqual(startedAt + lifetimeMs);
+		expect(notAfter).toBeLessThanOrEqual(new Date().getTime() + lifetimeMs);
+	});
+
+	it('should complete even if the auth context that created the task is gone', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const systemUser = await loadSystemUser(db, null);
+		const creatorAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, creatorAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			creatorAuthContext,
+			['proposal_submitter_email', 'organization_name', 'organization_tax_id'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			creatorAuthContext,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
+		);
+		await db.query(
+			'DELETE FROM ephemeral_auth_contexts WHERE token_id = :tokenId;',
+			{ tokenId: getTestAuthContextId(systemUser) },
+		);
+
+		s3Mock.on(GetObjectCommand).resolves({
+			Body: sdkStreamMixin(
+				fs.createReadStream(
+					path.join(
+						__dirname,
+						'fixtures',
+						'processBulkUploadTask',
+						'validCsvTemplateWithChangemakers.csv',
+					),
+				),
+			),
+		});
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			await getTestAuthContext(db),
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask).toMatchObject({
+			status: TaskStatus.COMPLETED,
+		});
 	});
 
 	it('should resolve file attachment paths when archive has a single root folder and CSV uses stripped paths', async () => {

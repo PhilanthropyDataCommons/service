@@ -3,6 +3,6 @@ FROM files
 WHERE
 	id = :fileId
 	AND (
-		created_by = :authContextKeycloakUserId
+		created_by = auth_context_user_keycloak_user_id(:authContextId)
 		OR :authContextIsAdministrator::boolean
 	);

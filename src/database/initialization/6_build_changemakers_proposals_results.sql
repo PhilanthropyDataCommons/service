@@ -6,7 +6,7 @@ SELECT drop_function('build_changemakers_proposals_results');
 -- snapshot to see the row it just inserted.
 CREATE FUNCTION build_changemakers_proposals_results(
 	changemakers_proposals changemakers_proposals[],
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_id text DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS TABLE (id int, object jsonb) AS $$
 	WITH input_entries AS (
@@ -23,7 +23,7 @@ CREATE FUNCTION build_changemakers_proposals_results(
 				FROM changemakers c
 				WHERE c.id IN (SELECT ie.changemaker_id FROM input_entries ie)
 			),
-			build_changemakers_proposals_results.auth_context_keycloak_user_id,
+			build_changemakers_proposals_results.auth_context_id,
 			build_changemakers_proposals_results.auth_context_is_administrator
 		) AS serialized_changemaker
 	),
@@ -35,7 +35,7 @@ CREATE FUNCTION build_changemakers_proposals_results(
 				FROM proposals p
 				WHERE p.id IN (SELECT ie.proposal_id FROM input_entries ie)
 			),
-			build_changemakers_proposals_results.auth_context_keycloak_user_id,
+			build_changemakers_proposals_results.auth_context_id,
 			build_changemakers_proposals_results.auth_context_is_administrator
 		) AS serialized_proposal
 	)

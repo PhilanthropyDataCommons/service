@@ -3,6 +3,7 @@ import { getDatabase } from '../../database';
 import { UnauthorizedError } from '../../errors';
 import {
 	allowNextToResolve,
+	getTestAuthContextId,
 	getMockNextFunction,
 	loadTestUser,
 } from '../../test/utils';
@@ -98,6 +99,7 @@ describe('requireAuthentication', () => {
 			canViewOrganizationsInKeycloak: false,
 		};
 		req.user = await loadTestUser(db);
+		req.authContextId = getTestAuthContextId(req.user);
 		const nextMock = getMockNextFunction();
 		requireAuthentication(req, res, nextMock);
 		await allowNextToResolve();

@@ -4,7 +4,7 @@ WITH
 		FROM permission_grants
 			INNER JOIN
 				permitted_permission_grant_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator
 				) AS permitted_grants
 				ON permission_grants.id = permitted_grants.id

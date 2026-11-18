@@ -20,14 +20,11 @@ CREATE FUNCTION grantee_permits_auth_context(
 			grantee_type = 'userGroup'
 			AND EXISTS (
 				SELECT 1
-				FROM ephemeral_user_group_associations euga
-				WHERE euga.user_keycloak_user_id
-						= auth_context_user_keycloak_user_id(
-							grantee_permits_auth_context.auth_context_id
-						)
-					AND euga.user_group_keycloak_organization_id
+				FROM ephemeral_auth_context_organizations organization
+				WHERE organization.auth_context_id
+						= grantee_permits_auth_context.auth_context_id
+					AND organization.keycloak_organization_id
 						= grantee_permits_auth_context.grantee_keycloak_organization_id
-					AND NOT is_expired(euga.not_after)
 			)
 		);
 $$ LANGUAGE sql STABLE;

@@ -45,6 +45,7 @@ import {
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
+	getMockJwtWithOrganizations,
 	mockOrgId,
 } from '../test/mockJwt';
 import {
@@ -726,6 +727,56 @@ describe('/changemakers', () => {
 					permissions: {
 						changemaker: [PermissionGrantVerb.EDIT],
 					},
+				}),
+			);
+		});
+
+		it('resolves user group permissions only for tokens that name the user group', async () => {
+			const db = getDatabase();
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const changemaker = await createTestChangemaker(db, testUserAuthContext);
+			const grantedOrganizationId = 'c1a5f7a2-3f5e-4b0e-9a55-6f0f3c7d2b11';
+			const otherOrganizationId = 'd2b6a8b3-4a6f-4c1f-8b66-7a1a4d8e3c22';
+			await createPermissionGrant(db, testUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: grantedOrganizationId,
+				contextEntityType: PermissionGrantEntityType.CHANGEMAKER,
+				changemakerId: changemaker.id,
+				scope: [PermissionGrantEntityType.CHANGEMAKER],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+			const grantedOrganizationAuthHeader = getMockJwtWithOrganizations([
+				grantedOrganizationId,
+			]);
+			const otherOrganizationAuthHeader = getMockJwtWithOrganizations([
+				otherOrganizationId,
+			]);
+
+			const grantedResponse = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(grantedOrganizationAuthHeader)
+				.expect(200);
+			const otherResponse = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(otherOrganizationAuthHeader)
+				.expect(200);
+			const grantedAgainResponse = await request(app)
+				.get(`/changemakers/${changemaker.id}`)
+				.set(grantedOrganizationAuthHeader)
+				.expect(200);
+
+			expect(grantedResponse.body).toEqual(
+				expectObjectContaining({
+					permissions: { changemaker: [PermissionGrantVerb.EDIT] },
+				}),
+			);
+			expect(otherResponse.body).toEqual(
+				expectObjectContaining({ permissions: {} }),
+			);
+			expect(grantedAgainResponse.body).toEqual(
+				expectObjectContaining({
+					permissions: { changemaker: [PermissionGrantVerb.EDIT] },
 				}),
 			);
 		});

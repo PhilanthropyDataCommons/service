@@ -16,6 +16,7 @@ import {
 	loadChangemakerProposalBundle,
 	loadSystemSource,
 	loadFileBundle,
+	loadEphemeralAuthContextByBulkUploadTaskId,
 } from '../../database';
 import { getMockJobHelpers } from '../../test/mockGraphileWorker';
 import { processBulkUploadTask } from '../processBulkUploadTask';
@@ -25,12 +26,14 @@ import {
 	PermissionGrantEntityType,
 	TaskStatus,
 	BaseFieldSensitivityClassification,
+	stringToKeycloakId,
 } from '../../types';
 import { NO_LIMIT, NO_OFFSET } from '../../constants';
 import {
 	getAuthContext,
 	getFullPermissionsMap,
 	getTestAuthContext,
+	loadTestUser,
 } from '../../test/utils';
 import {
 	expectArrayContaining,
@@ -44,6 +47,7 @@ import {
 import {
 	createTestBaseField,
 	createTestChangemaker,
+	createTestEphemeralAuthContext,
 	createTestFile,
 	createTestOpportunity,
 } from '../../test/factories';
@@ -2108,5 +2112,105 @@ describe('processBulkUploadTask', () => {
 			bulkUploadTask.id,
 		);
 		expect(updatedBulkUploadTask.status).toEqual(TaskStatus.COMPLETED);
+	});
+
+	it('should run under the user groups of the auth context that created the task', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const testUser = await loadTestUser(db);
+		const creatorOrganizationId = stringToKeycloakId(
+			'f0d4c43b-c2e1-4491-8dee-f2c2cf06b4aa',
+		);
+		const creatorEphemeralAuthContext = await createTestEphemeralAuthContext(
+			db,
+			null,
+			{ userKeycloakUserId: testUser.keycloakUserId },
+			[creatorOrganizationId],
+		);
+		const creatorAuthContext = {
+			...getAuthContext(testUser),
+			authContextId: creatorEphemeralAuthContext.tokenId,
+		};
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
+
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			creatorAuthContext,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
+		);
+
+		const taskEphemeralAuthContext =
+			await loadEphemeralAuthContextByBulkUploadTaskId(
+				db,
+				null,
+				bulkUploadTask.id,
+			);
+		const { rows: taskOrganizationRows } = await db.query<{
+			keycloakOrganizationId: string;
+		}>(
+			`SELECT keycloak_organization_id AS "keycloakOrganizationId"
+			FROM ephemeral_auth_context_organizations
+			WHERE auth_context_id = :authContextId`,
+			{ authContextId: taskEphemeralAuthContext.tokenId },
+		);
+		expect(taskEphemeralAuthContext).toMatchObject({
+			userKeycloakUserId: testUser.keycloakUserId,
+		});
+		expect(taskOrganizationRows).toEqual([
+			{ keycloakOrganizationId: creatorOrganizationId },
+		]);
+	});
+
+	it('should fail if the auth context of the bulk upload no longer exists', async () => {
+		const db = getDatabase();
+		await createTestBaseFields(db);
+		const testAuthContext = await getTestAuthContext(db);
+		const systemUser = await loadSystemUser(db, null);
+		const systemUserAuthContext = getAuthContext(systemUser);
+		const proposalsDataFile = await createTestFile(db, systemUserAuthContext);
+		const { applicationFormId } = await createTestApplicationForm(
+			db,
+			systemUserAuthContext,
+			['proposal_submitter_email', 'organization_name'],
+		);
+		const bulkUploadTask = await createTestBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{
+				proposalsDataFileId: proposalsDataFile.id,
+				applicationFormId,
+			},
+		);
+		await db.query(
+			`DELETE FROM ephemeral_auth_contexts
+			WHERE token_id = bulk_upload_task_token_id(:bulkUploadTaskId)`,
+			{ bulkUploadTaskId: bulkUploadTask.id },
+		);
+
+		await processBulkUploadTask(
+			{ bulkUploadId: bulkUploadTask.id },
+			getMockJobHelpers(),
+		);
+
+		const updatedBulkUploadTask = await loadBulkUploadTask(
+			db,
+			testAuthContext,
+			bulkUploadTask.id,
+		);
+		expect(updatedBulkUploadTask).toMatchObject({
+			status: TaskStatus.FAILED,
+		});
+		expect(updatedBulkUploadTask.logs.length).toBeGreaterThan(0);
+		expect(s3Mock.commandCalls(GetObjectCommand).length).toEqual(0);
 	});
 });

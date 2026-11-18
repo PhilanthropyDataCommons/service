@@ -4,7 +4,6 @@ import {
 	getDatabase,
 	createChangemakerFieldValueBatch,
 	createChangemakerFieldValue,
-	createEphemeralUserGroupAssociation,
 	loadPermissionGrantBundle,
 	loadSystemUser,
 	createPermissionGrant,
@@ -19,6 +18,7 @@ import {
 import {
 	createTestBaseField,
 	createTestChangemaker,
+	createTestEphemeralAuthContext,
 	createTestSource,
 } from '../test/factories';
 import { NO_LIMIT, NO_OFFSET } from '../constants';
@@ -786,11 +786,15 @@ describe('GET /changemakerFieldValues', () => {
 			scope: [PermissionGrantEntityType.CHANGEMAKER],
 			verbs: [PermissionGrantVerb.VIEW],
 		});
-		await createEphemeralUserGroupAssociation(db, null, {
-			userKeycloakUserId: testUser.keycloakUserId,
-			userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
-			notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
-		});
+		await createTestEphemeralAuthContext(
+			db,
+			null,
+			{
+				userKeycloakUserId: testUser.keycloakUserId,
+				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+			},
+			[stringToKeycloakId(expiredOrgId)],
+		);
 
 		const result = await request(app)
 			.get('/changemakerFieldValues')
@@ -1172,11 +1176,15 @@ describe('GET /changemakerFieldValues/:fieldValueId', () => {
 			scope: [PermissionGrantEntityType.CHANGEMAKER],
 			verbs: [PermissionGrantVerb.VIEW],
 		});
-		await createEphemeralUserGroupAssociation(db, null, {
-			userKeycloakUserId: testUser.keycloakUserId,
-			userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
-			notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
-		});
+		await createTestEphemeralAuthContext(
+			db,
+			null,
+			{
+				userKeycloakUserId: testUser.keycloakUserId,
+				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+			},
+			[stringToKeycloakId(expiredOrgId)],
+		);
 
 		const result = await request(app)
 			.get(`/changemakerFieldValues/${fieldValue.id}`)

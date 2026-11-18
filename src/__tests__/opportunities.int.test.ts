@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	getDatabase,
-	createEphemeralUserGroupAssociation,
 	loadPermissionGrantBundle,
 	loadTableMetrics,
 	loadSystemFunder,
@@ -10,7 +9,11 @@ import {
 	createPermissionGrant,
 	loadSystemUser,
 } from '../database';
-import { createTestFunder, createTestOpportunity } from '../test/factories';
+import {
+	createTestEphemeralAuthContext,
+	createTestFunder,
+	createTestOpportunity,
+} from '../test/factories';
 import { NO_LIMIT, NO_OFFSET } from '../constants';
 import { getAuthContext, loadTestUser } from '../test/utils';
 import {
@@ -281,11 +284,15 @@ describe('/opportunities', () => {
 				scope: [PermissionGrantEntityType.OPPORTUNITY],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createEphemeralUserGroupAssociation(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
-				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
-			});
+			await createTestEphemeralAuthContext(
+				db,
+				null,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+				},
+				[stringToKeycloakId(expiredOrgId)],
+			);
 
 			await request(app)
 				.get(`/opportunities/${opportunity.id}`)

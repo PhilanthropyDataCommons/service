@@ -2,7 +2,6 @@ import request from 'supertest';
 import { app } from '../app';
 import {
 	getDatabase,
-	createEphemeralUserGroupAssociation,
 	loadPermissionGrantBundle,
 	loadSystemSource,
 	loadTableMetrics,
@@ -22,6 +21,7 @@ import {
 import {
 	createTestChangemaker,
 	createTestDataProvider,
+	createTestEphemeralAuthContext,
 	createTestFunder,
 	createTestOpportunity,
 	createTestProposal,
@@ -578,11 +578,15 @@ describe('/sources', () => {
 				scope: [PermissionGrantEntityType.SOURCE],
 				verbs: [PermissionGrantVerb.CREATE],
 			});
-			await createEphemeralUserGroupAssociation(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
-				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
-			});
+			await createTestEphemeralAuthContext(
+				db,
+				null,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+				},
+				[stringToKeycloakId(expiredOrgId)],
+			);
 
 			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
@@ -704,11 +708,15 @@ describe('/sources', () => {
 				scope: [PermissionGrantEntityType.SOURCE],
 				verbs: [PermissionGrantVerb.CREATE],
 			});
-			await createEphemeralUserGroupAssociation(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
-				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
-			});
+			await createTestEphemeralAuthContext(
+				db,
+				null,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+				},
+				[stringToKeycloakId(expiredOrgId)],
+			);
 
 			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent
@@ -831,11 +839,15 @@ describe('/sources', () => {
 				scope: [PermissionGrantEntityType.SOURCE],
 				verbs: [PermissionGrantVerb.CREATE],
 			});
-			await createEphemeralUserGroupAssociation(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
-				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
-			});
+			await createTestEphemeralAuthContext(
+				db,
+				null,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+				},
+				[stringToKeycloakId(expiredOrgId)],
+			);
 
 			const before = await loadTableMetrics(db, 'sources');
 			const result = await agent

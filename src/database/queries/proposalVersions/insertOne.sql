@@ -8,7 +8,7 @@ INSERT INTO proposal_versions (
 	:proposalId,
 	:applicationFormId,
 	:sourceId,
-	:authContextKeycloakUserId,
+	auth_context_user_keycloak_user_id(:authContextId),
 	coalesce(
 		(
 			SELECT max(pv.version) + 1
@@ -20,6 +20,6 @@ INSERT INTO proposal_versions (
 )
 RETURNING build_proposal_version_result(
 	proposal_versions,
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS object;

@@ -2,7 +2,7 @@ MERGE INTO funder_collaborative_members
 USING (VALUES (
 	:funderCollaborativeShortCode::short_code_t,
 	:memberFunderShortCode::short_code_t,
-	:authContextKeycloakUserId::uuid
+	auth_context_user_keycloak_user_id(:authContextId::text)
 )) AS source (
 	funder_collaborative_short_code,
 	member_funder_short_code,

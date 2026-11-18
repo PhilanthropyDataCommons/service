@@ -4,7 +4,7 @@ WITH
 		FROM terminology_sets
 			INNER JOIN
 				permitted_terminology_set_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'terminologySet'

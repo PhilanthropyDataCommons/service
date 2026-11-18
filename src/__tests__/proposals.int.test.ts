@@ -752,8 +752,6 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 when given id is not present', async () => {
-			const db = getDatabase();
-			const testUser = await loadTestUser(db);
 			const response = await request(app)
 				.get('/proposals/9001')
 				.set(authHeader)
@@ -770,7 +768,7 @@ describe('/proposals', () => {
 								authContextCanViewOrganizationsInKeycloak: false,
 								authContextCanViewUsersInKeycloak: false,
 								authContextIsAdministrator: false,
-								authContextKeycloakUserId: testUser.keycloakUserId,
+								authContextId: expectString(),
 								proposalId: 9001,
 							},
 						},
@@ -825,7 +823,7 @@ describe('/proposals', () => {
 								authContextCanViewOrganizationsInKeycloak: false,
 								authContextCanViewUsersInKeycloak: false,
 								authContextIsAdministrator: false,
-								authContextKeycloakUserId: testUser.keycloakUserId,
+								authContextId: expectString(),
 								proposalId: proposal.id,
 							},
 						},
@@ -1715,8 +1713,6 @@ describe('/proposals', () => {
 		});
 
 		it('returns 404 not found when a non-existent opportunity id is provided', async () => {
-			const db = getDatabase();
-			const testUser = await loadTestUser(db);
 			const result = await request(app)
 				.post('/proposals')
 				.type('application/json')
@@ -1738,7 +1734,7 @@ describe('/proposals', () => {
 								authContextCanViewOrganizationsInKeycloak: false,
 								authContextCanViewUsersInKeycloak: false,
 								authContextIsAdministrator: false,
-								authContextKeycloakUserId: testUser.keycloakUserId,
+								authContextId: expectString(),
 								opportunityId: 1,
 							},
 						},

@@ -1,6 +1,6 @@
 import { requireAdministratorRole } from '../requireAdministratorRole';
 import { ForbiddenError, UnauthorizedError } from '../../errors';
-import { getMockedUser } from '../../test/utils';
+import { getTestAuthContextId, getMockedUser } from '../../test/utils';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import type { AuthenticatedRequest } from '../../types';
 
@@ -25,6 +25,7 @@ describe('requireAdministratorRole', () => {
 	it('calls next with a ForbiddenError when the user has an administrator role set to false', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
+		req.authContextId = getTestAuthContextId(getMockedUser());
 		req.user = getMockedUser();
 		req.role = {
 			isAdministrator: false,
@@ -47,6 +48,7 @@ describe('requireAdministratorRole', () => {
 	it('calls next when the user has an administrator role set to true', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
+		req.authContextId = getTestAuthContextId(getMockedUser());
 		req.user = getMockedUser();
 		req.role = {
 			isAdministrator: true,

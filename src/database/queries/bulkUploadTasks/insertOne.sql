@@ -12,11 +12,11 @@ VALUES (
 	:proposalsDataFileId,
 	:attachmentsArchiveFileId,
 	:status,
-	:authContextKeycloakUserId
+	auth_context_user_keycloak_user_id(:authContextId)
 )
 RETURNING
 	bulk_upload_task_to_json(
 		bulk_upload_tasks,
-		:authContextKeycloakUserId,
+		:authContextId,
 		:authContextIsAdministrator
 	) AS object;

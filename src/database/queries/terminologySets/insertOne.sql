@@ -17,6 +17,6 @@ INSERT INTO terminology_sets (
 	:applicationFormsLabel,
 	:proposalLabel,
 	:proposalsLabel,
-	:authContextKeycloakUserId
+	auth_context_user_keycloak_user_id(:authContextId)
 )
 RETURNING terminology_set_to_json(terminology_sets) AS object;

@@ -12,6 +12,6 @@ WHERE
 RETURNING
 	build_initiative_field_value_result(
 		initiative_field_values,
-		:authContextKeycloakUserId,
+		:authContextId,
 		:authContextIsAdministrator
 	) AS object;

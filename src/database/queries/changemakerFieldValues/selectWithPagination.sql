@@ -4,7 +4,7 @@ WITH
 		FROM changemaker_field_values
 			INNER JOIN
 				permitted_changemaker_field_value_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'changemakerFieldValue'
@@ -40,7 +40,7 @@ WITH
 		SELECT
 			build_changemaker_field_value_result(
 				page.*::changemaker_field_values,
-				:authContextKeycloakUserId,
+				:authContextId,
 				:authContextIsAdministrator
 			) AS object
 		FROM page

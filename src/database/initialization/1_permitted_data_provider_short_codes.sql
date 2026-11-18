@@ -3,7 +3,7 @@ SELECT drop_function('permitted_data_provider_short_codes');
 -- Returns the short codes of data providers on which the user holds `verb` at
 -- `scope`.
 CREATE FUNCTION permitted_data_provider_short_codes(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t
@@ -25,10 +25,10 @@ CREATE FUNCTION permitted_data_provider_short_codes(
 		AND scope_set_permits_scope(
 			pg.scope, permitted_data_provider_short_codes.scope
 		)
-		AND grantee_permits_user(
+		AND grantee_permits_auth_context(
 			pg.grantee_type,
 			pg.grantee_user_keycloak_user_id,
 			pg.grantee_keycloak_organization_id,
-			permitted_data_provider_short_codes.user_keycloak_user_id
+			permitted_data_provider_short_codes.auth_context_id
 		);
 $$ LANGUAGE sql STABLE;

@@ -1,8 +1,8 @@
 import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import { NoDataReturnedError } from '../../../errors/NoDataReturnedError';
 import {
+	getAuthContextIdFromAuthContext,
 	getIsAdministratorFromAuthContext,
-	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type { AuthIdentityAndRole, JsonResultSet } from '../../../types';
 import type { TinyPg } from 'tinypg';
@@ -37,12 +37,11 @@ const generateCreateItemOperation =
 		createValues: I,
 		...args: [...P]
 	): Promise<T> => {
-		const authContextKeycloakUserId =
-			getKeycloakUserIdFromAuthContext(authContext);
+		const authContextId = getAuthContextIdFromAuthContext(authContext);
 		const authContextIsAdministrator =
 			getIsAdministratorFromAuthContext(authContext);
 		const authenticationQueryParameters = {
-			authContextKeycloakUserId,
+			authContextId,
 			authContextIsAdministrator,
 		};
 		const savedItemAttributeQueryParameters = saveItemAttributes.reduce(

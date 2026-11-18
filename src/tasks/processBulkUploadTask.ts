@@ -25,9 +25,11 @@ import {
 	loadChangemaker,
 	loadOrCreateChangemaker,
 	updateBulkUploadTask,
+	loadSystemEphemeralAuthContext,
 	loadSystemUser,
 	loadUserByKeycloakUserId,
 	createFile,
+	createOrUpdateEphemeralAuthContext,
 } from '../database/operations';
 import {
 	EMPTY_AUTH_CONTEXT_ROLES,
@@ -41,7 +43,7 @@ import {
 import { InputValidationError } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
-import { SINGLE_STEP } from '../constants';
+import { MS_PER_SECOND, ONE_DAY_IN_SECONDS, SINGLE_STEP } from '../constants';
 import { getBulkUploadLogDetailsFromError } from './getBulkUploadLogDetailsFromError';
 import type { TinyPg } from 'tinypg';
 import type { JobHelpers, Logger as GraphileLogger } from 'graphile-worker';
@@ -257,6 +259,7 @@ const getDataColumnCsvIndexForShortCode = (
 const loadSystemUserAuthContext = async (
 	db: Pick<TinyPg, 'sql'>,
 ): Promise<AuthContext> => ({
+	authContextId: (await loadSystemEphemeralAuthContext(db, null)).tokenId,
 	user: await loadSystemUser(db, null),
 	role: {
 		isAdministrator: true,
@@ -265,13 +268,25 @@ const loadSystemUserAuthContext = async (
 	},
 });
 
+const getTaskAuthContextNotAfter = (): string =>
+	new Date(Date.now() + ONE_DAY_IN_SECONDS * MS_PER_SECOND).toISOString();
+
 const loadTaskAuthContext = async (
-	db: Pick<TinyPg, 'sql'>,
+	db: Pick<TinyPg, 'sql' | 'transaction'>,
 	bulkUploadTask: BulkUploadTask,
-): Promise<AuthContext> => ({
-	user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
-	role: EMPTY_AUTH_CONTEXT_ROLES,
-});
+): Promise<AuthContext> => {
+	const { item: ephemeralAuthContext } =
+		await createOrUpdateEphemeralAuthContext(db, null, {
+			tokenId: `bulkUploadTask:${bulkUploadTask.id}`,
+			userKeycloakUserId: bulkUploadTask.createdBy,
+			notAfter: getTaskAuthContextNotAfter(),
+		});
+	return {
+		authContextId: ephemeralAuthContext.tokenId,
+		user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
+		role: EMPTY_AUTH_CONTEXT_ROLES,
+	};
+};
 
 const cleanupTemporaryFileMap = async (
 	temporaryFileMap: Map<string, FileResult>,

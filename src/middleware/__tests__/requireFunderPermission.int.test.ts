@@ -10,7 +10,12 @@ import {
 	createPermissionGrant,
 	loadSystemUser,
 } from '../../database';
-import { getAuthContext, getMockedUser, loadTestUser } from '../../test/utils';
+import {
+	getAuthContext,
+	getTestAuthContextId,
+	getMockedUser,
+	loadTestUser,
+} from '../../test/utils';
 import { createTestFunder } from '../../test/factories';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import {
@@ -38,6 +43,7 @@ describe('requireFunderPermission', () => {
 	it('calls next without error when user is an administrator', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
+		req.authContextId = getTestAuthContextId(getMockedUser());
 		req.user = getMockedUser();
 		req.role = {
 			isAdministrator: true,
@@ -56,6 +62,7 @@ describe('requireFunderPermission', () => {
 	it('calls next with an InputValidationError when funderShortCode is invalid', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
+		req.authContextId = getTestAuthContextId(getMockedUser());
 		req.user = getMockedUser();
 		req.role = {
 			isAdministrator: false,
@@ -83,6 +90,7 @@ describe('requireFunderPermission', () => {
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
+			req.authContextId = getTestAuthContextId(testUser);
 			req.user = testUser;
 			req.role = {
 				isAdministrator: false,
@@ -114,6 +122,7 @@ describe('requireFunderPermission', () => {
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
+			req.authContextId = getTestAuthContextId(testUser);
 			req.user = testUser;
 			req.role = {
 				isAdministrator: false,
@@ -154,6 +163,7 @@ describe('requireFunderPermission', () => {
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
+			req.authContextId = getTestAuthContextId(testUser);
 			req.user = testUser;
 			req.role = {
 				isAdministrator: false,
@@ -194,6 +204,7 @@ describe('requireFunderPermission', () => {
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
+			req.authContextId = getTestAuthContextId(testUser);
 			req.user = testUser;
 			req.role = {
 				isAdministrator: false,

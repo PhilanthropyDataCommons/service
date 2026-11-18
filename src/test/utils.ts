@@ -2,6 +2,7 @@ import { setImmediate } from 'node:timers/promises';
 import { loadUserByKeycloakUserId } from '../database';
 import {
 	getScopesForContextEntityType,
+	nonNullKeycloakIdToString,
 	PermissionGrantEntityType,
 	PermissionGrantVerb,
 	stringToKeycloakId,
@@ -48,21 +49,30 @@ export const getMockedUser = (): User => ({
 	disabledAt: null,
 });
 
-export const loadTestUser = async (db: Pick<TinyPg, 'sql'>): Promise<User> => {
-	const testUserKeycloakUserId = getTestUserKeycloakUserId();
-	return await loadUserByKeycloakUserId(
-		db,
+export const getTestAuthContextId = (
+	user: Pick<User, 'keycloakUserId'>,
+): string => nonNullKeycloakIdToString(user.keycloakUserId);
+
+export const createTestUserAuthContext = async (
+	db: Pick<TinyPg, 'query'>,
+	user: Pick<User, 'keycloakUserId'>,
+): Promise<void> => {
+	await db.query(
+		`INSERT INTO ephemeral_auth_contexts (
+			token_id,
+			user_keycloak_user_id,
+			not_after
+		) VALUES (:tokenId, :userKeycloakUserId, 'infinity')
+		ON CONFLICT DO NOTHING;`,
 		{
-			user: { keycloakUserId: testUserKeycloakUserId },
-			role: {
-				isAdministrator: false,
-				canViewUsersInKeycloak: false,
-				canViewOrganizationsInKeycloak: false,
-			},
+			tokenId: getTestAuthContextId(user),
+			userKeycloakUserId: user.keycloakUserId,
 		},
-		testUserKeycloakUserId,
 	);
 };
+
+export const loadTestUser = async (db: Pick<TinyPg, 'sql'>): Promise<User> =>
+	await loadUserByKeycloakUserId(db, null, getTestUserKeycloakUserId());
 
 export const getAuthContext = (
 	user: User,
@@ -70,6 +80,7 @@ export const getAuthContext = (
 	canViewUsersInKeycloak = false,
 	canViewOrganizationsInKeycloak = false,
 ): AuthContext => ({
+	authContextId: getTestAuthContextId(user),
 	user,
 	role: {
 		isAdministrator,

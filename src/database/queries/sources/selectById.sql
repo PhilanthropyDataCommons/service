@@ -1,13 +1,13 @@
 SELECT
 	source_to_json(
 		sources.*,
-		:authContextKeycloakUserId,
+		:authContextId,
 		:authContextIsAdministrator
 	) AS object
 FROM sources
 	INNER JOIN
 		permitted_source_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'view',
 			'source'

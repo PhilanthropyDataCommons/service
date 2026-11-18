@@ -1,10 +1,10 @@
 import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import { NotFoundError } from '../../../errors';
 import {
+	getAuthContextIdFromAuthContext,
 	getCanViewOrganizationsInKeycloakFromAuthContext,
 	getCanViewUsersInKeycloakFromAuthContext,
 	getIsAdministratorFromAuthContext,
-	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type { AuthIdentityAndRole, JsonResultSet } from '../../../types';
 import type { TinyPg } from 'tinypg';
@@ -33,8 +33,7 @@ const generateLoadItemOperation =
 		authContext: AuthIdentityAndRole | null,
 		...args: [...P]
 	): Promise<T> => {
-		const authContextKeycloakUserId =
-			getKeycloakUserIdFromAuthContext(authContext);
+		const authContextId = getAuthContextIdFromAuthContext(authContext);
 		const authContextIsAdministrator =
 			getIsAdministratorFromAuthContext(authContext);
 		const authContextCanViewOrganizationsInKeycloak =
@@ -47,7 +46,7 @@ const generateLoadItemOperation =
 				[parameterName]: args[index],
 			}),
 			{
-				authContextKeycloakUserId,
+				authContextId,
 				authContextIsAdministrator,
 				authContextCanViewOrganizationsInKeycloak,
 				authContextCanViewUsersInKeycloak,

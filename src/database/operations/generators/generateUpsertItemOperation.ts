@@ -1,8 +1,8 @@
 import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import { NoDataReturnedError } from '../../../errors/NoDataReturnedError';
 import {
+	getAuthContextIdFromAuthContext,
 	getIsAdministratorFromAuthContext,
-	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type {
 	AuthIdentityAndRole,
@@ -41,12 +41,11 @@ const generateUpsertItemOperation =
 		createValues: I,
 		...args: [...P]
 	): Promise<UpsertResult<T>> => {
-		const authContextKeycloakUserId =
-			getKeycloakUserIdFromAuthContext(authContext);
+		const authContextId = getAuthContextIdFromAuthContext(authContext);
 		const authContextIsAdministrator =
 			getIsAdministratorFromAuthContext(authContext);
 		const authenticationQueryParameters = {
-			authContextKeycloakUserId,
+			authContextId,
 			authContextIsAdministrator,
 		};
 		const savedItemAttributeQueryParameters = saveItemAttributes.reduce(

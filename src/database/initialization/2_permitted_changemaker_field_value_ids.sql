@@ -4,7 +4,7 @@ SELECT drop_function('permitted_changemaker_field_value_ids');
 -- `scope`. Forbidden fields are never included; public fields are included for
 -- everyone when the verb is `view`.
 CREATE FUNCTION permitted_changemaker_field_value_ids(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t
@@ -41,11 +41,11 @@ CREATE FUNCTION permitted_changemaker_field_value_ids(
 		AND scope_set_permits_scope(
 			pg.scope, permitted_changemaker_field_value_ids.scope
 		)
-		AND grantee_permits_user(
+		AND grantee_permits_auth_context(
 			pg.grantee_type,
 			pg.grantee_user_keycloak_user_id,
 			pg.grantee_keycloak_organization_id,
-			permitted_changemaker_field_value_ids.user_keycloak_user_id
+			permitted_changemaker_field_value_ids.auth_context_id
 		)
 
 	UNION
@@ -55,7 +55,7 @@ CREATE FUNCTION permitted_changemaker_field_value_ids(
 	FROM changemaker_field_values cfv
 	INNER JOIN base_fields bf ON cfv.base_field_short_code = bf.short_code
 	INNER JOIN permitted_changemaker_ids(
-		permitted_changemaker_field_value_ids.user_keycloak_user_id,
+		permitted_changemaker_field_value_ids.auth_context_id,
 		permitted_changemaker_field_value_ids.user_is_admin,
 		permitted_changemaker_field_value_ids.verb,
 		permitted_changemaker_field_value_ids.scope

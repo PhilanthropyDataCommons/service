@@ -10,6 +10,6 @@ VALUES (
 	:mimeType,
 	:size,
 	:s3BucketName,
-	:authContextKeycloakUserId
+	auth_context_user_keycloak_user_id(:authContextId)
 )
 RETURNING file_to_json(files) AS object;

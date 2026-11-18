@@ -7,7 +7,7 @@ WITH
 		) VALUES (
 			:externalId,
 			:opportunityId,
-			:authContextKeycloakUserId
+			auth_context_user_keycloak_user_id(:authContextId)
 		)
 		RETURNING *
 	)
@@ -15,6 +15,6 @@ WITH
 SELECT serialized_proposal.object
 FROM build_proposals_results(
 	array(SELECT inserted_proposal::proposals FROM inserted_proposal),
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS serialized_proposal;

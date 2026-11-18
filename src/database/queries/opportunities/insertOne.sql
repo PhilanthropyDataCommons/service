@@ -7,10 +7,10 @@ INSERT INTO opportunities (
 	:title,
 	:funderShortCode::short_code_t,
 	:terminologySetId::int,
-	:authContextKeycloakUserId
+	auth_context_user_keycloak_user_id(:authContextId)
 )
 RETURNING opportunity_to_json(
 	opportunities,
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS object;

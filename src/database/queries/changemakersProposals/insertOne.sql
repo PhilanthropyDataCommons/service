@@ -13,6 +13,6 @@ WITH
 SELECT serialized_entry.object
 FROM build_changemakers_proposals_results(
 	array(SELECT inserted_entry::changemakers_proposals FROM inserted_entry),
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS serialized_entry;

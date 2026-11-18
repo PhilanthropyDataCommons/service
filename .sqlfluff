@@ -40,7 +40,7 @@ param_style = colon
 # placeholder values
 limit = 20
 offset = 0
-authContextKeycloakUserId = '00000000-0000-0000-0000-000000000000'
+authContextId = '00000000-0000-0000-0000-000000000000'
 authContextIsAdministrator = false
 authContextCanViewUsersInKeycloak = false
 proposalId = 1

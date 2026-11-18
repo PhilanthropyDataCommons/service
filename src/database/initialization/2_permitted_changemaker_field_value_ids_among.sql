@@ -9,7 +9,7 @@ SELECT drop_function('permitted_changemaker_field_value_ids_among');
 -- grant branches: they already have every non-forbidden field, so those
 -- branches can only return a subset of what they already get.
 CREATE FUNCTION permitted_changemaker_field_value_ids_among(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t,
@@ -51,11 +51,11 @@ CREATE FUNCTION permitted_changemaker_field_value_ids_among(
 		AND scope_set_permits_scope(
 			pg.scope, permitted_changemaker_field_value_ids_among.scope
 		)
-		AND grantee_permits_user(
+		AND grantee_permits_auth_context(
 			pg.grantee_type,
 			pg.grantee_user_keycloak_user_id,
 			pg.grantee_keycloak_organization_id,
-			permitted_changemaker_field_value_ids_among.user_keycloak_user_id
+			permitted_changemaker_field_value_ids_among.auth_context_id
 		)
 
 	UNION
@@ -65,7 +65,7 @@ CREATE FUNCTION permitted_changemaker_field_value_ids_among(
 	FROM changemaker_field_values cfv
 	INNER JOIN base_fields bf ON cfv.base_field_short_code = bf.short_code
 	INNER JOIN permitted_changemaker_ids(
-		permitted_changemaker_field_value_ids_among.user_keycloak_user_id,
+		permitted_changemaker_field_value_ids_among.auth_context_id,
 		permitted_changemaker_field_value_ids_among.user_is_admin,
 		permitted_changemaker_field_value_ids_among.verb,
 		permitted_changemaker_field_value_ids_among.scope

@@ -2,7 +2,7 @@ SELECT drop_function('build_initiative_field_value_result');
 
 CREATE FUNCTION build_initiative_field_value_result(
 	initiative_field_value initiative_field_values,
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_id text DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS jsonb AS $$
 DECLARE
@@ -21,7 +21,7 @@ BEGIN
 
 	SELECT source_to_json(
 		sources.*,
-		auth_context_keycloak_user_id,
+		auth_context_id,
 		auth_context_is_administrator
 	)
 	INTO source_json

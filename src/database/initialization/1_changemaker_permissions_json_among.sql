@@ -6,7 +6,7 @@ SELECT drop_function('changemaker_permissions_json_among');
 -- Changemakers with no resolved permissions are absent from the result; callers
 -- coalesce the missing row to an empty map.
 CREATE FUNCTION changemaker_permissions_json_among(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	filter_ids int[]
 ) RETURNS TABLE (changemaker_id int, permissions jsonb) AS $$
@@ -47,7 +47,7 @@ CREATE FUNCTION changemaker_permissions_json_among(
 			CROSS JOIN native_scopes
 			CROSS JOIN all_verbs
 		WHERE
-			changemaker_permissions_json_among.user_keycloak_user_id IS NOT NULL
+			changemaker_permissions_json_among.auth_context_id IS NOT NULL
 			AND pg.context_entity_type = 'changemaker'
 			AND pg.changemaker_id = ANY(changemaker_permissions_json_among.filter_ids)
 			AND verb_set_permits_verb(pg.verbs, all_verbs.verb)
@@ -56,11 +56,11 @@ CREATE FUNCTION changemaker_permissions_json_among(
 				pg.conditions IS NULL
 				OR NOT pg.conditions ? native_scopes.scope::text
 			)
-			AND grantee_permits_user(
+			AND grantee_permits_auth_context(
 				pg.grantee_type,
 				pg.grantee_user_keycloak_user_id,
 				pg.grantee_keycloak_organization_id,
-				changemaker_permissions_json_among.user_keycloak_user_id
+				changemaker_permissions_json_among.auth_context_id
 			)
 	),
 

@@ -7,7 +7,7 @@ WITH
 			:keycloakOrganizationId::uuid,
 			:isCollaborative::boolean,
 			:defaultTerminologySetId::int,
-			:authContextKeycloakUserId::uuid
+			auth_context_user_keycloak_user_id(:authContextId::text)
 		)) AS source (
 			short_code,
 			name,
@@ -49,7 +49,7 @@ FROM merged_funder
 	INNER JOIN
 		build_funders_results(
 			array(SELECT merged_funder.funder FROM merged_funder),
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator
 		) AS serialized_funder
 		ON serialized_funder.short_code = (merged_funder.funder).short_code;

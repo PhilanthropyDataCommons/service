@@ -1,13 +1,13 @@
 SELECT
 	opportunity_to_json(
 		opportunities.*,
-		:authContextKeycloakUserId,
+		:authContextId,
 		:authContextIsAdministrator
 	) AS object
 FROM opportunities
 	INNER JOIN
 		permitted_opportunity_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'view',
 			'opportunity'

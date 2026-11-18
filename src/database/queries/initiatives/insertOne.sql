@@ -5,6 +5,6 @@ INSERT INTO initiatives (
 ) VALUES (
 	:changemakerId,
 	:title,
-	:authContextKeycloakUserId
+	auth_context_user_keycloak_user_id(:authContextId)
 )
 RETURNING initiative_to_json(initiatives) AS object;

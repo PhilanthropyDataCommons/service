@@ -1,6 +1,6 @@
 SELECT organization_to_json(
 	:keycloakOrganizationId,
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator,
 	:authContextCanViewOrganizationsInKeycloak,
 	:authContextCanViewUsersInKeycloak

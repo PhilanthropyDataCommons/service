@@ -7,7 +7,7 @@ WITH
 			AND proposals.id IN (
 				SELECT permitted_proposals.id
 				FROM permitted_proposal_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'proposal'
@@ -18,6 +18,6 @@ WITH
 SELECT serialized_proposal.object
 FROM build_proposals_results(
 	array(SELECT requested_proposal.proposal FROM requested_proposal),
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS serialized_proposal;

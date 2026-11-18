@@ -6,7 +6,7 @@ SELECT drop_function('build_changemaker_field_value_result');
 -- not been permission-filtered (the field value insert).
 CREATE FUNCTION build_changemaker_field_value_result(
 	changemaker_field_value changemaker_field_values,
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_id text DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS jsonb AS $$
 DECLARE
@@ -25,7 +25,7 @@ BEGIN
 
 	SELECT changemaker_field_value_batch_to_json(
 		changemaker_field_value_batches.*,
-		auth_context_keycloak_user_id,
+		auth_context_id,
 		auth_context_is_administrator
 	)
 	INTO batch_json

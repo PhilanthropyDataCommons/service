@@ -6,7 +6,7 @@ SELECT drop_function('build_proposals_results');
 -- a STABLE function's snapshot would not otherwise see -- so callers pass rows.
 CREATE FUNCTION build_proposals_results(
 	proposals proposals[],
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_id text DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS TABLE (id int, object jsonb) AS $$
 	WITH input_proposals AS (
@@ -21,7 +21,7 @@ CREATE FUNCTION build_proposals_results(
 	permitted_field_values AS (
 		SELECT p.id
 		FROM permitted_proposal_field_value_ids_among(
-			build_proposals_results.auth_context_keycloak_user_id,
+			build_proposals_results.auth_context_id,
 			build_proposals_results.auth_context_is_administrator,
 			'view', 'proposalFieldValue',
 			ARRAY(
@@ -67,7 +67,7 @@ CREATE FUNCTION build_proposals_results(
 	source_json AS (
 		SELECT s.id, source_to_json(
 			s.*,
-			build_proposals_results.auth_context_keycloak_user_id,
+			build_proposals_results.auth_context_id,
 			build_proposals_results.auth_context_is_administrator
 		) AS object
 		FROM sources s
@@ -88,7 +88,7 @@ CREATE FUNCTION build_proposals_results(
 	opportunity_json AS (
 		SELECT o.id, opportunity_to_json(
 			o.*,
-			build_proposals_results.auth_context_keycloak_user_id,
+			build_proposals_results.auth_context_id,
 			build_proposals_results.auth_context_is_administrator
 		) AS object
 		FROM opportunities o
@@ -98,7 +98,7 @@ CREATE FUNCTION build_proposals_results(
 	viewable_changemaker_ids AS (
 		SELECT p.id
 		FROM permitted_changemaker_ids_among(
-			build_proposals_results.auth_context_keycloak_user_id,
+			build_proposals_results.auth_context_id,
 			build_proposals_results.auth_context_is_administrator,
 			'view', 'changemaker',
 			ARRAY(
@@ -107,7 +107,7 @@ CREATE FUNCTION build_proposals_results(
 				WHERE cp.proposal_id IN (SELECT ip.id FROM input_proposals ip)
 			)
 		) AS p
-		WHERE build_proposals_results.auth_context_keycloak_user_id IS NOT NULL
+		WHERE build_proposals_results.auth_context_id IS NOT NULL
 	),
 	changemaker_json AS (
 		SELECT

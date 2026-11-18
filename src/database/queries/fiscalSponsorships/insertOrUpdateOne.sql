@@ -2,7 +2,7 @@ MERGE INTO fiscal_sponsorships
 USING (VALUES (
 	:fiscalSponseeChangemakerId::integer,
 	:fiscalSponsorChangemakerId::integer,
-	:authContextKeycloakUserId::uuid
+	auth_context_user_keycloak_user_id(:authContextId::text)
 )) AS source (
 	fiscal_sponsee_changemaker_id,
 	fiscal_sponsor_changemaker_id,

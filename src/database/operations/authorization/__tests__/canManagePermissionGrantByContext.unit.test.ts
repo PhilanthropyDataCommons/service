@@ -6,6 +6,7 @@ import {
 import type { AuthIdentityAndRole } from '../../../../types';
 
 const authContext: AuthIdentityAndRole = {
+	authContextId: '33333333-3333-3333-3333-333333333333',
 	user: {
 		keycloakUserId: stringToKeycloakId('11111111-1111-1111-1111-111111111111'),
 	},
@@ -17,6 +18,7 @@ const authContext: AuthIdentityAndRole = {
 };
 
 const adminAuthContext: AuthIdentityAndRole = {
+	authContextId: '44444444-4444-4444-4444-444444444444',
 	user: {
 		keycloakUserId: stringToKeycloakId('22222222-2222-2222-2222-222222222222'),
 	},
@@ -195,7 +197,7 @@ describe('canManagePermissionGrantByContext', () => {
 			expect(db.sql).toHaveBeenCalledWith(
 				'authorization.canManagePermissionGrantByContext',
 				expect.objectContaining({
-					authContextKeycloakUserId: authContext.user.keycloakUserId,
+					authContextId: authContext.authContextId,
 					authContextIsAdministrator: false,
 					contextEntityType: grant.contextEntityType,
 					...ALL_UNSET_ID_KEYS,

@@ -10,7 +10,7 @@ SELECT drop_function('permitted_initiative_field_value_ids');
 -- because the per-field-value category conditions cannot be expressed at the
 -- initiative level.
 CREATE FUNCTION permitted_initiative_field_value_ids(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t
@@ -61,11 +61,11 @@ CREATE FUNCTION permitted_initiative_field_value_ids(
 		AND scope_set_permits_scope(
 			pg.scope, permitted_initiative_field_value_ids.scope
 		)
-		AND grantee_permits_user(
+		AND grantee_permits_auth_context(
 			pg.grantee_type,
 			pg.grantee_user_keycloak_user_id,
 			pg.grantee_keycloak_organization_id,
-			permitted_initiative_field_value_ids.user_keycloak_user_id
+			permitted_initiative_field_value_ids.auth_context_id
 		)
 		AND (
 			pg.conditions IS NULL

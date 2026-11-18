@@ -5,7 +5,7 @@ SELECT drop_function('funder_permissions_json_among');
 -- serialized rather than to every grant in the table. Funders with no resolved
 -- permissions are absent from the result; callers coalesce to an empty map.
 CREATE FUNCTION funder_permissions_json_among(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	filter_short_codes short_code_t[]
 ) RETURNS TABLE (funder_short_code short_code_t, permissions jsonb) AS $$
@@ -49,7 +49,7 @@ CREATE FUNCTION funder_permissions_json_among(
 			CROSS JOIN native_scopes
 			CROSS JOIN all_verbs
 		WHERE
-			funder_permissions_json_among.user_keycloak_user_id IS NOT NULL
+			funder_permissions_json_among.auth_context_id IS NOT NULL
 			AND pg.context_entity_type = 'funder'
 			AND pg.funder_short_code
 			= ANY(funder_permissions_json_among.filter_short_codes)
@@ -59,11 +59,11 @@ CREATE FUNCTION funder_permissions_json_among(
 				pg.conditions IS NULL
 				OR NOT pg.conditions ? native_scopes.scope::text
 			)
-			AND grantee_permits_user(
+			AND grantee_permits_auth_context(
 				pg.grantee_type,
 				pg.grantee_user_keycloak_user_id,
 				pg.grantee_keycloak_organization_id,
-				funder_permissions_json_among.user_keycloak_user_id
+				funder_permissions_json_among.auth_context_id
 			)
 	),
 

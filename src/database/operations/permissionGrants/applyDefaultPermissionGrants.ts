@@ -1,7 +1,7 @@
 import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import {
 	contextEntityKeyProperties,
-	getKeycloakUserIdFromAuthContext,
+	getAuthContextIdFromAuthContext,
 } from '../../../types';
 import type {
 	AuthIdentityAndRole,
@@ -26,7 +26,7 @@ const applyDefaultPermissionGrants = async (
 	const queryParameters = {
 		...unsetContextEntityKeys,
 		...contextEntity,
-		authContextKeycloakUserId: getKeycloakUserIdFromAuthContext(authContext),
+		authContextId: getAuthContextIdFromAuthContext(authContext),
 	};
 	await db.sql(QUERY_NAME, queryParameters);
 	await createServiceQueryAuditLog(db, authContext, {

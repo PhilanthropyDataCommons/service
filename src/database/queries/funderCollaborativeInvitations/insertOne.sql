@@ -3,7 +3,7 @@ USING (VALUES (
 	:funderCollaborativeShortCode::short_code_t,
 	:invitedFunderShortCode::short_code_t,
 	:invitationStatus::invitation_status_t,
-	:authContextKeycloakUserId::uuid
+	auth_context_user_keycloak_user_id(:authContextId::text)
 )) AS source (
 	funder_collaborative_short_code,
 	invited_funder_short_code,

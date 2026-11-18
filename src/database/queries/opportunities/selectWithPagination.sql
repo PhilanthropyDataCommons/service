@@ -4,7 +4,7 @@ WITH
 		FROM opportunities
 			INNER JOIN
 				permitted_opportunity_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'opportunity'
@@ -34,7 +34,7 @@ WITH
 		SELECT
 			opportunity_to_json(
 				page.*::opportunities,
-				:authContextKeycloakUserId,
+				:authContextId,
 				:authContextIsAdministrator
 			) AS object
 		FROM page

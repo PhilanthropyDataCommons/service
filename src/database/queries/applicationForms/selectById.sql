@@ -2,7 +2,7 @@ SELECT application_form_to_json(application_forms.*) AS object
 FROM application_forms
 	INNER JOIN
 		permitted_application_form_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'view',
 			'applicationForm'

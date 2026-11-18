@@ -1,7 +1,6 @@
 import {
 	getDatabase,
 	createEphemeralAuthContextOrganization,
-	createEphemeralUserGroupAssociation,
 	createOrUpdateEphemeralAuthContext,
 	createOrUpdateUser,
 	loadUserByKeycloakUserId,
@@ -57,10 +56,9 @@ const recordAuthenticatedUser = async (
 				userKeycloakUserId: keycloakUserId,
 				notAfter,
 			});
-		const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
 		if (isNewAuthContext) {
 			await allNoLeaks(
-				keycloakOrganizationIds.map(
+				getKeycloakOrganizationIdsFromRequest(req).map(
 					async (keycloakOrganizationId) =>
 						await createEphemeralAuthContextOrganization(transactionDb, null, {
 							authContextId,
@@ -69,16 +67,6 @@ const recordAuthenticatedUser = async (
 				),
 			);
 		}
-		await allNoLeaks(
-			keycloakOrganizationIds.map(
-				async (keycloakOrganizationId) =>
-					await createEphemeralUserGroupAssociation(transactionDb, null, {
-						userKeycloakUserId: keycloakUserId,
-						userGroupKeycloakOrganizationId: keycloakOrganizationId,
-						notAfter,
-					}),
-			),
-		);
 		return await loadUserByKeycloakUserId(
 			transactionDb,
 			{

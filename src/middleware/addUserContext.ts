@@ -5,6 +5,7 @@ import {
 	createEphemeralUserGroupAssociation,
 } from '../database';
 import {
+	EMPTY_AUTH_CONTEXT_ROLES,
 	getAuthSubFromRequest,
 	getKeycloakOrganizationIdsFromRequest,
 	getJwtExpFromRequest,
@@ -90,11 +91,7 @@ const addUserContext = (
 						db,
 						{
 							user: { keycloakUserId: stringToKeycloakId(keycloakUserId) },
-							role: {
-								isAdministrator: false,
-								canViewUsersInKeycloak: false,
-								canViewOrganizationsInKeycloak: false,
-							},
+							role: EMPTY_AUTH_CONTEXT_ROLES,
 						},
 						keycloakUserId,
 					)

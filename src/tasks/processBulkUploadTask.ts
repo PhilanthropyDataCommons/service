@@ -30,6 +30,7 @@ import {
 	createFile,
 } from '../database/operations';
 import {
+	EMPTY_AUTH_CONTEXT_ROLES,
 	TaskStatus,
 	getSelfManageGrantFragment,
 	isId,
@@ -269,11 +270,7 @@ const loadTaskAuthContext = async (
 	bulkUploadTask: BulkUploadTask,
 ): Promise<AuthContext> => ({
 	user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
-	role: {
-		isAdministrator: false,
-		canViewUsersInKeycloak: false,
-		canViewOrganizationsInKeycloak: false,
-	},
+	role: EMPTY_AUTH_CONTEXT_ROLES,
 });
 
 const cleanupTemporaryFileMap = async (

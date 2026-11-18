@@ -4,13 +4,9 @@ import {
 	loadEphemeralAuthContextByTokenId,
 	loadUserByKeycloakUserId,
 	loadTableMetrics,
-	loadEphemeralUserGroupAssociationsByUserKeycloakUserId,
 } from '../../database';
 import { generateNextWithAssertions } from '../../test/utils';
-import {
-	expectArrayContaining,
-	expectTimestamp,
-} from '../../test/asymettricMatchers';
+import { expectTimestamp } from '../../test/asymettricMatchers';
 import { stringToKeycloakId } from '../../types';
 import {
 	InputValidationError,
@@ -92,121 +88,6 @@ describe('addUserContext', () => {
 
 		const nextMock = generateNextWithAssertions(runAssertions, done);
 		addUserContext(req, res, nextMock);
-	});
-
-	it('creates ephemeral user group associations that outlive a token about to expire', (done) => {
-		const db = getDatabase();
-		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
-		const mockAuthExp = Math.round(new Date().getTime() / 1000) + 60;
-		const req = getMockRequest() as AuthenticatedRequest;
-		const res = getMockResponse();
-		req.auth = {
-			sub: mockSub,
-			name: 'Sabine',
-			exp: mockAuthExp,
-			jti: 'sabineToken',
-			organizations: {
-				myOrganization: { id: '47d406ad-5e50-42d4-88f1-f87947a3e314' },
-			},
-		};
-
-		const runAssertions = async (err: unknown) => {
-			expect(err).toBe(undefined);
-			const ephemeralUserGroupAssociations =
-				await loadEphemeralUserGroupAssociationsByUserKeycloakUserId(
-					db,
-					null,
-					stringToKeycloakId(mockSub),
-					undefined,
-					undefined,
-				);
-			const expirations = ephemeralUserGroupAssociations.entries.map((item) =>
-				new Date(item.notAfter).getTime(),
-			);
-			expect(expirations).toHaveLength(1);
-			expect(Math.min(...expirations)).toBeGreaterThan(mockAuthExp * 1000);
-		};
-
-		const nextMock = generateNextWithAssertions(runAssertions, done);
-		addUserContext(req, res, nextMock);
-	});
-
-	it('creates ephemeral user group associations when organizations are provided', (done) => {
-		const db = getDatabase();
-		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
-		const mockName = 'Provolone';
-		const mockAuthExp = Math.round(new Date().getTime() / 1000) + 3600;
-		const associationLifetimeMs = 180 * 1000;
-		const requestedAt = new Date().getTime();
-		const myOrganizationId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
-		const myOtherOrganizationId = '95e06557-6141-4be5-81df-e7f1a14bff5d';
-		const req = getMockRequest() as AuthenticatedRequest;
-		const res = getMockResponse();
-		req.auth = {
-			sub: mockSub,
-			name: mockName,
-			exp: mockAuthExp,
-			jti: 'provoloneToken',
-			organizations: {
-				myOrganization: { id: myOrganizationId },
-				myOtherOrganization: { id: myOtherOrganizationId },
-			},
-		};
-
-		loadTableMetrics(db, 'ephemeral_user_group_associations')
-			.then(({ count: baselineEphemeralUserGroupAssociationCount }) => {
-				const runAssertions = async (err: unknown) => {
-					expect(err).toBe(undefined);
-					const { count: ephemeralUserGroupAssociationCount } =
-						await loadTableMetrics(db, 'ephemeral_user_group_associations');
-					const ephemeralUserGroupAssociations =
-						await loadEphemeralUserGroupAssociationsByUserKeycloakUserId(
-							db,
-							null,
-							stringToKeycloakId('123e4567-e89b-12d3-a456-426614174000'),
-							undefined,
-							undefined,
-						);
-					expect(ephemeralUserGroupAssociations.entries).toEqual(
-						expectArrayContaining([
-							{
-								createdAt: expectTimestamp(),
-								userGroupKeycloakOrganizationId: myOrganizationId,
-								userKeycloakUserId: mockSub,
-								notAfter: expectTimestamp(),
-							},
-							{
-								createdAt: expectTimestamp(),
-								userGroupKeycloakOrganizationId: myOtherOrganizationId,
-								userKeycloakUserId: mockSub,
-								notAfter: expectTimestamp(),
-							},
-						]),
-					);
-					const ephemeralUserGroupAssociationExpirations =
-						ephemeralUserGroupAssociations.entries.map((item) =>
-							new Date(item.notAfter).getTime(),
-						);
-					const assertedAt = new Date().getTime();
-					ephemeralUserGroupAssociationExpirations.forEach((expiration) => {
-						expect(expiration).toBeGreaterThanOrEqual(
-							requestedAt + associationLifetimeMs,
-						);
-						expect(expiration).toBeLessThanOrEqual(
-							assertedAt + associationLifetimeMs,
-						);
-					});
-					expect(ephemeralUserGroupAssociationCount).toEqual(
-						baselineEphemeralUserGroupAssociationCount + 2,
-					);
-				};
-
-				const nextMock = generateNextWithAssertions(runAssertions, done);
-				addUserContext(req, res, nextMock);
-			})
-			.catch((e: unknown) => {
-				done(e);
-			});
 	});
 
 	it("records an ephemeral auth context with the token's organizations that lasts 180 seconds from the request", (done) => {

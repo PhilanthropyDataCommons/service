@@ -14,7 +14,6 @@ export * from './dataProviders';
 export * from './defaultPermissionGrants';
 export * from './ephemeralAuthContextOrganizations';
 export * from './ephemeralAuthContexts';
-export * from './ephemeralUserGroupAssociations';
 export * from './files';
 export * from './fiscalSponsorships';
 export * from './funderCollaborativeInvitations';

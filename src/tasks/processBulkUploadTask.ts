@@ -29,7 +29,7 @@ import {
 	loadSystemUser,
 	loadUserByKeycloakUserId,
 	createFile,
-	createOrUpdateEphemeralAuthContext,
+	loadEphemeralAuthContextByBulkUploadTaskId,
 } from '../database/operations';
 import {
 	EMPTY_AUTH_CONTEXT_ROLES,
@@ -43,7 +43,7 @@ import {
 import { InputValidationError } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
-import { MS_PER_SECOND, ONE_DAY_IN_SECONDS, SINGLE_STEP } from '../constants';
+import { SINGLE_STEP } from '../constants';
 import { getBulkUploadLogDetailsFromError } from './getBulkUploadLogDetailsFromError';
 import type { TinyPg } from 'tinypg';
 import type { JobHelpers, Logger as GraphileLogger } from 'graphile-worker';
@@ -268,24 +268,56 @@ const loadSystemUserAuthContext = async (
 	},
 });
 
-const getTaskAuthContextNotAfter = (): string =>
-	new Date(Date.now() + ONE_DAY_IN_SECONDS * MS_PER_SECOND).toISOString();
-
 const loadTaskAuthContext = async (
-	db: Pick<TinyPg, 'sql' | 'transaction'>,
+	db: Pick<TinyPg, 'sql'>,
 	bulkUploadTask: BulkUploadTask,
 ): Promise<AuthContext> => {
-	const { item: ephemeralAuthContext } =
-		await createOrUpdateEphemeralAuthContext(db, null, {
-			tokenId: `bulkUploadTask:${bulkUploadTask.id}`,
-			userKeycloakUserId: bulkUploadTask.createdBy,
-			notAfter: getTaskAuthContextNotAfter(),
-		});
+	const ephemeralAuthContext = await loadEphemeralAuthContextByBulkUploadTaskId(
+		db,
+		null,
+		bulkUploadTask.id,
+	);
 	return {
 		authContextId: ephemeralAuthContext.tokenId,
 		user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
 		role: EMPTY_AUTH_CONTEXT_ROLES,
 	};
+};
+
+const loadProcessableTaskAuthContext = async (
+	db: Pick<TinyPg, 'sql'>,
+	systemUserAuthContext: AuthContext,
+	bulkUploadTask: BulkUploadTask,
+	graphileLogger: GraphileLogger,
+): Promise<AuthContext | undefined> => {
+	if (bulkUploadTask.status !== TaskStatus.PENDING) {
+		graphileLogger.warn(
+			'Bulk upload cannot be processed because it is not in a PENDING state',
+			{ bulkUploadTask },
+		);
+		return undefined;
+	}
+	try {
+		return await loadTaskAuthContext(db, bulkUploadTask);
+	} catch (err: unknown) {
+		graphileLogger.warn('Loading the bulk upload auth context failed', {
+			err,
+		});
+		await createBulkUploadLog(db, systemUserAuthContext, {
+			bulkUploadTaskId: bulkUploadTask.id,
+			isError: true,
+			details: getBulkUploadLogDetailsFromError(err),
+		});
+		await updateBulkUploadTask(
+			db,
+			systemUserAuthContext,
+			{
+				status: TaskStatus.FAILED,
+			},
+			bulkUploadTask.id,
+		);
+		return undefined;
+	}
 };
 
 const cleanupTemporaryFileMap = async (
@@ -575,12 +607,13 @@ export const processBulkUploadTask = async (
 		payload.bulkUploadId,
 	);
 
-	const taskAuthContext = await loadTaskAuthContext(db, bulkUploadTask);
-	if (bulkUploadTask.status !== TaskStatus.PENDING) {
-		graphileLogger.warn(
-			'Bulk upload cannot be processed because it is not in a PENDING state',
-			{ bulkUploadTask },
-		);
+	const taskAuthContext = await loadProcessableTaskAuthContext(
+		db,
+		systemUserAuthContext,
+		bulkUploadTask,
+		graphileLogger,
+	);
+	if (taskAuthContext === undefined) {
 		return;
 	}
 

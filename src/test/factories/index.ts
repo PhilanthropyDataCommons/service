@@ -2,6 +2,7 @@ export * from './createTestBaseField';
 export * from './createTestChangemaker';
 export * from './createTestDataProvider';
 export * from './createTestDefaultPermissionGrant';
+export * from './createTestEphemeralAuthContext';
 export * from './createTestFile';
 export * from './createTestFunder';
 export * from './createTestInitiative';

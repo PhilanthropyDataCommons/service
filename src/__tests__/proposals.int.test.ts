@@ -5,7 +5,6 @@ import {
 	createApplicationFormField,
 	createOrUpdateBaseField,
 	createChangemakerProposal,
-	createEphemeralUserGroupAssociation,
 	createProposalFieldValue,
 	createProposalVersion,
 	getDatabase,
@@ -19,6 +18,7 @@ import {
 import {
 	createTestBaseField,
 	createTestChangemaker,
+	createTestEphemeralAuthContext,
 	createTestFunder,
 	createTestOpportunity,
 	createTestProposal,
@@ -801,11 +801,15 @@ describe('/proposals', () => {
 				scope: [PermissionGrantEntityType.PROPOSAL],
 				verbs: [PermissionGrantVerb.VIEW],
 			});
-			await createEphemeralUserGroupAssociation(db, null, {
-				userKeycloakUserId: testUser.keycloakUserId,
-				userGroupKeycloakOrganizationId: stringToKeycloakId(expiredOrgId),
-				notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
-			});
+			await createTestEphemeralAuthContext(
+				db,
+				null,
+				{
+					userKeycloakUserId: testUser.keycloakUserId,
+					notAfter: new Date(Date.now() - 3600000).toISOString(), // Expired 1 hour ago
+				},
+				[stringToKeycloakId(expiredOrgId)],
+			);
 
 			const response = await request(app)
 				.get(`/proposals/${proposal.id}`)

@@ -30,6 +30,7 @@ import { createTestFunder } from '../test/factories';
 import {
 	mockJwt as authHeader,
 	mockJwtWithAdminRole as adminUserAuthHeader,
+	getMockJwtWithOrganizations,
 	mockOrgId,
 } from '../test/mockJwt';
 import {
@@ -426,6 +427,123 @@ describe('/funders', () => {
 				permissions: {
 					funder: [PermissionGrantVerb.VIEW],
 				},
+			});
+		});
+
+		it('resolves user group permissions only for tokens that name the user group', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const grantedOrganizationId = 'a5e9dbe6-7d9c-4f4c-9e99-ad4d7ab16f55';
+			const otherOrganizationId = 'b6fae0f7-8ead-405d-8faa-be5e8bc27066';
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: grantedOrganizationId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			const grantedOrganizationAuthHeader = getMockJwtWithOrganizations([
+				grantedOrganizationId,
+			]);
+			const otherOrganizationAuthHeader = getMockJwtWithOrganizations([
+				otherOrganizationId,
+			]);
+
+			const grantedResponse = await agent
+				.get('/funders/theFundFund')
+				.set(grantedOrganizationAuthHeader)
+				.expect(200);
+			const otherResponse = await agent
+				.get('/funders/theFundFund')
+				.set(otherOrganizationAuthHeader)
+				.expect(200);
+			const grantedAgainResponse = await agent
+				.get('/funders/theFundFund')
+				.set(grantedOrganizationAuthHeader)
+				.expect(200);
+
+			expect(grantedResponse.body).toMatchObject({
+				permissions: { funder: [PermissionGrantVerb.VIEW] },
+			});
+			expect(otherResponse.body).toEqual(
+				expectObjectContaining({ permissions: {} }),
+			);
+			expect(grantedAgainResponse.body).toMatchObject({
+				permissions: { funder: [PermissionGrantVerb.VIEW] },
+			});
+		});
+
+		it('resolves no user group permissions for a token without organizations', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const grantedOrganizationId = 'c7a1f108-9fbe-416e-9abb-cf6f9cd38177';
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: grantedOrganizationId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+			await agent
+				.get('/funders/theFundFund')
+				.set(getMockJwtWithOrganizations([grantedOrganizationId]))
+				.expect(200);
+
+			const response = await agent
+				.get('/funders/theFundFund')
+				.set(getMockJwtWithOrganizations([]))
+				.expect(200);
+
+			expect(response.body).toEqual(
+				expectObjectContaining({ permissions: {} }),
+			);
+		});
+
+		it('resolves direct user permissions for tokens naming any user group', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser(db);
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.VIEW],
+			});
+
+			const firstResponse = await agent
+				.get('/funders/theFundFund')
+				.set(
+					getMockJwtWithOrganizations(['d8b2a219-a0cf-427f-8bcc-d0a0ade49288']),
+				)
+				.expect(200);
+			const secondResponse = await agent
+				.get('/funders/theFundFund')
+				.set(
+					getMockJwtWithOrganizations(['e9c3b32a-b1d0-4380-9cdd-e1b1bef5a399']),
+				)
+				.expect(200);
+
+			expect(firstResponse.body).toMatchObject({
+				permissions: { funder: [PermissionGrantVerb.VIEW] },
+			});
+			expect(secondResponse.body).toMatchObject({
+				permissions: { funder: [PermissionGrantVerb.VIEW] },
 			});
 		});
 
@@ -1295,6 +1413,57 @@ describe('/funders', () => {
 					'Authenticated user does not have permission to perform this action.',
 				details: expectArray(),
 			});
+		});
+
+		it('requires MANAGE permission through a token that names the granted user group', async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const grantedOrganizationId = 'e3c7b9c4-5b7a-4d2a-9c77-8b2b5e9f4d33';
+			const otherOrganizationId = 'f4d8cad5-6c8b-4e3b-8d88-9c3c6fa05e44';
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFundFund',
+				isCollaborative: true,
+			});
+			await createTestFunder(db, systemUserAuthContext, {
+				shortCode: 'theFoundationFoundation',
+				isCollaborative: false,
+			});
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER_GROUP,
+				granteeKeycloakOrganizationId: grantedOrganizationId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: 'theFundFund',
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.MANAGE],
+			});
+			const grantedOrganizationAuthHeader = getMockJwtWithOrganizations([
+				grantedOrganizationId,
+			]);
+			const otherOrganizationAuthHeader = getMockJwtWithOrganizations([
+				otherOrganizationId,
+			]);
+			const invitationPath =
+				'/funders/theFundFund/invitations/sent/theFoundationFoundation';
+
+			await agent
+				.post(invitationPath)
+				.type('application/json')
+				.send({})
+				.set(grantedOrganizationAuthHeader)
+				.expect(201);
+			await agent
+				.post(invitationPath)
+				.type('application/json')
+				.send({})
+				.set(otherOrganizationAuthHeader)
+				.expect(403);
+			await agent
+				.post(invitationPath)
+				.type('application/json')
+				.send({})
+				.set(grantedOrganizationAuthHeader)
+				.expect(200);
 		});
 
 		it('creates an invitation to a non-collaborative funder from a collaborative funder, and returns it', async () => {

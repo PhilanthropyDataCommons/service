@@ -99,6 +99,13 @@ For example, here is the relevant portion of a decoded JWT:
   },
 ```
 
+Permissions granted to a group apply only to requests whose JWT lists that
+group. A user who belongs to several organizations but presents a JWT listing
+only one of them receives that organization's group permissions and no others.
+Permissions granted directly to the user, or to all authenticated users, apply
+whichever organizations the JWT lists. A bulk upload is processed with the
+groups listed in the JWT that created it.
+
 Users can see their Keycloak organizations by decoding their JWTs (again,
 assuming the client they used to log in requests the `organizations` scope), or
 by logging into the account management interface e.g. URL `realms/pdc/account`.

@@ -24,7 +24,7 @@ const getMockJwt = (
 		roles?: string[];
 		realmManagementRoles?: string[];
 		iss?: string;
-		organizations?: Record<string, string>;
+		organizations?: Record<string, { id: string }>;
 		iat?: number;
 		jti?: string;
 		scope?: string;
@@ -65,6 +65,16 @@ const getMockJwt = (
 const mockJwt = getMockJwt({
 	sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
 });
+
+const getMockJwtWithOrganizations = (
+	keycloakOrganizationIds: string[],
+): { Authorization: string } =>
+	getMockJwt({
+		sub: nonNullKeycloakIdToString(getTestUserKeycloakUserId()),
+		organizations: Object.fromEntries(
+			keycloakOrganizationIds.map((id) => [id, { id }]),
+		),
+	});
 
 const mockJwtWithoutSub = getMockJwt();
 
@@ -117,4 +127,5 @@ export {
 	mockOrgId,
 	getMockJwt,
 	getMockJwks,
+	getMockJwtWithOrganizations,
 };

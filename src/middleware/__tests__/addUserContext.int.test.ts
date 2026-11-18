@@ -1,4 +1,7 @@
-import { addUserContext } from '../addUserContext';
+import {
+	addUserContext,
+	EPHEMERAL_USER_GROUP_ASSOCIATION_LIFETIME_SECONDS,
+} from '../addUserContext';
 import {
 	getDatabase,
 	loadUserByKeycloakUserId,
@@ -11,7 +14,8 @@ import {
 	expectTimestamp,
 } from '../../test/asymettricMatchers';
 import { stringToKeycloakId } from '../../types';
-import { InputValidationError } from '../../errors';
+import { InputValidationError, UnauthorizedError } from '../../errors';
+import { MS_PER_SECOND } from '../../constants';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import type { AuthenticatedRequest } from '../../types';
 
@@ -45,6 +49,7 @@ describe('addUserContext', () => {
 		req.auth = {
 			sub: '123e4567-e89b-12d3-a456-426614174000',
 			name: 'Olivia',
+			exp: Math.round(new Date().getTime() / 1000) + 3600,
 		};
 
 		loadTableMetrics(db, 'users')
@@ -69,12 +74,67 @@ describe('addUserContext', () => {
 			});
 	});
 
+	it('passes an error and does not assign a user when the token has no exp', (done) => {
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			sub: '123e4567-e89b-12d3-a456-426614174000',
+			name: 'Ruth',
+		};
+
+		const runAssertions = (err: unknown) => {
+			expect(err).toBeInstanceOf(UnauthorizedError);
+			expect(req.user).toBe(undefined);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addUserContext(req, res, nextMock);
+	});
+
+	it('creates ephemeral user group associations that outlive a token about to expire', (done) => {
+		const db = getDatabase();
+		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
+		const mockAuthExp = Math.round(new Date().getTime() / 1000) + 60;
+		const req = getMockRequest() as AuthenticatedRequest;
+		const res = getMockResponse();
+		req.auth = {
+			sub: mockSub,
+			name: 'Sabine',
+			exp: mockAuthExp,
+			organizations: {
+				myOrganization: { id: '47d406ad-5e50-42d4-88f1-f87947a3e314' },
+			},
+		};
+
+		const runAssertions = async (err: unknown) => {
+			expect(err).toBe(undefined);
+			const ephemeralUserGroupAssociations =
+				await loadEphemeralUserGroupAssociationsByUserKeycloakUserId(
+					db,
+					null,
+					stringToKeycloakId(mockSub),
+					undefined,
+					undefined,
+				);
+			const expirations = ephemeralUserGroupAssociations.entries.map((item) =>
+				new Date(item.notAfter).getTime(),
+			);
+			expect(expirations).toHaveLength(1);
+			expect(Math.min(...expirations)).toBeGreaterThan(mockAuthExp * 1000);
+		};
+
+		const nextMock = generateNextWithAssertions(runAssertions, done);
+		addUserContext(req, res, nextMock);
+	});
+
 	it('creates ephemeral user group associations when organizations are provided', (done) => {
 		const db = getDatabase();
 		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
 		const mockName = 'Provolone';
 		const mockAuthExp = Math.round(new Date().getTime() / 1000) + 3600;
-		const expectedNotAfter = new Date(mockAuthExp * 1000).toISOString();
+		const associationLifetimeMs =
+			EPHEMERAL_USER_GROUP_ASSOCIATION_LIFETIME_SECONDS * MS_PER_SECOND;
+		const requestedAt = new Date().getTime();
 		const myOrganizationId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
 		const myOtherOrganizationId = '95e06557-6141-4be5-81df-e7f1a14bff5d';
 		const req = getMockRequest() as AuthenticatedRequest;
@@ -123,10 +183,15 @@ describe('addUserContext', () => {
 						ephemeralUserGroupAssociations.entries.map((item) =>
 							new Date(item.notAfter).getTime(),
 						);
-					expect(ephemeralUserGroupAssociationExpirations).toEqual([
-						new Date(expectedNotAfter).getTime(),
-						new Date(expectedNotAfter).getTime(),
-					]);
+					const assertedAt = new Date().getTime();
+					ephemeralUserGroupAssociationExpirations.forEach((expiration) => {
+						expect(expiration).toBeGreaterThanOrEqual(
+							requestedAt + associationLifetimeMs,
+						);
+						expect(expiration).toBeLessThanOrEqual(
+							assertedAt + associationLifetimeMs,
+						);
+					});
 					expect(ephemeralUserGroupAssociationCount).toEqual(
 						baselineEphemeralUserGroupAssociationCount + 2,
 					);

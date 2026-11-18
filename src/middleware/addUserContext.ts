@@ -18,6 +18,7 @@ import {
 import { getSystemUser } from '../config';
 import { InputValidationError, UnauthorizedError } from '../errors';
 import { MS_PER_SECOND } from '../constants';
+import { epochSecondsToIsoString } from '../time';
 import type { Request, NextFunction, Response } from 'express';
 import type { AuthenticatedRequest } from '../types';
 
@@ -71,9 +72,7 @@ const addUserContext = (
 			keycloakUserId: stringToKeycloakId(keycloakUserId),
 			keycloakUserName,
 		},
-		jwtIssuedAt === null
-			? null
-			: new Date(jwtIssuedAt * MS_PER_SECOND).toISOString(),
+		jwtIssuedAt === null ? null : epochSecondsToIsoString(jwtIssuedAt),
 	)
 		.then(() => {
 			const createEphemeralUserGroupAssociationPromises =

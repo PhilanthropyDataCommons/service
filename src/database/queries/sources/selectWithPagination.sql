@@ -4,7 +4,7 @@ WITH
 		FROM sources
 			INNER JOIN
 				permitted_source_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'source'
@@ -27,7 +27,7 @@ WITH
 		SELECT
 			source_to_json(
 				page.*::sources,
-				:authContextKeycloakUserId,
+				:authContextId,
 				:authContextIsAdministrator
 			) AS object
 		FROM page

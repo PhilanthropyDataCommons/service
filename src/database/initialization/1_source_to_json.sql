@@ -2,7 +2,7 @@ SELECT drop_function('source_to_json');
 
 CREATE FUNCTION source_to_json(
 	source sources,
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_id text DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 )
 RETURNS jsonb AS $$
@@ -26,11 +26,11 @@ BEGIN
   -- (source -> changemaker -> fields -> batch -> source).
   SELECT changemaker_to_json(
     changemakers.*, NULL, NULL, NULL, TRUE,
-    source_to_json.auth_context_keycloak_user_id IS NOT NULL
+    source_to_json.auth_context_id IS NOT NULL
     AND EXISTS (
       SELECT 1
       FROM permitted_changemaker_ids_among(
-        source_to_json.auth_context_keycloak_user_id,
+        source_to_json.auth_context_id,
         source_to_json.auth_context_is_administrator,
         'view',
         'changemaker',

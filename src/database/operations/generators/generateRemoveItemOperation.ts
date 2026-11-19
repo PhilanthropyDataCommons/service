@@ -1,8 +1,8 @@
 import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import { NotFoundError } from '../../../errors';
 import {
+	getAuthContextIdFromAuthContext,
 	getIsAdministratorFromAuthContext,
-	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type { AuthIdentityAndRole, JsonResultSet } from '../../../types';
 import type { TinyPg } from 'tinypg';
@@ -31,8 +31,7 @@ const generateRemoveItemOperation =
 		authContext: AuthIdentityAndRole | null,
 		...args: [...P]
 	): Promise<T> => {
-		const authContextKeycloakUserId =
-			getKeycloakUserIdFromAuthContext(authContext);
+		const authContextId = getAuthContextIdFromAuthContext(authContext);
 		const authContextIsAdministrator =
 			getIsAdministratorFromAuthContext(authContext);
 		const queryParameters = parameterNames.reduce(
@@ -41,7 +40,7 @@ const generateRemoveItemOperation =
 				[parameterName]: args[index],
 			}),
 			{
-				authContextKeycloakUserId,
+				authContextId,
 				authContextIsAdministrator,
 			},
 		);

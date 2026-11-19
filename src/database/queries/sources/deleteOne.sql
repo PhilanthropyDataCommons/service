@@ -3,6 +3,6 @@ WHERE
 	id = :sourceId
 RETURNING source_to_json(
 	sources,
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS object;

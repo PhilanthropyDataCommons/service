@@ -50,7 +50,7 @@ WITH
 			INNER JOIN
 				build_changemakers_results(
 					array(SELECT page_changemakers.changemaker FROM page_changemakers),
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator
 				) AS serialized_changemaker
 				ON page.id = serialized_changemaker.id

@@ -60,7 +60,7 @@ WITH
 			INNER JOIN
 				build_funders_results(
 					array(SELECT page_funders.funder FROM page_funders),
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator
 				) AS serialized_funder
 				ON page.short_code = serialized_funder.short_code

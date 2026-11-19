@@ -1,13 +1,13 @@
 SELECT
 	build_initiative_field_value_result(
 		initiative_field_values.*::initiative_field_values,
-		:authContextKeycloakUserId,
+		:authContextId,
 		:authContextIsAdministrator
 	) AS object
 FROM initiative_field_values
 	INNER JOIN
 		permitted_initiative_field_value_ids_among(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'view',
 			'initiativeFieldValue',

@@ -11,7 +11,7 @@ SELECT drop_function('permitted_initiative_field_value_ids_among');
 -- grant-inheritance branch entirely: they already have every non-forbidden
 -- field, so that branch can only return a subset of what they already get.
 CREATE FUNCTION permitted_initiative_field_value_ids_among(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t,
@@ -67,11 +67,11 @@ CREATE FUNCTION permitted_initiative_field_value_ids_among(
 		AND scope_set_permits_scope(
 			pg.scope, permitted_initiative_field_value_ids_among.scope
 		)
-		AND grantee_permits_user(
+		AND grantee_permits_auth_context(
 			pg.grantee_type,
 			pg.grantee_user_keycloak_user_id,
 			pg.grantee_keycloak_organization_id,
-			permitted_initiative_field_value_ids_among.user_keycloak_user_id
+			permitted_initiative_field_value_ids_among.auth_context_id
 		)
 		AND (
 			pg.conditions IS NULL

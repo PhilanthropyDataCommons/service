@@ -3,7 +3,7 @@ SELECT drop_function('permitted_permission_grant_ids');
 -- Returns the ids of permission grants the user may manage: every grant for
 -- administrators, otherwise grants whose context entity the user can manage.
 CREATE FUNCTION permitted_permission_grant_ids(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean
 ) RETURNS TABLE (id int) AS $$
 	-- Administrators may manage every grant.
@@ -16,7 +16,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_funder_short_codes(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'funder'
@@ -28,7 +28,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_data_provider_short_codes(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'dataProvider'
@@ -41,7 +41,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_changemaker_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'changemaker'
@@ -53,7 +53,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_opportunity_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'opportunity'
@@ -65,7 +65,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_source_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'source'
@@ -77,7 +77,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_application_form_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'applicationForm'
@@ -90,7 +90,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_proposal_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'proposal'
@@ -102,7 +102,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_changemaker_field_value_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'changemakerFieldValue'
@@ -115,7 +115,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_proposal_field_value_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'proposalFieldValue'
@@ -128,7 +128,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_terminology_set_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'terminologySet'
@@ -141,7 +141,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_initiative_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'initiative'
@@ -154,7 +154,7 @@ CREATE FUNCTION permitted_permission_grant_ids(
 	SELECT pg.id
 	FROM permission_grants pg
 	INNER JOIN permitted_initiative_field_value_ids(
-		permitted_permission_grant_ids.user_keycloak_user_id,
+		permitted_permission_grant_ids.auth_context_id,
 		permitted_permission_grant_ids.user_is_admin,
 		'manage',
 		'initiativeFieldValue'

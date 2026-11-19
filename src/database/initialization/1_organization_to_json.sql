@@ -2,7 +2,7 @@ SELECT drop_function('organization_to_json');
 
 CREATE FUNCTION organization_to_json(
 	keycloak_id uuid,
-	auth_context_keycloak_user_id uuid,
+	auth_context_id text,
 	auth_context_is_administrator boolean,
 	auth_context_can_view_organizations_in_keycloak boolean,
 	auth_context_can_view_users_in_keycloak boolean
@@ -24,7 +24,7 @@ BEGIN
   INTO changemaker_json
   FROM changemakers
   INNER JOIN permitted_changemaker_ids(
-    auth_context_keycloak_user_id,
+    auth_context_id,
     auth_context_is_administrator,
     'view',
     'changemaker'
@@ -35,7 +35,7 @@ BEGIN
   INTO data_provider_json
   FROM data_providers
   INNER JOIN permitted_data_provider_short_codes(
-    auth_context_keycloak_user_id,
+    auth_context_id,
     auth_context_is_administrator,
     'view',
     'dataProvider'
@@ -47,7 +47,7 @@ BEGIN
   INTO funder_json
   FROM funders
   INNER JOIN permitted_funder_short_codes(
-    auth_context_keycloak_user_id,
+    auth_context_id,
     auth_context_is_administrator,
     'view',
     'funder'

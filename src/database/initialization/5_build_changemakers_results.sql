@@ -11,7 +11,7 @@ SELECT drop_function('build_changemakers_results');
 -- per-changemaker query the row-by-row serializer ran.
 CREATE FUNCTION build_changemakers_results(
 	changemakers changemakers[],
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_id text DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS TABLE (id int, object jsonb) AS $$
 	WITH input_changemakers AS (
@@ -22,7 +22,7 @@ CREATE FUNCTION build_changemakers_results(
 	viewable_changemaker_ids AS (
 		SELECT p.id
 		FROM permitted_changemaker_ids_among(
-			build_changemakers_results.auth_context_keycloak_user_id,
+			build_changemakers_results.auth_context_id,
 			build_changemakers_results.auth_context_is_administrator,
 			'view', 'changemaker',
 			ARRAY(
@@ -36,14 +36,14 @@ CREATE FUNCTION build_changemakers_results(
 					AND NOT is_expired(fs.not_after)
 			)
 		) AS p
-		WHERE build_changemakers_results.auth_context_keycloak_user_id
+		WHERE build_changemakers_results.auth_context_id
 			IS NOT NULL
 	),
 	-- viewable field values, bounded to this page's field values
 	permitted_proposal_field_values AS (
 		SELECT p.id
 		FROM permitted_proposal_field_value_ids_among(
-			build_changemakers_results.auth_context_keycloak_user_id,
+			build_changemakers_results.auth_context_id,
 			build_changemakers_results.auth_context_is_administrator,
 			'view', 'proposalFieldValue',
 			ARRAY(
@@ -58,7 +58,7 @@ CREATE FUNCTION build_changemakers_results(
 	permitted_changemaker_field_values AS (
 		SELECT p.id
 		FROM permitted_changemaker_field_value_ids_among(
-			build_changemakers_results.auth_context_keycloak_user_id,
+			build_changemakers_results.auth_context_id,
 			build_changemakers_results.auth_context_is_administrator,
 			'view', 'changemakerFieldValue',
 			ARRAY(
@@ -83,7 +83,9 @@ CREATE FUNCTION build_changemakers_results(
 			ON sponsor.id = fs.fiscal_sponsor_changemaker_id
 		INNER JOIN users u
 			ON u.keycloak_user_id
-			= build_changemakers_results.auth_context_keycloak_user_id
+			= auth_context_user_keycloak_user_id(
+				build_changemakers_results.auth_context_id
+			)
 		LEFT JOIN viewable_changemaker_ids vci ON vci.id = sponsor.id
 		WHERE fs.fiscal_sponsee_changemaker_id IN (
 			SELECT ic.id FROM input_changemakers ic
@@ -114,7 +116,9 @@ CREATE FUNCTION build_changemakers_results(
 			FROM proposal_field_values pfv
 			INNER JOIN users u
 				ON u.keycloak_user_id
-				= build_changemakers_results.auth_context_keycloak_user_id
+				= auth_context_user_keycloak_user_id(
+					build_changemakers_results.auth_context_id
+				)
 			INNER JOIN application_form_fields aff
 				ON pfv.application_form_field_id = aff.id
 			INNER JOIN base_fields bf ON aff.base_field_short_code = bf.short_code
@@ -145,7 +149,9 @@ CREATE FUNCTION build_changemakers_results(
 			FROM changemaker_field_values cfv
 			INNER JOIN users u
 				ON u.keycloak_user_id
-				= build_changemakers_results.auth_context_keycloak_user_id
+				= auth_context_user_keycloak_user_id(
+					build_changemakers_results.auth_context_id
+				)
 			INNER JOIN base_fields bf ON cfv.base_field_short_code = bf.short_code
 			INNER JOIN changemaker_field_value_batches cfvb ON cfv.batch_id = cfvb.id
 			INNER JOIN sources s ON cfvb.source_id = s.id
@@ -185,7 +191,7 @@ CREATE FUNCTION build_changemakers_results(
 					WHEN 1 THEN build_proposal_field_value_result(pfv.*)
 					WHEN 2 THEN build_changemaker_field_value_result(
 						cfv.*,
-						build_changemakers_results.auth_context_keycloak_user_id,
+						build_changemakers_results.auth_context_id,
 						build_changemakers_results.auth_context_is_administrator
 					)
 				END AS field_value_json
@@ -205,7 +211,7 @@ CREATE FUNCTION build_changemakers_results(
 			p.changemaker_id,
 			p.permissions
 		FROM changemaker_permissions_json_among(
-			build_changemakers_results.auth_context_keycloak_user_id,
+			build_changemakers_results.auth_context_id,
 			build_changemakers_results.auth_context_is_administrator,
 			ARRAY(SELECT ic.id FROM input_changemakers ic)
 		) AS p

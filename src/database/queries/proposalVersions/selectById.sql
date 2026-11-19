@@ -1,7 +1,7 @@
 SELECT
 	build_proposal_version_result(
 		proposal_versions,
-		:authContextKeycloakUserId,
+		:authContextId,
 		:authContextIsAdministrator
 	) AS object
 FROM proposal_versions
@@ -10,7 +10,7 @@ WHERE
 	AND proposal_versions.proposal_id IN (
 		SELECT permitted_proposals.id
 		FROM permitted_proposal_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'view',
 			'proposal'

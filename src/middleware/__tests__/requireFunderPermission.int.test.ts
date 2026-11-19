@@ -10,7 +10,12 @@ import {
 	createPermissionGrant,
 	loadSystemUser,
 } from '../../database';
-import { getAuthContext, getMockedUser, loadTestUser } from '../../test/utils';
+import {
+	getAuthContext,
+	getTestAuthContextId,
+	getMockedUser,
+	loadTestUser,
+} from '../../test/utils';
 import { createTestFunder } from '../../test/factories';
 import { getMockRequest, getMockResponse } from '../../test/mockExpress';
 import {
@@ -38,6 +43,7 @@ describe('requireFunderPermission', () => {
 	it('calls next without error when user is an administrator', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
+		req.authContextId = getTestAuthContextId(getMockedUser());
 		req.user = getMockedUser();
 		req.role = {
 			isAdministrator: true,
@@ -56,6 +62,7 @@ describe('requireFunderPermission', () => {
 	it('calls next with an InputValidationError when funderShortCode is invalid', (done) => {
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
+		req.authContextId = getTestAuthContextId(getMockedUser());
 		req.user = getMockedUser();
 		req.role = {
 			isAdministrator: false,
@@ -83,6 +90,7 @@ describe('requireFunderPermission', () => {
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
+			req.authContextId = getTestAuthContextId(testUser);
 			req.user = testUser;
 			req.role = {
 				isAdministrator: false,
@@ -114,6 +122,7 @@ describe('requireFunderPermission', () => {
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
+			req.authContextId = getTestAuthContextId(testUser);
 			req.user = testUser;
 			req.role = {
 				isAdministrator: false,
@@ -154,6 +163,7 @@ describe('requireFunderPermission', () => {
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
+			req.authContextId = getTestAuthContextId(testUser);
 			req.user = testUser;
 			req.role = {
 				isAdministrator: false,
@@ -163,6 +173,53 @@ describe('requireFunderPermission', () => {
 			req.params = { funderShortCode: permittedFunder.shortCode };
 			const nextMock = jest.fn((error: unknown) => {
 				expect(error).toBe(undefined);
+				done();
+			});
+
+			void requireFunderPermission(PermissionGrantVerb.EDIT)(
+				req,
+				res,
+				nextMock,
+			);
+		})();
+	});
+
+	it('calls next with a ForbiddenError when the auth context has expired', (done) => {
+		void (async () => {
+			const db = getDatabase();
+			const systemUser = await loadSystemUser(db, null);
+			const systemUserAuthContext = getAuthContext(systemUser, true);
+			const testUser = await loadTestUser(db);
+			const testUserAuthContext = getAuthContext(testUser);
+			const permittedFunder = await createTestFunder(db, testUserAuthContext);
+
+			await createPermissionGrant(db, systemUserAuthContext, {
+				granteeType: PermissionGrantGranteeType.USER,
+				granteeUserKeycloakUserId: testUser.keycloakUserId,
+				contextEntityType: PermissionGrantEntityType.FUNDER,
+				funderShortCode: permittedFunder.shortCode,
+				scope: [PermissionGrantEntityType.FUNDER],
+				verbs: [PermissionGrantVerb.EDIT],
+			});
+			await db.query(
+				`UPDATE ephemeral_auth_contexts
+				SET not_after = now() - interval '1 second'
+				WHERE token_id = :tokenId;`,
+				{ tokenId: getTestAuthContextId(testUser) },
+			);
+
+			const req = getMockRequest() as AuthenticatedRequest;
+			const res = getMockResponse();
+			req.authContextId = getTestAuthContextId(testUser);
+			req.user = testUser;
+			req.role = {
+				isAdministrator: false,
+				canViewUsersInKeycloak: false,
+				canViewOrganizationsInKeycloak: false,
+			};
+			req.params = { funderShortCode: permittedFunder.shortCode };
+			const nextMock = jest.fn((error: unknown) => {
+				expect(error).toBeInstanceOf(ForbiddenError);
 				done();
 			});
 
@@ -194,6 +251,7 @@ describe('requireFunderPermission', () => {
 
 			const req = getMockRequest() as AuthenticatedRequest;
 			const res = getMockResponse();
+			req.authContextId = getTestAuthContextId(testUser);
 			req.user = testUser;
 			req.role = {
 				isAdministrator: false,

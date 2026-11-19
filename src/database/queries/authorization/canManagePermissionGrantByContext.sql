@@ -1,7 +1,7 @@
 SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	SELECT 1 FROM
 		permitted_funder_short_codes(
-			:authContextKeycloakUserId, :authContextIsAdministrator, 'manage', 'funder'
+			:authContextId, :authContextIsAdministrator, 'manage', 'funder'
 		) AS f
 	WHERE
 		:contextEntityType::text = 'funder'
@@ -9,7 +9,7 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	UNION ALL
 	SELECT 1 FROM
 		permitted_data_provider_short_codes(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'manage',
 			'dataProvider'
@@ -20,7 +20,7 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	UNION ALL
 	SELECT 1 FROM
 		permitted_changemaker_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'manage',
 			'changemaker'
@@ -30,7 +30,7 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	UNION ALL
 	SELECT 1 FROM
 		permitted_opportunity_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'manage',
 			'opportunity'
@@ -40,13 +40,13 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	UNION ALL
 	SELECT 1 FROM
 		permitted_source_ids(
-			:authContextKeycloakUserId, :authContextIsAdministrator, 'manage', 'source'
+			:authContextId, :authContextIsAdministrator, 'manage', 'source'
 		) AS s
 	WHERE :contextEntityType::text = 'source' AND s.id = :sourceId::integer
 	UNION ALL
 	SELECT 1 FROM
 		permitted_application_form_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'manage',
 			'applicationForm'
@@ -57,13 +57,13 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	UNION ALL
 	SELECT 1 FROM
 		permitted_proposal_ids(
-			:authContextKeycloakUserId, :authContextIsAdministrator, 'manage', 'proposal'
+			:authContextId, :authContextIsAdministrator, 'manage', 'proposal'
 		) AS p
 	WHERE :contextEntityType::text = 'proposal' AND p.id = :proposalId::integer
 	UNION ALL
 	SELECT 1 FROM
 		permitted_changemaker_field_value_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'manage',
 			'changemakerFieldValue'
@@ -74,7 +74,7 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	UNION ALL
 	SELECT 1 FROM
 		permitted_proposal_field_value_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'manage',
 			'proposalFieldValue'
@@ -85,7 +85,7 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	UNION ALL
 	SELECT 1 FROM
 		permitted_terminology_set_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'manage',
 			'terminologySet'
@@ -96,7 +96,7 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	UNION ALL
 	SELECT 1 FROM
 		permitted_initiative_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'manage',
 			'initiative'
@@ -107,7 +107,7 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 	UNION ALL
 	SELECT 1 FROM
 		permitted_initiative_field_value_ids_among(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'manage',
 			'initiativeFieldValue',

@@ -4,7 +4,7 @@ WITH
 		FROM application_forms
 			INNER JOIN
 				permitted_application_form_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'applicationForm'

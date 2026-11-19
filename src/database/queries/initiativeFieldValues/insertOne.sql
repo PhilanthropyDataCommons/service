@@ -13,11 +13,11 @@ INSERT INTO initiative_field_values (
 	:value,
 	:isValid,
 	:goodAsOf,
-	:authContextKeycloakUserId
+	auth_context_user_keycloak_user_id(:authContextId)
 )
 RETURNING
 	build_initiative_field_value_result(
 		initiative_field_values,
-		:authContextKeycloakUserId,
+		:authContextId,
 		:authContextIsAdministrator
 	) AS object;

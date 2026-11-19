@@ -3,7 +3,8 @@ FROM organization_sync_tasks
 WHERE
 	id = :organizationSyncTaskId
 	AND (
-		:authContextKeycloakUserId::uuid IS NULL
-		OR organization_sync_tasks.created_by = :authContextKeycloakUserId
+		:authContextId::text IS NULL
+		OR organization_sync_tasks.created_by
+		= auth_context_user_keycloak_user_id(:authContextId)
 		OR :authContextIsAdministrator::boolean
 	);

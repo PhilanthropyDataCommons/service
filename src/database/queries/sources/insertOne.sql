@@ -10,10 +10,10 @@ VALUES (
 	:dataProviderShortCode,
 	:funderShortCode,
 	:changemakerId,
-	:authContextKeycloakUserId
+	auth_context_user_keycloak_user_id(:authContextId)
 )
 RETURNING source_to_json(
 	sources,
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS object;

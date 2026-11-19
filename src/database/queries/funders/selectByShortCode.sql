@@ -8,6 +8,6 @@ WITH
 SELECT serialized_funder.object
 FROM build_funders_results(
 	array(SELECT requested_funder.funder FROM requested_funder),
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS serialized_funder;

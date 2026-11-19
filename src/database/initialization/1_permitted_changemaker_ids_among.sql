@@ -6,7 +6,7 @@ SELECT drop_function('permitted_changemaker_ids_among');
 -- than every changemaker the user can see. Administrators would otherwise
 -- enumerate the whole changemakers table on each request.
 CREATE FUNCTION permitted_changemaker_ids_among(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t,
@@ -29,10 +29,10 @@ CREATE FUNCTION permitted_changemaker_ids_among(
 		AND scope_set_permits_scope(
 			pg.scope, permitted_changemaker_ids_among.scope
 		)
-		AND grantee_permits_user(
+		AND grantee_permits_auth_context(
 			pg.grantee_type,
 			pg.grantee_user_keycloak_user_id,
 			pg.grantee_keycloak_organization_id,
-			permitted_changemaker_ids_among.user_keycloak_user_id
+			permitted_changemaker_ids_among.auth_context_id
 		);
 $$ LANGUAGE sql STABLE;

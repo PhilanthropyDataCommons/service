@@ -4,7 +4,7 @@ WITH
 		FROM initiatives
 			INNER JOIN
 				permitted_initiative_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'initiative'

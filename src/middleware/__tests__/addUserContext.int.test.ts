@@ -209,11 +209,13 @@ describe('addUserContext', () => {
 			});
 	});
 
-	it('records an ephemeral auth context that lasts 180 seconds from the request', (done) => {
+	it("records an ephemeral auth context with the token's organizations that lasts 180 seconds from the request", (done) => {
 		const db = getDatabase();
 		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
 		const lifetimeMs = 180 * 1000;
 		const requestedAt = new Date().getTime();
+		const myOrganizationId = '47d406ad-5e50-42d4-88f1-f87947a3e314';
+		const myOtherOrganizationId = '95e06557-6141-4be5-81df-e7f1a14bff5d';
 		const req = getMockRequest() as AuthenticatedRequest;
 		const res = getMockResponse();
 		req.auth = {
@@ -221,6 +223,10 @@ describe('addUserContext', () => {
 			name: 'Provolone',
 			exp: Math.round(requestedAt / 1000) + 3600,
 			jti: 'provoloneToken',
+			organizations: {
+				myOrganization: { id: myOrganizationId },
+				myOtherOrganization: { id: myOtherOrganizationId },
+			},
 		};
 
 		const runAssertions = async (err: unknown) => {
@@ -241,13 +247,26 @@ describe('addUserContext', () => {
 			const notAfter = new Date(authContext.notAfter).getTime();
 			expect(notAfter).toBeGreaterThanOrEqual(requestedAt + lifetimeMs);
 			expect(notAfter).toBeLessThanOrEqual(new Date().getTime() + lifetimeMs);
+			const { rows: organizationRows } = await db.query<{
+				keycloakOrganizationId: string;
+			}>(
+				`SELECT keycloak_organization_id AS "keycloakOrganizationId"
+				FROM ephemeral_auth_context_organizations
+				WHERE auth_context_id = :authContextId
+				ORDER BY keycloak_organization_id`,
+				{ authContextId: authContext.tokenId },
+			);
+			expect(organizationRows).toEqual([
+				{ keycloakOrganizationId: myOrganizationId },
+				{ keycloakOrganizationId: myOtherOrganizationId },
+			]);
 		};
 
 		const nextMock = generateNextWithAssertions(runAssertions, done);
 		addUserContext(req, res, nextMock);
 	});
 
-	it('extends the ephemeral auth context on each request with the same token', (done) => {
+	it('extends the ephemeral auth context on each request with the same token without recording its organizations again', (done) => {
 		const db = getDatabase();
 		const mockSub = '123e4567-e89b-12d3-a456-426614174000';
 		const auth = {
@@ -255,6 +274,9 @@ describe('addUserContext', () => {
 			name: 'Quentin',
 			exp: Math.round(new Date().getTime() / 1000) + 3600,
 			jti: 'quentinToken',
+			organizations: {
+				myOrganization: { id: '47d406ad-5e50-42d4-88f1-f87947a3e314' },
+			},
 		};
 		const firstReq = getMockRequest() as AuthenticatedRequest;
 		const secondReq = getMockRequest() as AuthenticatedRequest;
@@ -274,6 +296,12 @@ describe('addUserContext', () => {
 			expect(new Date(authContext.notAfter).getTime()).toBeGreaterThan(
 				new Date().getTime(),
 			);
+			const { count: organizationCount } = await loadTableMetrics(
+				db,
+				'ephemeral_auth_context_organizations',
+			);
+			expect(secondReq.authContextId).toEqual(firstReq.authContextId);
+			expect(organizationCount).toEqual(1);
 		};
 
 		const firstNext = (firstErr?: unknown): void => {

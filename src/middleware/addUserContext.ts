@@ -15,13 +15,18 @@ import {
 	getAuthNameFromRequest,
 } from '../types';
 import { getSystemUser } from '../config';
-import { InputValidationError } from '../errors';
+import { InputValidationError, UnauthorizedError } from '../errors';
 import { MS_PER_SECOND } from '../constants';
 import type { Request, NextFunction, Response } from 'express';
 import type { AuthenticatedRequest } from '../types';
 
-const MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS = 180;
-const JWT_NEVER_EXPIRES = 0;
+const EPHEMERAL_USER_GROUP_ASSOCIATION_LIFETIME_SECONDS = 180;
+
+const getEphemeralUserGroupAssociationExpiration = (): string =>
+	new Date(
+		Date.now() +
+			EPHEMERAL_USER_GROUP_ASSOCIATION_LIFETIME_SECONDS * MS_PER_SECOND,
+	).toISOString();
 
 const addUserContext = (
 	req: Request,
@@ -32,7 +37,7 @@ const addUserContext = (
 	const keycloakUserId = getAuthSubFromRequest(req);
 	const keycloakUserName = getAuthNameFromRequest(req);
 	const keycloakOrganizationIds = getKeycloakOrganizationIdsFromRequest(req);
-	const jwtExpiration = getJwtExpFromRequest(req) ?? JWT_NEVER_EXPIRES;
+	const jwtExpiration = getJwtExpFromRequest(req);
 	const jwtIssuedAt = getJwtIatFromRequest(req);
 	const systemUser = getSystemUser();
 	if (
@@ -50,6 +55,11 @@ const addUserContext = (
 				isKeycloakId.errors ?? [],
 			),
 		);
+		return;
+	}
+
+	if (jwtExpiration === null) {
+		next(new UnauthorizedError('auth token must include an exp claim'));
 		return;
 	}
 
@@ -71,12 +81,7 @@ const addUserContext = (
 						await createEphemeralUserGroupAssociation(db, null, {
 							userKeycloakUserId: keycloakUserId,
 							userGroupKeycloakOrganizationId: keycloakOrganizationId,
-							notAfter: new Date(
-								Math.max(
-									jwtExpiration,
-									MINIMUM_EPHEMERAL_USER_GROUP_ASSOCIATION_TIMEOUT_SECONDS,
-								) * MS_PER_SECOND,
-							).toISOString(),
+							notAfter: getEphemeralUserGroupAssociationExpiration(),
 						}),
 				);
 			Promise.all(createEphemeralUserGroupAssociationPromises)

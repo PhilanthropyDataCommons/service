@@ -1,0 +1,10 @@
+{
+	"schema": {
+		"type": "string",
+		"format": "uuid"
+	},
+	"in": "query",
+	"name": "granteeOrganization",
+	"required": false,
+	"description": "Filters permission grants to those granted to the user group with the given Keycloak organization id."
+}

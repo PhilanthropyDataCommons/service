@@ -1,0 +1,17 @@
+{
+	"schema": {
+		"oneOf": [
+			{
+				"type": "string",
+				"format": "uuid"
+			},
+			{
+				"enum": ["me"]
+			}
+		]
+	},
+	"in": "query",
+	"name": "granteeUser",
+	"required": false,
+	"description": "Applies a filter based on permission grant grantee user, or 'me'."
+}

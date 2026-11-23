@@ -1,0 +1,9 @@
+{
+	"schema": {
+		"$ref": "../schemas/PermissionGrantEntityType.json"
+	},
+	"in": "query",
+	"name": "contextEntityType",
+	"required": false,
+	"description": "Applies a filter based on permission grant context entity type."
+}

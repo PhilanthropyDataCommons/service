@@ -1,3 +1,4 @@
+import type { JSONSchemaType } from 'ajv';
 import type { Id } from './Id';
 
 enum PermissionGrantEntityType {
@@ -18,6 +19,12 @@ enum PermissionGrantEntityType {
 	INITIATIVE_FIELD_VALUE = 'initiativeFieldValue',
 	ANY = 'any',
 }
+
+const permissionGrantEntityTypeSchema: JSONSchemaType<PermissionGrantEntityType> =
+	{
+		type: 'string',
+		enum: Object.values(PermissionGrantEntityType),
+	};
 
 enum PermissionGrantEntityKeyType {
 	ID = 'id',
@@ -202,6 +209,7 @@ export {
 	jsonSchemaTypeForPermissionGrantEntityKeyType,
 	PermissionGrantEntityKeyType,
 	PermissionGrantEntityType,
+	permissionGrantEntityTypeSchema,
 	type PermissionGrantEntityKeyValueType,
 	type PermissionGrantKeyedContextEntityType,
 };

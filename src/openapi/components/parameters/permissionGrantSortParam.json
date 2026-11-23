@@ -1,0 +1,21 @@
+{
+	"schema": {
+		"type": "string",
+		"enum": [
+			"id",
+			"-id",
+			"createdAt",
+			"-createdAt",
+			"granteeType",
+			"-granteeType",
+			"contextEntityType",
+			"-contextEntityType",
+			"createdByUserName",
+			"-createdByUserName"
+		]
+	},
+	"in": "query",
+	"name": "_sort",
+	"required": false,
+	"description": "Applies a sort based on the given field. Prefix with `-` for descending order. Defaults to `id` descending, which also breaks ties."
+}

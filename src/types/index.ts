@@ -16,6 +16,7 @@ export * from './CheckResult';
 export * from './CopyBaseFieldsJobPayload';
 export * from './DataProvider';
 export * from './DefaultPermissionGrant';
+export * from './EphemeralAuthContext';
 export * from './EphemeralUserGroupAssociation';
 export * from './express/AuthenticatedRequest';
 export * from './FieldValueBase';

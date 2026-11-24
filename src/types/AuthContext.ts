@@ -17,6 +17,12 @@ type AuthIdentityAndRole = Pick<AuthContext, 'role'> & {
 	user: Pick<AuthContext['user'], 'keycloakUserId'>;
 };
 
+const EMPTY_AUTH_CONTEXT_ROLES: AuthContext['role'] = {
+	isAdministrator: false,
+	canViewUsersInKeycloak: false,
+	canViewOrganizationsInKeycloak: false,
+};
+
 const authContextSchema: JSONSchemaType<AuthContext> = {
 	type: 'object',
 	properties: {
@@ -68,6 +74,7 @@ const getCanViewOrganizationsInKeycloakFromAuthContext = (
 export {
 	type AuthContext,
 	type AuthIdentityAndRole,
+	EMPTY_AUTH_CONTEXT_ROLES,
 	authContextSchema,
 	isAuthContext,
 	getKeycloakUserIdFromAuthContext,

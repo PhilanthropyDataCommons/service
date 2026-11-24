@@ -408,7 +408,14 @@
 			"attributes": {},
 			"realmRoles": ["pdc-admin"],
 			"clientRoles": {
-				"realm-management": ["query-users", "view-users", "manage-users"]
+				"realm-management": [
+					"query-users",
+					"view-users",
+					"manage-users",
+					"query-organizations",
+					"view-organizations",
+					"manage-organizations"
+				]
 			}
 		}
 	],
@@ -743,7 +750,8 @@
 				"address",
 				"phone",
 				"offline_access",
-				"microprofile-jwt"
+				"microprofile-jwt",
+				"kc-admin-api"
 			]
 		},
 		{
@@ -785,7 +793,8 @@
 				"address",
 				"phone",
 				"offline_access",
-				"microprofile-jwt"
+				"microprofile-jwt",
+				"kc-admin-api"
 			]
 		},
 		{
@@ -1569,6 +1578,27 @@
 					"name": "allowed web origins",
 					"protocol": "openid-connect",
 					"protocolMapper": "oidc-allowed-origins-mapper",
+					"consentRequired": false,
+					"config": {
+						"access.token.claim": "true",
+						"introspection.token.claim": "true"
+					}
+				}
+			]
+		},
+		{
+			"name": "kc-admin-api",
+			"description": "Grants access to the Keycloak Admin REST API by adding its required audience to the token",
+			"protocol": "openid-connect",
+			"attributes": {
+				"include.in.token.scope": "true",
+				"display.on.consent.screen": "false"
+			},
+			"protocolMappers": [
+				{
+					"name": "admin-api-audience",
+					"protocol": "openid-connect",
+					"protocolMapper": "oidc-admin-api-audience-mapper",
 					"consentRequired": false,
 					"config": {
 						"access.token.claim": "true",

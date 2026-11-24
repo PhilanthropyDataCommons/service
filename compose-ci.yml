@@ -90,9 +90,9 @@ services:
       S3_ACCESS_KEY_ID: s3key
       S3_ACCESS_SECRET: s3secret
       S3_ENDPOINT: 'http://pdc-s3:9300'
-      S3_PATH_STYLE: false
+      S3_PATH_STYLE: true
       S3_REGION: us-east-1
-      S3_BUCKET: pdc/service
+      S3_BUCKET: service
     ports:
       - '127.0.0.1:3030:3030'
     restart: always

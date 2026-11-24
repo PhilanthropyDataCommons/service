@@ -2,7 +2,7 @@ SELECT drop_function('opportunity_to_json');
 
 CREATE FUNCTION opportunity_to_json(
 	opportunity opportunities,
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_id text DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 )
 RETURNS jsonb AS $$
@@ -19,7 +19,7 @@ BEGIN
     AND EXISTS (
       SELECT 1
       FROM permitted_terminology_set_ids(
-        auth_context_keycloak_user_id,
+        auth_context_id,
         auth_context_is_administrator,
         'view',
         'terminologySet'

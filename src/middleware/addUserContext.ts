@@ -39,6 +39,7 @@ const recordAuthenticatedUser = async (
 ): Promise<void> => {
 	const jwtIssuedAt = getJwtIatFromRequest(req);
 	const notAfter = getEphemeralRecordExpiration();
+	const authContextId = tokenId;
 	const user = await getDatabase().transaction(async (transactionDb) => {
 		await createOrUpdateUser(
 			transactionDb,
@@ -68,12 +69,14 @@ const recordAuthenticatedUser = async (
 		return await loadUserByKeycloakUserId(
 			transactionDb,
 			{
+				authContextId,
 				user: { keycloakUserId },
 				role: EMPTY_AUTH_CONTEXT_ROLES,
 			},
 			keycloakUserId,
 		);
 	});
+	(req as AuthenticatedRequest).authContextId = authContextId;
 	(req as AuthenticatedRequest).user = user;
 };
 

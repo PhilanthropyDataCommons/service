@@ -19,11 +19,11 @@ SELECT :authContextIsAdministrator::boolean OR EXISTS (
 		i.id = :initiativeId::integer
 		AND verb_set_permits_verb(pg.verbs, 'create')
 		AND scope_set_permits_scope(pg.scope, 'initiativeFieldValue')
-		AND grantee_permits_user(
+		AND grantee_permits_auth_context(
 			pg.grantee_type,
 			pg.grantee_user_keycloak_user_id,
 			pg.grantee_keycloak_organization_id,
-			:authContextKeycloakUserId
+			:authContextId
 		)
 		AND (
 			pg.conditions IS NULL

@@ -2,7 +2,7 @@ SELECT drop_function('bulk_upload_task_to_json');
 
 CREATE FUNCTION bulk_upload_task_to_json(
 	bulk_upload_task bulk_upload_tasks,
-	auth_context_keycloak_user_id uuid,
+	auth_context_id text,
 	auth_context_is_administrator boolean
 )
 RETURNS jsonb AS $$
@@ -17,7 +17,7 @@ DECLARE
 BEGIN
   SELECT source_to_json(
     sources.*,
-    auth_context_keycloak_user_id,
+    auth_context_id,
     auth_context_is_administrator
   )
   INTO source_json

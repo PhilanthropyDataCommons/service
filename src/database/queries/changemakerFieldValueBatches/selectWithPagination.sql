@@ -4,7 +4,8 @@ WITH
 		FROM changemaker_field_value_batches
 		WHERE
 			:authContextIsAdministrator::boolean
-			OR changemaker_field_value_batches.created_by = :authContextKeycloakUserId
+			OR changemaker_field_value_batches.created_by
+			= auth_context_user_keycloak_user_id(:authContextId)
 	),
 
 	entry_count AS (
@@ -22,7 +23,7 @@ WITH
 		SELECT
 			changemaker_field_value_batch_to_json(
 				page.*::changemaker_field_value_batches,
-				:authContextKeycloakUserId,
+				:authContextId,
 				:authContextIsAdministrator
 			) AS object
 		FROM page

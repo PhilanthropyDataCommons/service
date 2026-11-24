@@ -4,7 +4,7 @@ WITH
 		FROM changemakers_proposals
 			INNER JOIN
 				permitted_proposal_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'proposal'
@@ -48,7 +48,7 @@ WITH
 			INNER JOIN
 				build_changemakers_proposals_results(
 					array(SELECT page_entries.entry FROM page_entries),
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator
 				) AS serialized_entry
 				ON page.id = serialized_entry.id

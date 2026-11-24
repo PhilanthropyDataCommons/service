@@ -5,10 +5,10 @@ INSERT INTO changemaker_field_value_batches (
 ) VALUES (
 	:sourceId,
 	:notes,
-	:authContextKeycloakUserId
+	auth_context_user_keycloak_user_id(:authContextId)
 )
 RETURNING changemaker_field_value_batch_to_json(
 	changemaker_field_value_batches,
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS object;

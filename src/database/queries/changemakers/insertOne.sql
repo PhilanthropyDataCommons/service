@@ -9,7 +9,7 @@ WITH
 			:taxId,
 			:name,
 			:keycloakOrganizationId,
-			:authContextKeycloakUserId
+			auth_context_user_keycloak_user_id(:authContextId)
 		)
 		RETURNING *
 	)
@@ -17,6 +17,6 @@ WITH
 SELECT serialized_changemaker.object
 FROM build_changemakers_results(
 	array(SELECT inserted_changemaker::changemakers FROM inserted_changemaker),
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS serialized_changemaker;

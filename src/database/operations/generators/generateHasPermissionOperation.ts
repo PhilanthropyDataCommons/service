@@ -1,6 +1,6 @@
 import {
+	getAuthContextIdFromAuthContext,
 	getIsAdministratorFromAuthContext,
-	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type {
 	AuthIdentityAndRole,
@@ -35,14 +35,13 @@ const generateHasPermissionOperation =
 	) => Promise<boolean>) =>
 	async (db, authContext, options): Promise<boolean> => {
 		const { [entityIdParamName]: entityId, permission, scope } = options;
-		const authContextKeycloakUserId =
-			getKeycloakUserIdFromAuthContext(authContext);
+		const authContextId = getAuthContextIdFromAuthContext(authContext);
 		const authContextIsAdministrator =
 			getIsAdministratorFromAuthContext(authContext);
 		const {
 			rows: [row],
 		} = await db.sql<HasPermissionResult>(queryName, {
-			userKeycloakUserId: authContextKeycloakUserId,
+			authContextId,
 			isAdministrator: authContextIsAdministrator,
 			[entityIdParamName]: entityId,
 			permission,

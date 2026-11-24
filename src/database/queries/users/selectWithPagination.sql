@@ -10,11 +10,12 @@ WITH
 					users.keycloak_user_id = :keycloakUserId
 			END
 			AND CASE
-				WHEN :authContextKeycloakUserId::uuid IS NULL THEN
+				WHEN :authContextId::text IS NULL THEN
 					TRUE
 				ELSE
 					(
-						users.keycloak_user_id = :authContextKeycloakUserId
+						users.keycloak_user_id
+						= auth_context_user_keycloak_user_id(:authContextId)
 						OR :authContextIsAdministrator::boolean
 						OR :authContextCanViewUsersInKeycloak::boolean
 					)

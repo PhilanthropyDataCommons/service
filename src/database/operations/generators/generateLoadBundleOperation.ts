@@ -1,9 +1,9 @@
 import { createServiceQueryAuditLog } from '../serviceQueryAuditLogs';
 import {
+	getAuthContextIdFromAuthContext,
 	getCanViewOrganizationsInKeycloakFromAuthContext,
 	getCanViewUsersInKeycloakFromAuthContext,
 	getIsAdministratorFromAuthContext,
-	getKeycloakUserIdFromAuthContext,
 } from '../../../types';
 import type {
 	AuthIdentityAndRole,
@@ -40,8 +40,7 @@ const generateLoadBundleOperation = <T, P extends [...args: unknown[]]>(
 				[parameterName]: args[index],
 			}),
 			{
-				authContextKeycloakUserId:
-					getKeycloakUserIdFromAuthContext(authContext),
+				authContextId: getAuthContextIdFromAuthContext(authContext),
 				authContextIsAdministrator:
 					getIsAdministratorFromAuthContext(authContext),
 				authContextCanViewUsersInKeycloak:

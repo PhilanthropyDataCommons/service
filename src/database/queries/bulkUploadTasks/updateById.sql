@@ -4,6 +4,6 @@ SET
 WHERE id = :bulkUploadTaskId
 RETURNING bulk_upload_task_to_json(
 	bulk_upload_tasks,
-	:authContextKeycloakUserId,
+	:authContextId,
 	:authContextIsAdministrator
 ) AS object;

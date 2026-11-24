@@ -4,7 +4,7 @@ WITH
 		FROM initiative_field_values
 			INNER JOIN
 				permitted_initiative_field_value_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'initiativeFieldValue'
@@ -28,7 +28,7 @@ WITH
 		SELECT
 			build_initiative_field_value_result(
 				page.*::initiative_field_values,
-				:authContextKeycloakUserId,
+				:authContextId,
 				:authContextIsAdministrator
 			) AS object
 		FROM page

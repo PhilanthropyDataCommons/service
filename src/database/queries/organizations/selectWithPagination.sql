@@ -25,7 +25,7 @@ WITH
 		SELECT
 			organization_to_json(
 				page.keycloak_organization_id,
-				:authContextKeycloakUserId::uuid,
+				:authContextId::text,
 				:authContextIsAdministrator::boolean,
 				:authContextCanViewOrganizationsInKeycloak::boolean,
 				:authContextCanViewUsersInKeycloak::boolean

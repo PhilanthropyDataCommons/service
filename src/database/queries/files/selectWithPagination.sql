@@ -10,7 +10,7 @@ WITH
 					files.created_by = :createdBy
 			END
 			AND (
-				files.created_by = :authContextKeycloakUserId
+				files.created_by = auth_context_user_keycloak_user_id(:authContextId)
 				OR :authContextIsAdministrator::boolean
 			)
 	),

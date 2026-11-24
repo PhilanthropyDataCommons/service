@@ -5,7 +5,7 @@ WITH
 			:taxId::varchar,
 			:name::varchar,
 			:keycloakOrganizationId::uuid,
-			:authContextKeycloakUserId::uuid
+			auth_context_user_keycloak_user_id(:authContextId::text)
 		)) AS source (
 			tax_id,
 			name,
@@ -40,7 +40,7 @@ FROM merged_changemaker
 	INNER JOIN
 		build_changemakers_results(
 			array(SELECT merged_changemaker.changemaker FROM merged_changemaker),
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator
 		) AS serialized_changemaker
 		ON serialized_changemaker.id = (merged_changemaker.changemaker).id;

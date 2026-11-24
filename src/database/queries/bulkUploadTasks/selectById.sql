@@ -1,7 +1,7 @@
 SELECT
 	bulk_upload_task_to_json(
 		bulk_upload_tasks.*,
-		:authContextKeycloakUserId,
+		:authContextId,
 		:authContextIsAdministrator
 	) AS object
 FROM bulk_upload_tasks
@@ -9,7 +9,7 @@ FROM bulk_upload_tasks
 		ON bulk_upload_tasks.application_form_id = application_forms.id
 	INNER JOIN
 		permitted_opportunity_ids(
-			:authContextKeycloakUserId,
+			:authContextId,
 			:authContextIsAdministrator,
 			'view',
 			'opportunity'

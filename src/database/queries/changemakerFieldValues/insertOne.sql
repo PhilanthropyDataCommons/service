@@ -16,6 +16,6 @@ INSERT INTO changemaker_field_values (
 RETURNING
 	build_changemaker_field_value_result(
 		changemaker_field_values,
-		:authContextKeycloakUserId,
+		:authContextId,
 		:authContextIsAdministrator
 	) AS object;

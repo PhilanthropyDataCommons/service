@@ -6,7 +6,7 @@ SELECT drop_function('build_proposal_version_result');
 -- bulk instead.
 CREATE FUNCTION build_proposal_version_result(
 	proposal_version proposal_versions,
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_id text DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS jsonb AS $$
 DECLARE
@@ -20,7 +20,7 @@ BEGIN
 	INTO field_values_json
 	FROM proposal_field_values
 	INNER JOIN permitted_proposal_field_value_ids_among(
-		auth_context_keycloak_user_id,
+		auth_context_id,
 		auth_context_is_administrator,
 		'view',
 		'proposalFieldValue',
@@ -35,7 +35,7 @@ BEGIN
 
 	SELECT source_to_json(
 		sources.*,
-		auth_context_keycloak_user_id,
+		auth_context_id,
 		auth_context_is_administrator
 	)
 	INTO source_json

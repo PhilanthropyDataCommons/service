@@ -16,6 +16,7 @@ import { getDefaultS3Bucket } from '../config';
 import {
 	createBulkUploadLog,
 	createChangemakerProposal,
+	createOrUpdateEphemeralAuthContext,
 	applyDefaultPermissionGrants,
 	createPermissionGrant,
 	createProposal,
@@ -25,6 +26,7 @@ import {
 	loadChangemaker,
 	loadOrCreateChangemaker,
 	updateBulkUploadTask,
+	loadSystemEphemeralAuthContext,
 	loadSystemUser,
 	loadUserByKeycloakUserId,
 	createFile,
@@ -41,7 +43,7 @@ import {
 import { InputValidationError } from '../errors';
 import { fieldValueIsValid } from '../fieldValidation';
 import { allNoLeaks } from '../promises';
-import { SINGLE_STEP } from '../constants';
+import { MS_PER_SECOND, ONE_DAY_IN_SECONDS, SINGLE_STEP } from '../constants';
 import { getBulkUploadLogDetailsFromError } from './getBulkUploadLogDetailsFromError';
 import type { TinyPg } from 'tinypg';
 import type { JobHelpers, Logger as GraphileLogger } from 'graphile-worker';
@@ -257,6 +259,7 @@ const getDataColumnCsvIndexForShortCode = (
 const loadSystemUserAuthContext = async (
 	db: Pick<TinyPg, 'sql'>,
 ): Promise<AuthContext> => ({
+	authContextId: (await loadSystemEphemeralAuthContext(db, null)).tokenId,
 	user: await loadSystemUser(db, null),
 	role: {
 		isAdministrator: true,
@@ -265,13 +268,32 @@ const loadSystemUserAuthContext = async (
 	},
 });
 
-const loadTaskAuthContext = async (
+const TASK_AUTH_CONTEXT_LIFETIME_SECONDS = ONE_DAY_IN_SECONDS;
+
+const getTaskAuthContextTokenId = (bulkUploadTask: BulkUploadTask): string =>
+	`bulkUploadTask:${bulkUploadTask.id}`;
+
+const getTaskAuthContextExpiration = (): string =>
+	new Date(
+		Date.now() + TASK_AUTH_CONTEXT_LIFETIME_SECONDS * MS_PER_SECOND,
+	).toISOString();
+
+const recordTaskAuthContext = async (
 	db: Pick<TinyPg, 'sql'>,
 	bulkUploadTask: BulkUploadTask,
-): Promise<AuthContext> => ({
-	user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
-	role: EMPTY_AUTH_CONTEXT_ROLES,
-});
+): Promise<AuthContext> => {
+	const { item: ephemeralAuthContext } =
+		await createOrUpdateEphemeralAuthContext(db, null, {
+			tokenId: getTaskAuthContextTokenId(bulkUploadTask),
+			userKeycloakUserId: bulkUploadTask.createdBy,
+			notAfter: getTaskAuthContextExpiration(),
+		});
+	return {
+		authContextId: ephemeralAuthContext.tokenId,
+		user: await loadUserByKeycloakUserId(db, null, bulkUploadTask.createdBy),
+		role: EMPTY_AUTH_CONTEXT_ROLES,
+	};
+};
 
 const cleanupTemporaryFileMap = async (
 	temporaryFileMap: Map<string, FileResult>,
@@ -560,7 +582,6 @@ export const processBulkUploadTask = async (
 		payload.bulkUploadId,
 	);
 
-	const taskAuthContext = await loadTaskAuthContext(db, bulkUploadTask);
 	if (bulkUploadTask.status !== TaskStatus.PENDING) {
 		graphileLogger.warn(
 			'Bulk upload cannot be processed because it is not in a PENDING state',
@@ -568,6 +589,8 @@ export const processBulkUploadTask = async (
 		);
 		return;
 	}
+
+	const taskAuthContext = await recordTaskAuthContext(db, bulkUploadTask);
 
 	await updateBulkUploadTask(
 		db,

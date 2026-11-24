@@ -46,7 +46,7 @@ SELECT
 	default_permission_grants.scope,
 	default_permission_grants.verbs,
 	default_permission_grants.conditions,
-	:authContextKeycloakUserId::uuid
+	auth_context_user_keycloak_user_id(:authContextId::text) AS created_by
 FROM default_permission_grants
 WHERE
 	default_permission_grants.context_entity_type

@@ -11,11 +11,12 @@ WITH
 			END
 			AND
 			CASE
-				WHEN :authContextKeycloakUserId::uuid IS NULL THEN
+				WHEN :authContextId::text IS NULL THEN
 					TRUE
 				ELSE
 					(
-						base_fields_copy_tasks.created_by = :authContextKeycloakUserId
+						base_fields_copy_tasks.created_by
+						= auth_context_user_keycloak_user_id(:authContextId)
 						OR :authContextIsAdministrator::boolean
 					)
 			END

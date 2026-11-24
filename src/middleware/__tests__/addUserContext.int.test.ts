@@ -242,6 +242,7 @@ describe('addUserContext', () => {
 				notAfter: expectTimestamp(),
 				createdAt: expectTimestamp(),
 			});
+			expect(req.authContextId).toEqual(authContext.tokenId);
 			const notAfter = new Date(authContext.notAfter).getTime();
 			expect(notAfter).toBeGreaterThanOrEqual(requestedAt + lifetimeMs);
 			expect(notAfter).toBeLessThanOrEqual(new Date().getTime() + lifetimeMs);
@@ -315,6 +316,7 @@ describe('addUserContext', () => {
 		const runAssertions = (err: unknown) => {
 			expect(err).toBeInstanceOf(UnauthorizedError);
 			expect(req.user).toBe(undefined);
+			expect(req.authContextId).toBe(undefined);
 		};
 
 		const nextMock = generateNextWithAssertions(runAssertions, done);
@@ -342,6 +344,7 @@ describe('addUserContext', () => {
 		const runAssertions = async (err: unknown) => {
 			expect(err).toBeInstanceOf(NoDataReturnedError);
 			expect(secondReq.user).toBe(undefined);
+			expect(secondReq.authContextId).toBe(undefined);
 			await expect(
 				loadUserByKeycloakUserId(
 					db,

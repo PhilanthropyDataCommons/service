@@ -4,7 +4,7 @@ WITH
 		FROM proposals
 			INNER JOIN
 				permitted_proposal_ids(
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator,
 					'view',
 					'proposal'
@@ -86,7 +86,7 @@ WITH
 			INNER JOIN
 				build_proposals_results(
 					array(SELECT page_proposals.proposal FROM page_proposals),
-					:authContextKeycloakUserId,
+					:authContextId,
 					:authContextIsAdministrator
 				) AS serialized_proposal
 				ON page.id = serialized_proposal.id

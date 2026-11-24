@@ -2,7 +2,7 @@ SELECT drop_function('permitted_opportunity_ids');
 
 -- Returns the ids of opportunities on which the user holds `verb` at `scope`.
 CREATE FUNCTION permitted_opportunity_ids(
-	user_keycloak_user_id uuid,
+	auth_context_id text,
 	user_is_admin boolean,
 	verb permission_grant_verb_t,
 	scope permission_grant_entity_type_t
@@ -22,11 +22,11 @@ CREATE FUNCTION permitted_opportunity_ids(
 		AND scope_set_permits_scope(
 			pg.scope, permitted_opportunity_ids.scope
 		)
-		AND grantee_permits_user(
+		AND grantee_permits_auth_context(
 			pg.grantee_type,
 			pg.grantee_user_keycloak_user_id,
 			pg.grantee_keycloak_organization_id,
-			permitted_opportunity_ids.user_keycloak_user_id
+			permitted_opportunity_ids.auth_context_id
 		)
 
 	UNION
@@ -35,7 +35,7 @@ CREATE FUNCTION permitted_opportunity_ids(
 	SELECT opportunities.id
 	FROM opportunities
 	INNER JOIN permitted_funder_short_codes(
-		permitted_opportunity_ids.user_keycloak_user_id,
+		permitted_opportunity_ids.auth_context_id,
 		permitted_opportunity_ids.user_is_admin,
 		permitted_opportunity_ids.verb,
 		permitted_opportunity_ids.scope

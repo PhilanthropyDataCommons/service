@@ -2,7 +2,7 @@ SELECT drop_function('build_funders_results');
 
 CREATE FUNCTION build_funders_results(
 	funders funders[],
-	auth_context_keycloak_user_id uuid DEFAULT NULL,
+	auth_context_id text DEFAULT NULL,
 	auth_context_is_administrator boolean DEFAULT FALSE
 ) RETURNS TABLE (short_code short_code_t, object jsonb) AS $$
 	WITH input_funders AS (
@@ -14,7 +14,7 @@ CREATE FUNCTION build_funders_results(
 			p.funder_short_code,
 			p.permissions
 		FROM funder_permissions_json_among(
-			build_funders_results.auth_context_keycloak_user_id,
+			build_funders_results.auth_context_id,
 			build_funders_results.auth_context_is_administrator,
 			ARRAY(SELECT input_funder.short_code FROM input_funders AS input_funder)
 		) AS p

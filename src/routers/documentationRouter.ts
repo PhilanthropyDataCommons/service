@@ -17,7 +17,7 @@ const options: SwaggerUiOptions = {
 	swaggerOptions: {
 		oauth: {
 			clientId: OPENAPI_DOCS_AUTH_CLIENT_ID,
-			scopes: ['openid', 'roles', 'profile'],
+			scopes: ['openid', 'roles', 'profile', 'organizations'],
 			usePkceWithAuthorizationCodeGrant: true,
 		},
 	},

@@ -562,14 +562,14 @@
 				"profile",
 				"roles",
 				"basic",
-				"email",
-				"organizations"
+				"email"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"microprofile-jwt"
+				"microprofile-jwt",
+				"organizations"
 			]
 		},
 		{
@@ -617,14 +617,14 @@
 				"profile",
 				"roles",
 				"basic",
-				"email",
-				"organizations"
+				"email"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"microprofile-jwt"
+				"microprofile-jwt",
+				"organizations"
 			]
 		},
 		{
@@ -659,14 +659,14 @@
 				"profile",
 				"roles",
 				"basic",
-				"email",
-				"organizations"
+				"email"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"microprofile-jwt"
+				"microprofile-jwt",
+				"organizations"
 			]
 		},
 		{
@@ -700,14 +700,14 @@
 				"profile",
 				"roles",
 				"basic",
-				"email",
-				"organizations"
+				"email"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"microprofile-jwt"
+				"microprofile-jwt",
+				"organizations"
 			]
 		},
 		{
@@ -743,14 +743,14 @@
 				"profile",
 				"roles",
 				"basic",
-				"email",
-				"organizations"
+				"email"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
 				"microprofile-jwt",
+				"organizations",
 				"kc-admin-api"
 			]
 		},
@@ -786,14 +786,14 @@
 				"profile",
 				"roles",
 				"basic",
-				"email",
-				"organizations"
+				"email"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
 				"microprofile-jwt",
+				"organizations",
 				"kc-admin-api"
 			]
 		},
@@ -828,14 +828,14 @@
 				"profile",
 				"roles",
 				"basic",
-				"email",
-				"organizations"
+				"email"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"microprofile-jwt"
+				"microprofile-jwt",
+				"organizations"
 			]
 		},
 		{
@@ -892,14 +892,14 @@
 				"profile",
 				"roles",
 				"basic",
-				"email",
-				"organizations"
+				"email"
 			],
 			"optionalClientScopes": [
 				"address",
 				"phone",
 				"offline_access",
-				"microprofile-jwt"
+				"microprofile-jwt",
+				"organizations"
 			]
 		}
 	],
@@ -1616,14 +1616,14 @@
 		"roles",
 		"web-origins",
 		"acr",
-		"basic",
-		"organizations"
+		"basic"
 	],
 	"defaultOptionalClientScopes": [
 		"offline_access",
 		"address",
 		"phone",
-		"microprofile-jwt"
+		"microprofile-jwt",
+		"organizations"
 	],
 	"browserSecurityHeaders": {
 		"contentSecurityPolicyReportOnly": "",

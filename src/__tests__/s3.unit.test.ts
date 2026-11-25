@@ -1,8 +1,10 @@
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import {
+	endpointRequiresPathStyle,
 	generatePresignedDownloadUrl,
 	generatePresignedPost,
 	getS3Client,
+	parseOptionalBoolean,
 } from '../s3';
 
 jest.mock('@aws-sdk/s3-presigned-post');
@@ -111,5 +113,29 @@ describe('generatePresignedDownloadUrl', () => {
 		expect(url.searchParams.get('response-content-disposition')).toBe(
 			'attachment; filename=chart.png',
 		);
+	});
+});
+
+describe('endpointRequiresPathStyle', () => {
+	it.each([
+		['http://pdc-s3:9300', true],
+		['http://localhost:9000', true],
+		['http://127.0.0.1:9000', true],
+		['http://[::1]:9000', true],
+		['https://s3.us-east-1.amazonaws.com', false],
+		['https://nyc3.digitaloceanspaces.com', false],
+	])('returns %s for %s', (endpoint, expected) => {
+		expect(endpointRequiresPathStyle(endpoint)).toBe(expected);
+	});
+});
+
+describe('parseOptionalBoolean', () => {
+	it.each([
+		[undefined, undefined],
+		['', undefined],
+		['true', true],
+		['false', false],
+	])('parses %p as %p', (value, expected) => {
+		expect(parseOptionalBoolean(value)).toBe(expected);
 	});
 });

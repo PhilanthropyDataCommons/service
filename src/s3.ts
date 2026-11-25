@@ -1,5 +1,6 @@
+import { isIPv4 } from 'node:net';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
-import { S3, type S3ClientConfig, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { create } from 'content-disposition';
 import { requireEnv } from 'require-env-variable';
@@ -10,40 +11,52 @@ const {
 	S3_ACCESS_KEY_ID,
 	S3_ACCESS_SECRET,
 	S3_ENDPOINT,
-	S3_PATH_STYLE,
 	S3_REGION,
 	S3_BUCKET,
 } = requireEnv(
 	'S3_ACCESS_KEY_ID',
 	'S3_ACCESS_SECRET',
 	'S3_ENDPOINT',
-	'S3_PATH_STYLE',
 	'S3_REGION',
 	'S3_BUCKET',
 );
+
+const isSingleLabelHost = (hostname: string): boolean =>
+	!hostname.includes('.');
+
+export const endpointRequiresPathStyle = (endpoint: string): boolean => {
+	const { hostname } = new URL(endpoint);
+	return isSingleLabelHost(hostname) || isIPv4(hostname);
+};
+
+export const parseOptionalBoolean = (
+	value: string | undefined,
+): boolean | undefined =>
+	value === undefined || value === '' ? undefined : value === 'true';
 
 const PRESIGNED_POST_EXPIRATION_SECONDS = 3600; // 1 hour
 const PRESIGNED_DOWNLOAD_URL_EXPIRATION_SECONDS = ONE_DAY_IN_SECONDS;
 
 const s3Clients: Record<string, S3> = {};
 
-export const getS3Client = (overrides?: Partial<S3ClientConfig>): S3 => {
-	const defaults = {
-		forcePathStyle: S3_PATH_STYLE === 'true',
-		endpoint: S3_ENDPOINT,
-		region: S3_REGION,
+export const getS3Client = (overrides?: {
+	endpoint?: string;
+	region?: string;
+}): S3 => {
+	const endpoint = overrides?.endpoint ?? S3_ENDPOINT;
+	const region = overrides?.region ?? S3_REGION;
+	s3Clients[region] ??= new S3({
+		forcePathStyle:
+			parseOptionalBoolean(process.env.S3_PATH_STYLE) ??
+			endpointRequiresPathStyle(endpoint),
+		endpoint,
+		region,
 		credentials: {
 			accessKeyId: S3_ACCESS_KEY_ID,
 			secretAccessKey: S3_ACCESS_SECRET,
 		},
-	};
-	const { region } = { ...defaults, ...overrides };
-	const clientKey = region.toString();
-	s3Clients[clientKey] ??= new S3({
-		...defaults,
-		...overrides,
 	});
-	return s3Clients[clientKey];
+	return s3Clients[region];
 };
 
 export const generatePresignedPost = async (

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - File `downloadUrl` values now make browsers download the file, using its `name`, instead of displaying it.
+- `S3_PATH_STYLE` is now optional. When it is unset or empty, the service uses path-style S3 URLs for endpoints whose host is a single label (such as a compose service name), `localhost`, or an IP address, and virtual-hosted URLs otherwise.
 
 ## 0.43.0 2026-11-19
 
